@@ -1,0 +1,9 @@
+.idea/
+.vs/
+.vscode/
+*.userprefs
+*.user
+bin/
+obj/
+BenchmarkDotNet.Artifacts
+.DS_Store
