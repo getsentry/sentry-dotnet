@@ -1,9 +1,6 @@
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
-#if NET45PLUS
-using Microsoft.Win32;
-#endif
 #if HAS_RUNTIME_INFORMATION
 using System.Runtime.InteropServices;
 #endif
@@ -11,17 +8,16 @@ using System.Runtime.InteropServices;
 namespace Sentry.PlatformAbstractions
 {
     // https://github.com/dotnet/corefx/issues/17452
-    public class RuntimeInfo
+    public static class RuntimeInfo
     {
-        private readonly RuntimeInfoOptions _options;
-
-        public RuntimeInfo(RuntimeInfoOptions options = null) => _options = options ?? new RuntimeInfoOptions();
+        private static readonly Regex RuntimeParseRegex = new Regex("^(?<name>[^\\d]+)(?<version>[\\d+\\.]+[^\\s]+)",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Gets the current runtime.
         /// </summary>
         /// <returns>A new instance for the current runtime</returns>
-        public Runtime GetRuntime()
+        internal static Runtime GetRuntime()
         {
 #if HAS_RUNTIME_INFORMATION
             var runtime = GetFromRuntimeInformation();
@@ -41,7 +37,7 @@ namespace Sentry.PlatformAbstractions
             return runtime;
         }
 
-        internal Runtime Parse(string rawRuntimeDescription, string name = null)
+        internal static Runtime Parse(string rawRuntimeDescription, string name = null)
         {
             if (rawRuntimeDescription == null)
             {
@@ -50,7 +46,7 @@ namespace Sentry.PlatformAbstractions
                     : new Runtime(name);
             }
 
-            var match = Regex.Match(rawRuntimeDescription, _options.RuntimeParseRegex);
+            var match = RuntimeParseRegex.Match(rawRuntimeDescription);
             if (match.Success)
             {
                 return new Runtime(
@@ -63,19 +59,14 @@ namespace Sentry.PlatformAbstractions
         }
 
 #if NET45PLUS // .NET Framework 4.5 and later
-        internal void SetReleaseAndVersionNetFx(Runtime runtime)
+        internal static void SetReleaseAndVersionNetFx(Runtime runtime)
         {
             if (runtime?.IsNetFx() == true)
             {
-                runtime.Release = Get45PlusLatestInstallationFromRegistry();
-                if (runtime.Release != null)
-                {
-                    var netFxVersion = GetNetFxVersionFromRelease(runtime.Release.Value);
-                    if (netFxVersion != null)
-                    {
-                        runtime.Version = netFxVersion;
-                    }
-                }
+                var latest = FrameworkInfo.GetLatest(Environment.Version.Major);
+
+                runtime.Release = latest.Release;
+                runtime.Version = latest.Version?.ToString();
             }
         }
 #endif
@@ -100,7 +91,7 @@ namespace Sentry.PlatformAbstractions
 #endif
 
 #if HAS_RUNTIME_INFORMATION
-        internal Runtime GetFromRuntimeInformation()
+        internal static Runtime GetFromRuntimeInformation()
         {
             // Prefered API: netstandard2.0
             // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
@@ -112,7 +103,7 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
-        internal Runtime GetFromMonoRuntime()
+        internal static Runtime GetFromMonoRuntime()
             => Type.GetType("Mono.Runtime", false)
 #if HAS_TYPE_INFO
                 ?.GetTypeInfo()
@@ -128,25 +119,6 @@ namespace Sentry.PlatformAbstractions
                 ? Parse(monoVersion, "Mono")
                 : null;
 
-#if NET45PLUS
-        // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
-        private static int? Get45PlusLatestInstallationFromRegistry()
-        {
-            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
-                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\"))
-            {
-                return int.TryParse(ndpKey?.GetValue("Release")?.ToString(), out var releaseId)
-                    ? releaseId
-                    : null as int?;
-            }
-        }
-
-        private string GetNetFxVersionFromRelease(int release)
-        {
-            _options.NetFxReleaseVersionMap.TryGetValue(release, out var version);
-            return version;
-        }
-#endif
 
 #if HAS_ENVIRONMENT_VERSION
         // This should really only be used on .NET 1.0, 1.1, 2.0, 3.0, 3.5 and 4.0

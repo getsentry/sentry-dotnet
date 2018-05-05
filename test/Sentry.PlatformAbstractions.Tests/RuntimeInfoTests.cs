@@ -5,12 +5,10 @@ namespace Sentry.PlatformAbstractions.Tests
 {
     public class RuntimeInfoTests
     {
-        private readonly RuntimeInfo _target = new RuntimeInfo();
-
         [Test] // Verifies that some value is extracted anywhere the tests runs
         public void GetRuntime_NotNull()
         {
-            var actual = _target.GetRuntime();
+            var actual = RuntimeInfo.GetRuntime();
             Assert.NotNull(actual);
             Assert.NotNull(actual.Name);
             Assert.NotNull(actual.Version);
@@ -19,7 +17,7 @@ namespace Sentry.PlatformAbstractions.Tests
         [Theory, TestCaseSource(typeof(RuntimeInfoTests), nameof(ParseTestCases))]
         public void Parse_TestCases(ParseTestCase parseTestCase)
         {
-            var actual = _target.Parse(parseTestCase.Raw);
+            var actual = RuntimeInfo.Parse(parseTestCase.Raw);
 
             if (parseTestCase.Raw == null)
             {
@@ -33,24 +31,26 @@ namespace Sentry.PlatformAbstractions.Tests
             }
         }
 
+
+
 #if NET45PLUS // .NET Framework 4.5 and later
         [Test]
         public void SetReleaseAndVersionNetFx_OnNetFx_NonNullReleaseAndVersion()
         {
-            if (_target.GetRuntime().IsMono())
+            if (RuntimeInfo.GetRuntime().IsMono())
             {
                 Assert.Inconclusive("This test is only relevant when running on CLR.");
             }
             else
             {
                 var input = new Runtime(".NET Framework");
-                _target.SetReleaseAndVersionNetFx(input);
+                RuntimeInfo.SetReleaseAndVersionNetFx(input);
 
                 Assert.NotNull(input.Version);
                 Assert.NotNull(input.Release);
             }
         }
-    #endif
+#endif
 
 #if NETCOREAPP
         [Test]
@@ -68,13 +68,13 @@ namespace Sentry.PlatformAbstractions.Tests
         [Test]
         public void GetFromMonoRuntime_OnMono_VersionNotNull()
         {
-            if (!_target.GetRuntime().IsMono())
+            if (!RuntimeInfo.GetRuntime().IsMono())
             {
-                Assert.Inconclusive("This test is only relevant when running on Mono.");
+                Assert.Ignore("This test is only relevant when running on Mono.");
             }
             else
             {
-                var actual = _target.GetFromMonoRuntime();
+                var actual = RuntimeInfo.GetFromMonoRuntime();
 
                 Assert.AreEqual("Mono", actual.Name);
                 Assert.NotNull(actual.Version);

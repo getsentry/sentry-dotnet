@@ -1,0 +1,223 @@
+#if NETFX
+using System;
+using System.Collections.Generic;
+using Microsoft.Win32;
+
+namespace Sentry.PlatformAbstractions
+{
+    /// <summary>
+    /// Information about .NET Framework in the running machine
+    /// </summary>
+    public static class FrameworkInfo
+    {
+#if HAS_READONLY_COLLECTION
+        public static IReadOnlyDictionary<int, string> NetFxReleaseVersionMap { get; set; }
+#else
+        public static IDictionary<int, string> NetFxReleaseVersionMap { get; set; }
+#endif
+            = new Dictionary<int, string>
+            {
+                { 378389, "4.5" },
+                { 378675, "4.5.1" },
+                { 378758, "4.5.1" },
+                { 379893, "4.5.2" },
+                { 393295, "4.6" },
+                { 393297, "4.6" },
+                { 394254, "4.6.1" },
+                { 394271, "4.6.1" },
+                { 394802, "4.6.2" },
+                { 394806, "4.6.2" },
+                { 460798, "4.7" },
+                { 460805, "4.7" },
+                { 461308, "4.7.1" },
+                { 461310, "4.7.1" },
+                { 461808, "4.7.2" },
+                { 461814, "4.7.2" },
+            };
+
+        // Gets latest installation of CLR 2 or 4
+        public static FrameworkInstallation GetLatest(int clr)
+        {
+#if NET45PLUS
+            if (clr == 4)
+            {
+                var release = Get45PlusLatestInstallationFromRegistry();
+                if (release != null)
+                {
+                    return new FrameworkInstallation
+                    {
+                        Version = GetNetFxVersionFromRelease(release.Value),
+                        Release = release
+                    };
+                }
+            }
+#endif
+            FrameworkInstallation latest = null;
+            foreach (var installation in GetInstalledVersions())
+            {
+                if (latest == null)
+                {
+                    latest = installation;
+                }
+
+                if (clr == 2)
+                {
+                    // CLR 2 runs .NET 2 to 3.5
+                    if ((installation.Version.Major == 2
+                        || installation.Version.Major == 3)
+                        && installation.Version >= latest.Version)
+                    {
+                        latest = installation;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else if (clr == 4)
+                {
+                    if (installation.Version.Major == 4
+                        && installation.Version >= latest.Version)
+                    {
+                        latest = installation;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return latest;
+        }
+        /// <summary>
+        /// Get all .NET Framework installations in this machine
+        /// </summary>
+        /// <seealso href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-1-4"/>
+        /// <returns>Enumerable of installations</returns>
+        public static IEnumerable<FrameworkInstallation> GetInstalledVersions()
+        {
+            using (var ndpKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, string.Empty)
+                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\"))
+            {
+                if (ndpKey == null)
+                {
+                    yield break;
+                }
+
+                foreach (var versionKeyName in ndpKey.GetSubKeyNames())
+                {
+                    if (!versionKeyName.StartsWith("v")
+                        || !(ndpKey.OpenSubKey(versionKeyName) is RegistryKey versionKey))
+                    {
+                        continue;
+                    }
+
+                    var version = versionKey.GetString("Version");
+                    if (version != null && versionKey.GetInt("Install") == 1)
+                    {
+                        // 1.0 to 3.5
+                        yield return new FrameworkInstallation
+                        {
+                            ShortName = versionKeyName,
+                            Version = ParseOrNull(version),
+                            ServicePack = versionKey.GetInt("SP")
+                        };
+
+                        continue;
+                    }
+
+                    // 4.0+
+                    foreach (var subKeyName in versionKey.GetSubKeyNames())
+                    {
+                        var subKey = versionKey.OpenSubKey(subKeyName);
+                        if (subKey?.GetInt("Install") != 1)
+                        {
+                            continue;
+                        }
+
+                        yield return GetFromV4(subKey, subKeyName);
+                    }
+                }
+            }
+        }
+
+        private static FrameworkInstallation GetFromV4(RegistryKey subKey, string subKeyName)
+        {
+            var hasRelease = int.TryParse(
+                subKey.GetValue("Release", null)?.ToString(), out var release);
+
+            Version version = null;
+            if (hasRelease)
+            {
+                // 4.5+
+                var displayableVersion = GetNetFxVersionFromRelease(release);
+                if (displayableVersion != null)
+                {
+                    version = displayableVersion;
+                }
+            }
+
+            if (version == null)
+            {
+                version = ParseOrNull(subKey.GetString("Version"));
+            }
+
+            FrameworkProfile? profile = null;
+            switch (subKeyName)
+            {
+                case "Full":
+                    profile = FrameworkProfile.Full;
+                    break;
+                case "Client":
+                    profile = FrameworkProfile.Client;
+                    break;
+            }
+
+            return new FrameworkInstallation
+            {
+                Profile = profile,
+                Version = version,
+                ServicePack = subKey.GetInt("SP"),
+                Release = hasRelease ? release : null as int?
+            };
+        }
+
+#if NET45PLUS
+        // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
+        internal static int? Get45PlusLatestInstallationFromRegistry()
+        {
+            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
+                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\"))
+            {
+                return ndpKey?.GetInt("Release");
+            }
+        }
+#endif
+
+        internal static Version GetNetFxVersionFromRelease(int release)
+        {
+            NetFxReleaseVersionMap.TryGetValue(release, out var version);
+            return ParseOrNull(version);
+        }
+
+        private static Version ParseOrNull(string version)
+        {
+#if NET35
+            try
+            {
+                return new Version(version);
+            }
+            catch
+            {
+                return null;
+            }
+#else
+            Version.TryParse(version, out var parsed);
+            return parsed;
+#endif
+        }
+    }
+}
+
+#endif

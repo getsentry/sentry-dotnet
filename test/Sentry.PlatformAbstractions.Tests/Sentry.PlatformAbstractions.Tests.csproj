@@ -40,7 +40,7 @@
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net471" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net471'">
-    <DefineConstants>NET45PLUS;HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETFX;NET45PLUS;HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net452'">
@@ -51,7 +51,7 @@
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net45" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net452'">
-    <DefineConstants>NET45PLUS;HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETFX;NET45PLUS;HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net40'">
@@ -61,7 +61,7 @@
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net40" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net40'">
-    <DefineConstants>$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETFX;NET40_OR_LESS;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net35'">
@@ -69,7 +69,7 @@
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net35" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net35'">
-    <DefineConstants>$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETFX;NET40_OR_LESS;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
 </Project>

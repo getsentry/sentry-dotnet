@@ -8,6 +8,14 @@ namespace Sentry.PlatformAbstractions
     /// <inheritdoc />
     public class Runtime : IEquatable<Runtime>
     {
+        private static Runtime _runtime;
+        /// <summary>
+        /// Gets the current runtime
+        /// </summary>
+        /// <value>
+        /// The current runtime.
+        /// </value>
+        public static Runtime Current => _runtime ?? (_runtime = RuntimeInfo.GetRuntime());
         /// <summary>
         /// The name of the runtime
         /// </summary>
@@ -63,15 +71,29 @@ namespace Sentry.PlatformAbstractions
         /// <summary>
         /// The string representation of the Runtime
         /// </summary>
-        /// <returns>
-        /// The raw value if any, or the Name and Version
-        /// </returns>
-        public override string ToString() => Raw ?? $"{Name} {Version}";
+        public override string ToString()
+        {
+            if (Name == null && Version == null)
+            {
+                return Raw;
+            }
+
+            if (Name != null && Version == null)
+            {
+                return Raw?.Contains(Name) == true
+                    ? Raw
+                    : $"{Name} {Raw}";
+            }
+
+            return $"{Name} {Version}";
+        }
 
         public bool Equals(Runtime other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
             return string.Equals(Name, other.Name)
                    && string.Equals(Version, other.Version)
                    && string.Equals(Raw, other.Raw) && Release == other.Release;
@@ -79,10 +101,13 @@ namespace Sentry.PlatformAbstractions
 
         public override bool Equals(object obj)
         {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Runtime) obj);
+            if (obj is null)
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != GetType())
+                return false;
+            return Equals((Runtime)obj);
         }
 
         public override int GetHashCode()
