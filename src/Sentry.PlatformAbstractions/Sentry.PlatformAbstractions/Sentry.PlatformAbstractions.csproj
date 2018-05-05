@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard1.5;net471;net45;net40;net35</TargetFrameworks>
@@ -10,7 +10,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
@@ -23,14 +23,20 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net471'">
-    <DefineConstants>HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
-    <DefineConstants>HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net40'">
+    <DefineConstants>HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
 </Project>
