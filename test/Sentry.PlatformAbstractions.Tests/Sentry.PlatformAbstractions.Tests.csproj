@@ -40,7 +40,7 @@
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net471" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net471'">
-    <DefineConstants>HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NET45PLUS;HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net452'">
@@ -51,7 +51,7 @@
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net45" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net452'">
-    <DefineConstants>HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NET45PLUS;HAS_RUNTIME_INFORMATION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net40'">
