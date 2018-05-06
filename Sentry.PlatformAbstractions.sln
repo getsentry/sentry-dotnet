@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B56B8225-B35
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4D401EA1-FD88-4B51-A438-AD793CBBCB6C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.PlatformAbstractions", "src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj", "{3E855C8F-BFC8-4E65-9AF9-A940432879B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.PlatformAbstractions", "src\Sentry.PlatformAbstractions\\Sentry.PlatformAbstractions.csproj", "{3E855C8F-BFC8-4E65-9AF9-A940432879B0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.PlatformAbstractions.Tests", "test\Sentry.PlatformAbstractions.Tests\Sentry.PlatformAbstractions.Tests.csproj", "{91265AF9-00FD-4025-89CC-59B3618A2DCA}"
 EndProject
