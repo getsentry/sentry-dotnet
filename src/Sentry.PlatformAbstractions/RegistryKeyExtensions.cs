@@ -1,4 +1,4 @@
-#if NET45PLUS || NET40_OR_LESS
+#if NETFX
 using Microsoft.Win32;
 
 namespace Sentry.PlatformAbstractions

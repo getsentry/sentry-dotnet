@@ -31,8 +31,6 @@ namespace Sentry.PlatformAbstractions.Tests
             }
         }
 
-
-
 #if NET45PLUS // .NET Framework 4.5 and later
         [Test]
         public void SetReleaseAndVersionNetFx_OnNetFx_NonNullReleaseAndVersion()
@@ -84,7 +82,7 @@ namespace Sentry.PlatformAbstractions.Tests
         }
 #endif
 
-        public static IEnumerable<ParseTestCase> ParseTestCases()
+        private static IEnumerable<ParseTestCase> ParseTestCases()
         {
             yield return new ParseTestCase
             {

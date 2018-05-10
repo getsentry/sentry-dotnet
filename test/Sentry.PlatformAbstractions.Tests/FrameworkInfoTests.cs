@@ -23,21 +23,22 @@ namespace Sentry.PlatformAbstractions.Tests
         }
 
         [Test]
-        public void GetInstalledVersions_NotEmpty()
+        public void GetInstallations_NotEmpty()
         {
-            var allInstallations = FrameworkInfo.GetInstalledVersions();
+            var allInstallations = FrameworkInfo.GetInstallations();
             Assert.IsNotEmpty(allInstallations);
         }
 
         [Test]
-        public void GetInstalledVersions_AllReleasesAreMappedToVersion()
+        public void GetInstallations_AllReleasesAreMappedToVersion()
         {
-            var allInstallations = FrameworkInfo.GetInstalledVersions();
+            var allInstallations = FrameworkInfo.GetInstallations();
             foreach (var installation in allInstallations)
             {
                 if (installation.Release != null)
                 {
-                    Assert.NotNull(installation.Version);
+                    Assert.NotNull(installation.Version,
+                        $"Release {installation.Release} has no version mapped");
                 }
             }
         }

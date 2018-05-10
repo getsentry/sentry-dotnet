@@ -35,9 +35,24 @@ namespace Sentry.PlatformAbstractions
                 { 461814, "4.7.2" },
             };
 
-        // Gets latest installation of CLR 2 or 4
+        /// <summary>
+        /// Get the latest Framework installation for the specified CLR
+        /// </summary>
+        /// <remarks>
+        /// Supports the current 3 CLR versions:
+        /// CLR 1 => .NET 1.0, 1.1
+        /// CLR 2 => .NET 2.0, 3.0, 3.5
+        /// CLR 4 => .NET 4.0, 4.5.x, 4.6.x, 4.7.x
+        /// </remarks>
+        /// <param name="clr">The CLR version: 1, 2 or 4</param>
+        /// <returns>The framework installation or null if none is found.</returns>
         public static FrameworkInstallation GetLatest(int clr)
         {
+            if (clr != 1 && clr != 2 && clr != 4)
+            {
+                return null;
+            }
+
 #if NET45PLUS
             if (clr == 4)
             {
@@ -53,7 +68,7 @@ namespace Sentry.PlatformAbstractions
             }
 #endif
             FrameworkInstallation latest = null;
-            foreach (var installation in GetInstalledVersions())
+            foreach (var installation in GetInstallations())
             {
                 if (latest == null)
                 {
@@ -90,12 +105,13 @@ namespace Sentry.PlatformAbstractions
 
             return latest;
         }
+
         /// <summary>
         /// Get all .NET Framework installations in this machine
         /// </summary>
         /// <seealso href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-1-4"/>
-        /// <returns>Enumerable of installations</returns>
-        public static IEnumerable<FrameworkInstallation> GetInstalledVersions()
+        /// <returns>Enumeration of installations</returns>
+        public static IEnumerable<FrameworkInstallation> GetInstallations()
         {
             using (var ndpKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, string.Empty)
                 .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\"))
