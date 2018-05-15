@@ -1,0 +1,12 @@
+<Project>
+  <!--Automatic upward search ends when first file found. From here we need to manually import parent props/targets
+        https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <!--Generate xml docs for all projects under 'src'-->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- On Release mode make sure missing docs raise warning -->
+    <NoWarn Condition="'$(Configuration)' != 'Release'">$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+</Project>
