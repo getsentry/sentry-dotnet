@@ -1,0 +1,17 @@
+language: csharp
+env:
+  global:
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+    - DOTNET_CLI_TELEMETRY_OPTOUT=1
+dotnet: 2.1.103
+mono: 5.12.0
+matrix:
+  include:
+    - os: osx # osx_image: xcode8.3 Default	Xcode 8.3.3	OS X 10.12	1.8.0_112-b16
+      osx_image: xcode9.2
+    - os: linux
+      dist: trusty
+      sudo: required
+      group: edge
+script:
+  - ./build.sh
