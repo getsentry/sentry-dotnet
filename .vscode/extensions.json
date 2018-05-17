@@ -1,6 +1,8 @@
 {
     "recommendations": [
         "ms-vscode.csharp",
-        "EditorConfig.editorconfig"
+        "EditorConfig.editorconfig",
+        "ryanluker.vscode-coverage-gutters",
+        "formulahendry.dotnet-test-explorer"
     ]
 }
