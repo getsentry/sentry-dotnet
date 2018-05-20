@@ -56,46 +56,11 @@ function GetTestRunner()
     return $testRunner
 }
 
-function GetNuGet()
-{
-    if ($global:nuget) { return $global:nuget }
-
-    $nuget = "nuget.exe"
-    $nugetDir = ".nuget"
-    $localNuget = "$nugetDir\$nuget"
-
-    if (Get-Command $nuget -ErrorAction SilentlyContinue)
-    {
-        $nugetPath = (Get-Command $nuget).Path
-    }
-    elseif ([System.IO.File]::Exists($localNuget))
-    {
-        $nugetPath = $localNuget
-    }
-    else
-    {
-        New-Item -ItemType directory -Path $nugetDir
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/v4.6.2/$nuget" -OutFile $localNuget
-        $nugetPath = $localNuget
-    }
-
-    if (!$nugetPath) { Write-Error "NuGet not found!" }
-    $global:nugetPath = $nugetPath
-    Write-Host "NuGet found at: $nugetPath" -ForegroundColor Green
-    return $nugetPath
-}
-
-function GetAllTargets($project)
-{
-    [xml]$projectContent = Get-Content $project
-    return $projectContent.SelectSingleNode("//TargetFrameworks").InnerText.Split(";")
-}
-
 function TestAllTargets($project)
 {
     $fail = False
-    foreach ($target in GetAllTargets($project))
+    [xml]$projectContent = Get-Content $project
+    foreach ($target in $projectContent.SelectSingleNode("//TargetFrameworks").InnerText.Split(";"))
     {
         Write-Host Testing target $target -ForegroundColor Green
         if ($target -eq "net35")
@@ -118,7 +83,8 @@ function TestAllTargets($project)
 }
 
 Set-Variable -name msbuild -value (GetMsbuild)
-& $msbuild /t:clean,restore,build,pack  /p:IncludeSymbols=true  /p:Configuration=Release
+& $msbuild /t:restore,build,pack  /p:IncludeSymbols=true  /p:Configuration=Release
+if ($lastexitcode -ne 0) { Write-Error "Build failed!" }
 
 $test = "test\Sentry.PlatformAbstractions.Tests\Sentry.PlatformAbstractions.Tests.csproj"
 TestAllTargets($test)
