@@ -6,6 +6,7 @@
 </p>
 
 # Sentry.PlatformAbstractions
+[![Travis](https://travis-ci.org/getsentry/dotnet-sentry-platform-abstractions.svg?branch=master)](https://travis-ci.org/getsentry/dotnet-sentry-platform-abstractions)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r?svg=true)](https://ci.appveyor.com/project/sentry/dotnet-sentry-platform-abstractions)
 
 ## This is a work in progress. 
