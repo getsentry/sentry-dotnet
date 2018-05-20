@@ -1,4 +1,12 @@
+<p align="center">
+  <a href="https://sentry.io" target="_blank" align="center">
+    <img src="https://sentry-brand.storage.googleapis.com/sentry-logo-black.png" width="280">
+  </a>
+  <br />
+</p>
+
 # Sentry.PlatformAbstractions
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r?svg=true)](https://ci.appveyor.com/project/sentry/dotnet-sentry-platform-abstractions)
 
 ## This is a work in progress. 
 

@@ -5,5 +5,8 @@
 *.user
 bin/
 obj/
+TestResult.xml
+.nunit
+.nuget
 BenchmarkDotNet.Artifacts
 .DS_Store
