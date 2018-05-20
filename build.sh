@@ -3,7 +3,7 @@ set -e
 
 msbuild /t:restore,build /p:Configuration=Release
 
-targets=`grep -oP 'TargetFrameworks\>\K(.*)(?=\<)' \
+targets=`perl -nle 'print $& if m{TargetFrameworks\>\K(.*)(?=\<)}' \
     test/Sentry.PlatformAbstractions.Tests/Sentry.PlatformAbstractions.Tests.csproj \
     | awk -F ";" '{ for(i = 1; i <= NF; i++) { print $i; } }'`
 
@@ -15,7 +15,12 @@ if [ ! -f $nunitRunner ]; then
     rm $nunitPackage
 fi
 
-echo -e "\033[92mTargets found:\n${targets[@]}\033[0m"
+if [ -z "$targets" ]; then
+    echo -e "\033[31mNo target for testing was found!"
+    exit 1
+else
+    echo -e "\033[92mTargets found:\n${targets[@]}\033[0m"
+fi
 
 for target in $targets; do
     echo -e "\033[92mTesting $target\033[0m"
