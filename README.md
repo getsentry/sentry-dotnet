@@ -20,6 +20,7 @@ Join the discussion in our
 know what you think of the new API and new features.
 
 ## Resources
-* [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/getsentry/dotnet)
-* [Issue Tracker](https://github.com/getsentry/sentry-dotnet/issues)
+* [![Gitter chat](https://img.shields.io/gitter/room/getsentry/dotnet.svg)](https://gitter.im/getsentry/dotnet)
+* [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-sentry-green.svg)](http://stackoverflow.com/questions/tagged/sentry)
+* [![Forum](https://img.shields.io/badge/forum-sentry-green.svg)](https://forum.sentry.io/c/sdks)
 * Follow [@getsentry](https://twitter.com/getsentry) on Twitter for updates
