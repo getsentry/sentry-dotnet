@@ -17,9 +17,7 @@ Most of the platform information used by the SDK goes to Sentry's [Context Inter
 ## Building
 
 ### Install .NET Core
-You can get it to build simply with .NET Core 2.0.x SDK.
-To run all tests, in all platforms, you'll need also .NET Core 1.1.x and 1.0.x.
-You can get both by installing only the latest 1.1.x SDK.
+.NET Core 2.0.x and 1.1.x SDKs.
 
 ### Windows
 .NET Framework, 4.7.1 or later
