@@ -6,6 +6,13 @@
     <!-- <GenerateDocumentationFile Condition="'$(Configuration)' == 'Release'">true</GenerateDocumentationFile> -->
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <LangVersion>7.2</LangVersion>
+    <Description>Abstractions to platform information</Description>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>Sentry Team and Contributors</Authors>
+    <PackageTags>platform-abstractions;runtime;operating-system;sentry;getsentry</PackageTags>
+    <PackageIconUrl>https://github.com/getsentry/dotnet-sentry-platform-abstractions/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/getsentry/dotnet-sentry-platform-abstractions</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/getsentry/dotnet-sentry-platform-abstractions/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
