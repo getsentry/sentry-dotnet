@@ -18,14 +18,14 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETCOREAPP;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
-    <DefineConstants>HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_TYPE_INFO;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETCOREAPP;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_TYPE_INFO;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">

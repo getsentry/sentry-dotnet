@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace Sentry.PlatformAbstractions
 {
     // https://github.com/dotnet/corefx/issues/17452
-    public static class RuntimeInfo
+    internal static class RuntimeInfo
     {
         private static readonly Regex RuntimeParseRegex = new Regex("^(?<name>[^\\d]*)(?<version>(\\d+\\.)+[^\\s]+)",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -29,7 +29,7 @@ namespace Sentry.PlatformAbstractions
             runtime = runtime ?? GetFromEnvironmentVariable();
 #endif
 
-#if NET45PLUS // .NET Framework 4.5 and later
+#if NETFX
             SetReleaseAndVersionNetFx(runtime);
 #elif NETSTANDARD || NETCOREAPP // Possibly .NET Core
             SetNetCoreVersion(runtime);
@@ -60,15 +60,25 @@ namespace Sentry.PlatformAbstractions
             return new Runtime(name, raw: rawRuntimeDescription);
         }
 
-#if NET45PLUS // .NET Framework 4.5 and later
+#if NETFX
         internal static void SetReleaseAndVersionNetFx(Runtime runtime)
         {
             if (runtime?.IsNetFx() == true)
             {
                 var latest = FrameworkInfo.GetLatest(Environment.Version.Major);
 
-                runtime.Release = latest.Release;
-                runtime.Version = latest.Version?.ToString();
+                runtime.FrameworkInstallation = latest;
+                if (latest.Version?.Major < 4)
+                {
+                    // prior to 4, user-friendly versions are always 2 digit: 1.0, 1.1, 2.0, 3.0, 3.5
+                    runtime.Version = latest.ServicePack == null
+                        ? $"{latest.Version.Major}.{latest.Version.Minor}"
+                        : $"{latest.Version.Major}.{latest.Version.Minor} SP {latest.ServicePack}";
+                }
+                else
+                {
+                    runtime.Version = latest.Version?.ToString();
+                }
             }
         }
 #endif

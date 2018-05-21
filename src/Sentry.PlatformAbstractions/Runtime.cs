@@ -30,16 +30,15 @@ namespace Sentry.PlatformAbstractions
         /// 4.7.2633.0
         /// </example>
         public string Version { get; internal set; }
+#if NETFX
         /// <summary>
-        ///  A .NET Framework release key
+        /// The .NET Framework installation which is running the process
         /// </summary>
-        /// <remarks>
-        /// Windows registry key:
-        /// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\Release
-        /// Only applicable when on Windows, with full .NET Framework 4.5 and later.
-        /// </remarks>
-        /// <see href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed"/>
-        public int? Release { get; internal set; }
+        /// <value>
+        /// The framework installation or null if not running .NET Framework
+        /// </value>
+        public FrameworkInstallation FrameworkInstallation { get; internal set; }
+#endif
         /// <summary>
         /// The raw value parsed to extract Name and Version
         /// </summary>
@@ -54,17 +53,21 @@ namespace Sentry.PlatformAbstractions
         /// </summary>
         /// <param name="name">The name of the runtime</param>
         /// <param name="version">The version of the runtime</param>
-        /// <param name="release">The .NET Framework 4.5+ release number</param>
+        /// <param name="frameworkInstallation">The .NET Framework installation which is running the process</param>
         /// <param name="raw">The raw value when parsing was required</param>
         public Runtime(
             string name = null,
             string version = null,
-            int? release = null,
+            #if NETFX
+            FrameworkInstallation frameworkInstallation = null,
+            #endif
             string raw = null)
         {
             Name = name;
             Version = version;
-            Release = release;
+#if NETFX
+            FrameworkInstallation = frameworkInstallation;
+#endif
             Raw = raw;
         }
 
@@ -90,24 +93,22 @@ namespace Sentry.PlatformAbstractions
 
         public bool Equals(Runtime other)
         {
-            if (other is null)
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
             return string.Equals(Name, other.Name)
                    && string.Equals(Version, other.Version)
-                   && string.Equals(Raw, other.Raw) && Release == other.Release;
+#if NETFX
+                   && Equals(FrameworkInstallation, other.FrameworkInstallation)
+#endif
+                   && string.Equals(Raw, other.Raw);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is null)
-                return false;
-            if (ReferenceEquals(this, obj))
-                return true;
-            if (obj.GetType() != GetType())
-                return false;
-            return Equals((Runtime)obj);
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Runtime) obj);
         }
 
         public override int GetHashCode()
@@ -116,8 +117,10 @@ namespace Sentry.PlatformAbstractions
             {
                 var hashCode = (Name != null ? Name.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Version != null ? Version.GetHashCode() : 0);
+#if NETFX
+                hashCode = (hashCode * 397) ^ (FrameworkInstallation != null ? FrameworkInstallation.GetHashCode() : 0);
+#endif
                 hashCode = (hashCode * 397) ^ (Raw != null ? Raw.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ Release.GetHashCode();
                 return hashCode;
             }
         }

@@ -39,7 +39,7 @@ namespace Sentry.PlatformAbstractions.Tests
             }
         }
 
-#if NET45PLUS // .NET Framework 4.5 and later
+#if NETFX
         [Test]
         public void SetReleaseAndVersionNetFx_OnNetFx_NonNullReleaseAndVersion()
         {
@@ -53,7 +53,8 @@ namespace Sentry.PlatformAbstractions.Tests
                 RuntimeInfo.SetReleaseAndVersionNetFx(input);
 
                 Assert.NotNull(input.Version);
-                Assert.NotNull(input.Release);
+                Assert.NotNull(input.FrameworkInstallation);
+                Assert.NotNull(input.FrameworkInstallation.Version);
             }
         }
 #endif
@@ -66,7 +67,6 @@ namespace Sentry.PlatformAbstractions.Tests
             RuntimeInfo.SetNetCoreVersion(input);
 
             Assert.NotNull(input.Version);
-            Assert.Null(input.Release);
             Assert.AreEqual(".NET Core", input.Name);
         }
 #else
@@ -84,7 +84,7 @@ namespace Sentry.PlatformAbstractions.Tests
 
                 Assert.AreEqual("Mono", actual.Name);
                 Assert.NotNull(actual.Version);
-                Assert.Null(actual.Release);
+                Assert.Null(actual.FrameworkInstallation);
                 Assert.NotNull(actual.Raw);
             }
         }

@@ -74,7 +74,7 @@ function TestAllTargets($project)
         }
         else
         {
-            dotnet test -c Release -f $target $project
+            dotnet test --no-build -c Release -f $target $project
             if ($lastexitcode -ne 0) { Set-Variable -name fail -value true }
         }
     }
