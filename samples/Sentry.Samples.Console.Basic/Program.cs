@@ -1,7 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using static System.Console;
-
 namespace Sentry.Samples.Console.Basic
 {
     static class Program
