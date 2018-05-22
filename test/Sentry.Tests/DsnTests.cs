@@ -277,8 +277,8 @@ namespace Sentry.Tests
             public int? Port { get; set; } = Rnd.Next(1, 65535);
             public string ProjectId { get; set; } = Rnd.Next().ToString();
 
-            public string CredentialSeparator { get; set; } = ":";
-            public string UserInfoSeparator { get; set; } = "@";
+            public string CredentialSeparator { private get; set; } = ":";
+            public string UserInfoSeparator { private get; set; } = "@";
             // -> {PROTOCOL}://{PUBLIC_KEY}:{SECRET_KEY}@{HOST}/{PATH}{PROJECT_ID} <-
             public override string ToString()
                 => $"{Scheme}://{PublicKey}{(SecretKey == null ? null : $"{CredentialSeparator}{SecretKey}")}{UserInfoSeparator}{Host}{(Port != null ? $":{Port}" : "")}{Path}/{ProjectId}";

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace Sentry
 {
@@ -43,6 +44,7 @@ namespace Sentry
         public Dsn(string dsn)
         {
             var parsed = Parse(dsn, throwOnError: true);
+            Debug.Assert(parsed != null, "Parse should throw instead of returning null!");
 
             var (projectId, path, secretKey, publicKey, sentryUri) = parsed.Value;
 
