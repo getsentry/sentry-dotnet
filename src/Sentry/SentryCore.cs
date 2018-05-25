@@ -28,6 +28,8 @@ namespace Sentry
             sdk?.Dispose(); // Possibily disposes an old client
         }
 
+        public static bool IsEnabled = _sdk != DisabledSdk.Disabled;
+
         public static IDisposable PushScope() => _sdk?.PushScope();
 
         public static void ConfigureScope(Action<Scope> configureScope)

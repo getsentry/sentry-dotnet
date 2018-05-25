@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
@@ -18,7 +19,7 @@ namespace Sentry
 
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
         private string SerializableEventId => EventId.ToString("N");
-        
+
         /// <summary>
         /// The unique identifier of this event
         /// </summary>
@@ -101,17 +102,16 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Creates a Sentry event with default values like Id and Timestamp
-        /// </summary>
-        public SentryEvent() => Reset(this);
-
-        /// <summary>
-        /// Creates a Sentry event with the Exception details and default values like Id and Timestamp
+        /// Creates a Sentry event with optional Exception details and default values like Id and Timestamp
         /// </summary>
         /// <param name="exception">The exception.</param>
-        public SentryEvent(Exception exception)
+        public SentryEvent(Exception exception = null)
+            : this(exception, null)
+        { }
+
+        internal SentryEvent(Exception exception = null, ISystemClock clock = null, Guid id = default)
         {
-            Reset(this);
+            Reset(this, clock, id);
             Populate(this, exception);
         }
 
@@ -122,15 +122,18 @@ namespace Sentry
         /// <param name="exception">The exception.</param>
         public static void Populate(SentryEvent @event, Exception exception)
         {
-            if (@event.Message == null)
+            if (exception != null)
             {
-                @event.Message = exception.Message;
-            }
+                if (@event.Message == null)
+                {
+                    @event.Message = exception.Message;
+                }
 
-            // e.g: Namespace.Class.Method
-            if (@event.Culprit == null)
-            {
-                @event.Culprit = $"{exception.TargetSite?.ReflectedType?.FullName ?? "<unavailable>"}.{exception.TargetSite?.Name ?? "<unavailable>"}";
+                // e.g: Namespace.Class.Method
+                if (@event.Culprit == null)
+                {
+                    @event.Culprit = $"{exception.TargetSite?.ReflectedType?.FullName ?? "<unavailable>"}.{exception.TargetSite?.Name ?? "<unavailable>"}";
+                }
             }
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -148,13 +151,16 @@ namespace Sentry
         /// Resets the instance to a new value
         /// </summary>
         /// <param name="event"></param>
-        public static void Reset(SentryEvent @event)
+        public static void Reset(SentryEvent @event) => Reset(@event, SystemClock.Clock, default);
+
+        internal static void Reset(SentryEvent @event, ISystemClock clock, Guid id)
         {
             // Set initial value to mandatory properties:
             //@event.InternalContexts = // TODO: Load initial context data
 
-            @event.EventId = Guid.NewGuid();
-            @event.Timestamp = DateTimeOffset.UtcNow;
+            @event.EventId = id == default ? Guid.NewGuid() : id;
+            @event.Timestamp = clock.GetUtcNow();
+
             // TODO: should this be dotnet instead?
             @event.Platform = "csharp";
             @event.Sdk.Name = "Sentry.NET";

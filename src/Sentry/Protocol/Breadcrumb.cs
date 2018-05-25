@@ -74,14 +74,14 @@ namespace Sentry.Protocol
         /// <param name="category">The category.</param>
         /// <param name="level">The level.</param>
         public Breadcrumb(
-            DateTimeOffset timestamp,
+            DateTimeOffset timestamp = default,
             string message = null,
             string type = null,
             IImmutableDictionary<string, string> data = null,
             string category = null,
             BreadcrumbLevel level = BreadcrumbLevel.Info)
         {
-            Timestamp = timestamp;
+            Timestamp = timestamp == default ? DateTimeOffset.UtcNow : timestamp;
             Message = message;
             Type = type;
             Data = data;
