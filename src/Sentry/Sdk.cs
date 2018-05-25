@@ -7,10 +7,10 @@ using System.Diagnostics;
 
 namespace Sentry
 {
-    internal class Sdk : IDisposable
+    internal class Sdk : ISdk
     {
         private readonly AsyncLocal<ImmutableStack<Scope>> _asyncLocalScope = new AsyncLocal<ImmutableStack<Scope>>();
-        private ISentryClient _client;
+        private readonly ISentryClient _client;
 
         internal ImmutableStack<Scope> ScopeStack
         {
@@ -22,6 +22,7 @@ namespace Sentry
 
         public Sdk(SentryOptions options)
         {
+            // TODO: Subscribing or not should be based on the Options
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             // Create proper client based on Options
@@ -30,16 +31,17 @@ namespace Sentry
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            CaptureException(e.ExceptionObject as Exception);
+            if (e.ExceptionObject is Exception ex)
+            {
+                // TODO: Add to Scope: Exception Mechanism = e.IsTerminating
+                CaptureException(ex);
+            }
         }
 
-        internal void ConfigureScope(Action<Scope> configureScope)
+        public void ConfigureScope(Action<Scope> configureScope)
         {
-            if (_client != null)
-            {
-                var scope = ScopeStack.Peek();
-                configureScope?.Invoke(scope);
-            }
+            var scope = ScopeStack.Peek();
+            configureScope?.Invoke(scope);
         }
 
         // Microsoft.Extensions.Logging calls its equivalent method: BeginScope()
@@ -66,44 +68,29 @@ namespace Sentry
                 => client.CaptureExceptionAsync(exception, scope));
 
         public SentryResponse WithClientAndScope(Func<ISentryClient, Scope, SentryResponse> handler)
-        {
-            var client = _client;
-            if (client == null)
-            {
-                // some Response object could always be returned while signaling SDK disabled instead of relying on magic strings
-                return SentryResponse.Disabled;
-            }
-
-            return handler(client, ScopeStack.Peek());
-        }
+            => handler(_client, ScopeStack.Peek());
 
         public Task<SentryResponse> WithClientAndScopeAsync(Func<ISentryClient, Scope, Task<SentryResponse>> handler)
-        {
-            var client = _client;
-            if (client == null)
-            {
-                // TODO: Task could be cached
-                return Task.FromResult(SentryResponse.Disabled);
-            }
-
-            return handler(client, Scope);
-        }
+            => handler(_client, Scope);
 
         public SentryResponse CaptureEvent(Func<SentryEvent> eventFactory)
             => _client?.CaptureEvent(eventFactory(), Scope);
 
         public async Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory)
         {
-            var client = _client;
-            if (client == null)
-            {
-                // Runs synchronously
-                return SentryResponse.Disabled;
-            }
-
             // SDK enabled, invoke the factory and the client, asynchronously
             var @event = await eventFactory();
-            return await client.CaptureEventAsync(@event, Scope);
+            return await _client.CaptureEventAsync(@event, Scope);
+        }
+
+        public void Dispose()
+        {
+            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+
+            // Client should empty it's queue until SentryOptions.ShutdownTimeout
+            (_client as IDisposable)?.Dispose();
+
+            // TODO: set _isDisposed and throw ObjectDisposed from members
         }
 
         private class ScopeSnapshot : IDisposable
@@ -120,14 +107,6 @@ namespace Sentry
             }
 
             public void Dispose() => _sdk.ScopeStack = _snapshot;
-        }
-
-        public void Dispose()
-        {
-            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-
-            // Client should empty it's queue until SentryOptions.ShutdownTimeout
-            _client.SafeDispose();
         }
     }
 }

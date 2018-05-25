@@ -60,7 +60,7 @@ namespace Sentry.Protocol
         public IImmutableList<string> Fingerprint
         {
             get => InternalFingerprint ?? (InternalFingerprint = ImmutableList<string>.Empty);
-            set => InternalFingerprint = value;
+            internal set => InternalFingerprint = value;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Sentry.Protocol
         public IImmutableList<Breadcrumb> Breadcrumbs
         {
             get => InternalBreadcrumbs ?? (InternalBreadcrumbs = ImmutableList<Breadcrumb>.Empty);
-            set => InternalBreadcrumbs = value;
+            internal set => InternalBreadcrumbs = value;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Sentry.Protocol
         public IImmutableDictionary<string, string> Extra
         {
             get => InternalExtra ?? (InternalExtra = ImmutableDictionary<string, string>.Empty);
-            set => InternalExtra = value;
+            internal set => InternalExtra = value;
         }
 
         /// <summary>
@@ -88,8 +88,13 @@ namespace Sentry.Protocol
         public IImmutableDictionary<string, string> Tags
         {
             get => InternalTags ?? (InternalTags = ImmutableDictionary<string, string>.Empty);
-            set => InternalTags = value;
+            internal set => InternalTags = value;
         }
+
+        public void AddBreadcrumb(Breadcrumb breadcrumb) => Breadcrumbs = Breadcrumbs.Add(breadcrumb);
+        public void AddFingerprint(string fingerprint) => Fingerprint = Fingerprint.Add(fingerprint);
+        public void AddExtra(string key, string value) => Extra = Extra.Add(key, value);
+        public void AddTag(string key, string value) => Tags = Tags.Add(key, value);
 
         internal Scope Clone()
         {
