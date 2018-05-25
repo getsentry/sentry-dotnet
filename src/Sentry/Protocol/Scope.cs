@@ -91,6 +91,7 @@ namespace Sentry.Protocol
             internal set => InternalTags = value;
         }
 
+        // TODO: Breadcrumb entries are ordered from oldest to newest.
         public void AddBreadcrumb(Breadcrumb breadcrumb) => Breadcrumbs = Breadcrumbs.Add(breadcrumb);
         public void AddFingerprint(string fingerprint) => Fingerprint = Fingerprint.Add(fingerprint);
         public void AddExtra(string key, string value) => Extra = Extra.Add(key, value);
