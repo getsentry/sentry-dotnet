@@ -11,30 +11,14 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/attributes/"/>
     [DataContract]
-    public class SentryEvent
+    public class SentryEvent : Scope
     {
-        [DataMember(Name = "contexts", EmitDefaultValue = false)]
-        internal Contexts InternalContexts { get; private set; }
-
-        [DataMember(Name = "user", EmitDefaultValue = false)]
-        internal User InternalUser { get; private set; }
-
-        // Used internally when serializing to avoid allocating the dictionary (and serializing empty) in case no data was written.
-        [DataMember(Name = "tags", EmitDefaultValue = false)]
-        internal IDictionary<string, string> InternalTags { get; private set; }
-
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string> InternalModules { get; private set; }
 
-        [DataMember(Name = "extra", EmitDefaultValue = false)]
-        internal IDictionary<string, string> InternalExtra { get; private set; }
-
-        [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        internal ICollection<string> InternalFingerprint { get; private set; }
-
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
         private string SerializableEventId => EventId.ToString("N");
-
+        
         /// <summary>
         /// The unique identifier of this event
         /// </summary>
@@ -49,22 +33,6 @@ namespace Sentry
         /// </summary>
         [DataMember(Name = "message", EmitDefaultValue = false)]
         public string Message { get; set; }
-
-        /// <summary>
-        /// Gets the structured Sentry context
-        /// </summary>
-        /// <value>
-        /// The contexts.
-        /// </value>
-        public Contexts Contexts => InternalContexts ?? (InternalContexts = new Contexts());
-
-        /// <summary>
-        /// Gets the user information
-        /// </summary>
-        /// <value>
-        /// The user.
-        /// </value>
-        public User User => InternalUser ?? (InternalUser = new User());
 
         /// <summary>
         /// Indicates when the event was created
@@ -124,46 +92,12 @@ namespace Sentry
         public string Environment { get; set; }
 
         /// <summary>
-        /// Arbitrary key-value for this event
-        /// </summary>
-        public IDictionary<string, string> Tags
-        {
-            get => InternalTags = InternalTags ?? new Dictionary<string, string>();
-            set => InternalTags = value;
-        }
-
-        /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
         public IDictionary<string, string> Modules
         {
-            get => InternalModules = InternalModules ?? new Dictionary<string, string>();
+            get => InternalModules ?? (InternalModules = new Dictionary<string, string>());
             set => InternalModules = value;
-        }
-
-        /// <summary>
-        /// An arbitrary mapping of additional metadata to store with the event.
-        /// </summary>
-        public IDictionary<string, string> Extra
-        {
-            get => InternalExtra = InternalExtra ?? new Dictionary<string, string>();
-            set => InternalExtra = value;
-        }
-
-        /// <summary>
-        /// A list of strings used to dictate the deduplication of this event.
-        /// </summary>
-        /// <seealso href="https://docs.sentry.io/learn/rollups/#custom-grouping"/>
-        /// <remarks>
-        /// A value of {{ default }} will be replaced with the built-in behavior, thus allowing you to extend it, or completely replace it.
-        /// New in version Protocol: version '7'
-        /// </remarks>
-        /// <example> { "fingerprint": ["myrpc", "POST", "/foo.bar"] } </example>
-        /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
-        public ICollection<string> Fingerprint
-        {
-            get => InternalFingerprint = InternalFingerprint ?? new List<string>();
-            set => InternalFingerprint = value;
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ namespace Sentry
     /// An interface which describes the authenticated User for a request.
     /// </summary>
     /// <see href="https://docs.sentry.io/clientdev/interfaces/user/"/>
-    public class User
+    public sealed class User
     {
         /// <summary>
         /// The email address of the user.
@@ -16,7 +16,7 @@ namespace Sentry
         /// The user's email address.
         /// </value>
         [DataMember(Name = "email", EmitDefaultValue = false)]
-        public string Email { get; set; }
+        public string Email { get; }
 
         /// <summary>
         /// The unique ID of the user.
@@ -25,7 +25,7 @@ namespace Sentry
         /// The unique identifier.
         /// </value>
         [DataMember(Name = "id", EmitDefaultValue = false)]
-        public string Id { get; set; }
+        public string Id { get; }
 
         /// <summary>
         /// The IP of the user.
@@ -34,7 +34,7 @@ namespace Sentry
         /// The user's IP address.
         /// </value>
         [DataMember(Name = "ip_address", EmitDefaultValue = false)]
-        public string IpAddress { get; set; }
+        public string IpAddress { get; }
 
         /// <summary>
         /// The username of the user
@@ -43,7 +43,18 @@ namespace Sentry
         /// The user's username.
         /// </value>
         [DataMember(Name = "username", EmitDefaultValue = false)]
-        public string Username { get; set; }
+        public string Username { get; }
 
+        public User(
+            string email = null,
+            string id = null,
+            string ipAddress = null,
+            string username = null)
+        {
+            Email = email;
+            Id = id;
+            IpAddress = ipAddress;
+            Username = username;
+        }
     }
 }

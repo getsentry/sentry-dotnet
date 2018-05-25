@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -15,10 +16,11 @@ namespace Sentry
         /// </summary>
         /// <param name="client">The Sentry client.</param>
         /// <param name="ex">The exception.</param>
+        /// <param name="scope">Scope</param>
         /// <returns></returns>
-        public static Task<SentryResponse> CaptureExceptionAsync(this ISentryClient client, Exception ex)
+        public static Task<SentryResponse> CaptureExceptionAsync(this ISentryClient client, Exception ex, Scope scope)
         {
-            return client.CaptureEventAsync(new SentryEvent(ex));
+            return client.CaptureEventAsync(new SentryEvent(ex), scope);
         }
 
         /// <summary>
@@ -26,10 +28,13 @@ namespace Sentry
         /// </summary>
         /// <param name="client">The Sentry client.</param>
         /// <param name="ex">The exception.</param>
+        /// <param name="scope">Scope</param>
         /// <returns></returns>
-        public static SentryResponse CaptureException(this ISentryClient client, Exception ex)
+        public static SentryResponse CaptureException(this ISentryClient client, Exception ex, Scope scope)
         {
-            return client.CaptureEvent(new SentryEvent(ex));
+            return client.CaptureEvent(new SentryEvent(ex), scope);
         }
+
+        internal static void SafeDispose(this ISentryClient client) => (client as IDisposable)?.Dispose();
     }
 }
