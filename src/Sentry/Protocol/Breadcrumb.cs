@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -74,8 +75,8 @@ namespace Sentry.Protocol
         /// <param name="category">The category.</param>
         /// <param name="level">The level.</param>
         public Breadcrumb(
-            string message = null,
-            string type = null,
+            string message,
+            string type,
             IImmutableDictionary<string, string> data = null,
             string category = null,
             BreadcrumbLevel level = default)
@@ -89,7 +90,9 @@ namespace Sentry.Protocol
         {
         }
 
-        internal Breadcrumb(
+        ///
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Breadcrumb(
             DateTimeOffset timestamp,
             string message = null,
             string type = null,

@@ -7,6 +7,8 @@
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- On Release mode make sure missing docs raise warning -->
-    <NoWarn Condition="'$(Configuration)' != 'Release'">$(NoWarn);CS1591</NoWarn>
+    <!--TODO: Add this when API is more stable:-->
+    <!--<NoWarn Condition="'$(Configuration)' != 'Release'">$(NoWarn);CS1591</NoWarn>-->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 </Project>

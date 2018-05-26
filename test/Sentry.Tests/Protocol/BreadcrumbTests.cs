@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Sentry.Internals;
 using Sentry.Protocol;
 using Xunit;
 
@@ -11,12 +12,14 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void SerializeObject_ParameterlessConstructor_IncludesTimestamp()
         {
-            var sut = new Breadcrumb();
+            var sut = new Breadcrumb("test", "unit");
 
             var actualJson = JsonSerializer.SerializeObject(sut);
-            var actual = JsonSerializer.DeserializeObject<Breadcrumb>(actualJson);
+            var actual = JsonSerializer.DeserializeObject(actualJson);
 
-            Assert.NotEqual(default, actual.Timestamp);
+            DateTimeOffset actualTimestamp = actual.timestamp;
+
+            Assert.NotEqual(default, actualTimestamp);
         }
 
         [Fact]

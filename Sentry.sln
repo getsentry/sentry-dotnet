@@ -39,7 +39,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.ME.Logging",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Logging", "src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj", "{2718BBA4-F080-4924-BA50-B63F756FB097}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Extensions.Logging.Tests", "test\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj", "{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Logging.Tests", "test\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj", "{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

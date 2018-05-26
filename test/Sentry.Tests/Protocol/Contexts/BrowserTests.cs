@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sentry.Internals;
 using Sentry.Protocol;
 using Xunit;
 

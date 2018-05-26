@@ -2,14 +2,18 @@ using System;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 
-namespace Sentry
+namespace Sentry.Extensibility
 {
-    internal interface ISdk : IDisposable
+    // The SDK main API set
+    public interface ISdk
     {
-        void ConfigureScope(Action<Scope> configureScope);
+        bool IsEnabled { get; }
 
+        // Scope stuff:
+        void ConfigureScope(Action<Scope> configureScope);
         IDisposable PushScope();
 
+        // Client or Client/Scope stuff:
         SentryResponse CaptureEvent(SentryEvent evt);
         SentryResponse CaptureEvent(Func<SentryEvent> eventFactory);
         Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory);

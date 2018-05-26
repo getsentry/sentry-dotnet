@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Sentry.Extensibility;
 
 namespace Sentry.Extensions.Logging
 {
@@ -9,11 +11,20 @@ namespace Sentry.Extensions.Logging
         private IDisposable _scope;
 
         public SentryLoggerProvider(SentryLoggingOptions options)
-        {
-            _options = options;
+            : this(StaticSentryScopeManagement.Instance, options)
+        { }
 
-            _scope = SentryCore.PushScope();
-            SentryCore.ConfigureScope(p => p.Sdk.Integrations.Add(Constants.IntegrationName));
+        internal SentryLoggerProvider(
+            ISentryScopeManagement scopeManagement,
+            SentryLoggingOptions options)
+        {
+            Debug.Assert(options != null);
+            Debug.Assert(scopeManagement != null);
+
+            _options = options;
+            _scope = scopeManagement.PushScope();
+
+            scopeManagement.ConfigureScope(p => p.Sdk.Integrations.Add(Constants.IntegrationName));
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options);

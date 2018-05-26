@@ -1,3 +1,4 @@
+using Sentry.Internals;
 using Xunit;
 
 namespace Sentry.Tests.Protocol.Contexts

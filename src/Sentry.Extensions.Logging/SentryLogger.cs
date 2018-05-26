@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 
@@ -8,25 +9,42 @@ namespace Sentry.Extensions.Logging
 {
     internal sealed class SentryLogger : ILogger
     {
-        private readonly string _categoryName;
+        private readonly ISdk _sdk;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
 
+        internal string CategoryName { get; }
+
         public SentryLogger(
             string categoryName,
+            SentryLoggingOptions options)
+            : this(
+                categoryName,
+                options,
+                SystemClock.Clock,
+                SentryCoreAdapter.Instance)
+        {
+        }
+
+        internal SentryLogger(
+            string categoryName,
             SentryLoggingOptions options,
-            ISystemClock clock = null)
+            ISystemClock clock,
+            ISdk sdk)
         {
             Debug.Assert(categoryName != null);
             Debug.Assert(options != null);
-            _categoryName = categoryName;
+            Debug.Assert(clock != null);
+            Debug.Assert(sdk != null);
+            CategoryName = categoryName;
             _options = options;
-            _clock = clock ?? SystemClock.Clock;
+            _clock = clock;
+            _sdk = sdk;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => SentryCore.PushScope();
+        public IDisposable BeginScope<TState>(TState state) => _sdk.PushScope();
 
-        public bool IsEnabled(LogLevel logLevel) => SentryCore.IsEnabled && logLevel >= _options.MinimumBreadcrumbLevel;
+        public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled && logLevel >= _options.MinimumBreadcrumbLevel;
 
         public void Log<TState>(
             LogLevel logLevel,
@@ -45,11 +63,11 @@ namespace Sentry.Extensions.Logging
             // If it's enabled, level is configured to at least store event as Breadcrumb
             if (logLevel < _options.MinimumEventLevel)
             {
-                SentryCore.ConfigureScope(
+                _sdk.ConfigureScope(
                     s => s.AddBreadcrumb(
                         message,
                         "logger",
-                        _categoryName,
+                        CategoryName,
                         eventId.ToTupleOrNull(),
                         logLevel.ToBreadcrumbLevel()));
             }
@@ -57,7 +75,7 @@ namespace Sentry.Extensions.Logging
             {
                 var @event = new SentryEvent(exception)
                 {
-                    Logger = _categoryName,
+                    Logger = CategoryName,
                     Message = message,
                 };
 
@@ -67,7 +85,7 @@ namespace Sentry.Extensions.Logging
                     @event.AddTag(tuple.Value.name, tuple.Value.value);
                 }
 
-                SentryCore.CaptureEvent(@event);
+                _sdk.CaptureEvent(@event);
             }
         }
     }
