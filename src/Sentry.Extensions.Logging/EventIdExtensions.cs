@@ -4,6 +4,8 @@ namespace Sentry.Extensions.Logging
 {
     internal static class EventIdExtensions
     {
+        public const string TupleName = "eventId";
+
         /// <summary>
         /// Returns a tuple (eventId,value) if the event is not empty, otherwise null.
         /// </summary>
@@ -13,7 +15,7 @@ namespace Sentry.Extensions.Logging
 
             if (eventId.Id != 0 || eventId.Name != null)
             {
-                data = (nameof(eventId), eventId.ToString());
+                data = (TupleName, eventId.ToString());
             }
 
             return data;
