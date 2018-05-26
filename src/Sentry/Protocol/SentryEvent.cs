@@ -56,13 +56,6 @@ namespace Sentry
         public string Platform { get; set; }
 
         /// <summary>
-        /// SDK information
-        /// </summary>
-        /// <remarks>New in Sentry version: 8.4</remarks>
-        [DataMember(Name = "sdk", EmitDefaultValue = false)]
-        public SdkVersion Sdk { get; set; } = new SdkVersion();
-
-        /// <summary>
         /// Sentry level
         /// </summary>
         [DataMember(Name = "level", EmitDefaultValue = false)]

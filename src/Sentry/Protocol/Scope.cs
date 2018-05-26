@@ -49,6 +49,13 @@ namespace Sentry.Protocol
         public User User => InternalUser ?? (InternalUser = new User());
 
         /// <summary>
+        /// SDK information
+        /// </summary>
+        /// <remarks>New in Sentry version: 8.4</remarks>
+        [DataMember(Name = "sdk", EmitDefaultValue = false)]
+        public SdkVersion Sdk { get; set; } = new SdkVersion();
+
+        /// <summary>
         /// A list of strings used to dictate the deduplication of this event.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/learn/rollups/#custom-grouping"/>
@@ -98,6 +105,7 @@ namespace Sentry.Protocol
         /// </summary>
         /// <param name="breadcrumb">The breadcrumb.</param>
         public void AddBreadcrumb(Breadcrumb breadcrumb) => Breadcrumbs = Breadcrumbs.Add(breadcrumb);
+
         /// <summary>
         /// Adds a figerprint to the <see cref="Scope"/>
         /// </summary>

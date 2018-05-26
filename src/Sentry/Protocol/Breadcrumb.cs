@@ -68,21 +68,36 @@ namespace Sentry.Protocol
         /// <summary>
         /// Initializes a new instance of the <see cref="Breadcrumb"/> class.
         /// </summary>
-        /// <param name="timestamp">The timestamp.</param>
         /// <param name="message">The message.</param>
         /// <param name="type">The type.</param>
         /// <param name="data">The data.</param>
         /// <param name="category">The category.</param>
         /// <param name="level">The level.</param>
         public Breadcrumb(
-            DateTimeOffset timestamp = default,
             string message = null,
             string type = null,
             IImmutableDictionary<string, string> data = null,
             string category = null,
-            BreadcrumbLevel level = BreadcrumbLevel.Info)
+            BreadcrumbLevel level = default)
+        : this(
+            DateTimeOffset.UtcNow,
+            message,
+            type,
+            data,
+            category,
+            level)
         {
-            Timestamp = timestamp == default ? DateTimeOffset.UtcNow : timestamp;
+        }
+
+        internal Breadcrumb(
+            DateTimeOffset timestamp,
+            string message = null,
+            string type = null,
+            IImmutableDictionary<string, string> data = null,
+            string category = null,
+            BreadcrumbLevel level = default)
+        {
+            Timestamp = timestamp;
             Message = message;
             Type = type;
             Data = data;

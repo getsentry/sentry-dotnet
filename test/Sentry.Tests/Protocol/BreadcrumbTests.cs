@@ -57,7 +57,7 @@ namespace Sentry.Tests.Protocol
             var expectedTimestampString = "9999-12-31T23:59:59.9999999+00:00";
             var timestampString = $"\"timestamp\":\"{expectedTimestampString}\"";
 
-            yield return new object[] { (new Breadcrumb (timestamp: expectedTimestamp), $"{{{timestampString}}}") };
+            yield return new object[] { (new Breadcrumb (expectedTimestamp), $"{{{timestampString}}}") };
             yield return new object[] { (new Breadcrumb (expectedTimestamp, message: "message"), $"{{{timestampString},\"message\":\"message\"}}") };
             yield return new object[] { (new Breadcrumb (expectedTimestamp, type: "type"), $"{{{timestampString},\"type\":\"type\"}}") };
             yield return new object[] { (new Breadcrumb (expectedTimestamp, data: ImmutableDictionary<string, string>.Empty.Add("key", "val")), $"{{{timestampString},\"data\":{{\"key\":\"val\"}}}}") };

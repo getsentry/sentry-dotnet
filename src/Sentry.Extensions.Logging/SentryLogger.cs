@@ -44,43 +44,32 @@ namespace Sentry.Extensions.Logging
 
             var message = formatter?.Invoke(state, exception);
 
-            // If it's enabled, at least Breadcrumb has to be stored
+            // If it's enabled, level is configured to at least store event as Breadcrumb
             if (logLevel < _options.MinimumEventLevel)
             {
-                SentryCore.ConfigureScope(s => s.AddBreadcrumb(FromLogEvent()));
+                SentryCore.ConfigureScope(
+                    s => s.AddBreadcrumb(
+                        message,
+                        "logger",
+                        _categoryName,
+                        eventId.ToTupleOrNull(),
+                        logLevel.ToBreadcrumbLevel()));
             }
             else
             {
                 var @event = new SentryEvent(exception)
                 {
                     Logger = _categoryName,
-                    Message = message
+                    Message = message,
                 };
 
-                if (eventId.Id != 0 || eventId.Name != null)
+                var tuple = eventId.ToTupleOrNull();
+                if (tuple.HasValue)
                 {
-                    @event.AddTag(nameof(eventId), eventId.ToString());
+                    @event.AddTag(tuple.Value.name, tuple.Value.value);
                 }
 
                 SentryCore.CaptureEvent(@event);
-            }
-
-            Breadcrumb FromLogEvent()
-            {
-                var data = ImmutableDictionary<string, string>.Empty;
-                if (eventId.Id != 0 || eventId.Name != null)
-                {
-                    data = ImmutableDictionary<string, string>.Empty
-                        .Add(nameof(eventId), eventId.ToString());
-                }
-
-                return new Breadcrumb(
-                    timestamp: _clock.GetUtcNow(),
-                    message: message,
-                    type: "logger",
-                    data: data,
-                    category: _categoryName,
-                    level: logLevel.ToBreadcrumbLevel());
             }
         }
     }
