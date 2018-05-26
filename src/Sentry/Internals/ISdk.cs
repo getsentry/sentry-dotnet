@@ -6,10 +6,11 @@ namespace Sentry
 {
     internal interface ISdk : IDisposable
     {
+        // Scope stuff:
         void ConfigureScope(Action<Scope> configureScope);
-
         IDisposable PushScope();
 
+        // Client or Client/Scope stuff:
         SentryResponse CaptureEvent(SentryEvent evt);
         SentryResponse CaptureEvent(Func<SentryEvent> eventFactory);
         Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory);

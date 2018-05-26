@@ -34,5 +34,13 @@ namespace Sentry.Extensions.Logging.Tests
 
             Assert.Same(expected, actual);
         }
+
+        [Fact]
+        public void Namespace_MicrosoftExtensionsLogging()
+        {
+            var @namespace = typeof(SentryLoggerFactoryExtensions).Namespace;
+
+            Assert.Equal("Microsoft.Extensions.Logging", @namespace);
+        }
     }
 }

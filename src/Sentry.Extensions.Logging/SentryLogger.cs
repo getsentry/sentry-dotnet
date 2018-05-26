@@ -8,9 +8,10 @@ namespace Sentry.Extensions.Logging
 {
     internal sealed class SentryLogger : ILogger
     {
-        private readonly string _categoryName;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
+
+        internal string CategoryName { get; }
 
         public SentryLogger(
             string categoryName,
@@ -19,7 +20,7 @@ namespace Sentry.Extensions.Logging
         {
             Debug.Assert(categoryName != null);
             Debug.Assert(options != null);
-            _categoryName = categoryName;
+            CategoryName = categoryName;
             _options = options;
             _clock = clock ?? SystemClock.Clock;
         }
@@ -49,7 +50,7 @@ namespace Sentry.Extensions.Logging
                     s => s.AddBreadcrumb(
                         message,
                         "logger",
-                        _categoryName,
+                        CategoryName,
                         eventId.ToTupleOrNull(),
                         logLevel.ToBreadcrumbLevel()));
             }
@@ -57,7 +58,7 @@ namespace Sentry.Extensions.Logging
             {
                 var @event = new SentryEvent(exception)
                 {
-                    Logger = _categoryName,
+                    Logger = CategoryName,
                     Message = message,
                 };
 
