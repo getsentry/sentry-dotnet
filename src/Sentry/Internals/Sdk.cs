@@ -68,7 +68,7 @@ namespace Sentry.Internals
 
         [DebuggerStepThrough]
         public IDisposable PushScope() => ScopeManagement.PushScope();
-        
+
         public void Dispose()
         {
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
