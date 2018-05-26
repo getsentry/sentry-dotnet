@@ -11,6 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AF6AF4C7-8AA
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{83263231-1A2A-4733-B759-EEFF14E8C5D5}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tests", "test\Sentry.Tests\Sentry.Tests.csproj", "{1E0F969B-67F9-4FCC-BCBF-596DB6460C7C}"
 EndProject
@@ -32,9 +35,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7745
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.Basic", "samples\Sentry.Samples.Console.Basic\Sentry.Samples.Console.Basic.csproj", "{65F5A969-B386-48F5-8B7E-6C90D6C720BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.ME.Logging", "samples\Sentry.Samples.ME.Logging\Sentry.Samples.ME.Logging.csproj", "{DE536383-4A18-4057-A7F0-639BDEF6E1BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.ME.Logging", "samples\Sentry.Samples.ME.Logging\Sentry.Samples.ME.Logging.csproj", "{DE536383-4A18-4057-A7F0-639BDEF6E1BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Extensions.Logging", "src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj", "{2718BBA4-F080-4924-BA50-B63F756FB097}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Logging", "src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj", "{2718BBA4-F080-4924-BA50-B63F756FB097}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Logging.Tests", "test\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj", "{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +67,10 @@ Global
 		{2718BBA4-F080-4924-BA50-B63F756FB097}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2718BBA4-F080-4924-BA50-B63F756FB097}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2718BBA4-F080-4924-BA50-B63F756FB097}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +81,7 @@ Global
 		{65F5A969-B386-48F5-8B7E-6C90D6C720BC} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{DE536383-4A18-4057-A7F0-639BDEF6E1BB} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{2718BBA4-F080-4924-BA50-B63F756FB097} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

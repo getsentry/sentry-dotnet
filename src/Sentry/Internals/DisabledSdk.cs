@@ -1,10 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Protocol;
 
-namespace Sentry
+namespace Sentry.Internals
 {
-    internal sealed class DisabledSdk : ISdk
+    internal sealed class DisabledSdk : ISdk, IDisposable
     {
         private static SentryResponse DisabledResponse { get; } = new SentryResponse(false, errorMessage: "SDK Disabled");
         private static readonly Task<SentryResponse> DisabledResponseTask = Task.FromResult(DisabledResponse);
@@ -16,6 +17,8 @@ namespace Sentry
         public void ConfigureScope(Action<Scope> configureScope) { }
 
         public IDisposable PushScope() => this;
+
+        public bool IsEnabled => false;
 
         public SentryResponse CaptureEvent(SentryEvent evt) => DisabledResponse;
 

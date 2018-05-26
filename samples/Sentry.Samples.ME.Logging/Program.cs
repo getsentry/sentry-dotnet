@@ -37,13 +37,13 @@ namespace Sentry.Samples.ME.Logging
             {
                 var logger = loggerFactory.CreateLogger<Program>();
 
-                logger.LogTrace("By default this is no-op");
-                logger.LogInformation("By default this should only store a Breadcrumb");
-                logger.LogError("This generates an event captured by sentry");
+                logger.LogTrace("By default this log level is no-op");
 
-                // Disposing the logger won't affect Sentry.
-                // The lifetime is managed externally (call CloseAndFlush)
-            }
+                logger.LogInformation("This should only store a Breadcrumb");
+
+                logger.LogError("This generates an event captured by sentry which includes the message above.");
+
+            } // Disposing the logger won't affect Sentry: The lifetime is managed externally (call CloseAndFlush)
         }
     }
 }

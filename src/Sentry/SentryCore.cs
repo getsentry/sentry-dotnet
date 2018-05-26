@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 using System.Diagnostics;
+using Sentry.Extensibility;
+using Sentry.Internals;
 
 namespace Sentry
 {
@@ -29,7 +31,7 @@ namespace Sentry
             configureOptions?.Invoke(options);
 
             var sdk = Interlocked.Exchange(ref _sdk, new Sdk(options));
-            sdk?.Dispose(); // Possibily disposes an old client
+            (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
         }
 
         /// <summary>
@@ -38,13 +40,13 @@ namespace Sentry
         public static void CloseAndFlush()
         {
             var sdk = Interlocked.Exchange(ref _sdk, DisabledSdk.Disabled);
-            sdk?.Dispose(); // Possibily disposes an old client
+            (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
         }
 
         /// <summary>
         /// Whether the SDK is enabled or not
         /// </summary>
-        public static bool IsEnabled => !ReferenceEquals(DisabledSdk.Disabled, _sdk);
+        public static bool IsEnabled { [DebuggerStepThrough] get => _sdk.IsEnabled; }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed

@@ -10,6 +10,7 @@ namespace Sentry.Protocol
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
+    [DataContract]
     public class Scope
     {
         [DataMember(Name = "user", EmitDefaultValue = false)]
@@ -46,6 +47,13 @@ namespace Sentry.Protocol
         /// The user.
         /// </value>
         public User User => InternalUser ?? (InternalUser = new User());
+
+        /// <summary>
+        /// SDK information
+        /// </summary>
+        /// <remarks>New in Sentry version: 8.4</remarks>
+        [DataMember(Name = "sdk", EmitDefaultValue = false)]
+        public SdkVersion Sdk { get; set; } = new SdkVersion();
 
         /// <summary>
         /// A list of strings used to dictate the deduplication of this event.
@@ -97,6 +105,7 @@ namespace Sentry.Protocol
         /// </summary>
         /// <param name="breadcrumb">The breadcrumb.</param>
         public void AddBreadcrumb(Breadcrumb breadcrumb) => Breadcrumbs = Breadcrumbs.Add(breadcrumb);
+
         /// <summary>
         /// Adds a figerprint to the <see cref="Scope"/>
         /// </summary>
