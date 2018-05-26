@@ -1,14 +1,16 @@
 using Sentry.Internals;
+using Sentry.Protocol;
 using Xunit;
 
-namespace Sentry.Tests.Protocol.Contexts
+// ReSharper disable once CheckNamespace
+namespace Sentry.Tests.Protocol
 {
     public class ContextsTests
     {
         [Fact]
         public void SerializeObject_NoPropertyFilled_SerializesEmptyObject()
         {
-            var sut = new Sentry.Protocol.Contexts();
+            var sut = new Contexts();
 
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -18,7 +20,7 @@ namespace Sentry.Tests.Protocol.Contexts
         [Fact]
         public void SerializeObject_SingleDevicePropertySet_SerializeSingleProperty()
         {
-            var sut = new Sentry.Protocol.Contexts();
+            var sut = new Contexts();
             sut.Device.Architecture = "x86";
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -28,7 +30,7 @@ namespace Sentry.Tests.Protocol.Contexts
         [Fact]
         public void SerializeObject_SingleAppPropertySet_SerializeSingleProperty()
         {
-            var sut = new Sentry.Protocol.Contexts();
+            var sut = new Contexts();
             sut.App.Name = "My.App";
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -38,7 +40,7 @@ namespace Sentry.Tests.Protocol.Contexts
         [Fact]
         public void SerializeObject_SingleOsPropertySet_SerializeSingleProperty()
         {
-            var sut = new Sentry.Protocol.Contexts();
+            var sut = new Contexts();
             sut.OperatingSystem.Version = "1.1.1.100";
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -48,7 +50,7 @@ namespace Sentry.Tests.Protocol.Contexts
         [Fact]
         public void SerializeObject_SingleRuntimePropertySet_SerializeSingleProperty()
         {
-            var sut = new Sentry.Protocol.Contexts();
+            var sut = new Contexts();
             sut.Runtime.Version = "2.1.1.100";
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -58,7 +60,7 @@ namespace Sentry.Tests.Protocol.Contexts
         [Fact]
         public void Ctor_SingleBrowserPropertySet_SerializeSingleProperty()
         {
-            var contexts = new Sentry.Protocol.Contexts();
+            var contexts = new Contexts();
             contexts.Browser.Name = "Netscape 1";
             var actual = JsonSerializer.SerializeObject(contexts);
 
@@ -68,7 +70,7 @@ namespace Sentry.Tests.Protocol.Contexts
         [Fact]
         public void Ctor_SingleOperatingSystemPropertySet_SerializeSingleProperty()
         {
-            var contexts = new Sentry.Protocol.Contexts();
+            var contexts = new Contexts();
             contexts.OperatingSystem.Name = "BeOS 1";
             var actual = JsonSerializer.SerializeObject(contexts);
 

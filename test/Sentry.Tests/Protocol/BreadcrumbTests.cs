@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Sentry.Tests.Protocol
 {
-    public class BreadcrumbTests
+    public class BreadcrumbTests : ImmutableTests<Breadcrumb>
     {
         [Fact]
         public void SerializeObject_ParameterlessConstructor_IncludesTimestamp()

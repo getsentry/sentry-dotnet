@@ -3,7 +3,8 @@ using Sentry.Internals;
 using Sentry.Protocol;
 using Xunit;
 
-namespace Sentry.Tests.Protocol.Contexts
+// ReSharper disable once CheckNamespace
+namespace Sentry.Tests.Protocol
 {
     public class OperatingSystemTests
     {
