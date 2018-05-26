@@ -4,8 +4,9 @@ namespace Sentry.Samples.Console.Basic
     {
         static void Main()
         {
-            var sentry = new HttpSentryClient();
-            // This exception is captured and sent to Sentry
+            SentryCore.Init();
+
+            // assuming it can find the DSN, the following exception is captured and sent to Sentry
             throw null;
         }
     }
