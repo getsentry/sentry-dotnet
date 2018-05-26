@@ -63,6 +63,7 @@ namespace Sentry.Protocol
             internal set => InternalFingerprint = value;
         }
 
+        // TODO: Breadcrumb entries should be ordered from oldest to newest.        
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>
@@ -91,10 +92,27 @@ namespace Sentry.Protocol
             internal set => InternalTags = value;
         }
 
-        // TODO: Breadcrumb entries are ordered from oldest to newest.
+        /// <summary>
+        /// Adds a breadcrumb to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="breadcrumb">The breadcrumb.</param>
         public void AddBreadcrumb(Breadcrumb breadcrumb) => Breadcrumbs = Breadcrumbs.Add(breadcrumb);
+        /// <summary>
+        /// Adds a figerprint to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="fingerprint">The fingerprint.</param>
         public void AddFingerprint(string fingerprint) => Fingerprint = Fingerprint.Add(fingerprint);
+        /// <summary>
+        /// Adds the extra values to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
         public void AddExtra(string key, string value) => Extra = Extra.Add(key, value);
+        /// <summary>
+        /// Adds the tag to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
         public void AddTag(string key, string value) => Tags = Tags.Add(key, value);
 
         internal Scope Clone()

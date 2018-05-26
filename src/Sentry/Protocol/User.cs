@@ -45,6 +45,13 @@ namespace Sentry
         [DataMember(Name = "username", EmitDefaultValue = false)]
         public string Username { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="User"/> class.
+        /// </summary>
+        /// <param name="email">The email.</param>
+        /// <param name="id">The identifier.</param>
+        /// <param name="ipAddress">The ip address.</param>
+        /// <param name="username">The username.</param>
         public User(
             string email = null,
             string id = null,
