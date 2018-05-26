@@ -5,6 +5,7 @@ using Sentry.Infrastructure;
 
 namespace Sentry.Protocol
 {
+    ///
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ScopeExtensions
     {
@@ -25,22 +26,17 @@ namespace Sentry.Protocol
                     (string, string)? dataPair = null,
                     BreadcrumbLevel level = default)
         {
-            var data = ImmutableDictionary<string, string>.Empty;
-            if (dataPair.HasValue)
-            {
-                data = data.Add(dataPair.Value.Item1, dataPair.Value.Item2);
-            }
-
             scope.AddBreadcrumb(
+                clock: null,
                 message: message,
-                type: "logger",
-                data: data,
+                type: type,
+                data: dataPair?.ToImmutableDictionary(),
                 category: category,
                 level: level);
         }
 
         /// <summary>
-        /// Adds the breadcrumb to the scope.
+        /// Adds a breadcrumb to the scope.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="message">The message.</param>
@@ -63,9 +59,29 @@ namespace Sentry.Protocol
                 data: data?.ToImmutableDictionary(),
                 category: category,
                 level: level);
-
         }
 
+        ///
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static void AddBreadcrumb(
+            this Scope scope,
+            ISystemClock clock,
+            string message,
+            string type,
+            string category = null,
+            (string, string)? dataPair = null,
+            BreadcrumbLevel level = default)
+        {
+            scope.AddBreadcrumb(
+                clock: clock,
+                message: message,
+                type: type,
+                data: dataPair?.ToImmutableDictionary(),
+                category: category,
+                level: level);
+        }
+
+        ///
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
             this Scope scope,
@@ -84,5 +100,10 @@ namespace Sentry.Protocol
                 category: category,
                 level: level));
         }
+
+        private static IImmutableDictionary<string, string> ToImmutableDictionary(
+            this (string name, string value) tuple)
+            => ImmutableDictionary<string, string>.Empty
+                .Add(tuple.name, tuple.value);
     }
 }

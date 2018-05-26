@@ -29,5 +29,15 @@ namespace Sentry.Extensions.Logging.Tests
 
             Assert.False(sut.IsEnabled(LogLevel.Critical));
         }
+
+        [Fact]
+        public void IsEnabled_EnabledSdk_ReturnsTrue()
+        {
+            _fixture.Sdk.IsEnabled.Returns(true);
+
+            var sut = _fixture.GetSut();
+
+            Assert.True(sut.IsEnabled(LogLevel.Critical));
+        }
     }
 }

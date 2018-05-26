@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
@@ -42,7 +43,15 @@ namespace Sentry.Extensions.Logging
             _sdk = sdk;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => _sdk.PushScope();
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            var guard = _sdk.PushScope();
+
+            // TODO: store state within Scope to be read later when (if) event is sent
+
+            return guard;
+        }
+
 
         public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled && logLevel >= _options.MinimumBreadcrumbLevel;
 
@@ -65,6 +74,7 @@ namespace Sentry.Extensions.Logging
             {
                 _sdk.ConfigureScope(
                     s => s.AddBreadcrumb(
+                        _clock,
                         message,
                         "logger",
                         CategoryName,
