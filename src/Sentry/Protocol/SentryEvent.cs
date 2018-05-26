@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
@@ -106,10 +107,13 @@ namespace Sentry
         /// </summary>
         /// <param name="exception">The exception.</param>
         public SentryEvent(Exception exception = null)
-            : this(exception, null)
+            : this(exception, SystemClock.Clock)
         { }
 
-        internal SentryEvent(Exception exception = null, ISystemClock clock = null, Guid id = default)
+        internal SentryEvent(
+            Exception exception = null,
+            ISystemClock clock = null,
+            Guid id = default)
         {
             Reset(this, clock, id);
             Populate(this, exception);
@@ -151,10 +155,13 @@ namespace Sentry
         /// Resets the instance to a new value
         /// </summary>
         /// <param name="event"></param>
-        public static void Reset(SentryEvent @event) => Reset(@event, SystemClock.Clock, default);
+        public static void Reset(SentryEvent @event) => Reset(@event, SystemClock.Clock);
 
-        internal static void Reset(SentryEvent @event, ISystemClock clock, Guid id)
+        internal static void Reset(SentryEvent @event, ISystemClock clock, Guid id = default)
         {
+            Debug.Assert(@event != null);
+            Debug.Assert(clock != null);
+
             // Set initial value to mandatory properties:
             //@event.InternalContexts = // TODO: Load initial context data
 

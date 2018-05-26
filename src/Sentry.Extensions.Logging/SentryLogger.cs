@@ -35,9 +35,13 @@ namespace Sentry.Extensions.Logging
             Exception exception,
             Func<TState, Exception, string> formatter)
         {
-            // Only called by the framework if IsEnabled returned true.
-            // That means at least an AddBreadcrumb operation has to be done
-            if (logLevel <= _options.MinimumEventLevel)
+            if (!IsEnabled(logLevel))
+            {
+                return;
+            }
+
+            // TODO: If it's enabled, at least Breadcrumb has to be stored
+            if (logLevel < _options.MinimumEventLevel)
             {
                 SentryCore.ConfigureScope(s => s.AddBreadcrumb(FromLogEvent()));
             }

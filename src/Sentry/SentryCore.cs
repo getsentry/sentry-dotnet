@@ -14,7 +14,6 @@ namespace Sentry
     /// It allows safe static access to a client and scope management.
     /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
     /// </remarks>
-    [DebuggerStepThrough]
     public static class SentryCore
     {
         // TODO: At this point no Scope (e.g: breadcrumb) will be kept until the SDK is enabled
@@ -45,18 +44,20 @@ namespace Sentry
         /// <summary>
         /// Whether the SDK is enabled or not
         /// </summary>
-        public static bool IsEnabled = _sdk != DisabledSdk.Disabled;
+        public static bool IsEnabled => !ReferenceEquals(DisabledSdk.Disabled, _sdk);
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
+        [DebuggerStepThrough]
         public static IDisposable PushScope() => _sdk?.PushScope();
 
         /// <summary>
         /// Configures the scope through the callback.
         /// </summary>
         /// <param name="configureScope">The configure scope.</param>
+        [DebuggerStepThrough]
         public static void ConfigureScope(Action<Scope> configureScope)
             => _sdk.ConfigureScope(configureScope);
 
@@ -65,6 +66,7 @@ namespace Sentry
         /// </summary>
         /// <param name="evt">The evt.</param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static SentryResponse CaptureEvent(SentryEvent evt)
             => _sdk.CaptureEvent(evt);
 
@@ -73,6 +75,7 @@ namespace Sentry
         /// </summary>
         /// <param name="eventFactory">The event factory.</param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static SentryResponse CaptureEvent(Func<SentryEvent> eventFactory)
             => _sdk.CaptureEvent(eventFactory);
 
@@ -81,6 +84,7 @@ namespace Sentry
         /// </summary>
         /// <param name="eventFactory">The event factory.</param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory)
             => _sdk.CaptureEventAsync(eventFactory);
 
@@ -89,6 +93,7 @@ namespace Sentry
         /// </summary>
         /// <param name="exception">The exception.</param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static SentryResponse CaptureException(Exception exception)
             => _sdk.CaptureException(exception);
 
@@ -97,6 +102,7 @@ namespace Sentry
         /// </summary>
         /// <param name="exception">The exception.</param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static Task<SentryResponse> CaptureExceptionAsync(Exception exception)
             => _sdk.CaptureExceptionAsync(exception);
 
@@ -105,6 +111,7 @@ namespace Sentry
         /// </summary>
         /// <param name="handler">The handler.</param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static SentryResponse WithClientAndScope(Func<ISentryClient, Scope, SentryResponse> handler)
             => _sdk.WithClientAndScope(handler);
 
@@ -113,6 +120,7 @@ namespace Sentry
         /// </summary>
         /// <param name="handler">The handler.</param>
         /// <returns></returns>
+        [DebuggerStepThrough]
         public static Task<SentryResponse> WithClientAndScopeAsync(Func<ISentryClient, Scope, Task<SentryResponse>> handler)
             => _sdk.WithClientAndScopeAsync(handler);
     }

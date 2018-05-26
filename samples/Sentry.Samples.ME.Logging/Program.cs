@@ -7,22 +7,11 @@ namespace Sentry.Samples.ME.Logging
     {
         static void Main()
         {
-            SentryCore.Init();
+            SentryCore.Init(); // Initialize SDK
+
             try
             {
-                var loggerFactory = new LoggerFactory()
-                    .AddSentry()
-                    .AddConsole();
-
-                var logger = loggerFactory.CreateLogger<Program>();
-
-                logger.LogTrace("By default this is no-op");
-                logger.LogInformation("By default this should only store a Breadcrumb");
-                logger.LogError("This generates an event captured by sentry");
-
-                // Disposing the logger won't affect Sentry.
-                // The lifetime is managed externally (call CloseAndFlush below)
-                loggerFactory.Dispose();
+                App();
             }
             catch (Exception e)
             {
@@ -31,6 +20,29 @@ namespace Sentry.Samples.ME.Logging
             finally
             {
                 SentryCore.CloseAndFlush();
+            }
+        }
+
+        static void App()
+        {
+            using (var loggerFactory = new LoggerFactory()
+                .AddSentry(o =>
+                {
+                    // The default values are:
+                    o.MinimumBreadcrumbLevel = LogLevel.Information;
+                    o.MinimumEventLevel = LogLevel.Error;
+                    o.MaxLogBreadcrumbs = 100;
+                })
+                .AddConsole())
+            {
+                var logger = loggerFactory.CreateLogger<Program>();
+
+                logger.LogTrace("By default this is no-op");
+                logger.LogInformation("By default this should only store a Breadcrumb");
+                logger.LogError("This generates an event captured by sentry");
+
+                // Disposing the logger won't affect Sentry.
+                // The lifetime is managed externally (call CloseAndFlush)
             }
         }
     }
