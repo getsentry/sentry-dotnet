@@ -10,6 +10,7 @@ namespace Sentry.Protocol
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
+    [DataContract]
     public class Scope
     {
         [DataMember(Name = "user", EmitDefaultValue = false)]

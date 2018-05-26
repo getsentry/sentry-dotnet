@@ -7,6 +7,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Series of application events
     /// </summary>
+    [DataContract]
     public sealed class Breadcrumb
     {
         /// <summary>
