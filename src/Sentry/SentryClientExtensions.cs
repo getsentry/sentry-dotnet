@@ -34,7 +34,5 @@ namespace Sentry
         {
             return client.CaptureEvent(new SentryEvent(ex), scope);
         }
-
-        internal static void SafeDispose(this ISentryClient client) => (client as IDisposable)?.Dispose();
     }
 }

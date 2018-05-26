@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
@@ -40,7 +42,9 @@ namespace Sentry.Extensions.Logging
                 return;
             }
 
-            // TODO: If it's enabled, at least Breadcrumb has to be stored
+            var message = formatter?.Invoke(state, exception);
+
+            // If it's enabled, at least Breadcrumb has to be stored
             if (logLevel < _options.MinimumEventLevel)
             {
                 SentryCore.ConfigureScope(s => s.AddBreadcrumb(FromLogEvent()));
@@ -50,7 +54,7 @@ namespace Sentry.Extensions.Logging
                 var @event = new SentryEvent(exception)
                 {
                     Logger = _categoryName,
-                    Message = formatter?.Invoke(state, exception)
+                    Message = message
                 };
 
                 if (eventId.Id != 0 || eventId.Name != null)
@@ -63,10 +67,20 @@ namespace Sentry.Extensions.Logging
 
             Breadcrumb FromLogEvent()
             {
+                var data = ImmutableDictionary<string, string>.Empty;
+                if (eventId.Id != 0 || eventId.Name != null)
+                {
+                    data = ImmutableDictionary<string, string>.Empty
+                        .Add(nameof(eventId), eventId.ToString());
+                }
+
                 return new Breadcrumb(
                     timestamp: _clock.GetUtcNow(),
-                    // TODO: finish breadcrumbs
-                    message: "todo");
+                    message: message,
+                    type: "logger",
+                    data: data,
+                    category: _categoryName,
+                    level: logLevel.ToBreadcrumbLevel());
             }
         }
     }

@@ -8,5 +8,6 @@ namespace Sentry
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
 
         public static string SerializeObject<T>(T @object) => JsonConvert.SerializeObject(@object, StringEnumConverter);
+        public static T DeserializeObject<T>(string json) => JsonConvert.DeserializeObject<T>(json);
     }
 }
