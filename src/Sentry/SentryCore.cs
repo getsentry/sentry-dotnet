@@ -34,6 +34,9 @@ namespace Sentry
             (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
         }
 
+        [DebuggerStepThrough]
+        public static IDisposable PushScope<TState>(TState state) => _sdk.PushScope(state);
+
         /// <summary>
         /// Closes the SDK and flushes any queued event to Sentry
         /// </summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -9,6 +10,7 @@ namespace Sentry.Protocol
     /// Series of application events
     /// </summary>
     [DataContract]
+    [DebuggerDisplay("{" + nameof(Message) + "}")]
     public sealed class Breadcrumb
     {
         /// <summary>

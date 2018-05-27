@@ -44,7 +44,7 @@ namespace Sentry.Extensions.Logging
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            var guard = _sdk.PushScope();
+            var guard = _sdk.PushScope(state);
 
             // TODO: store state within Scope to be read later when (if) event is sent
 

@@ -35,6 +35,10 @@ namespace Sentry.Extensibility
             => SentryCore.PushScope();
 
         [DebuggerStepThrough]
+        public IDisposable PushScope<TState>(TState state)
+            => SentryCore.PushScope(state);
+
+        [DebuggerStepThrough]
         public SentryResponse CaptureEvent(SentryEvent evt)
             => SentryCore.CaptureEvent(evt);
 

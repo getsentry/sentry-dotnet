@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -11,8 +13,11 @@ namespace Sentry.Protocol
     /// during the lifetime of the scope.
     /// </remarks>
     [DataContract]
+    [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count}")]
     public class Scope
     {
+        internal object State { get; private set; }
+
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
 
@@ -124,11 +129,17 @@ namespace Sentry.Protocol
         /// <param name="value">The value.</param>
         public void AddTag(string key, string value) => Tags = Tags.Add(key, value);
 
-        internal Scope Clone()
+        // TODO: make extenion methods instead of members
+        public void AddTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value);
+        public void AddTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
+        public void AddTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
+
+        internal Scope Clone(object state)
         {
             // TODO: test with reflection to ensure Clone doesn't go out of sync with members
             return new Scope
             {
+                State = state ?? State, // TODO: cloning would require a list of states to keep parent states
                 InternalUser = InternalUser,
                 InternalContexts = InternalContexts,
                 InternalFingerprint = InternalFingerprint,

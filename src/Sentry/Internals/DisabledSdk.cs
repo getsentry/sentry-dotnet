@@ -17,6 +17,7 @@ namespace Sentry.Internals
         public void ConfigureScope(Action<Scope> configureScope) { }
 
         public IDisposable PushScope() => this;
+        public IDisposable PushScope<TState>(TState state) => this;
 
         public bool IsEnabled => false;
 

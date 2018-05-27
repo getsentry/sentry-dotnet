@@ -12,6 +12,7 @@ namespace Sentry.Extensibility
         // Scope stuff:
         void ConfigureScope(Action<Scope> configureScope);
         IDisposable PushScope();
+        IDisposable PushScope<TState>(TState state);
 
         // Client or Client/Scope stuff:
         SentryResponse CaptureEvent(SentryEvent evt);

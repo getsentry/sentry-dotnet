@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Protocol;
@@ -35,6 +34,12 @@ namespace Sentry.Internals
 
         public bool IsEnabled => true;
 
+        public void ConfigureScope(Action<Scope> configureScope) => ScopeManagement.ConfigureScope(configureScope);
+
+        public IDisposable PushScope() => ScopeManagement.PushScope();
+
+        public IDisposable PushScope<TState>(TState state) => ScopeManagement.PushScope(state);
+
         public SentryResponse CaptureEvent(SentryEvent evt)
             => WithClientAndScope((client, scope)
                 => client.CaptureEvent(evt, scope));
@@ -62,12 +67,6 @@ namespace Sentry.Internals
             var @event = await eventFactory();
             return await _client.CaptureEventAsync(@event, ScopeManagement.GetCurrent());
         }
-
-        [DebuggerStepThrough]
-        public void ConfigureScope(Action<Scope> configureScope) => ScopeManagement.ConfigureScope(configureScope);
-
-        [DebuggerStepThrough]
-        public IDisposable PushScope() => ScopeManagement.PushScope();
 
         public void Dispose()
         {
