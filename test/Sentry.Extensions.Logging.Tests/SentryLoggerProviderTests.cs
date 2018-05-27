@@ -47,7 +47,7 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void Ctor_AddsSdkIntegration()
         {
-            var scope = new Scope();
+            var scope = new Scope(null);
             _fixture.SentryScopeManagement.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(info => info.Arg<Action<Scope>>()(scope));
 

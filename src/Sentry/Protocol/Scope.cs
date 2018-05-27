@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -16,6 +17,8 @@ namespace Sentry.Protocol
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count}")]
     public class Scope
     {
+        private readonly IScopeOptions _options;
+
         internal ImmutableList<object> States { get; private set; }
 
         [DataMember(Name = "user", EmitDefaultValue = false)]
@@ -105,6 +108,9 @@ namespace Sentry.Protocol
             internal set => InternalTags = value;
         }
 
+        public Scope(IScopeOptions options) => _options = options;
+        protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
+
         /// <summary>
         /// Adds a breadcrumb to the <see cref="Scope"/>
         /// </summary>
@@ -129,7 +135,7 @@ namespace Sentry.Protocol
         /// <param name="value">The value.</param>
         public void AddTag(string key, string value) => Tags = Tags.Add(key, value);
 
-        // TODO: make extenion methods instead of members
+        // TODO: make extension methods instead of members
         public void AddTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value);
         public void AddTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
         public void AddTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
@@ -146,7 +152,7 @@ namespace Sentry.Protocol
                 states = (states ?? ImmutableList<object>.Empty).Add(state);
             }
             // TODO: test with reflection to ensure Clone doesn't go out of sync with members
-            return new Scope
+            return new Scope(_options)
             {
                 States = states,
                 InternalUser = InternalUser,

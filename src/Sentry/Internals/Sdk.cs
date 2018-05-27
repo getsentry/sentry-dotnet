@@ -19,7 +19,7 @@ namespace Sentry.Internals
 
             // Create proper client based on Options
             _client = new HttpSentryClient(options);
-            ScopeManagement = new SentryScopeManagement();
+            ScopeManagement = new SentryScopeManagement(options);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)

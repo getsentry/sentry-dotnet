@@ -9,20 +9,6 @@ namespace Sentry.Extensions.Logging
     public class SentryLoggingOptions
     {
         /// <summary>
-        /// Gets or sets the maximum log breadcrumbs.
-        /// </summary>
-        /// <remarks>
-        /// Events with level higher than <see cref="MinimumBreadcrumbLevel"/>
-        /// will be logged as <see cref="Breadcrumb"/>
-        /// When the number of events reach this configuration value,
-        /// older breadcrumbs start dropping to make room for new ones.
-        /// </remarks>
-        /// <value>
-        /// The maximum log breadcrumbs.
-        /// </value>
-        public int MaxLogBreadcrumbs { get; set; } = 100;
-
-        /// <summary>
         /// Gets or sets the minimum breadcrumb level.
         /// </summary>
         /// <remarks>Events with this level or higher will be stored as <see cref="Breadcrumb"/></remarks>

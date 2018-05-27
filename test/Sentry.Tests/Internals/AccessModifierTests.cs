@@ -22,7 +22,7 @@ namespace Sentry.Tests.Internals
 
         public static IEnumerable<object[]> GetNonPublicTypes()
             => typeof(ISentryClient).Assembly.GetTypes()
-                .Where(t => !t.IsPublic)
+                .Where(t => !t.IsPublic && !t.IsNested && t.Namespace.StartsWith("Sentry"))
                 .Select(t => new[] { t });
 
         public static IEnumerable<object[]> GetTypesInInternalsNamespace()

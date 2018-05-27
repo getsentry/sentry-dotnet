@@ -36,7 +36,6 @@ namespace Sentry.Samples.ME.Logging
                     // This allows other integrations like ASP.NET Core use the crumbs collected via the logging integration
                     // But the calls to the Logger.Log itself won't be sending anything to Sentry
                     o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
-                    o.MaxLogBreadcrumbs = 100; // How many breadcrumbs to store.
                 })
                 .AddConsole())
             {

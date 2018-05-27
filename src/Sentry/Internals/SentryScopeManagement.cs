@@ -8,13 +8,16 @@ namespace Sentry.Internals
 {
     internal class SentryScopeManagement : IInternalScopeManagement
     {
+        private readonly IScopeOptions _options;
         private readonly AsyncLocal<ImmutableStack<Scope>> _asyncLocalScope = new AsyncLocal<ImmutableStack<Scope>>();
 
         internal ImmutableStack<Scope> ScopeStack
         {
-            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = ImmutableStack.Create(new Scope()));
+            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = ImmutableStack.Create(new Scope(_options)));
             set => _asyncLocalScope.Value = value;
         }
+
+        public SentryScopeManagement(IScopeOptions options) => _options = options;
 
         public Scope GetCurrent() => ScopeStack.Peek();
 
