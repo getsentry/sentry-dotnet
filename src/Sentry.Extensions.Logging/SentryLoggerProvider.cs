@@ -11,7 +11,7 @@ namespace Sentry.Extensions.Logging
         private IDisposable _scope;
 
         public SentryLoggerProvider(SentryLoggingOptions options)
-            : this(StaticSentryScopeManagement.Instance, options)
+            : this(SentryCoreAdapter.Instance, options)
         { }
 
         internal SentryLoggerProvider(

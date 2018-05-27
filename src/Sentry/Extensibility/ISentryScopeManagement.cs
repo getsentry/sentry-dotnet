@@ -1,7 +1,7 @@
 using System;
 using Sentry.Protocol;
 
-namespace Sentry
+namespace Sentry.Extensibility
 {
     /// <summary>
     /// Scope management

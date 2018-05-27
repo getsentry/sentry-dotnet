@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
@@ -51,7 +50,6 @@ namespace Sentry.Extensions.Logging
 
             return guard;
         }
-
 
         public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled && logLevel >= _options.MinimumBreadcrumbLevel;
 
