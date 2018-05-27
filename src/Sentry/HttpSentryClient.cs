@@ -22,26 +22,30 @@ namespace Sentry
         ///
         public SentryResponse CaptureEvent(SentryEvent @event, Scope scope)
         {
-            if (scope.State != null)
+            // TODO: Consider multiple events being sent with the same scope:
+            // Wherever this code will end up, it should evaluate only once
+            if (scope.States != null)
             {
-                if (scope.State is string scopeSring)
+                foreach (var state in scope.States.Reverse())
                 {
-                    @event.AddTag("scope", scopeSring);
+                    if (state is string scopeSring)
+                    {
+                        @event.AddTag("scope", scopeSring);
+                    }
+                    else if (state is IEnumerable<KeyValuePair<string, string>> keyValStringString)
+                    {
+                        @event.AddTags(keyValStringString);
+                    }
+                    else if (state is IEnumerable<KeyValuePair<string, object>> keyValStringObject)
+                    {
+                        @event.AddTags(keyValStringObject.Select(k => new KeyValuePair<string, string>(k.Key, k.Value.ToString())));
+                    }
+                    else
+                    {
+                        // TODO: possible callback invocation here
+                        @event.AddExtra("State of unknown type", state.GetType().ToString());
+                    }
                 }
-                else if (scope.State is IEnumerable<KeyValuePair<string, string>> keyValStringString)
-                {
-                    @event.AddTags(keyValStringString);
-                }
-                else if (scope.State is IEnumerable<KeyValuePair<string, object>> keyValStringObject)
-                {
-                    @event.AddTags(keyValStringObject.Select(k => new KeyValuePair<string, string>(k.Key, k.Value.ToString())));
-                }
-                else
-                {
-                    // TODO: possible callback invocation here
-                    @event.AddExtra("State of unknown type", scope.State.GetType().ToString());
-                }
-
             }
 
             return new SentryResponse(false);

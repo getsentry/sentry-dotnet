@@ -16,7 +16,7 @@ namespace Sentry.Protocol
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count}")]
     public class Scope
     {
-        internal object State { get; private set; }
+        internal ImmutableList<object> States { get; private set; }
 
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
@@ -136,10 +136,19 @@ namespace Sentry.Protocol
 
         internal Scope Clone(object state)
         {
+            ImmutableList<object> states = null;
+            if (States != null)
+            {
+                states = States;
+            }
+            if (state != null)
+            {
+                states = (states ?? ImmutableList<object>.Empty).Add(state);
+            }
             // TODO: test with reflection to ensure Clone doesn't go out of sync with members
             return new Scope
             {
-                State = state ?? State, // TODO: cloning would require a list of states to keep parent states
+                States = states,
                 InternalUser = InternalUser,
                 InternalContexts = InternalContexts,
                 InternalFingerprint = InternalFingerprint,
