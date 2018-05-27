@@ -115,7 +115,18 @@ namespace Sentry.Protocol
         /// Adds a breadcrumb to the <see cref="Scope"/>
         /// </summary>
         /// <param name="breadcrumb">The breadcrumb.</param>
-        public void AddBreadcrumb(Breadcrumb breadcrumb) => Breadcrumbs = Breadcrumbs.Add(breadcrumb);
+        public void AddBreadcrumb(Breadcrumb breadcrumb)
+        {
+            var breadcrumbs = Breadcrumbs;
+
+            var overflow = breadcrumbs.Count - _options.MaxBreadcrumbs + 1;
+            if (overflow > 0)
+            {
+                breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
+            }
+
+            Breadcrumbs = breadcrumbs.Add(breadcrumb);
+        }
 
         /// <summary>
         /// Adds a figerprint to the <see cref="Scope"/>
