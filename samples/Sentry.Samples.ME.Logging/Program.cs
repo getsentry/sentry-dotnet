@@ -30,12 +30,9 @@ namespace Sentry.Samples.ME.Logging
                 .AddSentry(o =>
                 {
                     // The default values are:
-                    o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to log store breadcrumb
-
-                    // TODO: Assess: Support LogLevel.None which means collect breadcrumbs but don't send event on Error
-                    // This allows other integrations like ASP.NET Core use the crumbs collected via the logging integration
-                    // But the calls to the Logger.Log itself won't be sending anything to Sentry
+                    o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
                     o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
+
                 })
                 .AddConsole())
             {

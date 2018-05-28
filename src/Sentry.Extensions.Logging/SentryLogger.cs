@@ -51,7 +51,10 @@ namespace Sentry.Extensions.Logging
             return guard;
         }
 
-        public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled && logLevel >= _options.MinimumBreadcrumbLevel;
+        public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled
+                                                    && logLevel != LogLevel.None // TODO: Does the framework already account for this?
+                                                    && (logLevel >= _options.MinimumBreadcrumbLevel
+                                                    || logLevel >= _options.MinimumEventLevel);
 
         public void Log<TState>(
             LogLevel logLevel,
@@ -66,20 +69,8 @@ namespace Sentry.Extensions.Logging
             }
 
             var message = formatter?.Invoke(state, exception);
-
-            // If it's enabled, level is configured to at least store event as Breadcrumb
-            if (logLevel < _options.MinimumEventLevel)
-            {
-                _sdk.ConfigureScope(
-                    s => s.AddBreadcrumb(
-                        _clock,
-                        message,
-                        "logger",
-                        CategoryName,
-                        eventId.ToTupleOrNull(),
-                        logLevel.ToBreadcrumbLevel()));
-            }
-            else
+            if (_options.MinimumEventLevel != LogLevel.None
+                && logLevel >= _options.MinimumEventLevel)
             {
                 var @event = new SentryEvent(exception)
                 {
@@ -94,6 +85,18 @@ namespace Sentry.Extensions.Logging
                 }
 
                 _sdk.CaptureEvent(@event);
+            }
+            else if (_options.MinimumBreadcrumbLevel != LogLevel.None
+                     && logLevel >= _options.MinimumBreadcrumbLevel)
+            {
+                _sdk.ConfigureScope(
+                    s => s.AddBreadcrumb(
+                        _clock,
+                        message,
+                        "logger",
+                        CategoryName,
+                        eventId.ToTupleOrNull(),
+                        logLevel.ToBreadcrumbLevel()));
             }
         }
     }

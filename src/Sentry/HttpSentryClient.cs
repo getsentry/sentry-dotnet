@@ -26,7 +26,7 @@ namespace Sentry
             // Wherever this code will end up, it should evaluate only once
             if (scope.States != null)
             {
-                foreach (var state in scope.States.Reverse())
+                foreach (var state in scope.States)
                 {
                     if (state is string scopeSring)
                     {
