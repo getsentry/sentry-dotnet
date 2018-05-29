@@ -22,7 +22,7 @@ namespace Sentry.Tests.Protocol
 
             // Breadcrumb 0 is dropped
             Assert.Equal("1", scope.Breadcrumbs[0].Message);
-            Assert.Equal("5", scope.Breadcrumbs[5].Message);
+            Assert.Equal("5", scope.Breadcrumbs[4].Message);
         }
     }
 }
