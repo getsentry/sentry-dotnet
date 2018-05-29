@@ -6,10 +6,16 @@ using Sentry.Protocol;
 namespace Sentry.Extensibility
 {
     /// <summary>
-    /// Allows testing classes which depend on static <see cref="SentryCore"/>
+    /// An implementation of <see cref="ISdk" /> which forwards any call to <see cref="SentryCore" />
     /// </summary>
-    /// <seealso cref="Sentry.Extensibility.ISdk" />
-    public sealed class SentryCoreAdapter : ISdk
+    /// <remarks>
+    /// Allows testing classes which otherwise would need to depend on static <see cref="SentryCore" />
+    /// by having them depend on ISdk instead, which can be mocked.
+    /// </remarks>
+    /// <seealso cref="ISdk" />
+    /// <inheritdoc cref="ISdk" />
+    /// <inheritdoc cref="ISentryScopeManagement" />
+    public sealed class SentryCoreAdapter : ISdk, ISentryScopeManagement
     {
         /// <summary>
         /// The single instance which forwards all calls to <see cref="SentryCore"/>
@@ -18,7 +24,7 @@ namespace Sentry.Extensibility
 
         private SentryCoreAdapter() { }
 
-        public bool IsEnabled => SentryCore.IsEnabled;
+        public bool IsEnabled { [DebuggerStepThrough] get => SentryCore.IsEnabled; }
 
         [DebuggerStepThrough]
         public void ConfigureScope(Action<Scope> configureScope)
@@ -27,6 +33,10 @@ namespace Sentry.Extensibility
         [DebuggerStepThrough]
         public IDisposable PushScope()
             => SentryCore.PushScope();
+
+        [DebuggerStepThrough]
+        public IDisposable PushScope<TState>(TState state)
+            => SentryCore.PushScope(state);
 
         [DebuggerStepThrough]
         public SentryResponse CaptureEvent(SentryEvent evt)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.ME.Logging
@@ -29,19 +30,41 @@ namespace Sentry.Samples.ME.Logging
                 .AddSentry(o =>
                 {
                     // The default values are:
-                    o.MinimumBreadcrumbLevel = LogLevel.Information;
-                    o.MinimumEventLevel = LogLevel.Error;
-                    o.MaxLogBreadcrumbs = 100;
+                    o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
+                    o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
+
                 })
                 .AddConsole())
             {
                 var logger = loggerFactory.CreateLogger<Program>();
 
-                logger.LogTrace("By default this log level is no-op");
+                logger.LogTrace("1 - By *default* this log level is ignored by Sentry.");
 
-                logger.LogInformation("This should only store a Breadcrumb");
+                logger.LogInformation("2 -Information messages are stored as Breadcrumb, sent with the next event.");
 
-                logger.LogError("This generates an event captured by sentry which includes the message above.");
+                logger.LogError("3 - This generates an event, captured by sentry and includes breadcrumbs (2) tracked in this transaction.");
+
+                using (logger.BeginScope(new Dictionary<string, string>
+                {
+                    {"A - some context", "some value"},
+                    {"B - more info on this", "more value"},
+                }))
+                {
+                    logger.LogWarning("4 - Breadcrumb that only exists inside this scope");
+
+                    logger.LogError("5 - An event that includes the scoped key-value (A, B) above and also the breadcrumbs: (2, 4)");
+
+                    using (logger.BeginScope("C - Inner most scope, with single string state"))
+                    {
+                        logger.LogInformation("6 - Inner most breadcrumb");
+
+                        logger.LogError("7 - An event that includes the scope key-value (A, B, C) and also the breadcrumbs: (2, 4, 6)");
+                    }
+
+                    logger.LogError("8 - Includes Scope (A, B) and breadcrumbs: (2, 4)");
+                }
+
+                logger.LogError("9 - No scope data, breadcrumb: 2");
 
             } // Disposing the logger won't affect Sentry: The lifetime is managed externally (call CloseAndFlush)
         }

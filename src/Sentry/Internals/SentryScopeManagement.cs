@@ -8,13 +8,16 @@ namespace Sentry.Internals
 {
     internal class SentryScopeManagement : IInternalScopeManagement
     {
+        private readonly IScopeOptions _options;
         private readonly AsyncLocal<ImmutableStack<Scope>> _asyncLocalScope = new AsyncLocal<ImmutableStack<Scope>>();
 
         internal ImmutableStack<Scope> ScopeStack
         {
-            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = ImmutableStack.Create(new Scope()));
+            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = ImmutableStack.Create(new Scope(_options)));
             set => _asyncLocalScope.Value = value;
         }
+
+        public SentryScopeManagement(IScopeOptions options) => _options = options;
 
         public Scope GetCurrent() => ScopeStack.Peek();
 
@@ -25,10 +28,12 @@ namespace Sentry.Internals
         }
 
         // TODO: Microsoft.Extensions.Logging calls its equivalent method: BeginScope()
-        public IDisposable PushScope()
+        public IDisposable PushScope() => PushScope<object>(null);
+
+        public IDisposable PushScope<TState>(TState state)
         {
             var currentScopeStack = ScopeStack;
-            var clonedScope = currentScopeStack.Peek().Clone();
+            var clonedScope = currentScopeStack.Peek().Clone(state);
             var scopeSnapshot = new ScopeSnapshot(currentScopeStack, this);
             ScopeStack = currentScopeStack.Push(clonedScope);
 

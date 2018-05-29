@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
@@ -45,15 +44,17 @@ namespace Sentry.Extensions.Logging
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            var guard = _sdk.PushScope();
+            var guard = _sdk.PushScope(state);
 
             // TODO: store state within Scope to be read later when (if) event is sent
 
             return guard;
         }
 
-
-        public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled && logLevel >= _options.MinimumBreadcrumbLevel;
+        public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled
+                                                    && logLevel != LogLevel.None
+                                                    && (logLevel >= _options.MinimumBreadcrumbLevel
+                                                    || logLevel >= _options.MinimumEventLevel);
 
         public void Log<TState>(
             LogLevel logLevel,
@@ -68,20 +69,8 @@ namespace Sentry.Extensions.Logging
             }
 
             var message = formatter?.Invoke(state, exception);
-
-            // If it's enabled, level is configured to at least store event as Breadcrumb
-            if (logLevel < _options.MinimumEventLevel)
-            {
-                _sdk.ConfigureScope(
-                    s => s.AddBreadcrumb(
-                        _clock,
-                        message,
-                        "logger",
-                        CategoryName,
-                        eventId.ToTupleOrNull(),
-                        logLevel.ToBreadcrumbLevel()));
-            }
-            else
+            if (_options.MinimumEventLevel != LogLevel.None
+                && logLevel >= _options.MinimumEventLevel)
             {
                 var @event = new SentryEvent(exception)
                 {
@@ -96,6 +85,18 @@ namespace Sentry.Extensions.Logging
                 }
 
                 _sdk.CaptureEvent(@event);
+            }
+            else if (_options.MinimumBreadcrumbLevel != LogLevel.None
+                     && logLevel >= _options.MinimumBreadcrumbLevel)
+            {
+                _sdk.ConfigureScope(
+                    s => s.AddBreadcrumb(
+                        _clock,
+                        message,
+                        "logger",
+                        CategoryName,
+                        eventId.ToTupleOrNull(),
+                        logLevel.ToBreadcrumbLevel()));
             }
         }
     }

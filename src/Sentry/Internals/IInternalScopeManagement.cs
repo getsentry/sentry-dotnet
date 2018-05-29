@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Protocol;
 
 namespace Sentry.Internals

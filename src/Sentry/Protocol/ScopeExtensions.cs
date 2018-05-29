@@ -22,7 +22,7 @@ namespace Sentry.Protocol
                     this Scope scope,
                     string message,
                     string type,
-                    string category = null,
+                    string category,
                     (string, string)? dataPair = null,
                     BreadcrumbLevel level = default)
         {

@@ -13,6 +13,7 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/attributes/"/>
     [DataContract]
+    [DebuggerDisplay("{" + nameof(Message) + "}")]
     public class SentryEvent : Scope
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]

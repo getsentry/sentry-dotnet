@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -11,8 +14,13 @@ namespace Sentry.Protocol
     /// during the lifetime of the scope.
     /// </remarks>
     [DataContract]
+    [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count}")]
     public class Scope
     {
+        private readonly IScopeOptions _options;
+
+        internal ImmutableList<object> States { get; private set; }
+
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
 
@@ -100,11 +108,25 @@ namespace Sentry.Protocol
             internal set => InternalTags = value;
         }
 
+        public Scope(IScopeOptions options) => _options = options;
+        protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
+
         /// <summary>
         /// Adds a breadcrumb to the <see cref="Scope"/>
         /// </summary>
         /// <param name="breadcrumb">The breadcrumb.</param>
-        public void AddBreadcrumb(Breadcrumb breadcrumb) => Breadcrumbs = Breadcrumbs.Add(breadcrumb);
+        public void AddBreadcrumb(Breadcrumb breadcrumb)
+        {
+            var breadcrumbs = Breadcrumbs;
+
+            var overflow = breadcrumbs.Count - _options.MaxBreadcrumbs + 1;
+            if (overflow > 0)
+            {
+                breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
+            }
+
+            Breadcrumbs = breadcrumbs.Add(breadcrumb);
+        }
 
         /// <summary>
         /// Adds a figerprint to the <see cref="Scope"/>
@@ -124,11 +146,26 @@ namespace Sentry.Protocol
         /// <param name="value">The value.</param>
         public void AddTag(string key, string value) => Tags = Tags.Add(key, value);
 
-        internal Scope Clone()
+        // TODO: make extension methods instead of members
+        public void AddTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value);
+        public void AddTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
+        public void AddTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
+
+        internal Scope Clone(object state)
         {
-            // TODO: test with reflection to ensure Clone doesn't go out of sync with members
-            return new Scope
+            ImmutableList<object> states = null;
+            if (States != null)
             {
+                states = States;
+            }
+            if (state != null)
+            {
+                states = (states ?? ImmutableList<object>.Empty).Add(state);
+            }
+            // TODO: test with reflection to ensure Clone doesn't go out of sync with members
+            return new Scope(_options)
+            {
+                States = states,
                 InternalUser = InternalUser,
                 InternalContexts = InternalContexts,
                 InternalFingerprint = InternalFingerprint,

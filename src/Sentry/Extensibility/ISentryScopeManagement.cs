@@ -1,7 +1,7 @@
 using System;
 using Sentry.Protocol;
 
-namespace Sentry
+namespace Sentry.Extensibility
 {
     /// <summary>
     /// Scope management
@@ -23,5 +23,7 @@ namespace Sentry
         /// <returns>A disposable which removes the scope
         /// from the environment when invoked</returns>
         IDisposable PushScope();
+
+        IDisposable PushScope<TState>(TState state);
     }
 }

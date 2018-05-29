@@ -22,7 +22,7 @@ namespace Sentry
         private static ISdk _sdk = DisabledSdk.Disabled;
 
         /// <summary>
-        /// Initializes the SDK with the specified configuration options callback.
+        /// Initializes the SDK with an optional configuration options callback.
         /// </summary>
         /// <param name="configureOptions">The configure options.</param>
         public static void Init(Action<SentryOptions> configureOptions = null)
@@ -33,6 +33,9 @@ namespace Sentry
             var sdk = Interlocked.Exchange(ref _sdk, new Sdk(options));
             (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
         }
+
+        [DebuggerStepThrough]
+        public static IDisposable PushScope<TState>(TState state) => _sdk.PushScope(state);
 
         /// <summary>
         /// Closes the SDK and flushes any queued event to Sentry
