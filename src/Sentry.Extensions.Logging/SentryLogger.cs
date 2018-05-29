@@ -52,7 +52,7 @@ namespace Sentry.Extensions.Logging
         }
 
         public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled
-                                                    && logLevel != LogLevel.None // TODO: Does the framework already account for this?
+                                                    && logLevel != LogLevel.None
                                                     && (logLevel >= _options.MinimumBreadcrumbLevel
                                                     || logLevel >= _options.MinimumEventLevel);
 
