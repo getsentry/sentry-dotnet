@@ -24,6 +24,13 @@ namespace Sentry.Extensibility
         /// from the environment when invoked</returns>
         IDisposable PushScope();
 
+        /// <summary>
+        /// Pushes a new scope into the stack which is removed upon Dispose
+        /// </summary>
+        /// <param name="state">A state to associate with the scope</param>
+        /// <typeparam name="TState"></typeparam>
+        /// <returns>A disposable which removes the scope
+        /// from the environment when invoked</returns>
         IDisposable PushScope<TState>(TState state);
     }
 }
