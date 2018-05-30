@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Extensions.Logging
 {
@@ -62,14 +62,25 @@ namespace Sentry.Extensions.Logging
             }
 
             var message = formatter?.Invoke(state, exception);
+
             if (_options.MinimumEventLevel != LogLevel.None
                 && logLevel >= _options.MinimumEventLevel)
             {
                 var @event = new SentryEvent(exception)
                 {
                     Logger = CategoryName,
-                    Message = message,
                 };
+
+                if (message != null)
+                {
+                    // TODO: this will override the current message
+                    // which could have been set from reading Exception.Message
+                    if (@event.Message != null)
+                    {
+                        @event.AddTag("message", @event.Message);
+                    }
+                    @event.Message = message;
+                }
 
                 var tuple = eventId.ToTupleOrNull();
                 if (tuple.HasValue)
@@ -84,14 +95,22 @@ namespace Sentry.Extensions.Logging
             if (_options.MinimumBreadcrumbLevel != LogLevel.None
                      && logLevel >= _options.MinimumBreadcrumbLevel)
             {
-                _sdk.ConfigureScope(
-                    s => s.AddBreadcrumb(
+
+                var data = eventId.ToDictionaryOrNull();
+                if (exception != null)
+                {
+                    data = data ?? new Dictionary<string, string>();
+                    data.Add("exception.message", exception.Message);
+                    data.Add("exception.stacktrace", exception.StackTrace);
+                }
+
+                _sdk.AddBreadcrumb(
                         _clock,
-                        message,
+                        message ?? exception?.Message,
                         "logger",
                         CategoryName,
-                        eventId.ToTupleOrNull(),
-                        logLevel.ToBreadcrumbLevel()));
+                        data,
+                        logLevel.ToBreadcrumbLevel());
             }
         }
     }

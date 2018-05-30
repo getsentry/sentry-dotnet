@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 
 namespace Sentry.Internals
@@ -39,6 +42,31 @@ namespace Sentry.Internals
         public IDisposable PushScope() => ScopeManagement.PushScope();
 
         public IDisposable PushScope<TState>(TState state) => ScopeManagement.PushScope(state);
+
+        public void AddBreadcrumb(
+            string message,
+            string type,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
+            => AddBreadcrumb(
+                    clock: null,
+                    message: message,
+                    type: type,
+                    data: data?.ToImmutableDictionary(),
+                    category: category,
+                    level: level);
+
+        public void AddBreadcrumb(ISystemClock clock, string message, string type = null, string category = null,
+            IDictionary<string, string> data = null, BreadcrumbLevel level = default)
+            => ConfigureScope(
+                s => s.AddBreadcrumb(new Breadcrumb(
+                    timestamp: (clock ?? SystemClock.Clock).GetUtcNow(),
+                    message: message,
+                    type: type,
+                    data: data?.ToImmutableDictionary(),
+                    category: category,
+                    level: level)));
 
         public SentryResponse CaptureEvent(SentryEvent evt)
             => WithClientAndScope((client, scope)

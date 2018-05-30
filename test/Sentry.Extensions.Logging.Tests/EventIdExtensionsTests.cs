@@ -17,7 +17,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             const int expectedId = int.MaxValue;
             var sut = new EventId(expectedId);
-            Assert.Equal((EventIdExtensions.TupleName, expectedId.ToString()), sut.ToTupleOrNull());
+            Assert.Equal((EventIdExtensions.DataKey, expectedId.ToString()), sut.ToTupleOrNull());
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace Sentry.Extensions.Logging.Tests
             const string expectedName = "name";
 
             var sut = new EventId(id, expectedName);
-            Assert.Equal((EventIdExtensions.TupleName, expectedName), sut.ToTupleOrNull());
+            Assert.Equal((EventIdExtensions.DataKey, expectedName), sut.ToTupleOrNull());
         }
     }
 }

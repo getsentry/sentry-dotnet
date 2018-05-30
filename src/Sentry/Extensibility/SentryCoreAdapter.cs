@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 
 namespace Sentry.Extensibility
@@ -37,6 +40,34 @@ namespace Sentry.Extensibility
         [DebuggerStepThrough]
         public IDisposable PushScope<TState>(TState state)
             => SentryCore.PushScope(state);
+
+        [DebuggerStepThrough]
+        public void AddBreadcrumb(
+            string message,
+            string type,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
+            => SentryCore.AddBreadcrumb(message, type, category, data, level);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerStepThrough]
+        public void AddBreadcrumb(
+            ISystemClock clock,
+            string message,
+            string type = null,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
+        {
+            SentryCore.AddBreadcrumb(
+                clock: clock,
+                message: message,
+                type: type,
+                data: data,
+                category: category,
+                level: level);
+        }
 
         [DebuggerStepThrough]
         public SentryResponse CaptureEvent(SentryEvent evt)
