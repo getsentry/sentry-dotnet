@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 using System.Diagnostics;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internals;
 
 namespace Sentry
@@ -57,6 +60,25 @@ namespace Sentry
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
         public static IDisposable PushScope() => _sdk?.PushScope();
+
+        [DebuggerStepThrough]
+        public static void AddBreadcrumb(
+            string message,
+            string type,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
+            => _sdk?.AddBreadcrumb(message, type, category, data, level);
+
+        [DebuggerStepThrough]
+        public static void AddBreadcrumb(
+            ISystemClock clock,
+            string message,
+            string type,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
+            => _sdk?.AddBreadcrumb(clock, message, type, category, data, level);
 
         /// <summary>
         /// Configures the scope through the callback.

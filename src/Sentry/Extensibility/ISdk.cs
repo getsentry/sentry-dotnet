@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Threading.Tasks;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 
 namespace Sentry.Extensibility
@@ -13,6 +17,22 @@ namespace Sentry.Extensibility
         void ConfigureScope(Action<Scope> configureScope);
         IDisposable PushScope();
         IDisposable PushScope<TState>(TState state);
+
+        void AddBreadcrumb(
+            string message,
+            string type = null,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddBreadcrumb(
+            ISystemClock clock,
+            string message,
+            string type = null,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default);
 
         // Client or Client/Scope stuff:
         SentryResponse CaptureEvent(SentryEvent evt);

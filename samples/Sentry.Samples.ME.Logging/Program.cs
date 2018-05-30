@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
@@ -14,10 +13,6 @@ namespace Sentry.Samples.ME.Logging
             {
                 App();
             }
-            catch (Exception e)
-            {
-                SentryCore.CaptureException(e);
-            }
             finally
             {
                 SentryCore.CloseAndFlush();
@@ -27,14 +22,13 @@ namespace Sentry.Samples.ME.Logging
         static void App()
         {
             using (var loggerFactory = new LoggerFactory()
+                .AddConsole(LogLevel.Trace)
                 .AddSentry(o =>
                 {
                     // The default values are:
                     o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
                     o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
-
-                })
-                .AddConsole())
+                }))
             {
                 var logger = loggerFactory.CreateLogger<Program>();
 
@@ -67,6 +61,9 @@ namespace Sentry.Samples.ME.Logging
                 logger.LogError("9 - No scope data, breadcrumb: 2");
 
             } // Disposing the logger won't affect Sentry: The lifetime is managed externally (call CloseAndFlush)
+
+            // An app crash outside of the logging block is captured without any breadcrumb
+            throw null;
         }
     }
 }

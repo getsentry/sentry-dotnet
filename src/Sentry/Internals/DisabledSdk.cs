@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 
 namespace Sentry.Internals
@@ -18,6 +20,23 @@ namespace Sentry.Internals
 
         public IDisposable PushScope() => this;
         public IDisposable PushScope<TState>(TState state) => this;
+
+        public void AddBreadcrumb(
+            string message,
+            string type,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
+        { }
+
+        public void AddBreadcrumb(
+            ISystemClock clock,
+            string message,
+            string type = null,
+            string category = null,
+            IDictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
+        { }
 
         public bool IsEnabled => false;
 
