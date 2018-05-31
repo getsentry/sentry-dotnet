@@ -77,7 +77,7 @@ namespace Sentry.Extensions.Logging
                     // which could have been set from reading Exception.Message
                     if (@event.Message != null)
                     {
-                        @event.AddTag("message", @event.Message);
+                        @event.SetExtra("original_message", @event.Message);
                     }
                     @event.Message = message;
                 }
@@ -85,7 +85,7 @@ namespace Sentry.Extensions.Logging
                 var tuple = eventId.ToTupleOrNull();
                 if (tuple.HasValue)
                 {
-                    @event.AddTag(tuple.Value.name, tuple.Value.value);
+                    @event.SetTag(tuple.Value.name, tuple.Value.value);
                 }
 
                 _sdk.CaptureEvent(@event);
@@ -100,14 +100,13 @@ namespace Sentry.Extensions.Logging
                 if (exception != null)
                 {
                     data = data ?? new Dictionary<string, string>();
-                    data.Add("exception.message", exception.Message);
-                    data.Add("exception.stacktrace", exception.StackTrace);
+                    data.Add("exception_message", exception.Message);
                 }
 
                 _sdk.AddBreadcrumb(
                         _clock,
                         message ?? exception?.Message,
-                        "logger",
+                        "default",
                         CategoryName,
                         data,
                         logLevel.ToBreadcrumbLevel());

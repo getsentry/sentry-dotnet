@@ -27,7 +27,6 @@ namespace Sentry.Internals
             configureScope?.Invoke(scope);
         }
 
-        // TODO: Microsoft.Extensions.Logging calls its equivalent method: BeginScope()
         public IDisposable PushScope() => PushScope<object>(null);
 
         public IDisposable PushScope<TState>(TState state)

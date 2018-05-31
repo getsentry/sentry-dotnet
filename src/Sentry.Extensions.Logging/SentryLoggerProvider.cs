@@ -22,8 +22,10 @@ namespace Sentry.Extensions.Logging
             Debug.Assert(scopeManagement != null);
 
             _options = options;
+            // Creates a scope so that Integration added below can be dropped when the logger is disposed
             _scope = scopeManagement.PushScope();
 
+            // TODO: Ask Eric about the list of integrations
             scopeManagement.ConfigureScope(p => p.Sdk.Integrations.Add(Constants.IntegrationName));
         }
 
