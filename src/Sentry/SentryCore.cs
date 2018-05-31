@@ -25,6 +25,14 @@ namespace Sentry
         private static ISdk _sdk = DisabledSdk.Disabled;
 
         /// <summary>
+        /// Initializes the SDK while attempting to locate the DSN
+        /// </summary>
+        /// <remarks>
+        /// If the DSN is not found, the SDK will not change state.
+        /// </remarks>
+        public static void Init() => Init(DsnLocator.FindDsnStringOrDisable());
+
+        /// <summary>
         /// Initializes the SDK with the specified DSN
         /// </summary>
         /// <remarks>

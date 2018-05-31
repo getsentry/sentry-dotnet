@@ -39,7 +39,7 @@ namespace Sentry.Tests
         public void Ctor_DisableSdk_ThrowsUriFormatException()
         {
             var ex = Assert.Throws<UriFormatException>(() => new Dsn(Constants.DisableSdkDsnValue));
-            Assert.Equal("Invalid URI: The format of the URI could not be determined.", ex.Message);
+            Assert.Equal("Invalid URI: The URI is empty.", ex.Message);
         }
 
         [Fact]
