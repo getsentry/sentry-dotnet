@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,10 +25,34 @@ namespace Sentry
         private static ISdk _sdk = DisabledSdk.Disabled;
 
         /// <summary>
+        /// Initializes the SDK with the specified DSN
+        /// </summary>
+        /// <remarks>
+        /// An empty string is interpreted as a disabled SDK
+        /// </remarks>
+        /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
+        /// <param name="dsn">The dsn</param>
+        public static void Init(string dsn)
+        {
+            if (string.IsNullOrWhiteSpace(dsn))
+            {
+                return;
+            }
+
+            Init(c => c.Dsn = new Dsn(dsn));
+        }
+
+        /// <summary>
+        /// Initializes the SDK with the specified DSN
+        /// </summary>
+        /// <param name="dsn">The dsn</param>
+        public static void Init(Dsn dsn) => Init(c => c.Dsn = dsn);
+
+        /// <summary>
         /// Initializes the SDK with an optional configuration options callback.
         /// </summary>
         /// <param name="configureOptions">The configure options.</param>
-        public static void Init(Action<SentryOptions> configureOptions = null)
+        public static void Init(Action<SentryOptions> configureOptions)
         {
             var options = new SentryOptions();
             configureOptions?.Invoke(options);
