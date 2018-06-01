@@ -92,8 +92,8 @@ namespace Sentry.Internals
         public async Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory)
         {
             // SDK enabled, invoke the factory and the client, asynchronously
-            var @event = await eventFactory();
-            return await _client.CaptureEventAsync(@event, ScopeManagement.GetCurrent());
+            var @event = await eventFactory().ConfigureAwait(false);
+            return await _client.CaptureEventAsync(@event, ScopeManagement.GetCurrent()).ConfigureAwait(false);
         }
 
         public void Dispose()

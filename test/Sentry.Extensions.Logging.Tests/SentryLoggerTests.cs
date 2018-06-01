@@ -27,7 +27,7 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         private readonly Fixture _fixture = new Fixture();
-        private const string BreadcrumbType = "logger";
+        private const string BreadcrumbType = "default";
 
         [Fact]
         public void Log_InvokesSdkIsEnabled()
@@ -67,8 +67,7 @@ namespace Sentry.Extensions.Logging.Tests
                     BreadcrumbType,
                     _fixture.CategoryName,
                     Arg.Is<Dictionary<string, string>>(
-                        e => e["exception.message"] == expectedException.Message
-                             && e["exception.stacktrace"] == expectedException.StackTrace),
+                        e => e["exception_message"] == expectedException.Message),
                     BreadcrumbLevel.Critical);
         }
 
@@ -90,7 +89,7 @@ namespace Sentry.Extensions.Logging.Tests
             _fixture.Sdk.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(
                     e => e.Message == expectedMessage
-                         && e.Tags["message"] == expectedException.Message));
+                         && e.Extra["original_message"] == expectedException.Message));
         }
 
         [Fact]

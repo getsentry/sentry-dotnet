@@ -7,7 +7,7 @@ namespace Sentry.Samples.ME.Logging
     {
         static void Main()
         {
-            SentryCore.Init(); // Initialize SDK
+            SentryCore.Init("https://key@sentry.io/id"); // Initialize SDK
 
             try
             {

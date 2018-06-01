@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -129,27 +128,27 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Adds a figerprint to the <see cref="Scope"/>
+        /// Sets the fingerprint to the <see cref="Scope"/>
         /// </summary>
         /// <param name="fingerprint">The fingerprint.</param>
-        public void AddFingerprint(string fingerprint) => Fingerprint = Fingerprint.Add(fingerprint);
+        public void SetFingerprint(IReadOnlyCollection<string> fingerprint) => Fingerprint = fingerprint.ToImmutableList();
         /// <summary>
-        /// Adds the extra values to the <see cref="Scope"/>
+        /// Sets the extra key-value to the <see cref="Scope"/>
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public void AddExtra(string key, string value) => Extra = Extra.Add(key, value);
+        public void SetExtra(string key, string value) => Extra = Extra.Add(key, value);
         /// <summary>
-        /// Adds the tag to the <see cref="Scope"/>
+        /// Sets the tag to the <see cref="Scope"/>
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public void AddTag(string key, string value) => Tags = Tags.Add(key, value);
+        public void SetTag(string key, string value) => Tags = Tags.Add(key, value);
 
         // TODO: make extension methods instead of members
-        public void AddTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value);
-        public void AddTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
-        public void AddTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
+        public void SetTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value);
+        public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
+        public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
 
         internal Scope Clone(object state)
         {

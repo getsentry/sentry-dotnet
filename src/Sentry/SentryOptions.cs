@@ -5,6 +5,7 @@ namespace Sentry
     /// TODO: the SDK options
     public class SentryOptions : IScopeOptions
     {
+        public Dsn Dsn { get; set; }
         /// 
         public bool CompressPayload { get; set; } = true;
         /// 

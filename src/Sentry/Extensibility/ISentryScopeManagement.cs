@@ -17,6 +17,7 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="configureScope">The configure scope.</param>
         void ConfigureScope(Action<Scope> configureScope);
+
         /// <summary>
         /// Pushes a new scope into the stack which is removed upon Dispose
         /// </summary>

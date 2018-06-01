@@ -28,22 +28,22 @@ namespace Sentry
             {
                 foreach (var state in scope.States)
                 {
-                    if (state is string scopeSring)
+                    if (state is string scopeString)
                     {
-                        @event.AddTag("scope", scopeSring);
+                        @event.SetTag("scope", scopeString);
                     }
                     else if (state is IEnumerable<KeyValuePair<string, string>> keyValStringString)
                     {
-                        @event.AddTags(keyValStringString);
+                        @event.SetTags(keyValStringString);
                     }
                     else if (state is IEnumerable<KeyValuePair<string, object>> keyValStringObject)
                     {
-                        @event.AddTags(keyValStringObject.Select(k => new KeyValuePair<string, string>(k.Key, k.Value.ToString())));
+                        @event.SetTags(keyValStringObject.Select(k => new KeyValuePair<string, string>(k.Key, k.Value.ToString())));
                     }
                     else
                     {
                         // TODO: possible callback invocation here
-                        @event.AddExtra("State of unknown type", state.GetType().ToString());
+                        @event.SetExtra("State of unknown type", state.GetType().ToString());
                     }
                 }
             }

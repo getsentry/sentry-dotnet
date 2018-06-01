@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Sentry.Infrastructure;
@@ -8,7 +7,14 @@ using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {
-    // The SDK main API set
+    /// <summary>
+    /// The SDK entry API set
+    /// </summary>
+    /// <remarks>
+    /// The contract of which <see cref="SentryCore"/> exposes statically.
+    /// This interface exist to allow better testability of integrations which otherwise
+    /// would require dependency to the static <see cref="SentryCore"/>
+    /// </remarks>
     public interface ISdk
     {
         bool IsEnabled { get; }
