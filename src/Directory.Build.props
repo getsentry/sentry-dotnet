@@ -11,4 +11,8 @@
     <!--<NoWarn Condition="'$(Configuration)' != 'Release'">$(NoWarn);CS1591</NoWarn>-->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="1.0.1" Condition="'$(Configuration)' != 'Release'" />
+  </ItemGroup>
 </Project>
