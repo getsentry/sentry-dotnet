@@ -10,7 +10,7 @@ namespace Sentry.Internals
         private static SentryResponse DisabledResponse { get; } = new SentryResponse(false, errorMessage: "SDK Disabled");
         private static readonly Task<SentryResponse> DisabledResponseTask = Task.FromResult(DisabledResponse);
 
-        public static DisabledSentryClient Disabled = new DisabledSentryClient();
+        public static DisabledSentryClient Instance = new DisabledSentryClient();
 
         public bool IsEnabled => false;
 

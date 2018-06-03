@@ -22,7 +22,7 @@ namespace Sentry
     public static class SentryCore
     {
         // TODO: At this point no Scope (e.g: breadcrumb) will be kept until the SDK is enabled
-        private static ISentryClient _sentryClient = DisabledSentryClient.Disabled;
+        private static ISentryClient _sentryClient = DisabledSentryClient.Instance;
 
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN
@@ -74,7 +74,7 @@ namespace Sentry
         /// </summary>
         public static void CloseAndFlush()
         {
-            var sdk = Interlocked.Exchange(ref _sentryClient, DisabledSentryClient.Disabled);
+            var sdk = Interlocked.Exchange(ref _sentryClient, DisabledSentryClient.Instance);
             (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
         }
 
@@ -100,7 +100,7 @@ namespace Sentry
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
-        public static IDisposable PushScope() => _sentryClient?.PushScope();
+        public static IDisposable PushScope() => _sentryClient.PushScope();
 
         /// <summary>
         /// Adds a breadcrumb to the current Scope
@@ -133,7 +133,7 @@ namespace Sentry
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _sentryClient?.AddBreadcrumb(message, type, category, data, level);
+            => _sentryClient.AddBreadcrumb(message, type, category, data, level);
 
         /// <summary>
         /// Adds a breadcrumb to the current scope
