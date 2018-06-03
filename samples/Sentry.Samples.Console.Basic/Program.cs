@@ -1,16 +1,12 @@
-// One of the ways to set your DSN is via attribute:
-[assembly: Sentry.Dsn("https://key@sentry.io/id")]
+using Sentry;
 
-namespace Sentry.Samples.Console.Basic
+static class Program
 {
-    static class Program
+    static void Main()
     {
-        static void Main()
-        {
-            SentryCore.Init();
+        SentryCore.Init("https://key@sentry.io/id");
 
-            // The following exception is captured and sent to Sentry
-            throw null;
-        }
+        // The following exception is captured and sent to Sentry
+        throw null;
     }
 }

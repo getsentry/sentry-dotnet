@@ -7,16 +7,17 @@ using Sentry.Protocol;
 
 namespace Sentry.Internals
 {
-    internal sealed class DisabledSdk : ISdk, IDisposable
+    internal sealed class DisabledSentryClient : ISentryClient, IDisposable
     {
         private static SentryResponse DisabledResponse { get; } = new SentryResponse(false, errorMessage: "SDK Disabled");
         private static readonly Task<SentryResponse> DisabledResponseTask = Task.FromResult(DisabledResponse);
 
-        public static DisabledSdk Disabled = new DisabledSdk();
+        public static DisabledSentryClient Disabled = new DisabledSentryClient();
 
-        private DisabledSdk() { }
+        private DisabledSentryClient() { }
 
         public void ConfigureScope(Action<Scope> configureScope) { }
+        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => Task.CompletedTask;
 
         public IDisposable PushScope() => this;
         public IDisposable PushScope<TState>(TState state) => this;
@@ -41,6 +42,8 @@ namespace Sentry.Internals
         public bool IsEnabled => false;
 
         public SentryResponse CaptureEvent(SentryEvent evt) => DisabledResponse;
+
+        public Task<SentryResponse> CaptureEventAsync(SentryEvent evt) => DisabledResponseTask;
 
         public SentryResponse CaptureException(Exception exception) => DisabledResponse;
 

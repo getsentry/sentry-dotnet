@@ -9,16 +9,14 @@ using Sentry.Protocol;
 namespace Sentry.Extensibility
 {
     /// <summary>
-    /// An implementation of <see cref="ISdk" /> which forwards any call to <see cref="SentryCore" />
+    /// An implementation of <see cref="ISentryClient" /> which forwards any call to <see cref="SentryCore" />
     /// </summary>
     /// <remarks>
     /// Allows testing classes which otherwise would need to depend on static <see cref="SentryCore" />
     /// by having them depend on ISdk instead, which can be mocked.
     /// </remarks>
-    /// <seealso cref="ISdk" />
-    /// <inheritdoc cref="ISdk" />
-    /// <inheritdoc cref="ISentryScopeManagement" />
-    public sealed class SentryCoreAdapter : ISdk, ISentryScopeManagement
+    /// <inheritdoc cref="ISentryClient" />
+    public sealed class SentryCoreAdapter : ISentryClient
     {
         /// <summary>
         /// The single instance which forwards all calls to <see cref="SentryCore"/>
@@ -32,6 +30,10 @@ namespace Sentry.Extensibility
         [DebuggerStepThrough]
         public void ConfigureScope(Action<Scope> configureScope)
             => SentryCore.ConfigureScope(configureScope);
+
+        [DebuggerStepThrough]
+        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+            => SentryCore.ConfigureScopeAsync(configureScope);
 
         [DebuggerStepThrough]
         public IDisposable PushScope()
@@ -82,19 +84,15 @@ namespace Sentry.Extensibility
             => SentryCore.CaptureEventAsync(eventFactory);
 
         [DebuggerStepThrough]
+        public Task<SentryResponse> CaptureEventAsync(SentryEvent evt)
+            => SentryCore.CaptureEventAsync(evt);
+
+        [DebuggerStepThrough]
         public SentryResponse CaptureException(Exception exception)
             => SentryCore.CaptureException(exception);
 
         [DebuggerStepThrough]
         public Task<SentryResponse> CaptureExceptionAsync(Exception exception)
             => SentryCore.CaptureExceptionAsync(exception);
-
-        [DebuggerStepThrough]
-        public SentryResponse WithClientAndScope(Func<ISentryClient, Scope, SentryResponse> handler)
-            => SentryCore.WithClientAndScope(handler);
-
-        [DebuggerStepThrough]
-        public Task<SentryResponse> WithClientAndScopeAsync(Func<ISentryClient, Scope, Task<SentryResponse>> handler)
-            => SentryCore.WithClientAndScopeAsync(handler);
     }
 }

@@ -7,8 +7,6 @@ namespace Sentry
     {
         public Dsn Dsn { get; set; }
         /// 
-        public bool CompressPayload { get; set; } = true;
-        /// 
         public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
         /// <summary>
@@ -22,5 +20,7 @@ namespace Sentry
         /// The maximum breadcrumbs per scope.
         /// </value>
         public int MaxBreadcrumbs { get; set; } = 100;
+
+        public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
     }
 }

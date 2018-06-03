@@ -40,7 +40,7 @@ namespace Sentry.Tests
         [Fact]
         public void Implements_Sdk()
         {
-            var sdk = typeof(ISdk).GetMembers(BindingFlags.Public | BindingFlags.Instance);
+            var sdk = typeof(ISentryClient).GetMembers(BindingFlags.Public | BindingFlags.Instance);
             var sentryCore = typeof(SentryCore).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
             Assert.Empty(sdk.Select(m => m.ToString()).Except(sentryCore.Select(m => m.ToString())));

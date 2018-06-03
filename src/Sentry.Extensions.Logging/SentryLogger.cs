@@ -9,7 +9,7 @@ namespace Sentry.Extensions.Logging
 {
     internal sealed class SentryLogger : ILogger
     {
-        private readonly ISdk _sdk;
+        private readonly ISentryClient _sentryClient;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
 
@@ -30,21 +30,21 @@ namespace Sentry.Extensions.Logging
             string categoryName,
             SentryLoggingOptions options,
             ISystemClock clock,
-            ISdk sdk)
+            ISentryClient sentryClient)
         {
             Debug.Assert(categoryName != null);
             Debug.Assert(options != null);
             Debug.Assert(clock != null);
-            Debug.Assert(sdk != null);
+            Debug.Assert(sentryClient != null);
             CategoryName = categoryName;
             _options = options;
             _clock = clock;
-            _sdk = sdk;
+            _sentryClient = sentryClient;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => _sdk.PushScope(state);
+        public IDisposable BeginScope<TState>(TState state) => _sentryClient.PushScope(state);
 
-        public bool IsEnabled(LogLevel logLevel) => _sdk.IsEnabled
+        public bool IsEnabled(LogLevel logLevel) => _sentryClient.IsEnabled
                                                     && logLevel != LogLevel.None
                                                     && (logLevel >= _options.MinimumBreadcrumbLevel
                                                     || logLevel >= _options.MinimumEventLevel);
@@ -88,7 +88,7 @@ namespace Sentry.Extensions.Logging
                     @event.SetTag(tuple.Value.name, tuple.Value.value);
                 }
 
-                _sdk.CaptureEvent(@event);
+                _sentryClient.CaptureEvent(@event);
             }
 
             // Even if it was sent as event, add breadcrumb so next event includes it
@@ -97,13 +97,15 @@ namespace Sentry.Extensions.Logging
             {
 
                 var data = eventId.ToDictionaryOrNull();
-                if (exception != null)
+                if (exception != null && message != null)
                 {
+                    // Exception.Message won't be used as Breadcrumb message
+                    // Avoid losing it by adding as data:
                     data = data ?? new Dictionary<string, string>();
                     data.Add("exception_message", exception.Message);
                 }
 
-                _sdk.AddBreadcrumb(
+                _sentryClient.AddBreadcrumb(
                         _clock,
                         message ?? exception?.Message,
                         "default",

@@ -15,7 +15,7 @@ namespace Sentry.Tests.Protocol
 
             var scope = new Scope(options);
 
-            for (int i = 0; i < limit + 1; i++)
+            for (var i = 0; i < limit + 1; i++)
             {
                 scope.AddBreadcrumb(i.ToString(), "test");
             }

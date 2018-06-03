@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sentry.Extensibility;
 using Sentry.Tests.Helpers.Reflection;
 using Xunit;
 
