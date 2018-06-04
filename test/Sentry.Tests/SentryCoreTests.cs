@@ -175,25 +175,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public async Task CaptureEventAsync_Func_NoOp()
-        {
-            var invoked = false;
-            await SentryCore.CaptureEventAsync(() =>
-            {
-                invoked = true;
-                return Task.FromResult(new SentryEvent(null));
-            });
-            Assert.False(invoked);
-        }
-
-        [Fact]
-        public Task CaptureEventAsync_Instance_NoOp() => SentryCore.CaptureEventAsync(new SentryEvent(null));
-
-        [Fact]
         public void CaptureException_Instance_NoOp() => SentryCore.CaptureException(new Exception());
-
-        [Fact]
-        public Task CaptureExceptionAsync_Instance_NoOp() => SentryCore.CaptureExceptionAsync(new Exception());
 
         [Fact]
         public void Implements_Client()

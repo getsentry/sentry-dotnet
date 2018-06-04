@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 namespace Sentry.Extensibility
 {
@@ -18,8 +17,5 @@ namespace Sentry.Extensibility
 
         SentryResponse CaptureEvent(SentryEvent evt);
         SentryResponse CaptureEvent(Func<SentryEvent> eventFactory);
-
-        Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory);
-        Task<SentryResponse> CaptureEventAsync(SentryEvent evt);
     }
 }

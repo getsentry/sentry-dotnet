@@ -47,23 +47,10 @@ namespace Sentry.Internals
 
         public IDisposable PushScope<TState>(TState state) => ScopeManagement.PushScope(state);
 
-        public async Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory)
-        {
-            // SDK enabled, invoke the factory and the client, asynchronously
-            var @event = await eventFactory().ConfigureAwait(false);
-            return await CaptureEventAsync(@event).ConfigureAwait(false);
-        }
-
         public SentryResponse CaptureEvent(Func<SentryEvent> eventFactory)
         {
             var @event = eventFactory();
             return CaptureEvent(@event);
-        }
-
-        public Task<SentryResponse> CaptureEventAsync(SentryEvent @event)
-        {
-            @event = PrepareEvent(@event);
-            return _transport.CaptureEventAsync(@event);
         }
 
         public SentryResponse CaptureEvent(SentryEvent @event)

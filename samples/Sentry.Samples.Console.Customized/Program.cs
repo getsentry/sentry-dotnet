@@ -45,7 +45,9 @@ namespace Sentry.Samples.Console.Customized
                 scope.SetExtra("Key", "Value");
             });
 
-            await SentryCore.CaptureExceptionAsync(new Exception("Something went wrong."));
+            SentryCore.CaptureException(new Exception("Something went wrong."));
+
+            SentryCore.CloseAndFlush();
         }
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
@@ -15,15 +14,6 @@ namespace Sentry
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryClientExtensions
     {
-        /// <summary>
-        /// Captures the exception.
-        /// </summary>
-        /// <param name="client">The Sentry client.</param>
-        /// <param name="ex">The exception.</param>
-        /// <returns></returns>
-        public static Task<SentryResponse> CaptureExceptionAsync(this ISentryClient client, Exception ex)
-            => client.CaptureEventAsync(new SentryEvent(ex));
-
         /// <summary>
         /// Captures the exception.
         /// </summary>

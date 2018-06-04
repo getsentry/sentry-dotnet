@@ -61,15 +61,13 @@ namespace Sentry.Extensibility
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-        {
-            SentryCore.AddBreadcrumb(
+            => SentryCore.AddBreadcrumb(
                 clock: clock,
                 message: message,
                 type: type,
                 data: data,
                 category: category,
                 level: level);
-        }
 
         [DebuggerStepThrough]
         public SentryResponse CaptureEvent(SentryEvent evt)
@@ -80,19 +78,7 @@ namespace Sentry.Extensibility
             => SentryCore.CaptureEvent(eventFactory);
 
         [DebuggerStepThrough]
-        public Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory)
-            => SentryCore.CaptureEventAsync(eventFactory);
-
-        [DebuggerStepThrough]
-        public Task<SentryResponse> CaptureEventAsync(SentryEvent evt)
-            => SentryCore.CaptureEventAsync(evt);
-
-        [DebuggerStepThrough]
         public SentryResponse CaptureException(Exception exception)
             => SentryCore.CaptureException(exception);
-
-        [DebuggerStepThrough]
-        public Task<SentryResponse> CaptureExceptionAsync(Exception exception)
-            => SentryCore.CaptureExceptionAsync(exception);
     }
 }

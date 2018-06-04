@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
-using System.Threading.Tasks;
 using Sentry.Protocol;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internals;
@@ -195,24 +195,6 @@ namespace Sentry
             => _sentryClient.CaptureEvent(eventFactory);
 
         /// <summary>
-        /// Captures the event asynchronously.
-        /// </summary>
-        /// <param name="eventFactory">The event factory.</param>
-        /// <returns></returns>
-        [DebuggerStepThrough]
-        public static Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory)
-            => _sentryClient.CaptureEventAsync(eventFactory);
-
-        /// <summary>
-        /// Captures the event asynchronously.
-        /// </summary>
-        /// <param name="evt">The event factory.</param>
-        /// <returns></returns>
-        [DebuggerStepThrough]
-        public static Task<SentryResponse> CaptureEventAsync(SentryEvent evt)
-            => _sentryClient.CaptureEventAsync(evt);
-
-        /// <summary>
         /// Captures the exception.
         /// </summary>
         /// <param name="exception">The exception.</param>
@@ -220,14 +202,5 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryResponse CaptureException(Exception exception)
             => _sentryClient.CaptureException(exception);
-
-        /// <summary>
-        /// Captures the exception asynchronously.
-        /// </summary>
-        /// <param name="exception">The exception.</param>
-        /// <returns></returns>
-        [DebuggerStepThrough]
-        public static Task<SentryResponse> CaptureExceptionAsync(Exception exception)
-            => _sentryClient.CaptureExceptionAsync(exception);
     }
 }
