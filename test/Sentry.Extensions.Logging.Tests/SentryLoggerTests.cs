@@ -15,15 +15,18 @@ namespace Sentry.Extensions.Logging.Tests
         {
             public string CategoryName { get; set; } = nameof(SentryLoggerTests);
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
-            public ISdk Sdk { get; set; } = Substitute.For<ISdk>();
+            public ISentryClient SentryClient { get; set; } = Substitute.For<ISentryClient>();
             public SentryLoggingOptions Options { get; set; } = new SentryLoggingOptions();
+            public Scope Scope { get; } = new Scope(new SentryOptions());
 
             public Fixture()
             {
-                Sdk.IsEnabled.Returns(true);
+                SentryClient.IsEnabled.Returns(true);
+                Clock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
+                SentryClient.ConfigureScope(Arg.Invoke(Scope));
             }
 
-            public SentryLogger GetSut() => new SentryLogger(CategoryName, Options, Clock, Sdk);
+            public SentryLogger GetSut() => new SentryLogger(CategoryName, Options, Clock, SentryClient);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -35,7 +38,7 @@ namespace Sentry.Extensions.Logging.Tests
             var sut = _fixture.GetSut();
             sut.Log(LogLevel.Critical, 1, "info", null, null);
 
-            _ = _fixture.Sdk.Received(1).IsEnabled;
+            _ = _fixture.SentryClient.Received(1).IsEnabled;
         }
 
         [Fact]
@@ -46,7 +49,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
 
-            _fixture.Sdk.Received(1)
+            _fixture.SentryClient.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(
                     e => e.Message == expectedException.Message));
         }
@@ -55,20 +58,19 @@ namespace Sentry.Extensions.Logging.Tests
         public void Log_WithException_BreadcrumbFromException()
         {
             var expectedException = new Exception("expected message");
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
 
             var sut = _fixture.GetSut();
 
             sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
 
-            _fixture.Sdk.Received(1)
-                .AddBreadcrumb(
-                    _fixture.Clock,
-                    expectedException.Message,
-                    BreadcrumbType,
-                    _fixture.CategoryName,
-                    Arg.Is<Dictionary<string, string>>(
-                        e => e["exception_message"] == expectedException.Message),
-                    BreadcrumbLevel.Critical);
+            var b = _fixture.Scope.Breadcrumbs[0];
+            Assert.Equal(b.Message, expectedException.Message);
+            Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+            Assert.Equal(b.Category, _fixture.CategoryName);
+            Assert.Equal(b.Level, expectedLevel);
+            Assert.Equal(b.Type, BreadcrumbType);
+            Assert.Null(b.Data);
         }
 
         [Fact]
@@ -86,7 +88,7 @@ namespace Sentry.Extensions.Logging.Tests
                 expectedException,
                 (o, exception) => o.ToString());
 
-            _fixture.Sdk.Received(1)
+            _fixture.SentryClient.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(
                     e => e.Message == expectedMessage
                          && e.Extra["original_message"] == expectedException.Message));
@@ -101,7 +103,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.Log<object>(LogLevel.Critical, expectedEventId, null, null, null);
 
-            _fixture.Sdk.Received(1)
+            _fixture.SentryClient.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(
                     e => e.Tags[EventIdExtensions.DataKey] == expectedEventId.ToString()));
         }
@@ -110,20 +112,19 @@ namespace Sentry.Extensions.Logging.Tests
         public void Log_WithEventId_EventIdAsBreadcrumbData()
         {
             var expectedEventId = new EventId(10, "EventId-!@#$%^&*(");
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
 
             var sut = _fixture.GetSut();
 
             sut.Log<object>(LogLevel.Critical, expectedEventId, null, null, null);
 
-            _fixture.Sdk.Received(1)
-                .AddBreadcrumb(
-                    _fixture.Clock,
-                    null,
-                    BreadcrumbType,
-                    _fixture.CategoryName,
-                    Arg.Is<IDictionary<string, string>>(
-                        e => e[EventIdExtensions.DataKey] == expectedEventId.ToString()),
-                    BreadcrumbLevel.Critical);
+            var b = _fixture.Scope.Breadcrumbs[0];
+            Assert.Equal(b.Data[EventIdExtensions.DataKey], expectedEventId.ToString());
+            Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+            Assert.Equal(b.Category, _fixture.CategoryName);
+            Assert.Equal(b.Level, expectedLevel);
+            Assert.Equal(b.Type, BreadcrumbType);
+            Assert.Null(b.Message);
         }
 
         [Fact]
@@ -134,7 +135,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogCritical(expected);
 
-            _fixture.Sdk.Received(1)
+            _fixture.SentryClient.Received(1)
                 .CaptureEvent(Arg.Any<SentryEvent>());
         }
 
@@ -146,80 +147,84 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogError(expected);
 
-            _fixture.Sdk.Received(1)
+            _fixture.SentryClient.Received(1)
                 .CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
         public void LogCritical_DefaultOptions_RecordsBreadcrumbs()
         {
-            const string expected = "message";
+            const string expectedMessage = "message";
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+
             var sut = _fixture.GetSut();
 
-            sut.LogCritical(expected);
+            sut.LogCritical(expectedMessage);
 
-            _fixture.Sdk.Received(1)
-                .AddBreadcrumb(
-                    _fixture.Clock,
-                    expected,
-                    BreadcrumbType,
-                    _fixture.CategoryName,
-                    null,
-                    BreadcrumbLevel.Critical);
+            var b = _fixture.Scope.Breadcrumbs[0];
+            Assert.Equal(b.Message, expectedMessage);
+            Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+            Assert.Equal(b.Category, _fixture.CategoryName);
+            Assert.Equal(b.Level, expectedLevel);
+            Assert.Equal(b.Type, BreadcrumbType);
+            Assert.Null(b.Data);
         }
 
         [Fact]
         public void LogError_DefaultOptions_RecordsBreadcrumbs()
         {
-            const string expected = "message";
+            const string expectedMessage = "message";
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Error;
+
             var sut = _fixture.GetSut();
 
-            sut.LogError(expected);
+            sut.LogError(expectedMessage);
 
-            _fixture.Sdk.Received(1)
-                .AddBreadcrumb(
-                    _fixture.Clock,
-                    expected,
-                    BreadcrumbType,
-                    _fixture.CategoryName,
-                    null,
-                    BreadcrumbLevel.Error);
+            var b = _fixture.Scope.Breadcrumbs[0];
+            Assert.Equal(b.Message, expectedMessage);
+            Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+            Assert.Equal(b.Category, _fixture.CategoryName);
+            Assert.Equal(b.Level, expectedLevel);
+            Assert.Equal(b.Type, BreadcrumbType);
+            Assert.Null(b.Data);
         }
 
         [Fact]
         public void LogWarning_DefaultOptions_RecordsBreadcrumbs()
         {
-            const string expected = "message";
+            const string expectedMessage = "message";
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Warning;
+
             var sut = _fixture.GetSut();
 
-            sut.LogWarning(expected);
+            sut.LogWarning(expectedMessage);
 
-            _fixture.Sdk.Received(1)
-                .AddBreadcrumb(
-                    _fixture.Clock,
-                    expected,
-                    BreadcrumbType,
-                    _fixture.CategoryName,
-                    null,
-                    BreadcrumbLevel.Warning);
+            var b = _fixture.Scope.Breadcrumbs[0];
+            Assert.Equal(b.Message, expectedMessage);
+            Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+            Assert.Equal(b.Category, _fixture.CategoryName);
+            Assert.Equal(b.Level, expectedLevel);
+            Assert.Equal(b.Type, BreadcrumbType);
+            Assert.Null(b.Data);
         }
 
         [Fact]
         public void LogInformation_DefaultOptions_RecordsBreadcrumbs()
         {
-            const string expected = "message";
+            const string expectedMessage = "message";
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Info;
+
             var sut = _fixture.GetSut();
 
-            sut.LogInformation(expected);
+            sut.LogInformation(expectedMessage);
 
-            _fixture.Sdk.Received(1)
-                .AddBreadcrumb(
-                    _fixture.Clock,
-                    expected,
-                    BreadcrumbType,
-                    _fixture.CategoryName,
-                    null,
-                    BreadcrumbLevel.Info);
+            var b = _fixture.Scope.Breadcrumbs[0];
+            Assert.Equal(b.Message, expectedMessage);
+            Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+            Assert.Equal(b.Category, _fixture.CategoryName);
+            Assert.Equal(b.Level, expectedLevel);
+            Assert.Equal(b.Type, BreadcrumbType);
+            Assert.Null(b.Data);
         }
 
         [Fact]
@@ -229,7 +234,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogDebug("antyhing");
 
-            _fixture.Sdk.DidNotReceive()
+            _fixture.SentryClient.DidNotReceive()
                 .AddBreadcrumb(
                     _fixture.Clock,
                     Arg.Any<string>(),
@@ -246,7 +251,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogTrace("antyhing");
 
-            _fixture.Sdk.DidNotReceive()
+            _fixture.SentryClient.DidNotReceive()
                 .AddBreadcrumb(
                     _fixture.Clock,
                     Arg.Any<string>(),
@@ -259,7 +264,7 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void IsEnabled_DisabledSdk_ReturnsFalse()
         {
-            _fixture.Sdk.IsEnabled.Returns(false);
+            _fixture.SentryClient.IsEnabled.Returns(false);
 
             var sut = _fixture.GetSut();
 
@@ -269,7 +274,7 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void IsEnabled_EnabledSdk_ReturnsTrue()
         {
-            _fixture.Sdk.IsEnabled.Returns(true);
+            _fixture.SentryClient.IsEnabled.Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -279,7 +284,7 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void IsEnabled_EnabledSdkLogLevelNone_ReturnsFalse()
         {
-            _fixture.Sdk.IsEnabled.Returns(true);
+            _fixture.SentryClient.IsEnabled.Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -291,7 +296,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Critical;
             _fixture.Options.MinimumEventLevel = LogLevel.Critical;
-            _fixture.Sdk.IsEnabled.Returns(true);
+            _fixture.SentryClient.IsEnabled.Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -303,7 +308,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Critical;
             _fixture.Options.MinimumEventLevel = LogLevel.Trace;
-            _fixture.Sdk.IsEnabled.Returns(true);
+            _fixture.SentryClient.IsEnabled.Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -315,7 +320,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Trace;
             _fixture.Options.MinimumEventLevel = LogLevel.Critical;
-            _fixture.Sdk.IsEnabled.Returns(true);
+            _fixture.SentryClient.IsEnabled.Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -327,7 +332,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             var sut = _fixture.GetSut();
             sut.BeginScope<object>(null);
-            _fixture.Sdk.Received(1).PushScope<object>(null);
+            _fixture.SentryClient.Received(1).PushScope<object>(null);
         }
 
         [Fact]
@@ -336,14 +341,14 @@ namespace Sentry.Extensions.Logging.Tests
             const string expected = "state";
             var sut = _fixture.GetSut();
             sut.BeginScope(expected);
-            _fixture.Sdk.Received(1).PushScope(expected);
+            _fixture.SentryClient.Received(1).PushScope(expected);
         }
 
         [Fact]
         public void BeginScope_Disposable_Scope()
         {
             var expected = Substitute.For<IDisposable>();
-            _fixture.Sdk.PushScope(Arg.Any<string>()).Returns(expected);
+            _fixture.SentryClient.PushScope(Arg.Any<string>()).Returns(expected);
 
             var sut = _fixture.GetSut();
             var actual = sut.BeginScope("state");

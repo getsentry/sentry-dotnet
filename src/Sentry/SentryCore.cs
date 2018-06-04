@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
-using System.Threading.Tasks;
 using Sentry.Protocol;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internals;
@@ -22,7 +22,7 @@ namespace Sentry
     public static class SentryCore
     {
         // TODO: At this point no Scope (e.g: breadcrumb) will be kept until the SDK is enabled
-        private static ISdk _sdk = DisabledSdk.Disabled;
+        private static ISentryClient _sentryClient = DisabledSentryClient.Instance;
 
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN
@@ -65,7 +65,7 @@ namespace Sentry
             var options = new SentryOptions();
             configureOptions?.Invoke(options);
 
-            var sdk = Interlocked.Exchange(ref _sdk, new Sdk(options));
+            var sdk = Interlocked.Exchange(ref _sentryClient, new SentryClient(options));
             (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
         }
 
@@ -74,14 +74,14 @@ namespace Sentry
         /// </summary>
         public static void CloseAndFlush()
         {
-            var sdk = Interlocked.Exchange(ref _sdk, DisabledSdk.Disabled);
+            var sdk = Interlocked.Exchange(ref _sentryClient, DisabledSentryClient.Instance);
             (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
         }
 
         /// <summary>
         /// Whether the SDK is enabled or not
         /// </summary>
-        public static bool IsEnabled { [DebuggerStepThrough] get => _sdk.IsEnabled; }
+        public static bool IsEnabled { [DebuggerStepThrough] get => _sentryClient.IsEnabled; }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
@@ -93,14 +93,14 @@ namespace Sentry
         /// <param name="state">A state object to be added to the scope</param>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
-        public static IDisposable PushScope<TState>(TState state) => _sdk.PushScope(state);
+        public static IDisposable PushScope<TState>(TState state) => _sentryClient.PushScope(state);
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
-        public static IDisposable PushScope() => _sdk?.PushScope();
+        public static IDisposable PushScope() => _sentryClient.PushScope();
 
         /// <summary>
         /// Adds a breadcrumb to the current Scope
@@ -133,7 +133,7 @@ namespace Sentry
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _sdk?.AddBreadcrumb(message, type, category, data, level);
+            => _sentryClient.AddBreadcrumb(message, type, category, data, level);
 
         /// <summary>
         /// Adds a breadcrumb to the current scope
@@ -157,15 +157,24 @@ namespace Sentry
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _sdk?.AddBreadcrumb(clock, message, type, category, data, level);
+            => _sentryClient?.AddBreadcrumb(clock, message, type, category, data, level);
 
         /// <summary>
         /// Configures the scope through the callback.
         /// </summary>
-        /// <param name="configureScope">The configure scope.</param>
+        /// <param name="configureScope">The configure scope callback.</param>
         [DebuggerStepThrough]
         public static void ConfigureScope(Action<Scope> configureScope)
-            => _sdk.ConfigureScope(configureScope);
+            => _sentryClient.ConfigureScope(configureScope);
+
+        /// <summary>
+        /// Configures the scope asynchronously
+        /// </summary>
+        /// <param name="configureScope">The configure scope callback.</param>
+        /// <returns></returns>
+        [DebuggerStepThrough]
+        public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+            => _sentryClient.ConfigureScopeAsync(configureScope);
 
         /// <summary>
         /// Captures the event.
@@ -174,7 +183,7 @@ namespace Sentry
         /// <returns></returns>
         [DebuggerStepThrough]
         public static SentryResponse CaptureEvent(SentryEvent evt)
-            => _sdk.CaptureEvent(evt);
+            => _sentryClient.CaptureEvent(evt);
 
         /// <summary>
         /// Captures the event.
@@ -183,16 +192,7 @@ namespace Sentry
         /// <returns></returns>
         [DebuggerStepThrough]
         public static SentryResponse CaptureEvent(Func<SentryEvent> eventFactory)
-            => _sdk.CaptureEvent(eventFactory);
-
-        /// <summary>
-        /// Captures the event asynchronously.
-        /// </summary>
-        /// <param name="eventFactory">The event factory.</param>
-        /// <returns></returns>
-        [DebuggerStepThrough]
-        public static Task<SentryResponse> CaptureEventAsync(Func<Task<SentryEvent>> eventFactory)
-            => _sdk.CaptureEventAsync(eventFactory);
+            => _sentryClient.CaptureEvent(eventFactory);
 
         /// <summary>
         /// Captures the exception.
@@ -201,33 +201,6 @@ namespace Sentry
         /// <returns></returns>
         [DebuggerStepThrough]
         public static SentryResponse CaptureException(Exception exception)
-            => _sdk.CaptureException(exception);
-
-        /// <summary>
-        /// Captures the exception asynchronously.
-        /// </summary>
-        /// <param name="exception">The exception.</param>
-        /// <returns></returns>
-        [DebuggerStepThrough]
-        public static Task<SentryResponse> CaptureExceptionAsync(Exception exception)
-            => _sdk.CaptureExceptionAsync(exception);
-
-        /// <summary>
-        /// Provides the current client and scope to the callback.
-        /// </summary>
-        /// <param name="handler">The handler.</param>
-        /// <returns></returns>
-        [DebuggerStepThrough]
-        public static SentryResponse WithClientAndScope(Func<ISentryClient, Scope, SentryResponse> handler)
-            => _sdk.WithClientAndScope(handler);
-
-        /// <summary>
-        /// Provides the current client and scope to the callback asynchronously.
-        /// </summary>
-        /// <param name="handler">The handler.</param>
-        /// <returns></returns>
-        [DebuggerStepThrough]
-        public static Task<SentryResponse> WithClientAndScopeAsync(Func<ISentryClient, Scope, Task<SentryResponse>> handler)
-            => _sdk.WithClientAndScopeAsync(handler);
+            => _sentryClient.CaptureException(exception);
     }
 }

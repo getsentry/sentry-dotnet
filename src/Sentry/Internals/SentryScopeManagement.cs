@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Sentry.Protocol;
 
 namespace Sentry.Internals
@@ -25,6 +26,12 @@ namespace Sentry.Internals
         {
             var scope = GetCurrent();
             configureScope?.Invoke(scope);
+        }
+
+        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+        {
+            var scope = GetCurrent();
+            return configureScope?.Invoke(scope) ?? Task.CompletedTask;
         }
 
         public IDisposable PushScope() => PushScope<object>(null);
@@ -52,7 +59,18 @@ namespace Sentry.Internals
                 _scopeManagement = scopeManagement;
             }
 
-            public void Dispose() => _scopeManagement.ScopeStack = _snapshot;
+            public void Dispose()
+            {
+                // Only reset the parent if this is still the current scope
+                foreach (var scope in _scopeManagement.ScopeStack)
+                {
+                    if (ReferenceEquals(scope, _snapshot.Peek()))
+                    {
+                        _scopeManagement.ScopeStack = _snapshot;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

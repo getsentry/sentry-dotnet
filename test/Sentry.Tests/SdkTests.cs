@@ -10,7 +10,7 @@ namespace Sentry.Tests
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
-            public Sdk GetSut() => new Sdk(SentryOptions);
+            public SentryClient GetSut() => new SentryClient(SentryOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();

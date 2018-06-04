@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Sentry.Protocol;
 
 namespace Sentry.Extensibility
@@ -17,6 +18,13 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="configureScope">The configure scope.</param>
         void ConfigureScope(Action<Scope> configureScope);
+
+        /// <summary>
+        /// Asynchronously configure the current scope.
+        /// </summary>
+        /// <param name="configureScope">The configure scope.</param>
+        /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
+        Task ConfigureScopeAsync(Func<Scope, Task> configureScope);
 
         /// <summary>
         /// Pushes a new scope into the stack which is removed upon Dispose

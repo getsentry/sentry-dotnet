@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Sentry.Tests.Helpers
+namespace Sentry.Tests.Helpers.Reflection
 {
     internal static class TypeExtensions
     {
