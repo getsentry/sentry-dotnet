@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Tests.Helpers;
 using Xunit;
+using static Sentry.Internals.Constants;
 
 namespace Sentry.Tests
 {
+    [Collection(DsnEnvironmentVariable)]
     public class SentryCoreTests : IDisposable
     {
         [Fact]

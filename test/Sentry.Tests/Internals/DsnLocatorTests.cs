@@ -2,20 +2,22 @@ using Sentry.Internals;
 using Sentry.Tests.Helpers;
 using Sentry.Tests.Helpers.Reflection;
 using Xunit;
+using static Sentry.Internals.Constants;
 
 namespace Sentry.Tests.Internals
 {
+    [Collection(DsnEnvironmentVariable)]
     public class DsnLocatorTests
     {
         [Fact]
         public void FindDsnOrDisable_NoEnvironmentVariableNorAttribute_ReturnsDisabledDsn()
         {
             EnvironmentVariableGuard.WithVariable(
-                Constants.DsnEnvironmentVariable,
+                DsnEnvironmentVariable,
                 null,
                 () =>
                 {
-                    Assert.Equal(Constants.DisableSdkDsnValue, DsnLocator.FindDsnStringOrDisable());
+                    Assert.Equal(DisableSdkDsnValue, DsnLocator.FindDsnStringOrDisable());
                 });
         }
 
@@ -25,7 +27,7 @@ namespace Sentry.Tests.Internals
             const string expected = DsnSamples.ValidDsnWithoutSecret;
 
             EnvironmentVariableGuard.WithVariable(
-                Constants.DsnEnvironmentVariable,
+                DsnEnvironmentVariable,
                 expected,
                 () =>
                 {
@@ -39,7 +41,7 @@ namespace Sentry.Tests.Internals
             const string expected = DsnSamples.ValidDsnWithoutSecret;
 
             EnvironmentVariableGuard.WithVariable(
-                Constants.DsnEnvironmentVariable,
+                DsnEnvironmentVariable,
                 expected,
                 () =>
                 {

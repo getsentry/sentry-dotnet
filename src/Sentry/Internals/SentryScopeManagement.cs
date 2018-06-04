@@ -59,7 +59,18 @@ namespace Sentry.Internals
                 _scopeManagement = scopeManagement;
             }
 
-            public void Dispose() => _scopeManagement.ScopeStack = _snapshot;
+            public void Dispose()
+            {
+                // Only reset the parent if this is still the current scope
+                foreach (var scope in _scopeManagement.ScopeStack)
+                {
+                    if (ReferenceEquals(scope, _snapshot.Peek()))
+                    {
+                        _scopeManagement.ScopeStack = _snapshot;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

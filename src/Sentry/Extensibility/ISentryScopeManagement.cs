@@ -20,7 +20,7 @@ namespace Sentry.Extensibility
         void ConfigureScope(Action<Scope> configureScope);
 
         /// <summary>
-        /// Asynchronouly configure the current scope.
+        /// Asynchronously configure the current scope.
         /// </summary>
         /// <param name="configureScope">The configure scope.</param>
         /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
