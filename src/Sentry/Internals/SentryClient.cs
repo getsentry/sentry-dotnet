@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -11,7 +12,9 @@ namespace Sentry.Internals
     internal class SentryClient : ISentryClient, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly ITransport _transport;
+        private readonly IBackgroundWorker _worker;
+
+        private readonly Guid _failureId = Guid.Empty;
 
         // Testability
         internal IInternalScopeManagement ScopeManagement { get; }
@@ -19,18 +22,20 @@ namespace Sentry.Internals
         public SentryClient(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
+
             // TODO: Subscribing or not should be based on the Options
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            // Create proper client based on Options
-            //_transport = new SentryClient(options);
-            _transport = new HttpTransport();
+            _worker = new BackgroundWorker(
+                new HttpTransport(),
+                options.BackgroundWorkerOptions);
+
             ScopeManagement = new SentryScopeManagement(options);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            // TODO: avoid stackoverflow
+            // TODO: avoid stack overflow
             if (e.ExceptionObject is Exception ex)
             {
                 // TODO: Add to Scope: Exception Mechanism = e.IsTerminating
@@ -47,16 +52,45 @@ namespace Sentry.Internals
 
         public IDisposable PushScope<TState>(TState state) => ScopeManagement.PushScope(state);
 
-        public SentryResponse CaptureEvent(Func<SentryEvent> eventFactory)
+        public Guid CaptureEvent(Func<SentryEvent> eventFactory)
         {
-            var @event = eventFactory();
+            SentryEvent @event;
+            try
+            {
+                @event = eventFactory();
+            }
+            catch (Exception e)
+            {
+                // User defined callback failed.
+                Trace.WriteLine(e.ToString()); // TODO: logger
+                return _failureId;
+            }
+
             return CaptureEvent(@event);
         }
 
-        public SentryResponse CaptureEvent(SentryEvent @event)
+        public Guid CaptureEvent(SentryEvent @event)
         {
-            @event = PrepareEvent(@event);
-            return _transport.CaptureEvent(@event);
+            var id = _failureId;
+            try
+            {
+                @event = PrepareEvent(@event);
+                if (_worker.EnqueueEvent(@event))
+                {
+                    id = @event.EventId;
+                }
+                else
+                {
+                    // TODO: Notify error handler
+                    Trace.WriteLine("Failed to enqueue event. Current queue depth: " + _worker.QueuedItems);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.ToString()); // TODO: logger
+            }
+
+            return id;
         }
 
         private SentryEvent PrepareEvent(SentryEvent @event)
@@ -98,8 +132,8 @@ namespace Sentry.Internals
         {
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
 
-            // Client should empty it's queue until SentryOptions.ShutdownTimeout
-            (_transport as IDisposable)?.Dispose();
+            // Worker should empty it's queue until SentryOptions.ShutdownTimeout
+            (_worker as IDisposable)?.Dispose();
 
             // TODO: set _isDisposed and throw ObjectDisposed from members
         }

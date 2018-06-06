@@ -29,7 +29,7 @@ namespace Sentry
         /// Hexadecimal string representing a uuid4 value.
         /// The length is exactly 32 characters (no dashes!)
         /// </remarks>
-        public Guid EventId { get; set; }
+        public Guid EventId { get; }
 
         /// <summary>
         /// Gets the message that describes this event
@@ -96,12 +96,15 @@ namespace Sentry
             set => InternalModules = value;
         }
 
+        public SentryEvent() : this(null)
+        { }
+
         /// <summary>
         /// Creates a Sentry event with optional Exception details and default values like Id and Timestamp
         /// </summary>
         /// <param name="exception">The exception.</param>
-        public SentryEvent(Exception exception = null)
-            : this(exception, SystemClock.Clock)
+        public SentryEvent(Exception exception)
+            : this(exception, null)
         { }
 
         internal SentryEvent(
@@ -109,7 +112,30 @@ namespace Sentry
             ISystemClock clock = null,
             Guid id = default)
         {
-            Reset(this, clock, id);
+            clock = clock ?? SystemClock.Clock;
+
+            // Set initial value to mandatory properties:
+            //@event.InternalContexts = // TODO: Load initial context data
+
+            Timestamp = clock.GetUtcNow();
+
+            // TODO: should this be dotnet instead?
+            Platform = "csharp";
+            Sdk.Name = "Sentry.NET";
+            // TODO: Read it off of env var here? Integration's version could be set instead
+            // Less flexible than using SentryOptions to define this value
+            Sdk.Version = "0.0.0";
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (assembly.IsDynamic)
+                {
+                    continue;
+                }
+                var asmName = assembly.GetName();
+                Modules[asmName.Name] = asmName.Version.ToString();
+            }
+
             Populate(this, exception);
         }
 
@@ -133,42 +159,6 @@ namespace Sentry
                     @event.Culprit = $"{exception.TargetSite?.ReflectedType?.FullName ?? "<unavailable>"}.{exception.TargetSite?.Name ?? "<unavailable>"}";
                 }
             }
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                if (assembly.IsDynamic)
-                {
-                    continue;
-                }
-                var asmName = assembly.GetName();
-                @event.Modules[asmName.Name] = asmName.Version.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Resets the instance to a new value
-        /// </summary>
-        /// <param name="event"></param>
-        public static void Reset(SentryEvent @event) => Reset(@event, SystemClock.Clock);
-
-        internal static void Reset(SentryEvent @event, ISystemClock clock, Guid id = default)
-        {
-            Debug.Assert(@event != null);
-            Debug.Assert(clock != null);
-
-            // Set initial value to mandatory properties:
-            //@event.InternalContexts = // TODO: Load initial context data
-
-            @event.EventId = id == default ? Guid.NewGuid() : id;
-            @event.Timestamp = clock.GetUtcNow();
-
-            // TODO: should this be dotnet instead?
-            @event.Platform = "csharp";
-            @event.Sdk.Name = "Sentry.NET";
-            // TODO: Read it off of env var here? Integration's version could be set instead
-            // Less flexible than using SentryOptions to define this value
-            @event.Sdk.Version = "0.0.0";
-
         }
     }
 }

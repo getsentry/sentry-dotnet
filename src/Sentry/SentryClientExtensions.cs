@@ -20,7 +20,7 @@ namespace Sentry
         /// <param name="client">The Sentry client.</param>
         /// <param name="ex">The exception.</param>
         /// <returns></returns>
-        public static SentryResponse CaptureException(this ISentryClient client, Exception ex)
+        public static Guid CaptureException(this ISentryClient client, Exception ex)
             => client.CaptureEvent(new SentryEvent(ex));
 
         public static void AddBreadcrumb(

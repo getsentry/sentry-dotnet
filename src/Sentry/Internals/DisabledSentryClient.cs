@@ -7,8 +7,6 @@ namespace Sentry.Internals
 {
     internal sealed class DisabledSentryClient : ISentryClient, IDisposable
     {
-        private static SentryResponse DisabledResponse { get; } = new SentryResponse(false, errorMessage: "SDK Disabled");
-
         public static DisabledSentryClient Instance = new DisabledSentryClient();
 
         public bool IsEnabled => false;
@@ -21,8 +19,8 @@ namespace Sentry.Internals
         public IDisposable PushScope() => this;
         public IDisposable PushScope<TState>(TState state) => this;
 
-        public SentryResponse CaptureEvent(SentryEvent evt) => DisabledResponse;
-        public SentryResponse CaptureEvent(Func<SentryEvent> eventFactory) => DisabledResponse;
+        public Guid CaptureEvent(SentryEvent evt) => Guid.Empty;
+        public Guid CaptureEvent(Func<SentryEvent> eventFactory) => Guid.Empty;
 
         public void Dispose() { }
     }

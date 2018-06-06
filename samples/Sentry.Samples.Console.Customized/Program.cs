@@ -36,6 +36,12 @@ namespace Sentry.Samples.Console.Customized
                     @event.ServerName = null; // Make sure no ServerName is sent out
                     return @event;
                 };
+
+                o.Worker(w =>
+                {
+                    w.EmptyQueueDelay = TimeSpan.FromMilliseconds(500); // Poll for events every 500ms
+                    w.FullQueueBlockTimeout = TimeSpan.FromMilliseconds(100); 
+                });
             });
 
             await SentryCore.ConfigureScopeAsync(async scope =>

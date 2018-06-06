@@ -22,5 +22,12 @@ namespace Sentry
         public int MaxBreadcrumbs { get; set; } = 100;
 
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
+
+        internal BackgroundWorkerOptions BackgroundWorkerOptions { get; } = new BackgroundWorkerOptions();
+
+        public void Worker(Action<BackgroundWorkerOptions> configure)
+        {
+            configure?.Invoke(BackgroundWorkerOptions);
+        }
     }
 }

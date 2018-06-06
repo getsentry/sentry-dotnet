@@ -66,7 +66,7 @@ namespace Sentry
             configureOptions?.Invoke(options);
 
             var sdk = Interlocked.Exchange(ref _sentryClient, new SentryClient(options));
-            (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
+            (sdk as IDisposable)?.Dispose(); // Possibly disposes an old client
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Sentry
         public static void CloseAndFlush()
         {
             var sdk = Interlocked.Exchange(ref _sentryClient, DisabledSentryClient.Instance);
-            (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
+            (sdk as IDisposable)?.Dispose(); // Possibly disposes an old client
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Sentry
         /// <param name="evt">The evt.</param>
         /// <returns></returns>
         [DebuggerStepThrough]
-        public static SentryResponse CaptureEvent(SentryEvent evt)
+        public static Guid CaptureEvent(SentryEvent evt)
             => _sentryClient.CaptureEvent(evt);
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Sentry
         /// <param name="eventFactory">The event factory.</param>
         /// <returns></returns>
         [DebuggerStepThrough]
-        public static SentryResponse CaptureEvent(Func<SentryEvent> eventFactory)
+        public static Guid CaptureEvent(Func<SentryEvent> eventFactory)
             => _sentryClient.CaptureEvent(eventFactory);
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Sentry
         /// <param name="exception">The exception.</param>
         /// <returns></returns>
         [DebuggerStepThrough]
-        public static SentryResponse CaptureException(Exception exception)
+        public static Guid CaptureException(Exception exception)
             => _sentryClient.CaptureException(exception);
     }
 }
