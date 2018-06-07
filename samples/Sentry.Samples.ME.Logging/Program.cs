@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
@@ -7,15 +8,9 @@ namespace Sentry.Samples.ME.Logging
     {
         static void Main()
         {
-            SentryCore.Init("https://key@sentry.io/id"); // Initialize SDK
-
-            try
+            using (SentryCore.Init("https://key@sentry.io/id")) // Initialize SDK
             {
                 App();
-            }
-            finally
-            {
-                SentryCore.CloseAndFlush();
             }
         }
 
@@ -60,10 +55,10 @@ namespace Sentry.Samples.ME.Logging
 
                 logger.LogError("9 - No scope data, breadcrumb: 2");
 
-            } // Disposing the logger won't affect Sentry: The lifetime is managed externally (call CloseAndFlush)
+            } // Disposing the logger won't affect Sentry if the SDK was initialized through: SentryCore.Init()
 
             // An app crash outside of the logging block is captured without any breadcrumb
-            throw null;
+            throw new Exception("Captures: exception outside of the Logging integration");
         }
     }
 }

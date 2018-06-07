@@ -22,7 +22,7 @@ namespace Sentry.Samples.Console.Customized
             });
 
             // Enable the SDK
-            SentryCore.Init(o =>
+            using (SentryCore.Init(o =>
             {
                 // Modifications to event before it goes out. Could replace the event altogether
                 o.BeforeSend = @event =>
@@ -41,58 +41,47 @@ namespace Sentry.Samples.Console.Customized
                 o.Worker(w =>
                 {
                     w.EmptyQueueDelay = TimeSpan.FromMilliseconds(500); // Poll for events every 500ms
-                    w.FullQueueBlockTimeout = TimeSpan.FromMilliseconds(100); 
+                    w.FullQueueBlockTimeout = TimeSpan.FromMilliseconds(100);
                 });
-            });
-
-            await SentryCore.ConfigureScopeAsync(async scope =>
+            }))
             {
-                // This could be any async I/O operation, like a DB query
-                await Task.Yield(); 
-                scope.SetExtra("Key", "Value");
-            });
+                await SentryCore.ConfigureScopeAsync(async scope =>
+                {
+                    // This could be any async I/O operation, like a DB query
+                    await Task.Yield();
+                    scope.SetExtra("Key", "Value");
+                });
 
-            SentryCore.CaptureException(new Exception("Something went wrong."));
-            SentryCore.CloseAndFlush();
+                SentryCore.CaptureException(new Exception("Something went wrong."));
 
-            // -------------------------
+                // -------------------------
 
-            // A custom made client, registered with DI which gets disposed by
-            // the container on app shutdown
-            var adminClient = new SentryClient(new SentryOptions
-            {
-                Dsn = new Dsn("admin-project-dsn")
-            });
+                // A custom made client, that can be registered with DI,
+                // would get disposed by the container on app shutdown
+                var adminDsn = new Dsn("admin-project-dsn");
+                using (var adminClient = new SentryClient(new SentryOptions { Dsn = adminDsn }))
+                {
+                    // Make believe web framework middleware
+                    var middleware = new AdminPartMiddleware(adminClient, null);
+                    var request = new { Path = "/bla" }; // made up request
+                    middleware.Invoke(request);
 
-            // Make believe web framework middleware
-            var middleware = new AdminPartMiddleware(adminClient, null);
-
-            var request = new Request { Path = "/bla" }; // made up request
-            middleware.Invoke(request);
-        }
-
-        private class Request
-        {
-            public string Path { get; set; }
-        }
-
-        private interface IMiddleware
-        {
-            void Invoke(Request request);
+                } // A client created by hand has its lifetime managed by the creator
+            }  // On Dispose: SDK closed, events queued are flushed
         }
 
         private class AdminPartMiddleware
         {
             private readonly ISentryClient _adminClient;
-            private readonly IMiddleware _middleware;
+            private readonly dynamic _middleware;
 
-            public AdminPartMiddleware(ISentryClient adminClient, IMiddleware middleware)
+            public AdminPartMiddleware(ISentryClient adminClient, dynamic middleware)
             {
                 _adminClient = adminClient;
                 _middleware = middleware;
             }
 
-            public void Invoke(Request request)
+            public void Invoke(dynamic request)
             {
                 using (SentryCore.PushScope())
                 {

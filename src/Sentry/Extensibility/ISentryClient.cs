@@ -6,11 +6,6 @@ namespace Sentry.Extensibility
     /// <summary>
     /// Sentry Client interface
     /// </summary>
-    /// <remarks>
-    /// The contract of which <see cref="T:Sentry.SentryCore" /> exposes statically.
-    /// This interface exist to allow better testability of integrations which otherwise
-    /// would require dependency to the static <see cref="T:Sentry.SentryCore" />
-    /// </remarks>
     public interface ISentryClient
     {
         /// <summary>

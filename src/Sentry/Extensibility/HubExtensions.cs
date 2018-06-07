@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
@@ -12,6 +13,15 @@ namespace Sentry.Extensibility
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HubExtensions
     {
+        /// <summary>
+        /// Captures the exception.
+        /// </summary>
+        /// <param name="hub">The Hub.</param>
+        /// <param name="ex">The exception.</param>
+        /// <returns></returns>
+        public static Guid CaptureException(this IHub hub, Exception ex)
+            => hub.CaptureEvent(new SentryEvent(ex));
+
         public static void AddBreadcrumb(
             this IHub hub,
             string message,

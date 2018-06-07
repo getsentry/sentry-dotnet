@@ -30,7 +30,7 @@ namespace Sentry
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
-        public static void Init() => Init(DsnLocator.FindDsnStringOrDisable());
+        public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable());
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
@@ -40,47 +40,53 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
-        public static void Init(string dsn)
+        public static IDisposable Init(string dsn)
         {
             if (string.IsNullOrWhiteSpace(dsn))
             {
-                return;
+                return DisabledHub.Instance;
             }
 
-            Init(c => c.Dsn = new Dsn(dsn));
+            return Init(c => c.Dsn = new Dsn(dsn));
         }
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
         /// </summary>
         /// <param name="dsn">The dsn</param>
-        public static void Init(Dsn dsn) => Init(c => c.Dsn = dsn);
+        public static IDisposable Init(Dsn dsn) => Init(c => c.Dsn = dsn);
 
         /// <summary>
         /// Initializes the SDK with an optional configuration options callback.
         /// </summary>
         /// <param name="configureOptions">The configure options.</param>
-        public static void Init(Action<SentryOptions> configureOptions)
+        public static IDisposable Init(Action<SentryOptions> configureOptions)
         {
             var options = new SentryOptions();
             configureOptions?.Invoke(options);
 
             if (options.Dsn == null)
             {
-                return; // TODO: Log that it continues disabled
+                // TODO: Log that it continues disabled
+                return DisabledHub.Instance;
             }
 
-            var sdk = Interlocked.Exchange(ref _hub, new Hub(options));
-            (sdk as IDisposable)?.Dispose(); // Possibly disposes an old client
+            var hub = new Hub(options);
+            _hub = hub;
+            return new DisposeHandle(hub);
         }
 
-        /// <summary>
-        /// Closes the SDK and flushes any queued event to Sentry
-        /// </summary>
-        public static void CloseAndFlush()
+        private class DisposeHandle : IDisposable
         {
-            var sdk = Interlocked.Exchange(ref _hub, DisabledHub.Instance);
-            (sdk as IDisposable)?.Dispose(); // Possibly disposes an old client
+            private IHub _localHub;
+            public DisposeHandle(IHub hub) => _localHub = hub;
+
+            public void Dispose()
+            {
+                Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
+                (_localHub as IDisposable)?.Dispose();
+                _localHub = null;
+            }
         }
 
         /// <summary>
@@ -203,7 +209,7 @@ namespace Sentry
         /// <param name="evt">The event.</param>
         /// <param name="scope">The scope.</param>
         /// <returns></returns>
-        [DebuggerStepThrough]
+        //[DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static Guid CaptureEvent(SentryEvent evt, Scope scope)
             => _hub.CaptureEvent(evt, scope);

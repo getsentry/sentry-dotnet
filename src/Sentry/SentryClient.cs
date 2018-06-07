@@ -22,22 +22,9 @@ namespace Sentry
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
-            // TODO: Subscribing or not should be based on the Options
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
             _worker = new BackgroundWorker(
                 new HttpTransport(),
                 options.BackgroundWorkerOptions);
-        }
-
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            // TODO: avoid stack overflow
-            if (e.ExceptionObject is Exception ex)
-            {
-                // TODO: Add to Scope: Exception Mechanism = e.IsTerminating
-                this.CaptureException(ex);
-            }
         }
 
         public Guid CaptureEvent(SentryEvent @event, Scope scope = null)
@@ -46,7 +33,13 @@ namespace Sentry
             var id = _failureId;
             try
             {
+                // TODO: prepare event run on the worker thread
                 @event = PrepareEvent(@event, scope);
+                if (@event == null) // Rejected event
+                {
+                    return id;
+                }
+
                 if (_worker.EnqueueEvent(@event))
                 {
                     id = @event.EventId;
@@ -69,7 +62,7 @@ namespace Sentry
         {
             // TODO: Consider multiple events being sent with the same scope:
             // Wherever this code will end up, it should evaluate only once
-            if (scope.States != null)
+            if (scope?.States != null)
             {
                 foreach (var state in scope.States)
                 {
@@ -94,15 +87,16 @@ namespace Sentry
                 }
             }
 
-            @event = _options.BeforeSend?.Invoke(@event);
+            if (_options.BeforeSend != null)
+            {
+                @event = _options.BeforeSend?.Invoke(@event);
+            }
 
             return @event;
         }
 
         public void Dispose()
         {
-            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
-
             // Worker should empty it's queue until SentryOptions.ShutdownTimeout
             (_worker as IDisposable)?.Dispose();
 
