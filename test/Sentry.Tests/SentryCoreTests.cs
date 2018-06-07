@@ -160,7 +160,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void CaptureEvent_Instance_NoOp() => SentryCore.CaptureEvent(new SentryEvent(null));
+        public void CaptureEvent_Instance_NoOp() => SentryCore.CaptureEvent(new SentryEvent());
 
         [Fact]
         public void CaptureEvent_Func_NoOp()

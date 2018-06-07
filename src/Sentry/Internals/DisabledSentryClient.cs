@@ -19,8 +19,7 @@ namespace Sentry.Internals
         public IDisposable PushScope() => this;
         public IDisposable PushScope<TState>(TState state) => this;
 
-        public Guid CaptureEvent(SentryEvent evt) => Guid.Empty;
-        public Guid CaptureEvent(Func<SentryEvent> eventFactory) => Guid.Empty;
+        public Guid CaptureEvent(SentryEvent evt, Scope scope = null) => Guid.Empty;
 
         public void Dispose() { }
     }

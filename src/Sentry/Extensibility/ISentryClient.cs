@@ -1,4 +1,5 @@
 using System;
+using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {
@@ -22,17 +23,8 @@ namespace Sentry.Extensibility
         /// Capture the event
         /// </summary>
         /// <param name="evt">The event to be captured</param>
+        /// <param name="scope">An optional scope to be applied to the event.</param>
         /// <returns>The Id of the event</returns>
-        Guid CaptureEvent(SentryEvent evt);
-        /// <summary>
-        /// Captures the event created by the specified function
-        /// </summary>
-        /// <param name="eventFactory">The function which creates the event.</param>
-        /// <remarks>
-        /// If the client is disabled, the function is never invoked.
-        /// This is especially useful if the callback executes something heavy
-        /// </remarks>
-        /// <returns></returns>
-        Guid CaptureEvent(Func<SentryEvent> eventFactory);
+        Guid CaptureEvent(SentryEvent evt, Scope scope = null);
     }
 }

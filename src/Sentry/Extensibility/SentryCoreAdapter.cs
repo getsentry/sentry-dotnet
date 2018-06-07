@@ -70,8 +70,8 @@ namespace Sentry.Extensibility
                 level: level);
 
         [DebuggerStepThrough]
-        public Guid CaptureEvent(SentryEvent evt)
-            => SentryCore.CaptureEvent(evt);
+        public Guid CaptureEvent(SentryEvent evt, Scope scope = null)
+            => SentryCore.CaptureEvent(evt, scope);
 
         [DebuggerStepThrough]
         public Guid CaptureEvent(Func<SentryEvent> eventFactory)

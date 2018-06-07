@@ -41,5 +41,7 @@ namespace Sentry.Extensibility
         /// <returns>A disposable which removes the scope
         /// from the environment when invoked</returns>
         IDisposable PushScope<TState>(TState state);
+
+        void BindClient(ISentryClient client);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Sentry;
+using Sentry.Extensibility;
 
 // One of the ways to set your DSN is via an attribute:
 // It could be set via AssemblyInfo.cs and patched via CI
@@ -52,8 +53,62 @@ namespace Sentry.Samples.Console.Customized
             });
 
             SentryCore.CaptureException(new Exception("Something went wrong."));
-
             SentryCore.CloseAndFlush();
+
+            // -------------------------
+
+            // A custom made client, registered with DI which gets disposed by
+            // the container on app shutdown
+            var adminClient = new SentryClient(new SentryOptions
+            {
+                Dsn = new Dsn("admin-project-dsn")
+            });
+
+            // Make believe web framework middleware
+            var middleware = new AdminPartMiddleware(adminClient, null);
+
+            var request = new Request { Path = "/bla" }; // made up request
+            middleware.Invoke(request);
+        }
+
+        private class Request
+        {
+            public string Path { get; set; }
+        }
+
+        private interface IMiddleware
+        {
+            void Invoke(Request request);
+        }
+
+        private class AdminPartMiddleware
+        {
+            private readonly ISentryClient _adminClient;
+            private readonly IMiddleware _middleware;
+
+            public AdminPartMiddleware(ISentryClient adminClient, IMiddleware middleware)
+            {
+                _adminClient = adminClient;
+                _middleware = middleware;
+            }
+
+            public void Invoke(Request request)
+            {
+                using (SentryCore.PushScope())
+                {
+                    SentryCore.AddBreadcrumb(request.Path, "request-path");
+
+                    if (request.Path.StartsWith("/admin"))
+                    {
+                        // Within this scope, the _adminClient will be used instead of whatever
+                        // client was defined before this point:
+                        SentryCore.BindClient(_adminClient);
+
+                        _middleware.Invoke(request);
+                    }
+
+                }
+            }
         }
     }
 }

@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Extensibility.Http;
 using Sentry.Protocol;
+using Sentry.Internals;
 
-namespace Sentry.Internals
+namespace Sentry
 {
-    internal class SentryClient : ISentryClient, IDisposable
+    public class SentryClient : ISentryClient, IDisposable
     {
         private readonly SentryOptions _options;
         private readonly IBackgroundWorker _worker;
@@ -52,25 +53,9 @@ namespace Sentry.Internals
 
         public IDisposable PushScope<TState>(TState state) => ScopeManagement.PushScope(state);
 
-        public Guid CaptureEvent(Func<SentryEvent> eventFactory)
+        public Guid CaptureEvent(SentryEvent @event, Scope scope = null)
         {
-            SentryEvent @event;
-            try
-            {
-                @event = eventFactory();
-            }
-            catch (Exception e)
-            {
-                // User defined callback failed.
-                Trace.WriteLine(e.ToString()); // TODO: logger
-                return _failureId;
-            }
-
-            return CaptureEvent(@event);
-        }
-
-        public Guid CaptureEvent(SentryEvent @event)
-        {
+            // TODO: Apply scope to event
             var id = _failureId;
             try
             {
