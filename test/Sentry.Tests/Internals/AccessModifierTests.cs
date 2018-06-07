@@ -9,7 +9,7 @@ namespace Sentry.Tests.Internals
 {
     public class AccessModifierTests
     {
-        private const string InternalsNamespace = "Sentry.Internals";
+        private const string InternalsNamespace = "Sentry.Internal";
 
         [Theory]
         [MemberData(nameof(GetTypesInInternalsNamespace))]
@@ -27,7 +27,7 @@ namespace Sentry.Tests.Internals
                 .Select(t => new[] { t });
 
         public static IEnumerable<object[]> GetTypesInInternalsNamespace()
-            => typeof(ISentryClient).Assembly.GetTypes("Sentry.Internals")
+            => typeof(ISentryClient).Assembly.GetTypes(InternalsNamespace)
                 .Select(t => new[] { t });
     }
 }

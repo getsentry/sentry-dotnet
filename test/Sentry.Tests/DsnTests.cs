@@ -1,5 +1,5 @@
 using System;
-using Sentry.Internals;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Tests

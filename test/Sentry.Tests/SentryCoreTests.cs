@@ -3,9 +3,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Tests.Helpers;
 using Xunit;
-using static Sentry.Internals.Constants;
+using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests
 {
@@ -50,7 +51,7 @@ namespace Sentry.Tests
         public void Init_ValidDsnEnvironmentVariable_EnablesSdk()
         {
             EnvironmentVariableGuard.WithVariable(
-                Sentry.Internals.Constants.DsnEnvironmentVariable,
+                Constants.DsnEnvironmentVariable,
                 DsnSamples.ValidDsnWithSecret,
                 () =>
                 {
@@ -63,7 +64,7 @@ namespace Sentry.Tests
         public void Init_InvalidDsnEnvironmentVariable_Throws()
         {
             EnvironmentVariableGuard.WithVariable(
-                Sentry.Internals.Constants.DsnEnvironmentVariable,
+                Constants.DsnEnvironmentVariable,
                 // If the variable was set, to non empty string but value is broken, better crash than silently disable
                 DsnSamples.InvalidDsn,
                 () =>
@@ -77,8 +78,8 @@ namespace Sentry.Tests
         public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
         {
             EnvironmentVariableGuard.WithVariable(
-                Sentry.Internals.Constants.DsnEnvironmentVariable,
-                Sentry.Internals.Constants.DisableSdkDsnValue,
+                Constants.DsnEnvironmentVariable,
+                Constants.DisableSdkDsnValue,
                 () =>
                 {
                     SentryCore.Init();
@@ -104,7 +105,7 @@ namespace Sentry.Tests
         [Fact]
         public void PushScope_InstanceOf_DisabledClient()
         {
-            Assert.Same(Sentry.Internals.DisabledSentryClient.Instance, SentryCore.PushScope());
+            Assert.Same(DisabledHub.Instance, SentryCore.PushScope());
         }
 
         [Fact]
@@ -161,18 +162,6 @@ namespace Sentry.Tests
 
         [Fact]
         public void CaptureEvent_Instance_NoOp() => SentryCore.CaptureEvent(new SentryEvent());
-
-        [Fact]
-        public void CaptureEvent_Func_NoOp()
-        {
-            var invoked = false;
-            SentryCore.CaptureEvent(() =>
-            {
-                invoked = true;
-                return null;
-            });
-            Assert.False(invoked);
-        }
 
         [Fact]
         public void CaptureException_Instance_NoOp() => SentryCore.CaptureException(new Exception());

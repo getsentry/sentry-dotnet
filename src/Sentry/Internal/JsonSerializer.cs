@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Sentry.Internals
+namespace Sentry.Internal
 {
     internal static class JsonSerializer
     {

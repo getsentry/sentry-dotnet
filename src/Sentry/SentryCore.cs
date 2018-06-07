@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Internals;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -107,11 +107,12 @@ namespace Sentry
         [DebuggerStepThrough]
         public static IDisposable PushScope() => _hub.PushScope();
 
+        /// <summary>
+        /// Binds the client to the current scope.
+        /// </summary>
+        /// <param name="client">The client.</param>
         [DebuggerStepThrough]
-        public static void BindClient(IHub adminClient)
-        {
-            //_hub.Pu
-        }
+        public static void BindClient(ISentryClient client) => _hub.BindClient(client);
 
         /// <summary>
         /// Adds a breadcrumb to the current Scope
@@ -168,7 +169,7 @@ namespace Sentry
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _hub?.AddBreadcrumb(clock, message, type, category, data, level);
+            => _hub.AddBreadcrumb(clock, message, type, category, data, level);
 
         /// <summary>
         /// Configures the scope through the callback.
@@ -195,6 +196,17 @@ namespace Sentry
         [DebuggerStepThrough]
         public static Guid CaptureEvent(SentryEvent evt)
             => _hub.CaptureEvent(evt);
+
+        /// <summary>
+        /// Captures the event using the specified scope.
+        /// </summary>
+        /// <param name="evt">The event.</param>
+        /// <param name="scope">The scope.</param>
+        /// <returns></returns>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Guid CaptureEvent(SentryEvent evt, Scope scope)
+            => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
         /// Captures the exception.

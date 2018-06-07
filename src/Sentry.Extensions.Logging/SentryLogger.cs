@@ -9,7 +9,7 @@ namespace Sentry.Extensions.Logging
 {
     internal sealed class SentryLogger : ILogger
     {
-        private readonly ISentryClient _sentryClient;
+        private readonly IHub _hub;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
 
@@ -22,7 +22,7 @@ namespace Sentry.Extensions.Logging
                 categoryName,
                 options,
                 SystemClock.Clock,
-                SentryCoreAdapter.Instance)
+                HubAdapter.Instance)
         {
         }
 
@@ -30,21 +30,21 @@ namespace Sentry.Extensions.Logging
             string categoryName,
             SentryLoggingOptions options,
             ISystemClock clock,
-            ISentryClient sentryClient)
+            IHub hub)
         {
             Debug.Assert(categoryName != null);
             Debug.Assert(options != null);
             Debug.Assert(clock != null);
-            Debug.Assert(sentryClient != null);
+            Debug.Assert(hub != null);
             CategoryName = categoryName;
             _options = options;
             _clock = clock;
-            _sentryClient = sentryClient;
+            _hub = hub;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => _sentryClient.PushScope(state);
+        public IDisposable BeginScope<TState>(TState state) => _hub.PushScope(state);
 
-        public bool IsEnabled(LogLevel logLevel) => _sentryClient.IsEnabled
+        public bool IsEnabled(LogLevel logLevel) => _hub.IsEnabled
                                                     && logLevel != LogLevel.None
                                                     && (logLevel >= _options.MinimumBreadcrumbLevel
                                                     || logLevel >= _options.MinimumEventLevel);
@@ -88,7 +88,7 @@ namespace Sentry.Extensions.Logging
                     @event.SetTag(tuple.Value.name, tuple.Value.value);
                 }
 
-                _sentryClient.CaptureEvent(@event);
+                _hub.CaptureEvent(@event);
             }
 
             // Even if it was sent as event, add breadcrumb so next event includes it
@@ -105,13 +105,13 @@ namespace Sentry.Extensions.Logging
                     data.Add("exception_message", exception.Message);
                 }
 
-                _sentryClient.AddBreadcrumb(
-                        _clock,
-                        message ?? exception?.Message,
-                        "default",
-                        CategoryName,
-                        data,
-                        logLevel.ToBreadcrumbLevel());
+                _hub.AddBreadcrumb(
+                    _clock,
+                    message ?? exception?.Message,
+                    "default",
+                    CategoryName,
+                    data,
+                    logLevel.ToBreadcrumbLevel());
             }
         }
     }

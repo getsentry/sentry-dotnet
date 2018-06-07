@@ -1,4 +1,4 @@
-namespace Sentry.Internals
+namespace Sentry.Internal
 {
     internal static class Constants
     {

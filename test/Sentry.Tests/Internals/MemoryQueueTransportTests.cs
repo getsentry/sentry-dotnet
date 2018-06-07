@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
-using Sentry.Internals;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -80,7 +80,7 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public async Task CaptureEvent_InnerTransportInvoked()
+        public void CaptureEvent_InnerTransportInvoked()
         {
             // Arrange
             var expected = new SentryEvent();
@@ -92,7 +92,7 @@ namespace Sentry.Tests.Internals
             sut.Dispose();
 
             // Assert
-            await _fixture.Transport.Received(1).CaptureEventAsync(expected, Arg.Any<CancellationToken>());
+            _fixture.Transport.Received(1).CaptureEventAsync(expected, Arg.Any<CancellationToken>());
         }
 
         [Fact]

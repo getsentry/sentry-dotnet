@@ -1,16 +1,16 @@
-using Sentry.Internals;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests
 {
-    public class SdkTests
+    public class HubTests
     {
         private class Fixture
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
-            public SentryClient GetSut() => new SentryClient(SentryOptions);
+            public Hub GetSut() => new Hub(SentryOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -23,10 +23,10 @@ namespace Sentry.Tests
             using (sut.PushScope())
             {
                 sut.ConfigureScope(s => s.AddBreadcrumb(new Breadcrumb("test", "unit")));
-                Assert.Single(sut.ScopeManagement.GetCurrent().Breadcrumbs);
+                Assert.Single(sut.ScopeManagement.GetCurrent().Scope.Breadcrumbs);
             }
 
-            Assert.Empty(sut.ScopeManagement.GetCurrent().Breadcrumbs);
+            Assert.Empty(sut.ScopeManagement.GetCurrent().Scope.Breadcrumbs);
         }
     }
 }

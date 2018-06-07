@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Extensibility.Http;
 
-namespace Sentry.Internals
+namespace Sentry.Internal
 {
     internal class BackgroundWorker : IBackgroundWorker, IDisposable
     {
@@ -15,7 +15,7 @@ namespace Sentry.Internals
         private readonly CancellationTokenSource _cancellationTokenSource;
         private bool _disposed;
 
-        internal Task WorkerTask;
+        internal Task WorkerTask { get; }
 
         public int QueuedItems => _queue.Count;
 
@@ -70,7 +70,7 @@ namespace Sentry.Internals
 
             while (!shutdownTimeout.IsCancellationRequested)
             {
-                // If the cancellation was signaled, 
+                // If the cancellation was signaled,
                 // set the latest we can keep reading off the queue (while there's still stuff to read)
                 if (!shutdownRequested && cancellation.IsCancellationRequested)
                 {

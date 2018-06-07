@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Extensibility.Http;
+using Sentry.Internal;
 using Sentry.Protocol;
-using Sentry.Internals;
 
 namespace Sentry
 {
@@ -17,8 +16,7 @@ namespace Sentry
 
         private readonly Guid _failureId = Guid.Empty;
 
-        // Testability
-        internal IInternalScopeManagement ScopeManagement { get; }
+        public bool IsEnabled => true;
 
         public SentryClient(SentryOptions options)
         {
@@ -30,8 +28,6 @@ namespace Sentry
             _worker = new BackgroundWorker(
                 new HttpTransport(),
                 options.BackgroundWorkerOptions);
-
-            ScopeManagement = new SentryScopeManagement(options);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -44,22 +40,13 @@ namespace Sentry
             }
         }
 
-        public bool IsEnabled => true;
-
-        public void ConfigureScope(Action<Scope> configureScope) => ScopeManagement.ConfigureScope(configureScope);
-        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => ScopeManagement.ConfigureScopeAsync(configureScope);
-
-        public IDisposable PushScope() => ScopeManagement.PushScope();
-
-        public IDisposable PushScope<TState>(TState state) => ScopeManagement.PushScope(state);
-
         public Guid CaptureEvent(SentryEvent @event, Scope scope = null)
         {
             // TODO: Apply scope to event
             var id = _failureId;
             try
             {
-                @event = PrepareEvent(@event);
+                @event = PrepareEvent(@event, scope);
                 if (_worker.EnqueueEvent(@event))
                 {
                     id = @event.EventId;
@@ -78,9 +65,8 @@ namespace Sentry
             return id;
         }
 
-        private SentryEvent PrepareEvent(SentryEvent @event)
+        private SentryEvent PrepareEvent(SentryEvent @event, Scope scope)
         {
-            var scope = ScopeManagement.GetCurrent();
             // TODO: Consider multiple events being sent with the same scope:
             // Wherever this code will end up, it should evaluate only once
             if (scope.States != null)

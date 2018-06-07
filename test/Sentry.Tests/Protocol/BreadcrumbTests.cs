@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Sentry.Internals;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
 
