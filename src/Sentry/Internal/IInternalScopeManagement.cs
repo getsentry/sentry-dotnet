@@ -1,10 +1,10 @@
 using Sentry.Extensibility;
 using Sentry.Protocol;
 
-namespace Sentry.Internals
+namespace Sentry.Internal
 {
     internal interface IInternalScopeManagement : ISentryScopeManagement
     {
-        Scope GetCurrent();
+        (Scope Scope, ISentryClient Client) GetCurrent();
     }
 }

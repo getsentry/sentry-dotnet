@@ -1,8 +1,8 @@
-using Sentry.Internals;
+using Sentry.Internal;
 using Sentry.Tests.Helpers;
 using Sentry.Tests.Helpers.Reflection;
 using Xunit;
-using static Sentry.Internals.Constants;
+using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests.Internals
 {

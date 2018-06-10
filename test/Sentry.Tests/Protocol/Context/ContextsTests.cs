@@ -1,4 +1,4 @@
-using Sentry.Internals;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
 

@@ -3,7 +3,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
-using Sentry.Internals;
+using Sentry.Extensibility;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -13,13 +14,70 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public IScopeOptions ScopeOptions { get; set; } = Substitute.For<IScopeOptions>();
-            public SentryScopeManagement GetSut() => new SentryScopeManagement(ScopeOptions);
+            public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
+            public SentryScopeManagement GetSut() => new SentryScopeManagement(ScopeOptions, Client);
         }
 
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
-        public void GetCurrent_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent());
+        public void GetCurrent_Scope_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Scope);
+
+        [Fact]
+        public void GetCurrent_Client_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Client);
+
+        [Fact]
+        public void GetCurrent_Equality_SameOnInstance()
+        {
+            var sut = _fixture.GetSut();
+
+            var root = sut.GetCurrent();
+
+            Assert.Equal(root, sut.GetCurrent());
+        }
+
+        [Fact]
+        public void GetCurrent_Equality_FalseOnModifiedClient()
+        {
+            var sut = _fixture.GetSut();
+
+            var root = sut.GetCurrent();
+            sut.BindClient(Substitute.For<ISentryClient>());
+
+            Assert.NotEqual(root, sut.GetCurrent());
+        }
+
+        [Fact]
+        public void GetCurrent_Equality_FalseOnModifiedScope()
+        {
+            var sut = _fixture.GetSut();
+
+            var root = sut.GetCurrent();
+            sut.PushScope();
+
+            Assert.NotEqual(root, sut.GetCurrent());
+        }
+
+        [Fact]
+        public void BindClient_Null_DisablesClient()
+        {
+            var sut = _fixture.GetSut();
+
+            sut.BindClient(null);
+            var (_, client) = sut.GetCurrent();
+
+            Assert.Same(DisabledSentryClient.Instance, client);
+        }
+
+        [Fact]
+        public void BindClient_Scope_StaysTheSame()
+        {
+            var sut = _fixture.GetSut();
+            var (scope, _) = sut.GetCurrent();
+
+            sut.BindClient(Substitute.For<ISentryClient>());
+            Assert.Same(scope, sut.GetCurrent().Scope);
+        }
 
         [Fact]
         public void ConfigureScope_NullArgument_NoOp()
@@ -53,7 +111,29 @@ namespace Sentry.Tests.Internals
             sut.PushScope();
             var second = sut.GetCurrent();
 
-            Assert.NotSame(first, second);
+            Assert.NotEqual(first, second);
+        }
+
+        [Fact]
+        public void PushScope_Parameterless_UsesSameClient()
+        {
+            var sut = _fixture.GetSut();
+            var (_, first) = sut.GetCurrent();
+            sut.PushScope();
+            var (_, second) = sut.GetCurrent();
+
+            Assert.Same(first, second);
+        }
+
+        [Fact]
+        public void PushScope_StateInstance_UsesSameClient()
+        {
+            var sut = _fixture.GetSut();
+            var (_, first) = sut.GetCurrent();
+            sut.PushScope(new object());
+            var (_, second) = sut.GetCurrent();
+
+            Assert.Same(first, second);
         }
 
         [Fact]
@@ -64,7 +144,7 @@ namespace Sentry.Tests.Internals
             sut.PushScope(new object());
             var second = sut.GetCurrent();
 
-            Assert.NotSame(first, second);
+            Assert.NotEqual(first, second);
         }
 
         [Fact]
@@ -76,7 +156,7 @@ namespace Sentry.Tests.Internals
             await Task.Run(async () =>
             {
                 await Task.Yield();
-                Assert.Same(root, sut.GetCurrent());
+                Assert.Equal(root, sut.GetCurrent());
             });
         }
 
@@ -87,7 +167,7 @@ namespace Sentry.Tests.Internals
             var root = sut.GetCurrent();
 
             sut.PushScope().Dispose();
-            Assert.Same(root, sut.GetCurrent());
+            Assert.Equal(root, sut.GetCurrent());
         }
 
         [Fact]
@@ -102,7 +182,7 @@ namespace Sentry.Tests.Internals
             first.Dispose();
             second.Dispose();
 
-            Assert.Same(root, sut.GetCurrent());
+            Assert.Equal(root, sut.GetCurrent());
         }
 
         [Fact]
@@ -123,10 +203,12 @@ namespace Sentry.Tests.Internals
                 try
                 {
                     // t2 created scope, make sure this parent is still root
-                    Assert.Same(root, sut.GetCurrent());
+                    Assert.Equal(root, sut.GetCurrent());
 
                     var scope = sut.PushScope();
-                    Assert.NotSame(root, sut.GetCurrent());
+
+                    Assert.NotEqual(root, sut.GetCurrent());
+
                     scope.Dispose();
                 }
                 finally
@@ -134,7 +216,7 @@ namespace Sentry.Tests.Internals
                     evt.Set();
                 }
 
-                Assert.Same(root, sut.GetCurrent());
+                Assert.Equal(root, sut.GetCurrent());
             });
 
             evt.WaitOne(); // Wait t1 start
@@ -147,7 +229,7 @@ namespace Sentry.Tests.Internals
                 try
                 {
                     // Create a scope first
-                    Assert.NotSame(root, sut.GetCurrent());
+                    Assert.NotEqual(root, sut.GetCurrent());
                 }
                 finally
                 {
@@ -158,12 +240,12 @@ namespace Sentry.Tests.Internals
                 evt.WaitOne();
                 scope.Dispose();
 
-                Assert.Same(root, sut.GetCurrent());
+                Assert.Equal(root, sut.GetCurrent());
             });
 
             await Task.WhenAll(t1, t2);
 
-            Assert.Same(root, sut.GetCurrent());
+            Assert.Equal(root, sut.GetCurrent());
         }
 
         [Fact]
@@ -171,8 +253,8 @@ namespace Sentry.Tests.Internals
         {
             var sut = _fixture.GetSut();
             var root = sut.GetCurrent();
-            void AddRandomTag() => sut.GetCurrent().SetTag(Guid.NewGuid().ToString(), "1");
-            void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Tags.Count);
+            void AddRandomTag() => sut.GetCurrent().Scope.SetTag(Guid.NewGuid().ToString(), "1");
+            void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Scope.Tags.Count);
 
             AddRandomTag();
             AssertTagCount(1);
@@ -203,7 +285,7 @@ namespace Sentry.Tests.Internals
                     .Select(__ => Test(1)))
                 .SelectMany(t => t));
 
-            Assert.Same(root, sut.GetCurrent());
+            Assert.Equal(root, sut.GetCurrent());
         }
     }
 }

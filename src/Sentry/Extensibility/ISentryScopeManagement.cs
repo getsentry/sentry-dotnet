@@ -27,6 +27,12 @@ namespace Sentry.Extensibility
         Task ConfigureScopeAsync(Func<Scope, Task> configureScope);
 
         /// <summary>
+        /// Binds the client to the current scope.
+        /// </summary>
+        /// <param name="client">The client.</param>
+        void BindClient(ISentryClient client);
+
+        /// <summary>
         /// Pushes a new scope into the stack which is removed upon Dispose
         /// </summary>
         /// <returns>A disposable which removes the scope

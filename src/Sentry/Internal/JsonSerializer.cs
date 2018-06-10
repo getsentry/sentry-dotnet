@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Sentry.Internals
+namespace Sentry.Internal
 {
     internal static class JsonSerializer
     {
@@ -9,10 +9,12 @@ namespace Sentry.Internals
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-            Converters = new [] { StringEnumConverter }
+            Formatting = Formatting.None,
+            Converters = new[] { StringEnumConverter }
         };
 
         public static string SerializeObject<T>(T @object) => JsonConvert.SerializeObject(@object, Settings);
         public static dynamic DeserializeObject(string json) => JsonConvert.DeserializeObject(json);
+        public static T DeserializeObject<T>(string json) => JsonConvert.DeserializeObject<T>(json);
     }
 }

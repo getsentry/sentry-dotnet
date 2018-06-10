@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Internals;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -22,7 +22,7 @@ namespace Sentry
     public static class SentryCore
     {
         // TODO: At this point no Scope (e.g: breadcrumb) will be kept until the SDK is enabled
-        private static ISentryClient _sentryClient = DisabledSentryClient.Instance;
+        private static IHub _hub = DisabledHub.Instance;
 
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN
@@ -30,7 +30,7 @@ namespace Sentry
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
-        public static void Init() => Init(DsnLocator.FindDsnStringOrDisable());
+        public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable());
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
@@ -40,48 +40,64 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
-        public static void Init(string dsn)
+        public static IDisposable Init(string dsn)
         {
             if (string.IsNullOrWhiteSpace(dsn))
             {
-                return;
+                return DisabledHub.Instance;
             }
 
-            Init(c => c.Dsn = new Dsn(dsn));
+            return Init(c => c.Dsn = new Dsn(dsn));
         }
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
         /// </summary>
         /// <param name="dsn">The dsn</param>
-        public static void Init(Dsn dsn) => Init(c => c.Dsn = dsn);
+        public static IDisposable Init(Dsn dsn) => Init(c => c.Dsn = dsn);
 
         /// <summary>
         /// Initializes the SDK with an optional configuration options callback.
         /// </summary>
         /// <param name="configureOptions">The configure options.</param>
-        public static void Init(Action<SentryOptions> configureOptions)
+        public static IDisposable Init(Action<SentryOptions> configureOptions)
         {
             var options = new SentryOptions();
             configureOptions?.Invoke(options);
 
-            var sdk = Interlocked.Exchange(ref _sentryClient, new SentryClient(options));
-            (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
+
+            if (options.Dsn == null)
+            {
+                if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
+                {
+                    // TODO: Log that it continues disabled
+                    return DisabledHub.Instance;
+                }
+                options.Dsn = dsn;
+            }
+
+            var hub = new Hub(options);
+            _hub = hub;
+            return new DisposeHandle(hub);
         }
 
-        /// <summary>
-        /// Closes the SDK and flushes any queued event to Sentry
-        /// </summary>
-        public static void CloseAndFlush()
+        private class DisposeHandle : IDisposable
         {
-            var sdk = Interlocked.Exchange(ref _sentryClient, DisabledSentryClient.Instance);
-            (sdk as IDisposable)?.Dispose(); // Possibily disposes an old client
+            private IHub _localHub;
+            public DisposeHandle(IHub hub) => _localHub = hub;
+
+            public void Dispose()
+            {
+                Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
+                (_localHub as IDisposable)?.Dispose();
+                _localHub = null;
+            }
         }
 
         /// <summary>
         /// Whether the SDK is enabled or not
         /// </summary>
-        public static bool IsEnabled { [DebuggerStepThrough] get => _sentryClient.IsEnabled; }
+        public static bool IsEnabled { [DebuggerStepThrough] get => _hub.IsEnabled; }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
@@ -93,14 +109,21 @@ namespace Sentry
         /// <param name="state">A state object to be added to the scope</param>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
-        public static IDisposable PushScope<TState>(TState state) => _sentryClient.PushScope(state);
+        public static IDisposable PushScope<TState>(TState state) => _hub.PushScope(state);
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
-        public static IDisposable PushScope() => _sentryClient.PushScope();
+        public static IDisposable PushScope() => _hub.PushScope();
+
+        /// <summary>
+        /// Binds the client to the current scope.
+        /// </summary>
+        /// <param name="client">The client.</param>
+        [DebuggerStepThrough]
+        public static void BindClient(ISentryClient client) => _hub.BindClient(client);
 
         /// <summary>
         /// Adds a breadcrumb to the current Scope
@@ -117,7 +140,7 @@ namespace Sentry
         /// <param name="category">
         /// Categories are dotted strings that indicate what the crumb is or where it comes from.
         /// Typically it’s a module name or a descriptive string.
-        /// For instance ui.click could be used to indicate that a click happend in the UI or flask could be used to indicate that the event originated in the Flask framework.
+        /// For instance ui.click could be used to indicate that a click happened in the UI or flask could be used to indicate that the event originated in the Flask framework.
         /// </param>
         /// <param name="data">
         /// Data associated with this breadcrumb.
@@ -133,13 +156,13 @@ namespace Sentry
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _sentryClient.AddBreadcrumb(message, type, category, data, level);
+            => _hub.AddBreadcrumb(message, type, category, data, level);
 
         /// <summary>
         /// Adds a breadcrumb to the current scope
         /// </summary>
         /// <remarks>
-        /// This overload is inteded to be used by integrations only.
+        /// This overload is intended to be used by integrations only.
         /// The objective is to allow better testability by allowing control of the timestamp set to the breadcrumb.
         /// </remarks>
         /// <param name="clock">An optional <see cref="ISystemClock"/></param>
@@ -157,7 +180,7 @@ namespace Sentry
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _sentryClient?.AddBreadcrumb(clock, message, type, category, data, level);
+            => _hub.AddBreadcrumb(clock, message, type, category, data, level);
 
         /// <summary>
         /// Configures the scope through the callback.
@@ -165,7 +188,7 @@ namespace Sentry
         /// <param name="configureScope">The configure scope callback.</param>
         [DebuggerStepThrough]
         public static void ConfigureScope(Action<Scope> configureScope)
-            => _sentryClient.ConfigureScope(configureScope);
+            => _hub.ConfigureScope(configureScope);
 
         /// <summary>
         /// Configures the scope asynchronously
@@ -174,25 +197,27 @@ namespace Sentry
         /// <returns></returns>
         [DebuggerStepThrough]
         public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
-            => _sentryClient.ConfigureScopeAsync(configureScope);
+            => _hub.ConfigureScopeAsync(configureScope);
 
         /// <summary>
         /// Captures the event.
         /// </summary>
-        /// <param name="evt">The evt.</param>
+        /// <param name="evt">The event.</param>
         /// <returns></returns>
         [DebuggerStepThrough]
-        public static SentryResponse CaptureEvent(SentryEvent evt)
-            => _sentryClient.CaptureEvent(evt);
+        public static Guid CaptureEvent(SentryEvent evt)
+            => _hub.CaptureEvent(evt);
 
         /// <summary>
-        /// Captures the event.
+        /// Captures the event using the specified scope.
         /// </summary>
-        /// <param name="eventFactory">The event factory.</param>
+        /// <param name="evt">The event.</param>
+        /// <param name="scope">The scope.</param>
         /// <returns></returns>
-        [DebuggerStepThrough]
-        public static SentryResponse CaptureEvent(Func<SentryEvent> eventFactory)
-            => _sentryClient.CaptureEvent(eventFactory);
+        //[DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Guid CaptureEvent(SentryEvent evt, Scope scope)
+            => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
         /// Captures the exception.
@@ -200,7 +225,7 @@ namespace Sentry
         /// <param name="exception">The exception.</param>
         /// <returns></returns>
         [DebuggerStepThrough]
-        public static SentryResponse CaptureException(Exception exception)
-            => _sentryClient.CaptureException(exception);
+        public static Guid CaptureException(Exception exception)
+            => _hub.CaptureException(exception);
     }
 }

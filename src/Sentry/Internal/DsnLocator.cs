@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace Sentry.Internals
+namespace Sentry.Internal
 {
     internal static class DsnLocator
     {

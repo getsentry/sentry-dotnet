@@ -22,7 +22,7 @@ namespace Sentry
         /// </summary>
         public string Path { get; }
         /// <summary>
-        /// The optional secret key to authenticate the SDK. 
+        /// The optional secret key to authenticate the SDK.
         /// </summary>
         public string SecretKey { get; }
         /// <summary>

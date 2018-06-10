@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
@@ -7,25 +8,19 @@ namespace Sentry.Samples.ME.Logging
     {
         static void Main()
         {
-            SentryCore.Init("https://key@sentry.io/id"); // Initialize SDK
-
-            try
-            {
-                App();
-            }
-            finally
-            {
-                SentryCore.CloseAndFlush();
-            }
-        }
-
-        static void App()
-        {
             using (var loggerFactory = new LoggerFactory()
                 .AddConsole(LogLevel.Trace)
                 .AddSentry(o =>
                 {
-                    // The default values are:
+                    // Initialize the SDK, alternative to relying on previously called: `using(SentryCore.Init)`:
+                    // this is useful when Logging is the first or is the only integration enabled:
+                    o.Init(i =>
+                    {
+                        i.Dsn = new Dsn("https://key@sentry.io/id");
+                        i.MaxBreadcrumbs = 150; // Increasing from default 100
+                    });
+
+                    // Logging settings: The default values are:
                     o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
                     o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
                 }))
@@ -34,14 +29,14 @@ namespace Sentry.Samples.ME.Logging
 
                 logger.LogTrace("1 - By *default* this log level is ignored by Sentry.");
 
-                logger.LogInformation("2 -Information messages are stored as Breadcrumb, sent with the next event.");
+                logger.LogInformation("2 - Information messages are stored as Breadcrumb, sent with the next event.");
 
                 logger.LogError("3 - This generates an event, captured by sentry and includes breadcrumbs (2) tracked in this transaction.");
 
                 using (logger.BeginScope(new Dictionary<string, string>
                 {
-                    {"A - some context", "some value"},
-                    {"B - more info on this", "more value"},
+                    {"A", "some value"},
+                    {"B", "more value"},
                 }))
                 {
                     logger.LogWarning("4 - Breadcrumb that only exists inside this scope");
@@ -53,17 +48,17 @@ namespace Sentry.Samples.ME.Logging
                         logger.LogInformation("6 - Inner most breadcrumb");
 
                         logger.LogError("7 - An event that includes the scope key-value (A, B, C) and also the breadcrumbs: (2, 4, 6)");
-                    }
 
-                    logger.LogError("8 - Includes Scope (A, B) and breadcrumbs: (2, 4)");
+                    } // Dispose scope C, drops state C and breadcrumb 6
+
+                    // An exception that will go unhandled and crash the app:
+                    // Even though it's not caught nor logged, this error is captured by Sentry!
+                    // It will include all the scope data available up to this point
+                    throw new Exception("8 - This unhandled exception is captured and includes Scope (A, B) and crumbs: (2, 4)");
                 }
-
-                logger.LogError("9 - No scope data, breadcrumb: 2");
-
-            } // Disposing the logger won't affect Sentry: The lifetime is managed externally (call CloseAndFlush)
-
-            // An app crash outside of the logging block is captured without any breadcrumb
-            throw null;
+            }
+            // Disposing the LoggerFactory will close the SDK since it was initialized through
+            // the integration while calling .Init()
         }
     }
 }

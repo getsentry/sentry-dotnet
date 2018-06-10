@@ -3,14 +3,16 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Tests.Helpers;
 using Xunit;
-using static Sentry.Internals.Constants;
+using static Sentry.Internal.Constants;
+using static Sentry.Tests.DsnSamples;
 
 namespace Sentry.Tests
 {
     [Collection(DsnEnvironmentVariable)]
-    public class SentryCoreTests : IDisposable
+    public class SentryCoreTests
     {
         [Fact]
         public void IsEnabled_StartsOfFalse()
@@ -27,35 +29,35 @@ namespace Sentry.Tests
         [Fact]
         public void Init_ValidDsnWithSecret_EnablesSdk()
         {
-            SentryCore.Init(DsnSamples.ValidDsnWithSecret);
-            Assert.True(SentryCore.IsEnabled);
+            using (SentryCore.Init(ValidDsnWithSecret))
+                Assert.True(SentryCore.IsEnabled);
         }
 
         [Fact]
         public void Init_ValidDsnWithoutSecret_EnablesSdk()
         {
-            SentryCore.Init(DsnSamples.ValidDsnWithoutSecret);
-            Assert.True(SentryCore.IsEnabled);
+            using (SentryCore.Init(DsnSamples.ValidDsnWithoutSecret))
+                Assert.True(SentryCore.IsEnabled);
         }
 
         [Fact]
         public void Init_DsnInstance_EnablesSdk()
         {
             var dsn = new Dsn(DsnSamples.ValidDsnWithoutSecret);
-            SentryCore.Init(dsn);
-            Assert.True(SentryCore.IsEnabled);
+            using (SentryCore.Init(dsn))
+                Assert.True(SentryCore.IsEnabled);
         }
 
         [Fact]
         public void Init_ValidDsnEnvironmentVariable_EnablesSdk()
         {
             EnvironmentVariableGuard.WithVariable(
-                Sentry.Internals.Constants.DsnEnvironmentVariable,
-                DsnSamples.ValidDsnWithSecret,
+                DsnEnvironmentVariable,
+                ValidDsnWithSecret,
                 () =>
                 {
-                    SentryCore.Init();
-                    Assert.True(SentryCore.IsEnabled);
+                    using (SentryCore.Init())
+                        Assert.True(SentryCore.IsEnabled);
                 });
         }
 
@@ -63,7 +65,7 @@ namespace Sentry.Tests
         public void Init_InvalidDsnEnvironmentVariable_Throws()
         {
             EnvironmentVariableGuard.WithVariable(
-                Sentry.Internals.Constants.DsnEnvironmentVariable,
+                DsnEnvironmentVariable,
                 // If the variable was set, to non empty string but value is broken, better crash than silently disable
                 DsnSamples.InvalidDsn,
                 () =>
@@ -77,34 +79,78 @@ namespace Sentry.Tests
         public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
         {
             EnvironmentVariableGuard.WithVariable(
-                Sentry.Internals.Constants.DsnEnvironmentVariable,
-                Sentry.Internals.Constants.DisableSdkDsnValue,
+                DsnEnvironmentVariable,
+                DisableSdkDsnValue,
                 () =>
                 {
-                    SentryCore.Init();
-                    Assert.False(SentryCore.IsEnabled);
+                    using (SentryCore.Init())
+                        Assert.False(SentryCore.IsEnabled);
                 });
         }
 
         [Fact]
         public void Init_EmptyDsn_DisabledSdk()
         {
-            SentryCore.Init(string.Empty);
+            using (SentryCore.Init(string.Empty))
+                Assert.False(SentryCore.IsEnabled);
+        }
+
+        [Fact]
+        public void Disposable_MultipleCalls_NoOp()
+        {
+            var disposable = SentryCore.Init();
+            disposable.Dispose();
+            disposable.Dispose();
             Assert.False(SentryCore.IsEnabled);
         }
 
         [Fact]
-        public void CloseAndFlush_MultipleCalls_NoOp()
+        public void Init_MultipleCalls_ReplacesHubWithLatest()
         {
-            SentryCore.CloseAndFlush();
-            SentryCore.CloseAndFlush();
-            Assert.False(SentryCore.IsEnabled);
+            var first = SentryCore.Init(ValidDsnWithSecret);
+            SentryCore.AddBreadcrumb("test", "type");
+            var called = false;
+            SentryCore.ConfigureScope(p =>
+            {
+                called = true;
+                Assert.Equal(1, p.Breadcrumbs.Count);
+            });
+            Assert.True(called);
+            called = false;
+
+            var second = SentryCore.Init(ValidDsnWithSecret);
+            SentryCore.ConfigureScope(p =>
+            {
+                called = true;
+                Assert.Equal(0, p.Breadcrumbs.Count);
+            });
+            Assert.True(called);
+
+            first.Dispose();
+            second.Dispose();
+        }
+
+        [Fact]
+        public void Dispose_DisposingFirst_DoesntAffectSecond()
+        {
+            var first = SentryCore.Init(ValidDsnWithSecret);
+            var second = SentryCore.Init(ValidDsnWithSecret);
+            SentryCore.AddBreadcrumb("test", "type");
+            first.Dispose();
+            var called = false;
+            SentryCore.ConfigureScope(p =>
+            {
+                called = true;
+                Assert.Equal(1, p.Breadcrumbs.Count);
+            });
+            Assert.True(called);
+            second.Dispose();
         }
 
         [Fact]
         public void PushScope_InstanceOf_DisabledClient()
         {
-            Assert.Same(Sentry.Internals.DisabledSentryClient.Instance, SentryCore.PushScope());
+            Assert.Same(DisabledHub.Instance, SentryCore.PushScope());
         }
 
         [Fact]
@@ -160,19 +206,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void CaptureEvent_Instance_NoOp() => SentryCore.CaptureEvent(new SentryEvent(null));
-
-        [Fact]
-        public void CaptureEvent_Func_NoOp()
-        {
-            var invoked = false;
-            SentryCore.CaptureEvent(() =>
-            {
-                invoked = true;
-                return null;
-            });
-            Assert.False(invoked);
-        }
+        public void CaptureEvent_Instance_NoOp() => SentryCore.CaptureEvent(new SentryEvent());
 
         [Fact]
         public void CaptureException_Instance_NoOp() => SentryCore.CaptureException(new Exception());
@@ -204,11 +238,6 @@ namespace Sentry.Tests
             var sentryCore = typeof(SentryCore).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
             Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(sentryCore.Select(m => m.ToString())));
-        }
-
-        public void Dispose()
-        {
-            SentryCore.CloseAndFlush();
         }
     }
 }
