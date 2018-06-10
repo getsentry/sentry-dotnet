@@ -32,6 +32,11 @@ namespace Sentry.Internal
                 // TODO: Add to Scope: Exception Mechanism = e.IsTerminating
                 this.CaptureException(ex);
             }
+
+            if (e.IsTerminating)
+            {
+                Dispose();
+            }
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
