@@ -9,6 +9,7 @@ namespace Sentry.Extensions.Logging
     {
         private readonly SentryLoggingOptions _options;
         private IDisposable _scope;
+        private IDisposable _sdk;
 
         public SentryLoggerProvider(SentryLoggingOptions options)
             : this(HubAdapter.Instance, options)
@@ -22,6 +23,14 @@ namespace Sentry.Extensions.Logging
             Debug.Assert(scopeManagement != null);
 
             _options = options;
+
+            // SDK is being initialized through this integration
+            // Lifetime is owned by this instance:
+            if (_options.InitSdk != null)
+            {
+                _sdk = SentryCore.Init(_options.InitSdk);
+            }
+
             // Creates a scope so that Integration added below can be dropped when the logger is disposed
             _scope = scopeManagement.PushScope();
 
@@ -34,6 +43,8 @@ namespace Sentry.Extensions.Logging
         {
             _scope?.Dispose();
             _scope = null;
+            _sdk?.Dispose();
+            _sdk = null;
         }
     }
 }
