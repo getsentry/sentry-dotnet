@@ -29,14 +29,14 @@ namespace Sentry.Samples.ME.Logging
 
                 logger.LogTrace("1 - By *default* this log level is ignored by Sentry.");
 
-                logger.LogInformation("2 -Information messages are stored as Breadcrumb, sent with the next event.");
+                logger.LogInformation("2 - Information messages are stored as Breadcrumb, sent with the next event.");
 
                 logger.LogError("3 - This generates an event, captured by sentry and includes breadcrumbs (2) tracked in this transaction.");
 
                 using (logger.BeginScope(new Dictionary<string, string>
                 {
-                    {"A - some context", "some value"},
-                    {"B - more info on this", "more value"},
+                    {"A", "some value"},
+                    {"B", "more value"},
                 }))
                 {
                     logger.LogWarning("4 - Breadcrumb that only exists inside this scope");
@@ -52,7 +52,7 @@ namespace Sentry.Samples.ME.Logging
                     } // Dispose scope C, drops state C and breadcrumb 6
 
                     // An exception that will go unhandled and crash the app:
-                    // Even though it's not caught nor logged, this error is captured by Sentry
+                    // Even though it's not caught nor logged, this error is captured by Sentry!
                     // It will include all the scope data available up to this point
                     throw new Exception("8 - This unhandled exception is captured and includes Scope (A, B) and crumbs: (2, 4)");
                 }

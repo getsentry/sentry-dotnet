@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Sentry.Extensibility;
-using Sentry.Extensibility.Http;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -19,12 +18,19 @@ namespace Sentry
         public bool IsEnabled => true;
 
         public SentryClient(SentryOptions options)
+            : this(options, null) { }
+
+        internal SentryClient(
+            SentryOptions options,
+            IBackgroundWorker worker)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
-            _worker = new BackgroundWorker(
-                new HttpTransport(),
-                options.BackgroundWorkerOptions);
+            if (worker == null)
+            {
+                var composer = new SdkComposer(options);
+                _worker = composer.CreateBackgroundWorker();
+            }
         }
 
         public Guid CaptureEvent(SentryEvent @event, Scope scope = null)
@@ -47,12 +53,12 @@ namespace Sentry
                 else
                 {
                     // TODO: Notify error handler
-                    Trace.WriteLine("Failed to enqueue event. Current queue depth: " + _worker.QueuedItems);
+                    Debug.WriteLine("Failed to enqueue event. Current queue depth: " + _worker.QueuedItems);
                 }
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e.ToString()); // TODO: logger
+                Debug.WriteLine(e.ToString()); // TODO: logger
             }
 
             return id;
@@ -64,11 +70,13 @@ namespace Sentry
             // Wherever this code will end up, it should evaluate only once
             if (scope?.States != null)
             {
+                var counter = 0;
                 foreach (var state in scope.States)
                 {
                     if (state is string scopeString)
                     {
-                        @event.SetTag("scope", scopeString);
+                        counter++;
+                        @event.SetTag("scope" + counter, scopeString);
                     }
                     else if (state is IEnumerable<KeyValuePair<string, string>> keyValStringString)
                     {

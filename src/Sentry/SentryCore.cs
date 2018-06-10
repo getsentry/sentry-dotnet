@@ -67,8 +67,15 @@ namespace Sentry
 
             if (options.Dsn == null)
             {
-                // TODO: Log that it continues disabled
-                return DisabledHub.Instance;
+                if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
+                {
+                    // TODO: Log that it continues disabled
+                    return DisabledHub.Instance;
+                }
+                else
+                {
+                    options.Dsn = dsn;
+                }
             }
 
             var hub = new Hub(options);

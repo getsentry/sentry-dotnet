@@ -1,13 +1,27 @@
 using System;
+using Sentry.Extensibility;
+using Sentry.Http;
 
 namespace Sentry
 {
     /// TODO: the SDK options
     public class SentryOptions : IScopeOptions
     {
-        public Dsn Dsn { get; set; }
-        /// 
+        // TODO: This will be set via AsmInfo.cs?
+        // Used on AUTH header and also SDK payload interface?
+        internal string ClientVersion
+        {
+            get;
+            set; // Cannot be null!
+        } = "Sentry.NET";
+
+        // TODO: Where does this go?
+        // Version protocol this SDK is written to support
+        internal int SentryVersion { get; } = 7;
+
         public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(3);
+
+        public Dsn Dsn { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.
@@ -23,11 +37,14 @@ namespace Sentry
 
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
 
-        internal BackgroundWorkerOptions BackgroundWorkerOptions { get; } = new BackgroundWorkerOptions();
+        internal Action<BackgroundWorkerOptions> ConfigureBackgroundWorkerOptions { get; private set; }
 
-        public void Worker(Action<BackgroundWorkerOptions> configure)
-        {
-            configure?.Invoke(BackgroundWorkerOptions);
-        }
+        internal Action<HttpOptions> ConfigureHttpTransportOptions { get; private set; }
+
+        internal Func<SentryOptions, ITransport> TransportFactory { get; set; }
+
+        public void Worker(Action<BackgroundWorkerOptions> configure) => ConfigureBackgroundWorkerOptions = configure;
+
+        public void Http(Action<HttpOptions> configure) => ConfigureHttpTransportOptions = configure;
     }
 }

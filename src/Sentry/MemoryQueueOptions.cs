@@ -1,4 +1,5 @@
 using System;
+using Sentry.Extensibility;
 
 namespace Sentry
 {
@@ -18,9 +19,11 @@ namespace Sentry
             }
         }
 
-        public TimeSpan FullQueueBlockTimeout = TimeSpan.Zero;
-        public TimeSpan EmptyQueueDelay = TimeSpan.FromSeconds(1);
+        internal TimeSpan FullQueueBlockTimeout { get; set; } = TimeSpan.Zero;
+        public TimeSpan EmptyQueueDelay { get; set; } = TimeSpan.FromMilliseconds(500);
         // The time to keep running, in case there are requests queued up, after cancellation is requested
-        public TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(2);
+        public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(2);
+
+        internal Func<SentryOptions, IBackgroundWorker> BackgroundWorkerFactory { get; set; }
     }
 }

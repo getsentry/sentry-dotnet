@@ -113,6 +113,7 @@ namespace Sentry
             Guid id = default)
         {
             clock = clock ?? SystemClock.Clock;
+            EventId = id == default ? Guid.NewGuid() : id;
 
             // Set initial value to mandatory properties:
             //@event.InternalContexts = // TODO: Load initial context data

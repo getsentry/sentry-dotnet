@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Extensibility.Http;
 
 namespace Sentry.Internal
 {
@@ -26,13 +25,15 @@ namespace Sentry.Internal
         { }
 
         internal BackgroundWorker(
-            ITransport transport = null,
-            BackgroundWorkerOptions options = null,
+            ITransport transport,
+            BackgroundWorkerOptions options,
             CancellationTokenSource cancellationTokenSource = null,
             IProducerConsumerCollection<SentryEvent> queue = null)
         {
-            transport = transport ?? new HttpTransport();
-            _options = options ?? new BackgroundWorkerOptions();
+            Debug.Assert(transport != null);
+            Debug.Assert(options != null);
+            _options = options;
+
             _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
             queue = queue ?? new ConcurrentQueue<SentryEvent>();
 
@@ -85,12 +86,12 @@ namespace Sentry.Internal
                         // Optionally we can keep multiple requests in-flight concurrently:
                         // instead of awaiting here, keep reading from the queue while less than
                         // N events are being sent
-                        await transport.CaptureEventAsync(@event, cancellation).ConfigureAwait(false);
+                        await transport.CaptureEventAsync(@event, shutdownTimeout.Token).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {
                         // TODO: Notify error handler
-                        Trace.WriteLine(exception.ToString());
+                        Debug.WriteLine(exception.ToString());
                     }
                 }
                 else
@@ -141,13 +142,13 @@ namespace Sentry.Internal
                 catch (Exception exception)
                 {
                     // TODO: Notify error handler
-                    Trace.WriteLine(exception.ToString());
+                    Debug.WriteLine(exception.ToString());
                 }
 
                 if (_queue.Count > 0)
                 {
                     // TODO: Notify error handler
-                    Trace.WriteLine($"Worker stopped while {_queue.Count} were still in the queue.");
+                    Debug.WriteLine($"Worker stopped while {_queue.Count} were still in the queue.");
                 }
             }
             finally

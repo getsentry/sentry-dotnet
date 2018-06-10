@@ -10,6 +10,8 @@ namespace Sentry.Tests
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
+            public Fixture() => SentryOptions.Dsn = new Dsn(DsnSamples.ValidDsnWithoutSecret);
+
             public Hub GetSut() => new Hub(SentryOptions);
         }
 

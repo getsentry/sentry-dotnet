@@ -1,6 +1,6 @@
-namespace Sentry.Internal
+namespace Sentry.Extensibility
 {
-    internal interface IBackgroundWorker
+    public interface IBackgroundWorker
     {
         bool EnqueueEvent(SentryEvent @event);
         int QueuedItems { get; }
