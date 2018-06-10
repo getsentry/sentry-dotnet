@@ -98,16 +98,18 @@ namespace Sentry.Samples.Console.Customized
                 {
                     SentryCore.AddBreadcrumb(request.Path, "request-path");
 
+                    // Change the SentryClient in case the request is to the admin part:
                     if (request.Path.StartsWith("/admin"))
                     {
                         // Within this scope, the _adminClient will be used instead of whatever
                         // client was defined before this point:
                         SentryCore.BindClient(_adminClient);
-
-                        _middleware.Invoke(request);
                     }
+                    // Else it uses the default client
 
-                }
+                    _middleware?.Invoke(request);
+
+                } // Scope is disposed.
             }
         }
     }

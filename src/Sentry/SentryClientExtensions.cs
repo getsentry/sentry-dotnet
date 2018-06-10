@@ -17,6 +17,10 @@ namespace Sentry
         /// <param name="ex">The exception.</param>
         /// <returns></returns>
         public static Guid CaptureException(this ISentryClient client, Exception ex)
-            => client.CaptureEvent(new SentryEvent(ex));
+        {
+            return !client.IsEnabled
+                ? Guid.Empty
+                : client.CaptureEvent(new SentryEvent(ex));
+        }
     }
 }
