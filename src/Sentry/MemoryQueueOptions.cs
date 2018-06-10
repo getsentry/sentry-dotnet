@@ -4,18 +4,10 @@ namespace Sentry
 {
     public class BackgroundWorkerOptions
     {
-        private int _maxQueueItems;
+        private int _maxQueueItems = 30;
         public int MaxQueueItems
         {
-            get
-            {
-                if (_maxQueueItems < 1)
-                {
-                    _maxQueueItems = 30; // Default
-                }
-                return _maxQueueItems;
-            }
-
+            get => _maxQueueItems;
             set
             {
                 if (value < 1)
