@@ -46,6 +46,11 @@ namespace Sentry
                     return id;
                 }
 
+                if (_options.BeforeSend != null)
+                {
+                    @event = _options.BeforeSend?.Invoke(@event);
+                }
+
                 if (_worker.EnqueueEvent(@event))
                 {
                     id = @event.EventId;
@@ -64,11 +69,16 @@ namespace Sentry
             return id;
         }
 
-        private SentryEvent PrepareEvent(SentryEvent @event, Scope scope)
+        private static SentryEvent PrepareEvent(SentryEvent @event, Scope scope)
         {
+            if (scope == null)
+            {
+                return @event;
+            }
+
             // TODO: Consider multiple events being sent with the same scope:
             // Wherever this code will end up, it should evaluate only once
-            if (scope?.States != null)
+            if (scope.States != null)
             {
                 var counter = 0;
                 foreach (var state in scope.States)
@@ -95,10 +105,7 @@ namespace Sentry
                 }
             }
 
-            if (_options.BeforeSend != null)
-            {
-                @event = _options.BeforeSend?.Invoke(@event);
-            }
+            @event.Breadcrumbs = @event.Breadcrumbs.AddRange(scope.Breadcrumbs);
 
             return @event;
         }

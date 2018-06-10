@@ -95,7 +95,6 @@ namespace Sentry.Extensions.Logging
             if (_options.MinimumBreadcrumbLevel != LogLevel.None
                      && logLevel >= _options.MinimumBreadcrumbLevel)
             {
-
                 var data = eventId.ToDictionaryOrNull();
                 if (exception != null && message != null)
                 {

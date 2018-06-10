@@ -23,18 +23,6 @@ namespace Sentry
 
         public Dsn Dsn { get; set; }
 
-        /// <summary>
-        /// Gets or sets the maximum breadcrumbs.
-        /// </summary>
-        /// <remarks>
-        /// When the number of events reach this configuration value,
-        /// older breadcrumbs start dropping to make room for new ones.
-        /// </remarks>
-        /// <value>
-        /// The maximum breadcrumbs per scope.
-        /// </value>
-        public int MaxBreadcrumbs { get; set; } = 100;
-
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
 
         internal Action<BackgroundWorkerOptions> ConfigureBackgroundWorkerOptions { get; private set; }

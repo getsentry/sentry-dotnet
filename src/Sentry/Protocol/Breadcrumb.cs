@@ -10,7 +10,7 @@ namespace Sentry.Protocol
     /// Series of application events
     /// </summary>
     [DataContract]
-    [DebuggerDisplay("{" + nameof(Message) + "}")]
+    [DebuggerDisplay("Message: {" + nameof(Message) + "}, Type: {" + nameof(Type) + "}")]
     public sealed class Breadcrumb
     {
         /// <summary>
