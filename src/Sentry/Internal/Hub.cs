@@ -62,6 +62,7 @@ namespace Sentry.Internal
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
             _ownedClient?.Dispose();
             _ownedClient = null;
+            (ScopeManagement as IDisposable)?.Dispose();
         }
     }
 }

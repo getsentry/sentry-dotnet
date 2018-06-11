@@ -8,7 +8,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
-    internal class SentryScopeManagement : IInternalScopeManagement
+    internal class SentryScopeManagement : IInternalScopeManagement, IDisposable
     {
         private readonly AsyncLocal<ImmutableStack<(Scope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ImmutableStack<(Scope, ISentryClient)>>();
 
@@ -87,5 +87,7 @@ namespace Sentry.Internal
                 }
             }
         }
+
+        public void Dispose() => _asyncLocalScope.Value = null;
     }
 }

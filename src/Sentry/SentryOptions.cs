@@ -19,7 +19,17 @@ namespace Sentry
         // Version protocol this SDK is written to support
         internal int SentryVersion { get; } = 7;
 
-        public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(3);
+        /// <summary>
+        /// Gets or sets the maximum breadcrumbs.
+        /// </summary>
+        /// <remarks>
+        /// When the number of events reach this configuration value,
+        /// older breadcrumbs start dropping to make room for new ones.
+        /// </remarks>
+        /// <value>
+        /// The maximum breadcrumbs per scope.
+        /// </value>
+        public int MaxBreadcrumbs { get; set; } = 100;
 
         public Dsn Dsn { get; set; }
 
