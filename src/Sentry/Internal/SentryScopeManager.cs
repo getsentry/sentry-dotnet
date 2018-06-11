@@ -8,7 +8,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
-    internal class SentryScopeManagement : IInternalScopeManagement, IDisposable
+    internal class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         private readonly AsyncLocal<ImmutableStack<(Scope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ImmutableStack<(Scope, ISentryClient)>>();
 
@@ -18,7 +18,7 @@ namespace Sentry.Internal
             set => _asyncLocalScope.Value = value;
         }
 
-        public SentryScopeManagement(
+        public SentryScopeManager(
             IScopeOptions options,
             ISentryClient rootClient)
         {
@@ -64,24 +64,24 @@ namespace Sentry.Internal
         private class ScopeSnapshot : IDisposable
         {
             private readonly ImmutableStack<(Scope scope, ISentryClient client)> _snapshot;
-            private readonly SentryScopeManagement _scopeManagement;
+            private readonly SentryScopeManager _scopeManager;
 
-            public ScopeSnapshot(ImmutableStack<(Scope, ISentryClient)> snapshot, SentryScopeManagement scopeManagement)
+            public ScopeSnapshot(ImmutableStack<(Scope, ISentryClient)> snapshot, SentryScopeManager scopeManager)
             {
                 Debug.Assert(snapshot != null);
-                Debug.Assert(scopeManagement != null);
+                Debug.Assert(scopeManager != null);
                 _snapshot = snapshot;
-                _scopeManagement = scopeManagement;
+                _scopeManager = scopeManager;
             }
 
             public void Dispose()
             {
                 // Only reset the parent if this is still the current scope
-                foreach (var (scope, _) in _scopeManagement.ScopeAndClientStack)
+                foreach (var (scope, _) in _scopeManager.ScopeAndClientStack)
                 {
                     if (ReferenceEquals(scope, _snapshot.Peek().scope))
                     {
-                        _scopeManagement.ScopeAndClientStack = _snapshot;
+                        _scopeManager.ScopeAndClientStack = _snapshot;
                         break;
                     }
                 }

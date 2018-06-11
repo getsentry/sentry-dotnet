@@ -9,10 +9,10 @@ namespace Sentry.Extensibility
     /// would require dependency to the static <see cref="T:Sentry.SentryCore" />
     /// </remarks>
     /// <inheritdoc cref="ISentryClient" />
-    /// <inheritdoc cref="ISentryScopeManagement" />
+    /// <inheritdoc cref="ISentryScopeManager" />
     public interface IHub :
         ISentryClient,
-        ISentryScopeManagement
+        ISentryScopeManager
     {
     }
 }

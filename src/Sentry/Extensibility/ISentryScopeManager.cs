@@ -11,7 +11,7 @@ namespace Sentry.Extensibility
     /// An implementation shall be create new scopes and allow consumers
     /// modify the current scope
     /// </remarks>
-    public interface ISentryScopeManagement
+    public interface ISentryScopeManager
     {
         /// <summary>
         /// Configures the current scope.
