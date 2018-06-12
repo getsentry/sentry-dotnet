@@ -25,10 +25,10 @@ namespace Sentry.Tests
             using (sut.PushScope())
             {
                 sut.ConfigureScope(s => s.AddBreadcrumb(new Breadcrumb("test", "unit")));
-                Assert.Single(sut.ScopeManagement.GetCurrent().Scope.Breadcrumbs);
+                Assert.Single(sut.ScopeManager.GetCurrent().Scope.Breadcrumbs);
             }
 
-            Assert.Empty(sut.ScopeManagement.GetCurrent().Scope.Breadcrumbs);
+            Assert.Empty(sut.ScopeManager.GetCurrent().Scope.Breadcrumbs);
         }
     }
 }

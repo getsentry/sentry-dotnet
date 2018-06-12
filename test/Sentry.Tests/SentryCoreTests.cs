@@ -234,7 +234,7 @@ namespace Sentry.Tests
         [Fact]
         public void Implements_ScopeManagement()
         {
-            var scopeManagement = typeof(ISentryScopeManagement).GetMembers(BindingFlags.Public | BindingFlags.Instance);
+            var scopeManagement = typeof(ISentryScopeManager).GetMembers(BindingFlags.Public | BindingFlags.Instance);
             var sentryCore = typeof(SentryCore).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
             Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(sentryCore.Select(m => m.ToString())));

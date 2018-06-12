@@ -65,7 +65,6 @@ namespace Sentry
             var options = new SentryOptions();
             configureOptions?.Invoke(options);
 
-
             if (options.Dsn == null)
             {
                 if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))

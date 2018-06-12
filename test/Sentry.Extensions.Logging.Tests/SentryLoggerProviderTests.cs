@@ -10,9 +10,9 @@ namespace Sentry.Extensions.Logging.Tests
     {
         private class Fixture
         {
-            public ISentryScopeManagement SentryScopeManagement { get; set; } = Substitute.For<ISentryScopeManagement>();
+            public ISentryScopeManager SentryScopeManager { get; set; } = Substitute.For<ISentryScopeManager>();
             public SentryLoggingOptions SentryLoggingOptions { get; set; } = new SentryLoggingOptions();
-            public SentryLoggerProvider GetSut() => new SentryLoggerProvider(SentryScopeManagement, SentryLoggingOptions);
+            public SentryLoggerProvider GetSut() => new SentryLoggerProvider(SentryScopeManager, SentryLoggingOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -41,14 +41,14 @@ namespace Sentry.Extensions.Logging.Tests
         public void Ctor_CreatesScope()
         {
             _fixture.GetSut();
-            _fixture.SentryScopeManagement.Received(1).PushScope();
+            _fixture.SentryScopeManager.Received(1).PushScope();
         }
 
         [Fact]
         public void Ctor_AddsSdkIntegration()
         {
             var scope = new Scope(null);
-            _fixture.SentryScopeManagement.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
+            _fixture.SentryScopeManager.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(info => info.Arg<Action<Scope>>()(scope));
 
             _fixture.GetSut();
@@ -60,7 +60,7 @@ namespace Sentry.Extensions.Logging.Tests
         public void Dispose_DisposesNewScope()
         {
             var disposable = Substitute.For<IDisposable>();
-            _fixture.SentryScopeManagement.PushScope().Returns(disposable);
+            _fixture.SentryScopeManager.PushScope().Returns(disposable);
 
             var sut = _fixture.GetSut();
 

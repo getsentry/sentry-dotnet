@@ -9,7 +9,7 @@ namespace Sentry.Internal
     // unhandled exceptions and notify via logging or callback
     internal class Hub : IHub, IDisposable
     {
-        public IInternalScopeManagement ScopeManagement { get; }
+        public IInternalScopeManager ScopeManager { get; }
         private SentryClient _ownedClient;
 
         public bool IsEnabled => true;
@@ -18,7 +18,7 @@ namespace Sentry.Internal
         {
             // Create client from options and bind
             _ownedClient = new SentryClient(options);
-            ScopeManagement = new SentryScopeManagement(options, _ownedClient);
+            ScopeManager = new SentryScopeManager(options, _ownedClient);
 
             // TODO: Subscribing or not should be based on the Options or some IIntegration
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -40,20 +40,20 @@ namespace Sentry.Internal
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
-            => ScopeManagement.ConfigureScope(configureScope);
+            => ScopeManager.ConfigureScope(configureScope);
 
         public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
-            => ScopeManagement.ConfigureScopeAsync(configureScope);
+            => ScopeManager.ConfigureScopeAsync(configureScope);
 
-        public IDisposable PushScope() => ScopeManagement.PushScope();
+        public IDisposable PushScope() => ScopeManager.PushScope();
 
-        public IDisposable PushScope<TState>(TState state) => ScopeManagement.PushScope(state);
+        public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
-        public void BindClient(ISentryClient client) => ScopeManagement.BindClient(client);
+        public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
         public Guid CaptureEvent(SentryEvent evt, Scope scope = null)
         {
-            var (currentScope, client) = ScopeManagement.GetCurrent();
+            var (currentScope, client) = ScopeManager.GetCurrent();
             return client.CaptureEvent(evt, scope ?? currentScope);
         }
 
@@ -62,6 +62,7 @@ namespace Sentry.Internal
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
             _ownedClient?.Dispose();
             _ownedClient = null;
+            (ScopeManager as IDisposable)?.Dispose();
         }
     }
 }

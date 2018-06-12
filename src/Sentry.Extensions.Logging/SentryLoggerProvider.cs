@@ -16,11 +16,11 @@ namespace Sentry.Extensions.Logging
         { }
 
         internal SentryLoggerProvider(
-            ISentryScopeManagement scopeManagement,
+            ISentryScopeManager scopeManager,
             SentryLoggingOptions options)
         {
             Debug.Assert(options != null);
-            Debug.Assert(scopeManagement != null);
+            Debug.Assert(scopeManager != null);
 
             _options = options;
 
@@ -32,9 +32,9 @@ namespace Sentry.Extensions.Logging
             }
 
             // Creates a scope so that Integration added below can be dropped when the logger is disposed
-            _scope = scopeManagement.PushScope();
+            _scope = scopeManager.PushScope();
 
-            scopeManagement.ConfigureScope(p => p.Sdk.Integrations.Add(Constants.IntegrationName));
+            scopeManager.ConfigureScope(p => p.Sdk.Integrations.Add(Constants.IntegrationName));
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options);
