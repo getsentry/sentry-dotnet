@@ -1,6 +1,5 @@
 using System;
 using NSubstitute;
-using Sentry.Extensibility;
 using Sentry.Protocol;
 using Xunit;
 

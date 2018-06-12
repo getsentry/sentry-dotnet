@@ -60,7 +60,7 @@ namespace Sentry.Protocol
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>
         [DataMember(Name = "sdk", EmitDefaultValue = false)]
-        public SdkVersion Sdk { get; set; } = new SdkVersion();
+        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
 
         /// <summary>
         /// A list of strings used to dictate the deduplication of this event.
@@ -78,7 +78,7 @@ namespace Sentry.Protocol
             internal set => InternalFingerprint = value;
         }
 
-        // TODO: Breadcrumb entries should be ordered from oldest to newest.        
+        // TODO: Breadcrumb entries should be ordered from oldest to newest.
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>

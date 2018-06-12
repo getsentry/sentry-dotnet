@@ -94,8 +94,13 @@ namespace Sentry
                     }
                     else if (state is IEnumerable<KeyValuePair<string, object>> keyValStringObject)
                     {
-                        @event.SetTags(keyValStringObject.Select(k =>
-                            new KeyValuePair<string, string>(k.Key, k.Value.ToString())));
+                        @event.SetTags(keyValStringObject
+                            .Where(k => k.Value != null)
+                            .Select(k => new KeyValuePair<string, string>(k.Key, k.Value.ToString())));
+                    }
+                    else if (state is ValueTuple<string, string> tupleStringString)
+                    {
+                        @event.SetTag(tupleStringString.Item1, tupleStringString.Item2);
                     }
                     else
                     {
@@ -104,6 +109,8 @@ namespace Sentry
                     }
                 }
             }
+
+            @event.Sdk.AddIntegrations(scope.Sdk.Integrations);
 
             @event.Breadcrumbs = @event.Breadcrumbs.AddRange(scope.Breadcrumbs);
 

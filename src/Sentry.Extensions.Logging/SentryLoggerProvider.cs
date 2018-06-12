@@ -34,7 +34,7 @@ namespace Sentry.Extensions.Logging
             // Creates a scope so that Integration added below can be dropped when the logger is disposed
             _scope = scopeManager.PushScope();
 
-            scopeManager.ConfigureScope(p => p.Sdk.Integrations.Add(Constants.IntegrationName));
+            scopeManager.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options);
