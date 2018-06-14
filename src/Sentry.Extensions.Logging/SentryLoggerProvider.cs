@@ -26,7 +26,7 @@ namespace Sentry.Extensions.Logging
 
             // SDK is being initialized through this integration
             // Lifetime is owned by this instance:
-            if (_options.InitSdk != null)
+            if (_options.InitializeSdk)
             {
                 _sdk = SentryCore.Init(_options.InitSdk);
             }

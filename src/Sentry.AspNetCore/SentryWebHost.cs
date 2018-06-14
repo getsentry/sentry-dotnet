@@ -18,46 +18,21 @@ namespace Sentry.AspNetCore
             _webHost = webHost ?? throw new ArgumentNullException(nameof(webHost));
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken = default)
+        public Task StartAsync(CancellationToken cancellationToken = default)
         {
-            try
-            {
-                SentryCore.AddBreadcrumb($"Starting the web host.");
-                await _webHost.StartAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                SentryCore.CaptureException(e);
-            }
+            SentryCore.AddBreadcrumb($"Starting the web host.");
+            return _webHost.StartAsync(cancellationToken);
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                await _webHost.StartAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                SentryCore.CaptureException(e);
-            }
-        }
+        public Task StopAsync(CancellationToken cancellationToken = default)
+            => _webHost.StartAsync(cancellationToken);
 
         public void Start()
         {
-            try
-            {
-                _webHost.Start();
-            }
-            catch (Exception e)
-            {
-                SentryCore.CaptureException(e);
-            }
+            SentryCore.AddBreadcrumb($"Starting the web host.");
+            _webHost.Start();
         }
 
-        public void Dispose()
-        {
-            _webHost.Dispose();
-        }
+        public void Dispose() => _webHost.Dispose();
     }
 }

@@ -16,7 +16,7 @@ namespace Sentry.Samples.ME.Logging
                     // this is useful when Logging is the first or is the only integration enabled:
                     o.Init(i =>
                     {
-                        i.Dsn = new Dsn("https://key@sentry.io/id");
+                        i.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
                         i.MaxBreadcrumbs = 150; // Increasing from default 100
                     });
 
