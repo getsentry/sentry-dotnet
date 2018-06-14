@@ -81,13 +81,6 @@ namespace Sentry
         public string Release { get; set; }
 
         /// <summary>
-        /// The environment name, such as 'production' or 'staging'.
-        /// </summary>
-        /// <remarks>Requires Sentry 8.0 or higher</remarks>
-        [DataMember(Name = "environment", EmitDefaultValue = false)]
-        public string Environment { get; set; }
-
-        /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
         public IDictionary<string, string> Modules

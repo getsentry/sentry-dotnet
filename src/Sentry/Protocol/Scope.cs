@@ -56,6 +56,13 @@ namespace Sentry.Protocol
         public User User => InternalUser ?? (InternalUser = new User());
 
         /// <summary>
+        /// The environment name, such as 'production' or 'staging'.
+        /// </summary>
+        /// <remarks>Requires Sentry 8.0 or higher</remarks>
+        [DataMember(Name = "environment", EmitDefaultValue = false)]
+        public string Environment { get; set; }
+
+        /// <summary>
         /// SDK information
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>

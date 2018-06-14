@@ -14,6 +14,8 @@ namespace Sentry.AspNetCore
     {
         public bool InitializeSdk { get; set; } = true;
 
+        public string Dsn { get; set; }
+
         public LoggingOptions Logging { get; set; } = new LoggingOptions();
 
         // An optional convinience callback to initialize the SDK

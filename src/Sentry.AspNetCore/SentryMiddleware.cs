@@ -50,7 +50,13 @@ namespace Sentry.AspNetCore
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
-            var scopeGuard = SentryCore.PushScope((nameof(context.TraceIdentifier), context.TraceIdentifier));
+            var scopeGuard = _sentry.PushScope();
+            _sentry.ConfigureScope(s =>
+            {
+                s.Environment = _hostingEnvironment?.EnvironmentName;
+
+                context.SentryScopeApply(s);
+            });
             try
             {
                 await _next(context).ConfigureAwait(false);
@@ -84,15 +90,9 @@ namespace Sentry.AspNetCore
         // TODO: extend Hub?
         private void CaptureException(HttpContext context, Exception e)
         {
-            var evt = new SentryEvent(e)
-            {
+            var evt = new SentryEvent(e);
 
-                // TODO: Extension method on SentryEvent in this assembly
-                //evt.Populate(context);
-
-                Environment = _hostingEnvironment?.EnvironmentName
-            };
-
+            // TODO: Ignore logs from Sentry by Sentry MEL integration
             _logger?.LogTrace("Sending event to Sentry '{SentryEvent}'.", evt);
 
             var response = _sentry.CaptureEvent(evt);

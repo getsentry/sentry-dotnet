@@ -32,7 +32,11 @@ namespace Sentry.AspNetCore
 
             if (aspnetOptions.InitializeSdk)
             {
-                loggingOptions.Init(aspnetOptions.InitSdk);
+                loggingOptions.Init(o =>
+                {
+                    o.Dsn = new Dsn(aspnetOptions.Dsn);
+                    aspnetOptions.InitSdk(o);
+                });
             }
         }
     }
