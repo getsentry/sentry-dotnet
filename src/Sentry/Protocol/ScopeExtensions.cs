@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.Protocol
 {
@@ -99,6 +100,25 @@ namespace Sentry.Protocol
                 data: data,
                 category: category,
                 level: level));
+        }
+
+        /// <summary>
+        /// Adds a breadcrumb to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">Scope</param>
+        /// <param name="breadcrumb">The breadcrumb.</param>
+        public static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
+        {
+            var breadcrumbs = scope.Breadcrumbs;
+
+            var overflow = breadcrumbs.Count - (scope.Options?.MaxBreadcrumbs
+                                                ?? Constants.DefaultMaxBreadcrumbs) + 1;
+            if (overflow > 0)
+            {
+                breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
+            }
+
+            scope.Breadcrumbs = breadcrumbs.Add(breadcrumb);
         }
 
         private static IImmutableDictionary<string, string> ToImmutableDictionary(

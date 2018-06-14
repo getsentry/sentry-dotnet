@@ -1,6 +1,7 @@
 using System;
 using Sentry.Extensibility;
 using Sentry.Http;
+using static Sentry.Internal.Constants;
 
 namespace Sentry
 {
@@ -15,9 +16,7 @@ namespace Sentry
             set; // Cannot be null!
         } = "Sentry.NET";
 
-        // TODO: Where does this go?
-        // Version protocol this SDK is written to support
-        internal int SentryVersion { get; } = 7;
+        internal int SentryVersion { get; } = ProtocolVersion;
 
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.
@@ -29,7 +28,7 @@ namespace Sentry
         /// <value>
         /// The maximum breadcrumbs per scope.
         /// </value>
-        public int MaxBreadcrumbs { get; set; } = 100;
+        public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
         public Dsn Dsn { get; set; }
 

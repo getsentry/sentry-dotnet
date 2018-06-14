@@ -1,3 +1,4 @@
+using System.Linq;
 using NSubstitute;
 using Sentry.Protocol;
 using Xunit;
@@ -21,8 +22,8 @@ namespace Sentry.Tests.Protocol
             }
 
             // Breadcrumb 0 is dropped
-            Assert.Equal("1", scope.Breadcrumbs[0].Message);
-            Assert.Equal("5", scope.Breadcrumbs[4].Message);
+            Assert.Equal("1", scope.Breadcrumbs.First().Message);
+            Assert.Equal("5", scope.Breadcrumbs.Last().Message);
         }
     }
 }

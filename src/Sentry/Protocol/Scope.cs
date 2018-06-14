@@ -16,7 +16,7 @@ namespace Sentry.Protocol
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count}")]
     public class Scope
     {
-        private readonly IScopeOptions _options;
+        internal IScopeOptions Options { get; }
 
         internal ImmutableList<object> States { get; private set; }
 
@@ -78,7 +78,6 @@ namespace Sentry.Protocol
             internal set => InternalFingerprint = value;
         }
 
-        // TODO: Breadcrumb entries should be ordered from oldest to newest.
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>
@@ -107,25 +106,8 @@ namespace Sentry.Protocol
             internal set => InternalTags = value;
         }
 
-        public Scope(IScopeOptions options) => _options = options;
+        public Scope(IScopeOptions options) => Options = options;
         protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
-
-        /// <summary>
-        /// Adds a breadcrumb to the <see cref="Scope"/>
-        /// </summary>
-        /// <param name="breadcrumb">The breadcrumb.</param>
-        public void AddBreadcrumb(Breadcrumb breadcrumb)
-        {
-            var breadcrumbs = Breadcrumbs;
-
-            var overflow = breadcrumbs.Count - _options.MaxBreadcrumbs + 1;
-            if (overflow > 0)
-            {
-                breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
-            }
-
-            Breadcrumbs = breadcrumbs.Add(breadcrumb);
-        }
 
         /// <summary>
         /// Sets the fingerprint to the <see cref="Scope"/>
@@ -162,7 +144,7 @@ namespace Sentry.Protocol
                 states = (states ?? ImmutableList<object>.Empty).Add(state);
             }
             // TODO: test with reflection to ensure Clone doesn't go out of sync with members
-            return new Scope(_options)
+            return new Scope(Options)
             {
                 States = states,
                 InternalUser = InternalUser,

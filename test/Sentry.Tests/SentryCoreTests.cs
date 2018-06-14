@@ -112,7 +112,7 @@ namespace Sentry.Tests
             SentryCore.ConfigureScope(p =>
             {
                 called = true;
-                Assert.Equal(1, p.Breadcrumbs.Count);
+                Assert.Single(p.Breadcrumbs);
             });
             Assert.True(called);
             called = false;
@@ -121,7 +121,7 @@ namespace Sentry.Tests
             SentryCore.ConfigureScope(p =>
             {
                 called = true;
-                Assert.Equal(0, p.Breadcrumbs.Count);
+                Assert.Empty(p.Breadcrumbs);
             });
             Assert.True(called);
 
@@ -140,7 +140,7 @@ namespace Sentry.Tests
             SentryCore.ConfigureScope(p =>
             {
                 called = true;
-                Assert.Equal(1, p.Breadcrumbs.Count);
+                Assert.Single(p.Breadcrumbs);
             });
             Assert.True(called);
             second.Dispose();
