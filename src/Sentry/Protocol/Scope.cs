@@ -18,8 +18,7 @@ namespace Sentry.Protocol
     {
         internal IScopeOptions Options { get; }
 
-        internal ImmutableList<object> States { get; private set; }
-
+        // Default values are null so no serialization of empty objects or arrays
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
 
@@ -45,7 +44,11 @@ namespace Sentry.Protocol
         /// <value>
         /// The contexts.
         /// </value>
-        public Contexts Contexts => InternalContexts ?? (InternalContexts = new Contexts());
+        public Contexts Contexts
+        {
+            get => InternalContexts ?? (InternalContexts = new Contexts());
+            set => InternalContexts = value;
+        }
 
         /// <summary>
         /// Gets the user information
@@ -53,7 +56,11 @@ namespace Sentry.Protocol
         /// <value>
         /// The user.
         /// </value>
-        public User User => InternalUser ?? (InternalUser = new User());
+        public User User
+        {
+            get => InternalUser ?? User.Empty;
+            set => InternalUser = value;
+        }
 
         /// <summary>
         /// The environment name, such as 'production' or 'staging'.
@@ -81,7 +88,7 @@ namespace Sentry.Protocol
         /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
         public IImmutableList<string> Fingerprint
         {
-            get => InternalFingerprint ?? (InternalFingerprint = ImmutableList<string>.Empty);
+            get => InternalFingerprint ?? ImmutableList<string>.Empty;
             internal set => InternalFingerprint = value;
         }
 
@@ -91,7 +98,7 @@ namespace Sentry.Protocol
         /// <seealso href="https://docs.sentry.io/learn/breadcrumbs/"/>
         public IImmutableList<Breadcrumb> Breadcrumbs
         {
-            get => InternalBreadcrumbs ?? (InternalBreadcrumbs = ImmutableList<Breadcrumb>.Empty);
+            get => InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
             internal set => InternalBreadcrumbs = value;
         }
 
@@ -100,7 +107,7 @@ namespace Sentry.Protocol
         /// </summary>
         public IImmutableDictionary<string, string> Extra
         {
-            get => InternalExtra ?? (InternalExtra = ImmutableDictionary<string, string>.Empty);
+            get => InternalExtra ?? ImmutableDictionary<string, string>.Empty;
             internal set => InternalExtra = value;
         }
 
@@ -109,7 +116,7 @@ namespace Sentry.Protocol
         /// </summary>
         public IImmutableDictionary<string, string> Tags
         {
-            get => InternalTags ?? (InternalTags = ImmutableDictionary<string, string>.Empty);
+            get => InternalTags ?? ImmutableDictionary<string, string>.Empty;
             internal set => InternalTags = value;
         }
 
@@ -139,28 +146,12 @@ namespace Sentry.Protocol
         public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
         public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
 
-        internal Scope Clone(object state)
+        // TODO: test with reflection to ensure Clone doesn't go out of sync with members
+        internal Scope Clone()
         {
-            ImmutableList<object> states = null;
-            if (States != null)
-            {
-                states = States;
-            }
-            if (state != null)
-            {
-                states = (states ?? ImmutableList<object>.Empty).Add(state);
-            }
-            // TODO: test with reflection to ensure Clone doesn't go out of sync with members
-            return new Scope(Options)
-            {
-                States = states,
-                InternalUser = InternalUser,
-                InternalContexts = InternalContexts,
-                InternalFingerprint = InternalFingerprint,
-                InternalBreadcrumbs = InternalBreadcrumbs,
-                InternalExtra = InternalExtra,
-                InternalTags = InternalTags,
-            };
+            var scope = new Scope(Options);
+            this.CopyTo(scope);
+            return scope;
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Sentry
     /// <see href="https://docs.sentry.io/clientdev/interfaces/user/"/>
     public sealed class User
     {
+        public static User Empty = new User();
+
         /// <summary>
         /// The email address of the user.
         /// </summary>
