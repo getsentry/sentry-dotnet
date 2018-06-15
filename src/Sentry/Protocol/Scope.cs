@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using Sentry.Internal;
 
 namespace Sentry.Protocol
 {
@@ -123,7 +124,29 @@ namespace Sentry.Protocol
 
         public event EventHandler OnEvaluating;
 
-        public Scope(IScopeOptions options) => Options = options;
+        public Scope(IScopeOptions options) : this (options, true)
+        {
+        }
+
+        private Scope(IScopeOptions options, bool introspect)
+        {
+            Options = options;
+
+            if (introspect)
+            {
+                try
+                {
+                    Contexts.Introspect();
+                }
+                catch (Exception e)
+                {
+                    // TODO: Log or callback handler here!
+                    //Options.HandleError
+                    Console.WriteLine(e);
+                }
+            }
+        }
+
         protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
 
         internal void Evaluate() => OnEvaluating?.Invoke(this, EventArgs.Empty);
@@ -154,7 +177,7 @@ namespace Sentry.Protocol
         // TODO: test with reflection to ensure Clone doesn't go out of sync with members
         internal Scope Clone()
         {
-            var scope = new Scope(Options);
+            var scope = new Scope(Options, false);
             this.CopyTo(scope);
             return scope;
         }

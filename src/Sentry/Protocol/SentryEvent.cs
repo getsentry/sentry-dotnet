@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.Serialization;
@@ -108,9 +107,6 @@ namespace Sentry
         {
             clock = clock ?? SystemClock.Clock;
             EventId = id == default ? Guid.NewGuid() : id;
-
-            // Set initial value to mandatory properties:
-            //@event.InternalContexts = // TODO: Load initial context data
 
             Timestamp = clock.GetUtcNow();
 
