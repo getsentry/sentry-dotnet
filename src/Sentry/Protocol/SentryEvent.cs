@@ -129,7 +129,7 @@ namespace Sentry
                     continue;
                 }
                 var asmName = assembly.GetName();
-                builder.Add(asmName.Name, asmName.Version.ToString());
+                builder[asmName.Name] = asmName.Version.ToString();
             }
             InternalModules = builder.ToImmutable();
 
