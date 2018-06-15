@@ -16,6 +16,7 @@ namespace Sentry.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly IHub _sentry;
+        private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
 
@@ -24,6 +25,7 @@ namespace Sentry.AspNetCore
         /// </summary>
         /// <param name="next">The next.</param>
         /// <param name="sentry">The sentry.</param>
+        /// <param name="options">The options for this integration</param>
         /// <param name="hostingEnvironment">The hosting environment.</param>
         /// <param name="logger">Sentry logger.</param>
         /// <exception cref="ArgumentNullException">
@@ -34,11 +36,13 @@ namespace Sentry.AspNetCore
         public SentryMiddleware(
             RequestDelegate next,
             IHub sentry,
+            SentryAspNetCoreOptions options,
             IHostingEnvironment hostingEnvironment,
             ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _sentry = sentry ?? throw new ArgumentNullException(nameof(sentry));
+            _options = options;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
         }
@@ -61,7 +65,7 @@ namespace Sentry.AspNetCore
                     // Identity for example is added later on in the pipeline
                     // Evaluating this callback must be done prior to an event being sent
                     // also to avoid paying the cost to get it run when no event is sent at all
-                    context.SentryScopeApply(s);
+                    context.SentryScopeApply(s, _options);
                 };
             });
             try
@@ -106,10 +110,6 @@ namespace Sentry.AspNetCore
 
             _logger?.LogInformation("Event sent to Sentry '{SentryResponse}'.", response);
             Debug.WriteLine(response);
-
-            // TODO: Set Id on response header?
-            // i.e: middlewares behind can retrieve it
-            // and an SPA could read it
         }
     }
 }

@@ -152,6 +152,10 @@ namespace Sentry.Protocol
             {
                 to.Contexts = from.InternalContexts;
             }
+            if (from.InternalRequest != null)
+            {
+                to.Request = from.InternalRequest;
+            }
             if (from.InternalUser != null)
             {
                 to.User = from.InternalUser;

@@ -1,7 +1,9 @@
-using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using Sentry;
+using Sentry.AspNetCore;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
@@ -18,19 +20,44 @@ namespace Microsoft.AspNetCore.Http
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="scope">The Sentry scope</param>
-        public static void SentryScopeApply(this HttpContext context, Scope scope)
+        /// <param name="options">Options</param>
+        public static void SentryScopeApply(
+            this HttpContext context,
+            Scope scope,
+            SentryAspNetCoreOptions options)
         {
-            PopulateFromContext(context, scope);
+            PopulateFromContext(context, scope, options);
             PopulateFromActivity(Activity.Current, scope);
         }
 
-        private static void PopulateFromContext(HttpContext context, Scope scope)
+        private static void PopulateFromContext(
+            HttpContext context,
+            Scope scope,
+            SentryAspNetCoreOptions options)
         {
             scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
-            if (context.Request.Headers.TryGetValue("User-Agent", out var userAgent))
+
+            // TODO: should be elsewhere.
+            if (options.IncludeRequestPayload && options.RequestPayloadExtractors != null)
             {
-                scope.Contexts.Browser.Name = userAgent;
+                foreach (var extractor in options.RequestPayloadExtractors)
+                {
+                    var data = extractor.ExtractPayload(context.Request);
+                    if (!string.IsNullOrWhiteSpace(data as string) || data != null)
+                    {
+                        scope.Request.Data = data;
+                        break;
+                    }
+                }
             }
+
+            scope.Request.Method = context.Request.Method;
+            scope.Request.Url = context.Request.Path;
+            scope.Request.QueryString = context.Request.QueryString.ToString();
+
+            scope.Request.Headers = context.Request.Headers
+                .Select(p => new KeyValuePair<string, string>(p.Key, string.Join(", ", p.Value)))
+                .ToDictionary(k => k.Key, v => v.Value);
 
             // TODO: Send users claim types?
             var identity = context.User?.Identity;

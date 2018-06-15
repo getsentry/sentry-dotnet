@@ -1,7 +1,9 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Sentry;
 using Sentry.AspNetCore;
@@ -37,9 +39,11 @@ namespace Microsoft.AspNetCore.Hosting
             this IWebHostBuilder builder,
             Action<SentryAspNetCoreOptions> configureOptions)
         {
+            SentryAspNetCoreOptions aspnetOptions = null;
+
             builder.ConfigureLogging((context, logging) =>
             {
-                var aspnetOptions = new SentryAspNetCoreOptions();
+                aspnetOptions = new SentryAspNetCoreOptions();
                 context.Configuration.GetSection("Sentry").Bind(aspnetOptions);
 
                 configureOptions?.Invoke(aspnetOptions);
@@ -49,6 +53,27 @@ namespace Microsoft.AspNetCore.Hosting
 
             builder.ConfigureServices(c =>
             {
+                // TODO: Add all extractors i.e: multi part form, json, etc
+                c.AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>();
+                // Last
+                c.AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
+
+                if (aspnetOptions != null)
+                {
+                    c.TryAddSingleton(p =>
+                    {
+                        if (aspnetOptions.IncludeRequestPayload)
+                        {
+                            var payloadExtractors = p.GetServices<IRequestPayloadExtractor>().ToList();
+                            if (payloadExtractors.Any())
+                            {
+                                aspnetOptions.RequestPayloadExtractors = payloadExtractors;
+                            }
+                        }
+
+                        return aspnetOptions;
+                    });
+                }
                 c.AddTransient<IStartupFilter, SentryStartupFilter>();
                 c.AddSentry();
             });

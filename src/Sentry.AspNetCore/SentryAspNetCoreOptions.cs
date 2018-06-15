@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 
@@ -13,6 +14,17 @@ namespace Sentry.AspNetCore
     public class SentryAspNetCoreOptions
     {
         public bool InitializeSdk { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to [include the request payload].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [the request payload shall be included in events]; otherwise, <c>false</c>.
+        /// </value>
+        public bool IncludeRequestPayload { get; set; }
+
+        // extractors registered with the container will be made available through this property
+        internal IEnumerable<IRequestPayloadExtractor> RequestPayloadExtractors;
 
         public string Dsn { get; set; }
 
