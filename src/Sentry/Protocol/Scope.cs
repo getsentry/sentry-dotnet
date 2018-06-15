@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -17,6 +18,8 @@ namespace Sentry.Protocol
     public class Scope
     {
         internal IScopeOptions Options { get; }
+
+        public event EventHandler OnEvaluating;
 
         // Default values are null so no serialization of empty objects or arrays
         [DataMember(Name = "user", EmitDefaultValue = false)]
@@ -145,6 +148,8 @@ namespace Sentry.Protocol
         public void SetTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value);
         public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
         public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
+
+        internal void Evaluate() => OnEvaluating?.Invoke(this, EventArgs.Empty);
 
         // TODO: test with reflection to ensure Clone doesn't go out of sync with members
         internal Scope Clone()

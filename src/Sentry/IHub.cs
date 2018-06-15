@@ -1,3 +1,6 @@
+using System;
+using Sentry.Protocol;
+
 namespace Sentry
 {
     /// <summary>

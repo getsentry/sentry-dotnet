@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using Sentry;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
@@ -26,7 +27,6 @@ namespace Microsoft.AspNetCore.Http
         private static void PopulateFromContext(HttpContext context, Scope scope)
         {
             scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
-
             if (context.Request.Headers.TryGetValue("User-Agent", out var userAgent))
             {
                 scope.Contexts.Browser.Name = userAgent;
@@ -36,16 +36,23 @@ namespace Microsoft.AspNetCore.Http
             var identity = context.User?.Identity;
             if (identity != null)
             {
-                //scope.SetUser(identity.Name;)
-
+                var id = identity.Name;
                 // TODO: Account for X-Forwarded-For.. Configurable?
-                //scope.User.IpAddress = context.Connection.RemoteIpAddress.ToString();
+                var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+                if (id != null || ipAddress != null)
+                {
+                    // TODO: Just make user mutable? Like the HttpContext,
+                    // it's just known not to be thread-safe
+                    scope.User = new User(
+                        id: id,
+                        ipAddress: ipAddress);
 
-                // TOOD: Consider also:
-                //identity.AuthenticationType
-                //identity.IsAuthenticated
-                //scope.User.Id
-                //scope.User.Email
+                    // TOOD: Consider also:
+                    //identity.AuthenticationType
+                    //identity.IsAuthenticated
+                    //scope.User.Id
+                    //scope.User.Email
+                }
             }
 
             //scope.Transation = context.Request.Path;

@@ -53,9 +53,16 @@ namespace Sentry.AspNetCore
             var scopeGuard = _sentry.PushScope();
             _sentry.ConfigureScope(s =>
             {
-                s.Environment = _hostingEnvironment?.EnvironmentName;
+                s.OnEvaluating += (sender, args) =>
+                {
+                    s.Environment = _hostingEnvironment?.EnvironmentName;
 
-                context.SentryScopeApply(s);
+                    // At the point lots of stuff from the request are not yet filled
+                    // Identity for example is added later on in the pipeline
+                    // Evaluating this callback must be done prior to an event being sent
+                    // also to avoid paying the cost to get it run when no event is sent at all
+                    context.SentryScopeApply(s);
+                };
             });
             try
             {
