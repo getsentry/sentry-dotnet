@@ -1,7 +1,7 @@
 using System;
 using Sentry.Protocol;
 
-namespace Sentry.Extensibility
+namespace Sentry
 {
     /// <summary>
     /// Sentry Client interface

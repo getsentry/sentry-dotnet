@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -11,28 +12,40 @@ namespace Sentry.Protocol
     public class SdkVersion
     {
         [DataMember(Name = "integrations", EmitDefaultValue = false)]
-        internal ICollection<string> InternalIntegrations { get; private set; }
+        internal IImmutableList<string> InternalIntegrations { get; private set; }
 
         /// <summary>
         /// SDK name
         /// </summary>
         [DataMember(Name = "name", EmitDefaultValue = false)]
-        public string Name { get; set; }
+        public string Name { get; internal set; }
         /// <summary>
         /// SDK Version
         /// </summary>
         [DataMember(Name = "version", EmitDefaultValue = false)]
-        public string Version { get; set; }
+        public string Version { get; internal set; }
 
         // TODO: this collection should be immutable and it's Add hidden behind a method on SDK class
         /// <summary>
         /// Any integration configured with the SDK
         /// </summary>
         /// <remarks>This property is not required</remarks>
-        public ICollection<string> Integrations
+        public IImmutableList<string> Integrations
         {
-            get => InternalIntegrations ?? (InternalIntegrations = new List<string>());
-            set => InternalIntegrations = value;
+            get => InternalIntegrations ?? (InternalIntegrations = ImmutableList<string>.Empty);
+            private set => InternalIntegrations = value;
         }
+
+        /// <summary>
+        /// Adds an integration.
+        /// </summary>
+        /// <param name="integration">The integration.</param>
+        public void AddIntegration(string integration) => Integrations = Integrations.Add(integration);
+
+        /// <summary>
+        /// Adds the integrations.
+        /// </summary>
+        /// <param name="integration">The integration.</param>
+        public void AddIntegrations(IEnumerable<string> integration) => Integrations = Integrations.AddRange(integration);
     }
 }

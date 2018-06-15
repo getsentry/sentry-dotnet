@@ -29,6 +29,8 @@ namespace Sentry.Extensions.Logging
         /// </value>
         public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
+        public bool InitializeSdk { get; set; } = true;
+
         // An optional convinience callback to initialize the SDK
         internal Action<SentryOptions> InitSdk { get; private set; }
 

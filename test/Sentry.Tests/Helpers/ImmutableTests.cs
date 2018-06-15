@@ -1,4 +1,3 @@
-using Sentry.Tests.Helpers;
 using Sentry.Tests.Helpers.Reflection;
 using Xunit;
 

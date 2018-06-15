@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using Sentry.Internal;
 
 namespace Sentry.Protocol
 {
@@ -16,10 +18,9 @@ namespace Sentry.Protocol
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count}")]
     public class Scope
     {
-        private readonly IScopeOptions _options;
+        internal IScopeOptions Options { get; }
 
-        internal ImmutableList<object> States { get; private set; }
-
+        // Default values are null so no serialization of empty objects or arrays
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
 
@@ -45,7 +46,11 @@ namespace Sentry.Protocol
         /// <value>
         /// The contexts.
         /// </value>
-        public Contexts Contexts => InternalContexts ?? (InternalContexts = new Contexts());
+        public Contexts Contexts
+        {
+            get => InternalContexts ?? (InternalContexts = new Contexts());
+            set => InternalContexts = value;
+        }
 
         /// <summary>
         /// Gets the user information
@@ -53,14 +58,25 @@ namespace Sentry.Protocol
         /// <value>
         /// The user.
         /// </value>
-        public User User => InternalUser ?? (InternalUser = new User());
+        public User User
+        {
+            get => InternalUser ?? User.Empty;
+            set => InternalUser = value;
+        }
+
+        /// <summary>
+        /// The environment name, such as 'production' or 'staging'.
+        /// </summary>
+        /// <remarks>Requires Sentry 8.0 or higher</remarks>
+        [DataMember(Name = "environment", EmitDefaultValue = false)]
+        public string Environment { get; set; }
 
         /// <summary>
         /// SDK information
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>
         [DataMember(Name = "sdk", EmitDefaultValue = false)]
-        public SdkVersion Sdk { get; set; } = new SdkVersion();
+        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
 
         /// <summary>
         /// A list of strings used to dictate the deduplication of this event.
@@ -74,18 +90,17 @@ namespace Sentry.Protocol
         /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
         public IImmutableList<string> Fingerprint
         {
-            get => InternalFingerprint ?? (InternalFingerprint = ImmutableList<string>.Empty);
+            get => InternalFingerprint ?? ImmutableList<string>.Empty;
             internal set => InternalFingerprint = value;
         }
 
-        // TODO: Breadcrumb entries should be ordered from oldest to newest.        
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/learn/breadcrumbs/"/>
         public IImmutableList<Breadcrumb> Breadcrumbs
         {
-            get => InternalBreadcrumbs ?? (InternalBreadcrumbs = ImmutableList<Breadcrumb>.Empty);
+            get => InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
             internal set => InternalBreadcrumbs = value;
         }
 
@@ -94,7 +109,7 @@ namespace Sentry.Protocol
         /// </summary>
         public IImmutableDictionary<string, string> Extra
         {
-            get => InternalExtra ?? (InternalExtra = ImmutableDictionary<string, string>.Empty);
+            get => InternalExtra ?? ImmutableDictionary<string, string>.Empty;
             internal set => InternalExtra = value;
         }
 
@@ -103,29 +118,38 @@ namespace Sentry.Protocol
         /// </summary>
         public IImmutableDictionary<string, string> Tags
         {
-            get => InternalTags ?? (InternalTags = ImmutableDictionary<string, string>.Empty);
+            get => InternalTags ?? ImmutableDictionary<string, string>.Empty;
             internal set => InternalTags = value;
         }
 
-        public Scope(IScopeOptions options) => _options = options;
+        public event EventHandler OnEvaluating;
+
+        public Scope(IScopeOptions options) : this (options, true)
+        {
+        }
+
+        private Scope(IScopeOptions options, bool introspect)
+        {
+            Options = options;
+
+            if (introspect)
+            {
+                try
+                {
+                    Contexts.Introspect();
+                }
+                catch (Exception e)
+                {
+                    // TODO: Log or callback handler here!
+                    //Options.HandleError
+                    Console.WriteLine(e);
+                }
+            }
+        }
+
         protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
 
-        /// <summary>
-        /// Adds a breadcrumb to the <see cref="Scope"/>
-        /// </summary>
-        /// <param name="breadcrumb">The breadcrumb.</param>
-        public void AddBreadcrumb(Breadcrumb breadcrumb)
-        {
-            var breadcrumbs = Breadcrumbs;
-
-            var overflow = breadcrumbs.Count - _options.MaxBreadcrumbs + 1;
-            if (overflow > 0)
-            {
-                breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
-            }
-
-            Breadcrumbs = breadcrumbs.Add(breadcrumb);
-        }
+        internal void Evaluate() => OnEvaluating?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
         /// Sets the fingerprint to the <see cref="Scope"/>
@@ -150,28 +174,12 @@ namespace Sentry.Protocol
         public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
         public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
 
-        internal Scope Clone(object state)
+        // TODO: test with reflection to ensure Clone doesn't go out of sync with members
+        internal Scope Clone()
         {
-            ImmutableList<object> states = null;
-            if (States != null)
-            {
-                states = States;
-            }
-            if (state != null)
-            {
-                states = (states ?? ImmutableList<object>.Empty).Add(state);
-            }
-            // TODO: test with reflection to ensure Clone doesn't go out of sync with members
-            return new Scope(_options)
-            {
-                States = states,
-                InternalUser = InternalUser,
-                InternalContexts = InternalContexts,
-                InternalFingerprint = InternalFingerprint,
-                InternalBreadcrumbs = InternalBreadcrumbs,
-                InternalExtra = InternalExtra,
-                InternalTags = InternalTags,
-            };
+            var scope = new Scope(Options, false);
+            this.CopyTo(scope);
+            return scope;
         }
     }
 }

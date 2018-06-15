@@ -1,17 +1,21 @@
 using System;
-using System.Net;
 using System.Threading.Tasks;
 using Sentry;
-using Sentry.Extensibility;
+using Sentry.Samples.Console.Customized;
 
 // One of the ways to set your DSN is via an attribute:
-// It could be set via AssemblyInfo.cs and patched via CI
-[assembly: Dsn("https://key@sentry.io/id")]
+// It could be set via AssemblyInfo.cs and patched via CI.
+// Other ways are via environment variable, configuration files and explictly via parameter
+[assembly: Dsn(Program.DefaultDsn)]
 
 namespace Sentry.Samples.Console.Customized
 {
-    internal class Program
+    internal static class Program
     {
+        public const string DefaultDsn = "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141";
+        // A different DSN for a section of the app (i.e: admin)
+        public const string AdminDsn = "https://f670c444cca14cf2bb4bfc403525b6a3@sentry.io/259314";
+
         private static async Task Main(string[] args)
         {
             // When the SDK is disabled, no callback is executed:
@@ -52,7 +56,7 @@ namespace Sentry.Samples.Console.Customized
                 o.Http(h =>
                 {
                     // Using a proxy:
-                    h.Proxy = new WebProxy("https://localhost:3128");
+                    h.Proxy = null; //new WebProxy("https://localhost:3128");
                 });
             }))
             {
@@ -67,18 +71,24 @@ namespace Sentry.Samples.Console.Customized
 
                 // -------------------------
 
-                // A custom made client, that can be registered with DI,
+                // A custom made client, that could be registered with DI,
                 // would get disposed by the container on app shutdown
-                var adminDsn = new Dsn("https://key@sentry.io/admin-project");
+
+                // Using a different DSN:
+                var adminDsn = new Dsn(AdminDsn);
                 using (var adminClient = new SentryClient(new SentryOptions { Dsn = adminDsn }))
                 {
                     // Make believe web framework middleware
                     var middleware = new AdminPartMiddleware(adminClient, null);
-                    var request = new { Path = "/bla" }; // made up request
+                    var request = new { Path = "/admin" }; // made up request
                     middleware.Invoke(request);
 
-                } // A client created by hand has its lifetime managed by the creator
-            }  // On Dispose: SDK closed, events queued are flushed
+                } // Dispose the client which flushes any queued events
+
+                SentryCore.CaptureException(
+                    new Exception("Error outside of the admin section: Goes to the default DSN"));
+
+            }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
         }
 
         private class AdminPartMiddleware
@@ -105,6 +115,8 @@ namespace Sentry.Samples.Console.Customized
                         // client was defined before this point:
                         SentryCore.BindClient(_adminClient);
                     }
+
+                    SentryCore.CaptureException(new Exception("Error at the admin section"));
                     // Else it uses the default client
 
                     _middleware?.Invoke(request);

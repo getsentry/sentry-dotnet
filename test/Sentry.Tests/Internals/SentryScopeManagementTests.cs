@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
-using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
 

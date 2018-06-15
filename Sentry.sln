@@ -32,6 +32,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Solution Items", "1 - S
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{77454495-55EE-4B40-A089-71B9E8F82E89}"
+	ProjectSection(SolutionItems) = preProject
+		samples\Directory.Build.props = samples\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.Basic", "samples\Sentry.Samples.Console.Basic\Sentry.Samples.Console.Basic.csproj", "{65F5A969-B386-48F5-8B7E-6C90D6C720BC}"
 EndProject
@@ -43,9 +46,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Logging.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.Customized", "samples\Sentry.Samples.Console.Customized\Sentry.Samples.Console.Customized.csproj", "{6CAE75C2-9DED-44F4-8E14-2D4F9159D55F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Benchmarks", "benchmarks\Sentry.Benchmarks\Sentry.Benchmarks.csproj", "{BD43F598-5B20-477D-88C9-55B186542179}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Benchmarks", "benchmarks\Sentry.Benchmarks\Sentry.Benchmarks.csproj", "{BD43F598-5B20-477D-88C9-55B186542179}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{97EF834D-6BEB-45E8-B69A-1F9B7815B8B4}"
+	ProjectSection(SolutionItems) = preProject
+		benchmarks\Directory.Build.props = benchmarks\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore", "src\Sentry.AspNetCore\Sentry.AspNetCore.csproj", "{EBD057E5-771A-47EC-90E3-3C2625426A05}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Basic", "samples\Sentry.Samples.AspNetCore.Basic\Sentry.Samples.AspNetCore.Basic.csproj", "{E061684E-0777-4C38-A90B-C53DAF260029}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Mvc", "samples\Sentry.Samples.AspNetCore.Mvc\Sentry.Samples.AspNetCore.Mvc.csproj", "{3D7754D1-CBA9-4693-80E9-B44F20423B51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +97,18 @@ Global
 		{BD43F598-5B20-477D-88C9-55B186542179}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD43F598-5B20-477D-88C9-55B186542179}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD43F598-5B20-477D-88C9-55B186542179}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBD057E5-771A-47EC-90E3-3C2625426A05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBD057E5-771A-47EC-90E3-3C2625426A05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBD057E5-771A-47EC-90E3-3C2625426A05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBD057E5-771A-47EC-90E3-3C2625426A05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E061684E-0777-4C38-A90B-C53DAF260029}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E061684E-0777-4C38-A90B-C53DAF260029}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E061684E-0777-4C38-A90B-C53DAF260029}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E061684E-0777-4C38-A90B-C53DAF260029}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D7754D1-CBA9-4693-80E9-B44F20423B51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D7754D1-CBA9-4693-80E9-B44F20423B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D7754D1-CBA9-4693-80E9-B44F20423B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D7754D1-CBA9-4693-80E9-B44F20423B51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +122,9 @@ Global
 		{7E1F6D4C-D385-4589-A92C-B1A27EF4E81E} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{6CAE75C2-9DED-44F4-8E14-2D4F9159D55F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{BD43F598-5B20-477D-88C9-55B186542179} = {97EF834D-6BEB-45E8-B69A-1F9B7815B8B4}
+		{EBD057E5-771A-47EC-90E3-3C2625426A05} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{E061684E-0777-4C38-A90B-C53DAF260029} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{3D7754D1-CBA9-4693-80E9-B44F20423B51} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

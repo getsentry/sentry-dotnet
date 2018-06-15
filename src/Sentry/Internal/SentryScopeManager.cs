@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Sentry.Extensibility;
 using Sentry.Protocol;
 
 namespace Sentry.Internal
@@ -46,7 +45,8 @@ namespace Sentry.Internal
         {
             var currentScopeAndClientStack = ScopeAndClientStack;
             var (scope, client) = currentScopeAndClientStack.Peek();
-            var clonedScope = scope.Clone(state);
+            var clonedScope = scope.Clone();
+            if (state != null) clonedScope.Apply(state);
             var scopeSnapshot = new ScopeSnapshot(currentScopeAndClientStack, this);
             ScopeAndClientStack = currentScopeAndClientStack.Push((clonedScope, client));
 

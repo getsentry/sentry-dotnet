@@ -65,6 +65,13 @@ namespace Sentry
             var options = new SentryOptions();
             configureOptions?.Invoke(options);
 
+            return Init(options);
+        }
+
+        // Used by integrations which have their own delegates
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static IDisposable Init(SentryOptions options)
+        {
             if (options.Dsn == null)
             {
                 if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
@@ -151,7 +158,7 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void AddBreadcrumb(
             string message,
-            string type,
+            string type = null,
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
@@ -175,7 +182,7 @@ namespace Sentry
         public static void AddBreadcrumb(
             ISystemClock clock,
             string message,
-            string type,
+            string type = null,
             string category = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)

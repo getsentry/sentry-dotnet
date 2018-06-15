@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sentry.Extensibility;
@@ -64,7 +64,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
 
-            var b = _fixture.Scope.Breadcrumbs[0];
+            var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Equal(b.Message, expectedException.Message);
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
             Assert.Equal(b.Category, _fixture.CategoryName);
@@ -118,7 +118,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.Log<object>(LogLevel.Critical, expectedEventId, null, null, null);
 
-            var b = _fixture.Scope.Breadcrumbs[0];
+            var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Equal(b.Data[EventIdExtensions.DataKey], expectedEventId.ToString());
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
             Assert.Equal(b.Category, _fixture.CategoryName);
@@ -161,7 +161,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogCritical(expectedMessage);
 
-            var b = _fixture.Scope.Breadcrumbs[0];
+            var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Equal(b.Message, expectedMessage);
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
             Assert.Equal(b.Category, _fixture.CategoryName);
@@ -180,7 +180,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogError(expectedMessage);
 
-            var b = _fixture.Scope.Breadcrumbs[0];
+            var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Equal(b.Message, expectedMessage);
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
             Assert.Equal(b.Category, _fixture.CategoryName);
@@ -199,7 +199,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogWarning(expectedMessage);
 
-            var b = _fixture.Scope.Breadcrumbs[0];
+            var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Equal(b.Message, expectedMessage);
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
             Assert.Equal(b.Category, _fixture.CategoryName);
@@ -218,7 +218,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogInformation(expectedMessage);
 
-            var b = _fixture.Scope.Breadcrumbs[0];
+            var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Equal(b.Message, expectedMessage);
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
             Assert.Equal(b.Category, _fixture.CategoryName);

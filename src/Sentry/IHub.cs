@@ -1,4 +1,4 @@
-namespace Sentry.Extensibility
+namespace Sentry
 {
     /// <summary>
     /// SDK API contract which combines a client and scope management

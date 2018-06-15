@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using Sentry.Infrastructure;
@@ -17,7 +17,7 @@ namespace Sentry
     public class SentryEvent : Scope
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]
-        internal IDictionary<string, string> InternalModules { get; private set; }
+        internal IImmutableDictionary<string, string> InternalModules { get; private set; }
 
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
         private string SerializableEventId => EventId.ToString("N");
@@ -81,19 +81,12 @@ namespace Sentry
         public string Release { get; set; }
 
         /// <summary>
-        /// The environment name, such as 'production' or 'staging'.
-        /// </summary>
-        /// <remarks>Requires Sentry 8.0 or higher</remarks>
-        [DataMember(Name = "environment", EmitDefaultValue = false)]
-        public string Environment { get; set; }
-
-        /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
-        public IDictionary<string, string> Modules
+        public IImmutableDictionary<string, string> Modules
         {
-            get => InternalModules ?? (InternalModules = new Dictionary<string, string>());
-            set => InternalModules = value;
+            get => InternalModules ?? (InternalModules = ImmutableDictionary<string, string>.Empty);
+            internal set => InternalModules = value;
         }
 
         public SentryEvent() : this(null)
@@ -115,9 +108,6 @@ namespace Sentry
             clock = clock ?? SystemClock.Clock;
             EventId = id == default ? Guid.NewGuid() : id;
 
-            // Set initial value to mandatory properties:
-            //@event.InternalContexts = // TODO: Load initial context data
-
             Timestamp = clock.GetUtcNow();
 
             // TODO: should this be dotnet instead?
@@ -127,6 +117,7 @@ namespace Sentry
             // Less flexible than using SentryOptions to define this value
             Sdk.Version = "0.0.0";
 
+            var builder = ImmutableDictionary.CreateBuilder<string, string>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 if (assembly.IsDynamic)
@@ -134,8 +125,9 @@ namespace Sentry
                     continue;
                 }
                 var asmName = assembly.GetName();
-                Modules[asmName.Name] = asmName.Version.ToString();
+                builder[asmName.Name] = asmName.Version.ToString();
             }
+            InternalModules = builder.ToImmutable();
 
             Populate(this, exception);
         }

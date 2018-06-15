@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 
-namespace Sentry.Extensibility
+namespace Sentry
 {
     /// <summary>
     /// Scope management
