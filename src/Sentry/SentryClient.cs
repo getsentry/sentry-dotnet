@@ -40,6 +40,7 @@ namespace Sentry
             try
             {
                 // TODO: prepare event run on the worker thread
+                scope?.Evaluate();
                 @event = PrepareEvent(@event, scope);
                 if (@event == null) // Rejected event
                 {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -120,8 +121,12 @@ namespace Sentry.Protocol
             internal set => InternalTags = value;
         }
 
+        public event EventHandler OnEvaluating;
+
         public Scope(IScopeOptions options) => Options = options;
         protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
+
+        internal void Evaluate() => OnEvaluating?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
         /// Sets the fingerprint to the <see cref="Scope"/>
