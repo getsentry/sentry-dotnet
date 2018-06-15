@@ -39,6 +39,7 @@ namespace Sentry
             var id = _failureId;
             try
             {
+                scope?.Evaluate();
                 // TODO: prepare event run on the worker thread
                 scope?.Evaluate();
                 @event = PrepareEvent(@event, scope);

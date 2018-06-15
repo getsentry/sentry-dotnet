@@ -1,6 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.AspNetCore.Mvc
@@ -9,10 +14,10 @@ namespace Sentry.Samples.AspNetCore.Mvc
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseShutdownTimeout(TimeSpan.FromSeconds(10))
                 .UseStartup<Startup>()
@@ -44,7 +49,6 @@ namespace Sentry.Samples.AspNetCore.Mvc
 
                     // Hard-coding here will override any value set on appsettings.json:
                     options.Logging.MinimumEventLevel = LogLevel.Error;
-                })
-                .Build();
+                });
     }
 }
