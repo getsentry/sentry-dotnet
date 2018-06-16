@@ -96,19 +96,17 @@ namespace Sentry.AspNetCore
                     ExceptionDispatchInfo.Capture(e).Throw();
                 }
             }
-        }
 
-        // TODO: extend Hub?
-        private void CaptureException(Exception e)
-        {
-            var evt = new SentryEvent(e);
+            void CaptureException(Exception e)
+            {
+                var evt = new SentryEvent(e);
 
-            // TODO: Ignore logs from Sentry by Sentry MEL integration
-            _logger?.LogTrace("Sending event to Sentry '{SentryEvent}'.", evt);
+                _logger?.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 
-            var id = _sentry.CaptureEvent(evt);
+                var id = _sentry.CaptureEvent(evt);
 
-            _logger?.LogInformation("Event sent to Sentry '{id}'.", id);
+                _logger?.LogInformation("Event '{id}' queued .", id);
+            }
         }
     }
 }

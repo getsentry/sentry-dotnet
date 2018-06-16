@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry;
 using Sentry.AspNetCore;
+using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Hosting
@@ -42,8 +43,11 @@ namespace Microsoft.AspNetCore.Hosting
             builder.ConfigureLogging((context, logging) =>
             {
                 context.Configuration.GetSection("Sentry").Bind(aspnetOptions);
-
                 configureOptions?.Invoke(aspnetOptions);
+
+                logging.AddFilter<SentryLoggerProvider>(
+                    "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
+                    LogLevel.None);
 
                 logging.AddSentry(o => aspnetOptions.Apply(o));
             });
@@ -51,7 +55,6 @@ namespace Microsoft.AspNetCore.Hosting
             builder.ConfigureServices(c =>
             {
                 c.AddSingleton(aspnetOptions);
-
                 c.AddTransient<IStartupFilter, SentryStartupFilter>();
 
                 c.AddSentry();

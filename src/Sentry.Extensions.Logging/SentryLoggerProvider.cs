@@ -5,7 +5,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Extensions.Logging
 {
-    internal class SentryLoggerProvider : ILoggerProvider
+    public class SentryLoggerProvider : ILoggerProvider
     {
         private readonly SentryLoggingOptions _options;
         private IDisposable _scope;

@@ -64,7 +64,9 @@ namespace Sentry.Extensions.Logging
             var message = formatter?.Invoke(state, exception);
 
             if (_options.MinimumEventLevel != LogLevel.None
-                && logLevel >= _options.MinimumEventLevel)
+                && logLevel >= _options.MinimumEventLevel
+                // No events from Sentry code using ILogger
+                && !CategoryName.StartsWith("Sentry"))
             {
                 var @event = new SentryEvent(exception)
                 {
