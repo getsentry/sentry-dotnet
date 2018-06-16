@@ -47,25 +47,32 @@ namespace Microsoft.Extensions.DependencyInjection
                     this IServiceCollection services,
                     Action<SentryOptions> configureOptions)
         {
-            services.TryAddSingleton(p =>
-            {
-                if (configureOptions != null && !SentryCore.IsEnabled)
+            services
+                .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
+                // Last
+                .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>()
+                .TryAddSingleton(p =>
                 {
-                    // TODO: IOptions<SentryOptions> ?
-                    var options = p.GetService<SentryOptions>();
-                    options = options ?? new SentryOptions();
-                    configureOptions?.Invoke(options);
+                    if (configureOptions != null && !SentryCore.IsEnabled)
+                    {
+                        var aspnetOptions = p.GetService<SentryAspNetCoreOptions>();
+                        var options = p.GetService<SentryOptions>();
+                        options = options ?? new SentryOptions();
 
-                    var lifetime = p.GetRequiredService<IApplicationLifetime>();
-                    var disposable = SentryCore.Init(options);
-                    lifetime.ApplicationStopped.Register(() => disposable.Dispose());
-                }
+                        aspnetOptions.InitSdk?.Invoke(options);
+                        configureOptions?.Invoke(options);
 
-                SentryCore.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
+                        var lifetime = p.GetRequiredService<IApplicationLifetime>();
+                        var disposable = SentryCore.Init(options);
+                        lifetime.ApplicationStopped.Register(() => disposable.Dispose());
+                    }
 
-                // TODO: Need to fetch the created client and hub now to register in DI
-                return HubAdapter.Instance as IHub;
-            });
+                    // TODO: SDK interface not accepting 'Integrations'
+                    // SentryCore.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
+
+                    // TODO: Need to fetch the created client and hub now to register in DI
+                    return HubAdapter.Instance as IHub;
+                });
 
             return services;
         }

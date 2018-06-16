@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,10 +10,14 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
 {
     public class HomeController : Controller
     {
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
+
+        [HttpPost]
+        public IActionResult PostIndex(string @params) => throw new Exception("POST exception ;)");
 
         public IActionResult About()
         {

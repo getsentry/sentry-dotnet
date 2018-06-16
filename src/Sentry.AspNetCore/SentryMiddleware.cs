@@ -16,6 +16,7 @@ namespace Sentry.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly IHub _sentry;
+        private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
 
@@ -24,6 +25,7 @@ namespace Sentry.AspNetCore
         /// </summary>
         /// <param name="next">The next.</param>
         /// <param name="sentry">The sentry.</param>
+        /// <param name="options">The options for this integration</param>
         /// <param name="hostingEnvironment">The hosting environment.</param>
         /// <param name="logger">Sentry logger.</param>
         /// <exception cref="ArgumentNullException">
@@ -34,11 +36,13 @@ namespace Sentry.AspNetCore
         public SentryMiddleware(
             RequestDelegate next,
             IHub sentry,
+            SentryAspNetCoreOptions options,
             IHostingEnvironment hostingEnvironment,
             ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _sentry = sentry ?? throw new ArgumentNullException(nameof(sentry));
+            _options = options;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
         }
@@ -50,66 +54,59 @@ namespace Sentry.AspNetCore
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
-            var scopeGuard = _sentry.PushScope();
-            _sentry.ConfigureScope(s =>
+            using (_sentry.PushScope())
             {
-                s.OnEvaluating += (sender, args) =>
+                _sentry.ConfigureScope(scope =>
                 {
-                    s.Environment = _hostingEnvironment?.EnvironmentName;
-
                     // At the point lots of stuff from the request are not yet filled
                     // Identity for example is added later on in the pipeline
-                    // Evaluating this callback must be done prior to an event being sent
-                    // also to avoid paying the cost to get it run when no event is sent at all
-                    context.SentryScopeApply(s);
-                };
-            });
-            try
-            {
-                await _next(context).ConfigureAwait(false);
+                    // Subscribing to the event so that HTTP data is only read in case an event is going to be
+                    // sent to Sentry. This avoid the cost in on error-free requests.
+                    // In case of event, all data made available through the HTTP Context at the time of the
+                    // event creation will be sent to Sentry
 
-                // TODO: Consider IExceptionHandlerFeature instead. Isn't Path the same as context route Path?
-                // When an exception was handled by other component (i.e: UseExceptionHandler feature).
-                var exceptionFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-                if (exceptionFeature?.Error != null)
-                {
-                    if (exceptionFeature.Path != null)
+                    scope.OnEvaluating += (sender, args) =>
                     {
-                        // TODO: Transaction field instead?
-                        _sentry.ConfigureScope(p => p.SetTag("Path", exceptionFeature.Path));
-                    }
+                        scope.Environment = _hostingEnvironment?.EnvironmentName;
 
-                    CaptureException(context, exceptionFeature.Error);
+                        scope.Populate(context);
+
+                        if (_options.IncludeActivityData)
+                        {
+                            scope.Populate(Activity.Current);
+                        }
+                    };
+                });
+                try
+                {
+                    await _next(context).ConfigureAwait(false);
+
+                    // TODO: Consider IExceptionHandlerFeature instead. Isn't Path the same as context route Path?
+                    // When an exception was handled by other component (i.e: UseExceptionHandler feature).
+                    var exceptionFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                    if (exceptionFeature?.Error != null)
+                    {
+                        CaptureException(exceptionFeature.Error);
+                    }
+                }
+                catch (Exception e)
+                {
+                    CaptureException(e);
+
+                    ExceptionDispatchInfo.Capture(e).Throw();
                 }
             }
-            catch (Exception e)
+
+            void CaptureException(Exception e)
             {
-                CaptureException(context, e);
+                var evt = new SentryEvent(e);
 
-                ExceptionDispatchInfo.Capture(e).Throw();
+                _logger?.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
+
+                var id = _sentry.CaptureEvent(evt);
+
+                _logger?.LogInformation("Event '{id}' queued .", id);
             }
-            finally
-            {
-                scopeGuard.Dispose();
-            }
-        }
-
-        // TODO: extend Hub?
-        private void CaptureException(HttpContext context, Exception e)
-        {
-            var evt = new SentryEvent(e);
-
-            // TODO: Ignore logs from Sentry by Sentry MEL integration
-            _logger?.LogTrace("Sending event to Sentry '{SentryEvent}'.", evt);
-
-            var response = _sentry.CaptureEvent(evt);
-
-            _logger?.LogInformation("Event sent to Sentry '{SentryResponse}'.", response);
-            Debug.WriteLine(response);
-
-            // TODO: Set Id on response header?
-            // i.e: middlewares behind can retrieve it
-            // and an SPA could read it
         }
     }
 }

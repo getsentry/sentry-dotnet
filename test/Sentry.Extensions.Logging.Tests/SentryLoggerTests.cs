@@ -13,7 +13,7 @@ namespace Sentry.Extensions.Logging.Tests
     {
         private class Fixture
         {
-            public string CategoryName { get; set; } = nameof(SentryLoggerTests);
+            public string CategoryName { get; set; } = "SomeApp";
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public SentryLoggingOptions Options { get; set; } = new SentryLoggingOptions();
@@ -149,6 +149,30 @@ namespace Sentry.Extensions.Logging.Tests
 
             _fixture.Hub.Received(1)
                 .CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
+        public void Log_SentryCategory_DoesNotSendEvent()
+        {
+            var expectedException = new Exception("expected message");
+            _fixture.CategoryName = "Sentry.Some.Class";
+            var sut = _fixture.GetSut();
+
+            sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
+
+            _fixture.Hub.DidNotReceive()
+                .CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
+        public void LogCritical_SentryCategory_RecordsBreadcrumbs()
+        {
+            _fixture.CategoryName = "Sentry.Some.Class";
+            var sut = _fixture.GetSut();
+
+            sut.LogCritical("message");
+
+            Assert.NotEmpty(_fixture.Scope.Breadcrumbs);
         }
 
         [Fact]

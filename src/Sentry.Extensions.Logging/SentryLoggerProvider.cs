@@ -5,7 +5,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Extensions.Logging
 {
-    internal class SentryLoggerProvider : ILoggerProvider
+    public class SentryLoggerProvider : ILoggerProvider
     {
         private readonly SentryLoggingOptions _options;
         private IDisposable _scope;
@@ -34,7 +34,8 @@ namespace Sentry.Extensions.Logging
             // Creates a scope so that Integration added below can be dropped when the logger is disposed
             _scope = scopeManager.PushScope();
 
-            scopeManager.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
+            // TODO: SDK interface not accepting 'Integrations'
+            // scopeManager.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options);

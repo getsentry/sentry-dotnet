@@ -7,6 +7,7 @@ namespace Sentry
     /// An interface which describes the authenticated User for a request.
     /// </summary>
     /// <see href="https://docs.sentry.io/clientdev/interfaces/user/"/>
+    [DataContract]
     public sealed class User
     {
         public static User Empty = new User();

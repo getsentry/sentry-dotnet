@@ -28,6 +28,9 @@ namespace Sentry.Protocol
         [DataMember(Name = "contexts", EmitDefaultValue = false)]
         internal Contexts InternalContexts { get; private set; }
 
+        [DataMember(Name = "request", EmitDefaultValue = false)]
+        internal Request InternalRequest { get; private set; }
+
         [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
         internal IImmutableList<string> InternalFingerprint { get; private set; }
 
@@ -39,6 +42,18 @@ namespace Sentry.Protocol
 
         [DataMember(Name = "tags", EmitDefaultValue = false)]
         internal IImmutableDictionary<string, string> InternalTags { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the HTTP.
+        /// </summary>
+        /// <value>
+        /// The HTTP.
+        /// </value>
+        public Request Request
+        {
+            get => InternalRequest ?? (InternalRequest = new Request());
+            set => InternalRequest = value;
+        }
 
         /// <summary>
         /// Gets the structured Sentry context

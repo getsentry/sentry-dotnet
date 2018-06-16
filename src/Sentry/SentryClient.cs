@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -35,53 +33,31 @@ namespace Sentry
 
         public Guid CaptureEvent(SentryEvent @event, Scope scope = null)
         {
-            // TODO: Apply scope to event
             var id = _failureId;
-            try
+            scope?.Evaluate();
+
+            scope?.CopyTo(@event);
+
+            if (_options.BeforeSend != null)
             {
-                // TODO: prepare event run on the worker thread
-                scope?.Evaluate();
-                @event = PrepareEvent(@event, scope);
+                @event = _options.BeforeSend?.Invoke(@event);
                 if (@event == null) // Rejected event
                 {
                     return id;
                 }
-
-                if (_options.BeforeSend != null)
-                {
-                    @event = _options.BeforeSend?.Invoke(@event);
-                }
-
-                if (_worker.EnqueueEvent(@event))
-                {
-                    id = @event.EventId;
-                }
-                else
-                {
-                    // TODO: Notify error handler
-                    Debug.WriteLine("Failed to enqueue event. Current queue depth: " + _worker.QueuedItems);
-                }
             }
-            catch (Exception e)
+
+            if (_worker.EnqueueEvent(@event))
             {
-                Debug.WriteLine(e.ToString()); // TODO: logger
+                id = @event.EventId;
+            }
+            else
+            {
+                // TODO: Notify error handler
+                Debug.WriteLine("Failed to enqueue event. Current queue depth: " + _worker.QueuedItems);
             }
 
             return id;
-        }
-
-        private static SentryEvent PrepareEvent(SentryEvent @event, Scope scope)
-        {
-            if (scope == null)
-            {
-                return @event;
-            }
-
-            @event.Sdk.AddIntegrations(scope.Sdk.Integrations);
-
-            scope.CopyTo(@event);
-
-            return @event;
         }
 
         public void Dispose()

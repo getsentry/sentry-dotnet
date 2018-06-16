@@ -35,6 +35,7 @@ namespace Sentry.AspNetCore
                 loggingOptions.Init(o =>
                 {
                     o.Dsn = new Dsn(aspnetOptions.Dsn);
+
                     aspnetOptions.InitSdk(o);
                 });
             }

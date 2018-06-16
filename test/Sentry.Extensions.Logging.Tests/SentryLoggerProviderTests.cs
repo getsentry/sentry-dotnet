@@ -43,7 +43,7 @@ namespace Sentry.Extensions.Logging.Tests
             _fixture.SentryScopeManager.Received(1).PushScope();
         }
 
-        [Fact]
+        [Fact(Skip = "Sentry is not accepting integrations ATM")]
         public void Ctor_AddsSdkIntegration()
         {
             var scope = new Scope(null);

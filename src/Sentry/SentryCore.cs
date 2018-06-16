@@ -220,7 +220,7 @@ namespace Sentry
         /// <param name="evt">The event.</param>
         /// <param name="scope">The scope.</param>
         /// <returns></returns>
-        //[DebuggerStepThrough]
+        [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static Guid CaptureEvent(SentryEvent evt, Scope scope)
             => _hub.CaptureEvent(evt, scope);
