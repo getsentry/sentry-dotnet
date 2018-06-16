@@ -1,10 +1,7 @@
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Sentry;
 using Sentry.AspNetCore;
@@ -40,11 +37,10 @@ namespace Microsoft.AspNetCore.Hosting
             this IWebHostBuilder builder,
             Action<SentryAspNetCoreOptions> configureOptions)
         {
-            SentryAspNetCoreOptions aspnetOptions = null;
+            var aspnetOptions = new SentryAspNetCoreOptions();
 
             builder.ConfigureLogging((context, logging) =>
             {
-                aspnetOptions = new SentryAspNetCoreOptions();
                 context.Configuration.GetSection("Sentry").Bind(aspnetOptions);
 
                 configureOptions?.Invoke(aspnetOptions);
@@ -54,7 +50,6 @@ namespace Microsoft.AspNetCore.Hosting
 
             builder.ConfigureServices(c =>
             {
-                Debug.Assert(aspnetOptions != null);
                 c.AddSingleton(aspnetOptions);
 
                 c.AddTransient<IStartupFilter, SentryStartupFilter>();
@@ -62,7 +57,7 @@ namespace Microsoft.AspNetCore.Hosting
                 c.AddSentry();
             });
 
-            return new SentryWebHostBuilder(builder);
+            return builder;
         }
     }
 }
