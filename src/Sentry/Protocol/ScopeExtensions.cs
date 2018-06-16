@@ -176,7 +176,8 @@ namespace Sentry.Protocol
             switch (state)
             {
                 case string scopeString:
-                    scope.SetTag(scopeString, string.Empty);
+                    // TODO: find unique key to support multiple single-string scopes
+                    scope.SetTag("scope", scopeString);
                     break;
                 case IEnumerable<KeyValuePair<string, string>> keyValStringString:
                     scope.SetTags(keyValStringString);
@@ -186,11 +187,16 @@ namespace Sentry.Protocol
                         scope.SetTags(keyValStringObject
                             .Select(k => new KeyValuePair<string, string>(
                                 k.Key,
-                                k.Value?.ToString() ?? string.Empty)));
+                                k.Value?.ToString()))
+                            .Where(kv => string.IsNullOrEmpty(kv.Value)));
+
                         break;
                     }
                 case ValueTuple<string, string> tupleStringString:
-                    scope.SetTag(tupleStringString.Item1, tupleStringString.Item2 ?? string.Empty);
+                    if (!string.IsNullOrEmpty(tupleStringString.Item2))
+                    {
+                        scope.SetTag(tupleStringString.Item1, tupleStringString.Item2);
+                    }
                     break;
                 default:
                     scope.SetExtra(state.ToString(), string.Empty);
