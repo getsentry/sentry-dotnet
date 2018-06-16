@@ -54,62 +54,61 @@ namespace Sentry.AspNetCore
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
-            var scopeGuard = _sentry.PushScope();
-            _sentry.ConfigureScope(s =>
+            using (_sentry.PushScope())
             {
-                s.OnEvaluating += (sender, args) =>
+                _sentry.ConfigureScope(scope =>
                 {
-                    s.Environment = _hostingEnvironment?.EnvironmentName;
-
                     // At the point lots of stuff from the request are not yet filled
                     // Identity for example is added later on in the pipeline
-                    // Evaluating this callback must be done prior to an event being sent
-                    // also to avoid paying the cost to get it run when no event is sent at all
-                    context.SentryScopeApply(s, _options);
-                };
-            });
-            try
-            {
-                await _next(context).ConfigureAwait(false);
+                    // Subscribing to the event so that HTTP data is only read in case an event is going to be
+                    // sent to Sentry. This avoid the cost in on error-free requests.
+                    // In case of event, all data made available through the HTTP Context at the time of the
+                    // event creation will be sent to Sentry
 
-                // TODO: Consider IExceptionHandlerFeature instead. Isn't Path the same as context route Path?
-                // When an exception was handled by other component (i.e: UseExceptionHandler feature).
-                var exceptionFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-                if (exceptionFeature?.Error != null)
-                {
-                    if (exceptionFeature.Path != null)
+                    scope.OnEvaluating += (sender, args) =>
                     {
-                        // TODO: Transaction field instead?
-                        _sentry.ConfigureScope(p => p.SetTag("Path", exceptionFeature.Path));
+                        scope.Environment = _hostingEnvironment?.EnvironmentName;
+
+                        scope.Populate(context);
+
+                        if (_options.IncludeActivityData)
+                        {
+                            scope.Populate(Activity.Current);
+                        }
+                    };
+                });
+                try
+                {
+                    await _next(context).ConfigureAwait(false);
+
+                    // TODO: Consider IExceptionHandlerFeature instead. Isn't Path the same as context route Path?
+                    // When an exception was handled by other component (i.e: UseExceptionHandler feature).
+                    var exceptionFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                    if (exceptionFeature?.Error != null)
+                    {
+                        CaptureException(exceptionFeature.Error);
                     }
-
-                    CaptureException(context, exceptionFeature.Error);
                 }
-            }
-            catch (Exception e)
-            {
-                CaptureException(context, e);
+                catch (Exception e)
+                {
+                    CaptureException(e);
 
-                ExceptionDispatchInfo.Capture(e).Throw();
-            }
-            finally
-            {
-                scopeGuard.Dispose();
+                    ExceptionDispatchInfo.Capture(e).Throw();
+                }
             }
         }
 
         // TODO: extend Hub?
-        private void CaptureException(HttpContext context, Exception e)
+        private void CaptureException(Exception e)
         {
             var evt = new SentryEvent(e);
 
             // TODO: Ignore logs from Sentry by Sentry MEL integration
             _logger?.LogTrace("Sending event to Sentry '{SentryEvent}'.", evt);
 
-            var response = _sentry.CaptureEvent(evt);
+            var id = _sentry.CaptureEvent(evt);
 
-            _logger?.LogInformation("Event sent to Sentry '{SentryResponse}'.", response);
-            Debug.WriteLine(response);
+            _logger?.LogInformation("Event sent to Sentry '{id}'.", id);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Sentry.Samples.ME.Logging
                         i.MaxBreadcrumbs = 150; // Increasing from default 100
                     });
 
-                    // Logging settings: The default values are:
+                    // Optionally configure options: The default values are:
                     o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
                     o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
                 }))

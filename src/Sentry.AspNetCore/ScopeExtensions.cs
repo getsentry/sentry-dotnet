@@ -2,45 +2,29 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using Sentry;
-using Sentry.AspNetCore;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Sentry.Protocol;
 
-// ReSharper disable once CheckNamespace
-namespace Microsoft.AspNetCore.Http
+namespace Sentry.AspNetCore
 {
-    /// <summary>
-    /// HttpContext extensions
-    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static class HttpContextExtensions
+    public static class ScopeExtensions
     {
         /// <summary>
-        /// Applies the HTTP data to the Sentry scope
+        /// Populates the scope with the HTTP data
         /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="scope">The Sentry scope</param>
-        /// <param name="options">Options</param>
-        public static void SentryScopeApply(
-            this HttpContext context,
-            Scope scope,
-            SentryAspNetCoreOptions options)
+        public static void Populate(this Scope scope, HttpContext context)
         {
-            PopulateFromContext(context, scope, options);
-            PopulateFromActivity(Activity.Current, scope);
-        }
+            var options = context.RequestServices.GetService<SentryAspNetCoreOptions>();
 
-        private static void PopulateFromContext(
-            HttpContext context,
-            Scope scope,
-            SentryAspNetCoreOptions options)
-        {
             scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
 
             // TODO: should be elsewhere.
-            if (options.IncludeRequestPayload && options.RequestPayloadExtractors != null)
+            if (options?.IncludeRequestPayload == true)
             {
-                foreach (var extractor in options.RequestPayloadExtractors)
+                var extractors = context.RequestServices.GetServices<IRequestPayloadExtractor>();
+                foreach (var extractor in extractors)
                 {
                     var data = extractor.ExtractPayload(context.Request);
                     if (!string.IsNullOrWhiteSpace(data as string) || data != null)
@@ -92,9 +76,14 @@ namespace Microsoft.AspNetCore.Http
             //context.Items
         }
 
-        private static void PopulateFromActivity(Activity activity, Scope scope)
+        /// <summary>
+        /// Populates the scope with the System.Diagnostics.Activity
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="activity">The activity.</param>
+        public static void Populate(this Scope scope, Activity activity)
         {
-            if (activity == null)
+            if (scope == null || activity == null)
             {
                 return;
             }

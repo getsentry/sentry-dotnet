@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 
@@ -13,6 +12,8 @@ namespace Sentry.AspNetCore
     /// </remarks>
     public class SentryAspNetCoreOptions
     {
+        public string Dsn { get; set; }
+
         public bool InitializeSdk { get; set; } = true;
 
         /// <summary>
@@ -23,10 +24,15 @@ namespace Sentry.AspNetCore
         /// </value>
         public bool IncludeRequestPayload { get; set; }
 
-        // extractors registered with the container will be made available through this property
-        internal IEnumerable<IRequestPayloadExtractor> RequestPayloadExtractors;
-
-        public string Dsn { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether [include System.Diagnostic.Activity data] to events.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [include activity data]; otherwise, <c>false</c>.
+        /// </value>
+        /// <see cref="System.Diagnostics.Activity"/>
+        /// <seealso href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md"/>
+        public bool IncludeActivityData { get; set; }
 
         public LoggingOptions Logging { get; set; } = new LoggingOptions();
 

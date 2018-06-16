@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,28 +54,11 @@ namespace Microsoft.AspNetCore.Hosting
 
             builder.ConfigureServices(c =>
             {
-                // TODO: Add all extractors i.e: multi part form, json, etc
-                c.AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>();
-                // Last
-                c.AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
+                Debug.Assert(aspnetOptions != null);
+                c.AddSingleton(aspnetOptions);
 
-                if (aspnetOptions != null)
-                {
-                    c.TryAddSingleton(p =>
-                    {
-                        if (aspnetOptions.IncludeRequestPayload)
-                        {
-                            var payloadExtractors = p.GetServices<IRequestPayloadExtractor>().ToList();
-                            if (payloadExtractors.Any())
-                            {
-                                aspnetOptions.RequestPayloadExtractors = payloadExtractors;
-                            }
-                        }
-
-                        return aspnetOptions;
-                    });
-                }
                 c.AddTransient<IStartupFilter, SentryStartupFilter>();
+
                 c.AddSentry();
             });
 

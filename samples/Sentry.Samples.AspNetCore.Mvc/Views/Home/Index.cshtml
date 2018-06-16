@@ -25,14 +25,12 @@
                     dataType: "json",
                     error: f => alert("Response: " + f.status)
                 });
-            //$.post("/Home/PostIndex", JSON.stringify({ a: "b", c: [{ d: "e", f: "g" }] }))
-            //.fail(f => alert("Response: " + f.status));
         </script>
         <textarea rows="6" id="json">
 {
-    a: "b",
-    c: [ { d: "e",
-           f: "g" } ]
+    "a": "b",
+    "c": [ { "d": "e",
+           "f": "g" } ]
 }
 </textarea>
         <button onclick="postJson()">Crash with XHR JSON!</button>
