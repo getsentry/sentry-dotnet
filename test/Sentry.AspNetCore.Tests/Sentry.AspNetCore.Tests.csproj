@@ -5,12 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.8.2" />
   </ItemGroup>
 
 </Project>

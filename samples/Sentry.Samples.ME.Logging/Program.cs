@@ -17,12 +17,12 @@ class Program
                 {
                     i.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
                     i.MaxBreadcrumbs = 150; // Increasing from default 100
-                    });
+                });
 
-                    // Optionally configure options: The default values are:
-                    o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
-                    o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
-                }))
+                // Optionally configure options: The default values are:
+                o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
+                o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
+            }))
         {
             var logger = loggerFactory.CreateLogger<Program>();
 

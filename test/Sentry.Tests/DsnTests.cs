@@ -266,6 +266,21 @@ namespace Sentry.Tests
             Assert.Null(dsn);
         }
 
+        [Fact]
+        public void IsDisabled_ValidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.ValidDsnWithSecret));
+
+        [Fact]
+        public void IsDisabled_InvalidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.InvalidDsn));
+
+        [Fact]
+        public void IsDisabled_NullDsn_False() => Assert.False(Dsn.IsDisabled(null));
+
+        [Fact]
+        public void IsDisabled_DisabledDsn_True() => Assert.True(Dsn.IsDisabled(Constants.DisableSdkDsnValue));
+
+        [Fact]
+        public void IsDisabled_EmptyStringDsn_True() => Assert.True(Dsn.IsDisabled(string.Empty));
+
         private static readonly Random Rnd = new Random();
 
         private class DsnTestCase

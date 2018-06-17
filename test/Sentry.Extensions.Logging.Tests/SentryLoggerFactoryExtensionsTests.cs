@@ -36,6 +36,30 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
+        public void AddSentry_ConfigureOptionsOverload_ReturnsSameFactory()
+        {
+            var expected = Substitute.For<ILoggerFactory>();
+            var actual = expected.AddSentry(_ => {});
+
+            Assert.Same(expected, actual);
+        }
+
+        [Fact]
+        public void AddSentry_ConfigureOptionsOverload_InvokesCallback()
+        {
+            var expected = Substitute.For<ILoggerFactory>();
+
+            var invoked = false;
+            expected.AddSentry(o =>
+            {
+                Assert.NotNull(o);
+                invoked = true;
+            });
+
+            Assert.True(invoked);
+        }
+
+        [Fact]
         public void Namespace_MicrosoftExtensionsLogging()
         {
             var @namespace = typeof(SentryLoggerFactoryExtensions).Namespace;

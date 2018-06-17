@@ -53,13 +53,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>()
                 .TryAddSingleton(p =>
                 {
+                    // If it was not initialized via the Logging integration which runs first
                     if (configureOptions != null && !SentryCore.IsEnabled)
                     {
                         var aspnetOptions = p.GetService<SentryAspNetCoreOptions>();
                         var options = p.GetService<SentryOptions>();
                         options = options ?? new SentryOptions();
 
-                        aspnetOptions.InitSdk?.Invoke(options);
+
+                        aspnetOptions.ConfigureOptions?.Invoke(options);
                         configureOptions?.Invoke(options);
 
                         var lifetime = p.GetRequiredService<IApplicationLifetime>();

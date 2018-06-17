@@ -1,6 +1,7 @@
-namespace Sentry.Tests
+// ReSharper disable once CheckNamespace
+namespace Sentry
 {
-    internal static class DsnSamples
+    public static class DsnSamples
     {
         /// <summary>
         /// Sentry has dropped the use of secrets

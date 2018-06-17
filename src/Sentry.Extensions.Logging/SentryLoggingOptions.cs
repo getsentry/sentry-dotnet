@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
 
@@ -32,7 +33,7 @@ namespace Sentry.Extensions.Logging
         public bool InitializeSdk { get; set; } = true;
 
         // An optional convinience callback to initialize the SDK
-        internal Action<SentryOptions> InitSdk { get; private set; }
+        internal Action<SentryOptions> ConfigureOptions { get; private set; }
 
         /// <summary>
         /// Initializes the SDK: This action should be done only once per application lifetime.
@@ -47,6 +48,6 @@ namespace Sentry.Extensions.Logging
         /// via this logging integration, the <see cref="SentryLoggerProvider"/> will dispose the SDK when it is itself disposed.
         /// </remarks>
         /// <param name="configureOptions">The configure options.</param>
-        public void Init(Action<SentryOptions> configureOptions) => InitSdk = configureOptions;
+        public void Init(Action<SentryOptions> configureOptions) => ConfigureOptions = configureOptions;
     }
 }

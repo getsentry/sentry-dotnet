@@ -4,8 +4,4 @@
     <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj" />
-  </ItemGroup>
-
 </Project>

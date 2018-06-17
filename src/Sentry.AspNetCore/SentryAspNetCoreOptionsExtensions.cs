@@ -30,6 +30,7 @@ namespace Sentry.AspNetCore
             if (aspnetOptions.InitializeSdk)
             {
                 loggingOptions.InitializeSdk = true;
+
                 loggingOptions.Init(o =>
                 {
                     if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
@@ -37,7 +38,7 @@ namespace Sentry.AspNetCore
                         o.Dsn = new Dsn(aspnetOptions.Dsn);
                     }
 
-                    aspnetOptions.InitSdk?.Invoke(o);
+                    aspnetOptions.ConfigureOptions?.Invoke(o);
                 });
             }
         }
