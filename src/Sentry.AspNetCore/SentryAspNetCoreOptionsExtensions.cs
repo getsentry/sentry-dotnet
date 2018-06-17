@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 
@@ -10,8 +9,6 @@ namespace Sentry.AspNetCore
             this SentryAspNetCoreOptions aspnetOptions,
             SentryLoggingOptions loggingOptions)
         {
-            Debug.Assert(aspnetOptions != null);
-
             if (loggingOptions == null)
             {
                 return;
@@ -32,11 +29,15 @@ namespace Sentry.AspNetCore
 
             if (aspnetOptions.InitializeSdk)
             {
+                loggingOptions.InitializeSdk = true;
                 loggingOptions.Init(o =>
                 {
-                    o.Dsn = new Dsn(aspnetOptions.Dsn);
+                    if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
+                    {
+                        o.Dsn = new Dsn(aspnetOptions.Dsn);
+                    }
 
-                    aspnetOptions.InitSdk(o);
+                    aspnetOptions.InitSdk?.Invoke(o);
                 });
             }
         }
