@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -27,6 +28,15 @@ namespace Sentry.Protocol
     [DataContract]
     public class Request
     {
+        [DataMember(Name = "env", EmitDefaultValue = false)]
+        internal IImmutableDictionary<string, string> InternalEnv { get; private set; }
+
+        [DataMember(Name = "other", EmitDefaultValue = false)]
+        internal IImmutableDictionary<string, string> InternalOther { get; private set; }
+
+        [DataMember(Name = "headers", EmitDefaultValue = false)]
+        internal IImmutableDictionary<string, string> InternalHeaders { get; private set; }
+
         /// <summary>
         /// Gets or sets the full request URL, if available.
         /// </summary>
@@ -69,22 +79,31 @@ namespace Sentry.Protocol
         /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
         /// </remarks>
         /// <value>The headers.</value>
-        [DataMember(Name = "headers", EmitDefaultValue = false)]
-        public IDictionary<string, string> Headers { get; set; }
+        public IImmutableDictionary<string, string> Headers 
+        {
+            get => InternalHeaders ?? ImmutableDictionary<string, string>.Empty;
+            set => InternalHeaders = value;
+        }
         /// <summary>
-        /// Gets or sets the optional envionment data.
+        /// Gets or sets the optional environment data.
         /// </summary>
         /// <remarks>
         /// This is where information such as IIS/CGI keys go that are not HTTP headers.
         /// </remarks>
         /// <value>The env.</value>
-        [DataMember(Name = "env", EmitDefaultValue = false)]
-        public IDictionary<string, string> Env { get; set; }
+        public IImmutableDictionary<string, string> Env
+        {
+            get => InternalEnv ?? ImmutableDictionary<string, string>.Empty;
+            set => InternalEnv = value;
+        }
         /// <summary>
         /// Gets or sets some optional other data.
         /// </summary>
-        /// <value>The env.</value>
-        [DataMember(Name = "other", EmitDefaultValue = false)]
-        public IDictionary<string, string> Other { get; set; }
+        /// <value>The other.</value>
+        public IImmutableDictionary<string, string> Other
+        {
+            get => InternalOther ?? ImmutableDictionary<string, string>.Empty;
+            set => InternalOther = value;
+        }
     }
 }
