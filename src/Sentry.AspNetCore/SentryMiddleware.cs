@@ -67,7 +67,17 @@ namespace Sentry.AspNetCore
 
                     scope.OnEvaluating += (sender, args) =>
                     {
-                        scope.Environment = _hostingEnvironment?.EnvironmentName;
+                        if (_hostingEnvironment != null)
+                        {
+                            scope.Environment = _hostingEnvironment.EnvironmentName;
+                            // TODO: Hide these 'Env' behind some extension method as
+                            // these might be reported in a non CGI, old-school way
+                            scope.Request.Env.Add("DOCUMENT_ROOT", _hostingEnvironment.WebRootPath);
+                        }
+
+                        // TODO: Find route template (MVC integration)
+                        // TODO: optionally get transaction from request through a dependency
+                        //scope.Transaction = context.Request.PathBase;
 
                         scope.Populate(context);
 

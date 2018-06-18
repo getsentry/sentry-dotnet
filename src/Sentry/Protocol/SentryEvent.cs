@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using Sentry.Infrastructure;
@@ -63,9 +64,14 @@ namespace Sentry
         public SentryLevel? Level { get; set; }
 
         /// <summary>
-        /// The name of the transaction (or culprit) which caused this exception.
+        /// The culprit
         /// </summary>
+        /// <remarks>
+        /// This value is essentially obsolete in favor of Transaction.
+        /// </remarks>
+        // TODO: Delete?
         [DataMember(Name = "culprit", EmitDefaultValue = false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public string Culprit { get; set; }
 
         /// <summary>
@@ -141,16 +147,7 @@ namespace Sentry
         {
             if (exception != null)
             {
-                if (@event.Message == null)
-                {
-                    @event.Message = exception.Message;
-                }
-
-                // e.g: Namespace.Class.Method
-                if (@event.Culprit == null)
-                {
-                    @event.Culprit = $"{exception.TargetSite?.ReflectedType?.FullName ?? "<unavailable>"}.{exception.TargetSite?.Name ?? "<unavailable>"}";
-                }
+                // TODO: Set the Exception interface
             }
         }
     }

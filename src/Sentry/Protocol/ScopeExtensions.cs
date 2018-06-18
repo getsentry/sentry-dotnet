@@ -50,7 +50,7 @@ namespace Sentry.Protocol
         public static void AddBreadcrumb(
                     this Scope scope,
                     string message,
-                    string type,
+                    string type = null,
                     string category = null,
                     IDictionary<string, string> data = null,
                     BreadcrumbLevel level = default)
@@ -170,6 +170,7 @@ namespace Sentry.Protocol
             }
         }
 
+        // TODO: Use the same logic on Extra's object
         // Applies the 'state' into the scope
         public static void Apply(this Scope scope, object state)
         {
@@ -180,7 +181,8 @@ namespace Sentry.Protocol
                     scope.SetTag("scope", scopeString);
                     break;
                 case IEnumerable<KeyValuePair<string, string>> keyValStringString:
-                    scope.SetTags(keyValStringString);
+                    scope.SetTags(keyValStringString
+                        .Where(kv => !string.IsNullOrEmpty(kv.Value)));
                     break;
                 case IEnumerable<KeyValuePair<string, object>> keyValStringObject:
                     {
@@ -188,7 +190,7 @@ namespace Sentry.Protocol
                             .Select(k => new KeyValuePair<string, string>(
                                 k.Key,
                                 k.Value?.ToString()))
-                            .Where(kv => string.IsNullOrEmpty(kv.Value)));
+                            .Where(kv => !string.IsNullOrEmpty(kv.Value)));
 
                         break;
                     }
@@ -199,6 +201,7 @@ namespace Sentry.Protocol
                     }
                     break;
                 default:
+                    // TODO: Serialize it?
                     scope.SetExtra(state.ToString(), string.Empty);
                     break;
             }
