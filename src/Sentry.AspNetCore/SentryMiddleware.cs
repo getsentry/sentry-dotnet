@@ -72,7 +72,7 @@ namespace Sentry.AspNetCore
                             scope.Environment = _hostingEnvironment.EnvironmentName;
                             // TODO: Hide these 'Env' behind some extension method as
                             // these might be reported in a non CGI, old-school way
-                            scope.Request.Env.Add("DOCUMENT_ROOT", _hostingEnvironment.WebRootPath);
+                            scope.Request.Env = scope.Request.Env.Add("DOCUMENT_ROOT", _hostingEnvironment.WebRootPath);
                         }
 
                         // TODO: Find route template (MVC integration)

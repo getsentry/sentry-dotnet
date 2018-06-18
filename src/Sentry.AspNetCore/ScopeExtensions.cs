@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -41,21 +42,23 @@ namespace Sentry.AspNetCore
             scope.Request.QueryString = context.Request.QueryString.ToString();
             scope.Request.Headers = context.Request.Headers
                 .Select(p => new KeyValuePair<string, string>(p.Key, string.Join(", ", p.Value)))
-                .ToDictionary(k => k.Key, v => v.Value);
+                .ToImmutableDictionary(k => k.Key, v => v.Value);
 
             // TODO: Hide these 'Env' behind some extension method as
             // these might be reported in a non CGI, old-school way
             var ipAddress = context.Connection.RemoteIpAddress?.ToString();
             if (ipAddress != null)
             {
-                scope.Request.Env.Add("REMOTE_ADDR", ipAddress);
+                scope.Request.Env = scope.Request.Env.Add("REMOTE_ADDR", ipAddress);
             }
-            scope.Request.Env.Add("SERVER_NAME", Environment.MachineName);
+
+            scope.Request.Env = scope.Request.Env.Add("SERVER_PORT", Environment.MachineName);
+            scope.Request.Env = scope.Request.Env.Add("SERVER_NAME", context.Connection.LocalPort.ToString());
 
             // TODO: likely a better way to do this as if the response didn't start yet nothing is found
             if (context.Response.Headers.TryGetValue("Server", out var server))
             {
-                scope.Request.Env.Add("SERVER_SOFTWARE", server);
+                scope.Request.Env = scope.Request.Env.Add("SERVER_SOFTWARE", server);
             }
 
             // Don't send the user if all we have of him/her is the IP address
