@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Sentry.Samples.AspNetCore.Mvc.Models;
 
@@ -7,6 +8,10 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IGameService _gameService;
+
+        public HomeController(IGameService gameService) => _gameService = gameService;
+
         [HttpGet]
         public IActionResult Index()
         {
@@ -14,30 +19,27 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
         }
 
         [HttpPost]
-        public void PostIndex(string @params)
+        public async Task PostIndex(string @params)
         {
             try
             {
-                Thrower();
+                await _gameService.FetchNextPhaseDataAsync();
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException($"Invalid POST with {@params}! See Inner exception for details.", e);
+                var ioe = new InvalidOperationException("Bad POST! See Inner exception for details.", e);
+
+                ioe.Data.Add("inventory",
+                    // The following anonymous object gets serialized:
+                    new
+                    {
+                        SmallPotion = 3,
+                        BigPotion = 0,
+                        CheeseWheels = 512
+                    });
+
+                throw ioe;
             }
-        }
-
-        public void Thrower()
-        {
-            var ex1 = new Exception("Exception #1");
-            var ex2 = new Exception("Exception #2");
-            var ae = new AggregateException(ex1, ex2);
-
-            ae.Data.Add("Extra", new
-            {
-                ErrorDetail = "I always throw!"
-            });
-
-            throw ae;
         }
 
         public IActionResult About()

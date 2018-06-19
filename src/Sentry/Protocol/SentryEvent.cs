@@ -170,6 +170,8 @@ namespace Sentry
 
         private static IEnumerable<SentryException> CreateSentryException(Exception exception)
         {
+            Debug.Assert(exception != null);
+
             if (exception is AggregateException ae)
             {
                 foreach (var inner in ae.InnerExceptions.SelectMany(CreateSentryException))
@@ -191,9 +193,11 @@ namespace Sentry
                 Module = exception.GetType()?.Assembly?.FullName,
                 Value = exception.Message,
                 ThreadId = Thread.CurrentThread.ManagedThreadId,
+                Mechanism = GetMechanism(exception)
             };
 
-            var stackTrace = new StackTrace(exception, true);
+
+        var stackTrace = new StackTrace(exception, true);
 
             // Sentry expects the frames to be sent in reversed order
             var frames = stackTrace.GetFrames()
@@ -210,6 +214,36 @@ namespace Sentry
             }
 
             yield return sentryEx;
+        }
+
+        public static Mechanism GetMechanism(Exception exception)
+        {
+            Debug.Assert(exception != null);
+
+            Mechanism mechanism = null;
+
+            if (exception.HelpLink != null)
+            {
+                mechanism = new Mechanism
+                {
+                    HelpLink = exception.HelpLink
+                };
+            }
+
+            if (exception.Data.Count != 0)
+            {
+                mechanism = new Mechanism();
+
+                var builder = ImmutableDictionary.CreateBuilder<string, object>();
+                foreach (string key in exception.Data.Keys)
+                {
+                    builder.Add(key, exception.Data[key]);
+                }
+
+                mechanism.Data = builder.ToImmutable();
+            }
+
+            return mechanism;
         }
 
         public static SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)

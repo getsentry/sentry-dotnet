@@ -41,8 +41,11 @@ namespace Sentry.Protocol
         [DataMember(Name = "stacktrace", EmitDefaultValue = false)]
         public SentryStackTrace Stacktrace { get; set; }
 
-        // https://docs.sentry.io/clientdev/interfaces/mechanism/
-        // TODO: Mechanism 
-        public object Mechanism { get; set; }
+        /// <summary>
+        /// An optional mechanism that created this exception.
+        /// </summary>
+        /// <see href="https://docs.sentry.io/clientdev/interfaces/mechanism/"/>
+        [DataMember(Name = "mechanism", EmitDefaultValue = false)]
+        public Mechanism Mechanism { get; set; }
     }
 }
