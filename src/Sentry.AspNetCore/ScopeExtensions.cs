@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -38,34 +40,51 @@ namespace Sentry.AspNetCore
             scope.Request.Method = context.Request.Method;
             scope.Request.Url = context.Request.Path;
             scope.Request.QueryString = context.Request.QueryString.ToString();
-
             scope.Request.Headers = context.Request.Headers
                 .Select(p => new KeyValuePair<string, string>(p.Key, string.Join(", ", p.Value)))
-                .ToDictionary(k => k.Key, v => v.Value);
+                .ToImmutableDictionary(k => k.Key, v => v.Value);
 
-            // TODO: Send users claim types?
-            var identity = context.User?.Identity;
-            if (identity != null)
+            // TODO: Hide these 'Env' behind some extension method as
+            // these might be reported in a non CGI, old-school way
+            var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+            if (ipAddress != null)
             {
-                var id = identity.Name;
-                // TODO: Account for X-Forwarded-For.. Configurable?
-                var ipAddress = context.Connection.RemoteIpAddress?.ToString();
-                if (id != null || ipAddress != null)
-                {
-                    // TODO: Just make user mutable? Like the HttpContext,
-                    // it's just known not to be thread-safe
-                    scope.User = new User(
-                        id: id,
-                        ipAddress: ipAddress);
-
-                    // TOOD: Consider also:
-                    //identity.AuthenticationType
-                    //identity.IsAuthenticated
-                    //scope.User.Id
-                    //scope.User.Email
-                }
+                scope.Request.Env = scope.Request.Env.Add("REMOTE_ADDR", ipAddress);
             }
 
+            scope.Request.Env = scope.Request.Env.Add("SERVER_PORT", Environment.MachineName);
+            scope.Request.Env = scope.Request.Env.Add("SERVER_NAME", context.Connection.LocalPort.ToString());
+
+            // TODO: likely a better way to do this as if the response didn't start yet nothing is found
+            if (context.Response.Headers.TryGetValue("Server", out var server))
+            {
+                scope.Request.Env = scope.Request.Env.Add("SERVER_SOFTWARE", server);
+            }
+
+            // Don't send the user if all we have of him/her is the IP address
+            // TODO: Send users claim types?
+            var identity = context.User?.Identity;
+            var name = identity?.Name;
+
+            // TODO: Account for X-Forwarded-For.. Configurable?
+            if (name != null)
+            {
+                // TODO: Just make user mutable? Like the HttpContext,
+                // it's just known not to be thread-safe
+                scope.User = new User(
+                    //username:
+                    //email:
+                    id: name,
+                    ipAddress: ipAddress);
+
+                // TOOD: Consider also:
+                //identity.AuthenticationType
+                //identity.IsAuthenticated
+                //scope.User.Id
+                //scope.User.Email
+            }
+
+            // TODO: From MVC route template, ideally
             //scope.Transation = context.Request.Path;
 
             // TODO: Get context stuff into scope

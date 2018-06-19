@@ -67,6 +67,16 @@ namespace Sentry
         }
 
         /// <summary>
+        /// Determines whether the specified DSN means a disabled SDK or not..
+        /// </summary>
+        /// <param name="dsn">The DSN.</param>
+        /// <returns>
+        ///   <c>true</c> if the string represents a disabled DSN; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsDisabled(string dsn) =>
+            Internal.Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.InvariantCultureIgnoreCase);
+
+        /// <summary>
         /// Tries to parse the string into a <see cref="Dsn"/>
         /// </summary>
         /// <param name="dsn">The string to attempt parsing.</param>

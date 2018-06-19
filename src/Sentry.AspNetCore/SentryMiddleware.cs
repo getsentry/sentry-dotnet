@@ -61,13 +61,23 @@ namespace Sentry.AspNetCore
                     // At the point lots of stuff from the request are not yet filled
                     // Identity for example is added later on in the pipeline
                     // Subscribing to the event so that HTTP data is only read in case an event is going to be
-                    // sent to Sentry. This avoid the cost in on error-free requests.
+                    // sent to Sentry. This avoid the cost on error-free requests.
                     // In case of event, all data made available through the HTTP Context at the time of the
                     // event creation will be sent to Sentry
 
                     scope.OnEvaluating += (sender, args) =>
                     {
-                        scope.Environment = _hostingEnvironment?.EnvironmentName;
+                        if (_hostingEnvironment != null)
+                        {
+                            scope.Environment = _hostingEnvironment.EnvironmentName;
+                            // TODO: Hide these 'Env' behind some extension method as
+                            // these might be reported in a non CGI, old-school way
+                            scope.Request.Env = scope.Request.Env.Add("DOCUMENT_ROOT", _hostingEnvironment.WebRootPath);
+                        }
+
+                        // TODO: Find route template (MVC integration)
+                        // TODO: optionally get transaction from request through a dependency
+                        //scope.Transaction = context.Request.PathBase;
 
                         scope.Populate(context);
 
@@ -81,9 +91,8 @@ namespace Sentry.AspNetCore
                 {
                     await _next(context).ConfigureAwait(false);
 
-                    // TODO: Consider IExceptionHandlerFeature instead. Isn't Path the same as context route Path?
                     // When an exception was handled by other component (i.e: UseExceptionHandler feature).
-                    var exceptionFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                    var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (exceptionFeature?.Error != null)
                     {
                         CaptureException(exceptionFeature.Error);

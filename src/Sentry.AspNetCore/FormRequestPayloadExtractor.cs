@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 
 namespace Sentry.AspNetCore
@@ -11,7 +12,7 @@ namespace Sentry.AspNetCore
         {
             return SupportedContentType
                 .Equals(request.ContentType, StringComparison.InvariantCulture)
-                ? request.Form
+                ? request.Form.ToDictionary(k => k.Key, v => v.Value)
                 : null;
         }
     }

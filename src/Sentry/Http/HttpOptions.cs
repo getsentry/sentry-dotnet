@@ -27,6 +27,8 @@ namespace Sentry.Http
         /// </summary>
         public IWebProxy Proxy { get; set; }
 
+        public ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
+
         internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; }
 
         internal Func<HttpMessageHandler> HttpMessageHandlerFactory { get; set; }

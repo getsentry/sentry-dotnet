@@ -42,19 +42,6 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
-        public void Log_WithException_EventMessageFromException()
-        {
-            var expectedException = new Exception("expected message");
-            var sut = _fixture.GetSut();
-
-            sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
-
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(
-                    e => e.Message == expectedException.Message));
-        }
-
-        [Fact]
         public void Log_WithException_BreadcrumbFromException()
         {
             var expectedException = new Exception("expected message");
@@ -71,27 +58,6 @@ namespace Sentry.Extensions.Logging.Tests
             Assert.Equal(b.Level, expectedLevel);
             Assert.Equal(b.Type, BreadcrumbType);
             Assert.Null(b.Data);
-        }
-
-        [Fact]
-        public void Log_WithExceptionAndMessage_ExceptionMessageAsTag()
-        {
-            var expectedMessage = "explicit message";
-            var expectedException = new Exception("expected message");
-
-            var sut = _fixture.GetSut();
-
-            sut.Log<object>(
-                LogLevel.Critical,
-                default,
-                expectedMessage,
-                expectedException,
-                (o, exception) => o.ToString());
-
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(
-                    e => e.Message == expectedMessage
-                         && e.Extra["original_message"] == expectedException.Message));
         }
 
         [Fact]

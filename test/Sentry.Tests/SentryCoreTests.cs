@@ -6,7 +6,7 @@ using Sentry.Internal;
 using Sentry.Tests.Helpers;
 using Xunit;
 using static Sentry.Internal.Constants;
-using static Sentry.Tests.DsnSamples;
+using static Sentry.DsnSamples;
 
 namespace Sentry.Tests
 {

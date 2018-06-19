@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sentry.Extensibility;
 using Sentry.Http;
 using static Sentry.Internal.Constants;
@@ -36,12 +37,19 @@ namespace Sentry
 
         internal Action<BackgroundWorkerOptions> ConfigureBackgroundWorkerOptions { get; private set; }
 
-        internal Action<HttpOptions> ConfigureHttpTransportOptions { get; private set; }
+        internal List<Action<HttpOptions>> ConfigureHttpTransportOptions { get; private set; }
 
         internal Func<SentryOptions, ITransport> TransportFactory { get; set; }
 
         public void Worker(Action<BackgroundWorkerOptions> configure) => ConfigureBackgroundWorkerOptions = configure;
 
-        public void Http(Action<HttpOptions> configure) => ConfigureHttpTransportOptions = configure;
+        public void Http(Action<HttpOptions> configure)
+        {
+            if (ConfigureHttpTransportOptions == null)
+            {
+                ConfigureHttpTransportOptions = new List<Action<HttpOptions>>(1);
+            }
+            ConfigureHttpTransportOptions.Add(configure);
+        }
     }
 }

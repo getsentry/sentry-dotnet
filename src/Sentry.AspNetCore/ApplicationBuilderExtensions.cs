@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Builder
     public static class ApplicationBuilderExtensions
     {
         /// <summary>
-        /// Uses the Sentry's middleware to capture exceptions thrown in the pipeline
+        /// Use Sentry integration
         /// </summary>
         /// <param name="app">The application.</param>
         /// <returns></returns>

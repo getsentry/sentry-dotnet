@@ -4,6 +4,8 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix>preview</VersionSuffix>
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- On Release mode make sure missing docs raise warning -->
@@ -11,6 +13,10 @@
     <!--<NoWarn Condition="'$(Configuration)' != 'Release'">$(NoWarn);CS1591</NoWarn>-->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.1" PrivateAssets="All" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="1.0.1" Condition="'$(Configuration)' != 'Release'">
