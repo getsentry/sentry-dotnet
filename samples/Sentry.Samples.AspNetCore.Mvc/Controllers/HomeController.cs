@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Sentry.Samples.AspNetCore.Mvc.Models;
 
@@ -17,7 +14,31 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
         }
 
         [HttpPost]
-        public IActionResult PostIndex(string @params) => throw new Exception("POST exception ;)");
+        public void PostIndex(string @params)
+        {
+            try
+            {
+                Thrower();
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($"Invalid POST with {@params}! See Inner exception for details.", e);
+            }
+        }
+
+        public void Thrower()
+        {
+            var ex1 = new Exception("Exception #1");
+            var ex2 = new Exception("Exception #2");
+            var ae = new AggregateException(ex1, ex2);
+
+            ae.Data.Add("Extra", new
+            {
+                ErrorDetail = "I always throw!"
+            });
+
+            throw ae;
+        }
 
         public IActionResult About()
         {

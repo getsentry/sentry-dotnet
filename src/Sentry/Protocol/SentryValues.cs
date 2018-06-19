@@ -10,9 +10,6 @@ namespace Sentry.Protocol
         [DataMember(Name = "values", EmitDefaultValue = false)]
         public IEnumerable<T> Values { get; }
 
-        public SentryValues(T value)
-            => Values = value == null
-            ? Enumerable.Empty<T>()
-            : new[] { value };
+        public SentryValues(IEnumerable<T> values) => Values = values ?? Enumerable.Empty<T>();
     }
 }

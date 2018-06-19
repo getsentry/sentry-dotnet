@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -18,7 +18,8 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/attributes/"/>
     [DataContract]
-    [DebuggerDisplay("{" + nameof(Message) + "}")]
+    [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
+
     public class SentryEvent : Scope
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]
@@ -158,34 +159,57 @@ namespace Sentry
         {
             if (exception != null)
             {
-                // TODO: Aggregate exception
-                var sentryEx = new SentryException
-                {
-                    Type = exception.GetType()?.FullName,
-                    Module = exception.GetType()?.Assembly?.FullName,
-                    Value = exception.Message,
-                    ThreadId = Thread.CurrentThread.ManagedThreadId,
-                };
-
-                var stackTrace = new StackTrace(exception, true);
-
-                // Sentry expects the frames to be sent in reversed order
-                var frames = stackTrace.GetFrames()?
-                    .Reverse()
-                    .Select(CreateSentryStackFrame)
+                var sentryExceptions = CreateSentryException(exception)
+                    // Otherwise realization happens on the worker thread before sending event.
                     .ToList();
 
-                if (frames != null)
-                {
-                    sentryEx.Stacktrace = new SentryStackTrace
-                    {
-                        Frames = frames
-                    };
-                }
-
-                var values = new SentryValues<SentryException>(sentryEx);
+                var values = new SentryValues<SentryException>(sentryExceptions);
                 @event.SentryExceptions = values;
             }
+        }
+
+        private static IEnumerable<SentryException> CreateSentryException(Exception exception)
+        {
+            if (exception is AggregateException ae)
+            {
+                foreach (var inner in ae.InnerExceptions.SelectMany(CreateSentryException))
+                {
+                    yield return inner;
+                }
+            }
+            else if (exception.InnerException != null)
+            {
+                foreach (var inner in CreateSentryException(exception.InnerException))
+                {
+                    yield return inner;
+                }
+            }
+
+            var sentryEx = new SentryException
+            {
+                Type = exception.GetType()?.FullName,
+                Module = exception.GetType()?.Assembly?.FullName,
+                Value = exception.Message,
+                ThreadId = Thread.CurrentThread.ManagedThreadId,
+            };
+
+            var stackTrace = new StackTrace(exception, true);
+
+            // Sentry expects the frames to be sent in reversed order
+            var frames = stackTrace.GetFrames()
+                ?.Reverse()
+                .Select(CreateSentryStackFrame)
+                .ToList();
+
+            if (frames != null)
+            {
+                sentryEx.Stacktrace = new SentryStackTrace
+                {
+                    Frames = frames
+                };
+            }
+
+            yield return sentryEx;
         }
 
         public static SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)
@@ -233,8 +257,8 @@ namespace Sentry
             // TODO: make this extensible
             bool IsSystemModuleName(string moduleName)
                 => !string.IsNullOrEmpty(moduleName) &&
-                      (moduleName.StartsWith("System.", System.StringComparison.Ordinal) ||
-                       moduleName.StartsWith("Microsoft.", System.StringComparison.Ordinal));
+                      (moduleName.StartsWith("System.", StringComparison.Ordinal) ||
+                       moduleName.StartsWith("Microsoft.", StringComparison.Ordinal));
         }
 
         /// <summary>
