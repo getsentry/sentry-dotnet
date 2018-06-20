@@ -5,17 +5,8 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    [Collection(nameof(SentryCoreDependentCollection))]
-    public class IntegrationsTests
+    public class IntegrationsTests : SentrySdkTestBase
     {
-        private readonly SentryCoreDependentCollection _fixture;
-
-        public IntegrationsTests(SentryCoreDependentCollection fixture)
-        {
-            fixture.Build();
-            _fixture = fixture;
-        }
-
         [Fact]
         public async Task UnhandledException_AvailableThroughLastExceptionFilter()
         {
@@ -26,10 +17,11 @@ namespace Sentry.AspNetCore.Tests
                 Handler = context => throw expectedException
             };
 
-            _fixture.Handlers = new[] { handler };
-            await _fixture.HttpClient.GetAsync(handler.Path);
+            Handlers = new[] { handler };
+            Build();
+            await HttpClient.GetAsync(handler.Path);
 
-            Assert.Same(expectedException, _fixture.LastExceptionFilter.LastException);
+            Assert.Same(expectedException, LastExceptionFilter.LastException);
         }
     }
 }

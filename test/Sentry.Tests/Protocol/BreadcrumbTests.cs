@@ -35,7 +35,7 @@ namespace Sentry.Tests.Protocol
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\","
+            Assert.Equal("{\"timestamp\":\"9999-12-31T23:59:59Z\","
                         + "\"message\":\"message1\","
                         + "\"type\":\"type1\","
                         + "\"data\":{\"key\":\"val\"},"
@@ -57,7 +57,7 @@ namespace Sentry.Tests.Protocol
         {
             // Timestamp is included in every breadcrumb
             var expectedTimestamp = DateTimeOffset.MaxValue;
-            var expectedTimestampString = "9999-12-31T23:59:59.9999999+00:00";
+            var expectedTimestampString = "9999-12-31T23:59:59Z";
             var timestampString = $"\"timestamp\":\"{expectedTimestampString}\"";
 
             yield return new object[] { (new Breadcrumb (expectedTimestamp), $"{{{timestampString}}}") };

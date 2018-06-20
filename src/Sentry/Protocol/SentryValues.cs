@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Sentry.Protocol
 {
     [DataContract]
-    internal class SentryValues<T>
+    public class SentryValues<T>
     {
         [DataMember(Name = "values", EmitDefaultValue = false)]
         public IEnumerable<T> Values { get; }

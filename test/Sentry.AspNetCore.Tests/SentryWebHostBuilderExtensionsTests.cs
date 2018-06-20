@@ -9,8 +9,7 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    [Collection(nameof(SentryCoreDependentCollection))]
-    public class SentryWebHostBuilderExtensionsTests
+    public class SentryWebHostBuilderExtensionsTests : SentrySdkTestBase
     {
         public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
         public ServiceCollection Services { get; set; } = new ServiceCollection();
@@ -63,7 +62,7 @@ namespace Sentry.AspNetCore.Tests
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_Callback_ServicesRegistered(Action<IServiceCollection> assert)
         {
-            WebHostBuilder.UseSentry(_ => { });
+            WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
             assert(Services);
             Assert.False(SentryCore.IsEnabled);
         }
