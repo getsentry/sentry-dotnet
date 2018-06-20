@@ -51,28 +51,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
                 // Last
                 .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>()
-                .TryAddSingleton(p =>
-                {
-                    if (configureOptions != null && !SentryCore.IsEnabled)
-                    {
-                        var aspnetOptions = p.GetService<SentryAspNetCoreOptions>();
-                        var options = p.GetService<SentryOptions>();
-                        options = options ?? new SentryOptions();
-
-                        aspnetOptions.InitSdk?.Invoke(options);
-                        configureOptions?.Invoke(options);
-
-                        var lifetime = p.GetRequiredService<IApplicationLifetime>();
-                        var disposable = SentryCore.Init(options);
-                        lifetime.ApplicationStopped.Register(() => disposable.Dispose());
-                    }
-
-                    // TODO: SDK interface not accepting 'Integrations'
-                    // SentryCore.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
-
-                    // TODO: Need to fetch the created client and hub now to register in DI
-                    return HubAdapter.Instance as IHub;
-                });
+                // Always read the current Hub
+                .TryAddTransient(p => HubAdapter.Instance as IHub);
 
             return services;
         }

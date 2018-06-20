@@ -17,23 +17,35 @@ namespace Microsoft.AspNetCore.Hosting
     public static class SentryWebHostBuilderExtensions
     {
         /// <summary>
-        /// Use Sentry's middleware to capture errors
+        /// Uses Sentry integration.
         /// </summary>
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseSentry(this IWebHostBuilder builder) => UseSentry(builder, (Action<SentryAspNetCoreOptions>)null);
+        public static IWebHostBuilder UseSentry(this IWebHostBuilder builder)
+            => UseSentry(builder, (Action<SentryAspNetCoreOptions>)null);
 
         /// <summary>
-        /// Use Sentry's middleware to capture errors
+        /// Uses Sentry integration.
         /// </summary>
         /// <param name="builder">The builder.</param>
         /// <param name="dsn">The DSN.</param>
         /// <returns></returns>
         public static IWebHostBuilder UseSentry(this IWebHostBuilder builder, string dsn)
-        {
-            return builder.UseSentry(o => o.Init(i => i.Dsn = new Dsn(dsn)));
-        }
+            => builder.UseSentry(o => o.Init(i =>
+            {
+                if (!Dsn.IsDisabled(dsn))
+                {
+                    // If it's invalid, let ctor throw
+                    i.Dsn = new Dsn(dsn);
+                }
+            }));
 
+        /// <summary>
+        /// Uses Sentry integration.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="configureOptions">The configure options.</param>
+        /// <returns></returns>
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
             Action<SentryAspNetCoreOptions> configureOptions)

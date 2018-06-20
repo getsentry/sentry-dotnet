@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Sentry.Protocol;
 
 namespace Sentry.Internal
@@ -13,6 +14,8 @@ namespace Sentry.Internal
                 contexts.Runtime.Version = runtime.Version;
                 contexts.Runtime.RawDescription = runtime.Raw;
             }
+
+            contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
         }
     }
 }

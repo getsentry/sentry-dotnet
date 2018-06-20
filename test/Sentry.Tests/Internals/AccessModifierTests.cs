@@ -13,12 +13,14 @@ namespace Sentry.Tests.Internals
         [Theory]
         [MemberData(nameof(GetTypesInInternalsNamespace))]
         public void TypesInInternalsNamespace_AreNotPublic(Type typeInNamespace)
-            => Assert.True(!typeInNamespace.IsPublic);
+            => Assert.True(!typeInNamespace.IsPublic,
+                $"Expected type {typeInNamespace.Name} to be internal.");
 
         [Theory]
         [MemberData(nameof(GetNonPublicTypes))]
         public void NonPublicTypes_AreInInternalsNamespace(Type internalType)
-            => Assert.StartsWith(InternalsNamespace, internalType.Namespace);
+            => Assert.True(internalType.FullName.StartsWith(InternalsNamespace),
+                $"Not in the expected namespace. Expected: {InternalsNamespace} but found: " + internalType.FullName);
 
         public static IEnumerable<object[]> GetNonPublicTypes()
             => typeof(ISentryClient).Assembly.GetTypes()

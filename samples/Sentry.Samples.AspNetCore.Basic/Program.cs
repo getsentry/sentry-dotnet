@@ -16,13 +16,16 @@ namespace Sentry.Samples.AspNetCore.Basic
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+
                 // Add Sentry integration
                 // In this example, DSN is set via environment variable:
-                // Properties/launchSettings.json
+                // See: Properties/launchSettings.json
                 .UseSentry()
                 // It can also be defined via configuration (including appsettings.json)
-                // or via parameter like:
+                // or coded explicitly, via parameter like:
                 // .UseSentry("https://a@b/c")
+
+                // The App:
                 .Configure(a =>
                 {
                     // An example ASP.NET Core middleware that throws an

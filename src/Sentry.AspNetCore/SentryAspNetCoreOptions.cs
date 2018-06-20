@@ -37,7 +37,7 @@ namespace Sentry.AspNetCore
         public LoggingOptions Logging { get; set; } = new LoggingOptions();
 
         // An optional convinience callback to initialize the SDK
-        internal Action<SentryOptions> InitSdk { get; private set; }
+        internal Action<SentryOptions> ConfigureOptions { get; private set; }
 
         /// <summary>
         /// Initializes the SDK: This action should be done only once per application lifetime.
@@ -52,7 +52,7 @@ namespace Sentry.AspNetCore
         /// via this logging integration, the <see cref="SentryLoggerProvider"/> will dispose the SDK when it is itself disposed.
         /// </remarks>
         /// <param name="configureOptions">The configure options.</param>
-        public void Init(Action<SentryOptions> configureOptions) => InitSdk = configureOptions;
+        public void Init(Action<SentryOptions> configureOptions) => ConfigureOptions = configureOptions;
     }
 
     public class LoggingOptions

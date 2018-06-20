@@ -13,16 +13,19 @@ namespace Sentry.Internal
 
         internal ImmutableStack<(Scope scope, ISentryClient client)> ScopeAndClientStack
         {
-            get => _asyncLocalScope.Value;
+            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = NewStack());
             set => _asyncLocalScope.Value = value;
         }
+
+        private Func<ImmutableStack<(Scope, ISentryClient)>> NewStack { get; }
+
 
         public SentryScopeManager(
             IScopeOptions options,
             ISentryClient rootClient)
         {
             Debug.Assert(rootClient != null);
-            _asyncLocalScope.Value = ImmutableStack.Create((new Scope(options), rootClient));
+            NewStack = () => ImmutableStack.Create((new Scope(options), rootClient));
         }
 
         public (Scope Scope, ISentryClient Client) GetCurrent() => ScopeAndClientStack.Peek();

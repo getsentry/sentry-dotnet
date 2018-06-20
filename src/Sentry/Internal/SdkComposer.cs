@@ -21,8 +21,10 @@ namespace Sentry.Internal
             if (options.Dsn == null) throw new ArgumentException("No DSN defined in the SentryOptions");
 
             var httpOptions = new HttpOptions(options.Dsn.SentryUri);
-            options.ConfigureHttpTransportOptions?.Invoke(httpOptions);
+            // TODO: ensure correct order
+            options.ConfigureHttpTransportOptions?.ForEach(o => o.Invoke(httpOptions));
             _httpOptions = httpOptions;
+            SentryHttpClientFactory = _httpOptions.SentryHttpClientFactory;
 
             var workerOptions = new BackgroundWorkerOptions();
             options.ConfigureBackgroundWorkerOptions?.Invoke(workerOptions);

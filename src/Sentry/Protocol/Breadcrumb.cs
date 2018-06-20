@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -20,6 +21,8 @@ namespace Sentry.Protocol
         /// This can be either an ISO datetime string, or a Unix timestamp.
         /// </remarks>
         [DataMember(Name = "timestamp", EmitDefaultValue = false)]
+        private string SerializableTimestamp => Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ssZ", DateTimeFormatInfo.InvariantInfo);
+
         public DateTimeOffset Timestamp { get; }
 
         /// <summary>

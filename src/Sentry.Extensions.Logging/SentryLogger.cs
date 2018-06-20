@@ -73,16 +73,7 @@ namespace Sentry.Extensions.Logging
                     Logger = CategoryName,
                 };
 
-                if (message != null)
-                {
-                    // TODO: this will override the current message
-                    // which could have been set from reading Exception.Message
-                    if (@event.Message != null)
-                    {
-                        @event.SetExtra("original_message", @event.Message);
-                    }
-                    @event.Message = message;
-                }
+                @event.Message = message;
 
                 var tuple = eventId.ToTupleOrNull();
                 if (tuple.HasValue)

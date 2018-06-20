@@ -83,8 +83,19 @@ namespace Sentry
             }
 
             var hub = new Hub(options);
-            _hub = hub;
+
+            var oldHub = Interlocked.Exchange(ref _hub, hub);
+            (oldHub as IDisposable)?.Dispose();
+
             return new DisposeHandle(hub);
+        }
+
+        // Used for testing
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static void Close()
+        {
+            var oldHub = Interlocked.Exchange(ref _hub, DisabledHub.Instance);
+            (oldHub as IDisposable)?.Dispose();
         }
 
         private class DisposeHandle : IDisposable
