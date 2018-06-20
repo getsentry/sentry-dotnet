@@ -52,8 +52,8 @@ namespace Sentry.AspNetCore
                 scope.Request.Env = scope.Request.Env.Add("REMOTE_ADDR", ipAddress);
             }
 
-            scope.Request.Env = scope.Request.Env.Add("SERVER_PORT", Environment.MachineName);
-            scope.Request.Env = scope.Request.Env.Add("SERVER_NAME", context.Connection.LocalPort.ToString());
+            scope.Request.Env = scope.Request.Env.Add("SERVER_NAME", Environment.MachineName);
+            scope.Request.Env = scope.Request.Env.Add("SERVER_PORT", context.Connection.LocalPort.ToString());
 
             // TODO: likely a better way to do this as if the response didn't start yet nothing is found
             if (context.Response.Headers.TryGetValue("Server", out var server))
