@@ -12,7 +12,88 @@ Work in progress, for a new .NET SDK
 
 
 
-NOTE: This repository is a work in progress. Our goal is to build a composable SDK, pay-for-play with many integrations.
+NOTE: This repository is a work in progress. Our goal is to build a composable SDK with many integrations.
+
+## Usage
+
+** Consider taking a look at the `samples` directory for different types of apps and example usages of the SDK. **
+
+The goal of this SDK is to provide integrations which can hook into your app and automatically capture errors and context. See ASP.NET Core below as an example.
+
+You can still use the SDK directly to send events to Sentry:
+
+Install the main SDK:
+```shell
+dotnet add package Sentry
+```
+
+Initialize the SDK:
+```csharp
+void Main() 
+{
+    using (SentrySdk.Init("https://id@sentry.io/project"))
+    {
+        // App code
+    }
+}
+```
+The SDK by default will watch for unhandled exceptions in your app.
+If the [DSN](https://docs.sentry.io/quickstart/#configure-the-dsn) is not explicitly passed by parameter to `Init`, the SDK will try to locate it via environment variable `SENTRY_DSN`.
+
+To configure advanced settings, for example a proxy server:
+```csharp
+void Main() 
+{
+    using (SentrySdk.Init(o =>
+    {
+        o.Dsn = new Dsn("https://id@sentry.io/project");
+        o.Http(h =>
+        {
+            h.Proxy = new WebProxy("https://localhost:3128");
+        });
+    }))
+    {
+        // App code
+    }
+}
+```
+
+Capture an exception:
+```csharp
+try
+{
+    throw null;
+}
+catch (Exception e)
+{
+    SentrySdk.CaptureException(e);
+}
+```
+
+## ASP.NET Core integration
+
+To use Sentry with your ASP.NET Core project, simply install the NuGet package:
+
+```shell
+dotnet add package Sentry.AspNetCore
+```
+
+Change your `Program.cs` by adding `UseSentry`:
+
+Like:
+```csharp
+public static IWebHost BuildWebHost(string[] args) =>
+    WebHost.CreateDefaultBuilder(args)
+        .UseStartup<Startup>()
+        // Integration
+        .UseSentry("https://id@sentry.io/project")
+        .Build();
+```
+
+This will also include automatically integration to `Microsoft.Extensions.Logging`. That means that any `LogError` or `LogCritical` by default will send an event to Sentry.
+Log messages of level `Information` will be kept as _breadcrumbs_ and if an event is sent, all breadcrumbs from that transaction are included.
+
+These levels can be configured so that the level you define tracks breadcrumbs or sends events or completely disable it.
 
 ## Get involved
 Join the discussion in our

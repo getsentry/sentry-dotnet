@@ -15,7 +15,8 @@ namespace Sentry.Samples.AspNetCore.Mvc
             var whenAll = Task.WhenAll(getDungeonsTask, getUserMana);
             try
             {
-                await whenAll;
+                var ids = await whenAll;
+                return (ids[0], ids[1]);
             }
             // await unwraps AggregateException and throws the first one
             catch when (whenAll.Exception is AggregateException ae && ae.InnerExceptions.Count > 1)
@@ -23,7 +24,6 @@ namespace Sentry.Samples.AspNetCore.Mvc
                 throw ae; // re-throw the AggregateException
             }
 
-            return (getDungeonsTask.Result, getUserMana.Result);
         }
     }
 }
