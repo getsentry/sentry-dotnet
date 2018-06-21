@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
@@ -31,8 +32,9 @@ namespace Sentry.Samples.AspNetCore.Mvc
                         i.Http(h =>
                         {
                             //h.Proxy = new WebProxy("https://localhost:3128");
-                            h.AcceptDeflate = false;
-                            h.AcceptGzip = false;
+
+                            // Example: Disabling support to compressed responses:
+                            h.DecompressionMethods = DecompressionMethods.None;
                         });
 
                         i.Worker(w =>

@@ -11,7 +11,7 @@ using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;
 
-namespace Sentry.Tests.Internals
+namespace Sentry.Tests.Internals.Http
 {
     public class HttpTransportTests
     {
