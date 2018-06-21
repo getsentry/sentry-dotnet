@@ -121,13 +121,22 @@ namespace Sentry
         internal SentryEvent(
             Exception exception = null,
             ISystemClock clock = null,
-            Guid id = default)
+            Guid id = default,
+            bool populate = true)
         {
             clock = clock ?? SystemClock.Clock;
             EventId = id == default ? Guid.NewGuid() : id;
 
             Timestamp = clock.GetUtcNow();
 
+            if (populate)
+            {
+                Populate(exception);
+            }
+        }
+
+        private void Populate(Exception exception)
+        {
             // TODO: should this be dotnet instead?
             Platform = "csharp";
             Sdk.Name = "Sentry.NET";
@@ -142,21 +151,13 @@ namespace Sentry
                 {
                     continue;
                 }
+
                 var asmName = assembly.GetName();
                 builder[asmName.Name] = asmName.Version.ToString();
             }
+
             InternalModules = builder.ToImmutable();
 
-            Populate(this, exception);
-        }
-
-        /// <summary>
-        /// Populate fields from Exception
-        /// </summary>
-        /// <param name="event">The event.</param>
-        /// <param name="exception">The exception.</param>
-        public static void Populate(SentryEvent @event, Exception exception)
-        {
             if (exception != null)
             {
                 var sentryExceptions = CreateSentryException(exception)
@@ -164,7 +165,7 @@ namespace Sentry
                     .ToList();
 
                 var values = new SentryValues<SentryException>(sentryExceptions);
-                @event.SentryExceptions = values;
+                SentryExceptions = values;
             }
         }
 
@@ -197,7 +198,7 @@ namespace Sentry
             };
 
 
-        var stackTrace = new StackTrace(exception, true);
+            var stackTrace = new StackTrace(exception, true);
 
             // Sentry expects the frames to be sent in reversed order
             var frames = stackTrace.GetFrames()

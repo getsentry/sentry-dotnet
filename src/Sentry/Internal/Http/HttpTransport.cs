@@ -17,6 +17,8 @@ namespace Sentry.Internal.Http
         private readonly HttpClient _httpClient;
         private readonly Action<HttpRequestHeaders> _addAuth;
 
+        internal const string NoMessageFallback = "No message";
+
         public HttpTransport(
             HttpOptions options,
             HttpClient httpClient,
@@ -52,16 +54,16 @@ namespace Sentry.Internal.Http
                 return;
 #endif
             }
-            else if (
-                _options.HandleFailedEventSubmission != null &&
-                response.Headers.TryGetValues(SentryHeaders.SentryErrorHeader, out var values))
+
+            if (_options.HandleFailedEventSubmission != null)
             {
-                var errorMessage = values.FirstOrDefault() ?? "No message";
+                response.Headers.TryGetValues(SentryHeaders.SentryErrorHeader, out var values);
+                var errorMessage = values?.FirstOrDefault() ?? NoMessageFallback;
                 _options.HandleFailedEventSubmission?.Invoke(@event, response.StatusCode, errorMessage);
             }
         }
 
-        private HttpRequestMessage CreateRequest(SentryEvent @event)
+        internal HttpRequestMessage CreateRequest(SentryEvent @event)
         {
             var request = new HttpRequestMessage
             {

@@ -29,7 +29,8 @@ namespace Sentry.Http
 
         public ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
 
-        internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; }
+        // Expected to call into the internal logging which will be expose
+        internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; set; }
 
         internal Func<HttpMessageHandler> HttpMessageHandlerFactory { get; set; }
 

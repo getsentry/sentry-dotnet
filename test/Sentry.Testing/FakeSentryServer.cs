@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.VisualBasic;
 
 namespace Sentry.Testing
 {
@@ -32,7 +33,7 @@ namespace Sentry.Testing
                 new RequestHandler
                 {
                     Path = "/store",
-                    Handler = c => c.Response.WriteAsync("{\n    \"id\": \"fc6d8c0c43fc4630ad850ee518f1b9d0\"\n    }")
+                    Handler = c => c.Response.WriteAsync(SentryResponses.SentryOkResponseBody)
                 }
             });
         }
