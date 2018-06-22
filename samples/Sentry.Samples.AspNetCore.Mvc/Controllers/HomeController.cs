@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Sentry.Samples.AspNetCore.Mvc.Models;
 
 namespace Sentry.Samples.AspNetCore.Mvc.Controllers
@@ -9,8 +10,13 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
     public class HomeController : Controller
     {
         private readonly IGameService _gameService;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(IGameService gameService) => _gameService = gameService;
+        public HomeController(IGameService gameService, ILogger<HomeController> logger)
+        {
+            _gameService = gameService;
+            _logger = logger;
+        }
 
         [HttpGet]
         public IActionResult Index()
@@ -23,6 +29,11 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
         {
             try
             {
+                if (@params == null)
+                {
+                    _logger.LogWarning("Param is null!", @params);
+                }
+
                 await _gameService.FetchNextPhaseDataAsync();
             }
             catch (Exception e)
