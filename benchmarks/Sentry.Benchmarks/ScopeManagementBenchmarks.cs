@@ -1,5 +1,6 @@
 using System;
 using BenchmarkDotNet.Attributes;
+using Sentry.Extensibility;
 using Sentry.Internal;
 
 namespace Sentry.Benchmarks
