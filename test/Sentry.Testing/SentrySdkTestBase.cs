@@ -4,16 +4,12 @@ using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Sentry.Testing;
-using Xunit;
 
-namespace Sentry.AspNetCore.Tests
+namespace Sentry.Testing
 {
-    [Collection(nameof(SentryCoreDependentCollection))]
-    public abstract class SentrySdkTestBase : IDisposable
+    public class SentrySdkTestBase : IDisposable
     {
         private TestServer _testServer;
 
@@ -38,7 +34,7 @@ namespace Sentry.AspNetCore.Tests
             }
         };
 
-        public void Build()
+        public virtual void Build()
         {
             var builder = new WebHostBuilder();
             builder.ConfigureServices(s =>
@@ -46,20 +42,6 @@ namespace Sentry.AspNetCore.Tests
                 var lastException = new LastExceptionFilter();
                 s.AddSingleton<IStartupFilter>(lastException);
                 s.AddSingleton(lastException);
-            });
-            var sentry = FakeSentryServer.CreateServer();
-            var sentryHttpClient = sentry.CreateClient();
-            ConfigureBuilder = b => b.UseSentry(options =>
-            {
-                options.Dsn = DsnSamples.ValidDsnWithSecret;
-                options.Init(i =>
-                {
-                    i.Http(h =>
-                    {
-                        h.SentryHttpClientFactory = new DelegateHttpClientFactory((d, o)
-                            => sentryHttpClient);
-                    });
-                });
             });
             builder.Configure(app =>
             {

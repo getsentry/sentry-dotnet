@@ -174,7 +174,7 @@ namespace Sentry.Protocol
             }
         }
 
-        protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
+        protected internal Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
 
         internal void Evaluate()
         {

@@ -9,13 +9,13 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    public class SentryWebHostBuilderExtensionsTests : SentrySdkTestBase
+    public class AspNetSentryWebHostBuilderExtensionsTests : AspNetSentrySdkTestBase
     {
         public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
         public ServiceCollection Services { get; set; } = new ServiceCollection();
         public IConfiguration Configuration { get; set; } = Substitute.For<IConfiguration>();
 
-        public SentryWebHostBuilderExtensionsTests()
+        public AspNetSentryWebHostBuilderExtensionsTests()
         {
             var context = new WebHostBuilderContext { Configuration = Configuration };
 

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    public class IntegrationsTests : SentrySdkTestBase
+    public class IntegrationsTests : AspNetSentrySdkTestBase
     {
         [Fact]
         public async Task UnhandledException_AvailableThroughLastExceptionFilter()

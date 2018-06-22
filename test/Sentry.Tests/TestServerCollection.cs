@@ -1,9 +1,10 @@
+using Sentry.Testing;
 using Xunit;
 
-namespace Sentry.AspNetCore.Tests
+namespace Sentry.Tests
 {
-    [CollectionDefinition(nameof(AspNetSentrySdkTestBase))]
-    public sealed class TestServerCollection : ICollectionFixture<AspNetSentrySdkTestBase>
+    [CollectionDefinition(nameof(SentrySdkTestBase))]
+    public sealed class TestServerCollection : ICollectionFixture<SentrySdkTestBase>
     {
         // This class has no code, and is never created. Its purpose is simply
         // to be the place to apply [CollectionDefinition] and all the

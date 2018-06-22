@@ -90,6 +90,9 @@ namespace Sentry
             return new DisposeHandle(hub);
         }
 
+        // For testing
+        internal static void UseHub(IHub hub) => _hub = hub;
+
         // Used for testing
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Close()

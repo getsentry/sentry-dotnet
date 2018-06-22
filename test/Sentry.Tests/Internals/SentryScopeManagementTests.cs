@@ -65,7 +65,7 @@ namespace Sentry.Tests.Internals
             sut.BindClient(null);
             var (_, client) = sut.GetCurrent();
 
-            Assert.Same(DisabledSentryClient.Instance, client);
+            Assert.Same(DisabledHub.Instance, client);
         }
 
         [Fact]

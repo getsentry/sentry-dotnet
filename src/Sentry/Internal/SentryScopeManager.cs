@@ -60,7 +60,7 @@ namespace Sentry.Internal
         {
             var currentScopeAndClientStack = ScopeAndClientStack;
             currentScopeAndClientStack = currentScopeAndClientStack.Pop(out var top);
-            currentScopeAndClientStack = currentScopeAndClientStack.Push((top.scope, client ?? DisabledSentryClient.Instance));
+            currentScopeAndClientStack = currentScopeAndClientStack.Push((top.scope, client ?? DisabledHub.Instance));
             ScopeAndClientStack = currentScopeAndClientStack;
         }
 
