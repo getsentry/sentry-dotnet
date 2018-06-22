@@ -24,8 +24,8 @@ namespace Sentry.Protocol
         public static void AddBreadcrumb(
                     this Scope scope,
                     string message,
-                    string type,
                     string category,
+                    string type,
                     (string, string)? dataPair = null,
                     BreadcrumbLevel level = default)
         {

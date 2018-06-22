@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    [Collection(nameof(SentrySdkTestBase))]
-    public class AspNetSentrySdkTestBase : SentrySdkTestBase
+    public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
     {
         public override void Build()
         {

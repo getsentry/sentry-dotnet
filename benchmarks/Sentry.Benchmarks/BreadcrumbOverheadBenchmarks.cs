@@ -36,8 +36,8 @@ namespace Sentry.Benchmarks
             {
                 SentryCore.AddBreadcrumb(
                     Message,
-                    Type,
                     Category,
+                    Type,
                     Data,
                     Level);
             }
@@ -50,8 +50,8 @@ namespace Sentry.Benchmarks
             {
                 SentryCore.AddBreadcrumb(
                     Message,
-                    Type,
                     Category,
+                    Type,
                     Data,
                     Level);
             }
@@ -66,8 +66,8 @@ namespace Sentry.Benchmarks
                 {
                     SentryCore.AddBreadcrumb(
                         Message,
-                        Type,
                         Category,
+                        Type,
                         Data,
                         Level);
                 }
@@ -83,8 +83,8 @@ namespace Sentry.Benchmarks
                 {
                     SentryCore.AddBreadcrumb(
                         Message,
-                        Type,
                         Category,
+                        Type,
                         Data,
                         Level);
                 }

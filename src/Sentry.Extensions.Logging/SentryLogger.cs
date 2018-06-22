@@ -100,8 +100,9 @@ namespace Sentry.Extensions.Logging
                 _hub.AddBreadcrumb(
                     _clock,
                     message ?? exception?.Message,
-                    "default",
                     CategoryName,
+                    // TODO: verify on sentry
+                    type: null,
                     data,
                     logLevel.ToBreadcrumbLevel());
             }

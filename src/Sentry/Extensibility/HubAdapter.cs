@@ -26,37 +26,44 @@ namespace Sentry.Extensibility
 
         private HubAdapter() { }
 
-        public bool IsEnabled => SentryCore.IsEnabled;
+        public bool IsEnabled { [DebuggerStepThrough] get => SentryCore.IsEnabled; }
 
+        [DebuggerStepThrough]
         public void ConfigureScope(Action<Scope> configureScope)
             => SentryCore.ConfigureScope(configureScope);
 
+        [DebuggerStepThrough]
         public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
             => SentryCore.ConfigureScopeAsync(configureScope);
 
+        [DebuggerStepThrough]
         public IDisposable PushScope()
             => SentryCore.PushScope();
 
+        [DebuggerStepThrough]
         public IDisposable PushScope<TState>(TState state)
             => SentryCore.PushScope(state);
 
+        [DebuggerStepThrough]
         public void BindClient(ISentryClient client)
             => SentryCore.BindClient(client);
 
+        [DebuggerStepThrough]
         public void AddBreadcrumb(
             string message,
-            string type,
             string category = null,
+            string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => SentryCore.AddBreadcrumb(message, type, category, data, level);
+            => SentryCore.AddBreadcrumb(message, category, type, data, level);
 
+        [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void AddBreadcrumb(
             ISystemClock clock,
             string message,
-            string type = null,
             string category = null,
+            string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
             => SentryCore.AddBreadcrumb(
@@ -67,12 +74,15 @@ namespace Sentry.Extensibility
                 category: category,
                 level: level);
 
+        [DebuggerStepThrough]
         public Guid CaptureEvent(SentryEvent evt)
             => SentryCore.CaptureEvent(evt);
 
+        [DebuggerStepThrough]
         public Guid CaptureException(Exception exception)
             => SentryCore.CaptureException(exception);
 
+        [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public Guid CaptureEvent(SentryEvent evt, Scope scope)
             => SentryCore.CaptureEvent(evt, scope);

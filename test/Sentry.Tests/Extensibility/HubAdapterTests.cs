@@ -12,7 +12,8 @@ using Xunit;
 
 namespace Sentry.Tests.Extensibility
 {
-    public class HubAdapterTests : SentrySdkTestBase
+    [Collection(nameof(SentrySdkCollection))]
+    public class HubAdapterTests : SentrySdkTestFixture
     {
         public IHub Hub { get; set; }
 
@@ -108,12 +109,12 @@ namespace Sentry.Tests.Extensibility
             var clock = Substitute.For<ISystemClock>();
             clock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
 
-            TestAddBreadcrumbExtension((message, type, category, data, level)
+            TestAddBreadcrumbExtension((message, category, type, data, level)
                 => HubAdapter.Instance.AddBreadcrumb(
                     clock,
                     message,
-                    type,
                     category,
+                    type,
                     data,
                     level));
 
@@ -142,7 +143,7 @@ namespace Sentry.Tests.Extensibility
             Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(c => c.Arg<Action<Scope>>()(scope));
 
-            action(message, type, category, data, level);
+            action(message, category, type, data, level);
 
             var crumb = scope.Breadcrumbs.First();
             Assert.Equal(message, crumb.Message);

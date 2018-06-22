@@ -5,7 +5,7 @@ using System.ComponentModel;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 
-namespace Sentry.Extensibility
+namespace Sentry
 {
     /// <summary>
     /// Extension methods for <see cref="IHub"/>
@@ -14,19 +14,19 @@ namespace Sentry.Extensibility
     public static class HubExtensions
     {
         /// <summary>
-        /// Captures the exception.
+        /// Adds a breadcrumb to the current scope
         /// </summary>
-        /// <param name="hub">The Hub.</param>
-        /// <param name="ex">The exception.</param>
-        /// <returns></returns>
-        public static Guid CaptureException(this IHub hub, Exception ex)
-            => hub.CaptureEvent(new SentryEvent(ex));
-
+        /// <param name="hub">The Hub which holds the scope stack</param>
+        /// <param name="message">The message</param>
+        /// <param name="category">Category</param>
+        /// <param name="type">Breadcrumb type</param>
+        /// <param name="data">Additional data</param>
+        /// <param name="level">Breadcrumb level</param>
         public static void AddBreadcrumb(
             this IHub hub,
             string message,
-            string type,
             string category = null,
+            string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
             => hub.AddBreadcrumb(
@@ -37,22 +37,35 @@ namespace Sentry.Extensibility
                 category: category,
                 level: level);
 
+        /// <summary>
+        /// Adds a breadcrumb using a custom <see cref="ISystemClock"/> which allows better testability
+        /// </summary>
+        /// <param name="hub">The Hub which holds the scope stack</param>
+        /// <param name="clock">The system clock</param>
+        /// <param name="message">The message</param>
+        /// <param name="category">Category</param>
+        /// <param name="type">Breadcrumb type</param>
+        /// <param name="data">Additional data</param>
+        /// <param name="level">Breadcrumb level</param>
+        /// <remarks>
+        /// This method is to be used by integrations to allow testing
+        /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
             this IHub hub,
             ISystemClock clock,
             string message,
-            string type = null,
             string category = null,
+            string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
             => hub.ConfigureScope(
-                s => s.AddBreadcrumb(new Breadcrumb(
-                    timestamp: (clock ?? SystemClock.Clock).GetUtcNow(),
+                s => s.AddBreadcrumb(
+                    clock: clock,
                     message: message,
                     type: type,
                     data: data?.ToImmutableDictionary(),
                     category: category,
-                    level: level)));
+                    level: level));
     }
 }

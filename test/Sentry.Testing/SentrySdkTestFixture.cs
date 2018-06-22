@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.Testing
 {
-    public class SentrySdkTestBase : IDisposable
+    public class SentrySdkTestFixture : IDisposable
     {
         private TestServer _testServer;
 

@@ -9,7 +9,8 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    public class AspNetSentryWebHostBuilderExtensionsTests : AspNetSentrySdkTestBase
+    [Collection(nameof(SentrySdkCollection))]
+    public class AspNetSentryWebHostBuilderExtensionsTests : AspNetSentrySdkTestFixture
     {
         public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
         public ServiceCollection Services { get; set; } = new ServiceCollection();
