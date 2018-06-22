@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using Sentry.Internal;
+using Sentry.Extensibility;
 using Xunit;
 
-namespace Sentry.Tests.Internals
+namespace Sentry.Tests.Extensibility
 {
     public class DisabledHubTests
     {

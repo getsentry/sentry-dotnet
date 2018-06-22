@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Sentry.Internal;
+using Sentry.Extensibility;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;

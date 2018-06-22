@@ -2,26 +2,35 @@ using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 
 namespace Sentry.Extensions.Logging
 {
     public class SentryLoggerProvider : ILoggerProvider
     {
+        private readonly IHub _hub;
+        private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
         private IDisposable _scope;
         private IDisposable _sdk;
 
         public SentryLoggerProvider(SentryLoggingOptions options)
-            : this(HubAdapter.Instance, options)
+            : this(HubAdapter.Instance,
+                   SystemClock.Clock,
+                   options)
         { }
 
         internal SentryLoggerProvider(
-            ISentryScopeManager scopeManager,
+            IHub hub,
+            ISystemClock clock,
             SentryLoggingOptions options)
         {
             Debug.Assert(options != null);
-            Debug.Assert(scopeManager != null);
+            Debug.Assert(clock != null);
+            Debug.Assert(hub != null);
 
+            _hub = hub;
+            _clock = clock;
             _options = options;
 
             // SDK is being initialized through this integration
@@ -32,13 +41,13 @@ namespace Sentry.Extensions.Logging
             }
 
             // Creates a scope so that Integration added below can be dropped when the logger is disposed
-            _scope = scopeManager.PushScope();
+            _scope = hub.PushScope();
 
             // TODO: SDK interface not accepting 'Integrations'
             // scopeManager.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
         }
 
-        public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options);
+        public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, _hub);
 
         public void Dispose()
         {

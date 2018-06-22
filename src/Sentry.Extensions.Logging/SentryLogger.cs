@@ -15,17 +15,6 @@ namespace Sentry.Extensions.Logging
 
         internal string CategoryName { get; }
 
-        public SentryLogger(
-            string categoryName,
-            SentryLoggingOptions options)
-            : this(
-                categoryName,
-                options,
-                SystemClock.Clock,
-                HubAdapter.Instance)
-        {
-        }
-
         internal SentryLogger(
             string categoryName,
             SentryLoggingOptions options,
@@ -42,12 +31,16 @@ namespace Sentry.Extensions.Logging
             _hub = hub;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => _hub.PushScope(state);
+        public IDisposable BeginScope<TState>(TState state)
+            => _options.PushSentryScopeOnBeginScope
+                ? _hub.PushScope(state)
+                : DisabledHub.Instance;
 
-        public bool IsEnabled(LogLevel logLevel) => _hub.IsEnabled
-                                                    && logLevel != LogLevel.None
-                                                    && (logLevel >= _options.MinimumBreadcrumbLevel
-                                                    || logLevel >= _options.MinimumEventLevel);
+        public bool IsEnabled(LogLevel logLevel)
+            => _hub.IsEnabled
+                && logLevel != LogLevel.None
+                && (logLevel >= _options.MinimumBreadcrumbLevel
+                || logLevel >= _options.MinimumEventLevel);
 
         public void Log<TState>(
             LogLevel logLevel,

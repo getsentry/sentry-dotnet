@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 
-namespace Sentry.Internal
+namespace Sentry.Extensibility
 {
-    internal class DisabledHub : IHub, IDisposable
+    public class DisabledHub : IHub, IDisposable
     {
         public static DisabledHub Instance = new DisabledHub();
 

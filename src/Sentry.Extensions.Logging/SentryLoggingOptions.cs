@@ -36,6 +36,15 @@ namespace Sentry.Extensions.Logging
         internal Action<SentryOptions> ConfigureOptions { get; private set; }
 
         /// <summary>
+        /// Whether to invoke <see cref="SentryCore.PushScope{TState}"/> when <see cref="ILogger.BeginScope{TState}"/> is called
+        /// </summary>
+        /// <remarks>
+        /// When other integrations are also included, scopes can be created by the outer integration.
+        /// They might expect to keep all log entries in the form of breadcrumbs instead of losing them when the logger disposes scopes
+        /// </remarks>
+        public bool PushSentryScopeOnBeginScope { get; set; } = true;
+
+        /// <summary>
         /// Initializes the SDK: This action should be done only once per application lifetime.
         /// </summary>
         /// <remarks>
