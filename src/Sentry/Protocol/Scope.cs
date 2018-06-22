@@ -184,8 +184,8 @@ namespace Sentry.Protocol
             }
             catch (Exception e)
             {
-                // TODO: internal error reporting
-                Debug.WriteLine(e);
+                this.AddBreadcrumb("Failed invoking event handler: " + e,
+                    level: BreadcrumbLevel.Error);
             }
         }
 

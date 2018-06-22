@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
+    [Collection(nameof(SentrySdkCollection))]
     public class IntegrationsTests : AspNetSentrySdkTestFixture
     {
         [Fact]

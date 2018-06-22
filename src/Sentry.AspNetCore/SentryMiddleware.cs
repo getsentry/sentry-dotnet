@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {
@@ -65,27 +66,7 @@ namespace Sentry.AspNetCore
                     // In case of event, all data made available through the HTTP Context at the time of the
                     // event creation will be sent to Sentry
 
-                    scope.OnEvaluating += (sender, args) =>
-                    {
-                        if (_hostingEnvironment != null)
-                        {
-                            scope.Environment = _hostingEnvironment.EnvironmentName;
-                            // TODO: Hide these 'Env' behind some extension method as
-                            // these might be reported in a non CGI, old-school way
-                            scope.Request.Env = scope.Request.Env.Add("DOCUMENT_ROOT", _hostingEnvironment.WebRootPath);
-                        }
-
-                        // TODO: Find route template (MVC integration)
-                        // TODO: optionally get transaction from request through a dependency
-                        //scope.Transaction = context.Request.PathBase;
-
-                        scope.Populate(context);
-
-                        if (_options.IncludeActivityData)
-                        {
-                            scope.Populate(Activity.Current);
-                        }
-                    };
+                    scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
                 });
                 try
                 {
@@ -104,17 +85,37 @@ namespace Sentry.AspNetCore
 
                     ExceptionDispatchInfo.Capture(e).Throw();
                 }
+
+                void CaptureException(Exception e)
+                {
+                    var evt = new SentryEvent(e);
+
+                    _logger?.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
+
+                    var id = _sentry.CaptureEvent(evt);
+
+                    _logger?.LogInformation("Event '{id}' queued .", id);
+                }
+            }
+        }
+
+        internal void PopulateScope(HttpContext context, Scope scope)
+        {
+            if (_hostingEnvironment != null)
+            {
+                scope.Environment = _hostingEnvironment.EnvironmentName;
+                scope.SetWebRoot(_hostingEnvironment.WebRootPath);
             }
 
-            void CaptureException(Exception e)
+            // TODO: Find route template (MVC integration)
+            // TODO: optionally get transaction from request through a dependency
+            //scope.Transaction = context.Request.PathBase;
+
+            scope.Populate(context);
+
+            if (_options?.IncludeActivityData == true)
             {
-                var evt = new SentryEvent(e);
-
-                _logger?.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
-
-                var id = _sentry.CaptureEvent(evt);
-
-                _logger?.LogInformation("Event '{id}' queued .", id);
+                scope.Populate(Activity.Current);
             }
         }
     }
