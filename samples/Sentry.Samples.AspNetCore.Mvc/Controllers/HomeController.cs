@@ -24,6 +24,7 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
             return View();
         }
 
+        // Example: An exception that goes unhandled by the app will be captured by Sentry:
         [HttpPost]
         public async Task PostIndex(string @params)
         {
@@ -53,17 +54,28 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
             }
         }
 
+        // Example: The view rendering throws: see about.cshtml
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
-
             return View();
         }
 
-        public IActionResult Contact()
+        // Example: To take the Sentry Hub and submit errors directly:
+        public IActionResult Contact(
+            // Hub holds a Client and Scope management
+            // Errors sent with the hub will include all context collected in the current scope
+            [FromServices] IHub sentry)
         {
-            ViewData["Message"] = "Your contact page.";
-
+            try
+            {
+                // Some code block that could throw
+                throw null;
+            }
+            catch (Exception e)
+            {
+                sentry.CaptureException(e);
+                ViewData["Message"] = "An exception was caught and sent to Sentry!";
+            }
             return View();
         }
 
