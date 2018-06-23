@@ -1,5 +1,6 @@
 using System;
 using NSubstitute;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Xunit;
 
@@ -9,9 +10,10 @@ namespace Sentry.Extensions.Logging.Tests
     {
         private class Fixture
         {
-            public ISentryScopeManager SentryScopeManager { get; set; } = Substitute.For<ISentryScopeManager>();
+            public IHub Hub { get; set; } = Substitute.For<IHub>();
+            public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public SentryLoggingOptions SentryLoggingOptions { get; set; } = new SentryLoggingOptions();
-            public SentryLoggerProvider GetSut() => new SentryLoggerProvider(SentryScopeManager, SentryLoggingOptions);
+            public SentryLoggerProvider GetSut() => new SentryLoggerProvider(Hub, Clock, SentryLoggingOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -40,14 +42,14 @@ namespace Sentry.Extensions.Logging.Tests
         public void Ctor_CreatesScope()
         {
             _fixture.GetSut();
-            _fixture.SentryScopeManager.Received(1).PushScope();
+            _fixture.Hub.Received(1).PushScope();
         }
 
         [Fact(Skip = "Sentry is not accepting integrations ATM")]
         public void Ctor_AddsSdkIntegration()
         {
             var scope = new Scope(null);
-            _fixture.SentryScopeManager.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
+            _fixture.Hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(info => info.Arg<Action<Scope>>()(scope));
 
             _fixture.GetSut();
@@ -59,7 +61,7 @@ namespace Sentry.Extensions.Logging.Tests
         public void Dispose_DisposesNewScope()
         {
             var disposable = Substitute.For<IDisposable>();
-            _fixture.SentryScopeManager.PushScope().Returns(disposable);
+            _fixture.Hub.PushScope().Returns(disposable);
 
             var sut = _fixture.GetSut();
 

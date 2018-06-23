@@ -110,7 +110,12 @@ namespace Sentry.AspNetCore
             //scope.ActivityId = activity.Id;
 
             // TODO: enumerating Activity.Tags clears the collection and sets field to null?
-            scope.Tags.AddRange(activity.Tags);
+            scope.SetTags(activity.Tags);
+        }
+
+        public static void SetWebRoot(this Scope scope, string webRoot)
+        {
+            scope.Request.Env = scope.Request.Env.Add("DOCUMENT_ROOT", webRoot);
         }
     }
 }

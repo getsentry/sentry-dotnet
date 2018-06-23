@@ -13,14 +13,14 @@ namespace Sentry.Http
         internal Uri SentryUri { get; }
 
         /// <summary>
-        /// Use 'Accept-Encoding: gzip'
+        /// Decompression methods accepted
         /// </summary>
-        public bool AcceptGzip { get; set; } = true;
-
-        /// <summary>
-        /// Use 'Accept-Encoding: deflate'
-        /// </summary>
-        public bool AcceptDeflate { get; set; } = true;
+        /// <remarks>
+        /// By default accepts all available compression methods supported by the platform
+        /// </remarks>
+        public DecompressionMethods DecompressionMethods { get; set; }
+            // Note the ~ enabling all bits
+            = ~DecompressionMethods.None;
 
         /// <summary>
         /// An optional web proxy
@@ -29,7 +29,8 @@ namespace Sentry.Http
 
         public ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
 
-        internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; }
+        // Expected to call into the internal logging which will be expose
+        internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; set; }
 
         internal Func<HttpMessageHandler> HttpMessageHandlerFactory { get; set; }
 

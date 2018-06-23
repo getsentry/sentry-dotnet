@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Protocol;
 
 namespace Sentry.Internal
@@ -60,7 +61,7 @@ namespace Sentry.Internal
         {
             var currentScopeAndClientStack = ScopeAndClientStack;
             currentScopeAndClientStack = currentScopeAndClientStack.Pop(out var top);
-            currentScopeAndClientStack = currentScopeAndClientStack.Push((top.scope, client ?? DisabledSentryClient.Instance));
+            currentScopeAndClientStack = currentScopeAndClientStack.Push((top.scope, client ?? DisabledHub.Instance));
             ScopeAndClientStack = currentScopeAndClientStack;
         }
 

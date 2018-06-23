@@ -2,15 +2,15 @@ using System;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 
-namespace Sentry.Internal
+namespace Sentry.Extensibility
 {
-    internal sealed class DisabledSentryClient : ISentryClient, IDisposable
+    public class DisabledHub : IHub, IDisposable
     {
-        public static DisabledSentryClient Instance = new DisabledSentryClient();
+        public static DisabledHub Instance = new DisabledHub();
 
         public bool IsEnabled => false;
 
-        private DisabledSentryClient() { }
+        private DisabledHub() { }
 
         public void ConfigureScope(Action<Scope> configureScope) { }
         public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => Task.CompletedTask;

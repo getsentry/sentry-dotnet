@@ -2,7 +2,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Sentry.Internal;
+using Sentry.Extensibility;
+using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;
 using static Sentry.Internal.Constants;
@@ -10,8 +11,8 @@ using static Sentry.DsnSamples;
 
 namespace Sentry.Tests
 {
-    [Collection(DsnEnvironmentVariable)]
-    public class SentryCoreTests
+    [Collection(nameof(SentrySdkCollection))]
+    public class SentryCoreTests : SentrySdkTestFixture
     {
         [Fact]
         public void IsEnabled_StartsOfFalse()
@@ -107,7 +108,7 @@ namespace Sentry.Tests
         public void Init_MultipleCalls_ReplacesHubWithLatest()
         {
             var first = SentryCore.Init(ValidDsnWithSecret);
-            SentryCore.AddBreadcrumb("test", "type");
+            SentryCore.AddBreadcrumb("test", "category");
             var called = false;
             SentryCore.ConfigureScope(p =>
             {
@@ -134,7 +135,7 @@ namespace Sentry.Tests
         {
             var first = SentryCore.Init(ValidDsnWithSecret);
             var second = SentryCore.Init(ValidDsnWithSecret);
-            SentryCore.AddBreadcrumb("test", "type");
+            SentryCore.AddBreadcrumb("test", "category");
             first.Dispose();
             var called = false;
             SentryCore.ConfigureScope(p =>
@@ -179,10 +180,10 @@ namespace Sentry.Tests
         public void PushScope_MultiCallParameterless_SameDisposableInstance() => Assert.Same(SentryCore.PushScope(), SentryCore.PushScope());
 
         [Fact]
-        public void AddBreadcrumb_NoClock_NoOp() => SentryCore.AddBreadcrumb(message: null, type: null);
+        public void AddBreadcrumb_NoClock_NoOp() => SentryCore.AddBreadcrumb(message: null);
 
         [Fact]
-        public void AddBreadcrumb_WithClock_NoOp() => SentryCore.AddBreadcrumb(clock: null, null, null);
+        public void AddBreadcrumb_WithClock_NoOp() => SentryCore.AddBreadcrumb(clock: null, null);
 
         [Fact]
         public void ConfigureScope_Sync_CallbackNeverInvoked()

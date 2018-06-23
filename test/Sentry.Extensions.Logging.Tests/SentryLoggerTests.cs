@@ -30,7 +30,7 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         private readonly Fixture _fixture = new Fixture();
-        private const string BreadcrumbType = "default";
+        private const string BreadcrumbType = null;
 
         [Fact]
         public void Log_InvokesSdkIsEnabled()
@@ -228,8 +228,8 @@ namespace Sentry.Extensions.Logging.Tests
                 .AddBreadcrumb(
                     _fixture.Clock,
                     Arg.Any<string>(),
-                    BreadcrumbType,
                     _fixture.CategoryName,
+                    BreadcrumbType,
                     null,
                     Arg.Any<BreadcrumbLevel>());
         }
@@ -245,8 +245,8 @@ namespace Sentry.Extensions.Logging.Tests
                 .AddBreadcrumb(
                     _fixture.Clock,
                     Arg.Any<string>(),
-                    BreadcrumbType,
                     _fixture.CategoryName,
+                    BreadcrumbType,
                     null,
                     Arg.Any<BreadcrumbLevel>());
         }

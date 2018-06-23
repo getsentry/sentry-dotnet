@@ -90,6 +90,9 @@ namespace Sentry
             return new DisposeHandle(hub);
         }
 
+        // For testing
+        internal static void UseHub(IHub hub) => _hub = hub;
+
         // Used for testing
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Close()
@@ -169,11 +172,11 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void AddBreadcrumb(
             string message,
-            string type = null,
             string category = null,
+            string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _hub.AddBreadcrumb(message, type, category, data, level);
+            => _hub.AddBreadcrumb(message, category, type, data, level);
 
         /// <summary>
         /// Adds a breadcrumb to the current scope
@@ -193,11 +196,11 @@ namespace Sentry
         public static void AddBreadcrumb(
             ISystemClock clock,
             string message,
-            string type = null,
             string category = null,
+            string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _hub.AddBreadcrumb(clock, message, type, category, data, level);
+            => _hub.AddBreadcrumb(clock, message, category, type, data, level);
 
         /// <summary>
         /// Configures the scope through the callback.

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
 
@@ -65,7 +66,7 @@ namespace Sentry.Tests.Internals
             sut.BindClient(null);
             var (_, client) = sut.GetCurrent();
 
-            Assert.Same(DisabledSentryClient.Instance, client);
+            Assert.Same(DisabledHub.Instance, client);
         }
 
         [Fact]

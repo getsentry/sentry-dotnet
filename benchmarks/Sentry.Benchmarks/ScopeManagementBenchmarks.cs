@@ -1,5 +1,6 @@
 using System;
 using BenchmarkDotNet.Attributes;
+using Sentry.Extensibility;
 using Sentry.Internal;
 
 namespace Sentry.Benchmarks
@@ -9,7 +10,7 @@ namespace Sentry.Benchmarks
         private SentryScopeManager _scopeManager;
 
         [IterationSetup]
-        public void IterationSetup() => _scopeManager = new SentryScopeManager(new SentryOptions(), DisabledSentryClient.Instance);
+        public void IterationSetup() => _scopeManager = new SentryScopeManager(new SentryOptions(), DisabledHub.Instance);
 
         [IterationCleanup]
         public void IterationCleanup() => _scopeManager.Dispose();

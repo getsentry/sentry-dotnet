@@ -174,7 +174,7 @@ namespace Sentry.Protocol
             }
         }
 
-        protected Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
+        protected internal Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
 
         internal void Evaluate()
         {
@@ -184,8 +184,8 @@ namespace Sentry.Protocol
             }
             catch (Exception e)
             {
-                // TODO: internal error reporting
-                Debug.WriteLine(e);
+                this.AddBreadcrumb("Failed invoking event handler: " + e,
+                    level: BreadcrumbLevel.Error);
             }
         }
 
