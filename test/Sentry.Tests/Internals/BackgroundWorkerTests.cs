@@ -158,28 +158,29 @@ namespace Sentry.Tests.Internals
         {
             // Arrange
             var expected = new SentryEvent();
-            var sync = new AutoResetEvent(false);
+            var transportEvent = new ManualResetEvent(false);
+            var eventsQueuedEvent = new ManualResetEvent(false);
             _fixture.BackgroundWorkerOptions.MaxQueueItems = 1;
             _fixture.Transport
                 .When(t => t.CaptureEventAsync(expected, Arg.Any<CancellationToken>()))
                 .Do(p =>
                 {
-                    sync.Set(); // Processing first event
-                    sync.WaitOne(); // Stay blocked while test queue events
+                    transportEvent.Set(); // Processing first event
+                    eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
                 });
 
             using (var sut = _fixture.GetSut())
             {
                 // Act
                 sut.EnqueueEvent(expected);
-                sync.WaitOne(); // Wait first event to be in-flight
+                transportEvent.WaitOne(); // Wait first event to be in-flight
 
                 var queued = sut.EnqueueEvent(expected);
                 Assert.True(queued); // Queue to limit (1)
                 queued = sut.EnqueueEvent(expected);
                 Assert.False(queued); // Fails to queue second
 
-                sync.Set();
+                eventsQueuedEvent.Set();
             }
         }
 

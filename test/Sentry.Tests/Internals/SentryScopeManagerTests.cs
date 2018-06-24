@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Sentry.Tests.Internals
 {
-    public class SentryScopeManagementTests
+    public class SentryScopeManagerTests
     {
         private class Fixture
         {
@@ -191,15 +191,16 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var root = sut.GetCurrent();
 
-            var evt = new AutoResetEvent(false);
+            var t1Evt = new ManualResetEvent(false);
+            var t2Evt = new ManualResetEvent(false);
 
             // Creates event second, disposes first
             var t1 = Task.Run(() =>
             {
-                evt.Set(); // unblock task start
+                t1Evt.Set(); // unblock task start
 
                 // Wait t2 create scope
-                evt.WaitOne();
+                t2Evt.WaitOne();
                 try
                 {
                     // t2 created scope, make sure this parent is still root
@@ -213,13 +214,14 @@ namespace Sentry.Tests.Internals
                 }
                 finally
                 {
-                    evt.Set();
+                    t1Evt.Set();
                 }
 
                 Assert.Equal(root, sut.GetCurrent());
             });
 
-            evt.WaitOne(); // Wait t1 start
+            t1Evt.WaitOne(); // Wait t1 start
+            t1Evt.Reset();
 
             // Creates a scope first, disposes after t2
             var t2 = Task.Run(() =>
@@ -233,11 +235,11 @@ namespace Sentry.Tests.Internals
                 }
                 finally
                 {
-                    evt.Set(); // release t1
+                    t2Evt.Set(); // release t1
                 }
 
                 // Wait for t1 to create and dispose its scope
-                evt.WaitOne();
+                t1Evt.WaitOne();
                 scope.Dispose();
 
                 Assert.Equal(root, sut.GetCurrent());
