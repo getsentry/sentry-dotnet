@@ -69,7 +69,7 @@ namespace Sentry.Tests.Internals
         public void Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
         {
             _fixture.BackgroundWorkerOptions.ShutdownTimeout = default; // Don't wait
-            var sync = new AutoResetEvent(false);
+
             var evt = new SentryEvent();
             using (var sut = _fixture.GetSut())
             {
@@ -80,21 +80,17 @@ namespace Sentry.Tests.Internals
                         var token = p.ArgAt<CancellationToken>(1);
                         token.ThrowIfCancellationRequested();
 
-                        sync.Set();
-                        sync.WaitOne();
+                        // First adds 2 extra items and requests shutdown
+                        sut.EnqueueEvent(evt);
+                        sut.EnqueueEvent(evt);
+
+                        sut.Dispose(); // Make sure next round awaits with a cancelled token
                     });
 
                 sut.EnqueueEvent(evt);
 
-                Assert.True(sync.WaitOne(TimeSpan.FromSeconds(2)));
+                Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(5)));
 
-                sut.EnqueueEvent(evt);
-                sut.EnqueueEvent(evt);
-
-                sut.Dispose(); // Make sure next round awaits with a cancelled token
-                sync.Set();
-
-                Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
                 // First event was sent, second hit transport with a cancelled token.
                 // Third never taken from the queue
                 Assert.Single(_fixture.Queue);
