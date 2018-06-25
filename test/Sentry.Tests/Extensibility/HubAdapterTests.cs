@@ -20,7 +20,7 @@ namespace Sentry.Tests.Extensibility
         public HubAdapterTests()
         {
             Hub = Substitute.For<IHub>();
-            SentryCore.UseHub(Hub);
+            SentrySdk.UseHub(Hub);
         }
 
         [Fact]

@@ -63,7 +63,7 @@ namespace Sentry.Testing
 
         public void Dispose()
         {
-            SentryCore.Close();
+            SentrySdk.Close();
         }
     }
 }

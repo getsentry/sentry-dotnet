@@ -19,7 +19,7 @@ namespace Sentry.Samples.Console.Customized
         private static async Task Main(string[] args)
         {
             // When the SDK is disabled, no callback is executed:
-            await SentryCore.ConfigureScopeAsync(async scope =>
+            await SentrySdk.ConfigureScopeAsync(async scope =>
             {
                 // Never executed:
                 // This could be any async I/O operation, like a DB query
@@ -28,7 +28,7 @@ namespace Sentry.Samples.Console.Customized
             });
 
             // Enable the SDK
-            using (SentryCore.Init(o =>
+            using (SentrySdk.Init(o =>
             {
                 // Modifications to event before it goes out. Could replace the event altogether
                 o.BeforeSend = @event =>
@@ -60,14 +60,14 @@ namespace Sentry.Samples.Console.Customized
                 });
             }))
             {
-                await SentryCore.ConfigureScopeAsync(async scope =>
+                await SentrySdk.ConfigureScopeAsync(async scope =>
                 {
                     // This could be any async I/O operation, like a DB query
                     await Task.Yield();
                     scope.SetExtra("Key", "Value");
                 });
 
-                SentryCore.CaptureException(new Exception("Something went wrong."));
+                SentrySdk.CaptureException(new Exception("Something went wrong."));
 
                 // -------------------------
 
@@ -85,7 +85,7 @@ namespace Sentry.Samples.Console.Customized
 
                 } // Dispose the client which flushes any queued events
 
-                SentryCore.CaptureException(
+                SentrySdk.CaptureException(
                     new Exception("Error outside of the admin section: Goes to the default DSN"));
 
             }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
@@ -104,19 +104,19 @@ namespace Sentry.Samples.Console.Customized
 
             public void Invoke(dynamic request)
             {
-                using (SentryCore.PushScope())
+                using (SentrySdk.PushScope())
                 {
-                    SentryCore.AddBreadcrumb(request.Path, "request-path");
+                    SentrySdk.AddBreadcrumb(request.Path, "request-path");
 
                     // Change the SentryClient in case the request is to the admin part:
                     if (request.Path.StartsWith("/admin"))
                     {
                         // Within this scope, the _adminClient will be used instead of whatever
                         // client was defined before this point:
-                        SentryCore.BindClient(_adminClient);
+                        SentrySdk.BindClient(_adminClient);
                     }
 
-                    SentryCore.CaptureException(new Exception("Error at the admin section"));
+                    SentrySdk.CaptureException(new Exception("Error at the admin section"));
                     // Else it uses the default client
 
                     _middleware?.Invoke(request);
