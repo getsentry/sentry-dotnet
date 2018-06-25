@@ -80,8 +80,6 @@ namespace Sentry.Tests.Internals
                         var token = p.ArgAt<CancellationToken>(1);
                         token.ThrowIfCancellationRequested();
 
-                        // First adds 2 extra items and requests shutdown
-                        sut.EnqueueEvent(evt);
                         sut.EnqueueEvent(evt);
 
                         sut.Dispose(); // Make sure next round awaits with a cancelled token
