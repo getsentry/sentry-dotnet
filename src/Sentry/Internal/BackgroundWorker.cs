@@ -10,8 +10,10 @@ namespace Sentry.Internal
     internal class BackgroundWorker : IBackgroundWorker, IDisposable
     {
         private readonly BackgroundWorkerOptions _options;
-        private readonly BlockingCollection<SentryEvent> _queue;
+        private readonly IProducerConsumerCollection<SentryEvent> _queue;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly SemaphoreSlim _inSemaphore;
+        private readonly SemaphoreSlim _outSemaphore;
         private bool _disposed;
 
         internal Task WorkerTask { get; }
@@ -32,18 +34,21 @@ namespace Sentry.Internal
         {
             Debug.Assert(transport != null);
             Debug.Assert(options != null);
+
+            _inSemaphore = new SemaphoreSlim(options.MaxQueueItems, options.MaxQueueItems);
+            _outSemaphore = new SemaphoreSlim(0, options.MaxQueueItems);
             _options = options;
 
             _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
-            queue = queue ?? new ConcurrentQueue<SentryEvent>();
-
-            _queue = new BlockingCollection<SentryEvent>(queue, _options.MaxQueueItems);
+            _queue = queue ?? new ConcurrentQueue<SentryEvent>();
 
             WorkerTask = Task.Run(
                 async () => await WorkerAsync(
                     _queue,
                     _options,
                     transport,
+                    _inSemaphore,
+                    _outSemaphore,
                     _cancellationTokenSource.Token)
                     .ConfigureAwait(false));
         }
@@ -55,65 +60,97 @@ namespace Sentry.Internal
                 throw new ObjectDisposedException(nameof(BackgroundWorker));
             }
 
-            return _queue.TryAdd(
-                @event,
-                (int)_options.FullQueueBlockTimeout.TotalMilliseconds);
+            if (@event == null)
+            {
+                return false;
+            }
+
+            var acquired = _inSemaphore.Wait((int)_options.FullQueueBlockTimeout.TotalMilliseconds);
+            if (acquired)
+            {
+                _queue.TryAdd(@event);
+                _outSemaphore.Release();
+            }
+            return acquired;
         }
 
         private static async Task WorkerAsync(
-           BlockingCollection<SentryEvent> queue,
+           IProducerConsumerCollection<SentryEvent> queue,
            BackgroundWorkerOptions options,
            ITransport transport,
+           SemaphoreSlim inSemaphore,
+           SemaphoreSlim outSemaphore,
            CancellationToken cancellation)
         {
             var shutdownTimeout = new CancellationTokenSource();
             var shutdownRequested = false;
 
-            while (!shutdownTimeout.IsCancellationRequested)
+            try
             {
-                // If the cancellation was signaled,
-                // set the latest we can keep reading off the queue (while there's still stuff to read)
-                if (!shutdownRequested && cancellation.IsCancellationRequested)
+                while (!shutdownTimeout.IsCancellationRequested)
                 {
-                    shutdownTimeout.CancelAfter(options.ShutdownTimeout);
-                    shutdownRequested = true;
-                }
+                    // If the cancellation was signaled,
+                    // set the latest we can keep reading off of the queue (while there's still stuff to read)
+                    // No longer synchronized with outSemaphore (Enqueue will throw object disposed),
+                    // run until the end of the queue or shutdownTimeout
+                    if (!shutdownRequested)
+                    {
+                        try
+                        {
+                            await outSemaphore.WaitAsync(cancellation).ConfigureAwait(false);
+                        }
+                        // Cancellation requested, scheduled shutdown but continue in case there are more items
+                        catch (OperationCanceledException)
+                        {
+                            if (options.ShutdownTimeout == TimeSpan.Zero)
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                shutdownTimeout.CancelAfter(options.ShutdownTimeout);
+                            }
 
-                if (queue.TryTake(out var @event))
-                {
-                    try
-                    {
-                        // Optionally we can keep multiple requests in-flight concurrently:
-                        // instead of awaiting here, keep reading from the queue while less than
-                        // N events are being sent
-                        await transport.CaptureEventAsync(@event, shutdownTimeout.Token).ConfigureAwait(false);
-                    }
-                    catch (Exception exception)
-                    {
-                        // TODO: Notify error handler
-                        Debug.WriteLine(exception.ToString());
-                    }
-                }
-                else
-                {
-                    if (shutdownRequested)
-                    {
-                        break; // Shutdown requested and queue is empty. ready to quit.
+                            shutdownRequested = true;
+                        }
                     }
 
-                    // Queue is empty, wait asynchronously before polling again
-                    try
+                    if (queue.TryTake(out var @event))
                     {
-                        await Task.Delay(options.EmptyQueueDelay, cancellation).ConfigureAwait(false);
+                        inSemaphore.Release();
+                        try
+                        {
+                            // Optionally we can keep multiple requests in-flight concurrently:
+                            // instead of awaiting here, keep reading from the queue while less than
+                            // N events are being sent
+                            await transport.CaptureEventAsync(@event, shutdownTimeout.Token).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            // Shutdown token triggered. Time to exit.
+                            return;
+                        }
+                        catch (Exception exception)
+                        {
+                            // TODO: Notify error handler
+                            Debug.WriteLine(exception.ToString());
+                        }
                     }
-                    // Cancellation requested, scheduled shutdown but loop again in case there are more items
-                    catch (OperationCanceledException)
+                    else
                     {
-                        shutdownTimeout.CancelAfter(options.ShutdownTimeout);
-                        shutdownRequested = true;
+                        Debug.Assert(shutdownRequested);
+
+                        // Empty queue. Exit.
+                        return;
                     }
                 }
             }
+            finally
+            {
+                inSemaphore.Dispose();
+                outSemaphore.Dispose();
+            }
+
         }
 
         /// <summary>
@@ -133,27 +170,21 @@ namespace Sentry.Internal
             {
                 // Immediately requests the Worker to stop.
                 _cancellationTokenSource.Cancel();
-                try
-                {
-                    // If there's anything in the queue, it'll keep running until 'shutudownTimeout' is reached
-                    // If the queue is empty it will quit immediately
-                    WorkerTask.GetAwaiter().GetResult();
-                }
-                catch (Exception exception)
-                {
-                    // TODO: Notify error handler
-                    Debug.WriteLine(exception.ToString());
-                }
 
-                if (_queue.Count > 0)
-                {
-                    // TODO: Notify error handler
-                    Debug.WriteLine($"Worker stopped while {_queue.Count} were still in the queue.");
-                }
+                // If there's anything in the queue, it'll keep running until 'shutudownTimeout' is reached
+                // If the queue is empty it will quit immediately
+                WorkerTask.Wait(_options.ShutdownTimeout);
             }
-            finally
+            catch (Exception exception)
             {
-                _queue.Dispose();
+                // TODO: Notify error handler
+                Debug.WriteLine(exception.ToString());
+            }
+
+            if (_queue.Count > 0)
+            {
+                // TODO: Notify error handler
+                Debug.WriteLine($"Worker stopped while {_queue.Count} were still in the queue.");
             }
         }
     }

@@ -6,7 +6,6 @@ using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests.Internals
 {
-    [Collection(DsnEnvironmentVariable)]
     public class DsnLocatorTests
     {
         [Fact]
