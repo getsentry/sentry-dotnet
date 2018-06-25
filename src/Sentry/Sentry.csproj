@@ -11,4 +11,14 @@
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.Metadata" Version="1.6.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Composite" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.StackTrace.Sources" Version="2.2.0-*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.TypeNameHelper.Sources" Version="2.2.0-*" PrivateAssets="All" />
+  </ItemGroup>
+
 </Project>

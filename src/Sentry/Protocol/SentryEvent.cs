@@ -4,9 +4,12 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.StackTrace.Sources;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 
@@ -135,6 +138,11 @@ namespace Sentry
             }
         }
 
+
+        // TODO: This is a hack to test this stuff
+        private static IFileProvider Provider = new CompositeFileProvider(new EmbeddedFileProvider(Assembly.GetEntryAssembly()));
+        private static ExceptionDetailsProvider DetailsProvider = new ExceptionDetailsProvider(Provider, 10);
+
         private void Populate(Exception exception)
         {
             // TODO: should this be dotnet instead?
@@ -157,7 +165,6 @@ namespace Sentry
             }
 
             InternalModules = builder.ToImmutable();
-
             if (exception != null)
             {
                 var sentryExceptions = CreateSentryException(exception)
@@ -173,6 +180,7 @@ namespace Sentry
         {
             Debug.Assert(exception != null);
 
+            // TODO: Replace it with: ExceptionDetailsProvider.FlattenAndReverseExceptionTree
             if (exception is AggregateException ae)
             {
                 foreach (var inner in ae.InnerExceptions.SelectMany(CreateSentryException))
@@ -197,14 +205,12 @@ namespace Sentry
                 Mechanism = GetMechanism(exception)
             };
 
-
-            var stackTrace = new StackTrace(exception, true);
-
-            // Sentry expects the frames to be sent in reversed order
-            var frames = stackTrace.GetFrames()
+            var frames = StackTraceHelper.GetFrames(exception)
+                // Sentry expects the frames to be sent in reversed order
                 ?.Reverse()
                 .Select(CreateSentryStackFrame)
-                .ToList();
+                .ToArray();
+
 
             if (frames != null)
             {
@@ -247,47 +253,62 @@ namespace Sentry
             return mechanism;
         }
 
-        public static SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)
+        internal static SentryStackFrame CreateSentryStackFrame(StackFrameInfo frameInfo)
         {
             const string unknownRequiredField = "(unknown)";
 
-            var frame = new SentryStackFrame();
+            var sentryFrame = new SentryStackFrame();
 
-            if (stackFrame.HasMethod())
+            var frame = frameInfo.StackFrame;
+            if (frame.HasMethod())
             {
-                var method = stackFrame.GetMethod();
+                var method = frame.GetMethod();
 
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
-                frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
-                frame.Package = method.DeclaringType?.Assembly.FullName;
-                frame.Function = method.Name;
-                frame.ContextLine = method.ToString();
+                sentryFrame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
+                sentryFrame.Package = method.DeclaringType?.Assembly.FullName;
+                sentryFrame.Function = frameInfo.MethodDisplayInfo.ToString();
+                sentryFrame.ContextLine = method.ToString();
             }
 
-            frame.InApp = !IsSystemModuleName(frame.Module);
-            frame.FileName = stackFrame.GetFileName();
+            sentryFrame.InApp = !IsSystemModuleName(sentryFrame.Module);
+            sentryFrame.AbsolutePath = frame.GetFileName();
 
-            if (stackFrame.HasILOffset())
+            if (frame.HasILOffset())
             {
-                frame.InstructionOffset = stackFrame.GetILOffset();
+                sentryFrame.InstructionOffset = frame.GetILOffset();
             }
-            var lineNo = stackFrame.GetFileLineNumber();
+            var lineNo = frame.GetFileLineNumber();
             if (lineNo != 0)
             {
-                frame.LineNumber = lineNo;
+                sentryFrame.LineNumber = lineNo;
             }
 
-            var colNo = stackFrame.GetFileColumnNumber();
+            var colNo = frame.GetFileColumnNumber();
             if (lineNo != 0)
             {
-                frame.ColumnNumber = colNo;
+                sentryFrame.ColumnNumber = colNo;
+            }
+
+            var sourceInfo = DetailsProvider.GetStackFrameSourceCodeInfo(
+                sentryFrame.Function,
+                sentryFrame.AbsolutePath,
+                sentryFrame.LineNumber ?? 0);
+
+            var contextLines = sourceInfo.ContextCode.ToList();
+            if (contextLines.Count > 0)
+            {
+                sentryFrame.ContextLine = string.Join("\n", contextLines);
+                sentryFrame.PreContext = sourceInfo.PreContextCode.ToList();
+                sentryFrame.PostContext = sourceInfo.PostContextCode.ToList();
             }
 
             // TODO: Consider Ben.Demystifier (not on netcoreapp2.1+ which has by default)
-            DemangleAsyncFunctionName(frame);
-            DemangleAnonymousFunction(frame);
+            DemangleAsyncFunctionName(sentryFrame);
+            DemangleAnonymousFunction(sentryFrame);
 
-            return frame;
+            // TODO: Consider Ben.Demystifier (not on netcoreapp2.1+ which has by default)
+            return sentryFrame;
 
             // TODO: make this extensible
             bool IsSystemModuleName(string moduleName)
