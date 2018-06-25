@@ -84,6 +84,7 @@ namespace Sentry.Internal
         {
             var shutdownTimeout = new CancellationTokenSource();
             var shutdownRequested = false;
+
             try
             {
                 while (!shutdownTimeout.IsCancellationRequested)
@@ -103,12 +104,13 @@ namespace Sentry.Internal
                         {
                             if (options.ShutdownTimeout == TimeSpan.Zero)
                             {
-                                shutdownTimeout.Cancel();
+                                return;
                             }
                             else
                             {
                                 shutdownTimeout.CancelAfter(options.ShutdownTimeout);
                             }
+
                             shutdownRequested = true;
                         }
                     }
@@ -164,10 +166,11 @@ namespace Sentry.Internal
 
             _disposed = true;
 
-            // Immediately requests the Worker to stop.
-            _cancellationTokenSource.Cancel();
             try
             {
+                // Immediately requests the Worker to stop.
+                _cancellationTokenSource.Cancel();
+
                 // If there's anything in the queue, it'll keep running until 'shutudownTimeout' is reached
                 // If the queue is empty it will quit immediately
                 WorkerTask.Wait(_options.ShutdownTimeout);
