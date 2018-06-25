@@ -43,9 +43,9 @@ namespace Sentry.AspNetCore
         /// Initializes the SDK: This action should be done only once per application lifetime.
         /// </summary>
         /// <remarks>
-        /// Using this initialization method is an alternative to calling <see cref="SentryCore.Init(string)"/> or any overload.
+        /// Using this initialization method is an alternative to calling <see cref="SentrySdk.Init(string)"/> or any overload.
         ///
-        /// Initializing the SDK multiple times simply means a new instance is set to the static <see cref="SentryCore"/>.
+        /// Initializing the SDK multiple times simply means a new instance is set to the static <see cref="SentrySdk"/>.
         /// Any scope data like breadcrumbs added up to calling Init will be not be included in future events.
         ///
         /// The caller of Init is responsible for disposing the instance returned. If the SDK is initialized

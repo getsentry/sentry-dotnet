@@ -36,11 +36,11 @@ namespace Sentry.AspNetCore.Tests
             try
             {
                 assert(Services);
-                Assert.True(SentryCore.IsEnabled);
+                Assert.True(SentrySdk.IsEnabled);
             }
             finally
             {
-                SentryCore.Close();
+                SentrySdk.Close();
             }
         }
 
@@ -49,7 +49,7 @@ namespace Sentry.AspNetCore.Tests
         {
             WebHostBuilder.UseSentry();
             assert(Services);
-            Assert.False(SentryCore.IsEnabled);
+            Assert.False(SentrySdk.IsEnabled);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
@@ -57,7 +57,7 @@ namespace Sentry.AspNetCore.Tests
         {
             WebHostBuilder.UseSentry(Internal.Constants.DisableSdkDsnValue);
             assert(Services);
-            Assert.False(SentryCore.IsEnabled);
+            Assert.False(SentrySdk.IsEnabled);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
@@ -65,7 +65,7 @@ namespace Sentry.AspNetCore.Tests
         {
             WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
             assert(Services);
-            Assert.False(SentryCore.IsEnabled);
+            Assert.False(SentrySdk.IsEnabled);
         }
 
         public static IEnumerable<object[]> ExpectedServices()

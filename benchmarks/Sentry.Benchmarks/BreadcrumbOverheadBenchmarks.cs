@@ -23,7 +23,7 @@ namespace Sentry.Benchmarks
 
         [GlobalSetup(Target = nameof(EnabledClient_AddBreadcrumb) + "," +
                               nameof(EnabledSdk_PushScope_AddBreadcrumb_PopScope))]
-        public void EnabledSdk() => _sdk = SentryCore.Init(Constants.ValidDsn);
+        public void EnabledSdk() => _sdk = SentrySdk.Init(Constants.ValidDsn);
 
         [GlobalCleanup(Target = nameof(EnabledClient_AddBreadcrumb) + "," +
                                 nameof(EnabledSdk_PushScope_AddBreadcrumb_PopScope))]
@@ -34,7 +34,7 @@ namespace Sentry.Benchmarks
         {
             for (int i = 0; i < BreadcrumbsCount; i++)
             {
-                SentryCore.AddBreadcrumb(
+                SentrySdk.AddBreadcrumb(
                     Message,
                     Category,
                     Type,
@@ -48,7 +48,7 @@ namespace Sentry.Benchmarks
         {
             for (int i = 0; i < BreadcrumbsCount; i++)
             {
-                SentryCore.AddBreadcrumb(
+                SentrySdk.AddBreadcrumb(
                     Message,
                     Category,
                     Type,
@@ -60,11 +60,11 @@ namespace Sentry.Benchmarks
         [Benchmark(Description = "Disabled SDK: Push scope, add breadcrumbs, pop scope")]
         public void DisabledClient_PushScope_AddBreadcrumb_PopScope()
         {
-            using (SentryCore.PushScope())
+            using (SentrySdk.PushScope())
             {
                 for (int i = 0; i < BreadcrumbsCount; i++)
                 {
-                    SentryCore.AddBreadcrumb(
+                    SentrySdk.AddBreadcrumb(
                         Message,
                         Category,
                         Type,
@@ -77,11 +77,11 @@ namespace Sentry.Benchmarks
         [Benchmark(Description = "Enabled SDK: Push scope, add breadcrumbs, pop scope")]
         public void EnabledSdk_PushScope_AddBreadcrumb_PopScope()
         {
-            using (SentryCore.PushScope())
+            using (SentrySdk.PushScope())
             {
                 for (int i = 0; i < BreadcrumbsCount; i++)
                 {
-                    SentryCore.AddBreadcrumb(
+                    SentrySdk.AddBreadcrumb(
                         Message,
                         Category,
                         Type,

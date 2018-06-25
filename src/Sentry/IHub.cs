@@ -4,9 +4,9 @@ namespace Sentry
     /// SDK API contract which combines a client and scope management
     /// </summary>
     /// <remarks>
-    /// The contract of which <see cref="T:Sentry.SentryCore" /> exposes statically.
+    /// The contract of which <see cref="T:Sentry.SentrySdk" /> exposes statically.
     /// This interface exist to allow better testability of integrations which otherwise
-    /// would require dependency to the static <see cref="T:Sentry.SentryCore" />
+    /// would require dependency to the static <see cref="T:Sentry.SentrySdk" />
     /// </remarks>
     /// <inheritdoc cref="ISentryClient" />
     /// <inheritdoc cref="ISentryScopeManager" />

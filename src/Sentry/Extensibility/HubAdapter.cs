@@ -9,10 +9,10 @@ using Sentry.Protocol;
 namespace Sentry.Extensibility
 {
     /// <summary>
-    /// An implementation of <see cref="IHub" /> which forwards any call to <see cref="SentryCore" />
+    /// An implementation of <see cref="IHub" /> which forwards any call to <see cref="SentrySdk" />
     /// </summary>
     /// <remarks>
-    /// Allows testing classes which otherwise would need to depend on static <see cref="SentryCore" />
+    /// Allows testing classes which otherwise would need to depend on static <see cref="SentrySdk" />
     /// by having them depend on <see cref="IHub"/> instead, which can be mocked.
     /// </remarks>
     /// <inheritdoc cref="IHub" />
@@ -20,33 +20,33 @@ namespace Sentry.Extensibility
     public sealed class HubAdapter : IHub
     {
         /// <summary>
-        /// The single instance which forwards all calls to <see cref="SentryCore"/>
+        /// The single instance which forwards all calls to <see cref="SentrySdk"/>
         /// </summary>
         public static readonly HubAdapter Instance = new HubAdapter();
 
         private HubAdapter() { }
 
-        public bool IsEnabled { [DebuggerStepThrough] get => SentryCore.IsEnabled; }
+        public bool IsEnabled { [DebuggerStepThrough] get => SentrySdk.IsEnabled; }
 
         [DebuggerStepThrough]
         public void ConfigureScope(Action<Scope> configureScope)
-            => SentryCore.ConfigureScope(configureScope);
+            => SentrySdk.ConfigureScope(configureScope);
 
         [DebuggerStepThrough]
         public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
-            => SentryCore.ConfigureScopeAsync(configureScope);
+            => SentrySdk.ConfigureScopeAsync(configureScope);
 
         [DebuggerStepThrough]
         public IDisposable PushScope()
-            => SentryCore.PushScope();
+            => SentrySdk.PushScope();
 
         [DebuggerStepThrough]
         public IDisposable PushScope<TState>(TState state)
-            => SentryCore.PushScope(state);
+            => SentrySdk.PushScope(state);
 
         [DebuggerStepThrough]
         public void BindClient(ISentryClient client)
-            => SentryCore.BindClient(client);
+            => SentrySdk.BindClient(client);
 
         [DebuggerStepThrough]
         public void AddBreadcrumb(
@@ -55,7 +55,7 @@ namespace Sentry.Extensibility
             string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => SentryCore.AddBreadcrumb(message, category, type, data, level);
+            => SentrySdk.AddBreadcrumb(message, category, type, data, level);
 
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -66,7 +66,7 @@ namespace Sentry.Extensibility
             string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => SentryCore.AddBreadcrumb(
+            => SentrySdk.AddBreadcrumb(
                 clock: clock,
                 message: message,
                 type: type,
@@ -76,15 +76,15 @@ namespace Sentry.Extensibility
 
         [DebuggerStepThrough]
         public Guid CaptureEvent(SentryEvent evt)
-            => SentryCore.CaptureEvent(evt);
+            => SentrySdk.CaptureEvent(evt);
 
         [DebuggerStepThrough]
         public Guid CaptureException(Exception exception)
-            => SentryCore.CaptureException(exception);
+            => SentrySdk.CaptureException(exception);
 
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public Guid CaptureEvent(SentryEvent evt, Scope scope)
-            => SentryCore.CaptureEvent(evt, scope);
+            => SentrySdk.CaptureEvent(evt, scope);
     }
 }

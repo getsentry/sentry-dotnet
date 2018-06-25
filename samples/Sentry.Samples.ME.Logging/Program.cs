@@ -11,7 +11,7 @@ class Program
             .AddConsole(LogLevel.Trace)
             .AddSentry(o =>
             {
-                // Initialize the SDK, alternative to relying on previously called: `using(SentryCore.Init)`:
+                // Initialize the SDK, alternative to relying on previously called: `using(SentrySdk.Init)`:
                 // this is useful when Logging is the first or is the only integration enabled:
                 o.Init(i =>
                 {
