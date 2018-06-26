@@ -50,9 +50,8 @@ namespace Sentry.Internal.Http
                 var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var responseId = JsonSerializer.DeserializeObject<SentrySuccessfulResponseBody>(body)?.id;
                 Debug.Assert(@event.EventId.ToString("N") == responseId);
-#else
-                return;
 #endif
+                return;
             }
 
             if (_options.HandleFailedEventSubmission != null)
