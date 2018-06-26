@@ -128,7 +128,29 @@ namespace Sentry.AspNetCore.Tests
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            _fixture.Hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
+            _fixture.Hub.Received().ConfigureScope(Arg.Any<Action<Scope>>());
+        }
+
+        [Fact]
+        public async Task InvokeAsync_LocksScope_BeforeConfiguringScope()
+        {
+            var verified = false;
+            var scope = new Scope();
+            _fixture.Hub
+                .When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(Callback
+                    .First(c => c.ArgAt<Action<Scope>>(0)(scope))
+                    .Then(c =>
+                    {
+                        Assert.True(scope.Options.Locked);
+                        verified = true;
+                    }));
+
+            var sut = _fixture.GetSut();
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            Assert.True(verified);
         }
 
         [Fact]

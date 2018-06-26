@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Sentry.Extensibility;
 using Sentry.Infrastructure;
 
 namespace Sentry.Extensions.Logging
@@ -31,10 +30,7 @@ namespace Sentry.Extensions.Logging
             _hub = hub;
         }
 
-        public IDisposable BeginScope<TState>(TState state)
-            => _options.PushSentryScopeOnBeginScope
-                ? _hub.PushScope(state)
-                : DisabledHub.Instance;
+        public IDisposable BeginScope<TState>(TState state) => _hub.PushScope(state);
 
         public bool IsEnabled(LogLevel logLevel)
             => _hub.IsEnabled
@@ -64,9 +60,8 @@ namespace Sentry.Extensions.Logging
                 var @event = new SentryEvent(exception)
                 {
                     Logger = CategoryName,
+                    Message = message,
                 };
-
-                @event.Message = message;
 
                 var tuple = eventId.ToTupleOrNull();
                 if (tuple.HasValue)

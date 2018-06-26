@@ -21,6 +21,52 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void PushAndLockScope_PushesNewScope()
+        {
+            Sut.PushAndLockScope();
+
+            Sut.Received(1).PushScope();
+        }
+
+        [Fact]
+        public void PushAndLockScope_Disposed_DisposesInnerScope()
+        {
+            var disposable = Substitute.For<IDisposable>();
+            Sut.PushScope().Returns(disposable);
+
+            var acutal = Sut.PushAndLockScope();
+            acutal.Dispose();
+
+            disposable.Received(1).Dispose();
+        }
+
+        [Fact]
+        public void PushAndLockScope_CreatedScopeIsLocked()
+        {
+            Sut.PushAndLockScope();
+
+            Assert.True(Scope.Options.Locked);
+        }
+
+        [Fact]
+        public void LockScope_LocksScope()
+        {
+            Sut.LockScope();
+
+            Assert.True(Scope.Options.Locked);
+        }
+
+        [Fact]
+        public void UnlockScope_UnlocksScope()
+        {
+            Sut.LockScope();
+
+            Sut.UnlockScope();
+
+            Assert.False(Scope.Options.Locked);
+        }
+
+        [Fact]
         public void AddBreadcrumb_MinimalArguments_CreatesBreadcrumb()
         {
             const string expectedMessage = "message";
