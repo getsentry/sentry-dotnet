@@ -29,8 +29,6 @@ namespace Sentry.AspNetCore
 
             if (aspnetOptions.InitializeSdk)
             {
-                loggingOptions.PushSentryScopeOnBeginScope = false;
-
                 loggingOptions.InitializeSdk = true;
 
                 loggingOptions.Init(o =>

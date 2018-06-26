@@ -49,6 +49,13 @@ namespace Sentry.Internal
         {
             var currentScopeAndClientStack = ScopeAndClientStack;
             var (scope, client) = currentScopeAndClientStack.Peek();
+
+            if (scope.Options.Locked)
+            {
+                // TODO: keep state on current scope?
+                return DisabledHub.Instance;
+            }
+
             var clonedScope = scope.Clone();
             if (state != null) clonedScope.Apply(state);
             var scopeSnapshot = new ScopeSnapshot(currentScopeAndClientStack, this);

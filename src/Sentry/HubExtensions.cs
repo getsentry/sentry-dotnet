@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Diagnostics;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 
@@ -67,5 +68,45 @@ namespace Sentry
                     data: data?.ToImmutableDictionary(),
                     category: category,
                     level: level));
+
+        /// <summary>
+        /// Pushes a new scope while locking it which stop new scope creation
+        /// </summary>
+        /// <param name="hub"></param>
+        /// <returns></returns>
+        public static IDisposable PushAndLockScope(this IHub hub) => new LockedScope(hub);
+
+        /// <summary>
+        /// Lock the scope so subsequent <see cref="ISentryScopeManager.PushScope"/> don't create new scopes.
+        /// </summary>
+        /// <remarks>
+        /// This is useful to stop following scope creation by other integrations
+        /// like Loggers which guarantee log messages are not lost
+        /// </remarks>
+        /// <param name="hub"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static void LockScope(this IHub hub) => hub.ConfigureScope(c => c.Options.Locked = true);
+
+        /// <summary>
+        /// Unlocks the current scope to allow subsequent calls to <see cref="ISentryScopeManager.PushScope"/> create new scopes.
+        /// </summary>
+        /// <param name="hub"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static void UnlockScope(this IHub hub) => hub.ConfigureScope(c => c.Options.Locked = false);
+
+        private class LockedScope : IDisposable
+        {
+            private readonly IDisposable _scope;
+
+            public LockedScope(IHub hub)
+            {
+                Debug.Assert(hub != null);
+
+                _scope = hub.PushScope();
+                hub.LockScope();
+            }
+
+            public void Dispose() => _scope.Dispose();
+        }
     }
 }

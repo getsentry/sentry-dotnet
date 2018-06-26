@@ -55,7 +55,7 @@ namespace Sentry.AspNetCore
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
-            using (_sentry.PushScope())
+            using (_sentry.PushAndLockScope())
             {
                 _sentry.ConfigureScope(scope =>
                 {

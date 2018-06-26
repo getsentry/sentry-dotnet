@@ -37,7 +37,6 @@ namespace Sentry.AspNetCore.Tests
                 var loggingOptions = new SentryLoggingOptions
                 {
                     InitializeSdk = false,
-                    PushSentryScopeOnBeginScope = true
                 };
                 var aspnetOptions = new SentryAspNetCoreOptions();
                 aspnetOptions.Apply(loggingOptions);

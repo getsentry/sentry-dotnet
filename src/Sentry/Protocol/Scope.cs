@@ -151,12 +151,15 @@ namespace Sentry.Protocol
 
         public event EventHandler OnEvaluating;
 
-        public Scope(IScopeOptions options) : this (options, true)
+        public Scope(IScopeOptions options)
+            : this(options ?? new SentryOptions(), true)
         {
         }
 
         private Scope(IScopeOptions options, bool introspect)
         {
+            Debug.Assert(options != null);
+
             Options = options;
 
             if (introspect)
@@ -174,7 +177,9 @@ namespace Sentry.Protocol
             }
         }
 
-        protected internal Scope() { } // NOTE: derived types (think Event) don't need to enforce scope semantics
+        protected internal Scope()
+            : this(null)
+        { }
 
         internal void Evaluate()
         {

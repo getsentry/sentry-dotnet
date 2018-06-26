@@ -11,6 +11,7 @@ namespace Sentry.Extensions.Logging
         private readonly IHub _hub;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
+
         private IDisposable _scope;
         private IDisposable _sdk;
 
