@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Xunit;
@@ -91,6 +90,40 @@ namespace Sentry.Extensions.Logging.Tests
             Assert.Equal(b.Level, expectedLevel);
             Assert.Equal(b.Type, BreadcrumbType);
             Assert.Null(b.Message);
+        }
+
+        [Fact]
+        public void LogCritical_MatchingFilter_DoesNotCapturesEvent()
+        {
+            const string expected = "message";
+            _fixture.Options.Filters = new[]
+            {
+                new DelegateLogEventFilter((_, __, ___, ____) => false),
+                new DelegateLogEventFilter((_, __, ___, ____) => true)
+            };
+            var sut = _fixture.GetSut();
+
+            sut.LogCritical(expected);
+
+            _fixture.Hub.DidNotReceive()
+                .CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
+        public void LogCritical_NotMatchingFilter_CapturesEvent()
+        {
+            const string expected = "message";
+            _fixture.Options.Filters = new[]
+            {
+                new DelegateLogEventFilter((_, __, ___, ____) => false),
+                new DelegateLogEventFilter((_, __, ___, ____) => false)
+            };
+            var sut = _fixture.GetSut();
+
+            sut.LogCritical(expected);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]

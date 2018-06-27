@@ -53,7 +53,7 @@ namespace Sentry.Extensions.Logging
 
             var message = formatter?.Invoke(state, exception);
 
-            if (SendEvent(logLevel, eventId, state, exception, formatter))
+            if (SendEvent(logLevel, eventId, exception))
             {
                 var @event = new SentryEvent(exception)
                 {
@@ -94,21 +94,20 @@ namespace Sentry.Extensions.Logging
             }
         }
 
-        private bool SendEvent<TState>(
+        private bool SendEvent(
             LogLevel logLevel,
             EventId eventId,
-            TState state,
-            Exception exception,
-            Func<TState, Exception, string> formatter)
+            Exception exception)
                 => _options.MinimumEventLevel != LogLevel.None
                    && logLevel >= _options.MinimumEventLevel
                    // No events from Sentry code using ILogger
                    && !CategoryName.StartsWith("Sentry")
-                   && _options?.Filters.Any(
-                       f => !f.Filter(
-                           CategoryName,
-                           logLevel,
-                           eventId,
-                           exception)) == true;
+                   && (_options.Filters == null
+                        || _options.Filters.All(
+                           f => !f.Filter(
+                               CategoryName,
+                               logLevel,
+                               eventId,
+                               exception)));
     }
 }
