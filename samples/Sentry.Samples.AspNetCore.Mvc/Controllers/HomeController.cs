@@ -73,8 +73,16 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
             }
             catch (Exception e)
             {
-                sentry.CaptureException(e);
-                ViewData["Message"] = "An exception was caught and sent to Sentry!";
+                e.Data.Add("detail",
+                    new
+                    {
+                        Reason = "There's a 'throw null' hard-coded here!",
+                        IsCrazy = true
+                    });
+
+                var id = sentry.CaptureException(e);
+
+                ViewData["Message"] = "An exception was caught and sent to Sentry! Event id: " + id;
             }
             return View();
         }
