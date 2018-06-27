@@ -19,8 +19,6 @@ namespace Sentry
             }
         }
 
-        internal TimeSpan FullQueueBlockTimeout { get; set; } = TimeSpan.Zero;
-        public TimeSpan EmptyQueueDelay { get; set; } = TimeSpan.FromMilliseconds(500);
         // The time to keep running, in case there are requests queued up, after cancellation is requested
         public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(2);
 

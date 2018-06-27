@@ -65,7 +65,7 @@ namespace Sentry.Internal
                 return false;
             }
 
-            var acquired = _inSemaphore.Wait((int)_options.FullQueueBlockTimeout.TotalMilliseconds);
+            var acquired = _inSemaphore.Wait(TimeSpan.Zero);
             if (acquired)
             {
                 _queue.TryAdd(@event);

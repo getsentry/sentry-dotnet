@@ -94,7 +94,7 @@ namespace Sentry.AspNetCore
 
                     var id = _sentry.CaptureEvent(evt);
 
-                    _logger?.LogInformation("Event '{id}' queued .", id);
+                    _logger?.LogInformation("Event '{id}' queued.", id);
                 }
             }
         }

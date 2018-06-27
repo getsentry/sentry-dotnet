@@ -85,14 +85,14 @@ namespace Sentry
         /// </remarks>
         /// <param name="hub"></param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void LockScope(this IHub hub) => hub.ConfigureScope(c => c.Options.Locked = true);
+        public static void LockScope(this IHub hub) => hub.ConfigureScope(c => c.Locked = true);
 
         /// <summary>
         /// Unlocks the current scope to allow subsequent calls to <see cref="ISentryScopeManager.PushScope"/> create new scopes.
         /// </summary>
         /// <param name="hub"></param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void UnlockScope(this IHub hub) => hub.ConfigureScope(c => c.Options.Locked = false);
+        public static void UnlockScope(this IHub hub) => hub.ConfigureScope(c => c.Locked = false);
 
         private class LockedScope : IDisposable
         {

@@ -31,8 +31,6 @@ namespace Sentry
         /// </value>
         public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
-        public bool Locked { get; set; }
-
         public Dsn Dsn { get; set; }
 
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }

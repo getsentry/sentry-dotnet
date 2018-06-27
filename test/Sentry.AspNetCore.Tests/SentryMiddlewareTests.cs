@@ -142,7 +142,7 @@ namespace Sentry.AspNetCore.Tests
                     .First(c => c.ArgAt<Action<Scope>>(0)(scope))
                     .Then(c =>
                     {
-                        Assert.True(scope.Options.Locked);
+                        Assert.True(scope.Locked);
                         verified = true;
                     }));
 
