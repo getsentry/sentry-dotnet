@@ -20,6 +20,8 @@ namespace Sentry.Protocol
     {
         internal IScopeOptions Options { get; }
 
+        internal bool Locked { get; set; }
+
         // Default values are null so no serialization of empty objects or arrays
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
@@ -205,22 +207,24 @@ namespace Sentry.Protocol
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public void SetExtra(string key, object value) => Extra = Extra.Add(key, value);
+        public void SetExtra(string key, object value) => Extra = Extra.SetItem(key, value);
         /// <summary>
         /// Sets the tag to the <see cref="Scope"/>
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public void SetTag(string key, string value) => Tags = Tags.Add(key, value);
+        public void SetTag(string key, string value) => Tags = Tags.SetItem(key, value);
 
         // TODO: make extension methods instead of members
-        public void SetTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value);
-        public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.Add(keyValue.Key, keyValue.Value.ToString());
-        public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.AddRange(tags);
+        public void SetTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.SetItem(keyValue.Key, keyValue.Value);
+        public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.SetItem(keyValue.Key, keyValue.Value.ToString());
+        public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.SetItems(tags);
 
         // TODO: test with reflection to ensure Clone doesn't go out of sync with members
         internal Scope Clone()
         {
+            Debug.Assert(!Locked);
+
             var scope = new Scope(Options, false);
             this.CopyTo(scope);
             return scope;

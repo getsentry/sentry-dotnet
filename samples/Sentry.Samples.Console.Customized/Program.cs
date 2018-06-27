@@ -47,8 +47,6 @@ namespace Sentry.Samples.Console.Customized
                 // Configure the background worker which sends events to sentry:
                 o.Worker(w =>
                 {
-                    // Poll for events every 100ms
-                    w.EmptyQueueDelay = TimeSpan.FromMilliseconds(100);
                     // Wait up to 5 seconds before shutdown while there are events to send.
                     w.ShutdownTimeout = TimeSpan.FromSeconds(5);
                 });

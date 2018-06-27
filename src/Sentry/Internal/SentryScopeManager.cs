@@ -50,7 +50,7 @@ namespace Sentry.Internal
             var currentScopeAndClientStack = ScopeAndClientStack;
             var (scope, client) = currentScopeAndClientStack.Peek();
 
-            if (scope.Options.Locked)
+            if (scope.Locked)
             {
                 // TODO: keep state on current scope?
                 return DisabledHub.Instance;

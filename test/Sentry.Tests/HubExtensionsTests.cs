@@ -45,7 +45,7 @@ namespace Sentry.Tests
         {
             Sut.PushAndLockScope();
 
-            Assert.True(Scope.Options.Locked);
+            Assert.True(Scope.Locked);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Sentry.Tests
         {
             Sut.LockScope();
 
-            Assert.True(Scope.Options.Locked);
+            Assert.True(Scope.Locked);
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace Sentry.Tests
 
             Sut.UnlockScope();
 
-            Assert.False(Scope.Options.Locked);
+            Assert.False(Scope.Locked);
         }
 
         [Fact]
