@@ -165,6 +165,18 @@ namespace Sentry
                     .ToList();
 
                 var values = new SentryValues<SentryException>(sentryExceptions);
+
+                foreach (var sentryException in sentryExceptions)
+                {
+                    var builderStrObj = ImmutableDictionary.CreateBuilder<string, object>();
+                    foreach (string key in exception.Data.Keys)
+                    {
+                        builderStrObj[$"{sentryException.Type}.Data[{key}]"] = exception.Data[key];
+                    }
+
+                    Extra = builderStrObj.ToImmutable();
+                }
+
                 SentryExceptions = values;
             }
         }
@@ -197,6 +209,16 @@ namespace Sentry
                 Mechanism = GetMechanism(exception)
             };
 
+            if (exception.Data.Count != 0)
+            {
+                var builder = ImmutableDictionary.CreateBuilder<string, object>();
+                foreach (string key in exception.Data.Keys)
+                {
+                    builder.Add(key, exception.Data[key]);
+                }
+
+                sentryEx.Data = builder.ToImmutable();
+            }
 
             var stackTrace = new StackTrace(exception, true);
 
@@ -229,19 +251,6 @@ namespace Sentry
                 {
                     HelpLink = exception.HelpLink
                 };
-            }
-
-            if (exception.Data.Count != 0)
-            {
-                mechanism = new Mechanism();
-
-                var builder = ImmutableDictionary.CreateBuilder<string, object>();
-                foreach (string key in exception.Data.Keys)
-                {
-                    builder.Add(key, exception.Data[key]);
-                }
-
-                mechanism.Data = builder.ToImmutable();
             }
 
             return mechanism;

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -47,5 +48,15 @@ namespace Sentry.Protocol
         /// <see href="https://docs.sentry.io/clientdev/interfaces/mechanism/"/>
         [DataMember(Name = "mechanism", EmitDefaultValue = false)]
         public Mechanism Mechanism { get; set; }
+
+        /// <summary>
+        /// Arbitrary extra data that related to this error
+        /// </summary>
+        /// <remarks>
+        /// The protocol does not support at this time, data at this level.
+        /// For this reason this property is not serialized.
+        /// The data is moved to the event level on Extra until such support is added
+        /// </remarks>
+        public ImmutableDictionary<string, object> Data { get; set; }
     }
 }
