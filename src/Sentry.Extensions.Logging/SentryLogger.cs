@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
 
@@ -52,10 +53,7 @@ namespace Sentry.Extensions.Logging
 
             var message = formatter?.Invoke(state, exception);
 
-            if (_options.MinimumEventLevel != LogLevel.None
-                && logLevel >= _options.MinimumEventLevel
-                // No events from Sentry code using ILogger
-                && !CategoryName.StartsWith("Sentry"))
+            if (SendEvent(logLevel, eventId, exception))
             {
                 var @event = new SentryEvent(exception)
                 {
@@ -95,5 +93,21 @@ namespace Sentry.Extensions.Logging
                     logLevel.ToBreadcrumbLevel());
             }
         }
+
+        private bool SendEvent(
+            LogLevel logLevel,
+            EventId eventId,
+            Exception exception)
+                => _options.MinimumEventLevel != LogLevel.None
+                   && logLevel >= _options.MinimumEventLevel
+                   // No events from Sentry code using ILogger
+                   && !CategoryName.StartsWith("Sentry")
+                   && (_options.Filters == null
+                        || _options.Filters.All(
+                           f => !f.Filter(
+                               CategoryName,
+                               logLevel,
+                               eventId,
+                               exception)));
     }
 }
