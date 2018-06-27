@@ -7,10 +7,6 @@ environment:
 test: off
 build_script:
 - ps: ./build.ps1
-on_success:
-- cmd: |
-    curl -s https://codecov.io/bash > codecov
-    bash ./codecov -f "*opencover.xml"
 dotnet_csproj:
   patch: true
   file: 'src\**\*.csproj'
