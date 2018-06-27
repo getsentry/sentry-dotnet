@@ -126,7 +126,7 @@ namespace Sentry.Protocol
         private static IImmutableDictionary<string, string> ToImmutableDictionary(
             this (string name, string value) tuple)
             => ImmutableDictionary<string, string>.Empty
-                .Add(tuple.name, tuple.value);
+                .SetItem(tuple.name, tuple.value);
 
         // shallow copy from this scope over to the parameter
         // Will override the value on 'to' when the value exists on 'from'
@@ -142,11 +142,11 @@ namespace Sentry.Protocol
             }
             if (from.InternalExtra != null)
             {
-                to.Extra = to.Extra?.AddRange(from.InternalExtra) ?? from.InternalExtra;
+                to.Extra = to.Extra?.SetItems(from.InternalExtra) ?? from.InternalExtra;
             }
             if (from.InternalTags != null)
             {
-                to.Tags = to.Tags?.AddRange(from.InternalTags) ?? from.InternalTags;
+                to.Tags = to.Tags?.SetItems(from.InternalTags) ?? from.InternalTags;
             }
             if (from.InternalContexts != null)
             {

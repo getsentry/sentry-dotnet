@@ -18,10 +18,9 @@ namespace Sentry.AspNetCore
         /// </summary>
         public static void Populate(this Scope scope, HttpContext context)
         {
-            var options = context.RequestServices.GetService<SentryAspNetCoreOptions>();
-
             scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
 
+            var options = context.RequestServices?.GetService<SentryAspNetCoreOptions>();
             // TODO: should be elsewhere.
             if (options?.IncludeRequestPayload == true)
             {
@@ -49,16 +48,16 @@ namespace Sentry.AspNetCore
             var ipAddress = context.Connection.RemoteIpAddress?.ToString();
             if (ipAddress != null)
             {
-                scope.Request.Env = scope.Request.Env.Add("REMOTE_ADDR", ipAddress);
+                scope.Request.Env = scope.Request.Env.SetItem("REMOTE_ADDR", ipAddress);
             }
 
-            scope.Request.Env = scope.Request.Env.Add("SERVER_NAME", Environment.MachineName);
-            scope.Request.Env = scope.Request.Env.Add("SERVER_PORT", context.Connection.LocalPort.ToString());
+            scope.Request.Env = scope.Request.Env.SetItem("SERVER_NAME", Environment.MachineName);
+            scope.Request.Env = scope.Request.Env.SetItem("SERVER_PORT", context.Connection.LocalPort.ToString());
 
             // TODO: likely a better way to do this as if the response didn't start yet nothing is found
             if (context.Response.Headers.TryGetValue("Server", out var server))
             {
-                scope.Request.Env = scope.Request.Env.Add("SERVER_SOFTWARE", server);
+                scope.Request.Env = scope.Request.Env.SetItem("SERVER_SOFTWARE", server);
             }
 
             // Don't send the user if all we have of him/her is the IP address
@@ -115,7 +114,7 @@ namespace Sentry.AspNetCore
 
         public static void SetWebRoot(this Scope scope, string webRoot)
         {
-            scope.Request.Env = scope.Request.Env.Add("DOCUMENT_ROOT", webRoot);
+            scope.Request.Env = scope.Request.Env.SetItem("DOCUMENT_ROOT", webRoot);
         }
     }
 }
