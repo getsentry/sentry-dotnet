@@ -114,7 +114,10 @@ namespace Sentry.AspNetCore
 
         public static void SetWebRoot(this Scope scope, string webRoot)
         {
-            scope.Request.Env = scope.Request.Env.SetItem("DOCUMENT_ROOT", webRoot);
+            if (webRoot != null)
+            {
+                scope.Request.Env = scope.Request.Env.SetItem("DOCUMENT_ROOT", webRoot);
+            }
         }
     }
 }
