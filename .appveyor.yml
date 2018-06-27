@@ -8,10 +8,9 @@ test: off
 build_script:
 - ps: ./build.ps1
 on_success:
-- sh: >-
+- cmd: >
     curl -s https://codecov.io/bash > codecov
-    chmod +x codecov
-    ./codecov -f *opencover.xml
+    bash ./codecov -f *opencover.xml
 dotnet_csproj:
   patch: true
   file: 'src\**\*.csproj'
