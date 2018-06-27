@@ -25,21 +25,24 @@ namespace Sentry.AspNetCore
                 {
                     loggingOptions.MinimumEventLevel = eventLevel;
                 }
+
+                loggingOptions.Filters = log.Filters;
             }
 
             if (aspnetOptions.InitializeSdk)
             {
                 loggingOptions.InitializeSdk = true;
 
-                loggingOptions.Init(o =>
-                {
-                    if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
-                    {
-                        o.Dsn = new Dsn(aspnetOptions.Dsn);
-                    }
 
-                    aspnetOptions.ConfigureOptions?.Invoke(o);
-                });
+                loggingOptions.Init(o =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
+                        {
+                            o.Dsn = new Dsn(aspnetOptions.Dsn);
+                        }
+
+                        aspnetOptions.ConfigureOptions?.Invoke(o);
+                    });
             }
         }
     }
