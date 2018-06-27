@@ -30,5 +30,18 @@ namespace Sentry.Tests
 
             Assert.Empty(sut.ScopeManager.GetCurrent().Scope.Breadcrumbs);
         }
+
+        [Fact]
+        public void PushAndLockScope_DoesNotAffectOuterScope()
+        {
+            var sut = _fixture.GetSut();
+
+            sut.ConfigureScope(s => Assert.False(s.Locked));
+            using (sut.PushAndLockScope())
+            {
+                sut.ConfigureScope(s => Assert.True(s.Locked));
+            }
+            sut.ConfigureScope(s => Assert.False(s.Locked));
+        }
     }
 }
