@@ -4,16 +4,15 @@ using Microsoft.AspNetCore.Http;
 
 namespace Sentry.AspNetCore
 {
-    public class FormRequestPayloadExtractor : IRequestPayloadExtractor
+    public class FormRequestPayloadExtractor : BaseRequestPayloadExtractor
     {
         private const string SupportedContentType = "application/x-www-form-urlencoded";
 
-        public object ExtractPayload(HttpRequest request)
-        {
-            return SupportedContentType
-                .Equals(request.ContentType, StringComparison.InvariantCulture)
-                ? request.Form.ToDictionary(k => k.Key, v => v.Value)
-                : null;
-        }
+        protected override bool IsSupported(HttpRequest request)
+            => SupportedContentType
+                .Equals(request.ContentType, StringComparison.InvariantCulture);
+
+        protected override object DoExtractPayLoad(HttpRequest request)
+            => request.Form?.ToDictionary(k => k.Key, v => v.Value);
     }
 }
