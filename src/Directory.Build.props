@@ -5,9 +5,24 @@
 
   <PropertyGroup>
     <VersionPrefix>0.0.1</VersionPrefix>
-    <VersionSuffix>preview</VersionSuffix>
+    <VersionSuffix>preview1</VersionSuffix>
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Authors>Sentry Team and Contributors</Authors>
+    <Company>Sentry.io</Company>
+    <Product>Sentry</Product>
+
+    <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <RepositoryUrl>https://github.com/getsentry/sentry-dotnet</RepositoryUrl>
+
+    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet/master/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/getsentry/sentry-dotnet</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet/master/LICENSE</PackageLicenseUrl>
+
+    <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet/releases</PackageReleaseNotes>
     <!-- On Release mode make sure missing docs raise warning -->
     <!--TODO: Add this when API is more stable:-->
     <!--<NoWarn Condition="'$(Configuration)' != 'Release'">$(NoWarn);CS1591</NoWarn>-->
