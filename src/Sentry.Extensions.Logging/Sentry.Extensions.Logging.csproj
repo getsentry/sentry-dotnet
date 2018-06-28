@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageTags>$(PackageTags);Logging;Microsoft.Extensions.Logging</PackageTags>
+    <PackageId>Sentry.Extensions.Logging</PackageId>
+    <AssemblyName>Sentry.Extensions.Logging</AssemblyName>
+    <RootNamespace>Sentry.Extensions.Logging</RootNamespace>
+    <Description>Official Microsoft.Extensions.Logging integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 
   <ItemGroup>
