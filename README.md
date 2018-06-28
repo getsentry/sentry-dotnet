@@ -13,8 +13,10 @@ New .NET SDK for Sentry
 
 
 **NOTE**: This repository is a work in progress. Our goal is to build a composable SDK with many integrations.
-|      Packages                 |                      |
-| ----------------------------- | :------------------: |
+
+
+|      Integrations                 |        NuGet         |
+| ----------------------------- | -------------------: |
 |         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
 |     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
