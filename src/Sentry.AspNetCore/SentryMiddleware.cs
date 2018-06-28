@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
 
@@ -57,6 +58,11 @@ namespace Sentry.AspNetCore
         {
             using (_sentry.PushAndLockScope())
             {
+                if (_options?.IncludeRequestPayload == true)
+                {
+                    context.Request.EnableRewind();
+                }
+
                 _sentry.ConfigureScope(scope =>
                 {
                     // At the point lots of stuff from the request are not yet filled

@@ -1,11 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -319,6 +321,47 @@ namespace Sentry.AspNetCore.Tests
             _fixture.Hub = null;
             var ex = Assert.Throws<ArgumentNullException>(() => _fixture.GetSut());
             Assert.Equal("sentry", ex.ParamName);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_OptionsReadPayload_CanSeekStream()
+        {
+            _fixture.Options.IncludeRequestPayload = true;
+            var sut = _fixture.GetSut();
+            var request = Substitute.For<HttpRequest>();
+            var stream = Substitute.For<Stream>();
+            request.Body.Returns(stream);
+            var response = Substitute.For<HttpResponse>();
+            _fixture.HttpContext.Response.Returns(response);
+            _fixture.HttpContext.Request.Returns(request);
+            request.HttpContext.Returns(_fixture.HttpContext);
+
+            var invoked = false;
+            request.When(w => w.Body = Arg.Any<Stream>())
+                .Do(d =>
+                {
+                    Assert.True(d.ArgAt<Stream>(0).CanSeek);
+                    invoked = true;
+                });
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            Assert.True(invoked);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_DefaultOptions_CanNotSeekStream()
+        {
+            var sut = _fixture.GetSut();
+            var request = Substitute.For<HttpRequest>();
+            var stream = Substitute.For<Stream>();
+            request.Body.Returns(stream);
+            _fixture.HttpContext.Request.Returns(request);
+            request.HttpContext.Returns(_fixture.HttpContext);
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            request.DidNotReceive().Body = Arg.Any<Stream>();
         }
     }
 }
