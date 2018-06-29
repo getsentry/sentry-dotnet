@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -12,40 +13,48 @@ namespace Sentry.Protocol
     public class SdkVersion
     {
         [DataMember(Name = "integrations", EmitDefaultValue = false)]
-        internal IImmutableList<string> InternalIntegrations { get; private set; }
+        internal IImmutableList<string> InternalIntegrations { get; set; }
 
         /// <summary>
         /// SDK name
         /// </summary>
         [DataMember(Name = "name", EmitDefaultValue = false)]
-        public string Name { get; internal set; }
+        public string Name
+        {
+            get;
+            // For integrations to set their name
+            [EditorBrowsable(EditorBrowsableState.Never)]
+            set;
+        }
         /// <summary>
         /// SDK Version
         /// </summary>
         [DataMember(Name = "version", EmitDefaultValue = false)]
-        public string Version { get; internal set; }
+        public string Version
+        {
+            get;
+            // For integrations to set their version
+            [EditorBrowsable(EditorBrowsableState.Never)]
+            set;
+        }
 
         // TODO: this collection should be immutable and it's Add hidden behind a method on SDK class
         /// <summary>
         /// Any integration configured with the SDK
         /// </summary>
         /// <remarks>This property is not required</remarks>
-        public IImmutableList<string> Integrations
-        {
-            get => InternalIntegrations ?? (InternalIntegrations = ImmutableList<string>.Empty);
-            private set => InternalIntegrations = value;
-        }
+        public IImmutableList<string> Integrations => InternalIntegrations ?? (InternalIntegrations = ImmutableList<string>.Empty);
 
         /// <summary>
         /// Adds an integration.
         /// </summary>
         /// <param name="integration">The integration.</param>
-        public void AddIntegration(string integration) => Integrations = Integrations.Add(integration);
+        public void AddIntegration(string integration) => InternalIntegrations = Integrations.Add(integration);
 
         /// <summary>
         /// Adds the integrations.
         /// </summary>
         /// <param name="integration">The integration.</param>
-        public void AddIntegrations(IEnumerable<string> integration) => Integrations = Integrations.AddRange(integration);
+        public void AddIntegrations(IEnumerable<string> integration) => InternalIntegrations = Integrations.AddRange(integration);
     }
 }

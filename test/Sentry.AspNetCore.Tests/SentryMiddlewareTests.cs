@@ -363,5 +363,23 @@ namespace Sentry.AspNetCore.Tests
 
             request.DidNotReceive().Body = Arg.Any<Stream>();
         }
+
+        [Fact]
+        public void NameAndVersion_Name_NotNull() => Assert.NotNull(SentryMiddleware.NameAndVersion.Name);
+
+        [Fact]
+        public void NameAndVersion_Version_NotNull() => Assert.NotNull(SentryMiddleware.NameAndVersion.Version);
+
+        [Fact]
+        public void PopulateScope_Sdk_ContainNameAndVersion()
+        {
+            var scope = new Scope();
+
+            var sut = _fixture.GetSut();
+            sut.PopulateScope(_fixture.HttpContext, scope);
+
+            Assert.Equal(SentryMiddleware.NameAndVersion.Name, scope.Sdk.Name);
+            Assert.Equal(SentryMiddleware.NameAndVersion.Version, scope.Sdk.Version);
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Reflection;
 
 namespace Sentry.Extensions.Logging
 {
@@ -14,6 +15,9 @@ namespace Sentry.Extensions.Logging
 
         private IDisposable _scope;
         private IDisposable _sdk;
+
+        internal static readonly (string Name, string Version) NameAndVersion
+            = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
         public SentryLoggerProvider(SentryLoggingOptions options)
             : this(HubAdapter.Instance,
@@ -43,9 +47,11 @@ namespace Sentry.Extensions.Logging
 
             // Creates a scope so that Integration added below can be dropped when the logger is disposed
             _scope = hub.PushScope();
-
-            // TODO: SDK interface not accepting 'Integrations'
-            // scopeManager.ConfigureScope(s => s.Sdk.AddIntegration(Constants.IntegrationName));
+            hub.ConfigureScope(s =>
+            {
+                s.Sdk.Name = NameAndVersion.Name;
+                s.Sdk.Version = NameAndVersion.Version;
+            });
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, _hub);

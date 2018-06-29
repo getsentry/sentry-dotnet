@@ -166,7 +166,18 @@ namespace Sentry.Protocol
             }
             if (from.Sdk != null)
             {
-                to.Sdk = from.Sdk;
+                if (from.Sdk.Name != null && from.Sdk.Version != null)
+                {
+                    to.Sdk.Name = from.Sdk.Name;
+                    to.Sdk.Version = from.Sdk.Version;
+                }
+
+                if (from.Sdk.InternalIntegrations != null)
+                {
+                    to.Sdk.InternalIntegrations =
+                        to.Sdk.InternalIntegrations?.AddRange(from.Sdk.InternalIntegrations)
+                        ?? from.Sdk.InternalIntegrations;
+                }
             }
         }
 
