@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry;
 using Sentry.AspNetCore;

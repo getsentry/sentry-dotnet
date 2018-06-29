@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.Samples.AspNetCore.Mvc.Models
 {
     public class ErrorViewModel
