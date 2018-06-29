@@ -12,7 +12,7 @@ namespace Sentry.Protocol
     public class SdkVersion
     {
         [DataMember(Name = "integrations", EmitDefaultValue = false)]
-        internal IImmutableList<string> InternalIntegrations { get; private set; }
+        internal IImmutableList<string> InternalIntegrations { get; set; }
 
         /// <summary>
         /// SDK name
@@ -30,22 +30,18 @@ namespace Sentry.Protocol
         /// Any integration configured with the SDK
         /// </summary>
         /// <remarks>This property is not required</remarks>
-        public IImmutableList<string> Integrations
-        {
-            get => InternalIntegrations ?? (InternalIntegrations = ImmutableList<string>.Empty);
-            private set => InternalIntegrations = value;
-        }
+        public IImmutableList<string> Integrations => InternalIntegrations ?? (InternalIntegrations = ImmutableList<string>.Empty);
 
         /// <summary>
         /// Adds an integration.
         /// </summary>
         /// <param name="integration">The integration.</param>
-        public void AddIntegration(string integration) => Integrations = Integrations.Add(integration);
+        public void AddIntegration(string integration) => InternalIntegrations = Integrations.Add(integration);
 
         /// <summary>
         /// Adds the integrations.
         /// </summary>
         /// <param name="integration">The integration.</param>
-        public void AddIntegrations(IEnumerable<string> integration) => Integrations = Integrations.AddRange(integration);
+        public void AddIntegrations(IEnumerable<string> integration) => InternalIntegrations = Integrations.AddRange(integration);
     }
 }
