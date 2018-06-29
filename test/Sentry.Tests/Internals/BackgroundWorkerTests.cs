@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
@@ -63,6 +64,33 @@ namespace Sentry.Tests.Internals
             sut.Dispose();
 
             Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
+        }
+
+        [Fact]
+        public void Dispose_TokenCancelledWhenRequestInFlight_StopsTask()
+        {
+            var evt = new SentryEvent();
+            _fixture.Transport
+                .CaptureEventAsync(evt, Arg.Any<CancellationToken>())
+                .Throws(new OperationCanceledException());
+
+            var sut = _fixture.GetSut();
+            sut.EnqueueEvent(evt);
+
+            sut.Dispose();
+
+            Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
+        }
+
+        [Fact]
+        public void Dispose_SwallowsException()
+        {
+            _fixture.CancellationTokenSource.Dispose();
+            var sut = _fixture.GetSut();
+
+            sut.Dispose();
+
+            Assert.Equal(TaskStatus.Faulted, sut.WorkerTask.Status);
         }
 
         [Fact]
