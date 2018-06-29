@@ -150,7 +150,6 @@ namespace Sentry.Internal
                 inSemaphore.Dispose();
                 outSemaphore.Dispose();
             }
-
         }
 
         /// <summary>

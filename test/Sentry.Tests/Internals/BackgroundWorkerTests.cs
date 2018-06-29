@@ -88,6 +88,7 @@ namespace Sentry.Tests.Internals
             _fixture.CancellationTokenSource.Dispose();
             var sut = _fixture.GetSut();
 
+            Assert.Throws<AggregateException>(() => sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
             sut.Dispose();
 
             Assert.Equal(TaskStatus.Faulted, sut.WorkerTask.Status);
