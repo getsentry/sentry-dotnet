@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
+using Sentry.Reflection;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -135,14 +136,14 @@ namespace Sentry
             }
         }
 
+        private static readonly (string Name, string Version) NameAndVersion
+            = typeof(ISentryClient).Assembly.GetNameAndVersion();
+
         private void Populate(Exception exception)
         {
-            // TODO: should this be dotnet instead?
             Platform = "csharp";
             Sdk.Name = "Sentry.NET";
-            // TODO: Read it off of env var here? Integration's version could be set instead
-            // Less flexible than using SentryOptions to define this value
-            Sdk.Version = "0.0.0";
+            Sdk.Version = NameAndVersion.Version;
 
             var builder = ImmutableDictionary.CreateBuilder<string, string>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())

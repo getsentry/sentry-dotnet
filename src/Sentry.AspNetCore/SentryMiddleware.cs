@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
+using Sentry.Reflection;
 
 namespace Sentry.AspNetCore
 {
@@ -21,6 +22,9 @@ namespace Sentry.AspNetCore
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
+
+        internal static readonly (string Name, string Version) NameAndVersion
+            = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentryMiddleware"/> class.
@@ -107,6 +111,9 @@ namespace Sentry.AspNetCore
 
         internal void PopulateScope(HttpContext context, Scope scope)
         {
+            scope.Sdk.Name = NameAndVersion.Name;
+            scope.Sdk.Version = NameAndVersion.Version;
+
             if (_hostingEnvironment != null)
             {
                 scope.Environment = _hostingEnvironment.EnvironmentName;

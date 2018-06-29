@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -18,12 +19,24 @@ namespace Sentry.Protocol
         /// SDK name
         /// </summary>
         [DataMember(Name = "name", EmitDefaultValue = false)]
-        public string Name { get; internal set; }
+        public string Name
+        {
+            get;
+            // For integrations to set their name
+            [EditorBrowsable(EditorBrowsableState.Never)]
+            set;
+        }
         /// <summary>
         /// SDK Version
         /// </summary>
         [DataMember(Name = "version", EmitDefaultValue = false)]
-        public string Version { get; internal set; }
+        public string Version
+        {
+            get;
+            // For integrations to set their version
+            [EditorBrowsable(EditorBrowsableState.Never)]
+            set;
+        }
 
         // TODO: this collection should be immutable and it's Add hidden behind a method on SDK class
         /// <summary>

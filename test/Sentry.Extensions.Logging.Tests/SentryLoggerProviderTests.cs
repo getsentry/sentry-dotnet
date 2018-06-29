@@ -45,18 +45,6 @@ namespace Sentry.Extensions.Logging.Tests
             _fixture.Hub.Received(1).PushScope();
         }
 
-        [Fact(Skip = "Sentry is not accepting integrations ATM")]
-        public void Ctor_AddsSdkIntegration()
-        {
-            var scope = new Scope(null);
-            _fixture.Hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(info => info.Arg<Action<Scope>>()(scope));
-
-            _fixture.GetSut();
-
-            Assert.Contains(Constants.IntegrationName, scope.Sdk.Integrations);
-        }
-
         [Fact]
         public void Dispose_DisposesNewScope()
         {
@@ -68,6 +56,26 @@ namespace Sentry.Extensions.Logging.Tests
             sut.Dispose();
 
             disposable.Received(1).Dispose();
+        }
+
+        [Fact]
+        public void NameAndVersion_Name_NotNull() => Assert.NotNull(SentryLoggerProvider.NameAndVersion.Name);
+
+        [Fact]
+        public void NameAndVersion_Version_NotNull() => Assert.NotNull(SentryLoggerProvider.NameAndVersion.Version);
+
+        [Fact]
+        public void Ctor_ScopeSdk_ContainNameAndVersion()
+        {
+            var scope = new Scope(null);
+
+            _fixture.Hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(info => info.Arg<Action<Scope>>()(scope));
+
+            _fixture.GetSut();
+
+            Assert.Equal(SentryLoggerProvider.NameAndVersion.Name, scope.Sdk.Name);
+            Assert.Equal(SentryLoggerProvider.NameAndVersion.Version, scope.Sdk.Version);
         }
     }
 }
