@@ -31,13 +31,6 @@ namespace Sentry.Internal
             _workerOptions = workerOptions;
         }
 
-        public ISentryClient CreateSentryClient()
-        {
-            return new SentryClient(
-                _options,
-                BackgroundWorker ?? CreateBackgroundWorker());
-        }
-
         public BackgroundWorker CreateBackgroundWorker()
         {
             return CreateBackgroundWorker(
