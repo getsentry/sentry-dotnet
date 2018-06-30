@@ -19,8 +19,7 @@ namespace Sentry.Tests.Http
         {
             var arg = Assert.Throws<ArgumentException>(() => new HttpOptions(new Uri("/store/123123", UriKind.Relative)));
             Assert.Equal("sentryUri", arg.ParamName);
-            Assert.Equal(@"URL to Sentry must be absolute. Example: https://98718479@sentry.io/123456
-Parameter name: sentryUri", arg.Message);
+            Assert.StartsWith(@"URL to Sentry must be absolute. Example: https://98718479@sentry.io/123456" , arg.Message);
         }
 
         [Fact]
