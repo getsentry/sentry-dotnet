@@ -15,7 +15,7 @@ namespace Sentry.AspNetCore
     /// <summary>
     /// Sentry middleware for ASP.NET Core
     /// </summary>
-    public class SentryMiddleware
+    internal class SentryMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IHub _sentry;

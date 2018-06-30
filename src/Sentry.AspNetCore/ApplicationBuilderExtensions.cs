@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Builder
     /// Extension methods for <see cref="IApplicationBuilder"/>
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class ApplicationBuilderExtensions
+    internal static class ApplicationBuilderExtensions
     {
         /// <summary>
         /// Use Sentry integration
