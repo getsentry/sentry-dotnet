@@ -9,5 +9,8 @@ namespace Sentry.Internal
         public const int DefaultMaxBreadcrumbs = 100;
 
         public const int ProtocolVersion = 7;
+
+        public const string SdkName = "Sentry.NET";
+        public const string Platform = "csharp";
     }
 }

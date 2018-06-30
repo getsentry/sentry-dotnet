@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Reflection;
 
@@ -142,8 +143,9 @@ namespace Sentry
 
         private void Populate(Exception exception, bool? isUnhandled)
         {
-            Platform = "csharp";
-            Sdk.Name = "Sentry.NET";
+            Platform = Constants.Platform;
+            Sdk.Name = Constants.SdkName;
+
             Sdk.Version = NameAndVersion.Version;
 
             var builder = ImmutableDictionary.CreateBuilder<string, string>();

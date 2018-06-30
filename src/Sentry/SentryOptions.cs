@@ -11,13 +11,7 @@ namespace Sentry
     /// TODO: the SDK options
     public class SentryOptions : IScopeOptions
     {
-        // TODO: This will be set via AsmInfo.cs?
-        // Used on AUTH header and also SDK payload interface?
-        internal string ClientVersion
-        {
-            get;
-            set; // Cannot be null!
-        } = "Sentry.NET";
+        internal string ClientVersion { get; } = SdkName;
 
         internal int SentryVersion { get; } = ProtocolVersion;
 
