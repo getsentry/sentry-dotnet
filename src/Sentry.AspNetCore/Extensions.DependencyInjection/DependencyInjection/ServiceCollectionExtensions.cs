@@ -20,6 +20,8 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddSentry(this IServiceCollection services)
         {
+            services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
+
             services
                 .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
                 // Last

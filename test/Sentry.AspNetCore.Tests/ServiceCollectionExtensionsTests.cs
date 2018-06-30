@@ -70,5 +70,13 @@ namespace Sentry.AspNetCore.Tests
             var last = _sut.Last(d => d.ServiceType == typeof(IRequestPayloadExtractor));
             Assert.Same(typeof(DefaultRequestPayloadExtractor), last.ImplementationType);
         }
+
+        [Fact]
+        public void AddSentry_DefaultUserFactory_Registered()
+        {
+            _sut.AddSentry();
+            _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(IUserFactory)
+                                                               && d.ImplementationType == typeof(DefaultUserFactory)));
+        }
     }
 }

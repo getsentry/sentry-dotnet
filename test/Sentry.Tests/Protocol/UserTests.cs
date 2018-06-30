@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -12,12 +11,12 @@ namespace Sentry.Tests.Protocol
         public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
         {
             var sut = new User
-            (
-                id: "user-id",
-                email: "test@sentry.io",
-                ipAddress: "::1",
-                username: "user-name"
-            );
+            {
+                Id = "user-id",
+                Email = "test@sentry.io",
+                IpAddress = "::1",
+                Username = "user-name"
+            };
 
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -40,10 +39,10 @@ namespace Sentry.Tests.Protocol
         public static IEnumerable<object[]> TestCases()
         {
             yield return new object[] { (new User(), "{}") };
-            yield return new object[] { (new User(id: "some id"), "{\"id\":\"some id\"}") };
-            yield return new object[] { (new User(email: "some email"), "{\"email\":\"some email\"}") };
-            yield return new object[] { (new User(ipAddress: "some ipAddress"), "{\"ip_address\":\"some ipAddress\"}") };
-            yield return new object[] { (new User(username: "some username"), "{\"username\":\"some username\"}") };
+            yield return new object[] { (new User { Id = "some id" }, "{\"id\":\"some id\"}") };
+            yield return new object[] { (new User { Email = "some email" }, "{\"email\":\"some email\"}") };
+            yield return new object[] { (new User { IpAddress = "some ipAddress" }, "{\"ip_address\":\"some ipAddress\"}") };
+            yield return new object[] { (new User { Username = "some username" }, "{\"username\":\"some username\"}") };
         }
     }
 }
