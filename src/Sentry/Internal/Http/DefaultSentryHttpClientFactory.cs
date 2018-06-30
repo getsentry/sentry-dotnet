@@ -42,6 +42,10 @@ namespace Sentry.Internal.Http
             }
 
             var httpClientHandler = CreateHttpClientHandler();
+            if (options.Proxy != null)
+            {
+                httpClientHandler.Proxy = options.Proxy;
+            }
 
             // If the platform supports automatic decompression
             if (httpClientHandler.SupportsAutomaticDecompression)
@@ -53,7 +57,6 @@ namespace Sentry.Internal.Http
             _configureHandler?.Invoke(httpClientHandler, dsn, options);
 
             var client = new HttpClient(httpClientHandler);
-
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             _configureClient?.Invoke(client, dsn, options);
