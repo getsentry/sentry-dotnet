@@ -41,14 +41,9 @@ namespace Sentry
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
         public static IDisposable Init(string dsn)
-        {
-            if (string.IsNullOrWhiteSpace(dsn))
-            {
-                return DisabledHub.Instance;
-            }
-
-            return Init(c => c.Dsn = new Dsn(dsn));
-        }
+            => string.IsNullOrWhiteSpace(dsn)
+                ? DisabledHub.Instance
+                : Init(c => c.Dsn = new Dsn(dsn));
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
