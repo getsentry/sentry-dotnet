@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Sentry.Extensibility;
 using Sentry.Http;
+using Sentry.Integrations;
 using static Sentry.Internal.Constants;
 
 namespace Sentry
@@ -40,6 +42,9 @@ namespace Sentry
         internal List<Action<HttpOptions>> ConfigureHttpTransportOptions { get; private set; }
 
         internal Func<SentryOptions, ITransport> TransportFactory { get; set; }
+
+        public ImmutableList<ISdkIntegration> Integrations { get; set; }
+            = new ISdkIntegration[] { new AppDomainUnhandledExceptionIntegration() }.ToImmutableList();
 
         public void Worker(Action<BackgroundWorkerOptions> configure) => ConfigureBackgroundWorkerOptions = configure;
 

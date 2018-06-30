@@ -247,5 +247,20 @@ namespace Sentry
         [DebuggerStepThrough]
         public static Guid CaptureException(Exception exception)
             => _hub.CaptureException(exception);
+
+        /// <summary>
+        /// Captures the exception while flagging if it went unhandled by user code.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <param name="isUnhandled">Whether the exception was handled by user code or not.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Usages of this class likely will always be handling the exception so flag is less useful here.
+        /// Hence EditorBrowsable:Never
+        /// </remarks>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Guid CaptureException(Exception exception, bool? isUnhandled)
+            => _hub.CaptureException(exception, isUnhandled);
     }
 }

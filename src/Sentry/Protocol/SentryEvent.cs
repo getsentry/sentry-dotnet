@@ -123,6 +123,7 @@ namespace Sentry
             Exception exception = null,
             ISystemClock clock = null,
             Guid id = default,
+            bool? isUnhandled = null,
             bool populate = true)
         {
             clock = clock ?? SystemClock.Clock;
@@ -132,14 +133,14 @@ namespace Sentry
 
             if (populate)
             {
-                Populate(exception);
+                Populate(exception, isUnhandled);
             }
         }
 
         private static readonly (string Name, string Version) NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
 
-        private void Populate(Exception exception)
+        private void Populate(Exception exception, bool? isUnhandled)
         {
             Platform = "csharp";
             Sdk.Name = "Sentry.NET";
@@ -161,7 +162,7 @@ namespace Sentry
 
             if (exception != null)
             {
-                var sentryExceptions = CreateSentryException(exception)
+                var sentryExceptions = CreateSentryException(exception, isUnhandled)
                     // Otherwise realization happens on the worker thread before sending event.
                     .ToList();
 
@@ -182,20 +183,20 @@ namespace Sentry
             }
         }
 
-        private static IEnumerable<SentryException> CreateSentryException(Exception exception)
+        private static IEnumerable<SentryException> CreateSentryException(Exception exception, bool? isUnhandled)
         {
             Debug.Assert(exception != null);
 
             if (exception is AggregateException ae)
             {
-                foreach (var inner in ae.InnerExceptions.SelectMany(CreateSentryException))
+                foreach (var inner in ae.InnerExceptions.SelectMany(e => CreateSentryException(e, null)))
                 {
                     yield return inner;
                 }
             }
             else if (exception.InnerException != null)
             {
-                foreach (var inner in CreateSentryException(exception.InnerException))
+                foreach (var inner in CreateSentryException(exception.InnerException, null))
                 {
                     yield return inner;
                 }
@@ -207,7 +208,7 @@ namespace Sentry
                 Module = exception.GetType()?.Assembly?.FullName,
                 Value = exception.Message,
                 ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Mechanism = GetMechanism(exception)
+                Mechanism = GetMechanism(exception, isUnhandled)
             };
 
             if (exception.Data.Count != 0)
@@ -240,7 +241,7 @@ namespace Sentry
             yield return sentryEx;
         }
 
-        public static Mechanism GetMechanism(Exception exception)
+        public static Mechanism GetMechanism(Exception exception, bool? isUnhandled = null)
         {
             Debug.Assert(exception != null);
 
@@ -251,6 +252,14 @@ namespace Sentry
                 mechanism = new Mechanism
                 {
                     HelpLink = exception.HelpLink
+                };
+            }
+
+            if (isUnhandled != null)
+            {
+                mechanism = new Mechanism
+                {
+                    Handled = !isUnhandled
                 };
             }
 
