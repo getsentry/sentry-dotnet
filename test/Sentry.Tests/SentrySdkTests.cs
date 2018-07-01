@@ -212,12 +212,15 @@ namespace Sentry.Tests
         public void CaptureException_Instance_NoOp() => SentrySdk.CaptureException(new Exception());
 
         [Fact]
+        public void CaptureException_InstanceUnhandled_NoOp() => SentrySdk.CaptureException(new Exception(), true);
+
+        [Fact]
         public void Implements_Client()
         {
             var clientMembers = typeof(ISentryClient).GetMembers(BindingFlags.Public | BindingFlags.Instance);
-            var SentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+            var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-            Assert.Empty(clientMembers.Select(m => m.ToString()).Except(SentrySdk.Select(m => m.ToString())));
+            Assert.Empty(clientMembers.Select(m => m.ToString()).Except(sentrySdk.Select(m => m.ToString())));
         }
 
         [Fact]
@@ -226,18 +229,18 @@ namespace Sentry.Tests
             var clientExtensions = typeof(SentryClientExtensions).GetMembers(BindingFlags.Public | BindingFlags.Static)
                 // Remove the extension argument: Method(this ISentryClient client, ...
                 .Select(m => m.ToString().Replace($"({typeof(ISentryClient).FullName}, ", "("));
-            var SentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+            var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-            Assert.Empty(clientExtensions.Except(SentrySdk.Select(m => m.ToString())));
+            Assert.Empty(clientExtensions.Except(sentrySdk.Select(m => m.ToString())));
         }
 
         [Fact]
         public void Implements_ScopeManagement()
         {
             var scopeManagement = typeof(ISentryScopeManager).GetMembers(BindingFlags.Public | BindingFlags.Instance);
-            var SentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+            var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-            Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(SentrySdk.Select(m => m.ToString())));
+            Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(sentrySdk.Select(m => m.ToString())));
         }
     }
 }
