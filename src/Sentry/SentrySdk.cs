@@ -223,7 +223,7 @@ namespace Sentry
         /// Configures the scope asynchronously
         /// </summary>
         /// <param name="configureScope">The configure scope callback.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
             => _hub.ConfigureScopeAsync(configureScope);
@@ -232,7 +232,7 @@ namespace Sentry
         /// Captures the event.
         /// </summary>
         /// <param name="evt">The event.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static Guid CaptureEvent(SentryEvent evt)
             => _hub.CaptureEvent(evt);
@@ -242,7 +242,7 @@ namespace Sentry
         /// </summary>
         /// <param name="evt">The event.</param>
         /// <param name="scope">The scope.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static Guid CaptureEvent(SentryEvent evt, Scope scope)
@@ -252,7 +252,7 @@ namespace Sentry
         /// Captures the exception.
         /// </summary>
         /// <param name="exception">The exception.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static Guid CaptureException(Exception exception)
             => _hub.CaptureException(exception);
@@ -271,5 +271,15 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static Guid CaptureException(Exception exception, bool? isUnhandled)
             => _hub.CaptureException(exception, isUnhandled);
+
+        /// <summary>
+        /// Captures the message.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <param name="level">The message level.</param>
+        /// <returns>The Id of the event</returns>
+        [DebuggerStepThrough]
+        public static Guid CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
+            => _hub.CaptureMessage(message, level);
     }
 }

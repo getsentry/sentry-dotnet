@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Sentry;
+using Sentry.Protocol;
 using Sentry.Samples.Console.Customized;
 
 // One of the ways to set your DSN is via an attribute:
@@ -65,13 +66,14 @@ namespace Sentry.Samples.Console.Customized
                     scope.SetExtra("Key", "Value");
                 });
 
-                SentrySdk.CaptureException(new Exception("Something went wrong."));
+                SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
 
                 // -------------------------
 
                 // A custom made client, that could be registered with DI,
                 // would get disposed by the container on app shutdown
 
+                SentrySdk.CaptureMessage("Starting new client");
                 // Using a different DSN:
                 var adminDsn = new Dsn(AdminDsn);
                 using (var adminClient = new SentryClient(new SentryOptions { Dsn = adminDsn }))
