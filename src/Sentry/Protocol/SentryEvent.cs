@@ -108,6 +108,10 @@ namespace Sentry
             internal set => InternalModules = value;
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />
+        /// </summary>
+        /// <inheritdoc />
         public SentryEvent() : this(null)
         { }
 
@@ -243,7 +247,7 @@ namespace Sentry
             yield return sentryEx;
         }
 
-        public static Mechanism GetMechanism(Exception exception, bool? isUnhandled = null)
+        internal static Mechanism GetMechanism(Exception exception, bool? isUnhandled = null)
         {
             Debug.Assert(exception != null);
 
@@ -268,7 +272,7 @@ namespace Sentry
             return mechanism;
         }
 
-        public static SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)
+        internal static SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)
         {
             const string unknownRequiredField = "(unknown)";
 

@@ -8,7 +8,7 @@ namespace Sentry
     /// Scope management
     /// </summary>
     /// <remarks>
-    /// An implementation shall be create new scopes and allow consumers
+    /// An implementation shall create new scopes and allow consumers
     /// modify the current scope
     /// </remarks>
     public interface ISentryScopeManager

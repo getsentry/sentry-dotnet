@@ -63,7 +63,14 @@ namespace Sentry
             return Init(options);
         }
 
-        // Used by integrations which have their own delegates
+        /// <summary>
+        /// Initializes the SDK with the specified options instance
+        /// </summary>
+        /// <param name="options">The options instance</param>
+        /// <remarks>
+        /// Used by integrations which have their own delegates
+        /// </remarks>
+        /// <returns>A disposable to close the SDK.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
@@ -88,7 +95,14 @@ namespace Sentry
         // For testing
         internal static void UseHub(IHub hub) => _hub = hub;
 
-        // Used for testing
+        /// <summary>
+        /// Close the SDK
+        /// </summary>
+        /// <remarks>
+        /// Flushes the events and disables the SDK.
+        /// This method is mostly used for testing the library since
+        /// Init returns a IDisposable that can be used to shutdown the SDK.
+        /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Close()
         {

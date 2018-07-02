@@ -7,15 +7,33 @@ using Sentry.Protocol;
 
 namespace Sentry
 {
+    /// <summary>
+    /// Sentry client used to send events to Sentry
+    /// </summary>
+    /// <remarks>
+    /// This client captures events by queueing those to its
+    /// internal background worker which sends events to Sentry
+    /// </remarks>
+    /// <inheritdoc cref="ISentryClient" />
+    /// <inheritdoc cref="IDisposable" />
     public class SentryClient : ISentryClient, IDisposable
     {
         private volatile bool _disposed;
         private readonly SentryOptions _options;
+
         // Internal for testing
         internal IBackgroundWorker Worker { get; }
 
+        /// <inheritdoc />
+        /// <summary>
+        /// Whether the client is enabled
+        /// </summary>
         public bool IsEnabled => true;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryClient"/>
+        /// </summary>
+        /// <param name="options">The configuration for this client.</param>
         public SentryClient(SentryOptions options)
             : this(options, null) { }
 
@@ -36,6 +54,16 @@ namespace Sentry
             }
         }
 
+        /// <summary>
+        /// Queues the event to be sent to Sentry
+        /// </summary>
+        /// <remarks>
+        /// An optional scope, if provided, will be applied to the event.
+        /// </remarks>
+        /// <param name="event">The event to send to Sentry.</param>
+        /// <param name="scope">The optional scope to augment the event with.</param>
+        /// <returns></returns>
+        /// <inheritdoc />
         public Guid CaptureEvent(SentryEvent @event, Scope scope = null)
         {
             if (_disposed)
@@ -95,6 +123,10 @@ namespace Sentry
             return @event;
         }
 
+        /// <summary>
+        /// Disposes this client
+        /// </summary>
+        /// <inheritdoc />
         public void Dispose()
         {
             if (_disposed)
