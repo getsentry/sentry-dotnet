@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests
@@ -8,13 +9,13 @@ namespace Sentry.Tests
         [Fact]
         public void SerializeObject_CorrectCasing()
         {
-            var sut = new 
+            var sut = new
             {
-                Debug = SentryLevel.Debug,
-                Info = SentryLevel.Info,
-                Warning = SentryLevel.Warning,
-                Error = SentryLevel.Error,
-                Fatal = SentryLevel.Fatal,
+               SentryLevel.Debug,
+               SentryLevel.Info,
+               SentryLevel.Warning,
+               SentryLevel.Error,
+               SentryLevel.Fatal,
             };
 
             var actual = JsonSerializer.SerializeObject(sut);
