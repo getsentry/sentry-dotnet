@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Threading.Tasks;
+using Sentry.Integrations;
 using Sentry.Protocol;
 
 namespace Sentry.Internal
@@ -8,6 +11,8 @@ namespace Sentry.Internal
     // unhandled exceptions and notify via logging or callback
     internal class Hub : IHub, IDisposable
     {
+        private readonly ImmutableList<ISdkIntegration> _integrations;
+
         public IInternalScopeManager ScopeManager { get; }
         private SentryClient _ownedClient;
 
@@ -15,26 +20,19 @@ namespace Sentry.Internal
 
         public Hub(SentryOptions options)
         {
-            // Create client from options and bind
+            Debug.Assert(options != null);
+
             _ownedClient = new SentryClient(options);
             ScopeManager = new SentryScopeManager(options, _ownedClient);
 
-            // TODO: Subscribing or not should be based on the Options or some IIntegration
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-        }
+            _integrations = options.Integrations;
 
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            // TODO: avoid stack overflow
-            if (e.ExceptionObject is Exception ex)
+            if (_integrations?.Count > 0)
             {
-                // TODO: Add to Scope: Exception Mechanism = e.IsTerminating
-                this.CaptureException(ex);
-            }
-
-            if (e.IsTerminating)
-            {
-                Dispose();
+                foreach (var integration in _integrations)
+                {
+                    integration.Register(this);
+                }
             }
         }
 
@@ -58,7 +56,14 @@ namespace Sentry.Internal
 
         public void Dispose()
         {
-            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
+            if (_integrations?.Count > 0)
+            {
+                foreach (var integration in _integrations)
+                {
+                    integration.Unregister(this);
+                }
+            }
+
             _ownedClient?.Dispose();
             _ownedClient = null;
             (ScopeManager as IDisposable)?.Dispose();

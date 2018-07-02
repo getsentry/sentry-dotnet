@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Sentry.Extensibility;
 using Sentry.Http;
+using Sentry.Integrations;
 using static Sentry.Internal.Constants;
 
 namespace Sentry
@@ -9,13 +11,7 @@ namespace Sentry
     /// TODO: the SDK options
     public class SentryOptions : IScopeOptions
     {
-        // TODO: This will be set via AsmInfo.cs?
-        // Used on AUTH header and also SDK payload interface?
-        internal string ClientVersion
-        {
-            get;
-            set; // Cannot be null!
-        } = "Sentry.NET";
+        internal string ClientVersion { get; } = SdkName;
 
         internal int SentryVersion { get; } = ProtocolVersion;
 
@@ -40,6 +36,9 @@ namespace Sentry
         internal List<Action<HttpOptions>> ConfigureHttpTransportOptions { get; private set; }
 
         internal Func<SentryOptions, ITransport> TransportFactory { get; set; }
+
+        public ImmutableList<ISdkIntegration> Integrations { get; set; }
+            = new ISdkIntegration[] { new AppDomainUnhandledExceptionIntegration() }.ToImmutableList();
 
         public void Worker(Action<BackgroundWorkerOptions> configure) => ConfigureBackgroundWorkerOptions = configure;
 

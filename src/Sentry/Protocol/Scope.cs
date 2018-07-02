@@ -89,7 +89,7 @@ namespace Sentry.Protocol
         /// </value>
         public User User
         {
-            get => InternalUser ?? User.Empty;
+            get => InternalUser ?? (InternalUser = new User());
             set => InternalUser = value;
         }
 
@@ -214,6 +214,11 @@ namespace Sentry.Protocol
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public void SetTag(string key, string value) => Tags = Tags.SetItem(key, value);
+        /// <summary>
+        /// Removes a tag from the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="key"></param>
+        public void UnsetTag(string key) => Tags = Tags.Remove(key);
 
         // TODO: make extension methods instead of members
         public void SetTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.SetItem(keyValue.Key, keyValue.Value);

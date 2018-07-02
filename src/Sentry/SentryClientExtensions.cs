@@ -14,12 +14,13 @@ namespace Sentry
         /// </summary>
         /// <param name="client">The Sentry client.</param>
         /// <param name="ex">The exception.</param>
+        /// <param name="isUnhandled">Whether the error was not handled by the application</param>
         /// <returns></returns>
-        public static Guid CaptureException(this ISentryClient client, Exception ex)
+        public static Guid CaptureException(this ISentryClient client, Exception ex, bool? isUnhandled = null)
         {
             return !client.IsEnabled
                 ? Guid.Empty
-                : client.CaptureEvent(new SentryEvent(ex));
+                : client.CaptureEvent(new SentryEvent(ex, isUnhandled: isUnhandled));
         }
     }
 }

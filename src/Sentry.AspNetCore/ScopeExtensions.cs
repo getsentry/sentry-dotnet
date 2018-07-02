@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {
+    ///
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ScopeExtensions
     {
@@ -18,30 +18,43 @@ namespace Sentry.AspNetCore
         /// </summary>
         public static void Populate(this Scope scope, HttpContext context)
         {
-            scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
-
-            var options = context.RequestServices?.GetService<SentryAspNetCoreOptions>();
-            // TODO: should be elsewhere.
-            if (options?.IncludeRequestPayload == true)
+            // With the logger integration, a BeginScope call is made with RequestId. That ends up adding
+            // two tags with the same value: RequestId and TraceIdentifier
+            if (!scope.Tags.TryGetValue("RequestId", out var requestId) || requestId != context.TraceIdentifier)
             {
-                var extractors = context.RequestServices.GetServices<IRequestPayloadExtractor>();
-                foreach (var extractor in extractors)
-                {
-                    var data = extractor.ExtractPayload(context.Request);
-                    if (!string.IsNullOrWhiteSpace(data as string) || data != null)
-                    {
-                        scope.Request.Data = data;
-                        break;
-                    }
-                }
+                scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
             }
 
+            var userFactory = context.RequestServices?.GetService<IUserFactory>();
+            if (userFactory != null)
+            {
+                scope.User = userFactory.Create(context);
+            }
+
+            SetBody(scope, context);
+            SetEnv(scope, context);
+
+            // TODO: From MVC route template, ideally
+            //scope.Transation = context.Request.Path;
+
+            // TODO: Get context stuff into scope
+            //context.Session
+            //context.Response
+            //context.Items
+        }
+
+        private static void SetEnv(Scope scope, HttpContext context)
+        {
             scope.Request.Method = context.Request.Method;
+
+            // Logging integration, if enabled, sets the following tag which ends up as duplicate
+            // to Request.Url. Prefer the interface value and remove tag.
             scope.Request.Url = context.Request.Path;
+            scope.UnsetTag("RequestPath");
+
             scope.Request.QueryString = context.Request.QueryString.ToString();
             scope.Request.Headers = context.Request.Headers
-                .Select(p => new KeyValuePair<string, string>(p.Key, string.Join(", ", p.Value)))
-                .ToImmutableDictionary(k => k.Key, v => v.Value);
+                .ToImmutableDictionary(k => k.Key, v => v.Value.ToString());
 
             // TODO: Hide these 'Env' behind some extension method as
             // these might be reported in a non CGI, old-school way
@@ -54,44 +67,39 @@ namespace Sentry.AspNetCore
             scope.Request.Env = scope.Request.Env.SetItem("SERVER_NAME", Environment.MachineName);
             scope.Request.Env = scope.Request.Env.SetItem("SERVER_PORT", context.Connection.LocalPort.ToString());
 
-            // TODO: likely a better way to do this as if the response didn't start yet nothing is found
             if (context.Response.Headers.TryGetValue("Server", out var server))
             {
                 scope.Request.Env = scope.Request.Env.SetItem("SERVER_SOFTWARE", server);
             }
+        }
 
-            // Don't send the user if all we have of him/her is the IP address
-            // TODO: Send users claim types?
-            var identity = context.User?.Identity;
-            var name = identity?.Name;
-
-            // TODO: Account for X-Forwarded-For.. Configurable?
-            if (name != null)
+        private static void SetBody(Scope scope, HttpContext context)
+        {
+            var options = context.RequestServices?.GetService<SentryAspNetCoreOptions>();
+            if (options?.IncludeRequestPayload == true)
             {
-                // TODO: Just make user mutable? Like the HttpContext,
-                // it's just known not to be thread-safe
-                scope.User = new User(
-                    //username:
-                    //email:
-                    id: name,
-                    ipAddress: ipAddress);
+                // GetServices<IRequestPayloadExtractor> throws! Shouldn't it return Enumerable.Empty<T>?
+                var extractors = context.RequestServices.GetService<IEnumerable<IRequestPayloadExtractor>>();
+                if (extractors == null)
+                {
+                    return;
+                }
 
-                // TOOD: Consider also:
-                //identity.AuthenticationType
-                //identity.IsAuthenticated
-                //scope.User.Id
-                //scope.User.Email
+                foreach (var extractor in extractors)
+                {
+                    var data = extractor.ExtractPayload(context.Request);
+
+                    if (data == null
+                        || data is string dataString
+                        && string.IsNullOrEmpty(dataString))
+                    {
+                        continue;
+                    }
+
+                    scope.Request.Data = data;
+                    break;
+                }
             }
-
-            // TODO: From MVC route template, ideally
-            //scope.Transation = context.Request.Path;
-
-            // TODO: Get context stuff into scope
-            //context.User
-            //context.Connection
-            //context.Session
-            //context.Response
-            //context.Items
         }
 
         /// <summary>
@@ -112,7 +120,7 @@ namespace Sentry.AspNetCore
             scope.SetTags(activity.Tags);
         }
 
-        public static void SetWebRoot(this Scope scope, string webRoot)
+        internal static void SetWebRoot(this Scope scope, string webRoot)
         {
             if (webRoot != null)
             {

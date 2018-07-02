@@ -88,5 +88,23 @@ namespace Sentry.Tests.Internals
 
             Assert.True(configureHandlerInvoked);
         }
+
+        [Fact]
+        public void Create_HttpProxyOnOptions_HandlerUsesProxy()
+        {
+            _fixture.HttpOptions.Proxy = new WebProxy("https://proxy.sentry.io:31337");
+            var configureHandlerInvoked = false;
+            _fixture.ConfigureHandler = (handler, dsn, o) =>
+            {
+                Assert.Same(_fixture.HttpOptions, o);
+                Assert.Same(_fixture.HttpOptions.Proxy, handler.Proxy);
+                configureHandlerInvoked = true;
+            };
+            var sut = _fixture.GetSut();
+
+            sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            Assert.True(configureHandlerInvoked);
+        }
     }
 }

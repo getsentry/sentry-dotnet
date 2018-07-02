@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Http;
 
 namespace Sentry.Http
 {
@@ -32,10 +31,23 @@ namespace Sentry.Http
         // Expected to call into the internal logging which will be expose
         internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; set; }
 
-        internal Func<HttpMessageHandler> HttpMessageHandlerFactory { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpOptions"/> class.
+        /// </summary>
+        /// <param name="sentryUri">The sentry URI.</param>
         public HttpOptions(Uri sentryUri)
         {
+            if (sentryUri == null)
+            {
+                throw new ArgumentNullException(nameof(sentryUri));
+            }
+
+            if (!sentryUri.IsAbsoluteUri)
+            {
+                throw new ArgumentException(
+                    "URL to Sentry must be absolute. Example: https://98718479@sentry.io/123456", nameof(sentryUri));
+            }
+
             SentryUri = sentryUri;
 
 #if DEBUG // Leave it null by default otherwise
