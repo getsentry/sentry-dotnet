@@ -15,6 +15,8 @@ namespace Sentry.Internal
 
         public static string SerializeObject<T>(T @object) => JsonConvert.SerializeObject(@object, Settings);
         public static dynamic DeserializeObject(string json) => JsonConvert.DeserializeObject(json);
+#if DEBUG
         public static T DeserializeObject<T>(string json) => JsonConvert.DeserializeObject<T>(json);
+#endif
     }
 }

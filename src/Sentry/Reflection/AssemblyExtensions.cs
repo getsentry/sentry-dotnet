@@ -3,6 +3,9 @@ using System.Reflection;
 
 namespace Sentry.Reflection
 {
+    /// <summary>
+    /// Extension methods to <see cref="Assembly"/>
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class AssemblyExtensions
     {

@@ -36,16 +36,42 @@ namespace Sentry.Tests
         [Fact]
         public void Init_ValidDsnWithoutSecret_EnablesSdk()
         {
-            using (SentrySdk.Init(DsnSamples.ValidDsnWithoutSecret))
+            using (SentrySdk.Init(ValidDsnWithoutSecret))
                 Assert.True(SentrySdk.IsEnabled);
         }
 
         [Fact]
         public void Init_DsnInstance_EnablesSdk()
         {
-            var dsn = new Dsn(DsnSamples.ValidDsnWithoutSecret);
+            var dsn = new Dsn(ValidDsnWithoutSecret);
             using (SentrySdk.Init(dsn))
                 Assert.True(SentrySdk.IsEnabled);
+        }
+
+        [Fact]
+        public void Init_CallbackWithoutDsn_ValidDsnEnvironmentVariable_LocatesDsnEnvironmentVariable()
+        {
+            EnvironmentVariableGuard.WithVariable(
+                DsnEnvironmentVariable,
+                ValidDsnWithSecret,
+                () =>
+                {
+                    using (SentrySdk.Init(c => { }))
+                        Assert.True(SentrySdk.IsEnabled);
+                });
+        }
+
+        [Fact]
+        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariabl_DisabledSdk()
+        {
+            EnvironmentVariableGuard.WithVariable(
+                DsnEnvironmentVariable,
+                InvalidDsn,
+                () =>
+                {
+                    using (SentrySdk.Init(c => { }))
+                        Assert.False(SentrySdk.IsEnabled);
+                });
         }
 
         [Fact]
@@ -67,7 +93,7 @@ namespace Sentry.Tests
             EnvironmentVariableGuard.WithVariable(
                 DsnEnvironmentVariable,
                 // If the variable was set, to non empty string but value is broken, better crash than silently disable
-                DsnSamples.InvalidDsn,
+                InvalidDsn,
                 () =>
                 {
                     var ex = Assert.Throws<ArgumentException>(() => SentrySdk.Init());
@@ -96,15 +122,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Disposable_MultipleCalls_NoOp()
-        {
-            var disposable = SentrySdk.Init();
-            disposable.Dispose();
-            disposable.Dispose();
-            Assert.False(SentrySdk.IsEnabled);
-        }
-
-        [Fact]
         public void Init_MultipleCalls_ReplacesHubWithLatest()
         {
             var first = SentrySdk.Init(ValidDsnWithSecret);
@@ -128,6 +145,15 @@ namespace Sentry.Tests
 
             first.Dispose();
             second.Dispose();
+        }
+
+        [Fact]
+        public void Disposable_MultipleCalls_NoOp()
+        {
+            var disposable = SentrySdk.Init();
+            disposable.Dispose();
+            disposable.Dispose();
+            Assert.False(SentrySdk.IsEnabled);
         }
 
         [Fact]
