@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Runtime.Serialization;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
@@ -53,7 +54,7 @@ namespace Sentry.Protocol
         /// Arbitrary extra data that related to this error
         /// </summary>
         /// <remarks>
-        /// The protocol does not support at this time, data at this level.
+        /// The protocol does not yet support data at this level.
         /// For this reason this property is not serialized.
         /// The data is moved to the event level on Extra until such support is added
         /// </remarks>

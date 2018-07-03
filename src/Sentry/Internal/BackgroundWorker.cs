@@ -14,7 +14,7 @@ namespace Sentry.Internal
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly SemaphoreSlim _inSemaphore;
         private readonly SemaphoreSlim _outSemaphore;
-        private bool _disposed;
+        private volatile bool _disposed;
 
         internal Task WorkerTask { get; }
 
@@ -150,7 +150,6 @@ namespace Sentry.Internal
                 inSemaphore.Dispose();
                 outSemaphore.Dispose();
             }
-
         }
 
         /// <summary>

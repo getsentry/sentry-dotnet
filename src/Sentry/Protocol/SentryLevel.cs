@@ -1,8 +1,6 @@
-// ReSharper disable once CheckNamespace
-
 using System.Runtime.Serialization;
 
-namespace Sentry
+namespace Sentry.Protocol
 {
     /// <summary>
     /// The level of the event sent to Sentry

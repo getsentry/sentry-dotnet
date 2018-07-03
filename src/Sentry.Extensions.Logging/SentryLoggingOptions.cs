@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
 
@@ -35,7 +34,7 @@ namespace Sentry.Extensions.Logging
 
         public IReadOnlyCollection<ILogEventFilter> Filters { get; set; }
 
-        // An optional convinience callback to initialize the SDK
+        // An optional convenience callback to initialize the SDK
         internal Action<SentryOptions> ConfigureOptions { get; private set; }
 
         /// <summary>

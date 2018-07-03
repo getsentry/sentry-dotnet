@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;
@@ -36,16 +37,42 @@ namespace Sentry.Tests
         [Fact]
         public void Init_ValidDsnWithoutSecret_EnablesSdk()
         {
-            using (SentrySdk.Init(DsnSamples.ValidDsnWithoutSecret))
+            using (SentrySdk.Init(ValidDsnWithoutSecret))
                 Assert.True(SentrySdk.IsEnabled);
         }
 
         [Fact]
         public void Init_DsnInstance_EnablesSdk()
         {
-            var dsn = new Dsn(DsnSamples.ValidDsnWithoutSecret);
+            var dsn = new Dsn(ValidDsnWithoutSecret);
             using (SentrySdk.Init(dsn))
                 Assert.True(SentrySdk.IsEnabled);
+        }
+
+        [Fact]
+        public void Init_CallbackWithoutDsn_ValidDsnEnvironmentVariable_LocatesDsnEnvironmentVariable()
+        {
+            EnvironmentVariableGuard.WithVariable(
+                DsnEnvironmentVariable,
+                ValidDsnWithSecret,
+                () =>
+                {
+                    using (SentrySdk.Init(c => { }))
+                        Assert.True(SentrySdk.IsEnabled);
+                });
+        }
+
+        [Fact]
+        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariabl_DisabledSdk()
+        {
+            EnvironmentVariableGuard.WithVariable(
+                DsnEnvironmentVariable,
+                InvalidDsn,
+                () =>
+                {
+                    using (SentrySdk.Init(c => { }))
+                        Assert.False(SentrySdk.IsEnabled);
+                });
         }
 
         [Fact]
@@ -67,7 +94,7 @@ namespace Sentry.Tests
             EnvironmentVariableGuard.WithVariable(
                 DsnEnvironmentVariable,
                 // If the variable was set, to non empty string but value is broken, better crash than silently disable
-                DsnSamples.InvalidDsn,
+                InvalidDsn,
                 () =>
                 {
                     var ex = Assert.Throws<ArgumentException>(() => SentrySdk.Init());
@@ -96,15 +123,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Disposable_MultipleCalls_NoOp()
-        {
-            var disposable = SentrySdk.Init();
-            disposable.Dispose();
-            disposable.Dispose();
-            Assert.False(SentrySdk.IsEnabled);
-        }
-
-        [Fact]
         public void Init_MultipleCalls_ReplacesHubWithLatest()
         {
             var first = SentrySdk.Init(ValidDsnWithSecret);
@@ -128,6 +146,15 @@ namespace Sentry.Tests
 
             first.Dispose();
             second.Dispose();
+        }
+
+        [Fact]
+        public void Disposable_MultipleCalls_NoOp()
+        {
+            var disposable = SentrySdk.Init();
+            disposable.Dispose();
+            disposable.Dispose();
+            Assert.False(SentrySdk.IsEnabled);
         }
 
         [Fact]
@@ -212,12 +239,21 @@ namespace Sentry.Tests
         public void CaptureException_Instance_NoOp() => SentrySdk.CaptureException(new Exception());
 
         [Fact]
+        public void CaptureException_InstanceUnhandled_NoOp() => SentrySdk.CaptureException(new Exception(), true);
+
+        [Fact]
+        public void CaptureMessage_Message_NoOp() => SentrySdk.CaptureMessage("message");
+
+        [Fact]
+        public void CaptureMessage_MessageLevel_NoOp() => SentrySdk.CaptureMessage("message", SentryLevel.Debug);
+
+        [Fact]
         public void Implements_Client()
         {
             var clientMembers = typeof(ISentryClient).GetMembers(BindingFlags.Public | BindingFlags.Instance);
-            var SentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+            var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-            Assert.Empty(clientMembers.Select(m => m.ToString()).Except(SentrySdk.Select(m => m.ToString())));
+            Assert.Empty(clientMembers.Select(m => m.ToString()).Except(sentrySdk.Select(m => m.ToString())));
         }
 
         [Fact]
@@ -226,18 +262,18 @@ namespace Sentry.Tests
             var clientExtensions = typeof(SentryClientExtensions).GetMembers(BindingFlags.Public | BindingFlags.Static)
                 // Remove the extension argument: Method(this ISentryClient client, ...
                 .Select(m => m.ToString().Replace($"({typeof(ISentryClient).FullName}, ", "("));
-            var SentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+            var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-            Assert.Empty(clientExtensions.Except(SentrySdk.Select(m => m.ToString())));
+            Assert.Empty(clientExtensions.Except(sentrySdk.Select(m => m.ToString())));
         }
 
         [Fact]
         public void Implements_ScopeManagement()
         {
             var scopeManagement = typeof(ISentryScopeManager).GetMembers(BindingFlags.Public | BindingFlags.Instance);
-            var SentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+            var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-            Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(SentrySdk.Select(m => m.ToString())));
+            Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(sentrySdk.Select(m => m.ToString())));
         }
     }
 }

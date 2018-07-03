@@ -87,7 +87,6 @@ namespace Sentry.Extensions.Logging
                     _clock,
                     message ?? exception?.Message,
                     CategoryName,
-                    // TODO: verify on sentry
                     type: null,
                     data,
                     logLevel.ToBreadcrumbLevel());

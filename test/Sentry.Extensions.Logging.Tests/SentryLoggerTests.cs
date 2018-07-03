@@ -194,6 +194,43 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
+        public void LogCritical_ExceptionAndMessage_ExceptionMessageAsBreadcrumbData()
+        {
+            const string expectedMessage = "message";
+            var exception = new Exception("exception message");
+
+            var sut = _fixture.GetSut();
+
+            sut.LogCritical(exception, expectedMessage);
+
+            var b = _fixture.Scope.Breadcrumbs.First();
+            Assert.Contains(b.Data,
+                pair => pair.Key == "exception_message" && pair.Value == exception.Message);
+            Assert.Equal(expectedMessage, b.Message);
+        }
+
+        [Fact]
+        public void LogCritical_ExceptionAndMessageAndEventId_ExceptionMessageAndEventIdAsBreadcrumbData()
+        {
+            const string expectedMessage = "message";
+            const int expectedEventId = 1;
+            var exception = new Exception("exception message");
+
+            var sut = _fixture.GetSut();
+
+            sut.LogCritical(expectedEventId, exception, expectedMessage);
+
+            var b = _fixture.Scope.Breadcrumbs.First();
+            Assert.Contains(b.Data,
+                pair => pair.Key == "exception_message"
+                        && pair.Value == exception.Message);
+            Assert.Contains(b.Data,
+                pair => pair.Key == EventIdExtensions.DataKey
+                         && pair.Value == expectedEventId.ToString());
+            Assert.Equal(expectedMessage, b.Message);
+        }
+
+        [Fact]
         public void LogError_DefaultOptions_RecordsBreadcrumbs()
         {
             const string expectedMessage = "message";

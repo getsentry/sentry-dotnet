@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <VersionPrefix>0.0.1</VersionPrefix>
-    <VersionSuffix>preview1</VersionSuffix>
+    <VersionSuffix>preview2</VersionSuffix>
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
@@ -23,9 +23,6 @@
     <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet/master/LICENSE</PackageLicenseUrl>
 
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet/releases</PackageReleaseNotes>
-    <!-- On Release mode make sure missing docs raise warning -->
-    <!--TODO: Add this when API is more stable:-->
-    <!--<NoWarn Condition="'$(Configuration)' != 'Release'">$(NoWarn);CS1591</NoWarn>-->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 

@@ -89,7 +89,7 @@ namespace Sentry.Protocol
         /// </value>
         public User User
         {
-            get => InternalUser ?? User.Empty;
+            get => InternalUser ?? (InternalUser = new User());
             set => InternalUser = value;
         }
 
@@ -151,8 +151,23 @@ namespace Sentry.Protocol
             internal set => InternalTags = value;
         }
 
+        /// <summary>
+        /// An event that fires when the scope evaluates
+        /// </summary>
+        /// <remarks>
+        /// This allows registering an event handler that is invoked in case
+        /// an event is about to be sent to Sentry. If an event is never sent,
+        /// this event is never fired and the resources spared.
+        /// It also allows registration at an early stage of the processing
+        /// but execution at a later time, when more data is available.
+        /// </remarks>
+        /// <see cref="Evaluate"/>
         public event EventHandler OnEvaluating;
 
+        /// <summary>
+        /// Creates a scope with the specified options
+        /// </summary>
+        /// <param name="options"></param>
         public Scope(IScopeOptions options)
             : this(options ?? new SentryOptions(), true)
         {
@@ -179,6 +194,9 @@ namespace Sentry.Protocol
             }
         }
 
+        /// <summary>
+        /// Creates a new scope with default options
+        /// </summary>
         protected internal Scope()
             : this(null)
         { }
@@ -201,6 +219,13 @@ namespace Sentry.Protocol
         /// </summary>
         /// <param name="fingerprint">The fingerprint.</param>
         public void SetFingerprint(IReadOnlyCollection<string> fingerprint) => Fingerprint = fingerprint.ToImmutableList();
+        /// <summary>
+        /// Set the fingerprint which defines the event grouping
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        /// <param name="fingerprint"></param>
         public void SetFingerprint(params string[] fingerprint) => Fingerprint = fingerprint.ToImmutableList();
         /// <summary>
         /// Sets the extra key-value to the <see cref="Scope"/>
@@ -214,10 +239,27 @@ namespace Sentry.Protocol
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public void SetTag(string key, string value) => Tags = Tags.SetItem(key, value);
+        /// <summary>
+        /// Removes a tag from the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="key"></param>
+        public void UnsetTag(string key) => Tags = Tags.Remove(key);
 
         // TODO: make extension methods instead of members
+        /// <summary>
+        /// Set all tags
+        /// </summary>
+        /// <param name="keyValue"></param>
         public void SetTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.SetItem(keyValue.Key, keyValue.Value);
+        /// <summary>
+        /// Set all items as tags
+        /// </summary>
+        /// <param name="keyValue"></param>
         public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.SetItem(keyValue.Key, keyValue.Value.ToString());
+        /// <summary>
+        /// Set all items as tags
+        /// </summary>
+        /// <param name="tags"></param>
         public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.SetItems(tags);
 
         // TODO: test with reflection to ensure Clone doesn't go out of sync with members

@@ -64,7 +64,19 @@ namespace Sentry.Protocol
                 level: level);
         }
 
-        ///
+        /// <summary>
+        /// Adds a breadcrumb to the scope
+        /// </summary>
+        /// <remarks>
+        /// This overload is used for testing.
+        /// </remarks>
+        /// <param name="scope">The scope.</param>
+        /// <param name="clock">The clock which controls timestamps</param>
+        /// <param name="message">The message.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="dataPair">The data</param>
+        /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
             this Scope scope,
@@ -84,7 +96,19 @@ namespace Sentry.Protocol
                 level: level);
         }
 
-        ///
+        /// <summary>
+        /// Adds a breadcrumb to the scope
+        /// </summary>
+        /// <remarks>
+        /// This overload is used for testing.
+        /// </remarks>
+        /// <param name="scope">The scope.</param>
+        /// <param name="clock">The clock which controls timestamps</param>
+        /// <param name="message">The message.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="data">The data</param>
+        /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
             this Scope scope,
@@ -128,8 +152,16 @@ namespace Sentry.Protocol
             => ImmutableDictionary<string, string>.Empty
                 .SetItem(tuple.name, tuple.value);
 
-        // shallow copy from this scope over to the parameter
-        // Will override the value on 'to' when the value exists on 'from'
+        /// <summary>
+        /// Copy the data from one scope to the other
+        /// </summary>
+        /// <param name="from">The scope to data copy from.</param>
+        /// <param name="to">The scope to copy data to.</param>
+        /// <remarks>
+        /// Will override the value on 'to' when the value exists on 'from'.
+        /// If 'from' is null, 'to' is unmodified.
+        /// This is a shallow copy.
+        /// </remarks>
         public static void CopyTo(this Scope from, Scope to)
         {
             if (from.InternalFingerprint != null)
@@ -181,8 +213,11 @@ namespace Sentry.Protocol
             }
         }
 
-        // TODO: Use the same logic on Extra's object
-        // Applies the 'state' into the scope
+        /// <summary>
+        /// Applies the state object into the scope
+        /// </summary>
+        /// <param name="scope">The scope to apply the data.</param>
+        /// <param name="state">The state object to apply.</param>
         public static void Apply(this Scope scope, object state)
         {
             switch (state)
@@ -212,8 +247,7 @@ namespace Sentry.Protocol
                     }
                     break;
                 default:
-                    // TODO: Serialize it?
-                    scope.SetExtra(state.ToString(), string.Empty);
+                    scope.SetExtra("state", state);
                     break;
             }
         }

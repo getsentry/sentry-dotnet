@@ -38,7 +38,6 @@ namespace Sentry.Protocol
             set;
         }
 
-        // TODO: this collection should be immutable and it's Add hidden behind a method on SDK class
         /// <summary>
         /// Any integration configured with the SDK
         /// </summary>

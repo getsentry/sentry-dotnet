@@ -41,14 +41,9 @@ namespace Sentry
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
         public static IDisposable Init(string dsn)
-        {
-            if (string.IsNullOrWhiteSpace(dsn))
-            {
-                return DisabledHub.Instance;
-            }
-
-            return Init(c => c.Dsn = new Dsn(dsn));
-        }
+            => string.IsNullOrWhiteSpace(dsn)
+                ? DisabledHub.Instance
+                : Init(c => c.Dsn = new Dsn(dsn));
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
@@ -68,7 +63,14 @@ namespace Sentry
             return Init(options);
         }
 
-        // Used by integrations which have their own delegates
+        /// <summary>
+        /// Initializes the SDK with the specified options instance
+        /// </summary>
+        /// <param name="options">The options instance</param>
+        /// <remarks>
+        /// Used by integrations which have their own delegates
+        /// </remarks>
+        /// <returns>A disposable to close the SDK.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
@@ -93,7 +95,14 @@ namespace Sentry
         // For testing
         internal static void UseHub(IHub hub) => _hub = hub;
 
-        // Used for testing
+        /// <summary>
+        /// Close the SDK
+        /// </summary>
+        /// <remarks>
+        /// Flushes the events and disables the SDK.
+        /// This method is mostly used for testing the library since
+        /// Init returns a IDisposable that can be used to shutdown the SDK.
+        /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Close()
         {
@@ -214,7 +223,7 @@ namespace Sentry
         /// Configures the scope asynchronously
         /// </summary>
         /// <param name="configureScope">The configure scope callback.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
             => _hub.ConfigureScopeAsync(configureScope);
@@ -223,7 +232,7 @@ namespace Sentry
         /// Captures the event.
         /// </summary>
         /// <param name="evt">The event.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static Guid CaptureEvent(SentryEvent evt)
             => _hub.CaptureEvent(evt);
@@ -233,7 +242,7 @@ namespace Sentry
         /// </summary>
         /// <param name="evt">The event.</param>
         /// <param name="scope">The scope.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static Guid CaptureEvent(SentryEvent evt, Scope scope)
@@ -243,9 +252,34 @@ namespace Sentry
         /// Captures the exception.
         /// </summary>
         /// <param name="exception">The exception.</param>
-        /// <returns></returns>
+        /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static Guid CaptureException(Exception exception)
             => _hub.CaptureException(exception);
+
+        /// <summary>
+        /// Captures the exception while flagging if it went unhandled by user code.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <param name="isUnhandled">Whether the exception was handled by user code or not.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Usages of this class likely will always be handling the exception so flag is less useful here.
+        /// Hence EditorBrowsable:Never
+        /// </remarks>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static Guid CaptureException(Exception exception, bool? isUnhandled)
+            => _hub.CaptureException(exception, isUnhandled);
+
+        /// <summary>
+        /// Captures the message.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <param name="level">The message level.</param>
+        /// <returns>The Id of the event</returns>
+        [DebuggerStepThrough]
+        public static Guid CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
+            => _hub.CaptureMessage(message, level);
     }
 }
