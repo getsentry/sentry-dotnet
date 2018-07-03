@@ -19,6 +19,13 @@ The idea here is to simplify the [.NET SDK](https://github.com/getsentry/sentry-
 
 Most of the platform information used by the SDK goes to Sentry's [Context Interface](https://docs.sentry.io/clientdev/interfaces/contexts/). When implementing this on SharpRaven it was clear that to get reliable information is not as trivial as it seems. This repo is an attempt to create a package which will provide reliable information in different types of apps.
 
+## Supported frameworks
+
+This library supports:
+
+* .NET Framework 3.5 and later
+* .NET Standard 1.5 and later
+
 ## Building
 
 ### Install .NET Core
