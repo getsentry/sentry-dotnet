@@ -15,10 +15,12 @@ namespace Sentry.EntityFramework
         /// This is a static setup call, so make sure you only call it once for each <see cref="IQueryLogger"/> instance you want to register globally
         /// </summary>
         /// <param name="logger"></param>
-        public static void UseBreadcrumbs(IQueryLogger logger = null)
+        public static SentryCommandInterceptor UseBreadcrumbs(IQueryLogger logger = null)
         {
             logger = logger ?? new SentryQueryLogger();
-            DbInterception.Add(new SentryCommandInterceptor(logger));
+            var interceptor = new SentryCommandInterceptor(logger);
+            DbInterception.Add(interceptor);
+            return interceptor;
         }
     }
 }
