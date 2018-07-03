@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;
@@ -239,6 +240,12 @@ namespace Sentry.Tests
 
         [Fact]
         public void CaptureException_InstanceUnhandled_NoOp() => SentrySdk.CaptureException(new Exception(), true);
+
+        [Fact]
+        public void CaptureMessage_Message_NoOp() => SentrySdk.CaptureMessage("message");
+
+        [Fact]
+        public void CaptureMessage_MessageLevel_NoOp() => SentrySdk.CaptureMessage("message", SentryLevel.Debug);
 
         [Fact]
         public void Implements_Client()
