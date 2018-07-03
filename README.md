@@ -15,7 +15,7 @@ master | [![Build status](https://ci.appveyor.com/api/projects/status/arv807179r
 
 ## This is a work in progress. 
 
-The idea here is to simplify the [.NET SDK](https://github.com/getsentry/sentry-dotnet/) by leaving the messy `#ifdefs`, platform specific code (operating system, runtime, etc) out into its own library. It also helps by allowing us to share code between the [new .NET SDK](https://github.com/getsentry/sentry-dotnet/) and the [new .NET SDK](https://github.com/getsentry/raven-csharp/).
+The idea here is to simplify the [.NET SDK](https://github.com/getsentry/sentry-dotnet/) by leaving the messy `#ifdefs`, platform specific code (operating system, runtime, etc) out into its own library. It also helps by allowing us to share code between the [new .NET SDK](https://github.com/getsentry/sentry-dotnet/) and the [current .NET SDK](https://github.com/getsentry/raven-csharp/).
 
 Most of the platform information used by the SDK goes to Sentry's [Context Interface](https://docs.sentry.io/clientdev/interfaces/contexts/). When implementing this on SharpRaven it was clear that to get reliable information is not as trivial as it seems. This repo is an attempt to create a package which will provide reliable information in different types of apps.
 
