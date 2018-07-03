@@ -80,6 +80,8 @@ namespace Sentry
             scope?.Evaluate();
             scope?.CopyTo(@event);
 
+            _options.Apply(@event);
+
             @event = BeforeSend(@event);
             if (@event == null) // Rejected event
             {

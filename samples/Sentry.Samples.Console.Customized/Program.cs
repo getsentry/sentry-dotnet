@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Sentry;
 using Sentry.Protocol;
@@ -6,8 +7,13 @@ using Sentry.Samples.Console.Customized;
 
 // One of the ways to set your DSN is via an attribute:
 // It could be set via AssemblyInfo.cs and patched via CI.
-// Other ways are via environment variable, configuration files and explictly via parameter
+// Other ways are via environment variable, configuration files and explictly via parameter to Init
 [assembly: Dsn(Program.DefaultDsn)]
+// Tracks the release which sent the event and enables more features: https://docs.sentry.io/learn/releases/
+// Much like the DSN above, this is only of way to define the release.
+// If not set here, it can also be defined via appsettings.json, environment variable etc
+// STANDARD_CI_SOURCE_REVISION_ID -> TeamCity: %build.vcs.number%, VSTS: BUILD_SOURCEVERSION, Travis-CI: TRAVIS_COMMIT, AppVeyor: APPVEYOR_REPO_COMMIT, CircleCI: CIRCLE_SHA1
+[assembly: AssemblyInformationalVersion("e386dfd")]
 
 namespace Sentry.Samples.Console.Customized
 {

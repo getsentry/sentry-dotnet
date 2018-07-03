@@ -33,6 +33,20 @@ namespace Sentry
         public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
         /// <summary>
+        /// The release version of the application.
+        /// </summary>
+        /// <example>
+        /// 721e41770371db95eee98ca2707686226b993eda
+        /// </example>
+        /// <remarks>
+        /// This value will generally be something along the lines of the git SHA for the given project.
+        /// If not explicitly defined via configuration. It will attempt o read it from:
+        /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
+        /// </remarks>
+        /// <seealso href="https://docs.sentry.io/learn/releases/"/>
+        public string Release { get; set; }
+
+        /// <summary>
         /// The Data Source Name of a given project in Sentry.
         /// </summary>
         public Dsn Dsn { get; set; }

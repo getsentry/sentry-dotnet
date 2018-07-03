@@ -14,6 +14,8 @@
       "launchUrl": "throw",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        // The release can be defined via environmnet variable:
+        "Sentry__Release": "e386dfd",
         // If running with IIS Express: Set your DSN here:
         "SENTRY_DSN": "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141"
       }
@@ -24,6 +26,8 @@
       "launchUrl": "throw",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        // The release can be defined via environmnet variable:
+        "Sentry__Release": "e386dfd",
         // If running with kestrel (dotnet run): Set your DSN here:
         "SENTRY_DSN": "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141"
       },

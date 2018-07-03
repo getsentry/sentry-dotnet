@@ -52,6 +52,17 @@ namespace Microsoft.AspNetCore.Hosting
         {
             var aspnetOptions = new SentryAspNetCoreOptions();
 
+            // Default aspnetOptions to sentryOptions configuration:
+            aspnetOptions.ConfigureOptionsActions.Add(o =>
+            {
+                if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
+                {
+                    o.Dsn = new Dsn(aspnetOptions.Dsn);
+                }
+
+                o.Release = aspnetOptions.Release;
+            });
+
             builder.ConfigureLogging((context, logging) =>
             {
                 context.Configuration.GetSection("Sentry").Bind(aspnetOptions);

@@ -17,6 +17,7 @@ class Program
                 {
                     i.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
                     i.MaxBreadcrumbs = 150; // Increasing from default 100
+                    i.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
                 });
 
                 // Optionally configure options: The default values are:
