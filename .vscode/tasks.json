@@ -3,16 +3,6 @@
     "tasks": [
         {
             "label": "build",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/test/Sentry.Tests/Sentry.Tests.csproj"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build",
             "command": "dotnet build",
             "type": "shell",
             "group": "build",
@@ -20,6 +10,35 @@
                 "reveal": "silent"
             },
             "problemMatcher": "$msCompile"
+        },
+        {
+          "label": "coverage",
+          "command": "dotnet",
+          "type": "process",
+          "args": [
+              "test",
+              "/p:CollectCoverage=true",
+              "/p:CoverletOutputFormat=lcov",
+              "/p:CoverletOutput=./lcov"
+          ],
+          "problemMatcher": "$msCompile",
+          "group": "build"
+        },
+        {
+          "label": "watch: coverage",
+          "command": "dotnet",
+          "type": "process",
+          "args": [
+              "watch",
+              "--project",
+              "Sentry.sln",
+              "test",
+              "/p:CollectCoverage=true",
+              "/p:CoverletOutputFormat=lcov",
+              "/p:CoverletOutput=./lcov"
+          ],
+          "problemMatcher": "$msCompile",
+          "group": "build"
         }
     ]
 }
