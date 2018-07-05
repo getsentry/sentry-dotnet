@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using static Sentry.Internal.Constants;
