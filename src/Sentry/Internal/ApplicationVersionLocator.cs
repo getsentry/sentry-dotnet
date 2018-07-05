@@ -5,38 +5,20 @@ namespace Sentry.Internal
 {
     internal static class ApplicationVersionLocator
     {
-        private static volatile bool _read;
-        private static string _version;
+        public static string GetCurrent() => GetCurrent(Assembly.GetEntryAssembly());
 
-        public static string GetCurrent()
+        internal static string GetCurrent(Assembly asm)
         {
-            if (_read)
-            {
-                return _version;
-            }
+            var version = asm?.GetNameAndVersion().Version;
 
-            try
-            {
-                if (_read)
-                {
-                    return _version;
-                }
-
-                var version = Assembly.GetEntryAssembly()?.GetNameAndVersion().Version;
-                if (version != string.Empty
-                    // If it really was 1.0, it would need to be set explicitly since this is the default.
-                    && version != "1.0.0"
-                    && version != "1.0.0.0")
-                {
-                    _version = version;
-                }
-
-                return _version;
-            }
-            finally
-            {
-                _read = true;
-            }
+            return !string.IsNullOrEmpty(version)
+                   // If it really was on of the following, app would need to be set explicitly since these are defaults.
+                   && version != "0.0.0"
+                   && version != "1.0.0"
+                   && version != "0.0.0.0"
+                   && version != "1.0.0.0"
+                ? version
+                : null;
         }
     }
 }

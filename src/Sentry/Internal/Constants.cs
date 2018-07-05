@@ -3,6 +3,8 @@ namespace Sentry.Internal
     internal static class Constants
     {
         public const string DsnEnvironmentVariable = "SENTRY_DSN";
+        public const string ReleaseEnvironmentVariable = "SENTRY_RELEASE";
+
         // https://docs.sentry.io/clientdev/overview/#usage-for-end-users
         public const string DisableSdkDsnValue = "";
 

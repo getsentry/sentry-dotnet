@@ -52,7 +52,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void FindDsn_NoDsnInAsm_ReturnsNull()
         {
-            var asm = AssemblyCreationHelper.CreateAssemblyWithoutDsnAttribute();
+            var asm = AssemblyCreationHelper.CreateAssembly();
             var actual = DsnLocator.FindDsn(asm);
 
             Assert.Null(actual);
