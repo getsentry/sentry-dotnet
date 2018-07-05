@@ -139,6 +139,20 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void CaptureEvent_Release_SetFromOptions()
+        {
+            const string expectedRelease = "release number";
+            _fixture.SentryOptions.Release = expectedRelease;
+
+            var @event = new SentryEvent(populate: false);
+
+            var sut = _fixture.GetSut();
+            sut.CaptureEvent(@event);
+
+            Assert.Equal(expectedRelease, @event.Release);
+        }
+
+        [Fact]
         public void CaptureEvent_DisposedClient_ThrowsObjectDisposedException()
         {
             var sut = _fixture.GetSut();
