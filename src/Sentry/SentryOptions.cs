@@ -69,7 +69,7 @@ namespace Sentry
         /// integrations by means of modifying this list before initializing the SDK.
         /// </remarks>
         public ImmutableList<ISdkIntegration> Integrations { get; set; }
-            = new ISdkIntegration[] { new AppDomainUnhandledExceptionIntegration() }.ToImmutableList();
+            = ImmutableList.Create<ISdkIntegration>(new AppDomainUnhandledExceptionIntegration());
 
         /// <summary>
         /// Configure the background worker options
