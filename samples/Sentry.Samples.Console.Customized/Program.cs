@@ -10,8 +10,8 @@ using Sentry.Samples.Console.Customized;
 // Other ways are via environment variable, configuration files and explictly via parameter to Init
 [assembly: Dsn(Program.DefaultDsn)]
 // Tracks the release which sent the event and enables more features: https://docs.sentry.io/learn/releases/
-// Much like the DSN above, this is only of way to define the release.
-// If not set here, it can also be defined via appsettings.json, environment variable etc
+// Much like the DSN above, this is only one of the ways to define the release.
+// If not set here, it can also be defined via appsettings.json, environment variable 'SENTRY_RELEASE' and AssemblyVersion
 // STANDARD_CI_SOURCE_REVISION_ID -> TeamCity: %build.vcs.number%, VSTS: BUILD_SOURCEVERSION, Travis-CI: TRAVIS_COMMIT, AppVeyor: APPVEYOR_REPO_COMMIT, CircleCI: CIRCLE_SHA1
 [assembly: AssemblyInformationalVersion("e386dfd")]
 
