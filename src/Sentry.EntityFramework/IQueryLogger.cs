@@ -4,6 +4,6 @@ namespace Sentry.EntityFramework
 {
     public interface IQueryLogger
     {
-        void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Info);
+        void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Debug);
     }
 }

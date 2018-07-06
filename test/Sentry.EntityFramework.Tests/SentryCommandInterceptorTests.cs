@@ -49,7 +49,7 @@ namespace Sentry.EntityFramework.Tests
             };
 
             interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int>());
-            _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Info);
+            _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Debug);
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace Sentry.EntityFramework.Tests
             };
 
             interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
-            _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Info);
+            _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Debug);
         }
 
         [Fact]
@@ -125,7 +125,7 @@ namespace Sentry.EntityFramework.Tests
             };
 
             interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object>());
-            _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Info);
+            _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Debug);
         }
 
         [Fact]
@@ -154,7 +154,7 @@ namespace Sentry.EntityFramework.Tests
 
             _fixture.DbContext.TestTable.FirstOrDefault();
             
-            _fixture.QueryLogger.Received().Log(Arg.Any<string>(), BreadcrumbLevel.Info);
+            _fixture.QueryLogger.Received().Log(Arg.Any<string>(), BreadcrumbLevel.Debug);
         }
     }
 }

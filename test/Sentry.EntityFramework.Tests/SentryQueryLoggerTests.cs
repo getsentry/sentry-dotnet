@@ -30,7 +30,7 @@ namespace Sentry.EntityFramework.Tests
             var expected = new
             {
                 Query = "Expected query string",
-                Level = BreadcrumbLevel.Info,
+                Level = BreadcrumbLevel.Debug,
                 Category = "Entity Framework"
             };
 

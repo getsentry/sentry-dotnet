@@ -14,7 +14,7 @@ namespace Sentry.EntityFramework
             _hub = hub ?? HubAdapter.Instance;
         }
 
-        public void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Info)
+        public void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Debug)
         {
             _hub.AddBreadcrumb(
                 message: text,
