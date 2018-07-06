@@ -25,6 +25,6 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="exception">The exception to process.</param>
         /// <param name="sentryEvent">The event to process.</param>
-        protected abstract void ProcessException(TException exception, SentryEvent sentryEvent);
+        protected internal abstract void ProcessException(TException exception, SentryEvent sentryEvent);
     }
 }
