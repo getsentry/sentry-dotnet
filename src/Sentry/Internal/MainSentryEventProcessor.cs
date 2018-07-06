@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
@@ -18,6 +19,11 @@ namespace Sentry.Internal
 
         public void Process(SentryEvent @event)
         {
+            if (@event.Level == null)
+            {
+                @event.Level = SentryLevel.Error;
+            }
+
             if (@event.Release == null)
             {
                 @event.Release = _options.Release ?? Release.Value;
