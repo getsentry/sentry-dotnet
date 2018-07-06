@@ -14,6 +14,8 @@ namespace Sentry.Internal
     {
         public void Process(Exception exception, SentryEvent sentryEvent)
         {
+            Debug.Assert(sentryEvent != null);
+
             if (exception != null)
             {
                 var sentryExceptions = CreateSentryException(exception)
