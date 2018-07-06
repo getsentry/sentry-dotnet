@@ -4,9 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using Sentry.Infrastructure;
-using Sentry.Internal;
 using Sentry.Protocol;
-using Sentry.Reflection;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -21,7 +19,7 @@ namespace Sentry
     public class SentryEvent : Scope
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, string> InternalModules { get; private set; }
+        internal IImmutableDictionary<string, string> InternalModules { get; set; }
 
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
         private string SerializableEventId => EventId.ToString("N");
@@ -121,49 +119,16 @@ namespace Sentry
             : this(exception, null)
         { }
 
-        // TODO: event as POCO, take this log out
         internal SentryEvent(
             Exception exception = null,
             ISystemClock clock = null,
-            Guid id = default,
-            bool? isUnhandled = null,
-            bool populate = true)
+            Guid id = default)
         {
             clock = clock ?? SystemClock.Clock;
             EventId = id == default ? Guid.NewGuid() : id;
 
             Timestamp = clock.GetUtcNow();
             Exception = exception;
-
-            if (populate)
-            {
-                Populate();
-            }
-        }
-
-        private static readonly (string Name, string Version) NameAndVersion
-            = typeof(ISentryClient).Assembly.GetNameAndVersion();
-
-        private void Populate()
-        {
-            Platform = Constants.Platform;
-            Sdk.Name = Constants.SdkName;
-
-            Sdk.Version = NameAndVersion.Version;
-
-            var builder = ImmutableDictionary.CreateBuilder<string, string>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                if (assembly.IsDynamic)
-                {
-                    continue;
-                }
-
-                var asmName = assembly.GetName();
-                builder[asmName.Name] = asmName.Version.ToString();
-            }
-
-            InternalModules = builder.ToImmutable();
         }
     }
 }

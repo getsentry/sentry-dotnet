@@ -3,6 +3,7 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
+using Sentry.Reflection;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -80,6 +81,56 @@ namespace Sentry.Tests.Internals
             Sut.Process(evt);
 
             Assert.False(invoked);
+        }
+
+        [Fact]
+        public void Process_Platform_CSharp()
+        {
+            var evt = new SentryEvent();
+            Sut.Process(evt);
+
+            Assert.Equal(Constants.Platform, evt.Platform);
+        }
+
+        [Fact]
+        public void Process_Modules_NotEmpty()
+        {
+            var evt = new SentryEvent();
+            Sut.Process(evt);
+
+            Assert.NotEmpty(evt.Modules);
+        }
+
+        [Fact]
+        public void Process_SdkNameAndVersion_ToDefault()
+        {
+            var evt = new SentryEvent();
+
+            Sut.Process(evt);
+
+            Assert.Equal(Constants.SdkName, evt.Sdk.Name);
+            Assert.Equal(typeof(ISentryClient).Assembly.GetNameAndVersion().Version, evt.Sdk.Version);
+        }
+
+        [Fact]
+        public void Process_SdkNameAndVersion_NotModified()
+        {
+            const string expectedName = "TestSdk";
+            const string expectedVersion = "1.0";
+
+            var evt = new SentryEvent
+            {
+                Sdk =
+                {
+                    Name = expectedName,
+                    Version = expectedVersion
+                }
+            };
+
+            Sut.Process(evt);
+
+            Assert.Equal(expectedName, evt.Sdk.Name);
+            Assert.Equal(expectedVersion, evt.Sdk.Version);
         }
     }
 }
