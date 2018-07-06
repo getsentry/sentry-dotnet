@@ -26,7 +26,7 @@ namespace Sentry.Samples.AspNetCore.Mvc
             services.AddTransient<ISentryEventProcessor, ExampleEventProcessor>();
 
             // To demonstrate taking a request-aware service into the event processor above
-            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
 
             services.AddSingleton<IGameService, GameService>();
 
