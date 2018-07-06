@@ -100,7 +100,7 @@ namespace Sentry.AspNetCore.Tests
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.SentryExceptions.Values.Single().Value == expected.Message));
+            _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
         }
 
         [Fact]

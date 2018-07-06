@@ -14,6 +14,8 @@ namespace Sentry.AspNetCore
     /// </remarks>
     public class SentryAspNetCoreOptions
     {
+        internal SentryOptions SentryOptions { get; set; }
+
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
         /// </summary>

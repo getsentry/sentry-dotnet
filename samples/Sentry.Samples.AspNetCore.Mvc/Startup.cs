@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sentry.Extensibility;
 
 namespace Sentry.Samples.AspNetCore.Mvc
 {
@@ -17,7 +19,17 @@ namespace Sentry.Samples.AspNetCore.Mvc
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Register as many ISentryEventExceptionProcessor as you need. They ALL get called.
+            services.AddSingleton<ISentryEventExceptionProcessor, SpecialExceptionProcessor>();
+
+            // You can also register as many ISentryEventProcessor as you need.
+            services.AddTransient<ISentryEventProcessor, ExampleEventProcessor>();
+
+            // To demonstrate taking a request-aware service into the event processor above
+            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddSingleton<IGameService, GameService>();
+
             services.AddMvc();
         }
 

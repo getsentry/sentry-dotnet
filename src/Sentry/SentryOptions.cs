@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
+using Sentry.Internal;
 using static Sentry.Internal.Constants;
 
 namespace Sentry
@@ -73,6 +74,20 @@ namespace Sentry
             = ImmutableList.Create<ISdkIntegration>(new AppDomainUnhandledExceptionIntegration());
 
         /// <summary>
+        /// A list of exception processors
+        /// </summary>
+        internal ImmutableList<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
+            = ImmutableList.Create<ISentryEventExceptionProcessor>(new MainExceptionProcessor());
+
+        /// <summary>
+        /// A list of event processors
+        /// </summary>
+        internal ImmutableList<ISentryEventProcessor> EventProcessors { get; set; }
+
+        internal Func<IEnumerable<ISentryEventProcessor>> GetEventProcessors { get; set; }
+        internal Func<IEnumerable<ISentryEventExceptionProcessor>> GetExceptionProcessors { get; set; }
+
+        /// <summary>
         /// Configure the background worker options
         /// </summary>
         /// <param name="configure">The callback to configure background worker options</param>
@@ -89,6 +104,16 @@ namespace Sentry
                 ConfigureHttpTransportOptions = new List<Action<HttpOptions>>(1);
             }
             ConfigureHttpTransportOptions.Add(configure);
+        }
+
+        public SentryOptions()
+        {
+            GetEventProcessors = () => EventProcessors;
+            GetExceptionProcessors = () => ExceptionProcessors;
+
+            EventProcessors =
+                ImmutableList.Create<ISentryEventProcessor>(
+                    new MainSentryEventProcessor(this));
         }
     }
 }

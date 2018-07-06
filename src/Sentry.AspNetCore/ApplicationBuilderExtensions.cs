@@ -1,5 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Sentry.AspNetCore;
+using Sentry.Extensibility;
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.AspNetCore.Builder
@@ -16,6 +21,27 @@ namespace Microsoft.AspNetCore.Builder
         /// <param name="app">The application.</param>
         /// <returns></returns>
         public static IApplicationBuilder UseSentry(this IApplicationBuilder app)
-            => app.UseMiddleware<SentryMiddleware>();
+        {
+            AddApplicationProcessors(app.ApplicationServices);
+
+            return app.UseMiddleware<SentryMiddleware>();
+        }
+
+        private static void AddApplicationProcessors(IServiceProvider provider)
+        {
+            var options = provider.GetService<SentryAspNetCoreOptions>();
+
+            if (provider.GetService<IEnumerable<ISentryEventProcessor>>().Any())
+            {
+                var originalFunc = options.SentryOptions.GetEventProcessors;
+                options.SentryOptions.GetEventProcessors = () => originalFunc().Concat(provider.GetServices<ISentryEventProcessor>());
+            }
+
+            if (provider.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
+            {
+                    var originalFunc = options.SentryOptions.GetExceptionProcessors;
+                options.SentryOptions.GetExceptionProcessors = () => originalFunc().Concat(provider.GetServices<ISentryEventExceptionProcessor>());
+            }
+        }
     }
 }
