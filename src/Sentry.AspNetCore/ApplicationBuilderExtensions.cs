@@ -22,12 +22,12 @@ namespace Microsoft.AspNetCore.Builder
         /// <returns></returns>
         public static IApplicationBuilder UseSentry(this IApplicationBuilder app)
         {
-            AddApplicationProcessors(app.ApplicationServices);
+            UseServiceProviderProcessors(app.ApplicationServices);
 
             return app.UseMiddleware<SentryMiddleware>();
         }
 
-        private static void AddApplicationProcessors(IServiceProvider provider)
+        private static void UseServiceProviderProcessors(IServiceProvider provider)
         {
             var options = provider.GetService<SentryAspNetCoreOptions>();
 
