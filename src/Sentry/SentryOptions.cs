@@ -106,6 +106,9 @@ namespace Sentry
             ConfigureHttpTransportOptions.Add(configure);
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryOptions"/>
+        /// </summary>
         public SentryOptions()
         {
             GetEventProcessors = () => EventProcessors;
