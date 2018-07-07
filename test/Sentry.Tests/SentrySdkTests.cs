@@ -239,9 +239,6 @@ namespace Sentry.Tests
         public void CaptureException_Instance_NoOp() => SentrySdk.CaptureException(new Exception());
 
         [Fact]
-        public void CaptureException_InstanceUnhandled_NoOp() => SentrySdk.CaptureException(new Exception(), true);
-
-        [Fact]
         public void CaptureMessage_Message_NoOp() => SentrySdk.CaptureMessage("message");
 
         [Fact]

@@ -80,7 +80,10 @@ namespace Sentry
             scope?.Evaluate();
             scope?.CopyTo(@event);
 
-            _options.Apply(@event);
+            foreach (var processor in _options.GetAllEventProcessors())
+            {
+                processor.Process(@event);
+            }
 
             @event = BeforeSend(@event);
             if (@event == null) // Rejected event

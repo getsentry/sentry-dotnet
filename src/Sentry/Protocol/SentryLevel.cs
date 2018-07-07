@@ -8,29 +8,29 @@ namespace Sentry.Protocol
     public enum SentryLevel : short
     {
         /// <summary>
-        /// Fatal
+        /// Debug
         /// </summary>
-        [EnumMember(Value = "fatal")]
-        Fatal = -1,
-        /// <summary>
-        /// Error
-        /// </summary>
-        [EnumMember(Value = "error")]
-        Error, // defaults to 0
-        /// <summary>
-        /// Warning
-        /// </summary>
-        [EnumMember(Value = "warning")]
-        Warning,
+        [EnumMember(Value = "debug")]
+        Debug,
         /// <summary>
         /// Informational
         /// </summary>
         [EnumMember(Value = "info")]
         Info,
         /// <summary>
-        /// Debug
+        /// Warning
         /// </summary>
-        [EnumMember(Value = "debug")]
-        Debug
+        [EnumMember(Value = "warning")]
+        Warning,
+        /// <summary>
+        /// Error
+        /// </summary>
+        [EnumMember(Value = "error")]
+        Error,
+        /// <summary>
+        /// Fatal
+        /// </summary>
+        [EnumMember(Value = "fatal")]
+        Fatal
     }
 }

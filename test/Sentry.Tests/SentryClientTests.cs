@@ -38,7 +38,7 @@ namespace Sentry.Tests
         public void CaptureEvent_NullScope_QueuesEvent()
         {
             var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(id: expectedId, populate: false);
+            var expectedEvent = new SentryEvent(id: expectedId);
             _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
 
             var sut = _fixture.GetSut();
@@ -51,7 +51,7 @@ namespace Sentry.Tests
         public void CaptureEvent_EventAndScope_QueuesEvent()
         {
             var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(id: expectedId, populate: false);
+            var expectedEvent = new SentryEvent(id: expectedId);
             _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
 
             var sut = _fixture.GetSut();
@@ -74,7 +74,7 @@ namespace Sentry.Tests
                 evaluated = true;
             };
 
-            sut.CaptureEvent(new SentryEvent(populate: false), scope);
+            sut.CaptureEvent(new SentryEvent(), scope);
 
             Assert.True(evaluated);
             Assert.Same(scope, actualSender);
@@ -86,7 +86,7 @@ namespace Sentry.Tests
             const string expectedBreadcrumb = "test";
             var scope = new Scope();
             scope.AddBreadcrumb(expectedBreadcrumb);
-            var @event = new SentryEvent(populate: false);
+            var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
             sut.CaptureEvent(@event, scope);
@@ -98,7 +98,7 @@ namespace Sentry.Tests
         public void CaptureEvent_BeforeEvent_RejectEvent()
         {
             _fixture.SentryOptions.BeforeSend = @event => null;
-            var expectedEvent = new SentryEvent(populate: false);
+            var expectedEvent = new SentryEvent();
 
             var sut = _fixture.GetSut();
             var actualId = sut.CaptureEvent(expectedEvent, new Scope());
@@ -113,7 +113,7 @@ namespace Sentry.Tests
             SentryEvent received = null;
             _fixture.SentryOptions.BeforeSend = e => received = e;
 
-            var @event = new SentryEvent(populate: false);
+            var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
             sut.CaptureEvent(@event);
@@ -127,7 +127,7 @@ namespace Sentry.Tests
             var error = new Exception("Exception message!");
             _fixture.SentryOptions.BeforeSend = e => throw error;
 
-            var @event = new SentryEvent(populate: false);
+            var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
             sut.CaptureEvent(@event);
@@ -144,7 +144,7 @@ namespace Sentry.Tests
             const string expectedRelease = "release number";
             _fixture.SentryOptions.Release = expectedRelease;
 
-            var @event = new SentryEvent(populate: false);
+            var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
             sut.CaptureEvent(@event);

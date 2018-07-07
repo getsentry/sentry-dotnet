@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Sentry.Testing;
 
@@ -5,6 +6,7 @@ namespace Sentry.AspNetCore.Tests
 {
     public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
     {
+        protected Action<SentryAspNetCoreOptions> Configure;
         public override void Build()
         {
             var sentry = FakeSentryServer.CreateServer();
@@ -20,6 +22,8 @@ namespace Sentry.AspNetCore.Tests
                             => sentryHttpClient);
                     });
                 });
+
+                Configure?.Invoke(options);
             });
 
             base.Build();

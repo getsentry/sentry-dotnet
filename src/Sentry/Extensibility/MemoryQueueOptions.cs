@@ -1,6 +1,6 @@
 using System;
 
-namespace Sentry
+namespace Sentry.Extensibility
 {
     /// <summary>
     /// Configuration to the worker which sends queued events to Sentry

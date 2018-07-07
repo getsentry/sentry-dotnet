@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sentry;
+using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Samples.Console.Customized;
 
@@ -37,6 +38,9 @@ namespace Sentry.Samples.Console.Customized
             // Enable the SDK
             using (SentrySdk.Init(o =>
             {
+                o.AddEventProcessor(new SomeEventProcessor());
+                o.AddExceptionProcessor(new ArgumentExceptionProcessor());
+
                 // Modifications to event before it goes out. Could replace the event altogether
                 o.BeforeSend = @event =>
                 {
@@ -46,8 +50,6 @@ namespace Sentry.Samples.Console.Customized
                         return null;
                     }
 
-                    // Create a totally new event or modify the current one:
-                    @event.ServerName = null; // Make sure no ServerName is sent out
                     return @event;
                 };
 
@@ -69,7 +71,12 @@ namespace Sentry.Samples.Console.Customized
                 {
                     // This could be any async I/O operation, like a DB query
                     await Task.Yield();
-                    scope.SetExtra("Key", "Value");
+                    scope.SetExtra("SomeExtraInfo",
+                        new
+                        {
+                            Data = "Value fetched asynchronously",
+                            ManaLevel = 199
+                        });
                 });
 
                 SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
@@ -128,6 +135,34 @@ namespace Sentry.Samples.Console.Customized
                     _middleware?.Invoke(request);
 
                 } // Scope is disposed.
+            }
+        }
+
+        private class SomeEventProcessor : ISentryEventProcessor
+        {
+            public void Process(SentryEvent @event)
+            {
+                // Here you can modify the event as you need
+                if (@event.Level > SentryLevel.Info)
+                {
+                    @event.AddBreadcrumb("Processed by " + nameof(SomeEventProcessor));
+
+                    @event.User = new User
+                    {
+                        Username = Environment.UserName
+                    };
+
+                    @event.ServerName = Environment.MachineName;
+                }
+            }
+        }
+
+        private class ArgumentExceptionProcessor : SentryEventExceptionProcessor<ArgumentException>
+        {
+            protected override void ProcessException(ArgumentException exception, SentryEvent sentryEvent)
+            {
+                // Handle specific types of exceptions and add more data to the event
+                sentryEvent.SetTag("parameter-name", exception.ParamName);
             }
         }
     }

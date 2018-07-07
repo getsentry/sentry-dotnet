@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
+using Sentry.Internal;
 using static Sentry.Internal.Constants;
 
 namespace Sentry
@@ -19,6 +21,26 @@ namespace Sentry
         internal Action<BackgroundWorkerOptions> ConfigureBackgroundWorkerOptions { get; private set; }
 
         internal List<Action<HttpOptions>> ConfigureHttpTransportOptions { get; private set; }
+
+        /// <summary>
+        /// A list of exception processors
+        /// </summary>
+        internal ImmutableList<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
+
+        /// <summary>
+        /// A list of event processors
+        /// </summary>
+        internal ImmutableList<ISentryEventProcessor> EventProcessors { get; set; }
+
+        /// <summary>
+        /// A list of providers of <see cref="ISentryEventProcessor"/>
+        /// </summary>
+        internal ImmutableList<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
+
+        /// <summary>
+        /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
+        /// </summary>
+        internal ImmutableList<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.
@@ -69,7 +91,7 @@ namespace Sentry
         /// integrations by means of modifying this list before initializing the SDK.
         /// </remarks>
         public ImmutableList<ISdkIntegration> Integrations { get; set; }
-            = new ISdkIntegration[] { new AppDomainUnhandledExceptionIntegration() }.ToImmutableList();
+            = ImmutableList.Create<ISdkIntegration>(new AppDomainUnhandledExceptionIntegration());
 
         /// <summary>
         /// Configure the background worker options
@@ -88,6 +110,28 @@ namespace Sentry
                 ConfigureHttpTransportOptions = new List<Action<HttpOptions>>(1);
             }
             ConfigureHttpTransportOptions.Add(configure);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryOptions"/>
+        /// </summary>
+        public SentryOptions()
+        {
+            EventProcessorsProviders
+                = ImmutableList.Create<Func<IEnumerable<ISentryEventProcessor>>>(
+                    () => EventProcessors);
+
+            ExceptionProcessorsProviders
+                = ImmutableList.Create<Func<IEnumerable<ISentryEventExceptionProcessor>>>(
+                    () => ExceptionProcessors);
+
+            EventProcessors
+                = ImmutableList.Create<ISentryEventProcessor>(
+                     new MainSentryEventProcessor(this));
+
+            ExceptionProcessors
+                = ImmutableList.Create<ISentryEventExceptionProcessor>(
+                    new MainExceptionProcessor());
         }
     }
 }

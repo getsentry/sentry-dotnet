@@ -17,6 +17,7 @@ namespace Sentry.Testing
         public IServiceProvider ServiceProvider { get; set; }
 
         public Action<IWebHostBuilder> ConfigureBuilder { get; set; }
+        public Action<IServiceCollection> ConfigureServices { get; set; }
 
         public LastExceptionFilter LastExceptionFilter { get; private set; }
 
@@ -42,6 +43,8 @@ namespace Sentry.Testing
                 var lastException = new LastExceptionFilter();
                 s.AddSingleton<IStartupFilter>(lastException);
                 s.AddSingleton(lastException);
+
+                ConfigureServices?.Invoke(s);
             });
             builder.Configure(app =>
             {
