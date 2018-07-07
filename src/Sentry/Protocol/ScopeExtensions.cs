@@ -34,9 +34,9 @@ namespace Sentry
             scope.AddBreadcrumb(
                 clock: null,
                 message: message,
+                category: category,
                 type: type,
                 data: dataPair?.ToImmutableDictionary(),
-                category: category,
                 level: level);
         }
 
@@ -45,24 +45,24 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="message">The message.</param>
-        /// <param name="type">The type.</param>
         /// <param name="category">The category.</param>
+        /// <param name="type">The type.</param>
         /// <param name="data">The data.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
                     this Scope scope,
                     string message,
-                    string type = null,
                     string category = null,
+                    string type = null,
                     IDictionary<string, string> data = null,
                     BreadcrumbLevel level = default)
         {
             scope.AddBreadcrumb(
                 clock: null,
                 message: message,
+                category: category,
                 type: type,
                 data: data?.ToImmutableDictionary(),
-                category: category,
                 level: level);
         }
 
@@ -75,49 +75,16 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="clock">The clock which controls timestamps</param>
         /// <param name="message">The message.</param>
-        /// <param name="type">The type.</param>
         /// <param name="category">The category.</param>
-        /// <param name="dataPair">The data</param>
-        /// <param name="level">The level.</param>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void AddBreadcrumb(
-            this Scope scope,
-            ISystemClock clock,
-            string message,
-            string type,
-            string category = null,
-            (string, string)? dataPair = null,
-            BreadcrumbLevel level = default)
-        {
-            scope.AddBreadcrumb(
-                clock: clock,
-                message: message,
-                type: type,
-                data: dataPair?.ToImmutableDictionary(),
-                category: category,
-                level: level);
-        }
-
-        /// <summary>
-        /// Adds a breadcrumb to the scope
-        /// </summary>
-        /// <remarks>
-        /// This overload is used for testing.
-        /// </remarks>
-        /// <param name="scope">The scope.</param>
-        /// <param name="clock">The clock which controls timestamps</param>
-        /// <param name="message">The message.</param>
         /// <param name="type">The type.</param>
-        /// <param name="category">The category.</param>
         /// <param name="data">The data</param>
         /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void AddBreadcrumb(
-            this Scope scope,
+        public static void AddBreadcrumb(this Scope scope,
             ISystemClock clock,
             string message,
-            string type,
             string category = null,
+            string type = null,
             IImmutableDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
         {
@@ -135,7 +102,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">Scope</param>
         /// <param name="breadcrumb">The breadcrumb.</param>
-        public static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
+        internal static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
         {
             var breadcrumbs = scope.InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
 

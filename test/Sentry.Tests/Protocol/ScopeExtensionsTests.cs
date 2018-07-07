@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using NSubstitute;
+using Sentry.Infrastructure;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
 
@@ -7,6 +13,158 @@ namespace Sentry.Tests.Protocol
     public class ScopeExtensionsTests
     {
         private Scope _sut = new Scope();
+
+        [Fact]
+        public void AddBreadcrumb_WithoutOptions_NoMoreThanDefaultMaxBreadcrumbs()
+        {
+            var scope = new Scope();
+
+            for (var i = 0; i < Constants.DefaultMaxBreadcrumbs + 1; i++)
+            {
+                scope.AddBreadcrumb(i.ToString());
+            }
+
+            Assert.Equal(Constants.DefaultMaxBreadcrumbs, scope.InternalBreadcrumbs.Count);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(5)]
+        [InlineData(10)]
+        public void AddBreadcrumb_WithOptions_BoundOptionsLimit(int limit)
+        {
+            var options = Substitute.For<IScopeOptions>();
+            options.MaxBreadcrumbs.Returns(limit);
+
+            var scope = new Scope(options);
+
+            for (var i = 0; i < limit + 1; i++)
+            {
+                scope.AddBreadcrumb(i.ToString());
+            }
+
+            Assert.Equal(limit, scope.InternalBreadcrumbs.Count);
+        }
+
+        [Fact]
+        public void AddBreadcrumb_DropOldest()
+        {
+            const int limit = 5;
+            var options = Substitute.For<IScopeOptions>();
+            options.MaxBreadcrumbs.Returns(limit);
+
+            var scope = new Scope(options);
+
+            for (var i = 0; i < limit + 1; i++)
+            {
+                scope.AddBreadcrumb(i.ToString());
+            }
+
+            // Breadcrumb 0 is dropped
+            Assert.Equal("1", scope.Breadcrumbs.First().Message);
+            Assert.Equal("5", scope.Breadcrumbs.Last().Message);
+        }
+
+        [Fact]
+        public void AddBreadcrumb_ValueTuple_AllArgumentsMatch()
+        {
+            const string expectedMessage = "original Message";
+            const string expectedCategory = "original Category";
+            const string expectedType = "original Type";
+            var expectedData = (key: "key", value: "value");
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+
+            _sut.AddBreadcrumb(
+                expectedMessage,
+                expectedCategory,
+                expectedType,
+                expectedData,
+                expectedLevel);
+
+            var actual = Assert.Single(_sut.InternalBreadcrumbs);
+            Assert.Equal(expectedMessage, actual.Message);
+            Assert.Equal(expectedCategory, actual.Category);
+            Assert.Equal(expectedType, actual.Type);
+            Assert.Equal(expectedData.key, actual.Data.Single().Key);
+            Assert.Equal(expectedData.value, actual.Data.Single().Value);
+            Assert.Equal(expectedLevel, actual.Level);
+        }
+
+        [Fact]
+        public void AddBreadcrumb_Dictionary_AllArgumentsMatch()
+        {
+            const string expectedMessage = "original Message";
+            const string expectedCategory = "original Category";
+            const string expectedType = "original Type";
+            var expectedData = new Dictionary<string, string>() { { "key", "val" } };
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+
+            _sut.AddBreadcrumb(
+                expectedMessage,
+                expectedCategory,
+                expectedType,
+                expectedData,
+                expectedLevel);
+
+            var actual = Assert.Single(_sut.InternalBreadcrumbs);
+            Assert.Equal(expectedMessage, actual.Message);
+            Assert.Equal(expectedCategory, actual.Category);
+            Assert.Equal(expectedType, actual.Type);
+            Assert.Equal(expectedData.Single().Key, actual.Data.Single().Key);
+            Assert.Equal(expectedData.Single().Value, actual.Data.Single().Value);
+            Assert.Equal(expectedLevel, actual.Level);
+        }
+
+        [Fact]
+        public void AddBreadcrumb_ImmutableDictionary_AllArgumentsMatch()
+        {
+            var expectedTimestamp = DateTimeOffset.MaxValue;
+            var clock = Substitute.For<ISystemClock>();
+            clock.GetUtcNow().Returns(expectedTimestamp);
+            const string expectedMessage = "original Message";
+            const string expectedCategory = "original Category";
+            const string expectedType = "original Type";
+            var expectedData = ImmutableDictionary<string, string>.Empty.Add("key", "val");
+            const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+
+            _sut.AddBreadcrumb(
+                clock,
+                expectedMessage,
+                expectedCategory,
+                expectedType,
+                expectedData,
+                expectedLevel);
+
+            var actual = Assert.Single(_sut.InternalBreadcrumbs);
+            Assert.Equal(expectedTimestamp, actual.Timestamp);
+            Assert.Equal(expectedMessage, actual.Message);
+            Assert.Equal(expectedCategory, actual.Category);
+            Assert.Equal(expectedType, actual.Type);
+            Assert.Equal(expectedData.Single().Key, actual.Data.Single().Key);
+            Assert.Equal(expectedData.Single().Value, actual.Data.Single().Value);
+            Assert.Equal(expectedLevel, actual.Level);
+        }
+
+        [Fact]
+        public void AddBreadcrumb_OnlyRequiredArguments_ExpectedDefaults()
+        {
+            var expectedTimestamp = DateTimeOffset.MaxValue;
+            var clock = Substitute.For<ISystemClock>();
+            clock.GetUtcNow().Returns(expectedTimestamp);
+            const string expectedMessage = "original Message";
+
+            _sut.AddBreadcrumb(
+                clock,
+                expectedMessage);
+
+            var actual = Assert.Single(_sut.InternalBreadcrumbs);
+            Assert.Equal(expectedTimestamp, actual.Timestamp);
+            Assert.Equal(expectedMessage, actual.Message);
+            Assert.Null(actual.Category);
+            Assert.Null(actual.Type);
+            Assert.Null(actual.Data);
+            Assert.Equal(BreadcrumbLevel.Info, actual.Level);
+        }
 
         [Fact]
         public void CopyTo_Sdk_DoesNotCopyNameWithoutVersion()
