@@ -71,7 +71,7 @@ namespace Sentry.AspNetCore.Tests
 
             _sut.Populate(_httpContext);
 
-            Assert.False(_sut.Tags.TryGetKey("RequestPath", out _));
+            Assert.False(_sut.Tags.ContainsKey("RequestPath"));
         }
 
         [Fact]

@@ -5,8 +5,10 @@ using System.ComponentModel;
 using System.Linq;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol;
 
-namespace Sentry.Protocol
+// ReSharper disable once CheckNamespace
+namespace Sentry
 {
     ///
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -135,7 +137,7 @@ namespace Sentry.Protocol
         /// <param name="breadcrumb">The breadcrumb.</param>
         public static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
         {
-            var breadcrumbs = scope.Breadcrumbs;
+            var breadcrumbs = scope.InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
 
             var overflow = breadcrumbs.Count - (scope.Options?.MaxBreadcrumbs
                                                 ?? Constants.DefaultMaxBreadcrumbs) + 1;
@@ -144,13 +146,79 @@ namespace Sentry.Protocol
                 breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
             }
 
-            scope.Breadcrumbs = breadcrumbs.Add(breadcrumb);
+            scope.InternalBreadcrumbs = breadcrumbs.Add(breadcrumb);
         }
 
         private static IImmutableDictionary<string, string> ToImmutableDictionary(
             this (string name, string value) tuple)
             => ImmutableDictionary<string, string>.Empty
                 .SetItem(tuple.name, tuple.value);
+
+        /// <summary>
+        /// Sets the fingerprint to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="fingerprint">The fingerprint.</param>
+        public static void SetFingerprint(this Scope scope, IReadOnlyCollection<string> fingerprint)
+            => scope.InternalFingerprint = fingerprint.ToImmutableList();
+
+        /// <summary>
+        /// Set the fingerprint which defines the event grouping
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="fingerprint"></param>
+        public static void SetFingerprint(this Scope scope, params string[] fingerprint)
+            => scope.InternalFingerprint = fingerprint.ToImmutableList();
+
+        /// <summary>
+        /// Sets the extra key-value to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        public static void SetExtra(this Scope scope, string key, object value)
+            => scope.InternalExtra = (scope.InternalExtra ?? ImmutableDictionary<string, object>.Empty).SetItem(key, value);
+
+        /// <summary>
+        /// Sets the tag to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        public static void SetTag(this Scope scope, string key, string value)
+            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItem(key, value);
+
+        /// <summary>
+        /// Set all tags
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="keyValue"></param>
+        public static void SetTag(this Scope scope, in KeyValuePair<string, string> keyValue)
+            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItem(keyValue.Key, keyValue.Value);
+
+        /// <summary>
+        /// Set all items as tags
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="keyValue"></param>
+        public static void SetTag(this Scope scope, in KeyValuePair<string, object> keyValue)
+            => scope.SetTag(keyValue.Key, keyValue.Value.ToString());
+
+        /// <summary>
+        /// Set all items as tags
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="tags"></param>
+        public static void SetTags(this Scope scope, IEnumerable<KeyValuePair<string, string>> tags)
+            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItems(tags);
+
+        /// <summary>
+        /// Removes a tag from the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="key"></param>
+        public static void UnsetTag(this Scope scope, string key)
+            => scope.InternalTags = scope.InternalTags?.Remove(key);
 
         /// <summary>
         /// Copy the data from one scope to the other
@@ -166,36 +234,52 @@ namespace Sentry.Protocol
         {
             if (from.InternalFingerprint != null)
             {
-                to.Fingerprint = to.Fingerprint?.AddRange(from.InternalFingerprint) ?? from.InternalFingerprint;
+                to.InternalFingerprint = to.InternalFingerprint != null
+                    ? to.InternalFingerprint.AddRange(from.InternalFingerprint)
+                    : from.InternalFingerprint;
             }
+
             if (from.InternalBreadcrumbs != null)
             {
-                to.Breadcrumbs = to.Breadcrumbs?.AddRange(from.InternalBreadcrumbs) ?? from.InternalBreadcrumbs;
+                to.InternalBreadcrumbs = to.InternalBreadcrumbs != null
+                    ? to.InternalBreadcrumbs.AddRange(from.InternalBreadcrumbs)
+                    : from.InternalBreadcrumbs;
             }
+
             if (from.InternalExtra != null)
             {
-                to.Extra = to.Extra?.SetItems(from.InternalExtra) ?? from.InternalExtra;
+                to.InternalExtra = to.InternalExtra != null
+                    ? to.InternalExtra.AddRange(from.InternalExtra)
+                    : from.InternalExtra;
             }
+
             if (from.InternalTags != null)
             {
-                to.Tags = to.Tags?.SetItems(from.InternalTags) ?? from.InternalTags;
+                to.InternalTags = to.InternalTags != null
+                    ? to.InternalTags.AddRange(from.InternalTags)
+                    : from.InternalTags;
             }
+
             if (from.InternalContexts != null)
             {
                 to.Contexts = from.InternalContexts;
             }
+
             if (from.InternalRequest != null)
             {
                 to.Request = from.InternalRequest;
             }
+
             if (from.InternalUser != null)
             {
                 to.User = from.InternalUser;
             }
+
             if (from.Environment != null)
             {
                 to.Environment = from.Environment;
             }
+
             if (from.Sdk != null)
             {
                 if (from.Sdk.Name != null && from.Sdk.Version != null)

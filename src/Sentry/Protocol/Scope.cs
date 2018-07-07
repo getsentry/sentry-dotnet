@@ -15,7 +15,7 @@ namespace Sentry.Protocol
     /// during the lifetime of the scope.
     /// </remarks>
     [DataContract]
-    [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count}")]
+    [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count ?? 0}")]
     public class Scope
     {
         internal IScopeOptions Options { get; }
@@ -34,16 +34,16 @@ namespace Sentry.Protocol
         internal Request InternalRequest { get; private set; }
 
         [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        internal IImmutableList<string> InternalFingerprint { get; private set; }
+        internal IImmutableList<string> InternalFingerprint { get; set; }
 
         [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
-        internal IImmutableList<Breadcrumb> InternalBreadcrumbs { get; private set; }
+        internal IImmutableList<Breadcrumb> InternalBreadcrumbs { get; set; }
 
         [DataMember(Name = "extra", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, object> InternalExtra { get; private set; }
+        internal IImmutableDictionary<string, object> InternalExtra { get; set; }
 
         [DataMember(Name = "tags", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, string> InternalTags { get; private set; }
+        internal IImmutableDictionary<string, string> InternalTags { get; set; }
 
         /// <summary>
         /// The name of the transaction in which there was an event.
@@ -117,39 +117,23 @@ namespace Sentry.Protocol
         /// </remarks>
         /// <example> { "fingerprint": ["myrpc", "POST", "/foo.bar"] } </example>
         /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
-        public IImmutableList<string> Fingerprint
-        {
-            get => InternalFingerprint ?? ImmutableList<string>.Empty;
-            internal set => InternalFingerprint = value;
-        }
+        public IReadOnlyList<string> Fingerprint => InternalFingerprint ?? ImmutableList<string>.Empty;
 
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/learn/breadcrumbs/"/>
-        public IImmutableList<Breadcrumb> Breadcrumbs
-        {
-            get => InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
-            internal set => InternalBreadcrumbs = value;
-        }
+        public IReadOnlyList<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
 
         /// <summary>
         /// An arbitrary mapping of additional metadata to store with the event.
         /// </summary>
-        public IImmutableDictionary<string, object> Extra
-        {
-            get => InternalExtra ?? ImmutableDictionary<string, object>.Empty;
-            internal set => InternalExtra = value;
-        }
+        public IReadOnlyDictionary<string, object> Extra => InternalExtra ?? ImmutableDictionary<string, object>.Empty;
 
         /// <summary>
         /// Arbitrary key-value for this event
         /// </summary>
-        public IImmutableDictionary<string, string> Tags
-        {
-            get => InternalTags ?? ImmutableDictionary<string, string>.Empty;
-            internal set => InternalTags = value;
-        }
+        public IReadOnlyDictionary<string, string> Tags => InternalTags ?? ImmutableDictionary<string, string>.Empty;
 
         /// <summary>
         /// An event that fires when the scope evaluates
@@ -213,54 +197,6 @@ namespace Sentry.Protocol
                     level: BreadcrumbLevel.Error);
             }
         }
-
-        /// <summary>
-        /// Sets the fingerprint to the <see cref="Scope"/>
-        /// </summary>
-        /// <param name="fingerprint">The fingerprint.</param>
-        public void SetFingerprint(IReadOnlyCollection<string> fingerprint) => Fingerprint = fingerprint.ToImmutableList();
-        /// <summary>
-        /// Set the fingerprint which defines the event grouping
-        /// </summary>
-        /// <remarks>
-        ///
-        /// </remarks>
-        /// <param name="fingerprint"></param>
-        public void SetFingerprint(params string[] fingerprint) => Fingerprint = fingerprint.ToImmutableList();
-        /// <summary>
-        /// Sets the extra key-value to the <see cref="Scope"/>
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The value.</param>
-        public void SetExtra(string key, object value) => Extra = Extra.SetItem(key, value);
-        /// <summary>
-        /// Sets the tag to the <see cref="Scope"/>
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The value.</param>
-        public void SetTag(string key, string value) => Tags = Tags.SetItem(key, value);
-        /// <summary>
-        /// Removes a tag from the <see cref="Scope"/>
-        /// </summary>
-        /// <param name="key"></param>
-        public void UnsetTag(string key) => Tags = Tags.Remove(key);
-
-        // TODO: make extension methods instead of members
-        /// <summary>
-        /// Set all tags
-        /// </summary>
-        /// <param name="keyValue"></param>
-        public void SetTag(in KeyValuePair<string, string> keyValue) => Tags = Tags.SetItem(keyValue.Key, keyValue.Value);
-        /// <summary>
-        /// Set all items as tags
-        /// </summary>
-        /// <param name="keyValue"></param>
-        public void SetTag(in KeyValuePair<string, object> keyValue) => Tags = Tags.SetItem(keyValue.Key, keyValue.Value.ToString());
-        /// <summary>
-        /// Set all items as tags
-        /// </summary>
-        /// <param name="tags"></param>
-        public void SetTags(IEnumerable<KeyValuePair<string, string>> tags) => Tags = Tags.SetItems(tags);
 
         // TODO: test with reflection to ensure Clone doesn't go out of sync with members
         internal Scope Clone()

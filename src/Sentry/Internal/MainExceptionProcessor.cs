@@ -32,7 +32,7 @@ namespace Sentry.Internal
                         builderStrObj[$"{sentryException.Type}.Data[{key}]"] = exception.Data[key];
                     }
 
-                    sentryEvent.Extra = builderStrObj.ToImmutable();
+                    sentryEvent.InternalExtra = builderStrObj.ToImmutable();
                 }
 
                 sentryEvent.SentryExceptions = values;
