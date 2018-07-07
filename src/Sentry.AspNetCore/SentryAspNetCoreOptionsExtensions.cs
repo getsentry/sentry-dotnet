@@ -34,9 +34,10 @@ namespace Sentry.AspNetCore
                 loggingOptions.InitializeSdk = true;
 
                 loggingOptions.Init(o =>
-                    {
-                        aspnetOptions.ConfigureOptionsActions?.ForEach(a => a?.Invoke(o));
-                    });
+                {
+                    aspnetOptions.SentryOptions = o;
+                    aspnetOptions.ConfigureOptionsActions?.ForEach(a => a?.Invoke(o));
+                });
             }
         }
     }

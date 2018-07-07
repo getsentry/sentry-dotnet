@@ -29,7 +29,7 @@ namespace Sentry.Integrations
         {
             if (e.ExceptionObject is Exception ex)
             {
-                _hub.CaptureException(ex, true);
+                _hub.CaptureException(ex);
             }
 
             if (e.IsTerminating)

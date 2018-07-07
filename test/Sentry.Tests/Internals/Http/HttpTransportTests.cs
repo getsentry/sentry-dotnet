@@ -55,8 +55,7 @@ namespace Sentry.Tests.Internals.Http
 
             await sut.CaptureEventAsync(
                 new SentryEvent(
-                    id: SentryResponses.ResponseId,
-                    populate: false),
+                    id: SentryResponses.ResponseId),
                 token);
 
             await _fixture.HttpMessageHandler
@@ -69,7 +68,7 @@ namespace Sentry.Tests.Internals.Http
         {
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             const string expectedMessage = "Bad Gateway!";
-            var expectedEvent = new SentryEvent(populate: false);
+            var expectedEvent = new SentryEvent();
 
             var callbackInvoked = false;
             _fixture.HttpOptions.HandleFailedEventSubmission = (e, c, m) =>
@@ -93,7 +92,7 @@ namespace Sentry.Tests.Internals.Http
         public async Task CaptureEventAsync_ResponseNotOkNoMessage_CallbackFired()
         {
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
-            var expectedEvent = new SentryEvent(populate: false);
+            var expectedEvent = new SentryEvent();
 
             var callbackInvoked = false;
             _fixture.HttpOptions.HandleFailedEventSubmission = (e, c, m) =>
@@ -125,7 +124,7 @@ namespace Sentry.Tests.Internals.Http
 
             var sut = _fixture.GetSut();
 
-            var evt = new SentryEvent(populate: false);
+            var evt = new SentryEvent();
             sut.CreateRequest(evt);
 
             Assert.True(callbackInvoked);
@@ -136,7 +135,7 @@ namespace Sentry.Tests.Internals.Http
         {
             var sut = _fixture.GetSut();
 
-            var evt = new SentryEvent(populate: false);
+            var evt = new SentryEvent();
             var actual = sut.CreateRequest(evt);
 
             Assert.Equal(HttpMethod.Post, actual.Method);
@@ -147,7 +146,7 @@ namespace Sentry.Tests.Internals.Http
         {
             var sut = _fixture.GetSut();
 
-            var evt = new SentryEvent(populate: false);
+            var evt = new SentryEvent();
             var actual = sut.CreateRequest(evt);
 
             Assert.Equal(_fixture.HttpOptions.SentryUri, actual.RequestUri);
@@ -158,8 +157,7 @@ namespace Sentry.Tests.Internals.Http
         {
             var sut = _fixture.GetSut();
 
-            var evt = new SentryEvent(
-                populate: false);
+            var evt = new SentryEvent();
             var actual = sut.CreateRequest(evt);
 
             Assert.Contains(evt.EventId.ToString("N"), await actual.Content.ReadAsStringAsync());
