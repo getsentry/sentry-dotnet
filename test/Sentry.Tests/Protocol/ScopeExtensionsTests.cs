@@ -15,6 +15,198 @@ namespace Sentry.Tests.Protocol
         private Scope _sut = new Scope();
 
         [Fact]
+        public void SetFingerprint_NullArgument_ReplacesCurrentWithNull()
+        {
+            var scope = new Scope { InternalFingerprint = ImmutableList<string>.Empty };
+
+            scope.SetFingerprint(null);
+
+            Assert.Null(scope.InternalFingerprint);
+        }
+
+        [Fact]
+        public void SetFingerprint_NewFingerprint_ReplacesCurrent()
+        {
+            var scope = new Scope { InternalFingerprint = ImmutableList.Create("to be dropped") };
+            var expectedFingerprint = new[] { "fingerprint" };
+
+            scope.SetFingerprint(expectedFingerprint);
+
+            Assert.Equal(expectedFingerprint, scope.InternalFingerprint);
+        }
+
+        [Fact]
+        public void SetExtra_FirstExtra_NewDictionary()
+        {
+            var scope = new Scope();
+            var expectedExtra = new Dictionary<string, object>
+            {
+                {"expected Extra", new object()}
+            };
+
+            scope.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
+
+            Assert.Equal(expectedExtra, scope.InternalExtra);
+        }
+
+        [Fact]
+        public void SetExtra_SecondExtra_AddedToDictionary()
+        {
+            var originalExtra = new Dictionary<string, object>
+            {
+                {"original", new object()}
+            };
+            var scope = new Scope { InternalExtra = originalExtra.ToImmutableDictionary() };
+
+            var expectedExtra = new Dictionary<string, object>
+            {
+                {"expected", "extra" }
+            };
+
+            scope.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
+
+            Assert.Equal(originalExtra.First().Value, scope.InternalExtra[originalExtra.Keys.First()]);
+            Assert.Equal(expectedExtra.First().Value, scope.InternalExtra[expectedExtra.Keys.First()]);
+        }
+
+        [Fact]
+        public void SetExtras_FirstExtra_NewDictionary()
+        {
+            var scope = new Scope();
+            var expectedExtra = new Dictionary<string, object>
+            {
+                {"expected Extra", new object()}
+            };
+
+            scope.SetExtras(expectedExtra);
+
+            Assert.Equal(expectedExtra, scope.InternalExtra);
+        }
+
+        [Fact]
+        public void SetExtras_SecondExtra_AddedToDictionary()
+        {
+            var originalExtra = new Dictionary<string, object>
+            {
+                {"original", new object()}
+            };
+            var scope = new Scope { InternalExtra = originalExtra.ToImmutableDictionary() };
+
+            var expectedExtra = new Dictionary<string, object>
+            {
+                {"expected", "extra" }
+            };
+
+            scope.SetExtras(expectedExtra);
+
+            Assert.Equal(originalExtra.First().Value, scope.InternalExtra[originalExtra.Keys.First()]);
+            Assert.Equal(expectedExtra.First().Value, scope.InternalExtra[expectedExtra.Keys.First()]);
+        }
+
+        [Fact]
+        public void SetExtras_DuplicateExtra_LastSet()
+        {
+            var scope = new Scope();
+
+            var expectedExtra = new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("expected", "extra"),
+                // second item has dup key:
+                new KeyValuePair<string, object>("expected", "extra 2"),
+            };
+
+            scope.SetExtras(expectedExtra);
+
+            Assert.Equal(expectedExtra.Last(), scope.InternalExtra.Single());
+        }
+
+        [Fact]
+        public void SetTag_FirstTag_NewDictionary()
+        {
+            var scope = new Scope();
+
+            var expectedTag = new Dictionary<string, string>
+            {
+                {"expected", "tag"}
+            };
+
+            scope.SetTag(expectedTag.Keys.Single(), expectedTag.Values.Single());
+
+            Assert.Equal(expectedTag, scope.InternalTags);
+        }
+
+        [Fact]
+        public void SetTag_SecondTag_AddedToDictionary()
+        {
+            var originalTag = new Dictionary<string, string>
+            {
+                {"original", "value"}
+            };
+            var scope = new Scope { InternalTags = originalTag.ToImmutableDictionary() };
+
+            var expectedTag = new Dictionary<string, string>
+            {
+                {"expected", "tag" }
+            };
+
+            scope.SetTag(expectedTag.Keys.Single(), expectedTag.Values.Single());
+
+            Assert.Equal(originalTag.First().Value, scope.InternalTags[originalTag.Keys.First()]);
+            Assert.Equal(expectedTag.First().Value, scope.InternalTags[expectedTag.Keys.First()]);
+        }
+
+        [Fact]
+        public void SetTags_FirstTag_NewDictionary()
+        {
+            var scope = new Scope();
+            var expectedTag = new Dictionary<string, string>
+            {
+                {"expected", "tag"}
+            };
+
+            scope.SetTags(expectedTag);
+
+            Assert.Equal(expectedTag, scope.InternalTags);
+        }
+
+        [Fact]
+        public void SetTags_SecondTag_AddedToDictionary()
+        {
+            var originalTags = new Dictionary<string, string>
+            {
+                {"original", "tag"}
+            };
+            var scope = new Scope { InternalTags = originalTags.ToImmutableDictionary() };
+
+            var expectedTags = new Dictionary<string, string>
+            {
+                {"expected", "tag" }
+            };
+
+            scope.SetTags(expectedTags);
+
+            Assert.Equal(originalTags.First().Value, scope.InternalTags[originalTags.Keys.First()]);
+            Assert.Equal(expectedTags.First().Value, scope.InternalTags[expectedTags.Keys.First()]);
+        }
+
+        [Fact]
+        public void SetTags_DuplicateTag_LastSet()
+        {
+            var scope = new Scope();
+
+            var expectedTag = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("expected", "tag"),
+                // second item has dup key:
+                new KeyValuePair<string, string>("expected", "tag 2"),
+            };
+
+            scope.SetTags(expectedTag);
+
+            Assert.Equal(expectedTag.Last(), scope.InternalTags.Single());
+        }
+
+        [Fact]
         public void AddBreadcrumb_WithoutOptions_NoMoreThanDefaultMaxBreadcrumbs()
         {
             var scope = new Scope();

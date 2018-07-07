@@ -126,16 +126,8 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
-        public static void SetFingerprint(this Scope scope, IReadOnlyCollection<string> fingerprint)
-            => scope.InternalFingerprint = fingerprint.ToImmutableList();
-
-        /// <summary>
-        /// Set the fingerprint which defines the event grouping
-        /// </summary>
-        /// <param name="scope">The scope.</param>
-        /// <param name="fingerprint"></param>
-        public static void SetFingerprint(this Scope scope, params string[] fingerprint)
-            => scope.InternalFingerprint = fingerprint.ToImmutableList();
+        public static void SetFingerprint(this Scope scope, IEnumerable<string> fingerprint)
+            => scope.InternalFingerprint = fingerprint?.ToImmutableList();
 
         /// <summary>
         /// Sets the extra key-value to the <see cref="Scope"/>
@@ -147,6 +139,14 @@ namespace Sentry
             => scope.InternalExtra = (scope.InternalExtra ?? ImmutableDictionary<string, object>.Empty).SetItem(key, value);
 
         /// <summary>
+        /// Sets the extra key-value pairs to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="values">The values.</param>
+        public static void SetExtras(this Scope scope, IEnumerable<KeyValuePair<string, object>> values)
+            => scope.InternalExtra = (scope.InternalExtra ?? ImmutableDictionary<string, object>.Empty).SetItems(values);
+
+        /// <summary>
         /// Sets the tag to the <see cref="Scope"/>
         /// </summary>
         /// <param name="scope">The scope.</param>
@@ -154,22 +154,6 @@ namespace Sentry
         /// <param name="value">The value.</param>
         public static void SetTag(this Scope scope, string key, string value)
             => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItem(key, value);
-
-        /// <summary>
-        /// Set all tags
-        /// </summary>
-        /// <param name="scope">The scope.</param>
-        /// <param name="keyValue"></param>
-        public static void SetTag(this Scope scope, in KeyValuePair<string, string> keyValue)
-            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItem(keyValue.Key, keyValue.Value);
-
-        /// <summary>
-        /// Set all items as tags
-        /// </summary>
-        /// <param name="scope">The scope.</param>
-        /// <param name="keyValue"></param>
-        public static void SetTag(this Scope scope, in KeyValuePair<string, object> keyValue)
-            => scope.SetTag(keyValue.Key, keyValue.Value.ToString());
 
         /// <summary>
         /// Set all items as tags
