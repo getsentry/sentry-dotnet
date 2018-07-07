@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <!--Version is detected by default as the application release and sent to sentry-->
+    <Version>9.8.7</Version>
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 

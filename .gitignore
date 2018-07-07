@@ -8,6 +8,7 @@
 *.userprefs
 *.user
 *opencover.xml
+lcov.info
 bin/
 obj/
 .DS_Store

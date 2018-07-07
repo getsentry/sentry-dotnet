@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 
@@ -13,8 +14,32 @@ namespace Sentry.AspNetCore
     /// </remarks>
     public class SentryAspNetCoreOptions
     {
+        /// <summary>
+        /// The Data Source Name of a given project in Sentry.
+        /// </summary>
         public string Dsn { get; set; }
 
+        /// <summary>
+        /// The release version of the application.
+        /// </summary>
+        /// <example>
+        /// 721e41770371db95eee98ca2707686226b993eda
+        /// </example>
+        /// <remarks>
+        /// This value will generally be something along the lines of the git SHA for the given project.
+        /// If not explicitly defined via configuration. It will attempt o read it from:
+        /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
+        /// </remarks>
+        /// <seealso href="https://docs.sentry.io/learn/releases/"/>
+        public string Release { get; set; }
+
+        /// <summary>
+        /// Whether to initialize the SDK or not.
+        /// </summary>
+        /// <remarks>
+        /// By default, calling <see cref="SentryWebHostBuilderExtensions.UseSentry(IWebHostBuilder)"/>
+        /// will enable the SDK. This flag helps you control this behavior.
+        /// </remarks>
         public bool InitializeSdk { get; set; } = true;
 
         /// <summary>
@@ -35,10 +60,13 @@ namespace Sentry.AspNetCore
         /// <seealso href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md"/>
         public bool IncludeActivityData { get; set; }
 
+        /// <summary>
+        /// Controls the integration with the logging integration
+        /// </summary>
         public LoggingOptions Logging { get; set; } = new LoggingOptions();
 
-        // An optional convinience callback to initialize the SDK
-        internal Action<SentryOptions> ConfigureOptions { get; private set; }
+        // Optional convinience callbacks to initialize the SDK
+        internal List<Action<SentryOptions>> ConfigureOptionsActions { get; } = new List<Action<SentryOptions>>();
 
         /// <summary>
         /// Initializes the SDK: This action should be done only once per application lifetime.
@@ -53,7 +81,7 @@ namespace Sentry.AspNetCore
         /// via this logging integration, the <see cref="SentryLoggerProvider"/> will dispose the SDK when it is itself disposed.
         /// </remarks>
         /// <param name="configureOptions">The configure options.</param>
-        public void Init(Action<SentryOptions> configureOptions) => ConfigureOptions = configureOptions;
+        public void Init(Action<SentryOptions> configureOptions) => ConfigureOptionsActions.Add(configureOptions);
     }
 
     public class LoggingOptions

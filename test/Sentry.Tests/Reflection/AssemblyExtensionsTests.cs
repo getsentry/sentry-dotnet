@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
-using System.Reflection.Emit;
 using Sentry.Reflection;
+using Sentry.Tests.Helpers.Reflection;
 using Xunit;
 
 namespace Sentry.Tests.Reflection
@@ -17,10 +17,8 @@ namespace Sentry.Tests.Reflection
                 Version = new Version(1, 2, 3, 4)
             };
 
-            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName,
-                AssemblyBuilderAccess.RunAndCollect);
+            var actual = AssemblyCreationHelper.CreateAssembly(asmName).GetNameAndVersion();
 
-            var actual = assemblyBuilder.GetNameAndVersion();
             Assert.Equal(asmName.Name, actual.Name);
             Assert.Equal(asmName.Version.ToString(), actual.Version);
         }
@@ -35,16 +33,9 @@ namespace Sentry.Tests.Reflection
                 Version = new Version(1, 2, 3, 4)
             };
 
-            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName,
-                AssemblyBuilderAccess.RunAndCollect);
+            var actual = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, asmName)
+                .GetNameAndVersion();
 
-            var infoAttrib = typeof(AssemblyInformationalVersionAttribute);
-            var ctor = infoAttrib.GetConstructor(new[] { typeof(string) });
-            var attributeBuilder = new CustomAttributeBuilder(ctor, new object[] { expectedVersion });
-            assemblyBuilder.SetCustomAttribute(attributeBuilder);
-
-
-            var actual = assemblyBuilder.GetNameAndVersion();
             Assert.Equal(asmName.Name, actual.Name);
             Assert.Equal(expectedVersion, actual.Version);
         }
