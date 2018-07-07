@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
 
@@ -33,14 +34,12 @@ namespace Microsoft.AspNetCore.Builder
 
             if (provider.GetService<IEnumerable<ISentryEventProcessor>>().Any())
             {
-                var originalFunc = options.SentryOptions.GetEventProcessors;
-                options.SentryOptions.GetEventProcessors = () => originalFunc().Concat(provider.GetServices<ISentryEventProcessor>());
+                options.SentryOptions.AddEventProcessorProvider(provider.GetServices<ISentryEventProcessor>);
             }
 
             if (provider.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
             {
-                    var originalFunc = options.SentryOptions.GetExceptionProcessors;
-                options.SentryOptions.GetExceptionProcessors = () => originalFunc().Concat(provider.GetServices<ISentryEventExceptionProcessor>());
+                options.SentryOptions.AddExceptionProcessorProvider(provider.GetServices<ISentryEventExceptionProcessor>);
             }
         }
     }

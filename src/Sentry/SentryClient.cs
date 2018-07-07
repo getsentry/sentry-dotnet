@@ -80,7 +80,7 @@ namespace Sentry
             scope?.Evaluate();
             scope?.CopyTo(@event);
 
-            foreach (var processor in _options.GetEventProcessors())
+            foreach (var processor in _options.GetAllEventProcessors())
             {
                 processor.Process(@event);
             }

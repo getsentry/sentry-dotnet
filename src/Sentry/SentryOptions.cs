@@ -23,6 +23,26 @@ namespace Sentry
         internal List<Action<HttpOptions>> ConfigureHttpTransportOptions { get; private set; }
 
         /// <summary>
+        /// A list of exception processors
+        /// </summary>
+        internal ImmutableList<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
+
+        /// <summary>
+        /// A list of event processors
+        /// </summary>
+        internal ImmutableList<ISentryEventProcessor> EventProcessors { get; set; }
+
+        /// <summary>
+        /// A list of providers of <see cref="ISentryEventProcessor"/>
+        /// </summary>
+        internal ImmutableList<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
+
+        /// <summary>
+        /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
+        /// </summary>
+        internal ImmutableList<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum breadcrumbs.
         /// </summary>
         /// <remarks>
@@ -74,20 +94,6 @@ namespace Sentry
             = ImmutableList.Create<ISdkIntegration>(new AppDomainUnhandledExceptionIntegration());
 
         /// <summary>
-        /// A list of exception processors
-        /// </summary>
-        internal ImmutableList<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
-            = ImmutableList.Create<ISentryEventExceptionProcessor>(new MainExceptionProcessor());
-
-        /// <summary>
-        /// A list of event processors
-        /// </summary>
-        internal ImmutableList<ISentryEventProcessor> EventProcessors { get; set; }
-
-        internal Func<IEnumerable<ISentryEventProcessor>> GetEventProcessors { get; set; }
-        internal Func<IEnumerable<ISentryEventExceptionProcessor>> GetExceptionProcessors { get; set; }
-
-        /// <summary>
         /// Configure the background worker options
         /// </summary>
         /// <param name="configure">The callback to configure background worker options</param>
@@ -111,12 +117,21 @@ namespace Sentry
         /// </summary>
         public SentryOptions()
         {
-            GetEventProcessors = () => EventProcessors;
-            GetExceptionProcessors = () => ExceptionProcessors;
+            EventProcessorsProviders
+                = ImmutableList.Create<Func<IEnumerable<ISentryEventProcessor>>>(
+                    () => EventProcessors);
 
-            EventProcessors =
-                ImmutableList.Create<ISentryEventProcessor>(
-                    new MainSentryEventProcessor(this));
+            ExceptionProcessorsProviders
+                = ImmutableList.Create<Func<IEnumerable<ISentryEventExceptionProcessor>>>(
+                    () => ExceptionProcessors);
+
+            EventProcessors
+                = ImmutableList.Create<ISentryEventProcessor>(
+                     new MainSentryEventProcessor(this));
+
+            ExceptionProcessors
+                = ImmutableList.Create<ISentryEventExceptionProcessor>(
+                    new MainExceptionProcessor());
         }
     }
 }

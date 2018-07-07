@@ -47,7 +47,7 @@ namespace Sentry.Internal
             {
                 // Depends on Options instead of the processors to allow application adding new processors
                 // after the SDK is initialized. Useful for example once a DI container is up
-                foreach (var processor in _options.GetExceptionProcessors())
+                foreach (var processor in _options.GetAllExceptionProcessors())
                 {
                     processor.Process(@event.Exception, @event);
                 }

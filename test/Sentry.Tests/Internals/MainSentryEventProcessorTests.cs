@@ -54,7 +54,7 @@ namespace Sentry.Tests.Internals
         public void Process_ExceptionProcessors_Invoked()
         {
             var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
-            SentryOptions.GetExceptionProcessors = () => new[] { exceptionProcessor };
+            SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
 
             var evt = new SentryEvent
             {
@@ -71,11 +71,11 @@ namespace Sentry.Tests.Internals
         {
             var invoked = false;
 
-            SentryOptions.GetExceptionProcessors = () =>
+            SentryOptions.AddExceptionProcessorProvider(() =>
             {
                 invoked = true;
                 return new[] { Substitute.For<ISentryEventExceptionProcessor>() };
-            };
+            });
 
             var evt = new SentryEvent();
             Sut.Process(evt);

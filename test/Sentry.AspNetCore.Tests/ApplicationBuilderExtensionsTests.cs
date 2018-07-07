@@ -60,20 +60,20 @@ namespace Sentry.AspNetCore.Tests
 
             sut.UseSentry();
 
-            Assert.Contains(_fixture.SentryAspNetCoreOptions.SentryOptions.GetEventProcessors(),
+            Assert.Contains(_fixture.SentryAspNetCoreOptions.SentryOptions.GetAllEventProcessors(),
                 actual => actual == _fixture.SentryEventProcessor);
         }
 
         [Fact]
         public void UseSentry_OriginalEventProcessor_StillAvailable()
         {
-            var originalFunc = _fixture.SentryAspNetCoreOptions.SentryOptions.GetEventProcessors;
+            var originalProviders = _fixture.SentryAspNetCoreOptions.SentryOptions.EventProcessorsProviders;
 
             var sut = _fixture.GetSut();
 
             sut.UseSentry();
 
-            var missing = originalFunc().Except(_fixture.SentryAspNetCoreOptions.SentryOptions.GetEventProcessors());
+            var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.SentryOptions.EventProcessorsProviders);
             Assert.Empty(missing);
         }
 
@@ -84,20 +84,20 @@ namespace Sentry.AspNetCore.Tests
 
             sut.UseSentry();
 
-            Assert.Contains(_fixture.SentryAspNetCoreOptions.SentryOptions.GetExceptionProcessors(),
+            Assert.Contains(_fixture.SentryAspNetCoreOptions.SentryOptions.GetAllExceptionProcessors(),
                 actual => actual == _fixture.SentryEventExceptionProcessor);
         }
 
         [Fact]
         public void UseSentry_OriginalEventExceptionProcessor_StillAvailable()
         {
-            var originalFunc = _fixture.SentryAspNetCoreOptions.SentryOptions.GetExceptionProcessors;
+            var originalProviders = _fixture.SentryAspNetCoreOptions.SentryOptions.ExceptionProcessorsProviders;
 
             var sut = _fixture.GetSut();
 
             sut.UseSentry();
 
-            var missing = originalFunc().Except(_fixture.SentryAspNetCoreOptions.SentryOptions.GetExceptionProcessors());
+            var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.SentryOptions.ExceptionProcessorsProviders);
             Assert.Empty(missing);
         }
 
@@ -105,26 +105,26 @@ namespace Sentry.AspNetCore.Tests
         public void UseSentry_NoEventProcessor_OriginalCallbackNotPatched()
         {
             _fixture.SentryEventProcessor = null;
-            var originalFunc = _fixture.SentryAspNetCoreOptions.SentryOptions.GetEventProcessors;
+            var originalProviders = _fixture.SentryAspNetCoreOptions.SentryOptions.EventProcessorsProviders;
 
             var sut = _fixture.GetSut();
 
             sut.UseSentry();
 
-            Assert.Same(originalFunc, _fixture.SentryAspNetCoreOptions.SentryOptions.GetEventProcessors);
+            Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.SentryOptions.EventProcessorsProviders);
         }
 
         [Fact]
         public void UseSentry_NoEventExceptionProcessor_OriginalCallbackNotPatched()
         {
             _fixture.SentryEventExceptionProcessor = null;
-            var originalFunc = _fixture.SentryAspNetCoreOptions.SentryOptions.GetExceptionProcessors;
+            var originalProviders = _fixture.SentryAspNetCoreOptions.SentryOptions.ExceptionProcessorsProviders;
 
             var sut = _fixture.GetSut();
 
             sut.UseSentry();
 
-            Assert.Same(originalFunc, _fixture.SentryAspNetCoreOptions.SentryOptions.GetExceptionProcessors);
+            Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.SentryOptions.ExceptionProcessorsProviders);
         }
     }
 }

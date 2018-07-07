@@ -7,6 +7,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Sentry.AspNetCore.Tests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
-[assembly: InternalsVisibleTo("Sentry.AspNetCore")]
-
 [assembly: CLSCompliant(true)]
