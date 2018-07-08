@@ -183,11 +183,13 @@ namespace Sentry
         /// </remarks>
         public static void CopyTo(this Scope from, Scope to)
         {
-            if (from.InternalFingerprint != null)
+            // Fingerprint isn't combined. It's absolute.
+            // One set explicitly on target (i.e: event)
+            // takes precedence and is not overwriten
+            if (to.InternalFingerprint == null
+                && from.InternalFingerprint != null)
             {
-                to.InternalFingerprint = to.InternalFingerprint != null
-                    ? to.InternalFingerprint.AddRange(from.InternalFingerprint)
-                    : from.InternalFingerprint;
+                to.InternalFingerprint = from.InternalFingerprint;
             }
 
             if (from.InternalBreadcrumbs != null)
@@ -200,14 +202,14 @@ namespace Sentry
             if (from.InternalExtra != null)
             {
                 to.InternalExtra = to.InternalExtra != null
-                    ? to.InternalExtra.AddRange(from.InternalExtra)
+                    ? from.InternalExtra.SetItems(to.InternalExtra)
                     : from.InternalExtra;
             }
 
             if (from.InternalTags != null)
             {
                 to.InternalTags = to.InternalTags != null
-                    ? to.InternalTags.AddRange(from.InternalTags)
+                    ? from.InternalTags.SetItems(to.InternalTags)
                     : from.InternalTags;
             }
 

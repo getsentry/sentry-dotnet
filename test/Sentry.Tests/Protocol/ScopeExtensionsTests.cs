@@ -359,6 +359,181 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public void CopyTo_Fingerprint_DoesNotSetWhenNull()
+        {
+            _sut.InternalFingerprint = null;
+
+            const string expected = "fingerprint";
+            var target = new Scope();
+            target.SetFingerprint(new[] { expected });
+
+            _sut.CopyTo(target);
+
+            Assert.Equal(expected, target.InternalFingerprint.Single());
+        }
+
+        [Fact]
+        public void CopyTo_Fingerprint_NotOnTarget_SetFromSource()
+        {
+            const string expected = "fingerprint";
+            _sut.SetFingerprint(new[] { expected });
+
+            var target = new Scope();
+
+            _sut.CopyTo(target);
+
+            Assert.Same(_sut.InternalFingerprint, target.InternalFingerprint);
+        }
+
+        [Fact]
+        public void CopyTo_Fingerprint_OnTarget_NotOverwritenBySource()
+        {
+            var target = new Scope();
+            target.SetFingerprint(new[] { "fingerprint" });
+            var expected = target.InternalFingerprint;
+
+            _sut.SetFingerprint(new[] { "new fingerprint" });
+            _sut.CopyTo(target);
+
+            Assert.Same(expected, target.InternalFingerprint);
+        }
+
+        [Fact]
+        public void CopyTo_Breadcrumbs_OnTarget_MergedWithSource()
+        {
+            _sut.AddBreadcrumb("test sut");
+            var target = new Scope();
+            target.AddBreadcrumb("test target");
+
+            _sut.CopyTo(target);
+
+            Assert.Equal(2, target.InternalBreadcrumbs.Count);
+        }
+
+        [Fact]
+        public void CopyTo_Breadcrumbs_NotOnTarget_SetFromSource()
+        {
+            _sut.AddBreadcrumb("test sut");
+
+            var target = new Scope();
+            _sut.CopyTo(target);
+
+            Assert.Single(target.InternalBreadcrumbs);
+        }
+
+        [Fact]
+        public void CopyTo_Breadcrumbs_NotOnSource_TargetUnmodified()
+        {
+            var target = new Scope();
+            target.AddBreadcrumb("test target");
+            var expected = target.InternalBreadcrumbs;
+
+            _sut.CopyTo(target);
+
+            Assert.Same(expected, target.InternalBreadcrumbs);
+        }
+
+        [Fact]
+        public void CopyTo_Extra_OnTarget_MergedWithSource()
+        {
+            _sut.SetExtra("sut", "sut");
+            var target = new Scope();
+            target.SetExtra("target", "target");
+
+            _sut.CopyTo(target);
+
+            Assert.Equal(2, target.InternalExtra.Count);
+        }
+
+        [Fact]
+        public void CopyTo_Extra_ConflictKey_KeepsTarget()
+        {
+            const string conflictingKey = "conflict";
+            const string expectedValue = "expected";
+            _sut.SetExtra(conflictingKey, "sut");
+            var target = new Scope();
+            target.SetExtra(conflictingKey, expectedValue);
+
+            _sut.CopyTo(target);
+
+            Assert.Single(target.InternalExtra);
+            Assert.Equal(expectedValue, target.InternalExtra[conflictingKey]);
+        }
+
+        [Fact]
+        public void CopyTo_Extra_NotOnTarget_SetFromSource()
+        {
+            _sut.SetExtra("sut", "sut");
+
+            var target = new Scope();
+            _sut.CopyTo(target);
+
+            Assert.Single(target.InternalExtra);
+        }
+
+        [Fact]
+        public void CopyTo_Extra_NotOnSource_TargetUnmodified()
+        {
+            var target = new Scope();
+            target.SetExtra("target", "target");
+            var expected = target.InternalExtra;
+
+            _sut.CopyTo(target);
+
+            Assert.Same(expected, target.InternalExtra);
+        }
+
+        [Fact]
+        public void CopyTo_Tags_OnTarget_MergedWithSource()
+        {
+            _sut.SetTag("sut", "sut");
+            var target = new Scope();
+            target.SetTag("target", "target");
+
+            _sut.CopyTo(target);
+
+            Assert.Equal(2, target.InternalTags.Count);
+        }
+
+        [Fact]
+        public void CopyTo_Tags_ConflictKey_KeepsTarget()
+        {
+            const string conflictingKey = "conflict";
+            const string expectedValue = "expected";
+            _sut.SetTag(conflictingKey, "sut");
+            var target = new Scope();
+            target.SetTag(conflictingKey, expectedValue);
+
+            _sut.CopyTo(target);
+
+            Assert.Single(target.InternalTags);
+            Assert.Equal(expectedValue, target.InternalTags[conflictingKey]);
+        }
+
+        [Fact]
+        public void CopyTo_Tags_NotOnTarget_SetFromSource()
+        {
+            _sut.SetTag("sut", "sut");
+
+            var target = new Scope();
+            _sut.CopyTo(target);
+
+            Assert.Single(target.InternalTags);
+        }
+
+        [Fact]
+        public void CopyTo_Tags_NotOnSource_TargetUnmodified()
+        {
+            var target = new Scope();
+            target.SetTag("target", "target");
+            var expected = target.InternalTags;
+
+            _sut.CopyTo(target);
+
+            Assert.Same(expected, target.InternalTags);
+        }
+
+        [Fact]
         public void CopyTo_Sdk_DoesNotCopyNameWithoutVersion()
         {
             const string expectedName = "original name";
