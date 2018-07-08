@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 
@@ -17,6 +17,8 @@ namespace Sentry.EntityFramework.Tests
             [Key]
             public int Id { get; set; }
             public string AColumn { get;set; }
+            [Required]
+            public string RequiredColumn { get;set; }
         }
     }
 }
