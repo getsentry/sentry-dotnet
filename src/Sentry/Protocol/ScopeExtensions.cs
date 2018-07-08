@@ -172,16 +172,16 @@ namespace Sentry
             => scope.InternalTags = scope.InternalTags?.Remove(key);
 
         /// <summary>
-        /// Copy the data from one scope to the other
+        /// Applies the data from one scope to the other while
         /// </summary>
         /// <param name="from">The scope to data copy from.</param>
         /// <param name="to">The scope to copy data to.</param>
         /// <remarks>
-        /// Will override the value on 'to' when the value exists on 'from'.
-        /// If 'from' is null, 'to' is unmodified.
+        /// Applies the data of 'from' into 'to'.
+        /// If data in 'from' is null, 'to' is unmodified.
         /// This is a shallow copy.
         /// </remarks>
-        public static void CopyTo(this Scope from, Scope to)
+        public static void Apply(this Scope from, Scope to)
         {
             // Fingerprint isn't combined. It's absolute.
             // One set explicitly on target (i.e: event)
@@ -213,7 +213,7 @@ namespace Sentry
                     : from.InternalTags;
             }
 
-            if (from.InternalContexts != null)
+            if (to.InternalContexts == null)
             {
                 to.Contexts = from.InternalContexts;
             }
@@ -228,7 +228,7 @@ namespace Sentry
                 to.User = from.InternalUser;
             }
 
-            if (from.Environment != null)
+            if (to.Environment == null)
             {
                 to.Environment = from.Environment;
             }

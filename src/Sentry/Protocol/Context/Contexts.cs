@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Sentry.Infrastructure;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
@@ -6,48 +8,34 @@ namespace Sentry.Protocol
     /// <summary>
     /// Represents Sentry's structured Context
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/"/>
+    /// <inheritdoc />
+    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/" />
     [DataContract]
-    public class Contexts
+    public class Contexts : Dictionary<string, object>
     {
-        [DataMember(Name = "app", EmitDefaultValue = false)]
-        private App _app;
-
-        [DataMember(Name = "browser", EmitDefaultValue = false)]
-        private Browser _browser;
-
-        [DataMember(Name = "device", EmitDefaultValue = false)]
-        private Device _device;
-
-        [DataMember(Name = "os", EmitDefaultValue = false)]
-        private OperatingSystem _operatingSystem;
-
-        [DataMember(Name = "runtime", EmitDefaultValue = false)]
-        private Runtime _runtime;
-
         /// <summary>
         /// Describes the application.
         /// </summary>
-        public App App => _app ?? (_app = new App());
+        public App App => this.GetOrCreate<App>(App.Type);
         /// <summary>
         /// Describes the browser.
         /// </summary>
-        public Browser Browser => _browser ?? (_browser = new Browser());
+        public Browser Browser => this.GetOrCreate<Browser>(Browser.Type);
         /// <summary>
         /// Describes the device.
         /// </summary>
-        public Device Device => _device ?? (_device = new Device());
+        public Device Device => this.GetOrCreate<Device>(Device.Type);
         /// <summary>
         /// Defines the operating system.
         /// </summary>
         /// <remarks>
         /// In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
         /// </remarks>
-        public OperatingSystem OperatingSystem => _operatingSystem ?? (_operatingSystem = new OperatingSystem());
+        public OperatingSystem OperatingSystem => this.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
         /// <summary>
         /// This describes a runtime in more detail.
         /// </summary>
-        public Runtime Runtime => _runtime ?? (_runtime = new Runtime());
+        public Runtime Runtime => this.GetOrCreate<Runtime>(Runtime.Type);
 
         /// <summary>
         /// Creates a deep clone of this context
@@ -56,11 +44,11 @@ namespace Sentry.Protocol
         internal Contexts Clone()
             => new Contexts
             {
-                _app = _app?.Clone(),
-                _browser = _browser?.Clone(),
-                _device = _device?.Clone(),
-                _operatingSystem = _operatingSystem?.Clone(),
-                _runtime = _runtime?.Clone()
+                [App.Type] = (this[App.Type] as App)?.Clone(),
+                [Browser.Type] = (this[Browser.Type] as Browser)?.Clone(),
+                [Device.Type] = (this[Device.Type] as Device)?.Clone(),
+                [OperatingSystem.Type] = (this[OperatingSystem.Type] as OperatingSystem)?.Clone(),
+                [Runtime.Type] = (this[Runtime.Type] as Runtime)?.Clone()
             };
     }
 }

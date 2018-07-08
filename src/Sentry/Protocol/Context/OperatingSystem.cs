@@ -13,6 +13,9 @@ namespace Sentry.Protocol
     [DataContract]
     public class OperatingSystem
     {
+        [DataMember(Name = "type", EmitDefaultValue = false)]
+        internal const string Type = "os";
+
         /// <summary>
         /// The name of the operating system.
         /// </summary>

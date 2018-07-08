@@ -367,7 +367,7 @@ namespace Sentry.Tests.Protocol
             var target = new Scope();
             target.SetFingerprint(new[] { expected });
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(expected, target.InternalFingerprint.Single());
         }
@@ -380,7 +380,7 @@ namespace Sentry.Tests.Protocol
 
             var target = new Scope();
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Same(_sut.InternalFingerprint, target.InternalFingerprint);
         }
@@ -393,7 +393,7 @@ namespace Sentry.Tests.Protocol
             var expected = target.InternalFingerprint;
 
             _sut.SetFingerprint(new[] { "new fingerprint" });
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Same(expected, target.InternalFingerprint);
         }
@@ -405,7 +405,7 @@ namespace Sentry.Tests.Protocol
             var target = new Scope();
             target.AddBreadcrumb("test target");
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(2, target.InternalBreadcrumbs.Count);
         }
@@ -416,7 +416,7 @@ namespace Sentry.Tests.Protocol
             _sut.AddBreadcrumb("test sut");
 
             var target = new Scope();
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Single(target.InternalBreadcrumbs);
         }
@@ -428,7 +428,7 @@ namespace Sentry.Tests.Protocol
             target.AddBreadcrumb("test target");
             var expected = target.InternalBreadcrumbs;
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Same(expected, target.InternalBreadcrumbs);
         }
@@ -440,7 +440,7 @@ namespace Sentry.Tests.Protocol
             var target = new Scope();
             target.SetExtra("target", "target");
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(2, target.InternalExtra.Count);
         }
@@ -454,7 +454,7 @@ namespace Sentry.Tests.Protocol
             var target = new Scope();
             target.SetExtra(conflictingKey, expectedValue);
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Single(target.InternalExtra);
             Assert.Equal(expectedValue, target.InternalExtra[conflictingKey]);
@@ -466,7 +466,7 @@ namespace Sentry.Tests.Protocol
             _sut.SetExtra("sut", "sut");
 
             var target = new Scope();
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Single(target.InternalExtra);
         }
@@ -478,7 +478,7 @@ namespace Sentry.Tests.Protocol
             target.SetExtra("target", "target");
             var expected = target.InternalExtra;
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Same(expected, target.InternalExtra);
         }
@@ -490,7 +490,7 @@ namespace Sentry.Tests.Protocol
             var target = new Scope();
             target.SetTag("target", "target");
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(2, target.InternalTags.Count);
         }
@@ -504,7 +504,7 @@ namespace Sentry.Tests.Protocol
             var target = new Scope();
             target.SetTag(conflictingKey, expectedValue);
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Single(target.InternalTags);
             Assert.Equal(expectedValue, target.InternalTags[conflictingKey]);
@@ -516,7 +516,7 @@ namespace Sentry.Tests.Protocol
             _sut.SetTag("sut", "sut");
 
             var target = new Scope();
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Single(target.InternalTags);
         }
@@ -528,7 +528,7 @@ namespace Sentry.Tests.Protocol
             target.SetTag("target", "target");
             var expected = target.InternalTags;
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Same(expected, target.InternalTags);
         }
@@ -550,7 +550,7 @@ namespace Sentry.Tests.Protocol
                 }
             };
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(expectedName, target.Sdk.Name);
             Assert.Equal(expectedVersion, target.Sdk.Version);
@@ -573,7 +573,7 @@ namespace Sentry.Tests.Protocol
                 }
             };
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(expectedName, target.Sdk.Name);
             Assert.Equal(expectedVersion, target.Sdk.Version);
@@ -596,7 +596,7 @@ namespace Sentry.Tests.Protocol
                 }
             };
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(expectedName, target.Sdk.Name);
             Assert.Equal(expectedVersion, target.Sdk.Version);
@@ -612,7 +612,7 @@ namespace Sentry.Tests.Protocol
 
             var target = new Scope();
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Same(_sut.Sdk.InternalIntegrations, target.Sdk.InternalIntegrations);
         }
@@ -630,7 +630,7 @@ namespace Sentry.Tests.Protocol
                 Sdk = { InternalIntegrations = ImmutableList.Create("integration 2") }
             };
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(2, target.Sdk.InternalIntegrations.Count);
         }
@@ -645,7 +645,7 @@ namespace Sentry.Tests.Protocol
                 Sdk = { InternalIntegrations = expected }
             };
 
-            _sut.CopyTo(target);
+            _sut.Apply(target);
 
             Assert.Equal(expected, target.Sdk.InternalIntegrations);
         }

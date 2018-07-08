@@ -13,6 +13,9 @@ namespace Sentry.Protocol
     [DataContract]
     public class Runtime
     {
+        [DataMember(Name = "type", EmitDefaultValue = false)]
+        internal const string Type = "runtime";
+
         /// <summary>
         /// The name of the runtime.
         /// </summary>

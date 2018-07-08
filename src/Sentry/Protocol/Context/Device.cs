@@ -11,6 +11,9 @@ namespace Sentry.Protocol
     [DataContract]
     public class Device
     {
+        [DataMember(Name = "type", EmitDefaultValue = false)]
+        internal const string Type = "device";
+
         [DataMember(Name = "timezone", EmitDefaultValue = false)]
         private string TimezoneSerializable => Timezone?.Id;
 

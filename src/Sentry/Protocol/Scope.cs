@@ -26,7 +26,6 @@ namespace Sentry.Protocol
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
 
-        // TODO: Still has to support key-value
         [DataMember(Name = "contexts", EmitDefaultValue = false)]
         internal Contexts InternalContexts { get; private set; }
 
@@ -204,7 +203,7 @@ namespace Sentry.Protocol
             Debug.Assert(!Locked);
 
             var scope = new Scope(Options, false);
-            this.CopyTo(scope);
+            this.Apply(scope);
             return scope;
         }
     }
