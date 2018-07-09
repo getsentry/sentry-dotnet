@@ -7,7 +7,8 @@ namespace Sentry.EntityFramework
         public static SentryOptions AddEntityFramework(this SentryOptions sentryOptions)
         {
             sentryOptions.AddExceptionProcessor(new DbEntityValidationExceptionProcessor());
-            sentryOptions.AddExceptionProcessor(new ConcurrencyExceptionHandler());
+            // DbConcurrencyExceptionProcessor is untested due to problems with testing it, so it might not be production ready
+            //sentryOptions.AddExceptionProcessor(new DbConcurrencyExceptionProcessor());
             return sentryOptions;
         }
     }
