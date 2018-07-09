@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Sentry.Extensibility;
@@ -120,10 +121,9 @@ namespace Sentry.Internal
 
             var frame = new SentryStackFrame();
 
-            if (stackFrame.HasMethod())
+            // stackFrame.HasMethod() throws NotImplemented on Mono 5.12
+            if (stackFrame.GetMethod() is MethodBase method)
             {
-                var method = stackFrame.GetMethod();
-
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
@@ -134,7 +134,9 @@ namespace Sentry.Internal
             frame.InApp = !IsSystemModuleName(frame.Module);
             frame.FileName = stackFrame.GetFileName();
 
-            if (stackFrame.HasILOffset())
+            // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
+            var ilOffset = stackFrame.GetILOffset();
+            if (ilOffset != 0)
             {
                 frame.InstructionOffset = stackFrame.GetILOffset();
             }
