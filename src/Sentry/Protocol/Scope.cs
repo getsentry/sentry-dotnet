@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.Serialization;
-using Sentry.Internal;
 
 namespace Sentry.Protocol
 {
@@ -152,29 +151,8 @@ namespace Sentry.Protocol
         /// </summary>
         /// <param name="options"></param>
         public Scope(IScopeOptions options)
-            : this(options ?? new SentryOptions(), true)
         {
-        }
-
-        private Scope(IScopeOptions options, bool introspect)
-        {
-            Debug.Assert(options != null);
-
-            Options = options;
-
-            if (introspect)
-            {
-                try
-                {
-                    Contexts.Introspect();
-                }
-                catch (Exception e)
-                {
-                    // TODO: Log or callback handler here!
-                    //Options.HandleError
-                    Console.WriteLine(e);
-                }
-            }
+            Options = options ?? new SentryOptions();
         }
 
         /// <summary>
@@ -197,12 +175,11 @@ namespace Sentry.Protocol
             }
         }
 
-        // TODO: test with reflection to ensure Clone doesn't go out of sync with members
         internal Scope Clone()
         {
             Debug.Assert(!Locked);
 
-            var scope = new Scope(Options, false);
+            var scope = new Scope(Options);
             this.Apply(scope);
             return scope;
         }

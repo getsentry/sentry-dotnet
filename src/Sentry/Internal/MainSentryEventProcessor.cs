@@ -1,15 +1,29 @@
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
+using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
 namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
         internal static readonly Lazy<string> Release = new Lazy<string>(ReleaseLocator.GetCurrent);
+        internal static readonly Lazy<Runtime> CurrentRuntime = new Lazy<Runtime>(() =>
+        {
+            var current = PlatformAbstractions.Runtime.Current;
+            return current != null
+                   ? new Runtime
+                   {
+                       Name = current.Name,
+                       Version = current.Version,
+                       RawDescription = current.Raw
+                   }
+                   : null;
+        });
 
         private static readonly (string Name, string Version) NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
@@ -23,6 +37,16 @@ namespace Sentry.Internal
         }
         public void Process(SentryEvent @event)
         {
+            if (!@event.Contexts.ContainsKey(Runtime.Type))
+            {
+                @event.Contexts[Runtime.Type] = CurrentRuntime.Value;
+            }
+
+            if (!@event.Contexts.ContainsKey(OperatingSystem.Type))
+            {
+                @event.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+            }
+
             @event.Platform = Constants.Platform;
 
             // An integration (e.g: ASP.NET Core) can set itself as the SDK
