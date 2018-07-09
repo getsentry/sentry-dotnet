@@ -1,4 +1,3 @@
-#if NETFX
 using System;
 
 namespace Sentry.PlatformAbstractions
@@ -74,4 +73,3 @@ namespace Sentry.PlatformAbstractions
         Full
     }
 }
-#endif
