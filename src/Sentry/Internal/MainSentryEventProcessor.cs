@@ -3,9 +3,11 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Sentry.Extensibility;
+using Sentry.PlatformAbstractions;
 using Sentry.Protocol;
 using Sentry.Reflection;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
+using Runtime = Sentry.Protocol.Runtime;
 
 namespace Sentry.Internal
 {
@@ -44,7 +46,11 @@ namespace Sentry.Internal
 
             if (!@event.Contexts.ContainsKey(OperatingSystem.Type))
             {
-                @event.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+                // RuntimeInformation.OSDescription is throwing on Mono 5.12
+                if (!PlatformAbstractions.Runtime.Current.IsMono())
+                {
+                    @event.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+                }
             }
 
             @event.Platform = Constants.Platform;
