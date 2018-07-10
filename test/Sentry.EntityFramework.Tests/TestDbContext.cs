@@ -6,9 +6,9 @@ namespace Sentry.EntityFramework.Tests
 {
     public class TestDbContext : DbContext
     {
-        public TestDbContext(DbConnection connection, bool ownsConnection) :base(connection, ownsConnection)
-        {
-        }
+        public TestDbContext(DbConnection connection, bool ownsConnection)
+            : base(connection, ownsConnection)
+        { }
 
         public virtual DbSet<TestData> TestTable { get; set; }
 
@@ -16,9 +16,9 @@ namespace Sentry.EntityFramework.Tests
         {
             [Key]
             public int Id { get; set; }
-            public string AColumn { get;set; }
+            public string AColumn { get; set; }
             [Required]
-            public string RequiredColumn { get;set; }
+            public string RequiredColumn { get; set; }
         }
     }
 }
