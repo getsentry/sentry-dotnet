@@ -23,12 +23,13 @@ namespace Sentry.Tests.Protocol
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"name\":\"Windows\","
+            Assert.Equal("{\"type\":\"os\","
+                         + "\"name\":\"Windows\","
                          + "\"version\":\"2016\","
                          + "\"raw_description\":\"Windows 2016\","
                          + "\"build\":\"14393\","
                          + "\"kernel_version\":\"who knows\","
-                         + "\"rooted\":true}", 
+                         + "\"rooted\":true}",
                     actual);
         }
 
@@ -43,12 +44,12 @@ namespace Sentry.Tests.Protocol
 
         public static IEnumerable<object[]> TestCases()
         {
-            yield return new object[] { (new OperatingSystem(), "{}") };
-            yield return new object[] { (new OperatingSystem { Name = "some name" }, "{\"name\":\"some name\"}") };
-            yield return new object[] { (new OperatingSystem { RawDescription = "some Name, some version" }, "{\"raw_description\":\"some Name, some version\"}") };
-            yield return new object[] { (new OperatingSystem { Build = "some build" }, "{\"build\":\"some build\"}") };
-            yield return new object[] { (new OperatingSystem { KernelVersion = "some kernel version" }, "{\"kernel_version\":\"some kernel version\"}") };
-            yield return new object[] { (new OperatingSystem { Rooted = false }, "{\"rooted\":false}") };
+            yield return new object[] { (new OperatingSystem(), "{\"type\":\"os\"}") };
+            yield return new object[] { (new OperatingSystem { Name = "some name" }, "{\"type\":\"os\",\"name\":\"some name\"}") };
+            yield return new object[] { (new OperatingSystem { RawDescription = "some Name, some version" }, "{\"type\":\"os\",\"raw_description\":\"some Name, some version\"}") };
+            yield return new object[] { (new OperatingSystem { Build = "some build" }, "{\"type\":\"os\",\"build\":\"some build\"}") };
+            yield return new object[] { (new OperatingSystem { KernelVersion = "some kernel version" }, "{\"type\":\"os\",\"kernel_version\":\"some kernel version\"}") };
+            yield return new object[] { (new OperatingSystem { Rooted = false }, "{\"type\":\"os\",\"rooted\":false}") };
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Sentry.Tests.Protocol
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{}", actual);
+            Assert.Equal("{\"type\":\"device\"}", actual);
         }
 
         [Fact]
@@ -45,7 +45,8 @@ namespace Sentry.Tests.Protocol
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal($"{{\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
+            Assert.Equal("{\"type\":\"device\","+
+                         $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
                          "\"name\":\"testing.sentry.io\"," +
                          "\"family\":\"Windows\"," +
                          "\"model\":\"Windows Server 2012 R2\"," +
@@ -76,24 +77,24 @@ namespace Sentry.Tests.Protocol
 
         public static IEnumerable<object[]> TestCases()
         {
-            yield return new object[] { (new Device(), "{}") };
-            yield return new object[] { (new Device { Name = "some name" }, "{\"name\":\"some name\"}") };
-            yield return new object[] { (new Device { Orientation = DeviceOrientation.Landscape }, "{\"orientation\":\"landscape\"}") };
-            yield return new object[] { (new Device { Family = "some family" }, "{\"family\":\"some family\"}") };
-            yield return new object[] { (new Device { Model = "some model" }, "{\"model\":\"some model\"}") };
-            yield return new object[] { (new Device { ModelId = "some model id" }, "{\"model_id\":\"some model id\"}") };
-            yield return new object[] { (new Device { Architecture = "some arch" }, "{\"arch\":\"some arch\"}") };
-            yield return new object[] { (new Device { BatteryLevel = 1 }, "{\"battery_level\":1}") };
-            yield return new object[] { (new Device { Simulator = false }, "{\"simulator\":false}") };
-            yield return new object[] { (new Device { MemorySize = 1 }, "{\"memory_size\":1}") };
-            yield return new object[] { (new Device { FreeMemory = 1 }, "{\"free_memory\":1}") };
-            yield return new object[] { (new Device { UsableMemory = 1 }, "{\"usable_memory\":1}") };
-            yield return new object[] { (new Device { StorageSize = 1 }, "{\"storage_size\":1}") };
-            yield return new object[] { (new Device { FreeStorage = 1 }, "{\"free_storage\":1}") };
-            yield return new object[] { (new Device { ExternalStorageSize = 1 }, "{\"external_storage_size\":1}") };
-            yield return new object[] { (new Device { ExternalFreeStorage = 1 }, "{\"external_free_storage\":1}") };
-            yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, "{\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
-            yield return new object[] { (new Device { Timezone = TimeZoneInfo.Utc }, "{\"timezone\":\"UTC\"}") };
+            yield return new object[] { (new Device(), "{\"type\":\"device\"}") };
+            yield return new object[] { (new Device { Name = "some name" }, "{\"type\":\"device\",\"name\":\"some name\"}") };
+            yield return new object[] { (new Device { Orientation = DeviceOrientation.Landscape }, "{\"type\":\"device\",\"orientation\":\"landscape\"}") };
+            yield return new object[] { (new Device { Family = "some family" }, "{\"type\":\"device\",\"family\":\"some family\"}") };
+            yield return new object[] { (new Device { Model = "some model" }, "{\"type\":\"device\",\"model\":\"some model\"}") };
+            yield return new object[] { (new Device { ModelId = "some model id" }, "{\"type\":\"device\",\"model_id\":\"some model id\"}") };
+            yield return new object[] { (new Device { Architecture = "some arch" }, "{\"type\":\"device\",\"arch\":\"some arch\"}") };
+            yield return new object[] { (new Device { BatteryLevel = 1 }, "{\"type\":\"device\",\"battery_level\":1}") };
+            yield return new object[] { (new Device { Simulator = false }, "{\"type\":\"device\",\"simulator\":false}") };
+            yield return new object[] { (new Device { MemorySize = 1 }, "{\"type\":\"device\",\"memory_size\":1}") };
+            yield return new object[] { (new Device { FreeMemory = 1 }, "{\"type\":\"device\",\"free_memory\":1}") };
+            yield return new object[] { (new Device { UsableMemory = 1 }, "{\"type\":\"device\",\"usable_memory\":1}") };
+            yield return new object[] { (new Device { StorageSize = 1 }, "{\"type\":\"device\",\"storage_size\":1}") };
+            yield return new object[] { (new Device { FreeStorage = 1 }, "{\"type\":\"device\",\"free_storage\":1}") };
+            yield return new object[] { (new Device { ExternalStorageSize = 1 }, "{\"type\":\"device\",\"external_storage_size\":1}") };
+            yield return new object[] { (new Device { ExternalFreeStorage = 1 }, "{\"type\":\"device\",\"external_free_storage\":1}") };
+            yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, "{\"type\":\"device\",\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
+            yield return new object[] { (new Device { Timezone = TimeZoneInfo.Utc }, "{\"type\":\"device\",\"timezone\":\"UTC\"}") };
         }
     }
 }

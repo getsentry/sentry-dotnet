@@ -5,8 +5,10 @@ using System.ComponentModel;
 using System.Linq;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol;
 
-namespace Sentry.Protocol
+// ReSharper disable once CheckNamespace
+namespace Sentry
 {
     ///
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -32,9 +34,9 @@ namespace Sentry.Protocol
             scope.AddBreadcrumb(
                 clock: null,
                 message: message,
+                category: category,
                 type: type,
                 data: dataPair?.ToImmutableDictionary(),
-                category: category,
                 level: level);
         }
 
@@ -43,24 +45,24 @@ namespace Sentry.Protocol
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="message">The message.</param>
-        /// <param name="type">The type.</param>
         /// <param name="category">The category.</param>
+        /// <param name="type">The type.</param>
         /// <param name="data">The data.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
                     this Scope scope,
                     string message,
-                    string type = null,
                     string category = null,
+                    string type = null,
                     IDictionary<string, string> data = null,
                     BreadcrumbLevel level = default)
         {
             scope.AddBreadcrumb(
                 clock: null,
                 message: message,
+                category: category,
                 type: type,
                 data: data?.ToImmutableDictionary(),
-                category: category,
                 level: level);
         }
 
@@ -73,49 +75,16 @@ namespace Sentry.Protocol
         /// <param name="scope">The scope.</param>
         /// <param name="clock">The clock which controls timestamps</param>
         /// <param name="message">The message.</param>
-        /// <param name="type">The type.</param>
         /// <param name="category">The category.</param>
-        /// <param name="dataPair">The data</param>
-        /// <param name="level">The level.</param>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void AddBreadcrumb(
-            this Scope scope,
-            ISystemClock clock,
-            string message,
-            string type,
-            string category = null,
-            (string, string)? dataPair = null,
-            BreadcrumbLevel level = default)
-        {
-            scope.AddBreadcrumb(
-                clock: clock,
-                message: message,
-                type: type,
-                data: dataPair?.ToImmutableDictionary(),
-                category: category,
-                level: level);
-        }
-
-        /// <summary>
-        /// Adds a breadcrumb to the scope
-        /// </summary>
-        /// <remarks>
-        /// This overload is used for testing.
-        /// </remarks>
-        /// <param name="scope">The scope.</param>
-        /// <param name="clock">The clock which controls timestamps</param>
-        /// <param name="message">The message.</param>
         /// <param name="type">The type.</param>
-        /// <param name="category">The category.</param>
         /// <param name="data">The data</param>
         /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void AddBreadcrumb(
-            this Scope scope,
+        public static void AddBreadcrumb(this Scope scope,
             ISystemClock clock,
             string message,
-            string type,
             string category = null,
+            string type = null,
             IImmutableDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
         {
@@ -133,9 +102,9 @@ namespace Sentry.Protocol
         /// </summary>
         /// <param name="scope">Scope</param>
         /// <param name="breadcrumb">The breadcrumb.</param>
-        public static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
+        internal static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
         {
-            var breadcrumbs = scope.Breadcrumbs;
+            var breadcrumbs = scope.InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
 
             var overflow = breadcrumbs.Count - (scope.Options?.MaxBreadcrumbs
                                                 ?? Constants.DefaultMaxBreadcrumbs) + 1;
@@ -144,7 +113,7 @@ namespace Sentry.Protocol
                 breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
             }
 
-            scope.Breadcrumbs = breadcrumbs.Add(breadcrumb);
+            scope.InternalBreadcrumbs = breadcrumbs.Add(breadcrumb);
         }
 
         private static IImmutableDictionary<string, string> ToImmutableDictionary(
@@ -153,49 +122,117 @@ namespace Sentry.Protocol
                 .SetItem(tuple.name, tuple.value);
 
         /// <summary>
-        /// Copy the data from one scope to the other
+        /// Sets the fingerprint to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="fingerprint">The fingerprint.</param>
+        public static void SetFingerprint(this Scope scope, IEnumerable<string> fingerprint)
+            => scope.InternalFingerprint = fingerprint?.ToImmutableList();
+
+        /// <summary>
+        /// Sets the extra key-value to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        public static void SetExtra(this Scope scope, string key, object value)
+            => scope.InternalExtra = (scope.InternalExtra ?? ImmutableDictionary<string, object>.Empty).SetItem(key, value);
+
+        /// <summary>
+        /// Sets the extra key-value pairs to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="values">The values.</param>
+        public static void SetExtras(this Scope scope, IEnumerable<KeyValuePair<string, object>> values)
+            => scope.InternalExtra = (scope.InternalExtra ?? ImmutableDictionary<string, object>.Empty).SetItems(values);
+
+        /// <summary>
+        /// Sets the tag to the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        public static void SetTag(this Scope scope, string key, string value)
+            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItem(key, value);
+
+        /// <summary>
+        /// Set all items as tags
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="tags"></param>
+        public static void SetTags(this Scope scope, IEnumerable<KeyValuePair<string, string>> tags)
+            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItems(tags);
+
+        /// <summary>
+        /// Removes a tag from the <see cref="Scope"/>
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <param name="key"></param>
+        public static void UnsetTag(this Scope scope, string key)
+            => scope.InternalTags = scope.InternalTags?.Remove(key);
+
+        /// <summary>
+        /// Applies the data from one scope to the other while
         /// </summary>
         /// <param name="from">The scope to data copy from.</param>
         /// <param name="to">The scope to copy data to.</param>
         /// <remarks>
-        /// Will override the value on 'to' when the value exists on 'from'.
-        /// If 'from' is null, 'to' is unmodified.
+        /// Applies the data of 'from' into 'to'.
+        /// If data in 'from' is null, 'to' is unmodified.
         /// This is a shallow copy.
         /// </remarks>
-        public static void CopyTo(this Scope from, Scope to)
+        public static void Apply(this Scope from, Scope to)
         {
-            if (from.InternalFingerprint != null)
+            // Fingerprint isn't combined. It's absolute.
+            // One set explicitly on target (i.e: event)
+            // takes precedence and is not overwriten
+            if (to.InternalFingerprint == null
+                && from.InternalFingerprint != null)
             {
-                to.Fingerprint = to.Fingerprint?.AddRange(from.InternalFingerprint) ?? from.InternalFingerprint;
+                to.InternalFingerprint = from.InternalFingerprint;
             }
+
             if (from.InternalBreadcrumbs != null)
             {
-                to.Breadcrumbs = to.Breadcrumbs?.AddRange(from.InternalBreadcrumbs) ?? from.InternalBreadcrumbs;
+                to.InternalBreadcrumbs = to.InternalBreadcrumbs != null
+                    ? to.InternalBreadcrumbs.AddRange(from.InternalBreadcrumbs)
+                    : from.InternalBreadcrumbs;
             }
+
             if (from.InternalExtra != null)
             {
-                to.Extra = to.Extra?.SetItems(from.InternalExtra) ?? from.InternalExtra;
+                to.InternalExtra = to.InternalExtra != null
+                    ? from.InternalExtra.SetItems(to.InternalExtra)
+                    : from.InternalExtra;
             }
+
             if (from.InternalTags != null)
             {
-                to.Tags = to.Tags?.SetItems(from.InternalTags) ?? from.InternalTags;
+                to.InternalTags = to.InternalTags != null
+                    ? from.InternalTags.SetItems(to.InternalTags)
+                    : from.InternalTags;
             }
-            if (from.InternalContexts != null)
+
+            if (to.InternalContexts == null)
             {
                 to.Contexts = from.InternalContexts;
             }
+
             if (from.InternalRequest != null)
             {
                 to.Request = from.InternalRequest;
             }
+
             if (from.InternalUser != null)
             {
                 to.User = from.InternalUser;
             }
-            if (from.Environment != null)
+
+            if (to.Environment == null)
             {
                 to.Environment = from.Environment;
             }
+
             if (from.Sdk != null)
             {
                 if (from.Sdk.Name != null && from.Sdk.Version != null)

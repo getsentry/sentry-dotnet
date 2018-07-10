@@ -18,13 +18,28 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public void SerializeObject_SingleUserDefinedKeyPropertySet_SerializeSingleProperty()
+        {
+            const string expectedKey = "server";
+            var os = new OperatingSystem { Name = "Linux" };
+            var sut = new Contexts
+            {
+                [expectedKey] = os
+            };
+
+            var actual = JsonSerializer.SerializeObject(sut);
+
+            Assert.Equal("{\"server\":{\"type\":\"os\",\"name\":\"Linux\"}}", actual);
+        }
+
+        [Fact]
         public void SerializeObject_SingleDevicePropertySet_SerializeSingleProperty()
         {
             var sut = new Contexts();
             sut.Device.Architecture = "x86";
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"device\":{\"arch\":\"x86\"}}", actual);
+            Assert.Equal("{\"device\":{\"type\":\"device\",\"arch\":\"x86\"}}", actual);
         }
 
         [Fact]
@@ -34,17 +49,7 @@ namespace Sentry.Tests.Protocol
             sut.App.Name = "My.App";
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"app\":{\"app_name\":\"My.App\"}}", actual);
-        }
-
-        [Fact]
-        public void SerializeObject_SingleOsPropertySet_SerializeSingleProperty()
-        {
-            var sut = new Contexts();
-            sut.OperatingSystem.Version = "1.1.1.100";
-            var actual = JsonSerializer.SerializeObject(sut);
-
-            Assert.Equal("{\"os\":{\"version\":\"1.1.1.100\"}}", actual);
+            Assert.Equal("{\"app\":{\"type\":\"app\",\"app_name\":\"My.App\"}}", actual);
         }
 
         [Fact]
@@ -54,7 +59,7 @@ namespace Sentry.Tests.Protocol
             sut.Runtime.Version = "2.1.1.100";
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"runtime\":{\"version\":\"2.1.1.100\"}}", actual);
+            Assert.Equal("{\"runtime\":{\"type\":\"runtime\",\"version\":\"2.1.1.100\"}}", actual);
         }
 
         [Fact]
@@ -64,7 +69,7 @@ namespace Sentry.Tests.Protocol
             contexts.Browser.Name = "Netscape 1";
             var actual = JsonSerializer.SerializeObject(contexts);
 
-            Assert.Equal("{\"browser\":{\"name\":\"Netscape 1\"}}", actual);
+            Assert.Equal("{\"browser\":{\"type\":\"browser\",\"name\":\"Netscape 1\"}}", actual);
         }
 
         [Fact]
@@ -74,7 +79,7 @@ namespace Sentry.Tests.Protocol
             contexts.OperatingSystem.Name = "BeOS 1";
             var actual = JsonSerializer.SerializeObject(contexts);
 
-            Assert.Equal("{\"os\":{\"name\":\"BeOS 1\"}}", actual);
+            Assert.Equal("{\"os\":{\"type\":\"os\",\"name\":\"BeOS 1\"}}", actual);
         }
     }
 }

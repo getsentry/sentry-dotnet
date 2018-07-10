@@ -16,6 +16,11 @@ namespace Sentry.Protocol
     public class App
     {
         /// <summary>
+        /// Tells Sentry which type of context this is.
+        /// </summary>
+        [DataMember(Name = "type", EmitDefaultValue = false)]
+        public const string Type = "app";
+        /// <summary>
         /// Version-independent application identifier, often a dotted bundle ID.
         /// </summary>
         [DataMember(Name = "app_identifier", EmitDefaultValue = false)]

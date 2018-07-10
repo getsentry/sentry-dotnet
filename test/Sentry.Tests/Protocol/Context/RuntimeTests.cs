@@ -21,7 +21,7 @@ namespace Sentry.Tests.Protocol
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"name\":\".NET Framework\",\"version\":\"4.7.2\",\"raw_description\":\".NET Framework 4.7.2\",\"build\":\"461814\"}", actual);
+            Assert.Equal("{\"type\":\"runtime\",\"name\":\".NET Framework\",\"version\":\"4.7.2\",\"raw_description\":\".NET Framework 4.7.2\",\"build\":\"461814\"}", actual);
         }
 
         [Theory]
@@ -35,11 +35,11 @@ namespace Sentry.Tests.Protocol
 
         public static IEnumerable<object[]> TestCases()
         {
-            yield return new object[] { (new Runtime(), "{}") };
-            yield return new object[] { (new Runtime { Name = "some name" }, "{\"name\":\"some name\"}") };
-            yield return new object[] { (new Runtime { Version = "some version" }, "{\"version\":\"some version\"}") };
-            yield return new object[] { (new Runtime { Build = "some build" }, "{\"build\":\"some build\"}") };
-            yield return new object[] { (new Runtime { RawDescription = "some Name, some version" }, "{\"raw_description\":\"some Name, some version\"}") };
+            yield return new object[] { (new Runtime(), "{\"type\":\"runtime\"}") };
+            yield return new object[] { (new Runtime { Name = "some name" }, "{\"type\":\"runtime\",\"name\":\"some name\"}") };
+            yield return new object[] { (new Runtime { Version = "some version" }, "{\"type\":\"runtime\",\"version\":\"some version\"}") };
+            yield return new object[] { (new Runtime { Build = "some build" }, "{\"type\":\"runtime\",\"build\":\"some build\"}") };
+            yield return new object[] { (new Runtime { RawDescription = "some Name, some version" }, "{\"type\":\"runtime\",\"raw_description\":\"some Name, some version\"}") };
         }
     }
 }

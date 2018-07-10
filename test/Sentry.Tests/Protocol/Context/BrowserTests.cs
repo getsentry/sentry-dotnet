@@ -19,7 +19,7 @@ namespace Sentry.Tests.Protocol
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"name\":\"Internet Explorer\",\"version\":\"6\"}", actual);
+            Assert.Equal("{\"type\":\"browser\",\"name\":\"Internet Explorer\",\"version\":\"6\"}", actual);
         }
 
         [Theory]
@@ -33,9 +33,9 @@ namespace Sentry.Tests.Protocol
 
         public static IEnumerable<object[]> TestCases()
         {
-            yield return new object[] { (new Browser(), "{}") };
-            yield return new object[] { (new Browser { Name = "some name" }, "{\"name\":\"some name\"}") };
-            yield return new object[] { (new Browser { Version = "some version" }, "{\"version\":\"some version\"}") };
+            yield return new object[] { (new Browser(), "{\"type\":\"browser\"}") };
+            yield return new object[] { (new Browser { Name = "some name" }, "{\"type\":\"browser\",\"name\":\"some name\"}") };
+            yield return new object[] { (new Browser { Version = "some version" }, "{\"type\":\"browser\",\"version\":\"some version\"}") };
         }
     }
 }

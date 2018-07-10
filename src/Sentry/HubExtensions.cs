@@ -64,10 +64,8 @@ namespace Sentry
                 s => s.AddBreadcrumb(
                     clock: clock,
                     message: message,
-                    type: type,
-                    data: data?.ToImmutableDictionary(),
                     category: category,
-                    level: level));
+                    type: type, data: data?.ToImmutableDictionary(), level: level));
 
         /// <summary>
         /// Pushes a new scope while locking it which stop new scope creation

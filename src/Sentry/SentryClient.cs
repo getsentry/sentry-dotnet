@@ -78,7 +78,7 @@ namespace Sentry
 
             // Evaluate and copy before invoking the callback
             scope?.Evaluate();
-            scope?.CopyTo(@event);
+            scope?.Apply(@event);
 
             foreach (var processor in _options.GetAllEventProcessors())
             {

@@ -97,7 +97,7 @@ namespace Sentry.Protocol
 
         ///
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public Breadcrumb(
+        internal Breadcrumb(
             DateTimeOffset timestamp,
             string message = null,
             string type = null,
