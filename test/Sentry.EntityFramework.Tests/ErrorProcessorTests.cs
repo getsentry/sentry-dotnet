@@ -45,8 +45,6 @@ namespace Sentry.EntityFramework.Tests
                     Dsn = DsnSamples.Valid,
                 }.AddEntityFramework());
             }
-
-            
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -61,7 +59,7 @@ namespace Sentry.EntityFramework.Tests
                 // This will throw a validation exception since TestData has a Required column which we didn't set
                 await _fixture.DbContext.SaveChangesAsync();
             }
-            catch(DbEntityValidationException e)
+            catch (DbEntityValidationException e)
             {
                 // SaveChanges will throw an exception
 
@@ -91,7 +89,7 @@ namespace Sentry.EntityFramework.Tests
                 // This will throw a validation exception since TestData has a Required column which we didn't set
                 await _fixture.DbContext.SaveChangesAsync();
             }
-            catch(DbEntityValidationException e)
+            catch (DbEntityValidationException e)
             {
                 Exception assertError = null;
                 // SaveChanges will throw an exception
