@@ -9,14 +9,13 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    [Collection(nameof(SentrySdkCollection))]
-    public class AspNetSentryWebHostBuilderExtensionsTests : AspNetSentrySdkTestFixture
+    public class SentryWebHostBuilderExtensionsTests
     {
         public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
         public ServiceCollection Services { get; set; } = new ServiceCollection();
         public IConfiguration Configuration { get; set; } = Substitute.For<IConfiguration>();
 
-        public AspNetSentryWebHostBuilderExtensionsTests()
+        public SentryWebHostBuilderExtensionsTests()
         {
             var context = new WebHostBuilderContext { Configuration = Configuration };
 
@@ -33,15 +32,7 @@ namespace Sentry.AspNetCore.Tests
         public void UseSentry_ValidDsnString_ServicesRegistered(Action<IServiceCollection> assert)
         {
             WebHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
-            try
-            {
-                assert(Services);
-                Assert.True(SentrySdk.IsEnabled);
-            }
-            finally
-            {
-                SentrySdk.Close();
-            }
+            assert(Services);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
@@ -49,7 +40,6 @@ namespace Sentry.AspNetCore.Tests
         {
             WebHostBuilder.UseSentry();
             assert(Services);
-            Assert.False(SentrySdk.IsEnabled);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
@@ -57,7 +47,6 @@ namespace Sentry.AspNetCore.Tests
         {
             WebHostBuilder.UseSentry(Internal.Constants.DisableSdkDsnValue);
             assert(Services);
-            Assert.False(SentrySdk.IsEnabled);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
@@ -65,7 +54,6 @@ namespace Sentry.AspNetCore.Tests
         {
             WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
             assert(Services);
-            Assert.False(SentrySdk.IsEnabled);
         }
 
         public static IEnumerable<object[]> ExpectedServices()
@@ -75,7 +63,7 @@ namespace Sentry.AspNetCore.Tests
                     Assert.Single(c, d => d.ServiceType == typeof(IHub)))};
             yield return new object[] {
                 new Action<IServiceCollection>(c =>
-                    Assert.Single(c, d => d.ImplementationInstance?.GetType() == typeof(SentryLoggerProvider)))};
+                    Assert.Single(c, d => d.ImplementationType == typeof(SentryLoggerProvider)))};
             yield return new object[] {
                 new Action<IServiceCollection>(c =>
                     Assert.Single(c, d => d.ServiceType == typeof(SentryAspNetCoreOptions)))};
