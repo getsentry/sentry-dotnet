@@ -1,9 +1,20 @@
+using System.ComponentModel;
 using Sentry.EntityFramework.ErrorProcessors;
 
-namespace Sentry.EntityFramework
+// ReSharper disable once CheckNamespace - Make it visible without: using Sentry.EntityFramework
+namespace Sentry
 {
+    /// <summary>
+    /// Extension methods to <see cref="SentryOptions"/>
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryOptionsExtensions
     {
+        /// <summary>
+        /// Adds the entity framework integration.
+        /// </summary>
+        /// <param name="sentryOptions">The sentry options.</param>
+        /// <returns></returns>
         public static SentryOptions AddEntityFramework(this SentryOptions sentryOptions)
         {
             sentryOptions.AddExceptionProcessor(new DbEntityValidationExceptionProcessor());
