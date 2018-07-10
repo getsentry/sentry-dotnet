@@ -7,6 +7,8 @@ namespace Sentry.EntityFramework.ErrorProcessors
 {
     public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcessor<DbEntityValidationException>
     {
+        internal const string EntityValidationErrors = "EntityValidationErrors";
+
         protected override void ProcessException(DbEntityValidationException exception, SentryEvent sentryEvent)
         {
             var errorList = new Dictionary<string, List<string>>();
@@ -23,7 +25,7 @@ namespace Sentry.EntityFramework.ErrorProcessors
                 }
             }
 
-            sentryEvent.SetExtra("EntityValidationErrors", errorList);
+            sentryEvent.SetExtra(EntityValidationErrors, errorList);
         }
     }
 }
