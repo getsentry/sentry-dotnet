@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Sentry.PlatformAbstractions.Tests
 {
-    public class FrameworkInfoTests
+    public class FrameworkInfoNetFxTests
     {
         [SetUp]
         public void TestSetUp()

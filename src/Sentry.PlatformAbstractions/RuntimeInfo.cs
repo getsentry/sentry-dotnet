@@ -141,7 +141,7 @@ namespace Sentry.PlatformAbstractions
             // Not recommended on NET45+ (which has RuntimeInformation)
             var version = Environment.Version;
 
-            string friendlyVersion = null;
+            string friendlyVersion;
             switch (version.Major)
             {
                 case 1:

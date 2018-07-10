@@ -24,12 +24,12 @@ Most of the platform information used by the SDK goes to Sentry's [Context Inter
 For details, check the [example project](https://github.com/getsentry/dotnet-sentry-platform-abstractions/tree/426b7b2a002738a5ccbbed644d6ccb3fa26b9eba/samples/Sentry.PlatformAbstractions.Console).
 
 ### Runtime information
-If you are interested in which runtime information, with .NET Standard 1.5 and later you can use `RuntimeInformation.FrameworkDescription`, which will give you a **single string**:
+If you are interested in the runtime information, with .NET Standard 1.5 onwards you can use: `RuntimeInformation.FrameworkDescription`, which will give you a **single string**
 
-For example, .NET Core 2.0.6 on Linux, returns: `.NET Core 4.6.0.0`.
-Not only it doesn't tell you what was installed on the machine but to get the version, you'd need to parse the string.
+For example, .NET Core 2.0.6 on Linux returns: `.NET Core 4.6.0.0`.
+Besides not telling you what was actually installed on the machine, to get the version number you would need to parse the string.
 
-The following table compares results of that API call to what this library returns:
+The following table compares the results of that API call to what this library returns:
 
 |      Target      |       OS         |           RuntimeInformation.FrameworkDescription         |  This library returns an object |
 | ---------------- | ---------------- | --------------------------------------------------------- | ------------------------------- |
