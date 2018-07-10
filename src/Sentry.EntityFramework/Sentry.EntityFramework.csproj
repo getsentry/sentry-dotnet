@@ -17,8 +17,4 @@
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Microsoft.VisualBasic" />
-  </ItemGroup>
-
 </Project>
