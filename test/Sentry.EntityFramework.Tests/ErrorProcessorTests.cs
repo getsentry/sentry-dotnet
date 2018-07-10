@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Data.Entity.Validation;
 using System.Threading.Tasks;
 using Sentry.EntityFramework.ErrorProcessors;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.EntityFramework.Tests
@@ -40,7 +41,7 @@ namespace Sentry.EntityFramework.Tests
 
         private readonly Fixture _fixture = new Fixture();
 
-        [Fact]
+        [NoMonoFact]
         public async Task EntityValidationExceptions_Extra_EntityValidationErrorsNotNullAsync()
         {
             // We use an actual Entity Framework instance since manually generating any EF related data is highly inaccurate
@@ -70,7 +71,7 @@ namespace Sentry.EntityFramework.Tests
         /// Integration test to ensure that the processor is also called and operated successfully inside an actual Sentry Client
         /// This should help avoid regression in case the underlying API changes in an unusual way
         /// </summary>
-        [Fact]
+        [NoMonoFact]
         public async Task Integration_DbEntityValidationExceptionProcessorAsync()
         {
             // We use an actual Entity Framework instane since manually generating any EF related data is highly inaccurate
