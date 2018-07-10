@@ -2,6 +2,9 @@ using System.Data.Entity.Infrastructure.Interception;
 
 namespace Sentry.EntityFramework
 {
+    /// <summary>
+    /// Sentry Database Logger
+    /// </summary>
     public static class SentryDatabaseLogging
     {
         /// <summary>
