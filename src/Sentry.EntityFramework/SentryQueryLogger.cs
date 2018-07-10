@@ -3,7 +3,7 @@ using Sentry.Protocol;
 
 namespace Sentry.EntityFramework
 {
-    public class SentryQueryLogger : IQueryLogger
+    internal class SentryQueryLogger : IQueryLogger
     {
         private readonly IHub _hub;
 

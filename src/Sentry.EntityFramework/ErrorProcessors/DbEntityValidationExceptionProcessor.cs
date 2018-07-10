@@ -5,7 +5,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.EntityFramework.ErrorProcessors
 {
-    public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcessor<DbEntityValidationException>
+    internal class DbEntityValidationExceptionProcessor : SentryEventExceptionProcessor<DbEntityValidationException>
     {
         internal const string EntityValidationErrors = "EntityValidationErrors";
 
