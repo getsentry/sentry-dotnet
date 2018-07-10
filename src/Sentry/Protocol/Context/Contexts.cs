@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Runtime.Serialization;
 using Sentry.Infrastructure;
 
@@ -11,7 +11,7 @@ namespace Sentry.Protocol
     /// <inheritdoc />
     /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/" />
     [DataContract]
-    public class Contexts : Dictionary<string, object>
+    public class Contexts : ConcurrentDictionary<string, object>
     {
         /// <summary>
         /// Describes the application.

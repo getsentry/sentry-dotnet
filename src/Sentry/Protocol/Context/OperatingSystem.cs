@@ -13,9 +13,11 @@ namespace Sentry.Protocol
     [DataContract]
     public class OperatingSystem
     {
+        /// <summary>
+        /// Tells Sentry which type of context this is.
+        /// </summary>
         [DataMember(Name = "type", EmitDefaultValue = false)]
-        internal const string Type = "os";
-
+        public const string Type = "os";
         /// <summary>
         /// The name of the operating system.
         /// </summary>

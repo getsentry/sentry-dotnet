@@ -15,9 +15,11 @@ namespace Sentry.Protocol
     [DataContract]
     public class App
     {
+        /// <summary>
+        /// Tells Sentry which type of context this is.
+        /// </summary>
         [DataMember(Name = "type", EmitDefaultValue = false)]
-        internal const string Type = "app";
-
+        public const string Type = "app";
         /// <summary>
         /// Version-independent application identifier, often a dotted bundle ID.
         /// </summary>

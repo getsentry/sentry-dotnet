@@ -12,9 +12,11 @@ namespace Sentry.Protocol
     [DataContract]
     public class Browser
     {
+        /// <summary>
+        /// Tells Sentry which type of context this is.
+        /// </summary>
         [DataMember(Name = "type", EmitDefaultValue = false)]
-        internal const string Type = "browser";
-
+        public const string Type = "browser";
         /// <summary>
         /// Display name of the browser application.
         /// </summary>

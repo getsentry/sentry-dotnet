@@ -11,12 +11,14 @@ namespace Sentry.Protocol
     [DataContract]
     public class Device
     {
-        [DataMember(Name = "type", EmitDefaultValue = false)]
-        internal const string Type = "device";
-
         [DataMember(Name = "timezone", EmitDefaultValue = false)]
         private string TimezoneSerializable => Timezone?.Id;
 
+        /// <summary>
+        /// Tells Sentry which type of context this is.
+        /// </summary>
+        [DataMember(Name = "type", EmitDefaultValue = false)]
+        public const string Type = "device";
         /// <summary>
         /// The name of the device. This is typically a hostname.
         /// </summary>
