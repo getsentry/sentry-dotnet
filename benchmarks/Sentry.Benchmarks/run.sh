@@ -1,5 +1,6 @@
 ﻿#!/bin/sh
 set -e errexit
 
-dotnet build -c Release -o bin/Release
-dotnet bin/Release/Sentry.Benchmarks.dll
+framework=netcoreapp2.1
+dotnet build -c Release -f $framework
+dotnet bin/Release/$framework/Sentry.Benchmarks.dll
