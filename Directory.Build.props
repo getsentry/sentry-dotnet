@@ -3,6 +3,12 @@
     <LangVersion>7.2</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 
+    <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign>true</PublicSign>
+
+   <Deterministic>True</Deterministic>
+
     <!-- When compiling .NET SDK 2.0 projects targeting .NET 4.x on Mono using 'dotnet build' you -->
     <!-- have to teach MSBuild where the Mono copy of the reference asssemblies is -->
     <TargetIsMono Condition="'$(OS)' != 'Windows_NT' AND $(TargetFramework.StartsWith('net4'))">true</TargetIsMono>
