@@ -63,7 +63,7 @@ function TestAllTargets($project)
     foreach ($target in $projectContent.SelectSingleNode("//TargetFrameworks").InnerText.Split(";"))
     {
         Write-Host Testing target $target -ForegroundColor Green
-        if ($target -eq "net35")
+        if (!$target.StartsWith("netcore"))
         {
             Set-Variable -name runner -value (GetTestRunner)
             $dll = Split-Path (Split-Path $project -Parent) -Leaf
