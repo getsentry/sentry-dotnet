@@ -57,7 +57,7 @@ dotnet_style_coalesce_expression = true : suggestion
 dotnet_style_null_propagation = true : suggestion
 dotnet_style_explicit_tuple_names = true : suggestion
 
-# Naming rules - async methods to be prefixed with Async
+# Naming rules - async methods to be suffixed with Async
 dotnet_naming_rule.async_methods_must_end_with_async.severity = warning
 dotnet_naming_rule.async_methods_must_end_with_async.symbols = method_symbols
 dotnet_naming_rule.async_methods_must_end_with_async.style = end_in_async_style

@@ -14,3 +14,4 @@ obj/
 .DS_Store
 **/BenchmarkDotNet.Artifacts/*.log
 !**/BenchmarkDotNet.Artifacts/results/*github.md
+/packages
