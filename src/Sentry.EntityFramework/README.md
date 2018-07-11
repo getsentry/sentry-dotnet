@@ -1,4 +1,4 @@
-﻿![Example in Sentry](ef.png)
+﻿![Example in Sentry](ef.PNG)
 
 ## Entity Framework 6 Integration for Sentry
 
