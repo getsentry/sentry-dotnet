@@ -1,16 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Data.Entity.Validation;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using NSubstitute;
 using Sentry.EntityFramework.ErrorProcessors;
-using Sentry.Extensibility;
-using Sentry.Protocol;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.EntityFramework.Tests
@@ -22,17 +16,15 @@ namespace Sentry.EntityFramework.Tests
             public DbConnection DbConnection { get; }
             public TestDbContext DbContext { get; }
 
-            public ISentryClient SentryClient;
+            public ISentryClient SentryClient { get; }
 
             public Func<SentryEvent, SentryEvent> BeforeSend = null;
 
             private SentryEvent _beforeSend(SentryEvent arg)
             {
-                if (BeforeSend != null)
-                {
-                    return BeforeSend(arg);
-                }
-                return arg;
+                return BeforeSend != null
+                    ? BeforeSend(arg)
+                    : arg;
             }
 
             public Fixture()
@@ -49,10 +41,10 @@ namespace Sentry.EntityFramework.Tests
 
         private readonly Fixture _fixture = new Fixture();
 
-        [Fact]
+        [NoMonoFact]
         public async Task EntityValidationExceptions_Extra_EntityValidationErrorsNotNullAsync()
         {
-            // We use an actual Entity Framework instane since manually generating any EF related data is highly inaccurate
+            // We use an actual Entity Framework instance since manually generating any EF related data is highly inaccurate
             _fixture.DbContext.TestTable.Add(new TestDbContext.TestData());
             try
             {
@@ -67,19 +59,19 @@ namespace Sentry.EntityFramework.Tests
                 var evt = new SentryEvent();
                 processor.Process(e, evt);
 
-                Assert.True(evt.Extra.TryGetValue("EntityValidationErrors", out var errors));
+                Assert.True(evt.Extra.TryGetValue(DbEntityValidationExceptionProcessor.EntityValidationErrors, out var errors));
                 var entityValidationErrors = errors as Dictionary<string, List<string>>;
                 Assert.NotNull(entityValidationErrors);
                 Assert.NotEmpty(entityValidationErrors);
             }
-            
+
         }
 
         /// <summary>
         /// Integration test to ensure that the processor is also called and operated successfully inside an actual Sentry Client
         /// This should help avoid regression in case the underlying API changes in an unusual way
         /// </summary>
-        [Fact]
+        [NoMonoFact]
         public async Task Integration_DbEntityValidationExceptionProcessorAsync()
         {
             // We use an actual Entity Framework instane since manually generating any EF related data is highly inaccurate
@@ -98,7 +90,7 @@ namespace Sentry.EntityFramework.Tests
                     // We use a try-catch here as we cannot assert directly since SentryClient itself would catch the thrown assertion errors
                     try
                     {
-                        Assert.True(evt.Extra.TryGetValue("EntityValidationErrors", out var errors));
+                        Assert.True(evt.Extra.TryGetValue(DbEntityValidationExceptionProcessor.EntityValidationErrors, out var errors));
                         var entityValidationErrors = errors as Dictionary<string, List<string>>;
                         Assert.NotNull(entityValidationErrors);
                         Assert.NotEmpty(entityValidationErrors);
@@ -107,7 +99,7 @@ namespace Sentry.EntityFramework.Tests
                     {
                         assertError = ex;
                     }
-                    
+
                     return null;
                 };
                 _fixture.SentryClient.CaptureException(e);

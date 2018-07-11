@@ -1,27 +1,20 @@
-using System.Linq;
-using System.Text;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 
 namespace Sentry.EntityFramework
 {
-    public class SentryQueryLogger : IQueryLogger
+    internal class SentryQueryLogger : IQueryLogger
     {
         private readonly IHub _hub;
 
-        public SentryQueryLogger(IHub hub = null)
-        {
-            _hub = hub ?? HubAdapter.Instance;
-        }
+        public SentryQueryLogger(IHub hub = null) => _hub = hub ?? HubAdapter.Instance;
 
         public void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Debug)
-        {
-            _hub.AddBreadcrumb(
+            => _hub.AddBreadcrumb(
                 message: text,
                 category: "Entity Framework",
                 type: null,
                 data: null,
                 level: level);
-        }
     }
 }

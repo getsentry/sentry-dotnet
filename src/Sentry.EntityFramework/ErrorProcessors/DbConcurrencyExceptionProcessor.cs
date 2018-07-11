@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Sentry.Extensibility;
 
 namespace Sentry.EntityFramework.ErrorProcessors
 {
-    public class DbConcurrencyExceptionProcessor : SentryEventExceptionProcessor<DBConcurrencyException>
+    internal class DbConcurrencyExceptionProcessor : SentryEventExceptionProcessor<DBConcurrencyException>
     {
         protected override void ProcessException(DBConcurrencyException exception, SentryEvent sentryEvent)
         {
