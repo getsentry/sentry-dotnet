@@ -68,7 +68,7 @@ namespace Sentry
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(BackgroundWorker));
+                throw new ObjectDisposedException(nameof(SentryClient));
             }
 
             if (@event == null)
@@ -82,12 +82,18 @@ namespace Sentry
 
             foreach (var processor in _options.GetAllEventProcessors())
             {
-                processor.Process(@event);
+                @event = processor.Process(@event);
+                if (@event == null)
+                {
+                    // TODO: Log here which processor dropped it
+                    return Guid.Empty;
+                }
             }
 
             @event = BeforeSend(@event);
             if (@event == null) // Rejected event
             {
+                // TODO: Log BeforeSend callback dropped it
                 return Guid.Empty;
             }
 

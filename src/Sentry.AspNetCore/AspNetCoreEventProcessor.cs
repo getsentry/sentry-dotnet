@@ -5,7 +5,7 @@ namespace Sentry.AspNetCore
 {
     internal class AspNetCoreEventProcessor : ISentryEventProcessor
     {
-        public void Process(SentryEvent @event)
+        public SentryEvent Process(SentryEvent @event)
         {
             // Move 'runtime' under key 'server-runtime' as User-Agent parsing done at
             // Sentry will represent the client's
@@ -18,6 +18,8 @@ namespace Sentry.AspNetCore
             {
                 @event.Contexts["server-os"] = os;
             }
+
+            return @event;
         }
     }
 }

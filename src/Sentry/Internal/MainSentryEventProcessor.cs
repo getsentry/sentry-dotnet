@@ -37,7 +37,7 @@ namespace Sentry.Internal
             Debug.Assert(options != null);
             _options = options;
         }
-        public void Process(SentryEvent @event)
+        public SentryEvent Process(SentryEvent @event)
         {
             if (!@event.Contexts.ContainsKey(Runtime.Type))
             {
@@ -96,6 +96,8 @@ namespace Sentry.Internal
             }
 
             @event.InternalModules = builder.ToImmutable();
+
+            return @event;
         }
     }
 }

@@ -140,7 +140,7 @@ namespace Sentry.Samples.Console.Customized
 
         private class SomeEventProcessor : ISentryEventProcessor
         {
-            public void Process(SentryEvent @event)
+            public SentryEvent Process(SentryEvent @event)
             {
                 // Here you can modify the event as you need
                 if (@event.Level > SentryLevel.Info)
@@ -154,6 +154,8 @@ namespace Sentry.Samples.Console.Customized
 
                     @event.ServerName = Environment.MachineName;
                 }
+
+                return @event;
             }
         }
 
