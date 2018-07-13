@@ -1,6 +1,7 @@
 using System.Linq;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Integrations;
 using Sentry.Internal;
 using Xunit;
 
@@ -16,6 +17,14 @@ namespace Sentry.Tests
             Sut.DisableDuplicateEventDetection();
             Assert.DoesNotContain(Sut.EventProcessors,
                 p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
+        }
+
+        [Fact]
+        public void AddIntegration_StoredInOptions()
+        {
+            var expected = Substitute.For<ISdkIntegration>();
+            Sut.AddIntegration(expected);
+            Assert.Contains(Sut.Integrations, actual => actual == expected);
         }
 
         [Fact]

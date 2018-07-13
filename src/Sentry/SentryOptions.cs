@@ -12,6 +12,7 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
+    /// <inheritdoc />
     public class SentryOptions : IScopeOptions
     {
         internal string ClientVersion { get; } = SdkName;
@@ -43,6 +44,11 @@ namespace Sentry
         internal ImmutableList<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
         /// <summary>
+        /// A list of integrations to be added when the SDK is initialized
+        /// </summary>
+        internal ImmutableList<ISdkIntegration> Integrations { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum breadcrumbs.
         /// </summary>
         /// <remarks>
@@ -52,6 +58,7 @@ namespace Sentry
         /// <value>
         /// The maximum breadcrumbs per scope.
         /// </value>
+        /// <inheritdoc />
         public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
         /// <summary>
@@ -82,16 +89,6 @@ namespace Sentry
         /// should not be sent at all, return null from the callback.
         /// </remarks>
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
-
-        /// <summary>
-        /// A list of integrations to be added when the SDK is initialized
-        /// </summary>
-        /// <remarks>
-        /// Default integrations are defined out of the box. It's possible to disable these
-        /// integrations by means of modifying this list before initializing the SDK.
-        /// </remarks>
-        public ImmutableList<ISdkIntegration> Integrations { get; set; }
-            = ImmutableList.Create<ISdkIntegration>(new AppDomainUnhandledExceptionIntegration());
 
         /// <summary>
         /// Configure the background worker options
@@ -133,6 +130,10 @@ namespace Sentry
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
                     new MainExceptionProcessor());
+
+            Integrations
+                = ImmutableList.Create<ISdkIntegration>(
+                    new AppDomainUnhandledExceptionIntegration());
         }
     }
 }

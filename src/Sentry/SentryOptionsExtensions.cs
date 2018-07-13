@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Integrations;
 
 namespace Sentry
 {
@@ -24,6 +25,14 @@ namespace Sentry
             => options.EventProcessors = options.EventProcessors.RemoveAll(p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
 
         /// <summary>
+        /// Add an integration
+        /// </summary>
+        /// <param name="options">The SentryOptions to hold the processor.</param>
+        /// <param name="integration">The integration.</param>
+        public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
+            => options.Integrations = options.Integrations.Add(integration);
+
+        /// <summary>
         /// Add an exception processor
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor.</param>
@@ -38,7 +47,6 @@ namespace Sentry
         /// <param name="processors">The exception processors.</param>
         public static void AddExceptionProcessors(this SentryOptions options, IEnumerable<ISentryEventExceptionProcessor> processors)
             => options.ExceptionProcessors = options.ExceptionProcessors.AddRange(processors);
-
 
         /// <summary>
         /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
@@ -71,7 +79,6 @@ namespace Sentry
         /// <param name="processorProvider">The exception processor provider.</param>
         public static void AddExceptionProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryEventExceptionProcessor>> processorProvider)
             => options.ExceptionProcessorsProviders = options.ExceptionProcessorsProviders.Add(processorProvider);
-
 
         /// <summary>
         /// Invokes all event processor providers available
