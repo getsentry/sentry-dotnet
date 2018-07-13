@@ -20,6 +20,14 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void DisableAppDomainUnhandledExceptionCapture_RemovesAppDomainUnhandledExceptionIntegration()
+        {
+            Sut.DisableAppDomainUnhandledExceptionCapture();
+            Assert.DoesNotContain(Sut.Integrations,
+                p => p.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
+        }
+
+        [Fact]
         public void AddIntegration_StoredInOptions()
         {
             var expected = Substitute.For<ISdkIntegration>();
@@ -177,6 +185,12 @@ namespace Sentry.Tests
         public void GetAllEventProcessors_NoAdding_FirstReturned_DuplicateDetectionProcessor()
         {
             Assert.IsType<DuplicateEventDetectionEventProcessor>(Sut.GetAllEventProcessors().First());
+        }
+
+        [Fact]
+        public void Integrations_Includes_AppDomainUnhandledExceptionIntegration()
+        {
+            Assert.Contains(Sut.Integrations, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
         }
     }
 }

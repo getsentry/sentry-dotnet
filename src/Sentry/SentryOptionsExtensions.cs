@@ -20,9 +20,16 @@ namespace Sentry
         /// It is possible the second event had in fact more data. In which case it'd be ideal to avoid the first
         /// event going out in the first place.
         /// </remarks>
-        /// <param name="options"></param>
+        /// <param name="options">The SentryOptions to remove the processor from.</param>
         public static void DisableDuplicateEventDetection(this SentryOptions options)
             => options.EventProcessors = options.EventProcessors.RemoveAll(p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
+
+        /// <summary>
+        /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options)
+            => options.Integrations = options.Integrations.RemoveAll(p => p.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
 
         /// <summary>
         /// Add an integration
