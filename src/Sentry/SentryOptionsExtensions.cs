@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -10,6 +11,18 @@ namespace Sentry
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryOptionsExtensions
     {
+        /// <summary>
+        /// Disables the strategy to detect duplicate events
+        /// </summary>
+        /// <remarks>
+        /// In case a second event is being sent out from the same exception, that event will be discarded.
+        /// It is possible the second event had in fact more data. In which case it'd be ideal to avoid the first
+        /// event going out in the first place.
+        /// </remarks>
+        /// <param name="options"></param>
+        public static void DisableDuplicateEventDetection(this SentryOptions options)
+            => options.EventProcessors = options.EventProcessors.RemoveAll(p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
+
         /// <summary>
         /// Add an exception processor
         /// </summary>

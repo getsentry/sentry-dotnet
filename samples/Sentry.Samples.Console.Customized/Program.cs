@@ -81,6 +81,16 @@ namespace Sentry.Samples.Console.Customized
 
                 SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
 
+                var error = new Exception("Attempting to send this multiple times");
+
+                // Only the first capture will be sent to Sentry
+                for (int i = 0; i < 100; i++)
+                {
+                    // The SDK is able to detect duplicate events:
+                    // This is useful, for example, when multiple loggers log the same exception. Or exception is re-thrown and recaptured.
+                    SentrySdk.CaptureException(error);
+                }
+
                 // -------------------------
 
                 // A custom made client, that could be registered with DI,

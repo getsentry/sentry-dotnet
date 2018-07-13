@@ -8,11 +8,11 @@ namespace Sentry.Benchmarks
     {
         [GlobalSetup(Target = nameof(Init_Dispose_DsnEnvVar))]
         public void SetDsnToEnvironmentVariable()
-            => Environment.SetEnvironmentVariable(Internal.Constants.DsnEnvironmentVariable, Constants.ValidDsn, EnvironmentVariableTarget.Process);
+            => Environment.SetEnvironmentVariable("SENTRY_DSN", Constants.ValidDsn, EnvironmentVariableTarget.Process);
 
         [GlobalCleanup(Target = nameof(Init_Dispose_DsnEnvVar))]
         public void UnsetDsnToEnvironmentVariable()
-            => Environment.SetEnvironmentVariable(Internal.Constants.DsnEnvironmentVariable, null, EnvironmentVariableTarget.Process);
+            => Environment.SetEnvironmentVariable("SENTRY_DSN", null, EnvironmentVariableTarget.Process);
 
         [Benchmark(Baseline = true, Description = "Init/Dispose: no DSN provided, disabled SDK")]
         public void Init_Dispose_NoDsnFound() => SentrySdk.Init().Dispose();
