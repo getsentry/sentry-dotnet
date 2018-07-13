@@ -12,6 +12,22 @@ namespace Sentry.Tests
         public SentryOptions Sut { get; set; } = new SentryOptions();
 
         [Fact]
+        public void DisableDuplicateEventDetection_RemovesDisableDuplicateEventDetection()
+        {
+            Sut.DisableDuplicateEventDetection();
+            Assert.DoesNotContain(Sut.EventProcessors,
+                p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
+        }
+
+        [Fact]
+        public void DisableAppDomainUnhandledExceptionCapture_RemovesAppDomainUnhandledExceptionIntegration()
+        {
+            Sut.DisableAppDomainUnhandledExceptionCapture();
+            Assert.DoesNotContain(Sut.Integrations,
+                p => p.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
+        }
+
+        [Fact]
         public void AddIntegration_StoredInOptions()
         {
             var expected = Substitute.For<ISdkIntegration>();
@@ -139,15 +155,42 @@ namespace Sentry.Tests
             Assert.Contains(Sut.GetAllEventProcessors(), actual => actual.GetType() == typeof(MainSentryEventProcessor));
         }
 
-
         [Fact]
-        public void GetAllEventProcessors_FirstReturned_MainSentryEventProcessor()
+        public void GetAllEventProcessors_AddingMore_SecondReturned_MainSentryEventProcessor()
         {
             Sut.AddEventProcessorProvider(() => new[] { Substitute.For<ISentryEventProcessor>() });
             Sut.AddEventProcessors(new[] { Substitute.For<ISentryEventProcessor>() });
             Sut.AddEventProcessor(Substitute.For<ISentryEventProcessor>());
 
-            Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().First());
+            Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().Skip(1).First());
+        }
+
+        [Fact]
+        public void GetAllEventProcessors_NoAdding_SecondReturned_MainSentryEventProcessor()
+        {
+            Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().Skip(1).First());
+        }
+
+        [Fact]
+        public void GetAllEventProcessors_AddingMore_FirstReturned_DuplicateDetectionProcessor()
+        {
+            Sut.AddEventProcessorProvider(() => new[] { Substitute.For<ISentryEventProcessor>() });
+            Sut.AddEventProcessors(new[] { Substitute.For<ISentryEventProcessor>() });
+            Sut.AddEventProcessor(Substitute.For<ISentryEventProcessor>());
+
+            Assert.IsType<DuplicateEventDetectionEventProcessor>(Sut.GetAllEventProcessors().First());
+        }
+
+        [Fact]
+        public void GetAllEventProcessors_NoAdding_FirstReturned_DuplicateDetectionProcessor()
+        {
+            Assert.IsType<DuplicateEventDetectionEventProcessor>(Sut.GetAllEventProcessors().First());
+        }
+
+        [Fact]
+        public void Integrations_Includes_AppDomainUnhandledExceptionIntegration()
+        {
+            Assert.Contains(Sut.Integrations, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
         }
     }
 }

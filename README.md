@@ -65,7 +65,6 @@ The SDK needs to know which project within Sentry your errors should go to. That
 
 The SDK is configurable, many of the settings are demonstrated through the samples but here are some options:
 
-* Whether to capture global unhandled exceptions
 * HTTP Proxy
 * Enable request body extraction
 * Read [diagnostics activity data]("https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md)
@@ -78,6 +77,10 @@ The SDK is configurable, many of the settings are demonstrated through the sampl
 * Compress request body
 * Breadcrumb level: Minimal log level to store as a breadcrumb
 * Event level: Minimal log level to send an event to Sentry
+* Disable duplicate event detection
+* Disable capture of global unhandled exceptions
+* Add event processor
+* Add exception processor
 
 and more...
 

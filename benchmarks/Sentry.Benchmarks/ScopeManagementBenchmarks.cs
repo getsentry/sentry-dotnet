@@ -1,19 +1,20 @@
 using System;
 using BenchmarkDotNet.Attributes;
 using Sentry.Extensibility;
-using Sentry.Internal;
 
 namespace Sentry.Benchmarks
 {
     public class ScopeManagementBenchmarks
     {
-        private SentryScopeManager _scopeManager;
-
         [IterationSetup]
-        public void IterationSetup() => _scopeManager = new SentryScopeManager(new SentryOptions(), DisabledHub.Instance);
+        public void IterationSetup()
+        {
+            SentrySdk.Init();
+            SentrySdk.BindClient(DisabledHub.Instance);
+        }
 
         [IterationCleanup]
-        public void IterationCleanup() => _scopeManager.Dispose();
+        public void IterationCleanup() => SentrySdk.Close();
 
         [Params(1, 10, 100)]
         public int Depth;
@@ -29,7 +30,7 @@ namespace Sentry.Benchmarks
                 {
                     return DisabledHub.Instance;
                 }
-                using (_scopeManager.PushScope())
+                using (SentrySdk.PushScope())
                 {
                     return PushScope(i - 1);
                 }

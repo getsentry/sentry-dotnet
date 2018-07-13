@@ -124,6 +124,7 @@ namespace Sentry
 
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
+                     new DuplicateEventDetectionEventProcessor(),
                      new MainSentryEventProcessor(this));
 
             ExceptionProcessors
