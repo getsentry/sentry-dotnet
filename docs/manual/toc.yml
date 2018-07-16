@@ -1,0 +1,6 @@
+ - name: Getting started
+   href: getting-started.md
+ - name: Manual
+   href: manual.md
+ - name: Testing
+   href: testing.md

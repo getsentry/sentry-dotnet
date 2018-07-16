@@ -24,7 +24,9 @@
       {
         "files": [
           "api/**.yml",
-          "api/index.md"
+          "api/index.md",
+          "manual/**.yml",
+          "manual/**.md"
         ]
       },
       {
@@ -40,19 +42,7 @@
     "resource": [
       {
         "files": [
-          "images/**",
-          "../.assets/sentry-nuget.png"
-        ]
-      }
-    ],
-    "overwrite": [
-      {
-        "files": [
-          "apidoc/**.md"
-        ],
-        "exclude": [
-          "obj/**",
-          "_site/**"
+          "images/**"
         ]
       }
     ],
