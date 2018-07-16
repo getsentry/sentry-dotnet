@@ -3,9 +3,44 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.EntityFramework", "src\Sentry.EntityFramework\Sentry.EntityFramework.csproj", "{360F2970-A782-4845-997B-826252E0BAA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNet.Mvc", "samples\Sentry.Samples.AspNet.Mvc\Sentry.Samples.AspNet.Mvc.csproj", "{BAF048DD-2A1C-411E-A7E5-6E182A228F09}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.EntityFramework.Tests", "test\Sentry.EntityFramework.Tests\Sentry.EntityFramework.Tests.csproj", "{B75DDE18-F0B3-4BEA-8D9D-FE57DF674349}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F8277B0D-27BD-4C18-A7AA-93A1B304817D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A4C4B285-F311-4A43-B0E2-7DFD6808F083}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{4AB47437-FE43-49F6-A63D-3B2103EA560E}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{360F2970-A782-4845-997B-826252E0BAA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{360F2970-A782-4845-997B-826252E0BAA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{360F2970-A782-4845-997B-826252E0BAA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{360F2970-A782-4845-997B-826252E0BAA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAF048DD-2A1C-411E-A7E5-6E182A228F09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAF048DD-2A1C-411E-A7E5-6E182A228F09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAF048DD-2A1C-411E-A7E5-6E182A228F09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAF048DD-2A1C-411E-A7E5-6E182A228F09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B75DDE18-F0B3-4BEA-8D9D-FE57DF674349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B75DDE18-F0B3-4BEA-8D9D-FE57DF674349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B75DDE18-F0B3-4BEA-8D9D-FE57DF674349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B75DDE18-F0B3-4BEA-8D9D-FE57DF674349}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{360F2970-A782-4845-997B-826252E0BAA6} = {F8277B0D-27BD-4C18-A7AA-93A1B304817D}
+		{BAF048DD-2A1C-411E-A7E5-6E182A228F09} = {4AB47437-FE43-49F6-A63D-3B2103EA560E}
+		{B75DDE18-F0B3-4BEA-8D9D-FE57DF674349} = {A4C4B285-F311-4A43-B0E2-7DFD6808F083}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACB1436C-80E4-4EDA-830D-A17AC4168CCD}
