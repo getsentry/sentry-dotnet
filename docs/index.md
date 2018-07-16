@@ -4,7 +4,7 @@ This documentation will help you get started with integrating Sentry with your .
 
 Refer to the [manual](/manual/getting-started.md) to get started and learn about concepts.
 
-The reference API documentation includes any public member of this SDK. Many of which include useful *see also* sections and links to external documentation, for example, on [sentry.io](sentry.io).
+The reference API documentation includes any public member of this SDK. Many of which include useful *see also* sections and links to external documentation, for example, on [sentry.io](https://sentry.io).
 
 Want to see some actual code? The SDK is developed on [GitHub](https://github.com/getsentry/sentry-dotnet/).
 
