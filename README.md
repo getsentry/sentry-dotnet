@@ -12,15 +12,17 @@ New .NET SDK for Sentry
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/master/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
 
 
-**NOTE**: This repository is a work in progress. Our goal is to build a composable SDK with many integrations.
-
-
 |      Integrations                 |        NuGet         |
 | ----------------------------- | -------------------: |
 |         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
 |     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 
+## Documentation
+
+Below you will find a basic introduction to the SDK and its API. 
+
+For more details, please: **refer to the [SDK documentation](https://getsentry.github.io/sentry-dotnet/index.html)**
 ## Usage
 
 **Consider taking a look at the _[samples](https://github.com/getsentry/sentry-dotnet/tree/master/samples)_ directory for different types of apps and example usages of the SDK.**
@@ -144,6 +146,7 @@ catch (Exception e)
     SentrySdk.CaptureException(e);
 }
 ```
+
 
 ### Internals/Testability
 
