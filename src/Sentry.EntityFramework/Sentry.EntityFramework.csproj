@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net462</TargetFrameworks>
+    <PackageTags>$(PackageTags);EntityFramework6</PackageTags>
+    <PackageId>Sentry.EntityFramework</PackageId>
+    <AssemblyName>Sentry.EntityFramework</AssemblyName>
+    <RootNamespace>Sentry.EntityFramework</RootNamespace>
+    <Description>Official Entity Framework 6 integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+</Project>
