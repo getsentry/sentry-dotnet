@@ -17,3 +17,5 @@ obj/
 docs/api/*
 !docs/api/index.md
 docs/_site/*
+docs/docfx/*
+docs/docfx.zip
