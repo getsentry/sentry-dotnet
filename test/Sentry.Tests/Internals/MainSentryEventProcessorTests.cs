@@ -4,6 +4,7 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Reflection;
+using Sentry.Tests.Helpers;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -34,7 +35,36 @@ namespace Sentry.Tests.Internals
 
             Sut.Process(evt);
 
-            Assert.Equal(MainSentryEventProcessor.Release.Value, evt.Release);
+            Assert.Equal(Sut.Release, evt.Release);
+        }
+
+        [Fact]
+        public void Process_EnvironmentOnOptions_SetToEvent()
+        {
+            const string expected = "Production";
+            SentryOptions.Environment = expected;
+            var evt = new SentryEvent();
+
+            Sut.Process(evt);
+
+            Assert.Equal(expected, evt.Environment);
+        }
+
+        [Fact]
+        public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable()
+        {
+            const string expected = "Staging";
+            var evt = new SentryEvent();
+
+            EnvironmentVariableGuard.WithVariable(
+                Constants.EnvironmentEnvironmentVariable,
+                expected,
+                () =>
+                {
+                    Sut.Process(evt);
+                });
+
+            Assert.Equal(expected, evt.Environment);
         }
 
         [Fact]
