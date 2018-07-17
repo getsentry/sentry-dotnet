@@ -4,7 +4,6 @@
 
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <PublicSign>true</PublicSign>
 
     <!-- When compiling .NET SDK 2.0 projects targeting .NET 4.x on 32 bit Windows or Mono using 'dotnet build' you -->
     <!-- have to teach MSBuild where the Mono copy of the reference asssemblies is -->
