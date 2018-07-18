@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Testing;
@@ -221,6 +222,27 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public async Task ConfigureScope_OnTask_PropagatedToCaller()
+        {
+            const string expected = "test";
+            using (SentrySdk.Init(ValidDsnWithoutSecret))
+            {
+                await ModifyScope();
+
+                string actual = null;
+                SentrySdk.ConfigureScope(s => actual = s.Breadcrumbs.First().Message);
+
+                Assert.Equal(expected, actual);
+
+                async Task ModifyScope()
+                {
+                    await Task.Yield();
+                    SentrySdk.AddBreadcrumb(expected);
+                }
+            }
+        }
+
+        [Fact]
         public async Task ConfigureScope_Async_CallbackNeverInvoked()
         {
             var invoked = false;
@@ -243,6 +265,24 @@ namespace Sentry.Tests
 
         [Fact]
         public void CaptureMessage_MessageLevel_NoOp() => SentrySdk.CaptureMessage("message", SentryLevel.Debug);
+
+        [Fact]
+        public void CaptureMessage_SdkInitialized_IncludesScope()
+        {
+            var worker = Substitute.For<IBackgroundWorker>();
+            const string expected = "test";
+            using (SentrySdk.Init(o =>
+            {
+                o.Dsn = Valid;
+                o.Worker(w => w.BackgroundWorker = worker);
+            }))
+            {
+                SentrySdk.AddBreadcrumb(expected);
+                SentrySdk.CaptureMessage("message");
+
+                worker.EnqueueEvent(Arg.Is<SentryEvent>(e => e.Breadcrumbs.Single().Message == expected));
+            }
+        }
 
         [Fact]
         public void Implements_Client()

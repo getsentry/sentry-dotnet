@@ -85,6 +85,8 @@ namespace Sentry
             }
 
             var hub = new Hub(options);
+            // Push the first scope so the async local starts from here
+            hub.PushScope();
 
             var oldHub = Interlocked.Exchange(ref _hub, hub);
             (oldHub as IDisposable)?.Dispose();
