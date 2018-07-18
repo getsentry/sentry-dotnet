@@ -60,6 +60,9 @@ namespace Microsoft.AspNetCore.Hosting
                     o.Dsn = new Dsn(aspnetOptions.Dsn);
                 }
 
+                o.Environment = aspnetOptions.Environment ??
+                                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
                 o.Release = aspnetOptions.Release;
             });
 

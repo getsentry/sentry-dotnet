@@ -1,7 +1,7 @@
 using System.Reflection;
 using Sentry.Internal;
 using Sentry.Reflection;
-using Sentry.Tests.Helpers;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests.Internals

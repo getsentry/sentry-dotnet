@@ -36,6 +36,21 @@ namespace Sentry.AspNetCore
         public string Release { get; set; }
 
         /// <summary>
+        /// Override the framework environment name
+        /// </summary>
+        /// <remarks>
+        /// By default the SDK will use the value of <see cref="IHostingEnvironment"/> which essentially reads from: ASPNETCORE_ENVIRONMENT
+        /// This property allows you control over what is sent to Sentry, separately from the ASP.NET Core framework.
+        /// This value can also be set via environment variable: SENTRY_ENVIRONMENT
+        /// </remarks>
+        /// <example>
+        /// Production, Staging
+        /// </example>
+        /// <seealso href="https://docs.sentry.io/learn/environments/"/>
+        /// <seealso href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments"/>
+        public string Environment { get; set; }
+
+        /// <summary>
         /// Whether to initialize the SDK or not.
         /// </summary>
         /// <remarks>

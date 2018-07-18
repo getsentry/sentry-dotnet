@@ -7,7 +7,7 @@ namespace Sentry.AspNetCore.Tests
     public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
     {
         protected Action<SentryAspNetCoreOptions> Configure;
-        public override void Build()
+        protected override void Build()
         {
             var sentry = FakeSentryServer.CreateServer();
             var sentryHttpClient = sentry.CreateClient();

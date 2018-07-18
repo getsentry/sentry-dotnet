@@ -116,7 +116,6 @@ namespace Sentry.AspNetCore
 
             if (_hostingEnvironment != null)
             {
-                scope.Environment = _hostingEnvironment.EnvironmentName;
                 scope.SetWebRoot(_hostingEnvironment.WebRootPath);
             }
 

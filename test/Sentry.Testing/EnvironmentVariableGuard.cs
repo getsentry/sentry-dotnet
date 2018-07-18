@@ -1,8 +1,8 @@
 using System;
 
-namespace Sentry.Tests.Helpers
+namespace Sentry.Testing
 {
-    internal static class EnvironmentVariableGuard
+    public static class EnvironmentVariableGuard
     {
         // To allow different xunit colletions use of this
         private static readonly object Lock = new object();
