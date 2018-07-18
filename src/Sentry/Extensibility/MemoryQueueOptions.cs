@@ -38,5 +38,7 @@ namespace Sentry.Extensibility
         /// Even though default settings say 2 seconds, closing the SDK would block for 50ms.
         /// </example>
         public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(2);
+
+        internal IBackgroundWorker BackgroundWorker { get; set; }
     }
 }

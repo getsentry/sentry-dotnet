@@ -11,10 +11,6 @@ namespace Sentry.Internal
         private readonly HttpOptions _httpOptions;
         private readonly BackgroundWorkerOptions _workerOptions;
 
-        internal IBackgroundWorker BackgroundWorker { get; private set; }
-        internal ITransport Transport { get; private set; }
-        internal ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
-
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
@@ -24,18 +20,18 @@ namespace Sentry.Internal
             // TODO: ensure correct order
             options.ConfigureHttpTransportOptions?.ForEach(o => o.Invoke(httpOptions));
             _httpOptions = httpOptions;
-            SentryHttpClientFactory = _httpOptions.SentryHttpClientFactory;
 
             var workerOptions = new BackgroundWorkerOptions();
             options.ConfigureBackgroundWorkerOptions?.Invoke(workerOptions);
             _workerOptions = workerOptions;
         }
 
-        public BackgroundWorker CreateBackgroundWorker()
+        public IBackgroundWorker CreateBackgroundWorker()
         {
-            return CreateBackgroundWorker(
-                                Transport ?? CreateHttpTransport(
-                                    SentryHttpClientFactory ?? CreateSentryHttpClientFactory(),
+            return _workerOptions.BackgroundWorker
+                        ?? CreateBackgroundWorker(
+                                CreateHttpTransport(
+                                    _httpOptions.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory(),
                                         _options,
                                         _httpOptions),
                                     _workerOptions);
@@ -64,8 +60,5 @@ namespace Sentry.Internal
                 httpClient,
                 addAuth);
         }
-
-        private static DefaultSentryHttpClientFactory CreateSentryHttpClientFactory()
-            => new DefaultSentryHttpClientFactory();
     }
 }
