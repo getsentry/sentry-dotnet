@@ -9,13 +9,13 @@ When visualizing a type, the documentation includes the name of the **Assembly**
 
 Assembly names are equal to the NuGet package that contains the assembly.
 
-For example, the [Dsn](Sentry.Dsn.html) class mentions:
+For example, the @Sentry.Dsn class mentions:
 
 > `Assembly: Sentry.dll`
 
 This means the type resides in the NuGet package [Sentry](https://www.nuget.org/packages/Sentry)
 
-Looking at [SentryLoggerProvider](Sentry.Extensions.Logging.SentryLoggerProvider.html), you'll notice: 
+Looking at @Sentry.Extensions.Logging.SentryLoggerProvider you'll notice: 
 
 > `Assembly: Sentry.Extensions.Logging.dll`
 

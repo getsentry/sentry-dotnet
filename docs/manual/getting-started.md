@@ -10,11 +10,11 @@ Sentry provides multiple **integrations**, for specific types of applications. I
 
 ## Sentry Client
 
-The [SentryClient](/api/Sentry.SentryClient.html) is used to send events to Sentry. It has only synchronous methods because all its operations are executed in the calling thread without any I/O operation.
+The @Sentry.SentryClient is used to send events to Sentry. It has only synchronous methods because all its operations are executed in the calling thread without any I/O operation.
 
-Calling `CaptureException` will create a `SentryEvent` from the `Exception` provided. Internally, `CaptureEvent` is then called.
+Calling @Sentry.SentrySdk.CaptureException(Exception) will create a @Sentry.SentryEvent from the @System.Exception provided. Internally, @Sentry.ISentryClient.CaptureEvent(Sentry.SentryEvent,Sentry.Protocol.Scope) is then called.
 
-Calling `CaptureEvent` will prepare the `SentryEvent`, applying the current `Scope` data to it if one exists. If any `EventProcessor` or `ExceptionProcessor` was configured by you, those are invoked too.
+Calling @Sentry.ISentryClient.CaptureEvent(Sentry.SentryEvent,Sentry.Protocol.Scope) will prepare the @Sentry.SentryEvent, applying the current @Sentry.Protocol.Scope data to it if one exists. If any @Sentry.Extensibility.ISentryEventProcessor or @Sentry.Extensibility.ISentryEventExceptionProcessor was configured by you, those are invoked too.
 
 Finally, the event is put into a in-memory queue to be sent to Sentry.
 
@@ -26,4 +26,4 @@ Perhaps that is what you need, for example on a WPF, WinForms or Xamarin app whe
 
 The scope feature is leveraged by the [ASP.NET Core integration](https://github.com/getsentry/sentry-dotnet/tree/master/src/Sentry.AspNetCore) for exactly this reason. It isolates data from each request so in case an event happens, only relevant data is sent to Sentry. This means you don't need to dig through logs with correlation ids in order to find the data relevant to you.
 
-Please check the [manual](/manual/manual.html) for more.
+Please check the [manual](~/manual/manual.md) for more.

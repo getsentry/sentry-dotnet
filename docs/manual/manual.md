@@ -6,11 +6,11 @@ These are complete samples which you can run with a debugger to see how the SDK 
 
 ### Static use
 
-The SDK provides a static entry point class called [SentrySdk](/api/Sentry.SentrySdk.html).
+The SDK provides a static entry point class called @Sentry.SentrySdk.
 
 ### Initialize the SDK
 
-`SentrySdk.Init();`
+@SentrySdk.Init
 
 Once the SDK is initialized, unhandled exceptions will automatically be captured and sent to Sentry.
 More context can be added, for example, breadcrumbs:
@@ -78,8 +78,8 @@ The SDK attempts to locate the release and add that to every event sent out to S
 
 > [Default values like 1.0 or 1.0.0.0 are ignored](https://github.com/getsentry/sentry-dotnet/blob/dbb5a3af054d0ca6f801de37fb7db3632ca2c65a/src/Sentry/Internal/ApplicationVersionLocator.cs#L14-L21).
 
-It will firstly look at the [entry assembly's](https://msdn.microsoft.com/en-us/library/system.reflection.assembly.getentryassembly(v=vs.110).aspx) `AssemblyInformationalVersionAttribute`, which accepts a string as
+It will firstly look at the [entry assembly's](https://msdn.microsoft.com/en-us/library/system.reflection.assembly.getentryassembly(v=vs.110).aspx) @System.Reflection.AssemblyInformationalVersionAttribute, which accepts a string as
 value as is often used to set the GIT commit hash. 
 
-If that returns null, it'll look at the default `AssemblyVersionAttribute` which accepts the numeric version number. When creating a project with Visual Studio, usually that includes version *1.0.0.0*.
+If that returns null, it'll look at the default @System.Reflection.AssemblyVersionAttribute which accepts the numeric version number. When creating a project with Visual Studio, usually that includes version *1.0.0.0*.
 Since that usually means that the version is either not being set, or is set via a different method. The **automatic version detection will disregard** this value and no *Release* will be reported automatically.
