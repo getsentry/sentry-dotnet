@@ -59,7 +59,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void Environment_BothOnOptionsAndEnvVar_ValueFromEnvVar()
+        public void Environment_BothOnOptionsAndEnvVar_ValueFromOption()
         {
             const string expected = "environment";
             const string other = "other";
