@@ -30,59 +30,6 @@ namespace Sentry.AspNetCore.Tests
                 .Do(i => i.Arg<Action<WebHostBuilderContext, IServiceCollection>>()(context, Services));
         }
 
-        [Fact]
-        public void UseSentry_EnvironmentOnAspNetOptions_SetToSentryOptions()
-        {
-            const string expected = "test";
-            WebHostBuilder.UseSentry(o => o.Environment = expected);
-            var options = (SentryAspNetCoreOptions)Services.Single(s => s.ServiceType == typeof(SentryAspNetCoreOptions))
-                .ImplementationInstance;
-
-            var target = new SentryOptions();
-            options.ConfigureOptionsActions.ForEach(c => c(target));
-
-            Assert.Equal(expected, target.Environment);
-        }
-
-        [Fact]
-        public void UseSentry_EnvironmentOnEnvVar_SetToSentryOptions()
-        {
-            const string expected = "test";
-            var target = new SentryOptions();
-
-            EnvironmentVariableGuard.WithVariable("ASPNETCORE_ENVIRONMENT",
-                expected,
-                () =>
-                {
-                    WebHostBuilder.UseSentry();
-                    var options = (SentryAspNetCoreOptions)Services.Single(s => s.ServiceType == typeof(SentryAspNetCoreOptions))
-                        .ImplementationInstance;
-                    options.ConfigureOptionsActions.ForEach(c => c(target));
-                });
-
-            Assert.Equal(expected, target.Environment);
-        }
-
-        [Fact]
-        public void UseSentry_EnvironmentOnOptionsAndEnvVar_ValueFromOptionsSetToSentryOptions()
-        {
-            const string expected = "test";
-            const string @else = "something else";
-            var target = new SentryOptions();
-
-            EnvironmentVariableGuard.WithVariable("ASPNETCORE_ENVIRONMENT",
-                @else,
-                () =>
-                {
-                    WebHostBuilder.UseSentry(o => o.Environment = expected);
-                    var options = (SentryAspNetCoreOptions)Services.Single(s => s.ServiceType == typeof(SentryAspNetCoreOptions))
-                        .ImplementationInstance;
-                    options.ConfigureOptionsActions.ForEach(c => c(target));
-                });
-
-            Assert.Equal(expected, target.Environment);
-        }
-
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_ValidDsnString_ServicesRegistered(Action<IServiceCollection> assert)
         {

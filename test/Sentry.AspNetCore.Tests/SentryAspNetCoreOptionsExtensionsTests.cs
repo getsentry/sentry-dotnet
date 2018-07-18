@@ -37,7 +37,7 @@ namespace Sentry.AspNetCore.Tests
             Sut.Apply(SentryLoggingOptions);
 
             var expected = new SentryOptions();
-            SentryLoggingOptions.ConfigureOptions(expected);
+            SentryLoggingOptions.ConfigureOptionsActions.ForEach(a => a(expected));
 
             Assert.Equal(expected, Sut.SentryOptions);
         }
@@ -51,7 +51,7 @@ namespace Sentry.AspNetCore.Tests
             Sut.Apply(SentryLoggingOptions);
 
             var expected = new SentryOptions();
-            SentryLoggingOptions.ConfigureOptions(expected);
+            SentryLoggingOptions.ConfigureOptionsActions.ForEach(a => a(expected));
 
             Assert.True(invoked);
         }
