@@ -13,18 +13,19 @@ namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
-        internal static readonly Lazy<string> Release = new Lazy<string>(ReleaseLocator.GetCurrent);
-        internal static readonly Lazy<Runtime> CurrentRuntime = new Lazy<Runtime>(() =>
+        private readonly Lazy<string> _release = new Lazy<string>(ReleaseLocator.GetCurrent);
+        private readonly Lazy<string> _environment = new Lazy<string>(EnvironmentLocator.GetCurrent);
+        private readonly Lazy<Runtime> _runtime = new Lazy<Runtime>(() =>
         {
-            var current = PlatformAbstractions.Runtime.Current;
-            return current != null
-                   ? new Runtime
-                   {
-                       Name = current.Name,
-                       Version = current.Version,
-                       RawDescription = current.Raw
-                   }
-                   : null;
+           var current = PlatformAbstractions.Runtime.Current;
+           return current != null
+                  ? new Runtime
+                  {
+                      Name = current.Name,
+                      Version = current.Version,
+                      RawDescription = current.Raw
+                  }
+                  : null;
         });
 
         private static readonly (string Name, string Version) NameAndVersion
@@ -32,6 +33,9 @@ namespace Sentry.Internal
 
         private readonly SentryOptions _options;
 
+        internal string Release => _release.Value;
+        internal string Environment => _environment.Value;
+        internal Runtime Runtime => _runtime.Value;
         public MainSentryEventProcessor(SentryOptions options)
         {
             Debug.Assert(options != null);
@@ -41,7 +45,7 @@ namespace Sentry.Internal
         {
             if (!@event.Contexts.ContainsKey(Runtime.Type))
             {
-                @event.Contexts[Runtime.Type] = CurrentRuntime.Value;
+                @event.Contexts[Runtime.Type] = Runtime;
             }
 
             if (!@event.Contexts.ContainsKey(OperatingSystem.Type))
@@ -70,7 +74,12 @@ namespace Sentry.Internal
 
             if (@event.Release == null)
             {
-                @event.Release = _options.Release ?? Release.Value;
+                @event.Release = _options.Release ?? Release;
+            }
+
+            if (@event.Environment == null)
+            {
+                @event.Environment = _options.Environment ?? Environment;
             }
 
             if (@event.Exception != null)

@@ -66,14 +66,33 @@ namespace Sentry
         /// </summary>
         /// <example>
         /// 721e41770371db95eee98ca2707686226b993eda
+        /// 14.1.16.32451
         /// </example>
         /// <remarks>
         /// This value will generally be something along the lines of the git SHA for the given project.
-        /// If not explicitly defined via configuration. It will attempt o read it from:
+        /// If not explicitly defined via configuration or environment variable (SENTRY_RELEASE).
+        /// It will attempt o read it from:
         /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
+        ///
+        /// Don't rely on discovery if your release is: '1.0.0' or '0.0.0'. Since those are
+        /// default values for new projects, they are not considered valid by the discovery process.
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/learn/releases/"/>
         public string Release { get; set; }
+
+        /// <summary>
+        /// The environment the application is running
+        /// </summary>
+        /// <remarks>
+        /// This value can also be set via environment variable: SENTRY_ENVIRONMENT
+        /// In some cases you don't need to set this manually since integrations, when possible, automatically fill this value.
+        /// For ASP.NET Core which can read from IHostingEnvironment
+        /// </remarks>
+        /// <example>
+        /// Production, Staging
+        /// </example>
+        /// <seealso href="https://docs.sentry.io/learn/environments/"/>
+        public string Environment { get; set; }
 
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
