@@ -21,7 +21,7 @@
   ],
   "build": {
     "sitemap":{
-      "baseUrl": "https://getsentry.github.io/sentry-dotnet"
+      "baseUrl": "https://getsentry.github.io/sentry-dotnet/"
     },
     "content": [
       {

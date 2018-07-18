@@ -51,6 +51,9 @@ await SentrySdk.ConfigureScopeAsync(async scope =>
 });
 ```
 
+> `ConfigureScope` and `ConfigureScopeAsync` can be called as many times as you need. 
+> It'll invoke your callback with the current scope, allowing you to modify it further.
+
 To push a new scope into the stack and isolate any modifications from other scope, you can call: `PushScope` and call `Dispose` to drop it.
 
 ```csharp
