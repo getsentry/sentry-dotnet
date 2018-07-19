@@ -15,3 +15,4 @@ obj/
 **/BenchmarkDotNet.Artifacts/*.log
 !**/BenchmarkDotNet.Artifacts/results/*github.md
 /packages
+.xunit/
