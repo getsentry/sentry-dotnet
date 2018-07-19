@@ -9,8 +9,8 @@
 
 Branch  | AppVeyor | Travis
 ------------- | ------------- |-------------
-dev | [![Build status](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/dev?svg=true)](https://ci.appveyor.com/project/sentry/dotnet-sentry-platform-abstractions/branch/dev) | [![Build Status](https://travis-ci.org/getsentry/dotnet-sentry-platform-abstractions.svg?branch=dev)](https://travis-ci.org/getsentry/dotnet-sentry-platform-abstractions)
-master | [![Build status](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/dotnet-sentry-platform-abstractions/branch/master) | [![Build Status](https://travis-ci.org/getsentry/dotnet-sentry-platform-abstractions.svg?branch=master)](https://travis-ci.org/getsentry/dotnet-sentry-platform-abstractions)
+dev | [![Build status](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/dev?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-platform-abstractions/branch/dev) | [![Build Status](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions.svg?branch=dev)](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions)
+master | [![Build status](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-platform-abstractions/branch/master) | [![Build Status](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions)
 
 
 ## This is a work in progress. 
@@ -21,7 +21,7 @@ Most of the platform information used by the SDK goes to Sentry's [Context Inter
 
 ## Examples
 
-For details, check the [example project](https://github.com/getsentry/dotnet-sentry-platform-abstractions/tree/426b7b2a002738a5ccbbed644d6ccb3fa26b9eba/samples/Sentry.PlatformAbstractions.Console).
+For details, check the [example project](https://github.com/getsentry/sentry-dotnet-platform-abstractions/tree/426b7b2a002738a5ccbbed644d6ccb3fa26b9eba/samples/Sentry.PlatformAbstractions.Console).
 
 ### Runtime information
 If you are interested in the runtime information, with .NET Standard 1.5 onwards you can use: `RuntimeInformation.FrameworkDescription`, which will give you a **single string**

@@ -82,13 +82,8 @@ function TestAllTargets($project)
     if ($fail) { Write-Error "Tests failed." }
 }
 
-$branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
-$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
-$suffix = @{ $true = ""; $false = "$($branch.Replace('/', '-').Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
-Write-Host "Suffix: " $suffix " Branch: " $branch " Revision: " $revision
-
 Set-Variable -name msbuild -value (GetMsbuild)
-& $msbuild /t:restore,build,pack /p:Configuration=Release /p:VersionSuffix=$suffix
+& $msbuild /t:restore,build,pack /p:Configuration=Release
 if ($lastexitcode -ne 0) { Write-Error "Build failed!" }
 
 $test = "test\Sentry.PlatformAbstractions.Tests\Sentry.PlatformAbstractions.Tests.csproj"
