@@ -5,12 +5,11 @@
   <br />
 </p>
 
-# Sentry.PlatformAbstractions
 
-Branch  | AppVeyor | Travis
-------------- | ------------- |-------------
-dev | [![Build status](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/dev?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-platform-abstractions/branch/dev) | [![Build Status](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions.svg?branch=dev)](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions)
-master | [![Build status](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-platform-abstractions/branch/master) | [![Build Status](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions)
+Sentry.PlatformAbstractions
+===========
+[![Travis](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet-platform-abstractions)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-platform-abstractions/branch/master)
 
 
 ## This is a work in progress. 
