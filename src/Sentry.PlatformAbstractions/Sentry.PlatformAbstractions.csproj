@@ -11,7 +11,7 @@
     <VersionSuffix>preview1</VersionSuffix>
     <Authors>Sentry Team and Contributors</Authors>
     <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling</PackageTags>
-    <PackageIconUrl>https://github.com/getsentry/sentry-dotnet-platform-abstractions/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-platform-abstractions/master/.assets/sentry-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/getsentry/sentry-dotnet-platform-abstractions</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/getsentry/sentry-dotnet-platform-abstractions/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
