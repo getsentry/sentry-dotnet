@@ -11,4 +11,4 @@ dotnet_csproj:
   version: '{version}'
   package_version: '{version}'
 artifacts:
-- path: '**\*.nupkg'
+- path: 'src\**\*.nupkg'
