@@ -12,6 +12,8 @@ namespace Sentry.Samples.AspNet.Mvc
 {
     public class MvcApplication : System.Web.HttpApplication
     {
+        private IDisposable _sentrySdk;
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -23,11 +25,13 @@ namespace Sentry.Samples.AspNet.Mvc
             SentryDatabaseLogging.UseBreadcrumbs();
 
             // Set up the sentry SDK
-            SentrySdk.Init(new SentryOptions
+            _sentrySdk = SentrySdk.Init(new SentryOptions
             {
                 // We store the DSN inside Web.config; make sure to use your own DSN!
                 Dsn = new Dsn(ConfigurationManager.AppSettings["SentryDsn"])
-            }.AddEntityFramework());
+            }
+            // Add the EntityFramework integration
+            .AddEntityFramework());
 
         }
 
@@ -36,6 +40,12 @@ namespace Sentry.Samples.AspNet.Mvc
         {
             var exception = Server.GetLastError();
             SentrySdk.CaptureException(exception);
+        }
+
+        public override void Dispose()
+        {
+            _sentrySdk.Dispose();
+            base.Dispose();
         }
     }
 }

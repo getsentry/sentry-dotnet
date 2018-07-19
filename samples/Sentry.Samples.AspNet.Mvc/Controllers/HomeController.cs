@@ -15,7 +15,7 @@ namespace Sentry.Samples.AspNet.Mvc.Controllers
             return View();
         }
 
-        
+
         // Example: An exception that goes unhandled by the app will be captured by Sentry:
         [HttpPost]
         public ActionResult PostIndex(string @params)
@@ -34,8 +34,7 @@ namespace Sentry.Samples.AspNet.Mvc.Controllers
                 var ioe = new InvalidOperationException("Bad POST! See Inner exception for details.", e);
 
                 ioe.Data.Add("inventory",
-                    // The following anonymous object gets serialized:
-                    new
+                    new Extra
                     {
                         SmallPotion = 3,
                         BigPotion = 0,
@@ -46,7 +45,7 @@ namespace Sentry.Samples.AspNet.Mvc.Controllers
             }
         }
 
-        
+
         // Example: An entity validation exception that goes unhandled by the app will be captured by Sentry:
         [HttpPost]
         public ActionResult ThrowEntityFramework()
@@ -76,6 +75,14 @@ namespace Sentry.Samples.AspNet.Mvc.Controllers
             ViewBag.Message = "Your contact page.";
 
             return View();
+        }
+
+        [Serializable]
+        public class Extra
+        {
+            public int SmallPotion { get; set; }
+            public int BigPotion { get; set; }
+            public int CheeseWheels { get; set; }
         }
     }
 }

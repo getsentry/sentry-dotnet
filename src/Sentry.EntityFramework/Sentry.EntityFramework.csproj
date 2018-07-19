@@ -1,12 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix>preview1</VersionSuffix>
     <TargetFrameworks>net462</TargetFrameworks>
-    <PackageTags>$(PackageTags);EntityFramework6</PackageTags>
+    <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling;EntityFramework6</PackageTags>
+    <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <Deterministic>True</Deterministic>
+    <Authors>Sentry Team and Contributors</Authors>
+    <Company>Sentry.io</Company>
+    <Product>Sentry</Product>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <RepositoryUrl>https://github.com/getsentry/sentry-dotnet-ef</RepositoryUrl>
+    <LangVersion>7.2</LangVersion>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-ef/master/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/getsentry/sentry-dotnet-ef</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-ef/master/LICENSE</PackageLicenseUrl>
+    <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet-ef/releases</PackageReleaseNotes>
     <PackageId>Sentry.EntityFramework</PackageId>
     <AssemblyName>Sentry.EntityFramework</AssemblyName>
     <RootNamespace>Sentry.EntityFramework</RootNamespace>
     <Description>Official Entity Framework 6 integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
