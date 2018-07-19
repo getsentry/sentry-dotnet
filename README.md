@@ -5,21 +5,22 @@
   <br />
 </p>
 
-## Entity Framework 6 Integration for Sentry
-
-This is packages extend [Sentry's .NET SDK](https://github.com/getsentry/sentry-dotnet) with Entity Framework 6 queries as *Breadcrumb*s.
-It also processes `DbEntityValidationException`s to extract the validation errors and add to the *Extra* field.
-This increases the debuggability of Entity Framework related errors gratefully.
-
+Entity Framework 6 Integration for Sentry
 ===========
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/bootstrap?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
 
 
 |      Name                 |        NuGet         |
 | ----------------------------- | -------------------: |
 |     **Sentry.EntityFramework**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.EntityFramework.svg)](https://www.nuget.org/packages/Sentry.EntityFramework)   |
 
-![Example in Sentry](.assets/ef.PNG)
 
+This is packages extend [Sentry's .NET SDK](https://github.com/getsentry/sentry-dotnet) with Entity Framework 6 queries as *Breadcrumb*s.
+It also processes `DbEntityValidationException`s to extract the validation errors and add to the *Extra* field.
+This increases the debuggability of Entity Framework related errors gratefully.
+
+
+![Example in Sentry](.assets/ef.PNG)
 
 ## Usage
 
