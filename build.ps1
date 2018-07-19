@@ -57,7 +57,10 @@ function GetTestRunner()
 }
 
 Set-Variable -name msbuild -value (GetMsbuild)
-& $msbuild /t:restore,build /p:Configuration=Release
+& $msbuild /t:restore /p:Configuration=Release
+if ($lastexitcode -ne 0) { Write-Error "Restore failed!" }
+
+& $msbuild /t:build /p:Configuration=Release
 if ($lastexitcode -ne 0) { Write-Error "Build failed!" }
 
 & $msbuild /t:pack src\Sentry.EntityFramework\Sentry.EntityFramework.csproj /p:Configuration=Release
