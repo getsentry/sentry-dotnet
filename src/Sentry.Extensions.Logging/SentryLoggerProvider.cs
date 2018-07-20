@@ -42,7 +42,7 @@ namespace Sentry.Extensions.Logging
             // Lifetime is owned by this instance:
             if (_options.InitializeSdk)
             {
-                _sdk = SentrySdk.Init(_options.ConfigureOptions);
+                _sdk = SentrySdk.Init(o => _options.ConfigureOptionsActions.ForEach(a => a(o)));
             }
 
             // Creates a scope so that Integration added below can be dropped when the logger is disposed

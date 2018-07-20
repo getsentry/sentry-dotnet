@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sentry.Extensions.Logging;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests

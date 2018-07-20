@@ -35,7 +35,7 @@ namespace Sentry.Extensions.Logging
         public IReadOnlyCollection<ILogEventFilter> Filters { get; set; }
 
         // An optional convenience callback to initialize the SDK
-        internal Action<SentryOptions> ConfigureOptions { get; private set; }
+        internal List<Action<SentryOptions>> ConfigureOptionsActions { get;  } = new List<Action<SentryOptions>>();
 
         /// <summary>
         /// Initializes the SDK: This action should be done only once per application lifetime.
@@ -50,6 +50,6 @@ namespace Sentry.Extensions.Logging
         /// via this logging integration, the <see cref="SentryLoggerProvider"/> will dispose the SDK when it is itself disposed.
         /// </remarks>
         /// <param name="configureOptions">The configure options.</param>
-        public void Init(Action<SentryOptions> configureOptions) => ConfigureOptions = configureOptions;
+        public void Init(Action<SentryOptions> configureOptions) => ConfigureOptionsActions.Add(configureOptions);
     }
 }

@@ -35,7 +35,7 @@ namespace Sentry.Testing
             }
         };
 
-        public virtual void Build()
+        protected virtual void Build()
         {
             var builder = new WebHostBuilder();
             builder.ConfigureServices(s =>

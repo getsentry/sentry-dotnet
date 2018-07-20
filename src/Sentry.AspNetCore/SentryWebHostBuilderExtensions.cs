@@ -72,7 +72,15 @@ namespace Microsoft.AspNetCore.Hosting
                     "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
                     LogLevel.None);
 
-                logging.AddSentry(o => aspnetOptions.Apply(o));
+                logging.AddSentry(loggingOptions =>
+                {
+                    loggingOptions.Init(o =>
+                        o.Environment
+                            = aspnetOptions.Environment
+                              ?? context.HostingEnvironment.EnvironmentName);
+
+                    aspnetOptions.Apply(loggingOptions);
+                });
             });
 
             builder.ConfigureServices(c =>

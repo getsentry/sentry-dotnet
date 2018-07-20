@@ -4,7 +4,7 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Reflection;
-using Sentry.Tests.Helpers;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests.Internals
