@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Log4net/Sentry.Log4net.csproj" />
+    <ProjectReference Include="../../src/Sentry.Log4Net/Sentry.Log4Net.csproj" />
   </ItemGroup>
 
 </Project>
