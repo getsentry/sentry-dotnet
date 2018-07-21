@@ -42,7 +42,7 @@ namespace Sentry.Internal
                         : builderStrObj.ToImmutable().SetItems(sentryEvent.InternalExtra);
                 }
 
-                sentryEvent.SentryExceptions = values;
+                sentryEvent.SentryExceptionValues = values;
             }
         }
 

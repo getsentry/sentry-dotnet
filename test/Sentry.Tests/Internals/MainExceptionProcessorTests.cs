@@ -15,7 +15,7 @@ namespace Sentry.Tests.Internals
             Sut.Process(null, evt);
 
             Assert.Null(evt.Exception);
-            Assert.Null(evt.SentryExceptions);
+            Assert.Null(evt.SentryExceptionValues);
         }
 
         [Fact]
