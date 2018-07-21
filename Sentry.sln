@@ -19,9 +19,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tests", "test\Sentry
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Solution Items", "1 - Solution Items", "{9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}"
 	ProjectSection(SolutionItems) = preProject
+		.appveyor.yml = .appveyor.yml
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		.travis.yml = .travis.yml
 		after.Sentry.sln.targets = after.Sentry.sln.targets
 		build.ps1 = build.ps1
 		build.sh = build.sh
@@ -29,8 +31,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Solution Items", "1 - S
 		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
 		README.md = README.md
-		.appveyor.yml = .appveyor.yml
-		.travis.yml = .travis.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{77454495-55EE-4B40-A089-71B9E8F82E89}"
@@ -63,7 +63,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Logging.Tests", "test\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj", "{32B17E4A-8C30-44CC-B1D3-093CF284B1C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Testing", "test\Sentry.Testing\Sentry.Testing.csproj", "{20602A5A-B413-4E48-9AC9-00A7155774BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Testing", "test\Sentry.Testing\Sentry.Testing.csproj", "{20602A5A-B413-4E48-9AC9-00A7155774BD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Log4Net", "samples\Sentry.Samples.Log4Net\Sentry.Samples.Log4Net.csproj", "{6B2A49CC-6992-47A7-8CF5-5EEA3216C8BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Log4Net", "src\Sentry.Log4Net\Sentry.Log4Net.csproj", "{D1D3BD5F-0C3A-4DA4-BAA2-2E725E74176F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Log4Net.Tests", "test\Sentry.Log4Net.Tests\Sentry.Log4Net.Tests.csproj", "{F275C86B-8F62-4070-9544-83CC5B68B751}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -123,6 +129,18 @@ Global
 		{20602A5A-B413-4E48-9AC9-00A7155774BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20602A5A-B413-4E48-9AC9-00A7155774BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20602A5A-B413-4E48-9AC9-00A7155774BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B2A49CC-6992-47A7-8CF5-5EEA3216C8BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B2A49CC-6992-47A7-8CF5-5EEA3216C8BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B2A49CC-6992-47A7-8CF5-5EEA3216C8BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B2A49CC-6992-47A7-8CF5-5EEA3216C8BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1D3BD5F-0C3A-4DA4-BAA2-2E725E74176F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1D3BD5F-0C3A-4DA4-BAA2-2E725E74176F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1D3BD5F-0C3A-4DA4-BAA2-2E725E74176F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1D3BD5F-0C3A-4DA4-BAA2-2E725E74176F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F275C86B-8F62-4070-9544-83CC5B68B751}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F275C86B-8F62-4070-9544-83CC5B68B751}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F275C86B-8F62-4070-9544-83CC5B68B751}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F275C86B-8F62-4070-9544-83CC5B68B751}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,6 +159,9 @@ Global
 		{C100F0D2-3743-48F5-BA05-81E40F6C72FD} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{32B17E4A-8C30-44CC-B1D3-093CF284B1C3} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{20602A5A-B413-4E48-9AC9-00A7155774BD} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{6B2A49CC-6992-47A7-8CF5-5EEA3216C8BC} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{D1D3BD5F-0C3A-4DA4-BAA2-2E725E74176F} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{F275C86B-8F62-4070-9544-83CC5B68B751} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

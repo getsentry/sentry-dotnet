@@ -1,7 +1,10 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.Serialization;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
@@ -87,11 +90,14 @@ namespace Sentry
         [DataMember(Name = "release", EmitDefaultValue = false)]
         public string Release { get; set; }
 
+        [DataMember(Name = "exception", EmitDefaultValue = false)]
+        internal SentryValues<SentryException> SentryExceptionValues { get; set; }
+
         /// <summary>
         /// The Sentry Exception interface
         /// </summary>
-        [DataMember(Name = "exception", EmitDefaultValue = false)]
-        internal SentryValues<SentryException> SentryExceptions { get; set; }
+        public IEnumerable<SentryException> SentryExceptions
+            => SentryExceptionValues?.Values ?? Enumerable.Empty<SentryException>();
 
         /// <summary>
         /// A list of relevant modules and their versions.
