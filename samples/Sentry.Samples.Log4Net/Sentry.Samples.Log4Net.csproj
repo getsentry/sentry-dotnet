@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net462</TargetFramework>
+    <Version>3.5.234</Version>
   </PropertyGroup>
 
   <ItemGroup>

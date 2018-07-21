@@ -1,4 +1,6 @@
 using System;
+using System.Security.Principal;
+using System.Threading;
 using log4net;
 using log4net.Config;
 
@@ -10,6 +12,10 @@ internal class Program
 
     private static void Main()
     {
+        // Set the user running the process the current principal
+        // Appender was configure to send the user with the event
+        AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+
         // The following anonymous object gets serialized and sent with log messages
         ThreadContext.Properties["inventory"] = new
         {
