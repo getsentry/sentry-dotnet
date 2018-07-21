@@ -6,9 +6,21 @@ using log4net.Config;
 
 internal class Program
 {
+    private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
+
     private static void Main()
     {
-        var log = LogManager.GetLogger(typeof(Program));
+        // The following anonymous object gets serialized and sent with log messages
+        ThreadContext.Properties["inventory"] = new
+        {
+            SmallPotion = 3,
+            BigPotion = 0,
+            CheeseWheels = 512
+        };
+
+        // app.config enables SentryAppender only for level INFO or higher so the Debug
+        // Does not result in an event in Sentry
+        Log.Debug("Debug message which is not sent.");
 
         try
         {
@@ -16,21 +28,15 @@ internal class Program
         }
         catch (Exception e)
         {
-            log.Debug("Debug: with exception", e);
-            log.DebugFormat("DebugFormat: An error with message '{0}' has occurred", e.Message);
-            log.Info("Info: with exception", e);
-            log.InfoFormat("InfoFormat: An error with message '{0}' has occurred", e.Message);
-            log.Warn("Warn: with exception", e);
-            log.WarnFormat("WarnFormat: An error with message '{0}' has occurred", e.Message);
-            log.Error("Error: with exception", e);
-            log.ErrorFormat("ErrorFormat: An error with message '{0}' has occurred", e.Message);
-            log.Fatal("Fatal: with exception", e);
-            log.FatalFormat("FatalFormat: An error with message '{0}' has occurred", e.Message);
+            e.Data.Add("details", "Do work always throws.");
+            Log.Error("Error: with exception", e);
         }
     }
 
     private static void DoWork()
     {
+        Log.InfoFormat("InfoFormat: About to throw {0} type of exception.", nameof(NotImplementedException));
+
         throw new NotImplementedException();
     }
 }
