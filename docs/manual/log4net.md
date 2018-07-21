@@ -43,4 +43,4 @@ Bottom line is that the SDK needs to be initialized only **once** so you can cho
 
 Please refer to [the sample](https://github.com/getsentry/sentry-dotnet/tree/master/samples/Sentry.Samples.Log4Net) to see it in action.
 
-![Sample event in Sentry](.assets/log4net-sample.gif)
+![Sample event in Sentry](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Log4Net/.assets/log4net-sample.gif?raw=true)
