@@ -25,15 +25,21 @@ namespace Sentry.Internal
 
                 var values = new SentryValues<SentryException>(sentryExceptions);
 
+                var builderStrObj = ImmutableDictionary.CreateBuilder<string, object>();
+
                 foreach (var sentryException in sentryExceptions)
                 {
-                    var builderStrObj = ImmutableDictionary.CreateBuilder<string, object>();
                     foreach (string key in exception.Data.Keys)
                     {
                         builderStrObj[$"{sentryException.Type}.Data[{key}]"] = exception.Data[key];
                     }
+                }
 
-                    sentryEvent.InternalExtra = builderStrObj.ToImmutable();
+                if (builderStrObj.Count > 0)
+                {
+                    sentryEvent.InternalExtra = sentryEvent.InternalExtra == null
+                        ? builderStrObj.ToImmutable()
+                        : builderStrObj.ToImmutable().SetItems(sentryEvent.InternalExtra);
                 }
 
                 sentryEvent.SentryExceptions = values;
