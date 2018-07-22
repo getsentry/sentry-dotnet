@@ -12,7 +12,7 @@ namespace Sentry.Log4Net
     public class SentryAppender : AppenderSkeleton
     {
         private readonly Func<string, IDisposable> _initAction;
-        private IDisposable _sdkHandle;
+        private volatile IDisposable _sdkHandle;
 
         private readonly object _initSync = new object();
 
