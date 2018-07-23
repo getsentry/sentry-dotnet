@@ -14,7 +14,7 @@ namespace Sentry.Internal.Http
     /// <seealso href="https://tools.ietf.org/html/rfc6585#section-4" />
     /// <seealso href="https://docs.sentry.io/clientdev/overview/#writing-an-sdk"/>
     /// <inheritdoc />
-    public class RetryAfterHandler : DelegatingHandler
+    internal class RetryAfterHandler : DelegatingHandler
     {
         private readonly ISystemClock _clock;
 
