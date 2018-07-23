@@ -27,11 +27,12 @@ namespace Sentry.Internal.Http
         }
 
         /// <summary>
-        /// Creates an <see cref="HttpClient"/> configure to call Sentry for the specified <see cref="Dsn"/>
+        /// Creates an <see cref="T:System.Net.Http.HttpClient" /> configure to call Sentry for the specified <see cref="T:Sentry.Dsn" />
         /// </summary>
         /// <param name="dsn">The DSN.</param>
         /// <param name="options">The HTTP options.</param>
         /// <returns></returns>
+        /// <inheritdoc />
         public HttpClient Create(Dsn dsn, HttpOptions options)
         {
             Debug.Assert(options != null);
@@ -56,7 +57,9 @@ namespace Sentry.Internal.Http
 
             _configureHandler?.Invoke(httpClientHandler, dsn, options);
 
-            var client = new HttpClient(httpClientHandler);
+            var httpMessageHandler = new RetryAfterHandler(httpClientHandler);
+
+            var client = new HttpClient(httpMessageHandler);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             _configureClient?.Invoke(client, dsn, options);

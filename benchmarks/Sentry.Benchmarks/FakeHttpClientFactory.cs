@@ -1,5 +1,7 @@
+using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Http;
@@ -13,8 +15,10 @@ namespace Sentry.Benchmarks
 
     internal class FakeMessageHandler : HttpMessageHandler
     {
-        private readonly Task<HttpResponseMessage> _result
-            = Task.FromResult<HttpResponseMessage>(new SentrySuccessResponse());
+        private readonly Task<HttpResponseMessage> _result;
+
+        public FakeMessageHandler(HttpStatusCode statusCode = HttpStatusCode.OK)
+            => _result = Task.FromResult<HttpResponseMessage>(new StatusCodeResponse(statusCode));
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -22,9 +26,16 @@ namespace Sentry.Benchmarks
             => _result;
     }
 
-    internal class SentrySuccessResponse : HttpResponseMessage
+    internal class StatusCodeResponse : HttpResponseMessage
     {
-        public SentrySuccessResponse() : base(HttpStatusCode.OK) { }
+        public StatusCodeResponse(HttpStatusCode statusCode)
+            : base(statusCode)
+        {
+            if (statusCode == HttpStatusCode.TooManyRequests)
+            {
+                Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromHours(24));
+            }
+        }
     }
 
 }
