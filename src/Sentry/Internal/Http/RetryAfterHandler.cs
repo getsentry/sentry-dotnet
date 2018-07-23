@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Infrastructure;
@@ -23,6 +22,8 @@ namespace Sentry.Internal.Http
 
         private long _retryAfterUtcTicks;
         internal long RetryAfterUtcTicks => _retryAfterUtcTicks;
+
+        private readonly HttpResponseMessage _tooManyRequestsResponse = new HttpResponseMessage(TooManyRequests);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RetryAfterHandler"/> class.
@@ -54,10 +55,7 @@ namespace Sentry.Internal.Http
             {
                 if (retryAfter > _clock.GetUtcNow().Ticks)
                 {
-                    var tooManyRequests = new HttpResponseMessage(TooManyRequests);
-                    tooManyRequests.Headers.RetryAfter =
-                        new RetryConditionHeaderValue(new DateTimeOffset(retryAfter, TimeSpan.Zero));
-                    return tooManyRequests;
+                    return _tooManyRequestsResponse;
                 }
 
                 Interlocked.Exchange(ref _retryAfterUtcTicks, 0);
