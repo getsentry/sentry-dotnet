@@ -23,26 +23,46 @@ namespace Sentry.Internal
                     // Otherwise realization happens on the worker thread before sending event.
                     .ToList();
 
-                var values = new SentryValues<SentryException>(sentryExceptions);
+                MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
 
-                var builderStrObj = ImmutableDictionary.CreateBuilder<string, object>();
+                sentryEvent.SentryExceptionValues = new SentryValues<SentryException>(sentryExceptions);
+            }
+        }
 
-                foreach (var sentryException in sentryExceptions)
+        // SentryException.Extra is not supported by Sentry yet.
+        // Move the extras to the Event Extra while marking
+        // by index the Exception which owns it
+        private static void MoveExceptionExtrasToEvent(
+            SentryEvent sentryEvent,
+            IReadOnlyList<SentryException> sentryExceptions)
+        {
+            ImmutableDictionary<string, object>.Builder extraBuilder = null;
+
+            for (var i = 0; i < sentryExceptions.Count; i++)
+            {
+                var sentryException = sentryExceptions[i];
+
+                if (!(sentryException.Data?.Count > 0))
                 {
-                    foreach (string key in exception.Data.Keys)
+                    continue;
+                }
+
+                foreach (var key in sentryException.Data.Keys)
+                {
+                    if (extraBuilder == null)
                     {
-                        builderStrObj[$"{sentryException.Type}.Data[{key}]"] = exception.Data[key];
+                        extraBuilder = ImmutableDictionary.CreateBuilder<string, object>();
                     }
-                }
 
-                if (builderStrObj.Count > 0)
-                {
-                    sentryEvent.InternalExtra = sentryEvent.InternalExtra == null
-                        ? builderStrObj.ToImmutable()
-                        : builderStrObj.ToImmutable().SetItems(sentryEvent.InternalExtra);
+                    extraBuilder[$"Exception[{i}][{key}]"] = sentryException.Data[key];
                 }
+            }
 
-                sentryEvent.SentryExceptionValues = values;
+            if (extraBuilder?.Count > 0)
+            {
+                sentryEvent.InternalExtra = sentryEvent.InternalExtra == null
+                    ? extraBuilder.ToImmutable()
+                    : extraBuilder.ToImmutable().SetItems(sentryEvent.InternalExtra);
             }
         }
 
