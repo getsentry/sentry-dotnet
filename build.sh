@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-msbuild /t:restore,build /p:Configuration=Release
+msbuild /t:restore,build,pack /p:Configuration=Release
 
 targets=`perl -nle 'print $& if m{TargetFrameworks\>\K(.*)(?=\<)}' \
     test/Sentry.PlatformAbstractions.Tests/Sentry.PlatformAbstractions.Tests.csproj \
