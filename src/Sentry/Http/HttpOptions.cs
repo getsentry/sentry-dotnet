@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Net;
 
 namespace Sentry.Http
@@ -20,6 +21,14 @@ namespace Sentry.Http
         public DecompressionMethods DecompressionMethods { get; set; }
             // Note the ~ enabling all bits
             = ~DecompressionMethods.None;
+
+        /// <summary>
+        /// The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry
+        /// </summary>
+        /// <remarks>
+        /// To disable request body compression, use <see cref="CompressionLevel.NoCompression"/>
+        /// </remarks>
+        public CompressionLevel RequestBodyCompressionLevel { get; set; } = CompressionLevel.Optimal;
 
         /// <summary>
         /// An optional web proxy

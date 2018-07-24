@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Net.Http;
 using Sentry.Http;
 
@@ -8,6 +9,7 @@ namespace Sentry.Internal.Http
     /// <summary>
     /// Default Sentry HttpClientFactory
     /// </summary>
+    /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
         private readonly Action<HttpClientHandler, Dsn, HttpOptions> _configureHandler;
@@ -27,18 +29,22 @@ namespace Sentry.Internal.Http
         }
 
         /// <summary>
-        /// Creates an <see cref="HttpClient"/> configure to call Sentry for the specified <see cref="Dsn"/>
+        /// Creates an <see cref="T:System.Net.Http.HttpClient" /> configure to call Sentry for the specified <see cref="T:Sentry.Dsn" />
         /// </summary>
         /// <param name="dsn">The DSN.</param>
         /// <param name="options">The HTTP options.</param>
         /// <returns></returns>
+        /// <inheritdoc />
         public HttpClient Create(Dsn dsn, HttpOptions options)
         {
-            Debug.Assert(options != null);
-
             if (dsn == null)
             {
                 throw new ArgumentNullException(nameof(dsn));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
             }
 
             var httpClientHandler = CreateHttpClientHandler();
@@ -56,7 +62,13 @@ namespace Sentry.Internal.Http
 
             _configureHandler?.Invoke(httpClientHandler, dsn, options);
 
-            var client = new HttpClient(httpClientHandler);
+            HttpMessageHandler handler = httpClientHandler;
+            if (options.RequestBodyCompressionLevel != CompressionLevel.NoCompression)
+            {
+                handler = new GzipRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
+            }
+
+            var client = new HttpClient(handler);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             _configureClient?.Invoke(client, dsn, options);
