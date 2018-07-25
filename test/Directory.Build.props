@@ -1,0 +1,27 @@
+<Project>
+  <!--Automatic upward search ends when first file found. From here we need to manually import parent props/targets
+        https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- An attempt to use run netfx tests with Mono and .NET Core CLI https://github.com/xunit/xunit/issues/1357 -->
+    <!-- After strong name signing assemblies, only net462 target stopped working. Again xunit -noshadow seems to solve it: https://github.com/Microsoft/vstest/issues/1684 -->
+    <Content Include="../xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" Version="2.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
+    <PackageReference Include="NSubstitute" Version="3.1.0" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,33 @@
+<Project>
+  <!--Automatic upward search ends when first file found. From here we need to manually import parent props/targets
+        https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix>preview3</VersionSuffix>
+    <!--Generate xml docs for all projects under 'src'-->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Authors>Sentry Team and Contributors</Authors>
+    <Company>Sentry.io</Company>
+    <Product>Sentry</Product>
+
+    <PackageTags>Sentry;Protocol;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <RepositoryUrl>https://github.com/getsentry/sentry-dotnet-protocol</RepositoryUrl>
+
+    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-protocol/master/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/getsentry/sentry-dotnet-protocol</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-protocol/master/LICENSE</PackageLicenseUrl>
+
+    <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet-protocol/releases</PackageReleaseNotes>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.1" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

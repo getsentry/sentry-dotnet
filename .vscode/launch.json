@@ -1,0 +1,115 @@
+{
+   // Use IntelliSense to find out which attributes exist for C# debugging
+   // Use hover for the description of the existing attributes
+   // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+   "version": "0.2.0",
+   "configurations": [
+        {
+            "name": "Sentry.Samples.AspNetCore.Mvc",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/samples/Sentry.Samples.AspNetCore.Mvc/bin/Debug/netcoreapp2.0/Sentry.Samples.AspNetCore.Mvc.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/Sentry.Samples.AspNetCore.Mvc",
+            "stopAtEntry": false,
+            "launchBrowser": {
+              "enabled": true,
+              "args": "${auto-detect-url}",
+              "windows": {
+                "command": "cmd.exe",
+                "args": "/C start ${auto-detect-url}"
+              },
+              "osx": {
+                "command": "open"
+              },
+              "linux": {
+                "command": "xdg-open"
+              }
+            },
+            "env": {
+              "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+              "/Views": "${workspaceRoot}/Views"
+            }
+        },
+        {
+            "name": "Sentry.Samples.AspNetCore.Basic",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/samples/Sentry.Samples.AspNetCore.Basic/bin/Debug/netcoreapp2.0/Sentry.Samples.AspNetCore.Basic.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/Sentry.Samples.AspNetCore.Basic",
+            "stopAtEntry": false,
+            "launchBrowser": {
+              "enabled": true,
+              "args": "${auto-detect-url}",
+              "windows": {
+                "command": "cmd.exe",
+                "args": "/C start ${auto-detect-url}"
+              },
+              "osx": {
+                "command": "open"
+              },
+              "linux": {
+                "command": "xdg-open"
+              }
+            },
+            "env": {
+              "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+              "/Views": "${workspaceRoot}/Views"
+            }
+        },
+        {
+            "name": "Sentry.Samples.ME.Logging",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/samples/Sentry.Samples.ME.Logging/bin/Debug/netcoreapp2.0/Sentry.Samples.ME.Logging.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/Sentry.Samples.ME.Logging",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": true,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Sentry.Samples.Console.Customized",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/samples/Sentry.Samples.Console.Customized/bin/Debug/netcoreapp2.0/Sentry.Samples.Console.Customized.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/Sentry.Samples.Console.Customized",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": true,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Sentry.Samples.Console.Basic",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/samples/Sentry.Samples.Console.Basic/bin/Debug/netcoreapp2.0/Sentry.Samples.Console.Basic.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/Sentry.Samples.Console.Basic",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": true,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "processId": "${command:pickProcess}"
+        }
+    ,]
+}
