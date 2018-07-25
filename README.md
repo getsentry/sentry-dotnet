@@ -13,7 +13,7 @@ Sentry Protocol
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet-protocol/branch/master/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet-protocol)
 
 
-|      Integrations                 |        NuGet         |
+|      Package name                 |        NuGet         |
 | ----------------------------- | -------------------: |
 |         **Sentry.Protocol**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Protocol.svg)](https://www.nuget.org/packages/Sentry.Protocol)   |
 
