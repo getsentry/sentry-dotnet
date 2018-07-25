@@ -9,7 +9,7 @@ Sentry Protocol
 ===========
 
 [![Travis](https://travis-ci.org/getsentry/sentry-dotnet-protocol.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet-protocol)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/p74mw2s92uf4uqit/branch/bootstrap?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-protocol/branch/master)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/p74mw2s92uf4uqit/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-protocol/branch/master)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet-protocol/branch/master/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet-protocol)
 
 
