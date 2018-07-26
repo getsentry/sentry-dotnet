@@ -138,7 +138,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetExtra(this Scope scope, string key, object value)
-            => ((ConcurrentDictionary<string, object>)scope.Extra).TryAdd(key, value);
+            => ((ConcurrentDictionary<string, object>)scope.Extra).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="Scope"/>
@@ -150,7 +150,7 @@ namespace Sentry
             var extra = (ConcurrentDictionary<string, object>)scope.Extra;
             foreach (var keyValuePair in values)
             {
-                extra.TryAdd(keyValuePair.Key, keyValuePair.Value);
+                extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
             }
         }
 
@@ -161,7 +161,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetTag(this Scope scope, string key, string value)
-            => ((ConcurrentDictionary<string, string>)scope.Tags).TryAdd(key, value);
+            => ((ConcurrentDictionary<string, string>)scope.Tags).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
         /// Set all items as tags
@@ -173,7 +173,7 @@ namespace Sentry
             var internalTags = (ConcurrentDictionary<string, string>)scope.Tags;
             foreach (var keyValuePair in tags)
             {
-                internalTags.TryAdd(keyValuePair.Key, keyValuePair.Value);
+                internalTags.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
             }
         }
 
@@ -193,10 +193,16 @@ namespace Sentry
         /// <remarks>
         /// Applies the data of 'from' into 'to'.
         /// If data in 'from' is null, 'to' is unmodified.
+        /// Conflicting keys are not overriden
         /// This is a shallow copy.
         /// </remarks>
         public static void Apply(this Scope from, Scope to)
         {
+            if (from == null || to == null)
+            {
+                return;
+            }
+
             // Fingerprint isn't combined. It's absolute.
             // One set explicitly on target (i.e: event)
             // takes precedence and is not overwritten
@@ -208,39 +214,28 @@ namespace Sentry
 
             if (from.InternalBreadcrumbs != null)
             {
-                to.InternalBreadcrumbs = to.InternalBreadcrumbs != null
-                    ? to.InternalBreadcrumbs.AddRange(from.InternalBreadcrumbs)
-                    : from.InternalBreadcrumbs;
+                ((ConcurrentQueue<Breadcrumb>)to.Breadcrumbs).EnqueueAll(from.InternalBreadcrumbs);
             }
 
             if (from.InternalExtra != null)
             {
-                to.InternalExtra = to.InternalExtra != null
-                    ? from.InternalExtra.SetItems(to.InternalExtra)
-                    : from.InternalExtra;
+                foreach (var extra in from.Extra)
+                {
+                    ((ConcurrentDictionary<string, object>)to.Extra).TryAdd(extra.Key, extra.Value);
+                }
             }
 
             if (from.InternalTags != null)
             {
-                to.InternalTags = to.InternalTags != null
-                    ? from.InternalTags.SetItems(to.InternalTags)
-                    : from.InternalTags;
+                foreach (var tag in from.Tags)
+                {
+                    ((ConcurrentDictionary<string, string>)to.Tags).TryAdd(tag.Key, tag.Value);
+                }
             }
 
-            if (to.InternalContexts == null)
-            {
-                to.Contexts = from.InternalContexts;
-            }
-
-            if (from.InternalRequest != null)
-            {
-                to.Request = from.InternalRequest;
-            }
-
-            if (from.InternalUser != null)
-            {
-                to.User = from.InternalUser;
-            }
+            from.InternalContexts?.CopyTo(to.Contexts);
+            from.InternalRequest?.CopyTo(to.Request);
+            from.InternalUser?.CopyTo(to.User);
 
             if (to.Environment == null)
             {
@@ -257,9 +252,10 @@ namespace Sentry
 
                 if (from.Sdk.InternalIntegrations != null)
                 {
-                    to.Sdk.InternalIntegrations =
-                        to.Sdk.InternalIntegrations?.AddRange(from.Sdk.InternalIntegrations)
-                        ?? from.Sdk.InternalIntegrations;
+                    foreach (var integration in from.Sdk.Integrations)
+                    {
+                        to.Sdk.AddIntegration(integration);
+                    }
                 }
             }
         }

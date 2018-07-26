@@ -23,6 +23,6 @@ namespace Sentry.Protocol
         /// <remarks>
         /// The list of frames should be ordered by the oldest call first.
         /// </remarks>
-        public IEnumerable<SentryStackFrame> Frames => InternalFrames ?? (InternalFrames = new List<SentryStackFrame>());
+        public IList<SentryStackFrame> Frames => InternalFrames ?? (InternalFrames = new List<SentryStackFrame>());
     }
 }

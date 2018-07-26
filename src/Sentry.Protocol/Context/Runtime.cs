@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.Serialization;
 
 // ReSharper disable once CheckNamespace
@@ -48,7 +49,7 @@ namespace Sentry.Protocol
         /// Clones this instance
         /// </summary>
         /// <returns></returns>
-        internal Runtime Clone()
+        public Runtime Clone()
             => new Runtime
             {
                 Name = Name,

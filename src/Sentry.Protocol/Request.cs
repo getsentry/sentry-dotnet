@@ -28,13 +28,13 @@ namespace Sentry.Protocol
     public class Request
     {
         [DataMember(Name = "env", EmitDefaultValue = false)]
-        internal Dictionary<string, string> InternalEnv { get; private set; }
+        internal Dictionary<string, string> InternalEnv { get; set; }
 
         [DataMember(Name = "other", EmitDefaultValue = false)]
-        internal Dictionary<string, string> InternalOther { get; private set; }
+        internal Dictionary<string, string> InternalOther { get; set; }
 
         [DataMember(Name = "headers", EmitDefaultValue = false)]
-        internal Dictionary<string, string> InternalHeaders { get; private set; }
+        internal Dictionary<string, string> InternalHeaders { get; set; }
 
         /// <summary>
         /// Gets or sets the full request URL, if available.
@@ -94,5 +94,59 @@ namespace Sentry.Protocol
         /// </summary>
         /// <value>The other.</value>
         public IDictionary<string, string> Other => InternalOther ?? (InternalOther = new Dictionary<string, string>());
+
+        /// <summary>
+        /// Clones this instance
+        /// </summary>
+        /// <remarks>
+        /// This is a shallow copy.
+        /// References like <see cref="Data"/> could hold a mutable, non-thread-safe object.
+        /// </remarks>
+        /// <returns></returns>
+        public Request Clone()
+        {
+            var request = new Request();
+
+            CopyTo(request);
+
+            return request;
+        }
+
+        internal void CopyTo(Request request)
+        {
+            if (request == null)
+            {
+                return;
+            }
+
+            if (request.Url == null)
+            {
+                request.Url = Url;
+            }
+
+            if (request.Method == null)
+            {
+                request.Method = Method;
+            }
+
+            if (request.Data == null)
+            {
+                request.Data = Data;
+            }
+
+            if (request.QueryString == null)
+            {
+                request.QueryString = QueryString;
+            }
+
+            if (request.Cookies == null)
+            {
+                request.Cookies = Cookies;
+            }
+
+            InternalEnv?.TryCopyTo(request.Env);
+            InternalOther?.TryCopyTo(request.Other);
+            InternalHeaders?.TryCopyTo(request.Headers);
+        }
     }
 }

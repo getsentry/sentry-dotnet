@@ -41,13 +41,53 @@ namespace Sentry.Protocol
         /// </summary>
         /// <returns></returns>
         internal Contexts Clone()
-            => new Contexts
+        {
+            var context = new Contexts();
+
+            CopyTo(context);
+
+            return context;
+        }
+
+        /// <summary>
+        /// Copies the items of the context while cloning the known types
+        /// </summary>
+        /// <param name="to">To.</param>
+        internal void CopyTo(Contexts to)
+        {
+            if (to == null)
             {
-                [App.Type] = (this[App.Type] as App)?.Clone(),
-                [Browser.Type] = (this[Browser.Type] as Browser)?.Clone(),
-                [Device.Type] = (this[Device.Type] as Device)?.Clone(),
-                [OperatingSystem.Type] = (this[OperatingSystem.Type] as OperatingSystem)?.Clone(),
-                [Runtime.Type] = (this[Runtime.Type] as Runtime)?.Clone()
-            };
+                return;
+            }
+
+            foreach (var kv in this)
+            {
+                object value;
+                switch (kv.Key)
+                {
+                    case App.Type:
+                        value = (kv.Value as App)?.Clone();
+                        break;
+                    case Browser.Type:
+                        value = (kv.Value as Browser)?.Clone();
+                        break;
+                    case Device.Type:
+                        value = (kv.Value as Device)?.Clone();
+                        break;
+                    case OperatingSystem.Type:
+                        value = (kv.Value as OperatingSystem)?.Clone();
+                        break;
+                    case Runtime.Type:
+                        value = (kv.Value as Runtime)?.Clone();
+                        break;
+
+                    default:
+                        value = kv.Value;
+                        break;
+                }
+
+                to.TryAdd(kv.Key, value);
+            }
+        }
     }
 }
