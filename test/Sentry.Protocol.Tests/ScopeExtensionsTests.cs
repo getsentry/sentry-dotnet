@@ -112,7 +112,7 @@ namespace Sentry.Protocol.Tests
 
             scope.SetExtras(expectedExtra);
 
-            Assert.Equal(expectedExtra.Last(), scope.InternalExtra.Single());
+            Assert.Equal(expectedExtra.First(), scope.InternalExtra.Single());
         }
 
         [Fact]
@@ -196,7 +196,7 @@ namespace Sentry.Protocol.Tests
 
             scope.SetTags(expectedTag);
 
-            Assert.Equal(expectedTag.Last(), scope.InternalTags.Single());
+            Assert.Equal(expectedTag.First(), scope.InternalTags.Single());
         }
 
         [Fact]

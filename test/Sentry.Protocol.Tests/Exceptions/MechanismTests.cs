@@ -18,13 +18,13 @@ namespace Sentry.Protocol.Tests.Exceptions
             };
 
             sut.Data.Add("data-key", "data-value");
-            sut.Data.Add("meta-key", "meta-value");
+            sut.Meta.Add("meta-key", "meta-value");
 
             var actual = JsonSerializer.SerializeObject(sut);
 
             Assert.Equal("{\"data\":{\"data-key\":\"data-value\"},"
                         + "\"meta\":{\"meta-key\":\"meta-value\"},"
-                        + "\"type\":\"mechanism type\""
+                        + "\"type\":\"mechanism type\","
                         + "\"description\":\"mechanism description\","
                         + "\"help_link\":\"https://helplink\","
                         + "\"handled\":true}",
@@ -49,7 +49,7 @@ namespace Sentry.Protocol.Tests.Exceptions
             yield return new object[] { (new Mechanism { Description = "some desc" }, "{\"description\":\"some desc\"}") };
             yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>("data-key", "data-value") } },
                 "{\"data\":{\"data-key\":\"data-value\"}}") };
-            yield return new object[] { (new Mechanism { Meta = { new KeyValuePair<string, object>("data-key", "data-value") } },
+            yield return new object[] { (new Mechanism { Meta = { new KeyValuePair<string, object>("meta-key", "meta-value") } },
                 "{\"meta\":{\"meta-key\":\"meta-value\"}}") };
         }
     }

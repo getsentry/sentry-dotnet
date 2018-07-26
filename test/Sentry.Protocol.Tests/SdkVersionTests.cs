@@ -10,11 +10,9 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void AddIntegration_DoesNotExcludeCurrentOne()
         {
-            var sut = new SdkVersion
-            {
-                InternalIntegrations = {"integration 1"}
-            };
+            var sut = new SdkVersion();
 
+            sut.AddIntegration("integration 1");
             sut.AddIntegration("integration 2");
 
             Assert.Equal(2, sut.Integrations.Count());
@@ -27,8 +25,8 @@ namespace Sentry.Protocol.Tests
             {
                 Name = "Sentry.Test.SDK",
                 Version = "0.0.1-preview1",
-                InternalIntegrations = {"integration 1"}
             };
+            sut.AddIntegration("integration 1");
 
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -53,7 +51,7 @@ namespace Sentry.Protocol.Tests
             yield return new object[] { (new SdkVersion { Name = "some name" }, "{\"name\":\"some name\"}") };
             yield return new object[] { (new SdkVersion { Version = "some version" }, "{\"version\":\"some version\"}") };
             yield return new object[] { (new SdkVersion { InternalIntegrations =
-                new ConcurrentBag<string> { "integration 1", "integration 2" } }, "{\"integrations\":[\"integration 1\",\"integration 2\"]}") };
+                new ConcurrentBag<string> { "integration 1", "integration 2" } }, "{\"integrations\":[\"integration 2\",\"integration 1\"]}") };
         }
     }
 }

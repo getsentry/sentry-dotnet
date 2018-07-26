@@ -111,7 +111,7 @@ namespace Sentry
         /// <param name="breadcrumb">The breadcrumb.</param>
         internal static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
         {
-            var breadcrumbs = scope.InternalBreadcrumbs ?? new ConcurrentQueue<Breadcrumb>();
+            var breadcrumbs = (ConcurrentQueue<Breadcrumb>)scope.Breadcrumbs;
 
             var overflow = breadcrumbs.Count - (scope.Options?.MaxBreadcrumbs
                                                 ?? Constants.DefaultMaxBreadcrumbs) + 1;
@@ -138,7 +138,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetExtra(this Scope scope, string key, object value)
-            => scope.InternalExtra.TryAdd(key, value);
+            => ((ConcurrentDictionary<string, object>)scope.Extra).TryAdd(key, value);
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="Scope"/>
@@ -147,9 +147,10 @@ namespace Sentry
         /// <param name="values">The values.</param>
         public static void SetExtras(this Scope scope, IEnumerable<KeyValuePair<string, object>> values)
         {
+            var extra = (ConcurrentDictionary<string, object>)scope.Extra;
             foreach (var keyValuePair in values)
             {
-                scope.InternalExtra.TryAdd(keyValuePair.Key, keyValuePair.Value);
+                extra.TryAdd(keyValuePair.Key, keyValuePair.Value);
             }
         }
 
@@ -160,7 +161,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetTag(this Scope scope, string key, string value)
-            => scope.InternalTags.TryAdd(key, value);
+            => ((ConcurrentDictionary<string, string>)scope.Tags).TryAdd(key, value);
 
         /// <summary>
         /// Set all items as tags
@@ -169,9 +170,10 @@ namespace Sentry
         /// <param name="tags"></param>
         public static void SetTags(this Scope scope, IEnumerable<KeyValuePair<string, string>> tags)
         {
+            var internalTags = (ConcurrentDictionary<string, string>)scope.Tags;
             foreach (var keyValuePair in tags)
             {
-                scope.InternalTags.TryAdd(keyValuePair.Key, keyValuePair.Value);
+                internalTags.TryAdd(keyValuePair.Key, keyValuePair.Value);
             }
         }
 
@@ -181,7 +183,7 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
         public static void UnsetTag(this Scope scope, string key)
-                    => scope.InternalTags?.TryRemove(key, out _);
+            => scope.InternalTags?.TryRemove(key, out _);
 
         /// <summary>
         /// Applies the data from one scope to the other while

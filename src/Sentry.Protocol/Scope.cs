@@ -122,17 +122,17 @@ namespace Sentry.Protocol
         /// A trail of events which happened prior to an issue.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/learn/breadcrumbs/"/>
-        public IEnumerable<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ?? new ConcurrentQueue<Breadcrumb>();
+        public IEnumerable<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ?? (InternalBreadcrumbs = new ConcurrentQueue<Breadcrumb>());
 
         /// <summary>
         /// An arbitrary mapping of additional metadata to store with the event.
         /// </summary>
-        public IReadOnlyDictionary<string, object> Extra => InternalExtra ?? new ConcurrentDictionary<string, object>();
+        public IReadOnlyDictionary<string, object> Extra => InternalExtra ?? (InternalExtra = new ConcurrentDictionary<string, object>());
 
         /// <summary>
         /// Arbitrary key-value for this event
         /// </summary>
-        public IReadOnlyDictionary<string, string> Tags => InternalTags ?? new ConcurrentDictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags => InternalTags ?? (InternalTags = new ConcurrentDictionary<string, string>());
 
         /// <summary>
         /// An event that fires when the scope evaluates
