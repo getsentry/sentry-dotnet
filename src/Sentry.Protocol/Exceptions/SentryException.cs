@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 // ReSharper disable once CheckNamespace
@@ -11,6 +11,10 @@ namespace Sentry.Protocol
     [DataContract]
     public class SentryException
     {
+        // Not serialized since not part of the protocol yet.
+        // Used by Sentry SDK though to transfer data from Exception.Data to Event.Data when parsing.
+        internal Dictionary<string, object> InternalData { get; private set; }
+
         /// <summary>
         /// Exception Type
         /// </summary>
@@ -58,6 +62,6 @@ namespace Sentry.Protocol
         /// For this reason this property is not serialized.
         /// The data is moved to the event level on Extra until such support is added
         /// </remarks>
-        public ImmutableDictionary<string, object> Data { get; set; }
+        public IDictionary<string, object> Data => InternalData ?? (InternalData = new Dictionary<string, object>());
     }
 }

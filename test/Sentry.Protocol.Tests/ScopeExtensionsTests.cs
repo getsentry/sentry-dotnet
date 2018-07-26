@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -49,11 +50,9 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetExtra_SecondExtra_AddedToDictionary()
         {
-            var originalExtra = new Dictionary<string, object>
-            {
-                {"original", new object()}
-            };
-            var scope = new Scope { InternalExtra = originalExtra.ToImmutableDictionary() };
+            var originalExtra = new ConcurrentDictionary<string, object>();
+            originalExtra.TryAdd("original", new object());
+            var scope = new Scope { InternalExtra = originalExtra };
 
             var expectedExtra = new Dictionary<string, object>
             {
@@ -83,11 +82,10 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetExtras_SecondExtra_AddedToDictionary()
         {
-            var originalExtra = new Dictionary<string, object>
-            {
-                {"original", new object()}
-            };
-            var scope = new Scope { InternalExtra = originalExtra.ToImmutableDictionary() };
+            var originalExtra = new ConcurrentDictionary<string, object>();
+            originalExtra.TryAdd("original", new object());
+
+            var scope = new Scope { InternalExtra = originalExtra };
 
             var expectedExtra = new Dictionary<string, object>
             {
@@ -135,11 +133,10 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetTag_SecondTag_AddedToDictionary()
         {
-            var originalTag = new Dictionary<string, string>
-            {
-                {"original", "value"}
-            };
-            var scope = new Scope { InternalTags = originalTag.ToImmutableDictionary() };
+            var originalTag = new ConcurrentDictionary<string, string>();
+            originalTag.TryAdd("original", "value");
+
+            var scope = new Scope { InternalTags = originalTag };
 
             var expectedTag = new Dictionary<string, string>
             {
@@ -169,11 +166,10 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetTags_SecondTag_AddedToDictionary()
         {
-            var originalTags = new Dictionary<string, string>
-            {
-                {"original", "tag"}
-            };
-            var scope = new Scope { InternalTags = originalTags.ToImmutableDictionary() };
+            var originalTag = new ConcurrentDictionary<string, string>();
+            originalTag.TryAdd("original", "value");
+
+            var scope = new Scope { InternalTags = originalTag };
 
             var expectedTags = new Dictionary<string, string>
             {
@@ -182,7 +178,7 @@ namespace Sentry.Protocol.Tests
 
             scope.SetTags(expectedTags);
 
-            Assert.Equal(originalTags.First().Value, scope.InternalTags[originalTags.Keys.First()]);
+            Assert.Equal(originalTag.First().Value, scope.InternalTags[originalTag.Keys.First()]);
             Assert.Equal(expectedTags.First().Value, scope.InternalTags[expectedTags.Keys.First()]);
         }
 
@@ -598,10 +594,9 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void CopyTo_Sdk_SourceSingle_TargetNone_CopiesIntegrations()
         {
-            _sut = new Scope
-            {
-                Sdk = { InternalIntegrations = ImmutableList.Create("integration 1") }
-            };
+            _sut = new Scope();
+
+            _sut.Sdk.AddIntegration("integration 1");
 
             var target = new Scope();
 
@@ -613,15 +608,11 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void CopyTo_Sdk_SourceSingle_AddsIntegrations()
         {
-            _sut = new Scope
-            {
-                Sdk = { InternalIntegrations = ImmutableList.Create("integration 1") }
-            };
+            _sut = new Scope();
+            _sut.Sdk.AddIntegration("integration 1");
 
-            var target = new Scope
-            {
-                Sdk = { InternalIntegrations = ImmutableList.Create("integration 2") }
-            };
+            var target = new Scope();
+            _sut.Sdk.AddIntegration("integration 2");
 
             _sut.Apply(target);
 
@@ -631,7 +622,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void CopyTo_Sdk_SourceNone_TargetSingle_DoesNotModifyTarget()
         {
-            var expected = ImmutableList.Create("integration");
+            var expected = new ConcurrentBag<string> { "integration" };
 
             var target = new Scope
             {

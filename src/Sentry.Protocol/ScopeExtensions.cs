@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using Sentry.Protocol;
@@ -29,12 +29,21 @@ namespace Sentry
                     (string, string)? dataPair = null,
                     BreadcrumbLevel level = default)
         {
+            Dictionary<string, string> data = null;
+            if (dataPair != null)
+            {
+                data = new Dictionary<string, string>
+                {
+                    {dataPair.Value.Item1, dataPair.Value.Item2}
+                };
+            }
+
             scope.AddBreadcrumb(
                 timestamp: null,
                 message: message,
                 category: category,
                 type: type,
-                data: dataPair?.ToImmutableDictionary(),
+                data: data,
                 level: level);
         }
 
@@ -48,19 +57,19 @@ namespace Sentry
         /// <param name="data">The data.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-                    this Scope scope,
-                    string message,
-                    string category = null,
-                    string type = null,
-                    IDictionary<string, string> data = null,
-                    BreadcrumbLevel level = default)
+            this Scope scope,
+            string message,
+            string category = null,
+            string type = null,
+            Dictionary<string, string> data = null,
+            BreadcrumbLevel level = default)
         {
             scope.AddBreadcrumb(
                 timestamp: null,
                 message: message,
                 category: category,
                 type: type,
-                data: data?.ToImmutableDictionary(),
+                data: data,
                 level: level);
         }
 
@@ -83,7 +92,7 @@ namespace Sentry
             string message,
             string category = null,
             string type = null,
-            IImmutableDictionary<string, string> data = null,
+            IReadOnlyDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
         {
             scope.AddBreadcrumb(new Breadcrumb(
@@ -102,22 +111,17 @@ namespace Sentry
         /// <param name="breadcrumb">The breadcrumb.</param>
         internal static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
         {
-            var breadcrumbs = scope.InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
+            var breadcrumbs = scope.InternalBreadcrumbs ?? new ConcurrentQueue<Breadcrumb>();
 
             var overflow = breadcrumbs.Count - (scope.Options?.MaxBreadcrumbs
                                                 ?? Constants.DefaultMaxBreadcrumbs) + 1;
             if (overflow > 0)
             {
-                breadcrumbs = breadcrumbs.RemoveRange(0, overflow);
+                breadcrumbs.TryDequeue(out _);
             }
 
-            scope.InternalBreadcrumbs = breadcrumbs.Add(breadcrumb);
+            breadcrumbs.Enqueue(breadcrumb);
         }
-
-        private static IImmutableDictionary<string, string> ToImmutableDictionary(
-            this (string name, string value) tuple)
-            => ImmutableDictionary<string, string>.Empty
-                .SetItem(tuple.name, tuple.value);
 
         /// <summary>
         /// Sets the fingerprint to the <see cref="Scope"/>
@@ -125,7 +129,7 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
         public static void SetFingerprint(this Scope scope, IEnumerable<string> fingerprint)
-            => scope.InternalFingerprint = fingerprint?.ToImmutableList();
+            => scope.InternalFingerprint = fingerprint;
 
         /// <summary>
         /// Sets the extra key-value to the <see cref="Scope"/>
@@ -134,7 +138,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetExtra(this Scope scope, string key, object value)
-            => scope.InternalExtra = (scope.InternalExtra ?? ImmutableDictionary<string, object>.Empty).SetItem(key, value);
+            => scope.InternalExtra.TryAdd(key, value);
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="Scope"/>
@@ -142,7 +146,12 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="values">The values.</param>
         public static void SetExtras(this Scope scope, IEnumerable<KeyValuePair<string, object>> values)
-            => scope.InternalExtra = (scope.InternalExtra ?? ImmutableDictionary<string, object>.Empty).SetItems(values);
+        {
+            foreach (var keyValuePair in values)
+            {
+                scope.InternalExtra.TryAdd(keyValuePair.Key, keyValuePair.Value);
+            }
+        }
 
         /// <summary>
         /// Sets the tag to the <see cref="Scope"/>
@@ -151,7 +160,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetTag(this Scope scope, string key, string value)
-            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItem(key, value);
+            => scope.InternalTags.TryAdd(key, value);
 
         /// <summary>
         /// Set all items as tags
@@ -159,7 +168,12 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="tags"></param>
         public static void SetTags(this Scope scope, IEnumerable<KeyValuePair<string, string>> tags)
-            => scope.InternalTags = (scope.InternalTags ?? ImmutableDictionary<string, string>.Empty).SetItems(tags);
+        {
+            foreach (var keyValuePair in tags)
+            {
+                scope.InternalTags.TryAdd(keyValuePair.Key, keyValuePair.Value);
+            }
+        }
 
         /// <summary>
         /// Removes a tag from the <see cref="Scope"/>
@@ -167,7 +181,7 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
         public static void UnsetTag(this Scope scope, string key)
-            => scope.InternalTags = scope.InternalTags?.Remove(key);
+                    => scope.InternalTags?.TryRemove(key, out _);
 
         /// <summary>
         /// Applies the data from one scope to the other while
@@ -183,7 +197,7 @@ namespace Sentry
         {
             // Fingerprint isn't combined. It's absolute.
             // One set explicitly on target (i.e: event)
-            // takes precedence and is not overwriten
+            // takes precedence and is not overwritten
             if (to.InternalFingerprint == null
                 && from.InternalFingerprint != null)
             {

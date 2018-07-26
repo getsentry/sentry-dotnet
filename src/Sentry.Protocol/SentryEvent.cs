@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -19,8 +18,10 @@ namespace Sentry
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
     public class SentryEvent : Scope
     {
+        internal Exception Exception { get; set; }
+
         [DataMember(Name = "modules", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, string> InternalModules { get; set; }
+        internal IDictionary<string, string> InternalModules { get; set; }
 
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
         private string SerializableEventId => EventId.ToString("N");
@@ -100,13 +101,7 @@ namespace Sentry
         /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
-        public IImmutableDictionary<string, string> Modules
-        {
-            get => InternalModules ?? (InternalModules = ImmutableDictionary<string, string>.Empty);
-            internal set => InternalModules = value;
-        }
-
-        internal Exception Exception { get; set; }
+        public IDictionary<string, string> Modules => InternalModules ?? (InternalModules = new Dictionary<string, string>());
 
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />

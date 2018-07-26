@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -32,16 +33,16 @@ namespace Sentry.Protocol
         internal Request InternalRequest { get; private set; }
 
         [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        internal IImmutableList<string> InternalFingerprint { get; set; }
+        internal IEnumerable<string> InternalFingerprint { get; set; }
 
         [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
-        internal IImmutableList<Breadcrumb> InternalBreadcrumbs { get; set; }
+        internal ConcurrentQueue<Breadcrumb> InternalBreadcrumbs { get; set; }
 
         [DataMember(Name = "extra", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, object> InternalExtra { get; set; }
+        internal ConcurrentDictionary<string, object> InternalExtra { get; set; }
 
         [DataMember(Name = "tags", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, string> InternalTags { get; set; }
+        internal ConcurrentDictionary<string, string> InternalTags { get; set; }
 
         /// <summary>
         /// The name of the transaction in which there was an event.
@@ -115,23 +116,23 @@ namespace Sentry.Protocol
         /// </remarks>
         /// <example> { "fingerprint": ["myrpc", "POST", "/foo.bar"] } </example>
         /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
-        public IReadOnlyList<string> Fingerprint => InternalFingerprint ?? ImmutableList<string>.Empty;
+        public IEnumerable<string> Fingerprint => InternalFingerprint ?? Enumerable.Empty<string>();
 
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/learn/breadcrumbs/"/>
-        public IReadOnlyList<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ?? ImmutableList<Breadcrumb>.Empty;
+        public IEnumerable<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ?? new ConcurrentQueue<Breadcrumb>();
 
         /// <summary>
         /// An arbitrary mapping of additional metadata to store with the event.
         /// </summary>
-        public IReadOnlyDictionary<string, object> Extra => InternalExtra ?? ImmutableDictionary<string, object>.Empty;
+        public IReadOnlyDictionary<string, object> Extra => InternalExtra ?? new ConcurrentDictionary<string, object>();
 
         /// <summary>
         /// Arbitrary key-value for this event
         /// </summary>
-        public IReadOnlyDictionary<string, string> Tags => InternalTags ?? ImmutableDictionary<string, string>.Empty;
+        public IReadOnlyDictionary<string, string> Tags => InternalTags ?? new ConcurrentDictionary<string, string>();
 
         /// <summary>
         /// An event that fires when the scope evaluates

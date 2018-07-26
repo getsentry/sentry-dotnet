@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -50,7 +50,7 @@ namespace Sentry.Protocol
         /// Additional parameters that are unsupported by the type are rendered as a key/value table.
         /// </remarks>
         [DataMember(Name = "data", EmitDefaultValue = false)]
-        public IImmutableDictionary<string, string> Data { get; }
+        public IReadOnlyDictionary<string, string> Data { get; }
 
         /// <summary>
         /// Dotted strings that indicate what the crumb is or where it comes from.
@@ -82,7 +82,7 @@ namespace Sentry.Protocol
         public Breadcrumb(
             string message,
             string type,
-            IImmutableDictionary<string, string> data = null,
+            IReadOnlyDictionary<string, string> data = null,
             string category = null,
             BreadcrumbLevel level = default)
         : this(
@@ -101,7 +101,7 @@ namespace Sentry.Protocol
             DateTimeOffset? timestamp = null,
             string message = null,
             string type = null,
-            IImmutableDictionary<string, string> data = null,
+            IReadOnlyDictionary<string, string> data = null,
             string category = null,
             BreadcrumbLevel level = default)
         {
