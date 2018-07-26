@@ -227,9 +227,9 @@ namespace Sentry.Internal
         /// <summary>
         /// Clean up function names for anonymous lambda calls.
         /// </summary>
-        private static void DemangleAnonymousFunction(SentryStackFrame frame)
+        internal static void DemangleAnonymousFunction(SentryStackFrame frame)
         {
-            if (frame == null)
+            if (frame?.Function == null)
             {
                 return;
             }
