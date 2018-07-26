@@ -62,7 +62,7 @@ namespace Sentry
             BreadcrumbLevel level = default)
             => hub.ConfigureScope(
                 s => s.AddBreadcrumb(
-                    clock: clock,
+                    timestamp: (clock ?? SystemClock.Clock).GetUtcNow(),
                     message: message,
                     category: category,
                     type: type, data: data?.ToImmutableDictionary(), level: level));

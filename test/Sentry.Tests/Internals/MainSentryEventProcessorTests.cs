@@ -6,6 +6,7 @@ using Sentry.Protocol;
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;
+using Constants = Sentry.Internal.Constants;
 
 namespace Sentry.Tests.Internals
 {

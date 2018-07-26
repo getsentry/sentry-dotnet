@@ -224,7 +224,7 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             sut.PopulateScope(_fixture.HttpContext, scope);
 
-            Assert.False(scope.Request.Env.TryGetKey("DOCUMENT_ROOT", out _));
+            Assert.False(scope.Request.Env.TryGetValue("DOCUMENT_ROOT", out _));
         }
 
         [Fact]
