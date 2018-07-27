@@ -1,6 +1,7 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -13,7 +14,7 @@ namespace Sentry.Protocol
     public class SdkVersion
     {
         [DataMember(Name = "integrations", EmitDefaultValue = false)]
-        internal IImmutableList<string> InternalIntegrations { get; set; }
+        internal ConcurrentBag<string> InternalIntegrations { get; set; }
 
         /// <summary>
         /// SDK name
@@ -42,18 +43,13 @@ namespace Sentry.Protocol
         /// Any integration configured with the SDK
         /// </summary>
         /// <remarks>This property is not required</remarks>
-        public IImmutableList<string> Integrations => InternalIntegrations ?? (InternalIntegrations = ImmutableList<string>.Empty);
+        public IEnumerable<string> Integrations => InternalIntegrations ?? Enumerable.Empty<string>();
 
         /// <summary>
         /// Adds an integration.
         /// </summary>
         /// <param name="integration">The integration.</param>
-        public void AddIntegration(string integration) => InternalIntegrations = Integrations.Add(integration);
-
-        /// <summary>
-        /// Adds the integrations.
-        /// </summary>
-        /// <param name="integration">The integration.</param>
-        public void AddIntegrations(IEnumerable<string> integration) => InternalIntegrations = Integrations.AddRange(integration);
+        public void AddIntegration(string integration)
+            => (InternalIntegrations ?? (InternalIntegrations = new ConcurrentBag<string>())).Add(integration);
     }
 }

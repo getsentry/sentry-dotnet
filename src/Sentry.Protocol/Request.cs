@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -28,13 +28,13 @@ namespace Sentry.Protocol
     public class Request
     {
         [DataMember(Name = "env", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, string> InternalEnv { get; private set; }
+        internal Dictionary<string, string> InternalEnv { get; set; }
 
         [DataMember(Name = "other", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, string> InternalOther { get; private set; }
+        internal Dictionary<string, string> InternalOther { get; set; }
 
         [DataMember(Name = "headers", EmitDefaultValue = false)]
-        internal IImmutableDictionary<string, string> InternalHeaders { get; private set; }
+        internal Dictionary<string, string> InternalHeaders { get; set; }
 
         /// <summary>
         /// Gets or sets the full request URL, if available.
@@ -78,11 +78,8 @@ namespace Sentry.Protocol
         /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
         /// </remarks>
         /// <value>The headers.</value>
-        public IImmutableDictionary<string, string> Headers 
-        {
-            get => InternalHeaders ?? ImmutableDictionary<string, string>.Empty;
-            set => InternalHeaders = value;
-        }
+        public IDictionary<string, string> Headers => InternalHeaders ?? (InternalHeaders = new Dictionary<string, string>());
+
         /// <summary>
         /// Gets or sets the optional environment data.
         /// </summary>
@@ -90,19 +87,66 @@ namespace Sentry.Protocol
         /// This is where information such as IIS/CGI keys go that are not HTTP headers.
         /// </remarks>
         /// <value>The env.</value>
-        public IImmutableDictionary<string, string> Env
-        {
-            get => InternalEnv ?? ImmutableDictionary<string, string>.Empty;
-            set => InternalEnv = value;
-        }
+        public IDictionary<string, string> Env => InternalEnv ?? (InternalEnv = new Dictionary<string, string>());
+
         /// <summary>
         /// Gets or sets some optional other data.
         /// </summary>
         /// <value>The other.</value>
-        public IImmutableDictionary<string, string> Other
+        public IDictionary<string, string> Other => InternalOther ?? (InternalOther = new Dictionary<string, string>());
+
+        /// <summary>
+        /// Clones this instance
+        /// </summary>
+        /// <remarks>
+        /// This is a shallow copy.
+        /// References like <see cref="Data"/> could hold a mutable, non-thread-safe object.
+        /// </remarks>
+        /// <returns></returns>
+        public Request Clone()
         {
-            get => InternalOther ?? ImmutableDictionary<string, string>.Empty;
-            set => InternalOther = value;
+            var request = new Request();
+
+            CopyTo(request);
+
+            return request;
+        }
+
+        internal void CopyTo(Request request)
+        {
+            if (request == null)
+            {
+                return;
+            }
+
+            if (request.Url == null)
+            {
+                request.Url = Url;
+            }
+
+            if (request.Method == null)
+            {
+                request.Method = Method;
+            }
+
+            if (request.Data == null)
+            {
+                request.Data = Data;
+            }
+
+            if (request.QueryString == null)
+            {
+                request.QueryString = QueryString;
+            }
+
+            if (request.Cookies == null)
+            {
+                request.Cookies = Cookies;
+            }
+
+            InternalEnv?.TryCopyTo(request.Env);
+            InternalOther?.TryCopyTo(request.Other);
+            InternalHeaders?.TryCopyTo(request.Headers);
         }
     }
 }

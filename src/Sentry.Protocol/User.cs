@@ -44,5 +44,42 @@ namespace Sentry.Protocol
         /// </value>
         [DataMember(Name = "username", EmitDefaultValue = false)]
         public string Username { get; set; }
+
+        public User Clone()
+        {
+            var user = new User();
+
+            CopyTo(user);
+
+            return user;
+        }
+
+        internal void CopyTo(User user)
+        {
+            if (user == null)
+            {
+                return;
+            }
+
+            if (user.Email == null)
+            {
+                user.Email = Email;
+            }
+
+            if (user.Id == null)
+            {
+                user.Id = Id;
+            }
+
+            if (user.Username == null)
+            {
+                user.Username = Username;
+            }
+
+            if (user.IpAddress == null)
+            {
+                user.IpAddress = IpAddress;
+            }
+        }
     }
 }

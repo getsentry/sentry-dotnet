@@ -1,5 +1,6 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Linq;
 using Xunit;
 
 namespace Sentry.Protocol.Tests
@@ -9,27 +10,12 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void AddIntegration_DoesNotExcludeCurrentOne()
         {
-            var sut = new SdkVersion
-            {
-                InternalIntegrations = ImmutableList.Create("integration 1")
-            };
+            var sut = new SdkVersion();
 
+            sut.AddIntegration("integration 1");
             sut.AddIntegration("integration 2");
 
-            Assert.Equal(2, sut.Integrations.Count);
-        }
-
-        [Fact]
-        public void AddIntegrations_DoesNotExcludeCurrentOne()
-        {
-            var sut = new SdkVersion
-            {
-                InternalIntegrations = ImmutableList.Create("integration 1")
-            };
-
-            sut.AddIntegrations(new[] { "integration 2", "integration 3" });
-
-            Assert.Equal(3, sut.Integrations.Count);
+            Assert.Equal(2, sut.Integrations.Count());
         }
 
         [Fact]
@@ -39,8 +25,8 @@ namespace Sentry.Protocol.Tests
             {
                 Name = "Sentry.Test.SDK",
                 Version = "0.0.1-preview1",
-                InternalIntegrations = ImmutableList.Create("integration 1")
             };
+            sut.AddIntegration("integration 1");
 
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -65,7 +51,7 @@ namespace Sentry.Protocol.Tests
             yield return new object[] { (new SdkVersion { Name = "some name" }, "{\"name\":\"some name\"}") };
             yield return new object[] { (new SdkVersion { Version = "some version" }, "{\"version\":\"some version\"}") };
             yield return new object[] { (new SdkVersion { InternalIntegrations =
-                new[] { "integration 1", "integration 2" }.ToImmutableList() }, "{\"integrations\":[\"integration 1\",\"integration 2\"]}") };
+                new ConcurrentBag<string> { "integration 1", "integration 2" } }, "{\"integrations\":[\"integration 2\",\"integration 1\"]}") };
         }
     }
 }

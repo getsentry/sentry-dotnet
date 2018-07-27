@@ -14,13 +14,15 @@ namespace Sentry.Protocol
     [DataContract]
     public class SentryStackTrace
     {
+        [DataMember(Name = "frames", EmitDefaultValue = false)]
+        internal IList<SentryStackFrame> InternalFrames { get; private set; }
+
         /// <summary>
         /// The list of frames in the stack
         /// </summary>
         /// <remarks>
         /// The list of frames should be ordered by the oldest call first.
         /// </remarks>
-        [DataMember(Name = "frames", EmitDefaultValue = false)]
-        public IEnumerable<SentryStackFrame> Frames { get; set; }
+        public IList<SentryStackFrame> Frames => InternalFrames ?? (InternalFrames = new List<SentryStackFrame>());
     }
 }

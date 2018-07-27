@@ -11,6 +11,19 @@ namespace Sentry.Protocol
     [DataContract]
     public class SentryStackFrame
     {
+        [DataMember(Name = "pre_context", EmitDefaultValue = false)]
+        internal List<string> InternalPreContext { get; private set; }
+
+        [DataMember(Name = "post_context", EmitDefaultValue = false)]
+        internal List<string> InternalPostContext { get; private set; }
+
+        [DataMember(Name = "vars", EmitDefaultValue = false)]
+        internal Dictionary<string, string> InternalVars { get; private set; }
+
+        [DataMember(Name = "frames_omitted ", EmitDefaultValue = false)]
+        internal List<int> InternalFramesOmmitted { get; private set; }
+
+
         /// <summary>
         /// The relative file path to the call
         /// </summary>
@@ -58,14 +71,12 @@ namespace Sentry.Protocol
         /// <summary>
         /// A list of source code lines before context_line (in order) – usually [lineno - 5:lineno]
         /// </summary>
-        [DataMember(Name = "pre_context", EmitDefaultValue = false)]
-        public IReadOnlyList<string> PreContext { get; set; }
+        public IList<string> PreContext => InternalPreContext ?? (InternalPreContext = new List<string>());
 
         /// <summary>
         /// A list of source code lines after context_line (in order) – usually [lineno + 1:lineno + 5]
         /// </summary>
-        [DataMember(Name = "post_context", EmitDefaultValue = false)]
-        public IReadOnlyList<string> PostContext { get; set; }
+        public IList<string> PostContext => InternalPostContext ?? (InternalPostContext = new List<string>());
 
         /// <summary>
         /// Signifies whether this frame is related to the execution of the relevant code in this stacktrace.
@@ -80,8 +91,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// A mapping of variables which were available within this frame (usually context-locals).
         /// </summary>
-        [DataMember(Name = "vars", EmitDefaultValue = false)]
-        public IDictionary<string, string> Vars { get; set; }
+        public IDictionary<string, string> Vars => InternalVars ?? (InternalVars = new Dictionary<string, string>());
 
         /// <summary>
         /// Which frames were omitted, if any.
@@ -95,8 +105,7 @@ namespace Sentry.Protocol
         /// and went until the 9th (the number of frames omitted is end-start).
         /// The values should be based on a one-index.
         /// </example>
-        [DataMember(Name = "frames_omitted ", EmitDefaultValue = false)]
-        public int[] FramesOmmitted { get; set; }
+        public IList<int> FramesOmmitted => InternalFramesOmmitted ?? (InternalFramesOmmitted = new List<int>());
 
         /// <summary>
         /// The assembly where the code resides

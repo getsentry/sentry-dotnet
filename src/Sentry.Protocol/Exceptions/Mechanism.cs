@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 // ReSharper disable once CheckNamespace
@@ -16,6 +16,12 @@ namespace Sentry.Protocol
     [DataContract]
     public class Mechanism
     {
+        [DataMember(Name = "data", EmitDefaultValue = false)]
+        internal Dictionary<string, object> InternalData { get; private set; }
+
+        [DataMember(Name = "meta", EmitDefaultValue = false)]
+        internal Dictionary<string, object> InternalMeta { get; private set; }
+
         /// <summary>
         /// Required unique identifier of this mechanism determining rendering and processing of the mechanism data
         /// </summary>
@@ -55,13 +61,11 @@ namespace Sentry.Protocol
         /// For proprietary or vendor-specific error codes, adding these values will give additional information to the user.
         /// </remarks>
         /// <see href="https://docs.sentry.io/clientdev/interfaces/mechanism/#meta-information"/>
-        [DataMember(Name = "meta", EmitDefaultValue = false)]
-        public ImmutableDictionary<string, object> Meta { get; set; }
+        public IDictionary<string, object> Meta => InternalMeta ?? (InternalMeta = new Dictionary<string, object>());
 
         /// <summary>
         /// Arbitrary extra data that might help the user understand the error thrown by this mechanism
         /// </summary>
-        [DataMember(Name = "data", EmitDefaultValue = false)]
-        public ImmutableDictionary<string, object> Data { get; set; }
+        public IDictionary<string, object> Data => InternalData ?? (InternalData = new Dictionary<string, object>());
     }
 }
