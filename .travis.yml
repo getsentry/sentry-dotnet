@@ -13,6 +13,10 @@ matrix:
       dist: trusty
       sudo: required
       group: edge
+branches:
+  only:
+    - master
+    - /^release\/.*$/
 script:
   - ./build.sh
 after_success:
