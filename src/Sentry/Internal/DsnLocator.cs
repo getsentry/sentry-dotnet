@@ -12,7 +12,7 @@ namespace Sentry.Internal
         internal static string FindDsnStringOrDisable(Assembly asm = null)
             => Environment.GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
                ?? FindDsn(asm)
-               ?? Constants.DisableSdkDsnValue;
+               ?? Protocol.Constants.DisableSdkDsnValue;
 
         /// <summary>
         /// Attempts to find a DSN string from the entry assembly's DsnAttribute

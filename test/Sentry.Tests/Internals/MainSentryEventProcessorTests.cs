@@ -6,6 +6,7 @@ using Sentry.Protocol;
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;
+using Constants = Sentry.Internal.Constants;
 
 namespace Sentry.Tests.Internals
 {
@@ -119,7 +120,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
             Sut.Process(evt);
 
-            Assert.Equal(Constants.Platform, evt.Platform);
+            Assert.Equal(Protocol.Constants.Platform, evt.Platform);
         }
 
         [Fact]

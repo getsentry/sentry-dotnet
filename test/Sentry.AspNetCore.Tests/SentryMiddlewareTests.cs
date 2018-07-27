@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -224,7 +223,7 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             sut.PopulateScope(_fixture.HttpContext, scope);
 
-            Assert.False(scope.Request.Env.TryGetKey("DOCUMENT_ROOT", out _));
+            Assert.False(scope.Request.Env.TryGetValue("DOCUMENT_ROOT", out _));
         }
 
         [Fact]
