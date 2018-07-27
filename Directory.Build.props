@@ -5,6 +5,8 @@
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
 
+    <Version>1.0.0-preview1</Version>
+
     <!-- When compiling .NET SDK 2.0 projects targeting .NET 4.x on 32 bit Windows or Mono using 'dotnet build' you -->
     <!-- have to teach MSBuild where the Mono copy of the reference asssemblies is -->
     <TargetFullFx Condition="$(TargetFramework.StartsWith('net4')) OR $(TargetFramework.StartsWith('net3'))">true</TargetFullFx>

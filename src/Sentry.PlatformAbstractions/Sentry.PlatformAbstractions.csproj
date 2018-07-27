@@ -7,8 +7,6 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <LangVersion>7.2</LangVersion>
     <Description>Abstractions to platform information</Description>
-    <VersionPrefix>1.0.1</VersionPrefix>
-    <VersionSuffix>preview1</VersionSuffix>
     <Authors>Sentry Team and Contributors</Authors>
     <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-platform-abstractions/master/.assets/sentry-nuget.png</PackageIconUrl>
