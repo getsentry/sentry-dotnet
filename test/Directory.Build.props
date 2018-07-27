@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <!-- No coverlet on Mono: /home/travis/.nuget/packages/coverlet.msbuild/2.0.1/build/netstandard2.0/coverlet.msbuild.targets(7,5): error : Failed to resolve assembly: 'Sentry.Protocol, Version=0.0.1.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0'-->
-    <PackageReference Include="coverlet.msbuild" Version="2.0.1" Condition="'$(OS)' != 'Windows_NT' AND $(TargetFramework.StartsWith('netcore'))" />
+    <PackageReference Include="coverlet.msbuild" Version="2.0.1" Condition="'$(TargetIsMono)' != 'true'" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
     <PackageReference Include="NSubstitute" Version="3.1.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
