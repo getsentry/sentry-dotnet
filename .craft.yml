@@ -4,3 +4,4 @@ github:
   repo: sentry-dotnet-platform-abstractions
 targets:
   - name: nuget
+  - name: github
