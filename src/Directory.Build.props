@@ -4,8 +4,6 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
-    <VersionPrefix>0.0.1</VersionPrefix>
-    <VersionSuffix>preview3</VersionSuffix>
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
