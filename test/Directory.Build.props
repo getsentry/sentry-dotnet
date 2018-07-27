@@ -15,6 +15,12 @@
     </Content>
   </ItemGroup>
 
+  <!-- No coverlet on Mono: /home/travis/.nuget/packages/coverlet.msbuild/2.0.1/build/netstandard2.0/coverlet.msbuild.targets(7,5): error
+    : Failed to resolve assembly: 'Sentry.Protocol, Version=0.0.1.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0'-->
+  <ItemGroup Condition="'$(TargetIsMono)' != 'true'">
+    <PackageReference Include="coverlet.msbuild" Version="2.0.1" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- No coverlet on Mono: /home/travis/.nuget/packages/coverlet.msbuild/2.0.1/build/netstandard2.0/coverlet.msbuild.targets(7,5): error : Failed to resolve assembly: 'Sentry.Protocol, Version=0.0.1.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0'-->
     <PackageReference Include="coverlet.msbuild" Version="2.0.1" Condition="'$(TargetIsMono)' != 'true'" />
