@@ -76,7 +76,7 @@ namespace Sentry
         ///   <c>true</c> if the string represents a disabled DSN; otherwise, <c>false</c>.
         /// </returns>
         public static bool IsDisabled(string dsn) =>
-            Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.InvariantCultureIgnoreCase);
+            Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Tries to parse the string into a <see cref="Dsn"/>
