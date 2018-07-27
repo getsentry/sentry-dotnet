@@ -6,7 +6,6 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Testing;
-using Sentry.Tests.Helpers;
 using Xunit;
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
