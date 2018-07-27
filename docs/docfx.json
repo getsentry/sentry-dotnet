@@ -14,6 +14,9 @@
         }
       ],
       "dest": "api",
+      "properties": {
+        "TargetFramework": "netstandard2.0"
+      },
       "filter": "filterConfig.yml",
       "disableGitFeatures": false,
       "disableDefaultFilter": false
