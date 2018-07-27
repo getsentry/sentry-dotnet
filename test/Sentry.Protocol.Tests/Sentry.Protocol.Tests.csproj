@@ -1,11 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net462</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <Reference Include="System.Threading.Tasks" />
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=net46" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=netstandard1.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=netstandard2.0" />
   </ItemGroup>
 
   <ItemGroup>
