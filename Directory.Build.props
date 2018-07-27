@@ -2,7 +2,7 @@
   <PropertyGroup>
     <LangVersion>7.2</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <Version>0.0.1-preview2</VersionPrefix>
+    <Version>0.0.1-preview3</Version>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
 
