@@ -47,7 +47,7 @@ namespace Sentry.AspNetCore.Tests
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_DisableDsnString_ServicesRegistered(Action<IServiceCollection> assert)
         {
-            WebHostBuilder.UseSentry(Internal.Constants.DisableSdkDsnValue);
+            WebHostBuilder.UseSentry(Protocol.Constants.DisableSdkDsnValue);
             assert(Services);
         }
 

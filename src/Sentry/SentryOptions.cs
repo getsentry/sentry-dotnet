@@ -7,6 +7,7 @@ using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Protocol;
 using static Sentry.Internal.Constants;
+using static Sentry.Protocol.Constants;
 
 namespace Sentry
 {

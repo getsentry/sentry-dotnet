@@ -37,7 +37,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void UseSentry_DisableDsnString_DisabledSdk()
         {
-            _webHostBuilder.UseSentry(Internal.Constants.DisableSdkDsnValue)
+            _webHostBuilder.UseSentry(Protocol.Constants.DisableSdkDsnValue)
                 .Build();
 
             Assert.False(SentrySdk.IsEnabled);
