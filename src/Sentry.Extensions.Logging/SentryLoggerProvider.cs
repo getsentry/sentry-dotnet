@@ -40,18 +40,18 @@ namespace Sentry.Extensions.Logging
 
             // SDK is being initialized through this integration
             // Lifetime is owned by this instance:
-            if (_options.InitializeSdk)
+            if (_options.InitializeSdk && !SentrySdk.IsEnabled)
             {
                 _sdk = SentrySdk.Init(o => _options.ConfigureOptionsActions.ForEach(a => a(o)));
-            }
 
-            // Creates a scope so that Integration added below can be dropped when the logger is disposed
-            _scope = hub.PushScope();
-            hub.ConfigureScope(s =>
-            {
-                s.Sdk.Name = NameAndVersion.Name;
-                s.Sdk.Version = NameAndVersion.Version;
-            });
+                // Creates a scope so that Integration added below can be dropped when the logger is disposed
+                _scope = hub.PushScope();
+                hub.ConfigureScope(s =>
+                {
+                    s.Sdk.Name = NameAndVersion.Name;
+                    s.Sdk.Version = NameAndVersion.Version;
+                });
+            }
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, _hub);
