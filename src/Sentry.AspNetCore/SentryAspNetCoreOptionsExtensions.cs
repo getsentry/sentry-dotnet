@@ -35,7 +35,6 @@ namespace Sentry.AspNetCore
 
                 loggingOptions.Init(o =>
                 {
-                    aspnetOptions.SentryOptions = o;
                     aspnetOptions.ConfigureOptionsActions?.ForEach(a => a?.Invoke(o));
                 });
             }

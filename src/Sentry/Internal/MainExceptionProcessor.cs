@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -23,26 +22,32 @@ namespace Sentry.Internal
                     // Otherwise realization happens on the worker thread before sending event.
                     .ToList();
 
-                var values = new SentryValues<SentryException>(sentryExceptions);
+                MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
 
-                var builderStrObj = ImmutableDictionary.CreateBuilder<string, object>();
+                sentryEvent.SentryExceptionValues = new SentryValues<SentryException>(sentryExceptions);
+            }
+        }
 
-                foreach (var sentryException in sentryExceptions)
+        // SentryException.Extra is not supported by Sentry yet.
+        // Move the extras to the Event Extra while marking
+        // by index the Exception which owns it
+        private static void MoveExceptionExtrasToEvent(
+            SentryEvent sentryEvent,
+            IReadOnlyList<SentryException> sentryExceptions)
+        {
+            for (var i = 0; i < sentryExceptions.Count; i++)
+            {
+                var sentryException = sentryExceptions[i];
+
+                if (!(sentryException.Data?.Count > 0))
                 {
-                    foreach (string key in exception.Data.Keys)
-                    {
-                        builderStrObj[$"{sentryException.Type}.Data[{key}]"] = exception.Data[key];
-                    }
+                    continue;
                 }
 
-                if (builderStrObj.Count > 0)
+                foreach (var key in sentryException.Data.Keys)
                 {
-                    sentryEvent.InternalExtra = sentryEvent.InternalExtra == null
-                        ? builderStrObj.ToImmutable()
-                        : builderStrObj.ToImmutable().SetItems(sentryEvent.InternalExtra);
+                    sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
                 }
-
-                sentryEvent.SentryExceptionValues = values;
             }
         }
 
@@ -76,13 +81,10 @@ namespace Sentry.Internal
 
             if (exception.Data.Count != 0)
             {
-                var builder = ImmutableDictionary.CreateBuilder<string, object>();
                 foreach (string key in exception.Data.Keys)
                 {
-                    builder.Add(key, exception.Data[key]);
+                    sentryEx.Data[key] = exception.Data[key];
                 }
-
-                sentryEx.Data = builder.ToImmutable();
             }
 
             var stackTrace = new StackTrace(exception, true);
@@ -90,15 +92,15 @@ namespace Sentry.Internal
             // Sentry expects the frames to be sent in reversed order
             var frames = stackTrace.GetFrames()
                 ?.Reverse()
-                .Select(CreateSentryStackFrame)
-                .ToList();
+                .Select(CreateSentryStackFrame);
 
             if (frames != null)
             {
-                sentryEx.Stacktrace = new SentryStackTrace
+                sentryEx.Stacktrace = new SentryStackTrace();
+                foreach (var frame in frames)
                 {
-                    Frames = frames
-                };
+                    sentryEx.Stacktrace.Frames.Add(frame);
+                }
             }
 
             yield return sentryEx;
@@ -207,9 +209,9 @@ namespace Sentry.Internal
         /// <summary>
         /// Clean up function names for anonymous lambda calls.
         /// </summary>
-        private static void DemangleAnonymousFunction(SentryStackFrame frame)
+        internal static void DemangleAnonymousFunction(SentryStackFrame frame)
         {
-            if (frame == null)
+            if (frame?.Function == null)
             {
                 return;
             }

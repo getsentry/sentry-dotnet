@@ -3,6 +3,7 @@ using Sentry.Testing;
 using Sentry.Tests.Helpers.Reflection;
 using Xunit;
 using static Sentry.Internal.Constants;
+using static Sentry.Protocol.Constants;
 
 namespace Sentry.Tests.Internals
 {

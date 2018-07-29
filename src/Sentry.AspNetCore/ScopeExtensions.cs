@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -53,23 +52,25 @@ namespace Sentry.AspNetCore
             scope.UnsetTag("RequestPath");
 
             scope.Request.QueryString = context.Request.QueryString.ToString();
-            scope.Request.Headers = context.Request.Headers
-                .ToImmutableDictionary(k => k.Key, v => v.Value.ToString());
+            foreach (var requestHeader in context.Request.Headers)
+            {
+                scope.Request.Headers[requestHeader.Key] = requestHeader.Value;
+            }
 
             // TODO: Hide these 'Env' behind some extension method as
             // these might be reported in a non CGI, old-school way
             var ipAddress = context.Connection.RemoteIpAddress?.ToString();
             if (ipAddress != null)
             {
-                scope.Request.Env = scope.Request.Env.SetItem("REMOTE_ADDR", ipAddress);
+                scope.Request.Env["REMOTE_ADDR"] = ipAddress;
             }
 
-            scope.Request.Env = scope.Request.Env.SetItem("SERVER_NAME", Environment.MachineName);
-            scope.Request.Env = scope.Request.Env.SetItem("SERVER_PORT", context.Connection.LocalPort.ToString());
+            scope.Request.Env["SERVER_NAME"] = Environment.MachineName;
+            scope.Request.Env["SERVER_PORT"] = context.Connection.LocalPort.ToString();
 
             if (context.Response.Headers.TryGetValue("Server", out var server))
             {
-                scope.Request.Env = scope.Request.Env.SetItem("SERVER_SOFTWARE", server);
+                scope.Request.Env["SERVER_SOFTWARE"] = server;
             }
         }
 
@@ -124,7 +125,7 @@ namespace Sentry.AspNetCore
         {
             if (webRoot != null)
             {
-                scope.Request.Env = scope.Request.Env.SetItem("DOCUMENT_ROOT", webRoot);
+                scope.Request.Env["DOCUMENT_ROOT"] = webRoot;
             }
         }
     }
