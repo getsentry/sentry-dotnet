@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http;
 using Sentry.Http;
@@ -47,7 +46,7 @@ namespace Sentry.Internal.Http
                 throw new ArgumentNullException(nameof(options));
             }
 
-            var httpClientHandler = CreateHttpClientHandler();
+            var httpClientHandler = new HttpClientHandler();
             if (options.Proxy != null)
             {
                 httpClientHandler.Proxy = options.Proxy;
@@ -80,12 +79,5 @@ namespace Sentry.Internal.Http
 
             return client;
         }
-
-        /// <summary>
-        /// Creates a new <see cref="HttpClientHandler"/>
-        /// </summary>
-        /// <returns><see cref="HttpClientHandler"/></returns>
-        protected virtual HttpClientHandler CreateHttpClientHandler()
-            => new HttpClientHandler();
     }
 }

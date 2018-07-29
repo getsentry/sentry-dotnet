@@ -1,6 +1,9 @@
 using System;
+using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using Sentry.Http;
 using Sentry.Internal.Http;
 using Xunit;
@@ -35,6 +38,45 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             Assert.NotNull(sut.Create(DsnSamples.Valid, _fixture.HttpOptions));
+        }
+
+        [Fact]
+        public void Create_CompressionLevelNoCompression_NoGzipRequestBodyHandler()
+        {
+            _fixture.HttpOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
+
+            var sut = _fixture.GetSut();
+
+            var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            foreach (var handler in client.GetMessageHandlers())
+            {
+                Assert.IsNotType<GzipRequestBodyHandler>(handler);
+            }
+        }
+
+        [Theory]
+        [InlineData(CompressionLevel.Fastest)]
+        [InlineData(CompressionLevel.Optimal)]
+        public void Create_CompressionLeveEnabled_IncludesGzipRequestBodyHandler(CompressionLevel level)
+        {
+            _fixture.HttpOptions.RequestBodyCompressionLevel = level;
+
+            var sut = _fixture.GetSut();
+
+            var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            Assert.Contains(client.GetMessageHandlers(), h => h.GetType() == typeof(GzipRequestBodyHandler));
+        }
+
+        [Fact]
+        public void Create_RetryAfterHandler_FirstHandler()
+        {
+            var sut = _fixture.GetSut();
+
+            var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            Assert.Equal(typeof(RetryAfterHandler), client.GetMessageHandlers().First().GetType());
         }
 
         [Fact]
