@@ -54,7 +54,8 @@ namespace Sentry.Internal.Http
             return base.SendAsync(request, cancellationToken);
         }
 
-        private class GzipContent : HttpContent
+        // Internal for testability
+        internal class GzipContent : HttpContent
         {
             private readonly HttpContent _content;
             private readonly CompressionLevel _compressionLevel;
@@ -70,8 +71,6 @@ namespace Sentry.Internal.Http
                     Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
 
-                // TODO: Content length?
-
                 Headers.ContentEncoding.Add(Gzip);
             }
 
@@ -83,7 +82,6 @@ namespace Sentry.Internal.Http
 
             protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
             {
-                // TODO: will it leak the inner stream?
                 var gzipStream = new GZipStream(stream, _compressionLevel, leaveOpen: true);
                 try
                 {

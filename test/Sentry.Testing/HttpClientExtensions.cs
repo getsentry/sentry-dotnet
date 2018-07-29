@@ -9,11 +9,11 @@ namespace Sentry
     {
         public static IEnumerable<HttpMessageHandler> GetMessageHandlers(this HttpClient client)
         {
-            if (!(typeof(HttpMessageInvoker)
-                .GetField("_handler",
-                    BindingFlags.NonPublic | BindingFlags.Instance)
-                .GetValue(client)
-                is HttpMessageHandler handler))
+            var invoker = typeof(HttpMessageInvoker);
+            var fieldInfo = invoker.GetField("handler", BindingFlags.NonPublic | BindingFlags.Instance)
+                            ?? invoker.GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (!(fieldInfo.GetValue(client) is HttpMessageHandler handler))
             {
                 yield break;
             }
