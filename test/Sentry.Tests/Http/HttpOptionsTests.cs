@@ -1,4 +1,5 @@
 using System;
+using System.IO.Compression;
 using System.Net;
 using Sentry.Http;
 using Xunit;
@@ -34,6 +35,13 @@ namespace Sentry.Tests.Http
         {
             var sut = new HttpOptions(DsnSamples.Valid.SentryUri);
             Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
+        }
+
+        [Fact]
+        public void RequestBodyCompressionLevel_ByDefault_Optimal()
+        {
+            var sut = new HttpOptions(DsnSamples.Valid.SentryUri);
+            Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
         }
 
 #if DEBUG

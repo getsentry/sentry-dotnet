@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics;
+using System.IO.Compression;
 using System.Net.Http;
 using Sentry.Http;
 
@@ -8,6 +8,7 @@ namespace Sentry.Internal.Http
     /// <summary>
     /// Default Sentry HttpClientFactory
     /// </summary>
+    /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
         private readonly Action<HttpClientHandler, Dsn, HttpOptions> _configureHandler;
@@ -35,14 +36,17 @@ namespace Sentry.Internal.Http
         /// <inheritdoc />
         public HttpClient Create(Dsn dsn, HttpOptions options)
         {
-            Debug.Assert(options != null);
-
             if (dsn == null)
             {
                 throw new ArgumentNullException(nameof(dsn));
             }
 
-            var httpClientHandler = CreateHttpClientHandler();
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            var httpClientHandler = new HttpClientHandler();
             if (options.Proxy != null)
             {
                 httpClientHandler.Proxy = options.Proxy;
@@ -57,21 +61,23 @@ namespace Sentry.Internal.Http
 
             _configureHandler?.Invoke(httpClientHandler, dsn, options);
 
-            var httpMessageHandler = new RetryAfterHandler(httpClientHandler);
+            HttpMessageHandler handler = httpClientHandler;
 
-            var client = new HttpClient(httpMessageHandler);
+            if (options.RequestBodyCompressionLevel != CompressionLevel.NoCompression)
+            {
+                handler = new GzipRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
+            }
+
+            // Adding retry after last for it to run first in the pipeline
+            handler = new RetryAfterHandler(handler);
+
+            var client = new HttpClient(handler);
+
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             _configureClient?.Invoke(client, dsn, options);
 
             return client;
         }
-
-        /// <summary>
-        /// Creates a new <see cref="HttpClientHandler"/>
-        /// </summary>
-        /// <returns><see cref="HttpClientHandler"/></returns>
-        protected virtual HttpClientHandler CreateHttpClientHandler()
-            => new HttpClientHandler();
     }
 }
