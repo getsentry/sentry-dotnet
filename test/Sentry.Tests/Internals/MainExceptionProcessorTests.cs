@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -105,6 +106,32 @@ namespace Sentry.Tests.Internals
             Assert.Equal(2, evt.Extra.Count);
             Assert.Contains(evt.Extra, e => e.Key == "Exception[0][first]" && e.Value == firstValue);
             Assert.Contains(evt.Extra, e => e.Key == "Exception[1][second]" && e.Value == secondValue);
+        }
+
+        // https://github.com/getsentry/sentry-dotnet/issues/64
+        [Fact]
+        public void DemangleAnonymousFunction_NullFunction_ContinuesNull()
+        {
+            var stackFrame = new SentryStackFrame
+            {
+                Function = null
+            };
+
+            MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
+            Assert.Null(stackFrame.Function);
+        }
+
+
+        [Fact]
+        public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
+        {
+            var stackFrame = new SentryStackFrame
+            {
+                Module = null
+            };
+
+            MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
+            Assert.Null(stackFrame.Module);
         }
 
         // TODO: Test when the approach for parsing is finalized

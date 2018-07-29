@@ -31,15 +31,17 @@ namespace Microsoft.AspNetCore.Builder
         private static void UseServiceProviderProcessors(IServiceProvider provider)
         {
             var options = provider.GetService<SentryAspNetCoreOptions>();
-
-            if (provider.GetService<IEnumerable<ISentryEventProcessor>>().Any())
+            if (options.SentryOptions != null)
             {
-                options.SentryOptions.AddEventProcessorProvider(provider.GetServices<ISentryEventProcessor>);
-            }
+                if (provider.GetService<IEnumerable<ISentryEventProcessor>>().Any())
+                {
+                    options.SentryOptions.AddEventProcessorProvider(provider.GetServices<ISentryEventProcessor>);
+                }
 
-            if (provider.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
-            {
-                options.SentryOptions.AddExceptionProcessorProvider(provider.GetServices<ISentryEventExceptionProcessor>);
+                if (provider.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
+                {
+                    options.SentryOptions.AddExceptionProcessorProvider(provider.GetServices<ISentryEventExceptionProcessor>);
+                }
             }
         }
     }

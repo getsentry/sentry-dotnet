@@ -57,7 +57,7 @@ namespace Sentry.Internal
                 }
             }
 
-            @event.Platform = Constants.Platform;
+            @event.Platform = Protocol.Constants.Platform;
 
             // An integration (e.g: ASP.NET Core) can set itself as the SDK
             // Else, it's the base package: Sentry

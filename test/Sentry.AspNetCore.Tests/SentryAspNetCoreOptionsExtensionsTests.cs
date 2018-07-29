@@ -32,17 +32,6 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void Apply_OnInit_TakesSentryOption()
-        {
-            Sut.Apply(SentryLoggingOptions);
-
-            var expected = new SentryOptions();
-            SentryLoggingOptions.ConfigureOptionsActions.ForEach(a => a(expected));
-
-            Assert.Equal(expected, Sut.SentryOptions);
-        }
-
-        [Fact]
         public void Apply_OnInit_InvokesOptionActions()
         {
             var invoked = false;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -36,8 +35,6 @@ namespace Sentry.Internal
             SentryEvent sentryEvent,
             IReadOnlyList<SentryException> sentryExceptions)
         {
-            ImmutableDictionary<string, object>.Builder extraBuilder = null;
-
             for (var i = 0; i < sentryExceptions.Count; i++)
             {
                 var sentryException = sentryExceptions[i];
@@ -49,20 +46,8 @@ namespace Sentry.Internal
 
                 foreach (var key in sentryException.Data.Keys)
                 {
-                    if (extraBuilder == null)
-                    {
-                        extraBuilder = ImmutableDictionary.CreateBuilder<string, object>();
-                    }
-
-                    extraBuilder[$"Exception[{i}][{key}]"] = sentryException.Data[key];
+                    sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
                 }
-            }
-
-            if (extraBuilder?.Count > 0)
-            {
-                sentryEvent.InternalExtra = sentryEvent.InternalExtra == null
-                    ? extraBuilder.ToImmutable()
-                    : extraBuilder.ToImmutable().SetItems(sentryEvent.InternalExtra);
             }
         }
 
@@ -96,13 +81,10 @@ namespace Sentry.Internal
 
             if (exception.Data.Count != 0)
             {
-                var builder = ImmutableDictionary.CreateBuilder<string, object>();
                 foreach (string key in exception.Data.Keys)
                 {
-                    builder.Add(key, exception.Data[key]);
+                    sentryEx.Data[key] = exception.Data[key];
                 }
-
-                sentryEx.Data = builder.ToImmutable();
             }
 
             var stackTrace = new StackTrace(exception, true);
@@ -110,15 +92,15 @@ namespace Sentry.Internal
             // Sentry expects the frames to be sent in reversed order
             var frames = stackTrace.GetFrames()
                 ?.Reverse()
-                .Select(CreateSentryStackFrame)
-                .ToList();
+                .Select(CreateSentryStackFrame);
 
             if (frames != null)
             {
-                sentryEx.Stacktrace = new SentryStackTrace
+                sentryEx.Stacktrace = new SentryStackTrace();
+                foreach (var frame in frames)
                 {
-                    Frames = frames
-                };
+                    sentryEx.Stacktrace.Frames.Add(frame);
+                }
             }
 
             yield return sentryEx;
@@ -227,9 +209,9 @@ namespace Sentry.Internal
         /// <summary>
         /// Clean up function names for anonymous lambda calls.
         /// </summary>
-        private static void DemangleAnonymousFunction(SentryStackFrame frame)
+        internal static void DemangleAnonymousFunction(SentryStackFrame frame)
         {
-            if (frame == null)
+            if (frame?.Function == null)
             {
                 return;
             }

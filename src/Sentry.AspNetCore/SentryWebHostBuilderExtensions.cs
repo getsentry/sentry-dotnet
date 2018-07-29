@@ -52,35 +52,39 @@ namespace Microsoft.AspNetCore.Hosting
         {
             var aspnetOptions = new SentryAspNetCoreOptions();
 
-            // Default aspnetOptions to sentryOptions configuration:
-            aspnetOptions.ConfigureOptionsActions.Add(o =>
-            {
-                if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
-                {
-                    o.Dsn = new Dsn(aspnetOptions.Dsn);
-                }
-
-                o.Release = aspnetOptions.Release;
-            });
-
+            // The earliest we can hook the SDK initialization code with the framework
+            // Initialization happens at a later time depending if the default MEL backend is enabled or not.
+            // In case the logging backend was replaced, init happens later, at the StartupFilter
             builder.ConfigureLogging((context, logging) =>
             {
+                // Configuration should be built. Bind Sentry values:
                 context.Configuration.GetSection("Sentry").Bind(aspnetOptions);
                 configureOptions?.Invoke(aspnetOptions);
 
+                // The earliest we can resolve HostingEnvironment
+                // Make sure this runs before the user defined callbacks
+                aspnetOptions.ConfigureOptionsActions.Insert(0, o =>
+                {
+                    aspnetOptions.SentryOptions = o;
+
+                    if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
+                    {
+                        o.Dsn = new Dsn(aspnetOptions.Dsn);
+                    }
+
+                    o.Release = aspnetOptions.Release;
+
+                    o.Environment
+                        = aspnetOptions.Environment
+                          ?? context.HostingEnvironment?.EnvironmentName;
+                });
+
+                // Prepare MEL provider in case MEL backend is going to be used.
                 logging.AddFilter<SentryLoggerProvider>(
                     "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
                     LogLevel.None);
 
-                logging.AddSentry(loggingOptions =>
-                {
-                    loggingOptions.Init(o =>
-                        o.Environment
-                            = aspnetOptions.Environment
-                              ?? context.HostingEnvironment.EnvironmentName);
-
-                    aspnetOptions.Apply(loggingOptions);
-                });
+                logging.AddSentry(logOptions => aspnetOptions.Apply(logOptions));
             });
 
             builder.ConfigureServices(c =>
