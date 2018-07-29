@@ -76,7 +76,7 @@ namespace Microsoft.AspNetCore.Hosting
 
                     o.Environment
                         = aspnetOptions.Environment
-                          ?? context.HostingEnvironment.EnvironmentName;
+                          ?? context.HostingEnvironment?.EnvironmentName;
                 });
 
                 // Prepare MEL provider in case MEL backend is going to be used.
