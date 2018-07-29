@@ -5,6 +5,8 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
+    <PublicSign>false</PublicSign>
   </PropertyGroup>
 
 </Project>
