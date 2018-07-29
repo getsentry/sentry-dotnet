@@ -63,12 +63,17 @@ namespace Sentry.Internal.Http
             _configureHandler?.Invoke(httpClientHandler, dsn, options);
 
             HttpMessageHandler handler = httpClientHandler;
+
             if (options.RequestBodyCompressionLevel != CompressionLevel.NoCompression)
             {
                 handler = new GzipRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
             }
 
+            // Adding retry after last for it to run first in the pipeline
+            handler = new RetryAfterHandler(handler);
+
             var client = new HttpClient(handler);
+
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             _configureClient?.Invoke(client, dsn, options);
