@@ -7,11 +7,14 @@ namespace Sentry.AspNetCore.Tests
     public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
     {
         protected Action<SentryAspNetCoreOptions> Configure;
-        protected override void Build()
+
+        protected Action<WebHostBuilder> AfterConfigureBuilder;
+
+        protected override void ConfigureBuilder(WebHostBuilder builder)
         {
             var sentry = FakeSentryServer.CreateServer();
             var sentryHttpClient = sentry.CreateClient();
-            ConfigureBuilder = b => b.UseSentry(options =>
+            builder.UseSentry(options =>
             {
                 options.Dsn = DsnSamples.ValidDsnWithSecret;
                 options.Init(i =>
@@ -26,7 +29,7 @@ namespace Sentry.AspNetCore.Tests
                 Configure?.Invoke(options);
             });
 
-            base.Build();
+            AfterConfigureBuilder?.Invoke(builder);
         }
     }
 }

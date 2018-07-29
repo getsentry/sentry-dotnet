@@ -112,8 +112,10 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void DemangleAnonymousFunction_NullFunction_ContinuesNull()
         {
-            var stackFrame = new SentryStackFrame();
-            stackFrame.Function = null;
+            var stackFrame = new SentryStackFrame
+            {
+                Function = null
+            };
 
             MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
             Assert.Null(stackFrame.Function);
@@ -123,8 +125,10 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
         {
-            var stackFrame = new SentryStackFrame();
-            stackFrame.Module = null;
+            var stackFrame = new SentryStackFrame
+            {
+                Module = null
+            };
 
             MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
             Assert.Null(stackFrame.Module);
