@@ -14,9 +14,9 @@ namespace Sentry.AspNetCore.Tests
         protected IBackgroundWorker Worker { get; set; } = Substitute.For<IBackgroundWorker>();
         protected Action<SentryAspNetCoreOptions> Configure;
 
-        public IntegrationMockedBackgroundWorker()
+        protected override void ConfigureBuilder(WebHostBuilder builder)
         {
-            ConfigureBuilder = b => b.UseSentry(options =>
+            builder.UseSentry(options =>
             {
                 options.Dsn = DsnSamples.ValidDsnWithSecret;
                 options.Init(i =>

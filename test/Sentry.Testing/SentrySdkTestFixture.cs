@@ -9,14 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.Testing
 {
-    public class SentrySdkTestFixture : IDisposable
+    public abstract class SentrySdkTestFixture : IDisposable
     {
-        private TestServer _testServer;
+        public TestServer TestServer { get; set; }
 
         public HttpClient HttpClient { get; set; }
         public IServiceProvider ServiceProvider { get; set; }
 
-        public Action<IWebHostBuilder> ConfigureBuilder { get; set; }
         public Action<IServiceCollection> ConfigureServices { get; set; }
 
         public LastExceptionFilter LastExceptionFilter { get; private set; }
@@ -56,12 +55,17 @@ namespace Sentry.Testing
                 });
             });
 
-            ConfigureBuilder?.Invoke(builder);
+            ConfigureBuilder(builder);
 
-            _testServer = new TestServer(builder);
-            HttpClient = _testServer.CreateClient();
-            ServiceProvider = _testServer.Host.Services;
+            TestServer = new TestServer(builder);
+            HttpClient = TestServer.CreateClient();
+            ServiceProvider = TestServer.Host.Services;
             LastExceptionFilter = ServiceProvider.GetRequiredService<LastExceptionFilter>();
+        }
+
+        protected virtual void ConfigureBuilder(WebHostBuilder builder)
+        {
+
         }
 
         public void Dispose()
