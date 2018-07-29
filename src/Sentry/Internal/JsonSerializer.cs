@@ -9,6 +9,7 @@ namespace Sentry.Internal
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+            NullValueHandling = NullValueHandling.Ignore,
             Formatting = Formatting.None,
             Converters = new[] { StringEnumConverter }
         };
