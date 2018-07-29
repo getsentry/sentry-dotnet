@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using Sentry.Integrations;
+using Sentry.PlatformAbstractions;
 using Xunit;
 
 namespace Sentry.Tests.Integrations
@@ -11,19 +12,23 @@ namespace Sentry.Tests.Integrations
         [Fact]
         public void UnhandledException_FiredOnExceptionUnhandledInThread()
         {
-            var evt = new ManualResetEventSlim(false);
-            AppDomainAdapter.Instance.UnhandledException += (sender, args) =>
+            // Test flaky on Mono
+            if (!Runtime.Current.IsMono())
             {
-                evt.Set();
-            };
+                var evt = new ManualResetEventSlim(false);
+                AppDomainAdapter.Instance.UnhandledException += (sender, args) =>
+                {
+                    evt.Set();
+                };
 
-            var thread = new Thread(() => throw new Exception())
-            {
-                IsBackground = false
-            };
+                var thread = new Thread(() => throw new Exception())
+                {
+                    IsBackground = false
+                };
 
-            thread.Start();
-            Assert.True(evt.Wait(TimeSpan.FromSeconds(3)));
+                thread.Start();
+                Assert.True(evt.Wait(TimeSpan.FromSeconds(3)));
+            }
         }
     }
 }
