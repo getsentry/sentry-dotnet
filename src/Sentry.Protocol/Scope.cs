@@ -18,6 +18,9 @@ namespace Sentry.Protocol
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count ?? 0}")]
     public class Scope
     {
+        private volatile bool _hasEvaluated;
+        private readonly object _evaluationSync = new object();
+
         internal IScopeOptions Options { get; }
 
         internal bool Locked { get; set; }
@@ -43,6 +46,11 @@ namespace Sentry.Protocol
 
         [DataMember(Name = "tags", EmitDefaultValue = false)]
         internal ConcurrentDictionary<string, string> InternalTags { get; set; }
+
+        /// <summary>
+        /// Whether the <see cref="OnEvaluating"/> event has already fired.
+        /// </summary>
+        public bool HasEvaluated => _hasEvaluated;
 
         /// <summary>
         /// The name of the transaction in which there was an event.
@@ -156,20 +164,38 @@ namespace Sentry.Protocol
         /// <summary>
         /// Creates a new scope with default options
         /// </summary>
+        /// <inheritdoc />
         protected internal Scope()
             : this(null)
         { }
 
         internal void Evaluate()
         {
-            try
+            if (_hasEvaluated)
             {
-                OnEvaluating?.Invoke(this, EventArgs.Empty);
+                return;
             }
-            catch (Exception e)
+
+            lock (_evaluationSync)
             {
-                this.AddBreadcrumb("Failed invoking event handler: " + e,
-                    level: BreadcrumbLevel.Error);
+                if (_hasEvaluated)
+                {
+                    return;
+                }
+
+                try
+                {
+                    OnEvaluating?.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception e)
+                {
+                    this.AddBreadcrumb("Failed invoking event handler: " + e,
+                        level: BreadcrumbLevel.Error);
+                }
+                finally
+                {
+                    _hasEvaluated = true;
+                }
             }
         }
 
