@@ -1,12 +1,9 @@
+using Sentry.EntityFramework;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using Sentry.EntityFramework;
 
 namespace Sentry.Samples.AspNet.Mvc
 {
@@ -25,14 +22,14 @@ namespace Sentry.Samples.AspNet.Mvc
             SentryDatabaseLogging.UseBreadcrumbs();
 
             // Set up the sentry SDK
-            _sentrySdk = SentrySdk.Init(new SentryOptions
+            _sentrySdk = SentrySdk.Init(o =>
             {
                 // We store the DSN inside Web.config; make sure to use your own DSN!
-                Dsn = new Dsn(ConfigurationManager.AppSettings["SentryDsn"])
-            }
-            // Add the EntityFramework integration
-            .AddEntityFramework());
-
+                o.Dsn = new Dsn(ConfigurationManager.AppSettings["SentryDsn"]);
+         
+                // Add the EntityFramework integration
+                o.AddEntityFramework();
+            });
         }
 
         // Global error catcher

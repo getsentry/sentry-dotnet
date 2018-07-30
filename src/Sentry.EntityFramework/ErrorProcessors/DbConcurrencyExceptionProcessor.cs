@@ -3,7 +3,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.EntityFramework.ErrorProcessors
 {
-    internal class DbConcurrencyExceptionProcessor : SentryEventExceptionProcessor<DBConcurrencyException>
+    public class DbConcurrencyExceptionProcessor : SentryEventExceptionProcessor<DBConcurrencyException>
     {
         protected override void ProcessException(DBConcurrencyException exception, SentryEvent sentryEvent)
         {
