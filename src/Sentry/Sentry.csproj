@@ -11,8 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.0.0-dev-00071" />
-    <PackageReference Include="Sentry.Protocol" Version="0.0.1-preview3" />
+    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.0.0-preview2" />
+    <PackageReference Include="Sentry.Protocol" Version="0.0.1-preview4" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
   </ItemGroup>
 
