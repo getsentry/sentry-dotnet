@@ -7,7 +7,7 @@
 
 Entity Framework 6 Integration for Sentry
 ===========
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/bootstrap?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/43u1aqlj5tj33x46/branch/bootstrap?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-ef/branch/master)
 
 
 |      Name                 |        NuGet         |
