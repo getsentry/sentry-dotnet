@@ -31,6 +31,17 @@ namespace Sentry.Http
         public CompressionLevel RequestBodyCompressionLevel { get; set; } = CompressionLevel.Optimal;
 
         /// <summary>
+        /// Whether the body compression is buffered and the request 'Content-Length' known in advance.
+        /// </summary>
+        /// <remarks>
+        /// Without reading through the Gzip stream to have its final size, it's no possible to use 'Content-Length'
+        /// header value. That means 'Content-Encoding: chunked' has to be used which is sometimes not supported.
+        /// Sentry on-premise without a reverse-proxy, for example, does not support 'chunked' requests.
+        /// </remarks>
+        /// <see href="https://github.com/getsentry/sentry-dotnet/issues/71"/>
+        public bool RequestBodyCompressionBuffered { get; set; } = true;
+
+        /// <summary>
         /// An optional web proxy
         /// </summary>
         public IWebProxy Proxy { get; set; }

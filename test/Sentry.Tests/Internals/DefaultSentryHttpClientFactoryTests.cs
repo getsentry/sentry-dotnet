@@ -58,10 +58,24 @@ namespace Sentry.Tests.Internals
         [Theory]
         [InlineData(CompressionLevel.Fastest)]
         [InlineData(CompressionLevel.Optimal)]
-        public void Create_CompressionLeveEnabled_IncludesGzipRequestBodyHandler(CompressionLevel level)
+        public void Create_CompressionLeveEnabled_ByDefault_IncludesGzipRequestBodyHandler(CompressionLevel level)
         {
             _fixture.HttpOptions.RequestBodyCompressionLevel = level;
 
+            var sut = _fixture.GetSut();
+
+            var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            Assert.Contains(client.GetMessageHandlers(), h => h.GetType() == typeof(GzipBufferedRequestBodyHandler));
+        }
+
+        [Theory]
+        [InlineData(CompressionLevel.Fastest)]
+        [InlineData(CompressionLevel.Optimal)]
+        public void Create_CompressionLeveEnabled_NonBuffered_IncludesGzipRequestBodyHandler(CompressionLevel level)
+        {
+            _fixture.HttpOptions.RequestBodyCompressionLevel = level;
+            _fixture.HttpOptions.RequestBodyCompressionBuffered = false;
             var sut = _fixture.GetSut();
 
             var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);

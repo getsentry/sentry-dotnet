@@ -65,7 +65,14 @@ namespace Sentry.Internal.Http
 
             if (options.RequestBodyCompressionLevel != CompressionLevel.NoCompression)
             {
-                handler = new GzipRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
+                if (options.RequestBodyCompressionBuffered)
+                {
+                    handler = new GzipBufferedRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
+                }
+                else
+                {
+                    handler = new GzipRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
+                }
             }
 
             // Adding retry after last for it to run first in the pipeline
