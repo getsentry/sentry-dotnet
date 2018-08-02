@@ -1,5 +1,7 @@
+using System;
 using Sentry.Extensibility;
 using Sentry.Protocol;
+using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
 namespace Sentry.AspNetCore
 {
@@ -18,6 +20,8 @@ namespace Sentry.AspNetCore
             {
                 @event.Contexts["server-os"] = os;
             }
+
+            @event.ServerName = Environment.MachineName;
 
             return @event;
         }
