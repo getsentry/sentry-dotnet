@@ -122,6 +122,51 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void CaptureEvent_SamplingLowest_DropsEvent()
+        {
+            // Three decimal places longer than what Random returns. Should always drop
+            _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
+            var @event = new SentryEvent();
+
+            var sut = _fixture.GetSut();
+
+            Assert.Equal(default, sut.CaptureEvent(@event));
+        }
+
+        [Fact]
+        public void CaptureEvent_SamplingHighest_SendsEvent()
+        {
+            // Three decimal places longer than what Random returns. Should always send
+            _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
+            SentryEvent received = null;
+            _fixture.SentryOptions.BeforeSend = e => received = e;
+
+            var @event = new SentryEvent();
+
+            var sut = _fixture.GetSut();
+
+            sut.CaptureEvent(@event);
+
+            Assert.Same(@event, received);
+        }
+
+        [Fact]
+        public void CaptureEvent_SamplingNull_DropEvent()
+        {
+            _fixture.SentryOptions.SampleRate = null;
+            SentryEvent received = null;
+            _fixture.SentryOptions.BeforeSend = e => received = e;
+
+            var @event = new SentryEvent();
+
+            var sut = _fixture.GetSut();
+
+            sut.CaptureEvent(@event);
+
+            Assert.Same(@event, received);
+        }
+
+        [Fact]
         public void CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
         {
             var error = new Exception("Exception message!");

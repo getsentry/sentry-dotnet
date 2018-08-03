@@ -77,6 +77,30 @@ namespace Sentry
         public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
         /// <summary>
+        /// The rate to sample events
+        /// </summary>
+        /// <remarks>
+        /// Can be anything between 0.01 (1%) and 1.0 (99.9%) or null (default), to disable it.
+        /// </remarks>
+        /// <example>
+        /// 0.1 = 10% of events are sent
+        /// </example>
+        /// <see href="https://docs.sentry.io/clientdev/features/#event-sampling"/>
+        private float? _sampleRate;
+        public float? SampleRate
+        {
+            get => _sampleRate;
+            set
+            {
+                if (value > 1 || value <= 0)
+                {
+                    throw new InvalidOperationException($"The value {value} is not valid. Use null to disable or values between 0.01 (inclusive) and 1.0 (exclusive) ");
+                }
+                _sampleRate = value;
+            }
+        }
+
+        /// <summary>
         /// The release version of the application.
         /// </summary>
         /// <example>

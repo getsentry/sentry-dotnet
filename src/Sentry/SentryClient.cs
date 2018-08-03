@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -20,6 +21,9 @@ namespace Sentry
     {
         private volatile bool _disposed;
         private readonly SentryOptions _options;
+
+        private readonly Lazy<Random> _random = new Lazy<Random>(() => new Random(), LazyThreadSafetyMode.PublicationOnly);
+        internal Random Random => _random.Value;
 
         // Internal for testing
         internal IBackgroundWorker Worker { get; }
@@ -74,6 +78,15 @@ namespace Sentry
             if (@event == null)
             {
                 return Guid.Empty;
+            }
+
+            if (_options.SampleRate is float sample)
+            {
+                if (Random.NextDouble() > sample)
+                {
+                    // TODO: Log here event dropped due to sampling
+                    return Guid.Empty;
+                }
             }
 
             // Evaluate and copy before invoking the callback

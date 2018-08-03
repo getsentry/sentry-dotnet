@@ -45,6 +45,9 @@ namespace Sentry.Samples.Console.Customized
                 // To see the lines from non `AppCode`, select `Full`. That'll include non App code like System.*, Microsoft.* and LibraryX.*
                 o.AddInAppExclude("LibraryX.");
 
+                // To enable event sampling, uncomment:
+                // o.SampleRate = 0.5f; // Randomly drop (don't send to Sentry) half of events
+
                 // Modifications to event before it goes out. Could replace the event altogether
                 o.BeforeSend = @event =>
                 {
