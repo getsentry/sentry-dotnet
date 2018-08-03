@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sentry\Sentry.csproj" />
     <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
   </ItemGroup>
 
