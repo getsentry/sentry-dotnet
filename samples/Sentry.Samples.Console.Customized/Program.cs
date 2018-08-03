@@ -41,6 +41,10 @@ namespace Sentry.Samples.Console.Customized
                 o.AddEventProcessor(new SomeEventProcessor());
                 o.AddExceptionProcessor(new ArgumentExceptionProcessor());
 
+                // Sentry won't consider code from namespace LibraryX.* as part of the app code and will hide it from the stacktrace by default
+                // To see the lines from non `AppCode`, select `Full`. That'll include non App code like System.*, Microsoft.* and LibraryX.*
+                o.AddInAppExclude("LibraryX.");
+
                 // Modifications to event before it goes out. Could replace the event altogether
                 o.BeforeSend = @event =>
                 {

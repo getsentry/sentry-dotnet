@@ -36,6 +36,14 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void AddInAppExclude_StoredInOptions()
+        {
+            const string expected = "test";
+            Sut.AddInAppExclude(expected);
+            Assert.Contains(Sut.InAppExclude, actual => actual == expected);
+        }
+
+        [Fact]
         public void AddExceptionProcessor_StoredInOptions()
         {
             var expected = Substitute.For<ISentryEventExceptionProcessor>();
@@ -191,6 +199,16 @@ namespace Sentry.Tests
         public void Integrations_Includes_AppDomainUnhandledExceptionIntegration()
         {
             Assert.Contains(Sut.Integrations, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
+        }
+
+        [Theory]
+        [InlineData("Microsoft.")]
+        [InlineData("System.")]
+        [InlineData("FSharp.")]
+        [InlineData("Giraffe.")]
+        public void Integrations_Includes_MajorSystemPrefixes(string expected)
+        {
+            Assert.Contains(Sut.InAppExclude, e => e == expected);
         }
     }
 }

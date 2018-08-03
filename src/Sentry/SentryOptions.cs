@@ -51,6 +51,19 @@ namespace Sentry
         internal ImmutableList<ISdkIntegration> Integrations { get; set; }
 
         /// <summary>
+        /// A list of namespaces (or prefixes) considered not part of application code
+        /// </summary>
+        /// <remarks>
+        /// Sentry by default filters the stacktrace to display only application code.
+        /// A user can optionally click to see all which will include framework and libraries.
+        /// A <see cref="string.StartsWith(string)"/> is executed
+        /// </remarks>
+        /// <example>
+        /// 'System.', 'Microsoft.'
+        /// </example>
+        internal ImmutableList<string> InAppExclude { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum breadcrumbs.
         /// </summary>
         /// <remarks>
@@ -150,11 +163,18 @@ namespace Sentry
 
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
-                    new MainExceptionProcessor());
+                    new MainExceptionProcessor(this));
 
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(
                     new AppDomainUnhandledExceptionIntegration());
+
+            InAppExclude
+                = ImmutableList.Create(
+                    "System.",
+                    "Microsoft.",
+                    "FSharp.",
+                    "Giraffe.");
         }
     }
 }
