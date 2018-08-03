@@ -17,12 +17,15 @@ New .NET SDK for Sentry
 |         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
 |     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
+| **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 
 ## Documentation
 
 Below you will find a basic introduction to the SDK and its API. 
 
-For more details, please: **refer to the [SDK documentation](https://getsentry.github.io/sentry-dotnet/index.html)**
+For more details, please: **refer to the [SDK documentation](https://getsentry.github.io/sentry-dotnet/index.html)**.
+Looking for samples using the NuGet packages? Check out [sentry-dotnet-samples](https://github.com/getsentry/sentry-dotnet-samples) repository.
+
 ## Usage
 
 **Consider taking a look at the _[samples](https://github.com/getsentry/sentry-dotnet/tree/master/samples)_ directory for different types of apps and example usages of the SDK.**
@@ -68,6 +71,7 @@ The SDK needs to know which project within Sentry your errors should go to. That
 The SDK is configurable, many of the settings are demonstrated through the samples but here are some options:
 
 * HTTP Proxy
+* Event sampling
 * Enable request body extraction
 * Read [diagnostics activity data]("https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md)
 * BeforeSend: Callback to modify/reject event before sending
