@@ -92,11 +92,27 @@ namespace Sentry
         [DataMember(Name = "exception", EmitDefaultValue = false)]
         internal SentryValues<SentryException> SentryExceptionValues { get; set; }
 
+        [DataMember(Name = "threads", EmitDefaultValue = false)]
+        internal SentryValues<SentryThread> SentryThreadValues { get; set; }
+
         /// <summary>
         /// The Sentry Exception interface
         /// </summary>
         public IEnumerable<SentryException> SentryExceptions
-            => SentryExceptionValues?.Values ?? Enumerable.Empty<SentryException>();
+        {
+            get => SentryExceptionValues?.Values ?? Enumerable.Empty<SentryException>();
+            set => SentryExceptionValues = value == null ? null : new SentryValues<SentryException>(value);
+        }
+
+        /// <summary>
+        /// The Sentry Thread interface
+        /// </summary>
+        /// <see href="https://docs.sentry.io/clientdev/interfaces/threads/"/>
+        public IEnumerable<SentryThread> SentryThreads
+        {
+            get => SentryThreadValues?.Values ?? Enumerable.Empty<SentryThread>();
+            set => SentryThreadValues = value == null ? null : new SentryValues<SentryThread>(value);
+        }
 
         /// <summary>
         /// A list of relevant modules and their versions.
