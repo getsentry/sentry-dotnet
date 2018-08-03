@@ -12,6 +12,11 @@ namespace Sentry.Internal
 {
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
+        private readonly SentryOptions _options;
+
+        public MainExceptionProcessor(SentryOptions options)
+            => _options = options ?? throw new ArgumentNullException(nameof(options));
+
         public void Process(Exception exception, SentryEvent sentryEvent)
         {
             Debug.Assert(sentryEvent != null);
@@ -51,7 +56,7 @@ namespace Sentry.Internal
             }
         }
 
-        private static IEnumerable<SentryException> CreateSentryException(Exception exception)
+        private IEnumerable<SentryException> CreateSentryException(Exception exception)
         {
             Debug.Assert(exception != null);
 
@@ -123,7 +128,7 @@ namespace Sentry.Internal
             return mechanism;
         }
 
-        internal static SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)
+        internal SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)
         {
             const string unknownRequiredField = "(unknown)";
 
@@ -148,6 +153,7 @@ namespace Sentry.Internal
             {
                 frame.InstructionOffset = stackFrame.GetILOffset();
             }
+
             var lineNo = stackFrame.GetFileLineNumber();
             if (lineNo != 0)
             {
@@ -165,12 +171,24 @@ namespace Sentry.Internal
             DemangleAnonymousFunction(frame);
 
             return frame;
+        }
 
-            // TODO: make this extensible
-            bool IsSystemModuleName(string moduleName)
-                => !string.IsNullOrEmpty(moduleName) &&
-                      (moduleName.StartsWith("System.", StringComparison.Ordinal) ||
-                       moduleName.StartsWith("Microsoft.", StringComparison.Ordinal));
+        private bool IsSystemModuleName(string moduleName)
+        {
+            if (string.IsNullOrEmpty(moduleName))
+            {
+                return false;
+            }
+
+            foreach (var exclude in _options.InAppExclude)
+            {
+                if (moduleName.StartsWith(exclude, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
