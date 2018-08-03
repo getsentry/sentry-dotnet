@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Sentry.Extensibility;
@@ -22,15 +23,52 @@ namespace Sentry.Internal
                 return @event;
             }
 
-            if (_capturedEvent.TryGetValue(@event.Exception, out _))
+            if (IsDuplicate(@event.Exception))
             {
                 // TODO: replace Debug with internal logging
                 Debug.WriteLine("Duplicate Exception detected and discarded");
                 return null;
             }
 
-            _capturedEvent.Add(@event.Exception, null);
             return @event;
+        }
+
+        private bool IsDuplicate(Exception ex)
+        {
+            if (ex == null)
+            {
+                return false;
+            }
+
+            while (true)
+            {
+                if (_capturedEvent.TryGetValue(ex, out _))
+                {
+                    return true;
+                }
+
+                _capturedEvent.Add(ex, null);
+
+                if (ex is AggregateException aex)
+                {
+                    foreach (var aexInnerException in aex.InnerExceptions)
+                    {
+                        if (IsDuplicate(aexInnerException))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else if (ex.InnerException != null)
+                {
+                    if (IsDuplicate(ex.InnerException))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
     }
 }
