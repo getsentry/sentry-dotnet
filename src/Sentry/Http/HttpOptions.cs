@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
 
 namespace Sentry.Http
 {
@@ -46,7 +47,17 @@ namespace Sentry.Http
         /// </summary>
         public IWebProxy Proxy { get; set; }
 
-        public ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
+        /// <summary>
+        /// A callback invoked when a <see cref="SentryClient"/> is created.
+        /// </summary>
+        public Action<HttpClientHandler, Dsn, HttpOptions> ConfigureHandler { get; set; }
+
+        /// <summary>
+        /// A callback invoked when a <see cref="SentryClient"/> is created.
+        /// </summary>
+        public Action<HttpClient, Dsn, HttpOptions> ConfigureClient { get; set; }
+
+        internal ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
 
         // Expected to call into the internal logging which will be expose
         internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; set; }

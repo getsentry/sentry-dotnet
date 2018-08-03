@@ -31,7 +31,10 @@ namespace Sentry.Internal
             return _workerOptions.BackgroundWorker
                         ?? CreateBackgroundWorker(
                                 CreateHttpTransport(
-                                    _httpOptions.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory(),
+                                    _httpOptions.SentryHttpClientFactory
+                                        ?? new DefaultSentryHttpClientFactory(
+                                            _httpOptions.ConfigureHandler,
+                                            _httpOptions.ConfigureClient),
                                         _options,
                                         _httpOptions),
                                     _workerOptions);

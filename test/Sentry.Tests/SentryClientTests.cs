@@ -244,6 +244,34 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void Ctor_HttpOptionsCallback_InvokedConfigureClient()
+        {
+            var invoked = false;
+            _fixture.BackgroundWorker = null;
+            _fixture.SentryOptions.Dsn = DsnSamples.Valid;
+            _fixture.SentryOptions.Http(h => h.ConfigureClient = (client, dsn, arg3) => invoked = true);
+
+            using (_fixture.GetSut())
+            {
+                Assert.True(invoked);
+            }
+        }
+
+        [Fact]
+        public void Ctor_HttpOptionsCallback_InvokedConfigureHandler()
+        {
+            var invoked = false;
+            _fixture.BackgroundWorker = null;
+            _fixture.SentryOptions.Dsn = DsnSamples.Valid;
+            _fixture.SentryOptions.Http(h => h.ConfigureHandler = (handler, dsn, arg3) => invoked = true);
+
+            using (_fixture.GetSut())
+            {
+                Assert.True(invoked);
+            }
+        }
+
+        [Fact]
         public void Ctor_NullBackgrondWorker_ConcreteBackgroundWorker()
         {
             _fixture.SentryOptions.Dsn = DsnSamples.Valid;

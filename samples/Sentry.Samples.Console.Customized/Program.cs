@@ -71,6 +71,20 @@ namespace Sentry.Samples.Console.Customized
                 {
                     // Using a proxy:
                     h.Proxy = null; //new WebProxy("https://localhost:3128");
+
+                    // Example customizing the HttpClientHandlers created
+                    h.ConfigureHandler = (handler, dsn, httpOptions) =>
+                    {
+                        handler.ServerCertificateCustomValidationCallback =
+                            // A custom certificate validation
+                            (sender, certificate, chain, sslPolicyErrors) => !certificate.Archived;
+                    };
+
+                    // Access to the HttpClient created to serve the SentryClint
+                    h.ConfigureClient = (client, dsn, httpOptions) =>
+                    {
+                        client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
+                    };
                 });
             }))
             {
@@ -91,7 +105,7 @@ namespace Sentry.Samples.Console.Customized
                 var error = new Exception("Attempting to send this multiple times");
 
                 // Only the first capture will be sent to Sentry
-                for (int i = 0; i < 100; i++)
+                for (var i = 0; i < 100; i++)
                 {
                     // The SDK is able to detect duplicate events:
                     // This is useful, for example, when multiple loggers log the same exception. Or exception is re-thrown and recaptured.
