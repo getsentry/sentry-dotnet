@@ -9,7 +9,7 @@ namespace Sentry.Tests.Internals
         private readonly DuplicateEventDetectionEventProcessor _sut = new DuplicateEventDetectionEventProcessor();
 
         [Fact]
-        public void Process_DuplicateEvent_Returns()
+        public void Process_DuplicateEvent_ReturnsNull()
         {
             var @event = new SentryEvent();
 
@@ -53,6 +53,44 @@ namespace Sentry.Tests.Internals
             var second = new SentryEvent
             {
                 Exception = duplicate
+            };
+
+            _ = _sut.Process(first);
+            var actual = _sut.Process(second);
+
+            Assert.Null(actual);
+        }
+
+        [Fact]
+        public void Process_AggregateExceptionDupe_ReturnsNull()
+        {
+            var duplicate = new Exception();
+            var first = new SentryEvent
+            {
+                Exception = new AggregateException(duplicate)
+            };
+            var second = new SentryEvent
+            {
+                Exception = duplicate
+            };
+
+            _ = _sut.Process(first);
+            var actual = _sut.Process(second);
+
+            Assert.Null(actual);
+        }
+
+        [Fact]
+        public void Process_InnerExceptionHasAggregateExceptionDupe_ReturnsNull()
+        {
+            var duplicate = new Exception();
+            var first = new SentryEvent
+            {
+                Exception = new InvalidOperationException("test", new AggregateException(duplicate))
+            };
+            var second = new SentryEvent
+            {
+                Exception = new InvalidOperationException("another test", new Exception("testing", new AggregateException(duplicate)))
             };
 
             _ = _sut.Process(first);
