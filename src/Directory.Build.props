@@ -19,13 +19,14 @@
     <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-protocol/master/.assets/sentry-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/getsentry/sentry-dotnet-protocol</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-protocol/master/LICENSE</PackageLicenseUrl>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet-protocol/releases</PackageReleaseNotes>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
