@@ -51,7 +51,7 @@ namespace Sentry
         /// <summary>
         /// Gets the structured message that describes this event
         /// </summary>
-        [DataMember(Name = "sentry.interfaces.Message", EmitDefaultValue = false)]
+        [DataMember(Name = "logentry", EmitDefaultValue = false)]
         public SentryMessage StructuredMessage { get; set; }
 
         /// <summary>
