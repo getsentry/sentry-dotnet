@@ -36,17 +36,17 @@ namespace Sentry
         public Guid EventId { get; }
 
         /// <summary>
-        /// Gets the message that describes this event
-        /// </summary>
-        [DataMember(Name = "message", EmitDefaultValue = false)]
-        public string Message { get; set; }
-
-        /// <summary>
         /// Indicates when the event was created
         /// </summary>
         /// <example>2018-04-03T17:41:36</example>
         [DataMember(Name = "timestamp", EmitDefaultValue = false)]
-        public DateTimeOffset Timestamp { get; set; }
+        public DateTimeOffset Timestamp { get; }
+
+        /// <summary>
+        /// Gets the message that describes this event
+        /// </summary>
+        [DataMember(Name = "message", EmitDefaultValue = false)]
+        public string Message { get; set; }
 
         /// <summary>
         /// Name of the logger (or source) of the event
