@@ -22,6 +22,10 @@ namespace Sentry.Protocol.Tests
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
                 Message = "message",
+                StructuredMessage = new SentryMessage
+                {
+                    Message = "structured_message"
+                },
                 Modules = { {"module_key", "module_value"}},
                 Release = "release",
                 SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
@@ -41,6 +45,7 @@ namespace Sentry.Protocol.Tests
                          "\"event_id\":\"4b780f4cec0342a78ef8a41c9d5621f8\"," +
                          "\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," +
                          "\"message\":\"message\"," +
+                         "\"logentry\":{\"message\":\"structured_message\"}," +
                          "\"logger\":\"logger\"," +
                          "\"platform\":\"csharp\"," +
                          "\"level\":\"fatal\"," +

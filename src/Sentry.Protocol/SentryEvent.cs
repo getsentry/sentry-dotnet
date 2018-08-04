@@ -49,6 +49,12 @@ namespace Sentry
         public string Message { get; set; }
 
         /// <summary>
+        /// Gets the structured message that describes this event
+        /// </summary>
+        [DataMember(Name = "logentry", EmitDefaultValue = false)]
+        public SentryMessage StructuredMessage { get; set; }
+
+        /// <summary>
         /// Name of the logger (or source) of the event
         /// </summary>
         [DataMember(Name = "logger", EmitDefaultValue = false)]
