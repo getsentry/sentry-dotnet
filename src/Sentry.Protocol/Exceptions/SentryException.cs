@@ -37,6 +37,7 @@ namespace Sentry.Protocol
         /// An optional value which refers to a thread in the threads interface.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/clientdev/interfaces/threads/"/>
+        /// <seealso cref="SentryThread"/>
         [DataMember(Name = "thread_id", EmitDefaultValue = false)]
         public int ThreadId { get; set; }
 
