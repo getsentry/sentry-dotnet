@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <VersionPrefix>0.0.1</VersionPrefix>
-    <VersionSuffix>preview4</VersionSuffix>
+    <VersionSuffix>preview5</VersionSuffix>
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
