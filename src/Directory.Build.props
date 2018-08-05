@@ -23,6 +23,9 @@
 
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet-protocol/releases</PackageReleaseNotes>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- Prop required by Microsoft.SourceLink.GitHub -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
