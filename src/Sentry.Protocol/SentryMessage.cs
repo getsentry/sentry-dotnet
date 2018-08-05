@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -31,7 +32,7 @@ namespace Sentry.Protocol
         /// The optional list of formatting parameters
         /// </summary>
         [DataMember(Name = "params", EmitDefaultValue = false)]
-        public object[] Params { get; set; }
+        public IEnumerable<object> Params { get; set; }
 
         /// <summary>
         /// The formatted message
