@@ -197,7 +197,7 @@ namespace Sentry
                 = ImmutableList.Create(
                     "System.",
                     "Microsoft.",
-                    "MS.Win32",
+                    "MS", // MS.Win32, MS.Internal, etc: Desktop apps
                     "FSharp.",
                     "Giraffe.");
         }
