@@ -197,6 +197,7 @@ namespace Sentry
                 = ImmutableList.Create(
                     "System.",
                     "Microsoft.",
+                    "MS.Win32",
                     "FSharp.",
                     "Giraffe.");
         }
