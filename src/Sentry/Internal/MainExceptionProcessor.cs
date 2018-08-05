@@ -56,7 +56,7 @@ namespace Sentry.Internal
             }
         }
 
-        private IEnumerable<SentryException> CreateSentryException(Exception exception)
+        internal IEnumerable<SentryException> CreateSentryException(Exception exception)
         {
             Debug.Assert(exception != null);
 
@@ -86,9 +86,12 @@ namespace Sentry.Internal
 
             if (exception.Data.Count != 0)
             {
-                foreach (string key in exception.Data.Keys)
+                foreach (var key in exception.Data.Keys)
                 {
-                    sentryEx.Data[key] = exception.Data[key];
+                    if (key is string keyString)
+                    {
+                        sentryEx.Data[keyString] = exception.Data[key];
+                    }
                 }
             }
 
