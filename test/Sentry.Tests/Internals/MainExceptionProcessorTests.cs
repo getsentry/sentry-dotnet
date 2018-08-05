@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
@@ -145,7 +146,6 @@ namespace Sentry.Tests.Internals
             Assert.Null(stackFrame.Function);
         }
 
-
         [Fact]
         public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
         {
@@ -156,6 +156,17 @@ namespace Sentry.Tests.Internals
 
             MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
             Assert.Null(stackFrame.Module);
+        }
+
+        [Fact]
+        public void CreateSentryException_DataHasObjectAsKey_ItemIgnored()
+        {
+            var ex = new Exception();
+            ex.Data[new object()] = new object();
+
+            var actual = Sut.CreateSentryException(ex);
+
+            Assert.Empty(actual.Single().Data);
         }
 
         // TODO: Test when the approach for parsing is finalized
