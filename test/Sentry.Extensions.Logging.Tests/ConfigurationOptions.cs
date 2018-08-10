@@ -1,16 +1,23 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests
 {
-    public class SentryLoggingOptionsTest
+    public class ConfigurationOptions
     {
+        private readonly IEnumerable<ILoggerProvider> _providers;
         private readonly SentryLoggingOptions _options;
-        public SentryLoggingOptionsTest(IOptions<SentryLoggingOptions> options) => _options = options.Value;
+        public ConfigurationOptions(IOptions<SentryLoggingOptions> options, IEnumerable<ILoggerProvider> providers)
+        {
+            _providers = providers;
+            _options = options.Value;
+        }
 
         [Fact]
-        public void SentryLoggingOptions()
+        public void SentryLoggingOptionsTest()
         {
             Assert.False(_options.InitializeSdk);
             Assert.Equal(LogLevel.Warning, _options.MinimumBreadcrumbLevel);
@@ -18,7 +25,7 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
-        public void SentryOptions()
+        public void SentryOptionsTest()
         {
             Assert.Single(_options.ConfigureOptionsActions);
 
@@ -29,6 +36,12 @@ namespace Sentry.Extensions.Logging.Tests
             Assert.Equal(150, options.MaxBreadcrumbs);
             Assert.Equal("e386dfd", options.Release);
             Assert.Equal("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141", options.Dsn.ToString());
+        }
+
+        [Fact]
+        public void SentryLoggerProviderTest()
+        {
+            Assert.Single(_providers.OfType<SentryLoggerProvider>());
         }
     }
 }
