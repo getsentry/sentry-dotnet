@@ -57,10 +57,9 @@ namespace Microsoft.Extensions.Logging
             this ILoggingBuilder builder,
             Action<SentryLoggingOptions> optionsConfiguration)
         {
-            var options = new SentryLoggingOptions();
-            optionsConfiguration?.Invoke(options);
+            if (optionsConfiguration != null)
+                builder.Services.Configure(optionsConfiguration);
 
-            builder.Services.AddSingleton(options);
             builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
             return builder;
         }

@@ -21,12 +21,6 @@ namespace Sentry.Extensions.Logging
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
-        public SentryLoggerProvider(SentryLoggingOptions options)
-            : this(HubAdapter.Instance,
-                   SystemClock.Clock,
-                   options)
-        { }
-
         public SentryLoggerProvider(IOptions<SentryLoggingOptions> options)
             : this(HubAdapter.Instance,
                 SystemClock.Clock,
