@@ -20,7 +20,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Solution Items", "1 - S
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		.travis.yml = .travis.yml
-		after.Sentry.sln.targets = after.Sentry.sln.targets
 		build.ps1 = build.ps1
 		build.sh = build.sh
 		Directory.Build.props = Directory.Build.props
