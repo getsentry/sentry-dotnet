@@ -1,12 +1,14 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Reflection;
 
 namespace Sentry.Extensions.Logging
 {
+    [ProviderAlias("Sentry")]
     public class SentryLoggerProvider : ILoggerProvider
     {
         private readonly IHub _hub;
@@ -19,10 +21,10 @@ namespace Sentry.Extensions.Logging
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
-        public SentryLoggerProvider(SentryLoggingOptions options)
+        public SentryLoggerProvider(IOptions<SentryLoggingOptions> options)
             : this(HubAdapter.Instance,
-                   SystemClock.Clock,
-                   options)
+                SystemClock.Clock,
+                options.Value)
         { }
 
         internal SentryLoggerProvider(

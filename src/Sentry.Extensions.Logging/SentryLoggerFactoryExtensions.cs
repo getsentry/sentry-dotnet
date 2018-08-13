@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.Logging
             var options = new SentryLoggingOptions();
             optionsConfiguration?.Invoke(options);
 
-            factory.AddProvider(new SentryLoggerProvider(options));
+            factory.AddProvider(new SentryLoggerProvider(Options.Options.Create(options)));
             return factory;
         }
     }
