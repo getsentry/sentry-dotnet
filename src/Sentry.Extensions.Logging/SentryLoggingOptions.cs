@@ -35,7 +35,7 @@ namespace Sentry.Extensions.Logging
         public IReadOnlyCollection<ILogEventFilter> Filters { get; set; }
 
         // An optional convenience callback to initialize the SDK
-        internal List<Action<SentryOptions>> ConfigureOptionsActions { get;  } = new List<Action<SentryOptions>>();
+        internal List<Action<SentryOptions>> ConfigureOptionsActions { get; } = new List<Action<SentryOptions>>();
 
         /// <summary>
         /// Initializes the SDK: This action should be done only once per application lifetime.

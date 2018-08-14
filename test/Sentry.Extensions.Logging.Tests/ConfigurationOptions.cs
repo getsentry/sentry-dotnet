@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
@@ -11,23 +12,32 @@ namespace Sentry.Extensions.Logging.Tests
 {
     public class ConfigurationOptions
     {
-        private static readonly IServiceProvider Provider;
-
-        static ConfigurationOptions()
+        private class Fixture
         {
-            var services = new ServiceCollection();
+            public ConfigurationBuilder Builder { get; set; }
 
-            var configuration = new ConfigurationBuilder().AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json")).Build();
+            public Fixture()
+            {
+                Builder = new ConfigurationBuilder();
+                Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+            }
 
-            services.AddLogging(builder => builder.AddConfiguration(configuration.GetSection("Logging")).AddSentry());
-
-            Provider = services.BuildServiceProvider();
+            public IServiceProvider GetSut()
+            {
+                var configuration = Builder.Build();
+                var services = new ServiceCollection();
+                services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry());
+                return services.BuildServiceProvider();
+            }
         }
 
+        private readonly Fixture _fixture = new Fixture();
+
         [Fact]
-        public void SentryLoggingOptionsTest()
+        public void SentryLoggingOptions_ValuesFromAppSettings()
         {
-            var sentryLoggingOptions = Provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
+            var provider = _fixture.GetSut();
+            var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
 
             Assert.False(sentryLoggingOptions.InitializeSdk);
             Assert.Equal(LogLevel.Warning, sentryLoggingOptions.MinimumBreadcrumbLevel);
@@ -35,9 +45,17 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
-        public void SentryOptionsTest()
+        public void SentryOptions_InitializeTrue_ValuesAppliedFromLoggingOptions()
         {
-            var sentryLoggingOptions = Provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
+            var dict = new Dictionary<string, string>
+            {
+                {"Sentry:InitializeSdk", "true"},
+            };
+
+            _fixture.Builder.AddInMemoryCollection(dict);
+
+            var provider = _fixture.GetSut();
+            var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
 
             Assert.Single(sentryLoggingOptions.ConfigureOptionsActions);
 
@@ -51,9 +69,19 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
-        public void SentryLoggerProviderTest()
+        public void SentryOptions_InitializeFalse_ValuesAppliedFromLoggingOptions()
         {
-            Assert.Single(Provider.GetServices<ILoggerProvider>().OfType<SentryLoggerProvider>());
+            var provider = _fixture.GetSut();
+            var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
+
+            Assert.Empty(sentryLoggingOptions.ConfigureOptionsActions);
+        }
+
+        [Fact]
+        public void SentryLoggerProvider_ResolvedFromILoggerProvider()
+        {
+            var provider = _fixture.GetSut();
+            Assert.Single(provider.GetServices<ILoggerProvider>().OfType<SentryLoggerProvider>());
         }
     }
 }

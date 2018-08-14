@@ -20,7 +20,7 @@ namespace Sentry.Extensions.Logging
             options.MinimumBreadcrumbLevel = _options.MinimumBreadcrumbLevel;
             options.MinimumEventLevel = _options.MinimumEventLevel;
 
-            if (_options.InitializeSdk && Dsn.IsDisabled(_options.Dsn))
+            if (_options.InitializeSdk && !Dsn.IsDisabled(_options.Dsn))
             {
                 options.Init(i =>
                 {

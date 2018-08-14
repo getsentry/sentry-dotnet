@@ -1,8 +1,5 @@
 using System;
-using System.Linq;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Configuration;
-using Microsoft.Extensions.Options;
 using Sentry.Protocol;
 
 namespace Sentry.Extensions.Logging
