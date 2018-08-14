@@ -20,17 +20,22 @@ namespace Sentry.Extensions.Logging
             options.MinimumBreadcrumbLevel = _options.MinimumBreadcrumbLevel;
             options.MinimumEventLevel = _options.MinimumEventLevel;
 
-            options.Init(i =>
+            if (_options.InitializeSdk && Dsn.IsDisabled(_options.Dsn))
             {
-                i.Dsn = new Dsn(_options.Dsn);
-                i.Environment = _options.Environment;
-                i.MaxBreadcrumbs = _options.MaxBreadcrumbs;
-                i.Release = _options.Release;
-                i.SampleRate = _options.SampleRate;
-            });
+                options.Init(i =>
+                {
+                    i.Dsn = new Dsn(_options.Dsn);
+                    i.Environment = _options.Environment;
+                    i.MaxBreadcrumbs = _options.MaxBreadcrumbs;
+                    i.Release = _options.Release;
+                    i.SampleRate = _options.SampleRate;
+                });
 
-            foreach (var configure in _configures)
-                options.Init(configure.Configure);
+                foreach (var configure in _configures)
+                {
+                    options.Init(configure.Configure);
+                }
+            }
         }
     }
 }

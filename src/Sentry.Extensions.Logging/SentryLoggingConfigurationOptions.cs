@@ -9,7 +9,6 @@ namespace Sentry.Extensions.Logging
 {
     public class SentryLoggingConfigurationOptions
     {
-        #region SentryLoggingOptions
         /// <summary>
         /// Gets or sets the minimum breadcrumb level.
         /// </summary>
@@ -30,10 +29,15 @@ namespace Sentry.Extensions.Logging
         /// </value>
         public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
+        /// <summary>
+        /// Whether to initialize the SDK via this logging integration
+        /// </summary>
+        /// <remarks>
+        /// The SDK only needs to be initialized once. If you are explicitly calling
+        /// <see cref="SentrySdk.Init(string)"/>, there's no need to initialize the SDK again through
+        /// integrations.
+        /// </remarks>
         public bool InitializeSdk { get; set; } = true;
-        #endregion
-
-        #region SentryOptions
 
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.
@@ -108,6 +112,5 @@ namespace Sentry.Extensions.Logging
         /// The Data Source Name of a given project in Sentry.
         /// </summary>
         public string Dsn { get; set; }
-        #endregion
     }
 }
