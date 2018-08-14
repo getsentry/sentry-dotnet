@@ -21,31 +21,23 @@ namespace Microsoft.Extensions.Logging
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
         public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
-        {
-            builder.AddConfiguration();
-
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<SentryLoggingConfigurationOptions>, SentryLoggingConfigurationOptionsSetup>());
-            builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
-
-            builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
-            return builder;
-        }
+            => builder.AddSentry((Action<SentryLoggingOptions>)null);
 
         /// <summary>
-        /// Uses Sentry integration.
+        /// Adds the Sentry logging integration.
         /// </summary>
         /// <param name="builder">The builder.</param>
         /// <param name="dsn">The DSN.</param>
         /// <returns></returns>
-        public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, string dsn) =>
-            builder.AddSentry(o => o.Init(i =>
-            {
-                if (!Dsn.IsDisabled(dsn))
+        public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, string dsn)
+            => builder.AddSentry(o => o.Init(i =>
                 {
-                    // If it's invalid, let ctor throw
-                    i.Dsn = new Dsn(dsn);
-                }
-            }));
+                    if (!Dsn.IsDisabled(dsn))
+                    {
+                        // If it's invalid, let ctor throw
+                        i.Dsn = new Dsn(dsn);
+                    }
+                }));
 
         /// <summary>
         /// Adds the Sentry logging integration.
@@ -57,12 +49,19 @@ namespace Microsoft.Extensions.Logging
             this ILoggingBuilder builder,
             Action<SentryLoggingOptions> optionsConfiguration)
         {
+            builder.AddConfiguration();
+
             if (optionsConfiguration != null)
             {
                 builder.Services.Configure(optionsConfiguration);
             }
 
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<SentryLoggingConfigurationOptions>, SentryLoggingConfigurationOptionsSetup>());
+            builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
+
             builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
+
+            builder.Services.AddSentry();
             return builder;
         }
     }

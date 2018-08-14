@@ -71,6 +71,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Log4Net", "src\Sentr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Log4Net.Tests", "test\Sentry.Log4Net.Tests\Sentry.Log4Net.Tests.csproj", "{F275C86B-8F62-4070-9544-83CC5B68B751}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.GenericHost", "samples\Sentry.Samples.GenericHost\Sentry.Samples.GenericHost.csproj", "{5CBEFF17-71BF-407B-868F-C784E6385DC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -141,6 +143,10 @@ Global
 		{F275C86B-8F62-4070-9544-83CC5B68B751}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F275C86B-8F62-4070-9544-83CC5B68B751}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F275C86B-8F62-4070-9544-83CC5B68B751}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CBEFF17-71BF-407B-868F-C784E6385DC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CBEFF17-71BF-407B-868F-C784E6385DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CBEFF17-71BF-407B-868F-C784E6385DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CBEFF17-71BF-407B-868F-C784E6385DC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -162,6 +168,7 @@ Global
 		{6B2A49CC-6992-47A7-8CF5-5EEA3216C8BC} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{D1D3BD5F-0C3A-4DA4-BAA2-2E725E74176F} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{F275C86B-8F62-4070-9544-83CC5B68B751} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{5CBEFF17-71BF-407B-868F-C784E6385DC8} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

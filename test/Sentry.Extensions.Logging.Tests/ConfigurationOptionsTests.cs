@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests
 {
-    public class ConfigurationOptions
+    public class ConfigurationOptionsTests
     {
         private class Fixture
         {
