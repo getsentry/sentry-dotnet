@@ -1,10 +1,9 @@
 using System.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sentry;
 using Sentry.Extensibility;
 
-// ReSharper disable once CheckNamespace -- Discoverability
-namespace Microsoft.Extensions.DependencyInjection
+namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
 {
     /// <summary>
     /// Extension methods for <see cref="IServiceCollection"/>

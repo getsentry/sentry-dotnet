@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.Extensions.Logging;
+using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 // Ensures 'AddSentry' can be found without: 'using Sentry;'
