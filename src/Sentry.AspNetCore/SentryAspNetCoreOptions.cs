@@ -82,7 +82,7 @@ namespace Sentry.AspNetCore
         /// </summary>
         public LoggingOptions Logging { get; set; } = new LoggingOptions();
 
-        // Optional convinience callbacks to initialize the SDK
+        // Optional convenience callbacks to initialize the SDK
         internal List<Action<SentryOptions>> ConfigureOptionsActions { get; } = new List<Action<SentryOptions>>();
 
         /// <summary>

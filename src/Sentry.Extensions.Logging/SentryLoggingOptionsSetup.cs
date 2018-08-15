@@ -1,34 +1,32 @@
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Sentry.Extensions.Logging
 {
-    public class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggingOptions>
+    public class SentryLoggingOptionsSetup : ConfigureFromConfigurationOptions<SentryLoggingOptions>
     {
         private readonly IEnumerable<IConfigureOptions<SentryOptions>> _configures;
-        private readonly SentryLoggingConfigurationOptions _options;
 
-        public SentryLoggingOptionsSetup(IEnumerable<IConfigureOptions<SentryOptions>> configures, IOptions<SentryLoggingConfigurationOptions> options)
+        public SentryLoggingOptionsSetup(
+            IEnumerable<IConfigureOptions<SentryOptions>> configures,
+            ILoggerProviderConfiguration<SentryLoggerProvider> providerConfiguration)
+            : base(providerConfiguration.Configuration)
+            => _configures = configures;
+
+        public override void Configure(SentryLoggingOptions options)
         {
-            _configures = configures;
-            _options = options.Value;
-        }
+            base.Configure(options);
 
-        public void Configure(SentryLoggingOptions options)
-        {
-            options.InitializeSdk = _options.InitializeSdk;
-            options.MinimumBreadcrumbLevel = _options.MinimumBreadcrumbLevel;
-            options.MinimumEventLevel = _options.MinimumEventLevel;
-
-            if (_options.InitializeSdk && _options.Dsn != null && !Dsn.IsDisabled(_options.Dsn))
+            if (options.InitializeSdk && options.Dsn != null && !Dsn.IsDisabled(options.Dsn))
             {
                 options.Init(i =>
                 {
-                    i.Dsn = new Dsn(_options.Dsn);
-                    i.Environment = _options.Environment;
-                    i.MaxBreadcrumbs = _options.MaxBreadcrumbs;
-                    i.Release = _options.Release;
-                    i.SampleRate = _options.SampleRate;
+                    i.Dsn = new Dsn(options.Dsn);
+                    i.Environment = options.Environment;
+                    i.MaxBreadcrumbs = options.MaxBreadcrumbs;
+                    i.Release = options.Release;
+                    i.SampleRate = options.SampleRate;
                 });
 
                 foreach (var configure in _configures)

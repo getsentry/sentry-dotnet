@@ -8,7 +8,8 @@ namespace Sentry.Extensions.Logging
     /// <summary>
     /// Sentry logging integration options
     /// </summary>
-    public class SentryLoggingOptions
+    /// <inheritdoc />
+    public class SentryLoggingOptions : SentryOptions
     {
         /// <summary>
         /// Gets or sets the minimum breadcrumb level.
@@ -30,6 +31,24 @@ namespace Sentry.Extensions.Logging
         /// </value>
         public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
+        /// <summary>
+        /// The DSN which defines where events are sent
+        /// </summary>
+        public new string Dsn
+        {
+            get => base.Dsn?.ToString();
+            set
+            {
+                if (value != null && !Sentry.Dsn.IsDisabled(value))
+                {
+                    base.Dsn = new Dsn(value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Whether to initialize this SDK through this integration
+        /// </summary>
         public bool InitializeSdk { get; set; } = true;
 
         public IReadOnlyCollection<ILogEventFilter> Filters { get; set; }
