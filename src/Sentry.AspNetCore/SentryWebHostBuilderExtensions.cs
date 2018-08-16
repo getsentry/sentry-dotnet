@@ -57,17 +57,17 @@ namespace Microsoft.AspNetCore.Hosting
 
                 logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
                 logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
-                logging.Services.AddSentry();
 
-                logging.AddFilter<SentryLoggerProvider>(
+                logging.AddFilter<SentryAspNetCoreLoggerProvider>(
                     "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
                     LogLevel.None);
+
+                logging.Services.AddSentry();
             });
 
             builder.ConfigureServices(c =>
             {
                 c.AddTransient<IStartupFilter, SentryStartupFilter>();
-                c.AddSentry();
             });
 
             return builder;
