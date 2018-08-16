@@ -41,11 +41,7 @@ namespace Microsoft.AspNetCore.Builder
 
                 if (provider.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
                 {
-                    o.AddExceptionProcessorProvider(() =>
-                    {
-
-                        return provider.GetServices<ISentryEventExceptionProcessor>();
-                    });
+                    o.AddExceptionProcessorProvider(provider.GetServices<ISentryEventExceptionProcessor>);
                 }
             }
         }
