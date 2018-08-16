@@ -1,31 +1,39 @@
 using System;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
+using NSubstitute;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    public class SentryAspNetCoreOptionsTests
+    public class SentryAspNetCoreOptionsSetupTests
     {
-        private readonly SentryAspNetCoreOptions _sut = new SentryAspNetCoreOptions();
+        private readonly SentryAspNetCoreOptionsSetup _sut = new SentryAspNetCoreOptionsSetup(
+            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
+            Substitute.For<IHostingEnvironment>());
+
+        private readonly SentryAspNetCoreOptions _target = new SentryAspNetCoreOptions();
 
         [Fact]
         public void Filters_KestrelApplicationEvent_NoException_Filtered()
         {
-            var sut = new SentryAspNetCoreOptions();
-            Assert.Contains(sut.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, null));
+            _sut.Configure(_target);
+            Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, null));
         }
 
         [Fact]
         public void Filters_KestrelApplicationEvent_WithException_Filtered()
         {
-            var sut = new SentryAspNetCoreOptions();
-            Assert.Contains(sut.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new Exception()));
+            _sut.Configure(_target);
+            Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new Exception()));
         }
 
         [Fact]
         public void Filters_KestrelEventId1_WithException_NotFiltered()
         {
-            Assert.DoesNotContain(_sut.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Trace, 1, null));
+            _sut.Configure(_target);
+            Assert.DoesNotContain(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Trace, 1, null));
         }
     }
 }
