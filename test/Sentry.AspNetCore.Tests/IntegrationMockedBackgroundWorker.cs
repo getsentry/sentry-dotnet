@@ -19,10 +19,7 @@ namespace Sentry.AspNetCore.Tests
             builder.UseSentry(options =>
             {
                 options.Dsn = DsnSamples.ValidDsnWithSecret;
-                options.Init(i =>
-                {
-                    i.Worker(w => w.BackgroundWorker = Worker);
-                });
+                options.Worker(w => w.BackgroundWorker = Worker);
 
                 Configure?.Invoke(options);
             });

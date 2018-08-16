@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sentry.Protocol;
 using Sentry.Reflection;
 
@@ -42,13 +43,13 @@ namespace Sentry.AspNetCore
         public SentryMiddleware(
             RequestDelegate next,
             IHub sentry,
-            SentryAspNetCoreOptions options,
+            IOptions<SentryAspNetCoreOptions> options,
             IHostingEnvironment hostingEnvironment,
             ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _sentry = sentry ?? throw new ArgumentNullException(nameof(sentry));
-            _options = options;
+            _options = options?.Value;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
         }

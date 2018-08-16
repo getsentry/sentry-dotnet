@@ -34,85 +34,84 @@ namespace Sentry.AspNetCore.Tests
                 .Do(i => i.Arg<Action<WebHostBuilderContext, IServiceCollection>>()(context, Services));
         }
 
+        //[Fact]
+        //public void UseSentry_OnInit_RegistersSentryAspNetCoreOptions()
+        //{
+        //    WebHostBuilder.UseSentry();
 
-        [Fact]
-        public void UseSentry_OnInit_RegistersSentryAspNetCoreOptions()
-        {
-            WebHostBuilder.UseSentry();
+        //    Assert.Single(Services, s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions));
+        //}
 
-            Assert.Single(Services, s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions));
-        }
+        //[Fact]
+        //public void UseSentry_OnInit_SetsSentryOptionsToAspNetCore()
+        //{
+        //    WebHostBuilder.UseSentry();
 
-        [Fact]
-        public void UseSentry_OnInit_SetsSentryOptionsToAspNetCore()
-        {
-            WebHostBuilder.UseSentry();
+        //    var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
 
-            var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
+        //    var sentryOptions = new SentryOptions();
+        //    aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
 
-            var sentryOptions = new SentryOptions();
-            aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
+        //    Assert.Same(sentryOptions, aspnetOptions.SentryOptions);
+        //}
 
-            Assert.Same(sentryOptions, aspnetOptions.SentryOptions);
-        }
+        //[Fact]
+        //public void UseSentry_OnInit_InvokesCallback()
+        //{
+        //    var callbackInvoked = false;
+        //    WebHostBuilder.UseSentry(_ => callbackInvoked = true);
 
-        [Fact]
-        public void UseSentry_OnInit_InvokesCallback()
-        {
-            var callbackInvoked = false;
-            WebHostBuilder.UseSentry(_ => callbackInvoked = true);
+        //    var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
 
-            var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
+        //    var sentryOptions = new SentryOptions();
+        //    aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
 
-            var sentryOptions = new SentryOptions();
-            aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
+        //    Assert.True(callbackInvoked);
+        //}
 
-            Assert.True(callbackInvoked);
-        }
+        //[Fact]
+        //public void UseSentry_OnInit_UserCallbackDataNotOverwritten()
+        //{
+        //    HostingEnvironment.EnvironmentName.Returns("framework defined env");
+        //    const string expectedEnvironment = "environment";
+        //    WebHostBuilder.UseSentry(o => o.Environment = expectedEnvironment);
 
-        [Fact]
-        public void UseSentry_OnInit_UserCallbackDataNotOverwritten()
-        {
-            HostingEnvironment.EnvironmentName.Returns("framework defined env");
-            const string expectedEnvironment = "environment";
-            WebHostBuilder.UseSentry(o => o.Environment = expectedEnvironment);
+        //    var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
 
-            var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
+        //    var sentryOptions = new SentryOptions();
+        //    aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
 
-            var sentryOptions = new SentryOptions();
-            aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
+        //    Assert.Equal(expectedEnvironment, sentryOptions.Environment);
+        //}
 
-            Assert.Equal(expectedEnvironment, sentryOptions.Environment);
-        }
+        //[Fact]
+        //public void UseSentry_OnInit_EnvironmentSetFromAspNetCore()
+        //{
+        //    const string expectedEnvironment = "environment";
+        //    HostingEnvironment.EnvironmentName.Returns(expectedEnvironment);
+        //    WebHostBuilder.UseSentry();
 
-        [Fact]
-        public void UseSentry_OnInit_EnvironmentSetFromAspNetCore()
-        {
-            const string expectedEnvironment = "environment";
-            HostingEnvironment.EnvironmentName.Returns(expectedEnvironment);
-            WebHostBuilder.UseSentry();
+        //    var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
 
-            var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
+        //    var sentryOptions = new SentryOptions();
+        //    aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
 
-            var sentryOptions = new SentryOptions();
-            aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
+        //    Assert.Equal(expectedEnvironment, sentryOptions.Environment);
+        //}
 
-            Assert.Equal(expectedEnvironment, sentryOptions.Environment);
-        }
+        //[Fact]
+        //public void UseSentry_OnInit_SetReleaseFromAspNetOptions()
+        //{
+        //    const string expectedRelease = "release";
+        //    WebHostBuilder.UseSentry(o => o.Release = expectedRelease);
 
-        [Fact]
-        public void UseSentry_OnInit_SetReleaseFromAspNetOptions()
-        {
-            const string expectedRelease = "release";
-            WebHostBuilder.UseSentry(o => o.Release = expectedRelease);
+        //    var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
 
-            var aspnetOptions = (SentryAspNetCoreOptions)Services.Single(s => s.ImplementationInstance?.GetType() == typeof(SentryAspNetCoreOptions)).ImplementationInstance;
+        //    var sentryOptions = new SentryOptions();
+        //    aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
 
-            var sentryOptions = new SentryOptions();
-            aspnetOptions.ConfigureOptionsActions.ForEach(a => a(sentryOptions));
-
-            Assert.Equal(expectedRelease, sentryOptions.Release);
-        }
+        //    Assert.Equal(expectedRelease, sentryOptions.Release);
+        //}
 
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_ValidDsnString_ServicesRegistered(Action<IServiceCollection> assert)

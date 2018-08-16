@@ -38,8 +38,6 @@ namespace Sentry.AspNetCore.Tests
                 {
                     InitializeSdk = false,
                 };
-                var aspnetOptions = new SentryAspNetCoreOptions();
-                aspnetOptions.Apply(loggingOptions);
                 loggingOptions.InitializeSdk = false;
 
                 var hub = new Hub(new SentryOptions { Dsn = DsnSamples.Valid });
@@ -55,7 +53,7 @@ namespace Sentry.AspNetCore.Tests
                 => new SentryMiddleware(
                     RequestDelegate,
                     Hub,
-                    Options,
+                    Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment,
                     MiddlewareLogger);
 

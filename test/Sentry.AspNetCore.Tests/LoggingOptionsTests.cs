@@ -4,21 +4,21 @@ using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
-    public class LoggingOptionsTests
+    public class SentryAspNetCoreOptionsTests
     {
-        private readonly LoggingOptions _sut = new LoggingOptions();
+        private readonly SentryAspNetCoreOptions _sut = new SentryAspNetCoreOptions();
 
         [Fact]
         public void Filters_KestrelApplicationEvent_NoException_Filtered()
         {
-            var sut = new LoggingOptions();
+            var sut = new SentryAspNetCoreOptions();
             Assert.Contains(sut.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, null));
         }
 
         [Fact]
         public void Filters_KestrelApplicationEvent_WithException_Filtered()
         {
-            var sut = new LoggingOptions();
+            var sut = new SentryAspNetCoreOptions();
             Assert.Contains(sut.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new Exception()));
         }
 
@@ -27,11 +27,5 @@ namespace Sentry.AspNetCore.Tests
         {
             Assert.DoesNotContain(_sut.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Trace, 1, null));
         }
-
-        [Fact]
-        public void Ctor_MinimumBreadcrumbLevel_NoLevelSpecifiedByDefault() => Assert.Null(_sut.MinimumBreadcrumbLevel);
-
-        [Fact]
-        public void Ctor_MinimumEventLevel_NoLevelSpecifiedByDefault() => Assert.Null(_sut.MinimumEventLevel);
     }
 }

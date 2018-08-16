@@ -1,10 +1,8 @@
 using System;
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
-using Sentry;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
@@ -31,14 +29,7 @@ namespace Microsoft.Extensions.Logging
         /// <param name="dsn">The DSN.</param>
         /// <returns></returns>
         public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, string dsn)
-            => builder.AddSentry(o => o.Init(i =>
-                {
-                    if (!Dsn.IsDisabled(dsn))
-                    {
-                        // If it's invalid, let ctor throw
-                        i.Dsn = new Dsn(dsn);
-                    }
-                }));
+            => builder.AddSentry(o => o.Dsn = dsn);
 
         /// <summary>
         /// Adds the Sentry logging integration.

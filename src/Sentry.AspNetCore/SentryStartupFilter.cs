@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Sentry.AspNetCore
 {
@@ -12,16 +13,12 @@ namespace Sentry.AspNetCore
             => e =>
             {
                 // Initialize the SDK: This will not run if SentryLoggingProvider is enabled (i.e: other logging library didn't replace it)
-                var options = e.ApplicationServices.GetService<SentryAspNetCoreOptions>();
-                if (options?.InitializeSdk == true && !SentrySdk.IsEnabled)
+                var options = e.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>()?.Value;
+                if (options?.InitializeSdk == true)
                 {
                     var lifetime = e.ApplicationServices.GetRequiredService<IApplicationLifetime>();
 
-                    var sdk = SentrySdk.Init(o =>
-                    {
-                        // Invoke all Init calls to AspNetCoreOptions object
-                        options.ConfigureOptionsActions.ForEach(a => a(o));
-                    });
+                    var sdk = SentrySdk.Init(options);
 
                     lifetime.ApplicationStopped.Register(() => sdk.Dispose());
                 }
