@@ -4,6 +4,7 @@ using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests
 {
+    // Allows integration tests the include the background worker and mock only the HTTP bits
     public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
     {
         protected Action<SentryAspNetCoreOptions> Configure;

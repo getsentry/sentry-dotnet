@@ -49,6 +49,9 @@ namespace Microsoft.AspNetCore.Hosting
             {
                 logging.AddConfiguration();
 
+                var section = context.Configuration.GetSection("Sentry");
+                logging.Services.Configure<SentryAspNetCoreOptions>(section);
+
                 if (configureOptions != null)
                 {
                     logging.Services.Configure(configureOptions);

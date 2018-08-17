@@ -64,6 +64,16 @@ namespace Sentry
         internal ImmutableList<string> InAppExclude { get; set; }
 
         /// <summary>
+        /// Whether to include default Personal Identifiable information
+        /// </summary>
+        /// <remarks>
+        /// By default PII data like Username and Client IP address are not sent to Sentry.
+        /// When this flag is turned on, default PII data like Cookies, Claims in Web applications
+        /// and user data read from the request are sent.
+        /// </remarks>
+        public bool SendDefaultPii { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum breadcrumbs.
         /// </summary>
         /// <remarks>

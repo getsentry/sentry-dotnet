@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
@@ -7,6 +8,11 @@ namespace Sentry.AspNetCore
 {
     internal class AspNetCoreEventProcessor : ISentryEventProcessor
     {
+        private readonly SentryAspNetCoreOptions _options;
+
+        public AspNetCoreEventProcessor(IOptions<SentryAspNetCoreOptions> options)
+            => _options = options?.Value;
+
         public SentryEvent Process(SentryEvent @event)
         {
             // Move 'runtime' under key 'server-runtime' as User-Agent parsing done at
@@ -21,7 +27,15 @@ namespace Sentry.AspNetCore
                 @event.Contexts["server-os"] = os;
             }
 
+            // Not PII as this is running on a server
             @event.ServerName = Environment.MachineName;
+
+            if (_options?.SendDefaultPii == true && @event.User.Username == Environment.UserName)
+            {
+                // if SendDefaultPii is true, Sentry SDK will send the current logged on user
+                // which doesn't make sense in a server apps
+                @event.User.Username = null;
+            }
 
             return @event;
         }

@@ -124,7 +124,7 @@ namespace Sentry.AspNetCore
             // TODO: optionally get transaction from request through a dependency
             //scope.Transaction = context.Request.PathBase;
 
-            scope.Populate(context);
+            scope.Populate(context, _options);
 
             if (_options?.IncludeActivityData == true)
             {

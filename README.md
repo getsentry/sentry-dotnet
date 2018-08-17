@@ -32,75 +32,11 @@ Looking for samples using the NuGet packages? Check out [sentry-dotnet-samples](
 
 This SDK provides integrations which can hook into your app and automatically capture errors and context.
 
-## ASP.NET Core integration
+### Basic usage without framework integration
 
-To use Sentry with your ASP.NET Core project, simply install the NuGet package:
-
-```shell
-dotnet add package Sentry.AspNetCore
-```
-
-Change your `Program.cs` by adding `UseSentry`:
-
-```csharp
-public static IWebHost BuildWebHost(string[] args) =>
-    WebHost.CreateDefaultBuilder(args)
-        .UseStartup<Startup>()
-        // Integration
-        .UseSentry()
-        .Build();
-```
-
-### Logging integration
-
-This will also automatically include the integration to `Microsoft.Extensions.Logging`. That means that any `LogError` or `LogCritical` by default will send an event to Sentry.
-
-Log messages of level `Information` will be kept as _breadcrumbs_ and if an event is sent, all breadcrumbs from that transaction are included.
-
-These levels can be configured so that the level you define tracks breadcrumbs or sends events or completely disable it.
-
-**That means that log mesages logged by you or the framework, related to the failed transaction, will be added to the event!**
-
-## DSN
-
-The SDK needs to know which project within Sentry your errors should go to. That's defined via the [DSN](https://docs.sentry.io/quickstart/#configure-the-dsn). You can provide it directly as an argument to `UseSentry`, defined via configuration like `appsettings.json` or set via environment variable `SENTRY_DSN`.
-[This sample demonstrates defining the DSN via `appsettings.json`](https://github.com/getsentry/sentry-dotnet/blob/f7f5c8cafcf2a54ccffeedb9ed0359c880b6aae5/samples/Sentry.Samples.AspNetCore.Mvc/appsettings.json#L6).
-
-## Configuration
-
-The SDK is configurable, many of the settings are demonstrated through the samples but here are some options:
-
-* HTTP Proxy
-* Event sampling
-* Enable request body extraction
-* Read [diagnostics activity data]("https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md)
-* BeforeSend: Callback to modify/reject event before sending
-* LogEventFilter: Filter events by inspecting log data
-* Maximum number of breadcrumbs to store
-* Event queue depth
-* Shutdown timeout: If there are events to send, how long to wait until shutdown
-* Accept compressed response
-* Compress request body
-* Breadcrumb level: Minimal log level to store as a breadcrumb
-* Event level: Minimal log level to send an event to Sentry
-* Disable duplicate event detection
-* Disable capture of global unhandled exceptions
-* Add event processor
-* Add exception processor
-
-and more...
-
-## Microsoft.Extensions.Logging
-
-If you want only the logging integration:
-```shell
-dotnet add package Sentry.Extensions.Logging
-```
-See the [logging integration only sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.ME.Logging/Program.cs)
-
-
-## Without any framework integration
 You can still use the SDK directly to send events to Sentry.
+The integrations are just wrappers around the main SDK `Sentry`.
+
 There's a [basic sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Basic/Program.cs) and a one demonstrating [more customization](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Customized/Program.cs).
 
 Install the main SDK:
@@ -150,6 +86,74 @@ catch (Exception e)
     SentrySdk.CaptureException(e);
 }
 ```
+
+
+## ASP.NET Core integration
+
+To use Sentry with your ASP.NET Core project, simply install the NuGet package:
+
+```shell
+dotnet add package Sentry.AspNetCore
+```
+
+Change your `Program.cs` by adding `UseSentry`:
+
+```csharp
+public static IWebHost BuildWebHost(string[] args) =>
+    WebHost.CreateDefaultBuilder(args)
+        .UseStartup<Startup>()
+        // Integration
+        .UseSentry()
+        .Build();
+```
+
+### Logging integration
+
+This will also automatically include the integration to `Microsoft.Extensions.Logging`. That means that any `LogError` or `LogCritical` by default will send an event to Sentry.
+
+Log messages of level `Information` will be kept as _breadcrumbs_ and if an event is sent, all breadcrumbs from that transaction are included.
+
+These levels can be configured so that the level you define tracks breadcrumbs or sends events or completely disable it.
+
+**That means that log mesages logged by you or the framework, related to the failed transaction, will be added to the event!**
+
+## DSN
+
+The SDK needs to know which project within Sentry your errors should go to. That's defined via the [DSN](https://docs.sentry.io/quickstart/#configure-the-dsn). You can provide it directly as an argument to `UseSentry`, defined via configuration like `appsettings.json` or set via environment variable `SENTRY_DSN`.
+[This sample demonstrates defining the DSN via `appsettings.json`](https://github.com/getsentry/sentry-dotnet/blob/f7f5c8cafcf2a54ccffeedb9ed0359c880b6aae5/samples/Sentry.Samples.AspNetCore.Mvc/appsettings.json#L6).
+
+## Configuration
+
+The SDK is configurable, many of the settings are demonstrated through the samples but here are some options:
+
+* HTTP Proxy
+* Event sampling
+* Enable request body extraction
+* Send PII data (Personal Identifiable Information, requires opt-in)
+* Read [diagnostics activity data]("https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md)
+* BeforeSend: Callback to modify/reject event before sending
+* LogEventFilter: Filter events by inspecting log data
+* Maximum number of breadcrumbs to store
+* Event queue depth
+* Shutdown timeout: If there are events to send, how long to wait until shutdown
+* Accept compressed response
+* Compress request body
+* Breadcrumb level: Minimal log level to store as a breadcrumb
+* Event level: Minimal log level to send an event to Sentry
+* Disable duplicate event detection
+* Disable capture of global unhandled exceptions
+* Add event processor
+* Add exception processor
+
+and more...
+
+## Microsoft.Extensions.Logging
+
+If you want only the logging integration:
+```shell
+dotnet add package Sentry.Extensions.Logging
+```
+See the [logging integration only sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.ME.Logging/Program.cs)
 
 
 ### Internals/Testability

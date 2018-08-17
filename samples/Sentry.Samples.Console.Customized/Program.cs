@@ -45,6 +45,9 @@ namespace Sentry.Samples.Console.Customized
                 // To see the lines from non `AppCode`, select `Full`. That'll include non App code like System.*, Microsoft.* and LibraryX.*
                 o.AddInAppExclude("LibraryX.");
 
+                // Send personal identifiable information like the username logged on to the computer and machine name
+                o.SendDefaultPii = true;
+
                 // To enable event sampling, uncomment:
                 // o.SampleRate = 0.5f; // Randomly drop (don't send to Sentry) half of events
 
@@ -177,13 +180,6 @@ namespace Sentry.Samples.Console.Customized
                 if (@event.Level > SentryLevel.Info)
                 {
                     @event.AddBreadcrumb("Processed by " + nameof(SomeEventProcessor));
-
-                    @event.User = new User
-                    {
-                        Username = Environment.UserName
-                    };
-
-                    @event.ServerName = Environment.MachineName;
                 }
 
                 return @event;
