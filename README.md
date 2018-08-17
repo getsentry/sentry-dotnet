@@ -32,35 +32,61 @@ Looking for samples using the NuGet packages? Check out [sentry-dotnet-samples](
 
 This SDK provides integrations which can hook into your app and automatically capture errors and context.
 
-To give you a super quick _getting started_ using the SDK without any framewokr integration:
+### Basic usage without framework integration
 
-#### Install the SDK
+You can still use the SDK directly to send events to Sentry.
+The integrations are just wrappers around the main SDK `Sentry`.
 
+There's a [basic sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Basic/Program.cs) and a one demonstrating [more customization](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Customized/Program.cs).
+
+Install the main SDK:
 ```shell
-# via .NET CLI
 dotnet add package Sentry
-# or via package manager
-Install-Package Sentry
 ```
 
-#### Initialize and capture an exception
-
+Initialize the SDK:
 ```csharp
-// Init in the beginning of your app and dispose when closing it.
-using (SentrySdk.Init("dsn"))
+void Main() 
 {
-    try
+    using (SentrySdk.Init("dsn"))
     {
-        throw null;
+        // App code
     }
-    catch (Exception e)
+}
+```
+The SDK by default will watch for unhandled exceptions in your app.
+If the [DSN](https://docs.sentry.io/quickstart/#configure-the-dsn) is not explicitly passed by parameter to `Init`, the SDK will try to locate it via environment variable `SENTRY_DSN`.
+
+To configure advanced settings, for example a proxy server:
+```csharp
+void Main() 
+{
+    using (SentrySdk.Init(o =>
     {
-        SentrySdk.CaptureException(e);
+        o.Dsn = new Dsn("dsn");
+        o.Http(h =>
+        {
+            h.Proxy = new WebProxy("https://localhost:3128");
+        });
+    }))
+    {
+        // App code
     }
 }
 ```
 
-The SDK can also be used via abstractions `ISentryClient` and `IHub`. Please refer to the documentation to learn more.
+Capture an exception:
+```csharp
+try
+{
+    throw null;
+}
+catch (Exception e)
+{
+    SentrySdk.CaptureException(e);
+}
+```
+
 
 ## ASP.NET Core integration
 
@@ -128,59 +154,6 @@ If you want only the logging integration:
 dotnet add package Sentry.Extensions.Logging
 ```
 See the [logging integration only sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.ME.Logging/Program.cs)
-
-
-## Without any framework integration
-You can still use the SDK directly to send events to Sentry.
-There's a [basic sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Basic/Program.cs) and a one demonstrating [more customization](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Customized/Program.cs).
-
-Install the main SDK:
-```shell
-dotnet add package Sentry
-```
-
-Initialize the SDK:
-```csharp
-void Main() 
-{
-    using (SentrySdk.Init("dsn"))
-    {
-        // App code
-    }
-}
-```
-The SDK by default will watch for unhandled exceptions in your app.
-If the [DSN](https://docs.sentry.io/quickstart/#configure-the-dsn) is not explicitly passed by parameter to `Init`, the SDK will try to locate it via environment variable `SENTRY_DSN`.
-
-To configure advanced settings, for example a proxy server:
-```csharp
-void Main() 
-{
-    using (SentrySdk.Init(o =>
-    {
-        o.Dsn = new Dsn("dsn");
-        o.Http(h =>
-        {
-            h.Proxy = new WebProxy("https://localhost:3128");
-        });
-    }))
-    {
-        // App code
-    }
-}
-```
-
-Capture an exception:
-```csharp
-try
-{
-    throw null;
-}
-catch (Exception e)
-{
-    SentrySdk.CaptureException(e);
-}
-```
 
 
 ### Internals/Testability
