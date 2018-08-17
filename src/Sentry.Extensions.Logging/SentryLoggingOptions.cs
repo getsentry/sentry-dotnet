@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
@@ -8,7 +7,8 @@ namespace Sentry.Extensions.Logging
     /// <summary>
     /// Sentry logging integration options
     /// </summary>
-    public class SentryLoggingOptions
+    /// <inheritdoc />
+    public class SentryLoggingOptions : SentryOptions
     {
         /// <summary>
         /// Gets or sets the minimum breadcrumb level.
@@ -30,26 +30,29 @@ namespace Sentry.Extensions.Logging
         /// </value>
         public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
-        public bool InitializeSdk { get; set; } = true;
-
-        public IReadOnlyCollection<ILogEventFilter> Filters { get; set; }
-
-        // An optional convenience callback to initialize the SDK
-        internal List<Action<SentryOptions>> ConfigureOptionsActions { get; } = new List<Action<SentryOptions>>();
+        /// <summary>
+        /// The DSN which defines where events are sent
+        /// </summary>
+        public new string Dsn
+        {
+            get => base.Dsn?.ToString();
+            set
+            {
+                if (value != null && !Sentry.Dsn.IsDisabled(value))
+                {
+                    base.Dsn = new Dsn(value);
+                }
+            }
+        }
 
         /// <summary>
-        /// Initializes the SDK: This action should be done only once per application lifetime.
+        /// Whether to initialize this SDK through this integration
         /// </summary>
-        /// <remarks>
-        /// Using this initialization method is an alternative to calling <see cref="SentrySdk.Init(string)"/> or any overload.
-        ///
-        /// Initializing the SDK multiple times simply means a new instance is set to the static <see cref="SentrySdk"/>.
-        /// Any scope data like breadcrumbs added up to calling Init will be not be included in future events.
-        ///
-        /// The caller of Init is responsible for disposing the instance returned. If the SDK is initialized
-        /// via this logging integration, the <see cref="SentryLoggerProvider"/> will dispose the SDK when it is itself disposed.
-        /// </remarks>
-        /// <param name="configureOptions">The configure options.</param>
-        public void Init(Action<SentryOptions> configureOptions) => ConfigureOptionsActions.Add(configureOptions);
+        public bool InitializeSdk { get; set; } = true;
+
+        /// <summary>
+        /// Event filters
+        /// </summary>
+        public IReadOnlyCollection<ILogEventFilter> Filters { get; set; }
     }
 }

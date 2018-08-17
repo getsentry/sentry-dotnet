@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using Sentry;
 
 class Program
 {
@@ -11,14 +10,9 @@ class Program
             .AddConsole(LogLevel.Trace)
             .AddSentry(o =>
             {
-                // Initialize the SDK, alternative to relying on previously called: `using(SentrySdk.Init)`:
-                // this is useful when Logging is the first or is the only integration enabled:
-                o.Init(i =>
-                {
-                    i.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
-                    i.MaxBreadcrumbs = 150; // Increasing from default 100
-                    i.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
-                });
+                o.Dsn = "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141";
+                o.MaxBreadcrumbs = 150; // Increasing from default 100
+                o.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
 
                 // Optionally configure options: The default values are:
                 o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb

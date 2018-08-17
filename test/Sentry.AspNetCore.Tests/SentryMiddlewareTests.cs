@@ -32,7 +32,7 @@ namespace Sentry.AspNetCore.Tests
                 => new SentryMiddleware(
                     RequestDelegate,
                     Hub,
-                    Options,
+                    Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment,
                     Logger);
         }

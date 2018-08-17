@@ -57,24 +57,9 @@ namespace Sentry.Extensions.Logging.Tests
             var provider = _fixture.GetSut();
             var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
 
-            Assert.Single(sentryLoggingOptions.ConfigureOptionsActions);
-
-            var sentryOptions = new SentryOptions();
-
-            sentryLoggingOptions.ConfigureOptionsActions[0](sentryOptions);
-
-            Assert.Equal(150, sentryOptions.MaxBreadcrumbs);
-            Assert.Equal("e386dfd", sentryOptions.Release);
-            Assert.Equal("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141", sentryOptions.Dsn.ToString());
-        }
-
-        [Fact]
-        public void SentryOptions_InitializeFalse_ValuesAppliedFromLoggingOptions()
-        {
-            var provider = _fixture.GetSut();
-            var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
-
-            Assert.Empty(sentryLoggingOptions.ConfigureOptionsActions);
+            Assert.Equal(150, sentryLoggingOptions.MaxBreadcrumbs);
+            Assert.Equal("e386dfd", sentryLoggingOptions.Release);
+            Assert.Equal("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141", sentryLoggingOptions.Dsn);
         }
 
         [Fact]

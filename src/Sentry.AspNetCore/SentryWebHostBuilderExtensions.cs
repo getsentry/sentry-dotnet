@@ -1,11 +1,10 @@
 using System;
 using System.ComponentModel;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sentry;
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
-using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Hosting
@@ -31,14 +30,7 @@ namespace Microsoft.AspNetCore.Hosting
         /// <param name="dsn">The DSN.</param>
         /// <returns></returns>
         public static IWebHostBuilder UseSentry(this IWebHostBuilder builder, string dsn)
-            => builder.UseSentry(o => o.Init(i =>
-            {
-                if (!Dsn.IsDisabled(dsn))
-                {
-                    // If it's invalid, let ctor throw
-                    i.Dsn = new Dsn(dsn);
-                }
-            }));
+            => builder.UseSentry(o => o.Dsn = dsn);
 
         /// <summary>
         /// Uses Sentry integration.
@@ -50,49 +42,31 @@ namespace Microsoft.AspNetCore.Hosting
             this IWebHostBuilder builder,
             Action<SentryAspNetCoreOptions> configureOptions)
         {
-            var aspnetOptions = new SentryAspNetCoreOptions();
-
             // The earliest we can hook the SDK initialization code with the framework
             // Initialization happens at a later time depending if the default MEL backend is enabled or not.
             // In case the logging backend was replaced, init happens later, at the StartupFilter
             builder.ConfigureLogging((context, logging) =>
             {
-                // Configuration should be built. Bind Sentry values:
-                context.Configuration.GetSection("Sentry").Bind(aspnetOptions);
-                configureOptions?.Invoke(aspnetOptions);
+                logging.AddConfiguration();
 
-                // The earliest we can resolve HostingEnvironment
-                // Make sure this runs before the user defined callbacks
-                aspnetOptions.ConfigureOptionsActions.Insert(0, o =>
+                if (configureOptions != null)
                 {
-                    aspnetOptions.SentryOptions = o;
+                    logging.Services.Configure(configureOptions);
+                }
 
-                    if (!string.IsNullOrWhiteSpace(aspnetOptions.Dsn))
-                    {
-                        o.Dsn = new Dsn(aspnetOptions.Dsn);
-                    }
+                logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
+                logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
 
-                    o.Release = aspnetOptions.Release;
-
-                    o.Environment
-                        = aspnetOptions.Environment
-                          ?? context.HostingEnvironment?.EnvironmentName;
-                });
-
-                // Prepare MEL provider in case MEL backend is going to be used.
-                logging.AddFilter<SentryLoggerProvider>(
+                logging.AddFilter<SentryAspNetCoreLoggerProvider>(
                     "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
                     LogLevel.None);
 
-                logging.AddSentry(logOptions => aspnetOptions.Apply(logOptions));
+                logging.Services.AddSentry();
             });
 
             builder.ConfigureServices(c =>
             {
-                c.AddSingleton(aspnetOptions);
                 c.AddTransient<IStartupFilter, SentryStartupFilter>();
-
-                c.AddSentry();
             });
 
             return builder;

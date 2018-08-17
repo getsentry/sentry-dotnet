@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
@@ -30,17 +31,17 @@ namespace Microsoft.AspNetCore.Builder
 
         private static void UseServiceProviderProcessors(IServiceProvider provider)
         {
-            var options = provider.GetService<SentryAspNetCoreOptions>();
-            if (options.SentryOptions != null)
+            var options = provider.GetService<IOptions<SentryAspNetCoreOptions>>();
+            if (options?.Value is SentryAspNetCoreOptions o)
             {
                 if (provider.GetService<IEnumerable<ISentryEventProcessor>>().Any())
                 {
-                    options.SentryOptions.AddEventProcessorProvider(provider.GetServices<ISentryEventProcessor>);
+                    o.AddEventProcessorProvider(provider.GetServices<ISentryEventProcessor>);
                 }
 
                 if (provider.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
                 {
-                    options.SentryOptions.AddExceptionProcessorProvider(provider.GetServices<ISentryEventExceptionProcessor>);
+                    o.AddExceptionProcessorProvider(provider.GetServices<ISentryEventExceptionProcessor>);
                 }
             }
         }

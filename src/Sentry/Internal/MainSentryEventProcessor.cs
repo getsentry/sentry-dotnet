@@ -36,11 +36,13 @@ namespace Sentry.Internal
         internal string Release => _release.Value;
         internal string Environment => _environment.Value;
         internal Runtime Runtime => _runtime.Value;
+
         public MainSentryEventProcessor(SentryOptions options)
         {
             Debug.Assert(options != null);
             _options = options;
         }
+
         public SentryEvent Process(SentryEvent @event)
         {
             if (!@event.Contexts.ContainsKey(Runtime.Type))
