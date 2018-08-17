@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -80,7 +81,11 @@ namespace Sentry.AspNetCore.Tests
         {
             ConfigureWehHost = b =>
             {
-                b.ConfigureAppConfiguration(c => c.AddJsonFile("allsettings.json", optional: false));
+                b.ConfigureAppConfiguration(c =>
+                {
+                    c.SetBasePath(Directory.GetCurrentDirectory()); // fails on net462 without this
+                    c.AddJsonFile("allsettings.json", optional: false);
+                });
                 b.UseSentry(o => o.Worker(w => w.BackgroundWorker = Worker));
             };
 
