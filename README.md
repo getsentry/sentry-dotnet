@@ -32,6 +32,35 @@ Looking for samples using the NuGet packages? Check out [sentry-dotnet-samples](
 
 This SDK provides integrations which can hook into your app and automatically capture errors and context.
 
+To give you a super quick _getting started_:
+
+#### Install the SDK
+
+```shell
+# via .NET CLI
+dotnet add Sentry
+# or via package manager
+Install-Package Sentry
+```
+
+#### Initialize
+
+```csharp
+using (SentrySdk.Init("dsn"))
+{
+    try
+    {
+        throw null;
+    }
+    catch (Exception e)
+    {
+        SentrySdk.CaptureException(e);
+    }
+}
+```
+
+The SDK can also be used via abstractions `ISentryClient` and `IHub`. Please refer to the documentation for more.
+
 ## ASP.NET Core integration
 
 To use Sentry with your ASP.NET Core project, simply install the NuGet package:
@@ -73,6 +102,7 @@ The SDK is configurable, many of the settings are demonstrated through the sampl
 * HTTP Proxy
 * Event sampling
 * Enable request body extraction
+* Send PII data (Personal Identifiable Information, requires opt-in)
 * Read [diagnostics activity data]("https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md)
 * BeforeSend: Callback to modify/reject event before sending
 * LogEventFilter: Filter events by inspecting log data

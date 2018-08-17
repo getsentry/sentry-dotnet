@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Sentry.Protocol;
 using Xunit;
 
@@ -5,7 +6,7 @@ namespace Sentry.AspNetCore.Tests
 {
     public class AspNetCoreEventProcessorTests
     {
-        private readonly AspNetCoreEventProcessor _sut = new AspNetCoreEventProcessor();
+        private readonly AspNetCoreEventProcessor _sut = new AspNetCoreEventProcessor(Options.Create(new SentryAspNetCoreOptions()));
 
         [Fact]
         public void Process_WithRuntime_MovesToServerRuntime()

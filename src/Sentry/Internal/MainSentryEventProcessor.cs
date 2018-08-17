@@ -69,6 +69,16 @@ namespace Sentry.Internal
                 @event.Sdk.Version = NameAndVersion.Version;
             }
 
+            if (@event.InternalUser == null && _options.SendDefaultPii)
+            {
+                @event.User.Username = System.Environment.UserName;
+            }
+
+            if (@event.ServerName == null && _options.SendDefaultPii)
+            {
+                @event.ServerName = System.Environment.MachineName;
+            }
+
             if (@event.Level == null)
             {
                 @event.Level = SentryLevel.Error;

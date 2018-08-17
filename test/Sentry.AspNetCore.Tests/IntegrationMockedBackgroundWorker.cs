@@ -26,6 +26,28 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task SendDefaultPii_FalseWithoutUserInRequest_NoUserNameSent()
+        {
+            Configure = o => o.SendDefaultPii = false;
+
+            Build();
+            await HttpClient.GetAsync("/throw");
+
+            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == null));
+        }
+
+        [Fact]
+        public async Task SendDefaultPii_TrueWithoutUserInRequest_NoUserNameSent()
+        {
+            Configure = o => o.SendDefaultPii = true; // Sentry package will set to Environment.UserName
+
+            Build();
+            await HttpClient.GetAsync("/throw");
+
+            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == null));
+        }
+
+        [Fact]
         public async Task Environment_OnOptions_ValueFromOptions()
         {
             const string expected = "environment";
@@ -42,7 +64,6 @@ namespace Sentry.AspNetCore.Tests
         public void Environment_NotOnOptions_ValueFromEnvVar()
         {
             const string expected = "environment";
-            var target = new SentryOptions();
 
             EnvironmentVariableGuard.WithVariable("ASPNETCORE_ENVIRONMENT",
                 expected,
