@@ -42,6 +42,7 @@ namespace Sentry.AspNetCore
             SetEnv(scope, context, options);
 
             // TODO: From MVC route template, ideally
+            // TODO: optionally get transaction from request through a dependency
             //scope.Transation = context.Request.Path;
 
             // TODO: Get context stuff into scope
@@ -62,7 +63,7 @@ namespace Sentry.AspNetCore
             scope.Request.QueryString = context.Request.QueryString.ToString();
             foreach (var requestHeader in context.Request.Headers)
             {
-                if (options?.SendDefaultPii == false
+                if (options?.SendDefaultPii != true
                 // Don't add headers which might contain PII
                 && (requestHeader.Key == HeaderNames.Cookie
                     || requestHeader.Key == HeaderNames.Authorization))
