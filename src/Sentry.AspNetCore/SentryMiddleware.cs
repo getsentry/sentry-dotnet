@@ -61,6 +61,12 @@ namespace Sentry.AspNetCore
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
+            if (!_sentry.IsEnabled)
+            {
+                await _next(context).ConfigureAwait(false);
+                return;
+            }
+
             using (_sentry.PushAndLockScope())
             {
                 if (_options?.IncludeRequestPayload == true)

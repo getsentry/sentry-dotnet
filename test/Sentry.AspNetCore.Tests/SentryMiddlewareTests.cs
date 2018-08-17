@@ -26,7 +26,11 @@ namespace Sentry.AspNetCore.Tests
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
 
-            public Fixture() => HttpContext.Features.Returns(FeatureCollection);
+            public Fixture()
+            {
+                Hub.IsEnabled.Returns(true);
+                HttpContext.Features.Returns(FeatureCollection);
+            }
 
             public SentryMiddleware GetSut()
                 => new SentryMiddleware(
@@ -38,6 +42,29 @@ namespace Sentry.AspNetCore.Tests
         }
 
         private readonly Fixture _fixture = new Fixture();
+
+        [Fact]
+        public async Task InvokeAsync_DisabledSdk_InvokesNextHandlers()
+        {
+            _fixture.Hub.IsEnabled.Returns(false);
+            _fixture.RequestDelegate = Substitute.For<RequestDelegate>();
+
+            var sut = _fixture.GetSut();
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+            await _fixture.RequestDelegate.Received(1).Invoke(_fixture.HttpContext);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_DisabledSdk_NoScopePushed()
+        {
+            _fixture.Hub.IsEnabled.Returns(false);
+
+            var sut = _fixture.GetSut();
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+            _fixture.Hub.DidNotReceive().PushScope();
+        }
 
         [Fact]
         public async Task InvokeAsync_OnlyCtorRequiredArguments_InvokesNextHandlers()

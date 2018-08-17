@@ -47,6 +47,18 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task DisabledSdk_NoEventCaptured()
+        {
+            Configure = o => o.InitializeSdk = false;
+
+            Build();
+            await HttpClient.GetAsync("/throw");
+
+            Worker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            Assert.False(ServiceProvider.GetRequiredService<IHub>().IsEnabled);
+        }
+
+        [Fact]
         public async Task SendDefaultPii_TrueWithoutUserInRequest_NoUserNameSent()
         {
             Configure = o => o.SendDefaultPii = true; // Sentry package will set to Environment.UserName
