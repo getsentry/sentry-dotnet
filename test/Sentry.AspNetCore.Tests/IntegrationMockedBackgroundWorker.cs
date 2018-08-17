@@ -7,6 +7,10 @@ using Sentry.Extensibility;
 using Sentry.Testing;
 using Xunit;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Sentry.AspNetCore.Tests
 {
@@ -16,15 +20,18 @@ namespace Sentry.AspNetCore.Tests
         protected IBackgroundWorker Worker { get; set; } = Substitute.For<IBackgroundWorker>();
         protected Action<SentryAspNetCoreOptions> Configure;
 
-        protected override void ConfigureBuilder(WebHostBuilder builder)
+        public IntegrationMockedBackgroundWorker()
         {
-            builder.UseSentry(options =>
+            ConfigureWehHost = builder =>
             {
-                options.Dsn = DsnSamples.ValidDsnWithSecret;
-                options.Worker(w => w.BackgroundWorker = Worker);
+                builder.UseSentry(options =>
+                {
+                    options.Dsn = DsnSamples.ValidDsnWithSecret;
+                    options.Worker(w => w.BackgroundWorker = Worker);
 
-                Configure?.Invoke(options);
-            });
+                    Configure?.Invoke(options);
+                });
+            };
         }
 
         [Fact]
@@ -66,6 +73,32 @@ namespace Sentry.AspNetCore.Tests
             await HttpClient.GetAsync("/throw");
 
             Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == expectedName));
+        }
+
+        [Fact]
+        public void AllSettingsViaJson()
+        {
+            ConfigureWehHost = b =>
+            {
+                b.ConfigureAppConfiguration(c => c.AddJsonFile("allsettings.json", optional: false));
+                b.UseSentry(o => o.Worker(w => w.BackgroundWorker = Worker));
+            };
+
+            Build();
+
+            var options = ServiceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+
+            Assert.Equal("https://1@sentry.yo/1", ((SentryOptions)options).Dsn.ToString());
+            Assert.True(options.IncludeRequestPayload);
+            Assert.True(options.SendDefaultPii);
+            Assert.True(options.IncludeActivityData);
+            Assert.Equal(LogLevel.Error, options.MinimumBreadcrumbLevel);
+            Assert.Equal(LogLevel.Critical, options.MinimumEventLevel);
+            Assert.False(options.InitializeSdk);
+            Assert.Equal(999, options.MaxBreadcrumbs);
+            Assert.Equal(1, options.SampleRate.Value);
+            Assert.Equal("7f5d9a1", options.Release);
+            Assert.Equal("Staging", options.Environment);
         }
 
         [Fact]

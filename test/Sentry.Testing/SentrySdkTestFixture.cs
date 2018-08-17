@@ -18,6 +18,7 @@ namespace Sentry.Testing
 
         public Action<IServiceCollection> ConfigureServices { get; set; }
         public Action<IApplicationBuilder> ConfigureApp { get; set; }
+        public Action<IWebHostBuilder> ConfigureWehHost { get; set; }
 
         public LastExceptionFilter LastExceptionFilter { get; private set; }
 
@@ -38,6 +39,7 @@ namespace Sentry.Testing
         protected virtual void Build()
         {
             var builder = new WebHostBuilder();
+
             builder.ConfigureServices(s =>
             {
                 var lastException = new LastExceptionFilter();
@@ -57,6 +59,7 @@ namespace Sentry.Testing
                 });
             });
 
+            ConfigureWehHost?.Invoke(builder);
             ConfigureBuilder(builder);
 
             TestServer = new TestServer(builder);
