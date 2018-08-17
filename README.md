@@ -32,20 +32,21 @@ Looking for samples using the NuGet packages? Check out [sentry-dotnet-samples](
 
 This SDK provides integrations which can hook into your app and automatically capture errors and context.
 
-To give you a super quick _getting started_:
+To give you a super quick _getting started_ using the SDK without any framewokr integration:
 
 #### Install the SDK
 
 ```shell
 # via .NET CLI
-dotnet add Sentry
+dotnet add package Sentry
 # or via package manager
 Install-Package Sentry
 ```
 
-#### Initialize
+#### Initialize and capture an exception
 
 ```csharp
+// Init in the beginning of your app and dispose when closing it.
 using (SentrySdk.Init("dsn"))
 {
     try
@@ -59,7 +60,7 @@ using (SentrySdk.Init("dsn"))
 }
 ```
 
-The SDK can also be used via abstractions `ISentryClient` and `IHub`. Please refer to the documentation for more.
+The SDK can also be used via abstractions `ISentryClient` and `IHub`. Please refer to the documentation to learn more.
 
 ## ASP.NET Core integration
 
