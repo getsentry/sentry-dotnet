@@ -12,8 +12,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry;
+using Sentry.AspNetCore;
+using Sentry.AspNetCore.Tests;
 
-namespace Sentry.AspNetCore.Tests
+// ReSharper disable once CheckNamespace - To test Logger emitting events:
+// It filters events coming from 'Sentry.' namespace.
+namespace SentryTest.AspNetCore.Tests
 {
     [Collection(nameof(SentrySdkCollection))]
     public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
@@ -33,6 +38,67 @@ namespace Sentry.AspNetCore.Tests
                     Configure?.Invoke(options);
                 });
             };
+        }
+
+        [Fact]
+        public async Task DisabledSdk_UnhadledException_NoEventCaptured()
+        {
+            Configure = o => o.InitializeSdk = false;
+
+            Build();
+            await HttpClient.GetAsync("/throw");
+
+            Worker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            Assert.False(ServiceProvider.GetRequiredService<IHub>().IsEnabled);
+        }
+
+        [Fact]
+        public void DisabledSdk_WithLogger_NoEventCaptured()
+        {
+            Configure = o => o.InitializeSdk = false;
+
+            Build();
+            var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
+            logger.LogCritical("test");
+
+            Worker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            Assert.False(ServiceProvider.GetRequiredService<IHub>().IsEnabled);
+        }
+
+        [Fact]
+        public void LogError_ByDefault_EventCaptured()
+        {
+            const string expectedMessage = "test";
+
+            Build();
+            var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
+            logger.LogError(expectedMessage);
+
+            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
+        }
+
+        [Fact]
+        public void SentryClient_CaptureMessage_EventCaptured()
+        {
+            const string expectedMessage = "test";
+
+            Build();
+            var client = ServiceProvider.GetRequiredService<ISentryClient>();
+            client.CaptureMessage(expectedMessage);
+
+            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
+        }
+
+        [Fact]
+        public void Hub_CaptureMessage_EventCaptured()
+        {
+            const string expectedMessage = "test";
+
+            Build();
+            var client = ServiceProvider.GetRequiredService<IHub>();
+            client.CaptureMessage(expectedMessage);
+
+            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
         }
 
         [Fact]

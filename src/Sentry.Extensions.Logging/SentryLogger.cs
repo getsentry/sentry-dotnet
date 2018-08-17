@@ -100,7 +100,7 @@ namespace Sentry.Extensions.Logging
                 => _options.MinimumEventLevel != LogLevel.None
                    && logLevel >= _options.MinimumEventLevel
                    // No events from Sentry code using ILogger
-                   && !CategoryName.StartsWith("Sentry")
+                   && !CategoryName.StartsWith("Sentry.")
                    && (_options.Filters == null
                         || _options.Filters.All(
                            f => !f.Filter(
