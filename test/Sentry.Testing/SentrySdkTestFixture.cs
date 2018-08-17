@@ -17,6 +17,7 @@ namespace Sentry.Testing
         public IServiceProvider ServiceProvider { get; set; }
 
         public Action<IServiceCollection> ConfigureServices { get; set; }
+        public Action<IApplicationBuilder> ConfigureApp { get; set; }
 
         public LastExceptionFilter LastExceptionFilter { get; private set; }
 
@@ -47,6 +48,7 @@ namespace Sentry.Testing
             });
             builder.Configure(app =>
             {
+                ConfigureApp?.Invoke(app);
                 app.Use(async (context, next) =>
                 {
                     var handler = Handlers.FirstOrDefault(p => p.Path == context.Request.Path);

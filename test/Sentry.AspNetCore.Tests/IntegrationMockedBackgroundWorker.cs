@@ -1,10 +1,12 @@
 using System;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Testing;
 using Xunit;
+using Microsoft.AspNetCore.Builder;
 
 namespace Sentry.AspNetCore.Tests
 {
@@ -45,6 +47,25 @@ namespace Sentry.AspNetCore.Tests
             await HttpClient.GetAsync("/throw");
 
             Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == null));
+        }
+
+        [Fact]
+        public async Task SendDefaultPii_TrueWithUserInRequest_UserNameSent()
+        {
+            const string expectedName = "sentry user";
+            Configure = o => o.SendDefaultPii = true; // Sentry package will set to Environment.UserName
+            ConfigureApp = app =>
+            {
+                app.Use(async (context, next) =>
+                {
+                    context.User = new GenericPrincipal(new GenericIdentity(expectedName), Array.Empty<string>());
+                    await next();
+                });
+            };
+            Build();
+            await HttpClient.GetAsync("/throw");
+
+            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == expectedName));
         }
 
         [Fact]
