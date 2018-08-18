@@ -2,6 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Integrations;
 using Sentry.Protocol;
 
@@ -21,6 +22,8 @@ namespace Sentry.Internal
         public Hub(SentryOptions options)
         {
             Debug.Assert(options != null);
+
+            options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
             _ownedClient = new SentryClient(options);
             ScopeManager = new SentryScopeManager(options, _ownedClient);

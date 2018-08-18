@@ -126,10 +126,6 @@ namespace Sentry.AspNetCore
                 scope.SetWebRoot(_hostingEnvironment.WebRootPath);
             }
 
-            // TODO: Find route template (MVC integration)
-            // TODO: optionally get transaction from request through a dependency
-            //scope.Transaction = context.Request.PathBase;
-
             scope.Populate(context, _options);
 
             if (_options?.IncludeActivityData == true)

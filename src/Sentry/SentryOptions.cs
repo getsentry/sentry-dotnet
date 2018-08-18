@@ -177,6 +177,9 @@ namespace Sentry
             ConfigureHttpTransportOptions.Add(configure);
         }
 
+        // TODO: this shouldn't be a prop exposed. Needs an API to replacing the strategy and the level. Mind lifetime
+        public IDiagnosticLogger DiagnosticLogger { get; set; } = new ConsoleDiagnosticLogger(SentryLevel.Error);
+
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
