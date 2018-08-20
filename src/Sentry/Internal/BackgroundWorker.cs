@@ -9,7 +9,7 @@ namespace Sentry.Internal
 {
     internal class BackgroundWorker : IBackgroundWorker, IDisposable
     {
-        private readonly BackgroundWorkerOptions _options;
+        private readonly SentryOptions _options;
         private readonly IProducerConsumerCollection<SentryEvent> _queue;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly SemaphoreSlim _inSemaphore;
@@ -22,13 +22,13 @@ namespace Sentry.Internal
 
         public BackgroundWorker(
             ITransport transport,
-            BackgroundWorkerOptions options)
+            SentryOptions options)
         : this(transport, options, null, null)
         { }
 
         internal BackgroundWorker(
             ITransport transport,
-            BackgroundWorkerOptions options,
+            SentryOptions options,
             CancellationTokenSource cancellationTokenSource = null,
             IProducerConsumerCollection<SentryEvent> queue = null)
         {
@@ -76,7 +76,7 @@ namespace Sentry.Internal
 
         private static async Task WorkerAsync(
            IProducerConsumerCollection<SentryEvent> queue,
-           BackgroundWorkerOptions options,
+           SentryOptions options,
            ITransport transport,
            SemaphoreSlim inSemaphore,
            SemaphoreSlim outSemaphore,

@@ -8,47 +8,36 @@ namespace Sentry.Internal
     internal class SdkComposer
     {
         private readonly SentryOptions _options;
-        private readonly HttpOptions _httpOptions;
-        private readonly BackgroundWorkerOptions _workerOptions;
 
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             if (options.Dsn == null) throw new ArgumentException("No DSN defined in the SentryOptions");
-
-            var httpOptions = new HttpOptions(options.Dsn.SentryUri);
-            // TODO: ensure correct order
-            options.ConfigureHttpTransportOptions?.ForEach(o => o.Invoke(httpOptions));
-            _httpOptions = httpOptions;
-
-            var workerOptions = new BackgroundWorkerOptions();
-            options.ConfigureBackgroundWorkerOptions?.Invoke(workerOptions);
-            _workerOptions = workerOptions;
         }
 
         public IBackgroundWorker CreateBackgroundWorker()
         {
-            return _workerOptions.BackgroundWorker
+            return _options.BackgroundWorker
                         ?? CreateBackgroundWorker(
                                 CreateHttpTransport(
-                                    _httpOptions.SentryHttpClientFactory
+                                    _options.SentryHttpClientFactory
                                         ?? new DefaultSentryHttpClientFactory(
-                                            _httpOptions.ConfigureHandler,
-                                            _httpOptions.ConfigureClient),
+                                        _options.ConfigureHandler,
+                                        _options.ConfigureClient),
                                         _options,
-                                        _httpOptions),
-                                    _workerOptions);
+                                    _options),
+                       _options);
         }
 
         private static BackgroundWorker CreateBackgroundWorker(
             ITransport transport,
-            BackgroundWorkerOptions options)
+            SentryOptions options)
             => new BackgroundWorker(transport, options);
 
         private static HttpTransport CreateHttpTransport(
             ISentryHttpClientFactory sentryHttpClientFactory,
             SentryOptions options,
-            HttpOptions httpOptions)
+            SentryOptions httpOptions)
         {
             var addAuth = SentryHeaders.AddSentryAuth(
                options.SentryVersion,

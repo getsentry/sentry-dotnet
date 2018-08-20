@@ -64,31 +64,25 @@ namespace Sentry.Samples.Console.Customized
                 };
 
                 // Configure the background worker which sends events to sentry:
-                o.Worker(w =>
+                // Wait up to 5 seconds before shutdown while there are events to send.
+                o.ShutdownTimeout = TimeSpan.FromSeconds(5);
+
+                // Using a proxy:
+                o.Proxy = null; //new WebProxy("https://localhost:3128");
+
+                // Example customizing the HttpClientHandlers created
+                o.ConfigureHandler = (handler, dsn) =>
                 {
-                    // Wait up to 5 seconds before shutdown while there are events to send.
-                    w.ShutdownTimeout = TimeSpan.FromSeconds(5);
-                });
+                    handler.ServerCertificateCustomValidationCallback =
+                        // A custom certificate validation
+                        (sender, certificate, chain, sslPolicyErrors) => !certificate.Archived;
+                };
 
-                o.Http(h =>
+                // Access to the HttpClient created to serve the SentryClint
+                o.ConfigureClient = (client, dsn) =>
                 {
-                    // Using a proxy:
-                    h.Proxy = null; //new WebProxy("https://localhost:3128");
-
-                    // Example customizing the HttpClientHandlers created
-                    h.ConfigureHandler = (handler, dsn, httpOptions) =>
-                    {
-                        handler.ServerCertificateCustomValidationCallback =
-                            // A custom certificate validation
-                            (sender, certificate, chain, sslPolicyErrors) => !certificate.Archived;
-                    };
-
-                    // Access to the HttpClient created to serve the SentryClint
-                    h.ConfigureClient = (client, dsn, httpOptions) =>
-                    {
-                        client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
-                    };
-                });
+                    client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
+                };
             }))
             {
                 await SentrySdk.ConfigureScopeAsync(async scope =>

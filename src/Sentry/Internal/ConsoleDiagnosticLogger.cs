@@ -4,7 +4,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
-    public class ConsoleDiagnosticLogger : IDiagnosticLogger
+    internal class ConsoleDiagnosticLogger : IDiagnosticLogger
     {
         private readonly SentryLevel _minimalLevel;
 
@@ -12,8 +12,8 @@ namespace Sentry.Internal
 
         public bool IsEnabled(SentryLevel level) => level >= _minimalLevel;
 
-        public void Log(SentryLevel logLevel, string message, Exception exception = null)
-            => Console.Write($@"{logLevel,7}: {message}
+        public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+            => Console.Write($@"{logLevel,7}: {string.Format(message, args)}
 {exception}");
     }
 }

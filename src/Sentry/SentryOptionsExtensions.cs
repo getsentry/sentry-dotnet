@@ -110,5 +110,20 @@ namespace Sentry
         /// <returns></returns>
         public static IEnumerable<ISentryEventExceptionProcessor> GetAllExceptionProcessors(this SentryOptions options)
             => options.ExceptionProcessorsProviders.SelectMany(p => p());
+
+        internal static void SetupLogging(this SentryOptions options)
+        {
+            if (options.EnableDiagnostics)
+            {
+                if (options.DiagnosticLogger == null)
+                {
+                    options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
+                }
+            }
+            else
+            {
+                options.DiagnosticLogger = null;
+            }
+        }
     }
 }

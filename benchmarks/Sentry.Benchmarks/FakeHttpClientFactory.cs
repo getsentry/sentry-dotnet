@@ -10,7 +10,7 @@ namespace Sentry.Benchmarks
 {
     internal class FakeHttpClientFactory : ISentryHttpClientFactory
     {
-        public HttpClient Create(Dsn dsn, HttpOptions options) => new HttpClient(new FakeMessageHandler());
+        public HttpClient Create(Dsn dsn, SentryOptions options) => new HttpClient(new FakeMessageHandler());
     }
 
     internal class FakeMessageHandler : HttpMessageHandler

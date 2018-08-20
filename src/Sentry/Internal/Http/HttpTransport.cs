@@ -13,14 +13,14 @@ namespace Sentry.Internal.Http
 {
     internal class HttpTransport : ITransport
     {
-        private readonly HttpOptions _options;
+        private readonly SentryOptions _options;
         private readonly HttpClient _httpClient;
         private readonly Action<HttpRequestHeaders> _addAuth;
 
         internal const string NoMessageFallback = "No message";
 
         public HttpTransport(
-            HttpOptions options,
+            SentryOptions options,
             HttpClient httpClient,
             Action<HttpRequestHeaders> addAuth)
         {
@@ -66,7 +66,7 @@ namespace Sentry.Internal.Http
         {
             var request = new HttpRequestMessage
             {
-                RequestUri = _options.SentryUri,
+                RequestUri = _options.Dsn.SentryUri,
                 Method = HttpMethod.Post,
                 Content = new StringContent(JsonSerializer.SerializeObject(@event))
             };

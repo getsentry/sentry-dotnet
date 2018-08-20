@@ -11,8 +11,8 @@ namespace Sentry.Internal.Http
     /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
-        private readonly Action<HttpClientHandler, Dsn, HttpOptions> _configureHandler;
-        private readonly Action<HttpClient, Dsn, HttpOptions> _configureClient;
+        private readonly Action<HttpClientHandler, Dsn> _configureHandler;
+        private readonly Action<HttpClient, Dsn> _configureClient;
 
         /// <summary>
         /// Creates a new instance of <see cref="DefaultSentryHttpClientFactory"/>
@@ -20,8 +20,8 @@ namespace Sentry.Internal.Http
         /// <param name="configureHandler">An optional configuration callback</param>
         /// <param name="configureClient">An optional HttpClient configuration callback</param>
         public DefaultSentryHttpClientFactory(
-            Action<HttpClientHandler, Dsn, HttpOptions> configureHandler = null,
-            Action<HttpClient, Dsn, HttpOptions> configureClient = null)
+            Action<HttpClientHandler, Dsn> configureHandler = null,
+            Action<HttpClient, Dsn> configureClient = null)
         {
             _configureHandler = configureHandler;
             _configureClient = configureClient;
@@ -34,7 +34,7 @@ namespace Sentry.Internal.Http
         /// <param name="options">The HTTP options.</param>
         /// <returns></returns>
         /// <inheritdoc />
-        public HttpClient Create(Dsn dsn, HttpOptions options)
+        public HttpClient Create(Dsn dsn, SentryOptions options)
         {
             if (dsn == null)
             {
@@ -59,7 +59,7 @@ namespace Sentry.Internal.Http
                 httpClientHandler.AutomaticDecompression = options.DecompressionMethods;
             }
 
-            _configureHandler?.Invoke(httpClientHandler, dsn, options);
+            _configureHandler?.Invoke(httpClientHandler, dsn);
 
             HttpMessageHandler handler = httpClientHandler;
 
@@ -82,7 +82,7 @@ namespace Sentry.Internal.Http
 
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-            _configureClient?.Invoke(client, dsn, options);
+            _configureClient?.Invoke(client, dsn);
 
             return client;
         }

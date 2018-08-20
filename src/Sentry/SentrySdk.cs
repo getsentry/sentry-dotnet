@@ -21,7 +21,6 @@ namespace Sentry
     /// </remarks>
     public static class SentrySdk
     {
-        // TODO: At this point no Scope (e.g: breadcrumb) will be kept until the SDK is enabled
         private static IHub _hub = DisabledHub.Instance;
 
         /// <summary>
@@ -74,11 +73,13 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
+            options.SetupLogging();
+
             if (options.Dsn == null)
             {
                 if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
                 {
-                    // TODO: Log that it continues disabled
+                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
                     return DisabledHub.Instance;
                 }
                 options.Dsn = dsn;

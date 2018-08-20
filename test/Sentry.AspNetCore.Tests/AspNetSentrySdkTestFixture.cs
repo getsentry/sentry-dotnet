@@ -18,11 +18,8 @@ namespace Sentry.AspNetCore.Tests
             builder.UseSentry(options =>
             {
                 options.Dsn = DsnSamples.ValidDsnWithSecret;
-                options.Http(h =>
-                {
-                    h.SentryHttpClientFactory = new DelegateHttpClientFactory((d, o)
+                options.SentryHttpClientFactory = new DelegateHttpClientFactory((d, o)
                         => sentryHttpClient);
-                });
 
                 Configure?.Invoke(options);
             });

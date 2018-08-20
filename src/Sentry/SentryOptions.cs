@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO.Compression;
+using System.Net;
+using System.Net.Http;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
@@ -20,10 +23,6 @@ namespace Sentry
         internal string ClientVersion { get; } = SdkName;
 
         internal int SentryVersion { get; } = ProtocolVersion;
-
-        internal Action<BackgroundWorkerOptions> ConfigureBackgroundWorkerOptions { get; private set; }
-
-        internal List<Action<HttpOptions>> ConfigureHttpTransportOptions { get; private set; }
 
         /// <summary>
         /// A list of exception processors
@@ -49,6 +48,10 @@ namespace Sentry
         /// A list of integrations to be added when the SDK is initialized
         /// </summary>
         internal ImmutableList<ISdkIntegration> Integrations { get; set; }
+
+        internal IBackgroundWorker BackgroundWorker { get; set; }
+
+        internal ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
 
         /// <summary>
         /// A list of namespaces (or prefixes) considered not part of application code
@@ -158,27 +161,97 @@ namespace Sentry
         /// </remarks>
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
 
+        private int _maxQueueItems = 30;
         /// <summary>
-        /// Configure the background worker options
+        /// The maximum number of events to keep while the worker attempts to send them
         /// </summary>
-        /// <param name="configure">The callback to configure background worker options</param>
-        public void Worker(Action<BackgroundWorkerOptions> configure) => ConfigureBackgroundWorkerOptions = configure;
-
-        /// <summary>
-        /// Configure HTTP related options
-        /// </summary>
-        /// <param name="configure"></param>
-        public void Http(Action<HttpOptions> configure)
+        public int MaxQueueItems
         {
-            if (ConfigureHttpTransportOptions == null)
+            get => _maxQueueItems;
+            set
             {
-                ConfigureHttpTransportOptions = new List<Action<HttpOptions>>(1);
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the queue.");
+                }
+                _maxQueueItems = value;
             }
-            ConfigureHttpTransportOptions.Add(configure);
         }
 
-        // TODO: this shouldn't be a prop exposed. Needs an API to replacing the strategy and the level. Mind lifetime
-        public IDiagnosticLogger DiagnosticLogger { get; set; } = new ConsoleDiagnosticLogger(SentryLevel.Error);
+        /// <summary>
+        /// How long to wait for events to be sent before shutdown
+        /// </summary>
+        /// <remarks>
+        /// In case there are events queued when the SDK is closed, upper bound limit to wait
+        /// for the worker to send the events to Sentry.
+        /// </remarks>
+        /// <example>
+        /// The SDK is closed while the queue has 1 event queued.
+        /// The worker takes 50 milliseconds to send an event to Sentry.
+        /// Even though default settings say 2 seconds, closing the SDK would block for 50ms.
+        /// </example>
+        public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(2);
+
+        /// <summary>
+        /// Decompression methods accepted
+        /// </summary>
+        /// <remarks>
+        /// By default accepts all available compression methods supported by the platform
+        /// </remarks>
+        public DecompressionMethods DecompressionMethods { get; set; }
+            // Note the ~ enabling all bits
+            = ~DecompressionMethods.None;
+
+        /// <summary>
+        /// The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry
+        /// </summary>
+        /// <remarks>
+        /// To disable request body compression, use <see cref="CompressionLevel.NoCompression"/>
+        /// </remarks>
+        public CompressionLevel RequestBodyCompressionLevel { get; set; } = CompressionLevel.Optimal;
+
+        /// <summary>
+        /// Whether the body compression is buffered and the request 'Content-Length' known in advance.
+        /// </summary>
+        /// <remarks>
+        /// Without reading through the Gzip stream to have its final size, it's no possible to use 'Content-Length'
+        /// header value. That means 'Content-Encoding: chunked' has to be used which is sometimes not supported.
+        /// Sentry on-premise without a reverse-proxy, for example, does not support 'chunked' requests.
+        /// </remarks>
+        /// <see href="https://github.com/getsentry/sentry-dotnet/issues/71"/>
+        public bool RequestBodyCompressionBuffered { get; set; } = true;
+
+        /// <summary>
+        /// An optional web proxy
+        /// </summary>
+        public IWebProxy Proxy { get; set; }
+
+        /// <summary>
+        /// A callback invoked when a <see cref="SentryClient"/> is created.
+        /// </summary>
+        public Action<HttpClientHandler, Dsn> ConfigureHandler { get; set; }
+
+        /// <summary>
+        /// A callback invoked when a <see cref="SentryClient"/> is created.
+        /// </summary>
+        public Action<HttpClient, Dsn> ConfigureClient { get; set; }
+
+        // Expected to call into the internal logging which will be expose
+        internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; set; }
+
+        /// <summary>
+        /// Whether to log diagnostics messages
+        /// </summary>
+        public bool EnableDiagnostics { get; set; } = true;
+        /// <summary>
+        /// The diagnostics level to be used
+        /// </summary>
+        /// <remarks>
+        /// By default only errors are output
+        /// </remarks>
+        public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Error;
+
+        public IDiagnosticLogger DiagnosticLogger { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>

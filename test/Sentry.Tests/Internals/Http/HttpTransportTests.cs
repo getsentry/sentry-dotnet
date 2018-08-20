@@ -17,7 +17,11 @@ namespace Sentry.Tests.Internals.Http
     {
         private class Fixture
         {
-            public HttpOptions HttpOptions { get; set; } = new HttpOptions(new Uri("https://sentry.yo/store"));
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions
+            {
+                Dsn = DsnSamples.Valid
+            };
+
             public HttpClient HttpClient { get; set; }
             public MockableHttpMessageHandler HttpMessageHandler { get; set; } = Substitute.For<MockableHttpMessageHandler>();
             public HttpContent HttpContent { get; set; } = Substitute.For<HttpContent>();
@@ -31,7 +35,7 @@ namespace Sentry.Tests.Internals.Http
                 HttpClient = new HttpClient(HttpMessageHandler);
             }
 
-            public HttpTransport GetSut() => new HttpTransport(HttpOptions, HttpClient, AddAuth);
+            public HttpTransport GetSut() => new HttpTransport(SentryOptions, HttpClient, AddAuth);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -71,7 +75,7 @@ namespace Sentry.Tests.Internals.Http
             var expectedEvent = new SentryEvent();
 
             var callbackInvoked = false;
-            _fixture.HttpOptions.HandleFailedEventSubmission = (e, c, m) =>
+            _fixture.SentryOptions.HandleFailedEventSubmission = (e, c, m) =>
             {
                 Assert.Same(e, expectedEvent);
                 Assert.Equal(expectedMessage, m);
@@ -95,7 +99,7 @@ namespace Sentry.Tests.Internals.Http
             var expectedEvent = new SentryEvent();
 
             var callbackInvoked = false;
-            _fixture.HttpOptions.HandleFailedEventSubmission = (e, c, m) =>
+            _fixture.SentryOptions.HandleFailedEventSubmission = (e, c, m) =>
             {
                 Assert.Same(e, expectedEvent);
                 Assert.Equal(HttpTransport.NoMessageFallback, m);
@@ -149,7 +153,7 @@ namespace Sentry.Tests.Internals.Http
             var evt = new SentryEvent();
             var actual = sut.CreateRequest(evt);
 
-            Assert.Equal(_fixture.HttpOptions.SentryUri, actual.RequestUri);
+            Assert.Equal(_fixture.SentryOptions.Dsn.SentryUri, actual.RequestUri);
         }
 
         [Fact]

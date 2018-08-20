@@ -17,12 +17,12 @@ namespace Sentry.Tests.Internals
             public ITransport Transport { get; set; } = Substitute.For<ITransport>();
             public IProducerConsumerCollection<SentryEvent> Queue { get; set; } = new ConcurrentQueue<SentryEvent>();
             public CancellationTokenSource CancellationTokenSource { get; set; } = new CancellationTokenSource();
-            public BackgroundWorkerOptions BackgroundWorkerOptions { get; set; } = new BackgroundWorkerOptions();
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
             public BackgroundWorker GetSut()
                 => new BackgroundWorker(
                     Transport,
-                    BackgroundWorkerOptions,
+                    SentryOptions,
                     CancellationTokenSource,
                     Queue);
         }
@@ -97,7 +97,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
         {
-            _fixture.BackgroundWorkerOptions.ShutdownTimeout = default; // Don't wait
+            _fixture.SentryOptions.ShutdownTimeout = default; // Don't wait
 
             var evt = new SentryEvent();
             using (var sut = _fixture.GetSut())
@@ -165,7 +165,7 @@ namespace Sentry.Tests.Internals
         public void Create_CancelledTaskAndNoShutdownTimeout_ConsumesNoEvents()
         {
             // Arrange
-            _fixture.BackgroundWorkerOptions.ShutdownTimeout = default;
+            _fixture.SentryOptions.ShutdownTimeout = default;
             _fixture.CancellationTokenSource.Cancel();
 
             // Act
@@ -187,7 +187,7 @@ namespace Sentry.Tests.Internals
             var expected = new SentryEvent();
             var transportEvent = new ManualResetEvent(false);
             var eventsQueuedEvent = new ManualResetEvent(false);
-            _fixture.BackgroundWorkerOptions.MaxQueueItems = 1;
+            _fixture.SentryOptions.MaxQueueItems = 1;
             _fixture.Transport
                 .When(t => t.CaptureEventAsync(expected, Arg.Any<CancellationToken>()))
                 .Do(p =>

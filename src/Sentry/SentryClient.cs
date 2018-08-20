@@ -47,6 +47,8 @@ namespace Sentry
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
+            options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
+
             if (worker == null)
             {
                 var composer = new SdkComposer(options);

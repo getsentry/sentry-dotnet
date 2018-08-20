@@ -6,7 +6,10 @@ namespace Sentry.Internal
 {
     internal class NoOpDiagnosticLogger : IDiagnosticLogger
     {
-        public void Log(SentryLevel logLevel, string message, Exception exception)
-        { }
+        public bool IsEnabled(SentryLevel level) => false;
+
+        public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+        {
+        }
     }
 }

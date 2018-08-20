@@ -33,7 +33,7 @@ namespace SentryTest.AspNetCore.Tests
                 builder.UseSentry(options =>
                 {
                     options.Dsn = DsnSamples.ValidDsnWithSecret;
-                    options.Worker(w => w.BackgroundWorker = Worker);
+                    options.BackgroundWorker = Worker;
 
                     Configure?.Invoke(options);
                 });
@@ -41,7 +41,7 @@ namespace SentryTest.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task DisabledSdk_UnhadledException_NoEventCaptured()
+        public async Task DisabledSdk_UnhandledException_NoEventCaptured()
         {
             Configure = o => o.InitializeSdk = false;
 
@@ -152,7 +152,7 @@ namespace SentryTest.AspNetCore.Tests
                     c.SetBasePath(Directory.GetCurrentDirectory()); // fails on net462 without this
                     c.AddJsonFile("allsettings.json", optional: false);
                 });
-                b.UseSentry(o => o.Worker(w => w.BackgroundWorker = Worker));
+                b.UseSentry(o => o.BackgroundWorker = Worker);
             };
 
             Build();

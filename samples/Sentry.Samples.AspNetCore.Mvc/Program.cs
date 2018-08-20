@@ -32,19 +32,13 @@ namespace Sentry.Samples.AspNetCore.Mvc
 
                     options.MaxBreadcrumbs = 200;
 
-                    options.Http(h =>
-                    {
-                        //h.Proxy = new WebProxy("https://localhost:3128");
+                    //options.Proxy = new WebProxy("https://localhost:3128");
 
-                        // Example: Disabling support to compressed responses:
-                        h.DecompressionMethods = DecompressionMethods.None;
-                    });
+                    // Example: Disabling support to compressed responses:
+                    options.DecompressionMethods = DecompressionMethods.None;
 
-                    options.Worker(w =>
-                    {
-                        w.MaxQueueItems = 100;
-                        w.ShutdownTimeout = TimeSpan.FromSeconds(5);
-                    });
+                    options.MaxQueueItems = 100;
+                    options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
                     // Hard-coding here will override any value set on appsettings.json:
                     options.MinimumEventLevel = LogLevel.Error;
