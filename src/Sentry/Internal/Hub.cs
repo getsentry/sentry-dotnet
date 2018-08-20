@@ -8,8 +8,6 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
-    // TODO Hub being the entry point, here's the place to capture
-    // unhandled exceptions and notify via logging or callback
     internal class Hub : IHub, IDisposable
     {
         private readonly SentryOptions _options;
@@ -43,10 +41,28 @@ namespace Sentry.Internal
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
-            => ScopeManager.ConfigureScope(configureScope);
+        {
+            try
+            {
+                ScopeManager.ConfigureScope(configureScope);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to ConfigureScope", e);
+            }
+        }
 
-        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
-            => ScopeManager.ConfigureScopeAsync(configureScope);
+        public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+        {
+            try
+            {
+                await ScopeManager.ConfigureScopeAsync(configureScope).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to ConfigureScopeAsync", e);
+            }
+        }
 
         public IDisposable PushScope() => ScopeManager.PushScope();
 
@@ -56,8 +72,16 @@ namespace Sentry.Internal
 
         public Guid CaptureEvent(SentryEvent evt, Scope scope = null)
         {
-            var (currentScope, client) = ScopeManager.GetCurrent();
-            return client.CaptureEvent(evt, scope ?? currentScope);
+            try
+            {
+                var (currentScope, client) = ScopeManager.GetCurrent();
+                return client.CaptureEvent(evt, scope ?? currentScope);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
+                return Guid.Empty;
+            }
         }
 
         public void Dispose()

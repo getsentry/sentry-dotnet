@@ -52,6 +52,13 @@ namespace Sentry.Extensibility
             Exception exception = null)
             => logger.LogIfEnabled(SentryLevel.Error, message, exception);
 
+        public static void LogError<TArg>(
+            this IDiagnosticLogger logger,
+            string message,
+            Exception exception,
+            TArg arg)
+            => logger.LogIfEnabled(SentryLevel.Error, message, exception, arg);
+
         public static void LogError<TArg, TArg2>(
             this IDiagnosticLogger logger,
             string message,

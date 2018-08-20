@@ -83,6 +83,19 @@ namespace Sentry
                 return Guid.Empty;
             }
 
+            try
+            {
+                return DoSendEvent(@event, scope);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("An error occured when capturing the event {0}.", e, @event.EventId);
+                return Guid.Empty;
+            }
+        }
+
+        private Guid DoSendEvent(SentryEvent @event, Scope scope)
+        {
             if (_options.SampleRate is float sample)
             {
                 if (Random.NextDouble() > sample)
@@ -121,7 +134,8 @@ namespace Sentry
                 return @event.EventId;
             }
 
-            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}", Worker.QueuedItems);
+            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
+                Worker.QueuedItems);
             return Guid.Empty;
         }
 

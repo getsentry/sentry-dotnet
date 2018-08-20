@@ -21,7 +21,6 @@ namespace Sentry.Internal
 
         private Func<ImmutableStack<(Scope, ISentryClient)>> NewStack { get; }
 
-
         public SentryScopeManager(
             SentryOptions options,
             ISentryClient rootClient)
