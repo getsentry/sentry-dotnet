@@ -130,7 +130,11 @@ namespace Sentry.Tests
             var logger = Substitute.For<IDiagnosticLogger>();
             logger.IsEnabled(SentryLevel.Warning).Returns(true);
 
-            var options = new SentryOptions { DiagnosticLogger = logger };
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = logger,
+                Debug = true
+            };
 
             using (SentrySdk.Init(options))
             {
@@ -147,7 +151,7 @@ namespace Sentry.Tests
             var options = new SentryOptions
             {
                 DiagnosticLogger = logger,
-                EnableDiagnostics = false,
+                Debug = false,
             };
 
             using (SentrySdk.Init(options))

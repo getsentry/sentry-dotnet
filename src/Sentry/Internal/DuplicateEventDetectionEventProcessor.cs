@@ -7,13 +7,16 @@ namespace Sentry.Internal
 {
     internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
     {
+        private readonly SentryOptions _options;
         private readonly ConditionalWeakTable<object, object> _capturedEvent = new ConditionalWeakTable<object, object>();
+
+        public DuplicateEventDetectionEventProcessor(SentryOptions options) => _options = options;
 
         public SentryEvent Process(SentryEvent @event)
         {
             if (_capturedEvent.TryGetValue(@event, out _))
             {
-                Debug.WriteLine("Same event instance detected and discarded");
+                _options.DiagnosticLogger?.LogDebug("Same event instance detected and discarded. EventId: {0}", @event.EventId);
                 return null;
             }
             _capturedEvent.Add(@event, null);
@@ -25,8 +28,7 @@ namespace Sentry.Internal
 
             if (IsDuplicate(@event.Exception))
             {
-                // TODO: replace Debug with internal logging
-                Debug.WriteLine("Duplicate Exception detected and discarded");
+                _options.DiagnosticLogger?.LogDebug("Duplicate Exception detected. Event {0} will be discarded.", @event.EventId);
                 return null;
             }
 

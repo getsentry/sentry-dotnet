@@ -236,21 +236,30 @@ namespace Sentry
         /// </summary>
         public Action<HttpClient, Dsn> ConfigureClient { get; set; }
 
-        // Expected to call into the internal logging which will be expose
-        internal Action<SentryEvent, HttpStatusCode, string> HandleFailedEventSubmission { get; set; }
-
         /// <summary>
         /// Whether to log diagnostics messages
         /// </summary>
-        public bool EnableDiagnostics { get; set; } = true;
+        /// <remarks>
+        /// The verbosity can be controlled through <see cref="DiagnosticsLevel"/>
+        /// and the implementation via <see cref="DiagnosticLogger"/>.
+        /// </remarks>
+        public bool Debug { get; set; }
+
         /// <summary>
         /// The diagnostics level to be used
         /// </summary>
         /// <remarks>
-        /// By default only errors are output
+        /// The <see cref="Debug"/> flag has to be switched on for this setting to take effect.
         /// </remarks>
-        public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Error;
+        public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Debug;
 
+        /// <summary>
+        /// The implementation of the logger.
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="Debug"/> flag has to be switched on for this logger to be used at all.
+        /// When debugging is turned off, this property is made null and any internal logging results in a no-op.
+        /// </remarks>
         public IDiagnosticLogger DiagnosticLogger { get; set; }
 
         /// <summary>
@@ -268,7 +277,7 @@ namespace Sentry
 
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
-                     new DuplicateEventDetectionEventProcessor(),
+                     new DuplicateEventDetectionEventProcessor(this),
                      new MainSentryEventProcessor(this));
 
             ExceptionProcessors

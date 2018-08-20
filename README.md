@@ -144,6 +144,7 @@ The SDK is configurable, many of the settings are demonstrated through the sampl
 * Disable capture of global unhandled exceptions
 * Add event processor
 * Add exception processor
+* Enable SDK debug mode
 
 and more...
 

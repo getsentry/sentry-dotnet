@@ -14,9 +14,9 @@ namespace Sentry.Tests.Internals
     {
         private class Fixture
         {
-            public IScopeOptions ScopeOptions { get; set; } = Substitute.For<IScopeOptions>();
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
             public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
-            public SentryScopeManager GetSut() => new SentryScopeManager(ScopeOptions, Client);
+            public SentryScopeManager GetSut() => new SentryScopeManager(SentryOptions, Client);
         }
 
         private readonly Fixture _fixture = new Fixture();

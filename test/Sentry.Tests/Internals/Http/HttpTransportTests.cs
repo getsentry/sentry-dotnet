@@ -5,8 +5,10 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
+using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Internal.Http;
+using Sentry.Protocol;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;
@@ -19,7 +21,8 @@ namespace Sentry.Tests.Internals.Http
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions
             {
-                Dsn = DsnSamples.Valid
+                Dsn = DsnSamples.Valid,
+                DiagnosticLogger = Substitute.For<IDiagnosticLogger>()
             };
 
             public HttpClient HttpClient { get; set; }
@@ -74,14 +77,7 @@ namespace Sentry.Tests.Internals.Http
             const string expectedMessage = "Bad Gateway!";
             var expectedEvent = new SentryEvent();
 
-            var callbackInvoked = false;
-            _fixture.SentryOptions.HandleFailedEventSubmission = (e, c, m) =>
-            {
-                Assert.Same(e, expectedEvent);
-                Assert.Equal(expectedMessage, m);
-                Assert.Equal(expectedCode, c);
-                callbackInvoked = true;
-            };
+            _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
             _fixture.HttpMessageHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage));
 
@@ -89,7 +85,11 @@ namespace Sentry.Tests.Internals.Http
 
             await sut.CaptureEventAsync(expectedEvent);
 
-            Assert.True(callbackInvoked);
+            _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
+                "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,
+                Arg.Is<object[]>(p => p[0].ToString() == expectedEvent.EventId.ToString()
+                                      && p[1].ToString() == expectedCode.ToString()
+                                      && p[2].ToString() == expectedMessage));
         }
 
         [Fact]
@@ -98,14 +98,7 @@ namespace Sentry.Tests.Internals.Http
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             var expectedEvent = new SentryEvent();
 
-            var callbackInvoked = false;
-            _fixture.SentryOptions.HandleFailedEventSubmission = (e, c, m) =>
-            {
-                Assert.Same(e, expectedEvent);
-                Assert.Equal(HttpTransport.NoMessageFallback, m);
-                Assert.Equal(expectedCode, c);
-                callbackInvoked = true;
-            };
+            _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
             _fixture.HttpMessageHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, null));
 
@@ -113,7 +106,11 @@ namespace Sentry.Tests.Internals.Http
 
             await sut.CaptureEventAsync(expectedEvent);
 
-            Assert.True(callbackInvoked);
+            _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
+                "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,
+                Arg.Is<object[]>(p => p[0].ToString() == expectedEvent.EventId.ToString()
+                                      && p[1].ToString() == expectedCode.ToString()
+                                      && p[2].ToString() == HttpTransport.NoMessageFallback));
         }
 
         [Fact]

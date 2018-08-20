@@ -12,6 +12,7 @@ namespace Sentry.Internal
     // unhandled exceptions and notify via logging or callback
     internal class Hub : IHub, IDisposable
     {
+        private readonly SentryOptions _options;
         private readonly ImmutableList<ISdkIntegration> _integrations;
 
         public IInternalScopeManager ScopeManager { get; }
@@ -22,6 +23,7 @@ namespace Sentry.Internal
         public Hub(SentryOptions options)
         {
             Debug.Assert(options != null);
+            _options = options;
 
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
@@ -34,6 +36,7 @@ namespace Sentry.Internal
             {
                 foreach (var integration in _integrations)
                 {
+                    options.DiagnosticLogger?.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
                     integration.Register(this);
                 }
             }
@@ -59,6 +62,8 @@ namespace Sentry.Internal
 
         public void Dispose()
         {
+            _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
+
             if (_integrations?.Count > 0)
             {
                 foreach (var integration in _integrations)

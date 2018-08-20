@@ -45,6 +45,8 @@ namespace Sentry.Internal
 
         public SentryEvent Process(SentryEvent @event)
         {
+            _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
+
             if (!@event.Contexts.ContainsKey(Runtime.Type))
             {
                 @event.Contexts[Runtime.Type] = Runtime;

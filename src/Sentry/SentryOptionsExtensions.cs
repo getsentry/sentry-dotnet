@@ -113,11 +113,12 @@ namespace Sentry
 
         internal static void SetupLogging(this SentryOptions options)
         {
-            if (options.EnableDiagnostics)
+            if (options.Debug)
             {
                 if (options.DiagnosticLogger == null)
                 {
                     options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
+                    options.DiagnosticLogger?.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", options.DiagnosticsLevel);
                 }
             }
             else

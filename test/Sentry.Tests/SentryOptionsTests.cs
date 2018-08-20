@@ -19,12 +19,5 @@ namespace Sentry.Tests
             var sut = new SentryOptions();
             Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
         }
-
-        [Fact]
-        public void HandleFailedEventSubmission_ByDefault_NoHandlerAssigned()
-        {
-            var sut = new SentryOptions();
-            Assert.Null(sut.HandleFailedEventSubmission);
-        }
     }
 }

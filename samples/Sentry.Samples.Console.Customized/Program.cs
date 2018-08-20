@@ -67,6 +67,13 @@ namespace Sentry.Samples.Console.Customized
                 // Wait up to 5 seconds before shutdown while there are events to send.
                 o.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
+                // Enable SDK logging with Debug level
+                o.Debug = true;
+                // To change the verbosity, use:
+                // o.DiagnosticsLevel = SentryLevel.Info;
+                // To use a custom logger:
+                // o.DiagnosticLogger = ...
+
                 // Using a proxy:
                 o.Proxy = null; //new WebProxy("https://localhost:3128");
 
@@ -102,7 +109,7 @@ namespace Sentry.Samples.Console.Customized
                 var error = new Exception("Attempting to send this multiple times");
 
                 // Only the first capture will be sent to Sentry
-                for (var i = 0; i < 100; i++)
+                for (var i = 0; i < 3; i++)
                 {
                     // The SDK is able to detect duplicate events:
                     // This is useful, for example, when multiple loggers log the same exception. Or exception is re-thrown and recaptured.

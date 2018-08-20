@@ -6,7 +6,7 @@ namespace Sentry.Tests.Internals
 {
     public class DuplicateEventDetectionEventProcessorTests
     {
-        private readonly DuplicateEventDetectionEventProcessor _sut = new DuplicateEventDetectionEventProcessor();
+        private readonly DuplicateEventDetectionEventProcessor _sut = new DuplicateEventDetectionEventProcessor(new SentryOptions());
 
         [Fact]
         public void Process_DuplicateEvent_ReturnsNull()

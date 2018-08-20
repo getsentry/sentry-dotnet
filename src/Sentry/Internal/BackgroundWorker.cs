@@ -104,10 +104,12 @@ namespace Sentry.Internal
                         {
                             if (options.ShutdownTimeout == TimeSpan.Zero)
                             {
+                                options.DiagnosticLogger?.LogDebug("Exiting immediately due to 0 shutdown timeout. #{0} in queue.", queue.Count);
                                 return;
                             }
                             else
                             {
+                                options.DiagnosticLogger?.LogDebug("Shutdown scheduled. Stopping by: {0}. #{1} in queue.", options.ShutdownTimeout, queue.Count);
                                 shutdownTimeout.CancelAfter(options.ShutdownTimeout);
                             }
 
@@ -123,22 +125,24 @@ namespace Sentry.Internal
                             // Optionally we can keep multiple requests in-flight concurrently:
                             // instead of awaiting here, keep reading from the queue while less than
                             // N events are being sent
-                            await transport.CaptureEventAsync(@event, shutdownTimeout.Token).ConfigureAwait(false);
+                            var task = transport.CaptureEventAsync(@event, shutdownTimeout.Token).ConfigureAwait(false);
+                            options.DiagnosticLogger?.LogDebug("Event {0} in-flight to Sentry. #{1} in queue.", @event.EventId, queue.Count);
+                            await task;
                         }
                         catch (OperationCanceledException)
                         {
-                            // Shutdown token triggered. Time to exit.
+                            options.DiagnosticLogger?.LogInfo("Shutdown token triggered. Time to exit. #{0} in queue.", queue.Count);
                             return;
                         }
                         catch (Exception exception)
                         {
-                            // TODO: Notify error handler
-                            Debug.WriteLine(exception.ToString());
+                            options.DiagnosticLogger?.LogError("Error while processing event: {0}. #{1} in queue.", exception, @event.EventId, queue.Count);
                         }
                     }
                     else
                     {
                         Debug.Assert(shutdownRequested);
+                        options.DiagnosticLogger?.LogInfo("Exiting the worker with an empty queue.");
 
                         // Empty queue. Exit.
                         return;
@@ -158,6 +162,8 @@ namespace Sentry.Internal
         /// <inheritdoc />
         public void Dispose()
         {
+            _options.DiagnosticLogger?.LogDebug("Disposing BackgroundWorker.");
+
             if (_disposed)
             {
                 return;
@@ -170,20 +176,18 @@ namespace Sentry.Internal
                 // Immediately requests the Worker to stop.
                 _cancellationTokenSource.Cancel();
 
-                // If there's anything in the queue, it'll keep running until 'shutudownTimeout' is reached
+                // If there's anything in the queue, it'll keep running until 'shutdownTimeout' is reached
                 // If the queue is empty it will quit immediately
                 WorkerTask.Wait(_options.ShutdownTimeout);
             }
             catch (Exception exception)
             {
-                // TODO: Notify error handler
-                Debug.WriteLine(exception.ToString());
+                _options.DiagnosticLogger?.LogError("Stopping the background worker threw an exception.", exception);
             }
 
             if (_queue.Count > 0)
             {
-                // TODO: Notify error handler
-                Debug.WriteLine($"Worker stopped while {_queue.Count} were still in the queue.");
+                _options.DiagnosticLogger?.LogWarning("Worker stopped while {0} were still in the queue.", _queue.Count);
             }
         }
     }

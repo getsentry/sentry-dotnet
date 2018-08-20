@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Http;
+using Sentry.Protocol;
 
 namespace Sentry.Internal.Http
 {
@@ -46,6 +47,7 @@ namespace Sentry.Internal.Http
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
+                _options.DiagnosticLogger?.LogDebug("Event {0} successfully received by Sentry.", @event.EventId);
 #if DEBUG
                 var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var responseId = JsonSerializer.DeserializeObject<SentrySuccessfulResponseBody>(body)?.id;
@@ -54,11 +56,12 @@ namespace Sentry.Internal.Http
                 return;
             }
 
-            if (_options.HandleFailedEventSubmission != null)
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
                 response.Headers.TryGetValues(SentryHeaders.SentryErrorHeader, out var values);
                 var errorMessage = values?.FirstOrDefault() ?? NoMessageFallback;
-                _options.HandleFailedEventSubmission?.Invoke(@event, response.StatusCode, errorMessage);
+                _options.DiagnosticLogger?.Log(SentryLevel.Error, "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,
+                    @event.EventId, response.StatusCode, errorMessage);
             }
         }
 

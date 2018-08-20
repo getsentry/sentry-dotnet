@@ -56,6 +56,7 @@ namespace Sentry
             }
             else
             {
+                options.DiagnosticLogger?.LogDebug("Worker of type {0} was provided via Options.", worker.GetType().Name);
                 Worker = worker;
             }
         }
@@ -86,10 +87,12 @@ namespace Sentry
             {
                 if (Random.NextDouble() > sample)
                 {
-                    // TODO: Log here event dropped due to sampling
+                    _options.DiagnosticLogger?.LogDebug("Event sampled.");
                     return Guid.Empty;
                 }
             }
+
+            _options.DiagnosticLogger?.LogInfo("Capturing event. Has scope: {0}", scope != null);
 
             // Evaluate and copy before invoking the callback
             scope?.Evaluate();
@@ -100,7 +103,7 @@ namespace Sentry
                 @event = processor.Process(@event);
                 if (@event == null)
                 {
-                    // TODO: Log here which processor dropped it
+                    _options.DiagnosticLogger?.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                     return Guid.Empty;
                 }
             }
@@ -108,17 +111,17 @@ namespace Sentry
             @event = BeforeSend(@event);
             if (@event == null) // Rejected event
             {
-                // TODO: Log BeforeSend callback dropped it
+                _options.DiagnosticLogger?.LogInfo("Event dropped by BeforeSend callback.");
                 return Guid.Empty;
             }
 
             if (Worker.EnqueueEvent(@event))
             {
+                _options.DiagnosticLogger?.LogDebug("Event queued up.");
                 return @event.EventId;
             }
 
-            // TODO: Notify error handler
-            Debug.WriteLine("Failed to enqueue event. Current queue depth: " + Worker.QueuedItems);
+            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}", Worker.QueuedItems);
             return Guid.Empty;
         }
 
@@ -129,12 +132,15 @@ namespace Sentry
                 return @event;
             }
 
+            _options.DiagnosticLogger?.LogDebug("Calling the BeforeSend callback");
             try
             {
                 @event = _options.BeforeSend?.Invoke(@event);
             }
             catch (Exception e)
             {
+                _options.DiagnosticLogger?.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
+
                 @event.AddBreadcrumb(
                     "BeforeSend callback failed.",
                     category: "SentryClient",
@@ -155,6 +161,8 @@ namespace Sentry
         /// <inheritdoc />
         public void Dispose()
         {
+            _options.DiagnosticLogger?.LogDebug("Disposing SentryClient.");
+
             if (_disposed)
             {
                 return;
