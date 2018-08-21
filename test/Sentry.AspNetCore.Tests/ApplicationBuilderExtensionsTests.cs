@@ -55,15 +55,6 @@ namespace Sentry.AspNetCore.Tests
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
-        public void UseSentry_NoDiagnosticSet_MelSet()
-        {
-            var sut = _fixture.GetSut();
-            sut.UseSentry();
-
-            Assert.IsType<MelDiagnosticLogger>(_fixture.SentryAspNetCoreOptions.DiagnosticLogger);
-        }
-
-        [Fact]
         public void UseSentry_DiagnosticSet_NoOverriden()
         {
             var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
