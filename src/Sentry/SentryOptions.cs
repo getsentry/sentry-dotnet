@@ -302,6 +302,7 @@ namespace Sentry
                     "System.",
                     "Microsoft.",
                     "MS", // MS.Win32, MS.Internal, etc: Desktop apps
+                    "Newtonsoft.Json",
                     "FSharp.",
                     "Giraffe.");
         }
