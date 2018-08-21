@@ -224,7 +224,7 @@ namespace Sentry
         /// <summary>
         /// An optional web proxy
         /// </summary>
-        public IWebProxy Proxy { get; set; }
+        public IWebProxy HttpProxy { get; set; }
 
         /// <summary>
         /// A callback invoked when a <see cref="SentryClient"/> is created.

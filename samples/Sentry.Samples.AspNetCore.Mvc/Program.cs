@@ -32,7 +32,7 @@ namespace Sentry.Samples.AspNetCore.Mvc
 
                     options.MaxBreadcrumbs = 200;
 
-                    //options.Proxy = new WebProxy("https://localhost:3128");
+                    //options.HttpProxy = new WebProxy("https://localhost:3128");
 
                     // Example: Disabling support to compressed responses:
                     options.DecompressionMethods = DecompressionMethods.None;

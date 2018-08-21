@@ -75,7 +75,7 @@ namespace Sentry.Samples.Console.Customized
                 // o.DiagnosticLogger = ...
 
                 // Using a proxy:
-                o.Proxy = null; //new WebProxy("https://localhost:3128");
+                o.HttpProxy = null; //new WebProxy("https://localhost:3128");
 
                 // Example customizing the HttpClientHandlers created
                 o.ConfigureHandler = (handler, dsn) =>

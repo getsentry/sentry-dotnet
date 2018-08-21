@@ -149,11 +149,11 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Create_HttpProxyOnOptions_HandlerUsesProxy()
         {
-            _fixture.HttpOptions.Proxy = new WebProxy("https://proxy.sentry.io:31337");
+            _fixture.HttpOptions.HttpProxy = new WebProxy("https://proxy.sentry.io:31337");
             var configureHandlerInvoked = false;
             _fixture.ConfigureHandler = (handler, dsn) =>
             {
-                Assert.Same(_fixture.HttpOptions.Proxy, handler.Proxy);
+                Assert.Same(_fixture.HttpOptions.HttpProxy, handler.Proxy);
                 configureHandlerInvoked = true;
             };
             var sut = _fixture.GetSut();

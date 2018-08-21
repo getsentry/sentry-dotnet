@@ -48,10 +48,10 @@ namespace Sentry.Internal.Http
             }
 
             var httpClientHandler = new HttpClientHandler();
-            if (options.Proxy != null)
+            if (options.HttpProxy != null)
             {
-                httpClientHandler.Proxy = options.Proxy;
-                options.DiagnosticLogger?.LogInfo("Using Proxy: {0}", options.Proxy);
+                httpClientHandler.Proxy = options.HttpProxy;
+                options.DiagnosticLogger?.LogInfo("Using Proxy: {0}", options.HttpProxy);
             }
 
             // If the platform supports automatic decompression
