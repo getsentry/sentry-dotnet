@@ -1,11 +1,43 @@
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests
 {
     public class SentryLoggerFactoryExtensionsTests
     {
+        [Fact]
+        public void AddSentry_NoDiagnosticSet_MelSet()
+        {
+            SentryLoggingOptions options = null;
+            var sut = Substitute.For<ILoggerFactory>();
+            sut.AddSentry(o =>
+            {
+                o.Debug = true;
+                options = o;
+            });
+
+            Assert.IsType<MelDiagnosticLogger>(options.DiagnosticLogger);
+        }
+
+        [Fact]
+        public void AddSentry_DiagnosticSet_NoOverriden()
+        {
+            SentryLoggingOptions options = null;
+            var sut = Substitute.For<ILoggerFactory>();
+            var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
+            sut.AddSentry(o =>
+            {
+                o.Debug = true;
+                Assert.Null(o.DiagnosticLogger);
+                o.DiagnosticLogger = diagnosticLogger;
+                options = o;
+            });
+
+            Assert.Same(diagnosticLogger, options.DiagnosticLogger);
+        }
+
         [Fact]
         public void AddSentry_WithOptionsCallback_CallbackInvoked()
         {
@@ -39,7 +71,7 @@ namespace Sentry.Extensions.Logging.Tests
         public void AddSentry_ConfigureOptionsOverload_ReturnsSameFactory()
         {
             var expected = Substitute.For<ILoggerFactory>();
-            var actual = expected.AddSentry(_ => {});
+            var actual = expected.AddSentry(_ => { });
 
             Assert.Same(expected, actual);
         }

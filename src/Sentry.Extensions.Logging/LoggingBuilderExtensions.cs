@@ -49,6 +49,7 @@ namespace Microsoft.Extensions.Logging
             }
 
             builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
+
             builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
 
             builder.Services.AddSentry();

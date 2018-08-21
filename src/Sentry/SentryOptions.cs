@@ -253,6 +253,7 @@ namespace Sentry
         /// </remarks>
         public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Debug;
 
+        private volatile IDiagnosticLogger _diagnosticLogger;
         /// <summary>
         /// The implementation of the logger.
         /// </summary>
@@ -260,7 +261,15 @@ namespace Sentry
         /// The <see cref="Debug"/> flag has to be switched on for this logger to be used at all.
         /// When debugging is turned off, this property is made null and any internal logging results in a no-op.
         /// </remarks>
-        public IDiagnosticLogger DiagnosticLogger { get; set; }
+        public IDiagnosticLogger DiagnosticLogger
+        {
+            get => _diagnosticLogger;
+            set
+            {
+                _diagnosticLogger?.LogInfo("Replacing current logger with: '{0}'.", value?.GetType().Name);
+                _diagnosticLogger = value;
+            }
+        }
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>

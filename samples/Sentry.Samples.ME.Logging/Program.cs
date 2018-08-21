@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sentry.Protocol;
 
 class Program
 {
@@ -10,6 +11,11 @@ class Program
             .AddConsole(LogLevel.Trace)
             .AddSentry(o =>
             {
+                // Set to true to SDK debugging to see the internal messages through the logging library.
+                o.Debug = false;
+                // Configure the level of Sentry internal logging
+                o.DiagnosticsLevel = SentryLevel.Debug;
+
                 o.Dsn = "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141";
                 o.MaxBreadcrumbs = 150; // Increasing from default 100
                 o.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion

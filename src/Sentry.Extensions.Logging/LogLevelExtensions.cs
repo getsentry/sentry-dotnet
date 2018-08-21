@@ -26,5 +26,24 @@ namespace Sentry.Extensions.Logging
                     return (BreadcrumbLevel)level;
             }
         }
+
+        public static LogLevel ToMicrosoft(this SentryLevel level)
+        {
+            switch (level)
+            {
+                case SentryLevel.Debug:
+                    return LogLevel.Debug;
+                case SentryLevel.Info:
+                    return LogLevel.Information;
+                case SentryLevel.Warning:
+                    return LogLevel.Warning;
+                case SentryLevel.Error:
+                    return LogLevel.Error;
+                case SentryLevel.Fatal:
+                    return LogLevel.Critical;
+                default:
+                    return LogLevel.Debug;
+            }
+        }
     }
 }
