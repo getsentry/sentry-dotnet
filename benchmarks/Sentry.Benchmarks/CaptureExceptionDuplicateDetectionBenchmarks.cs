@@ -13,7 +13,7 @@ namespace Sentry.Benchmarks
         private static Action<SentryOptions> SharedConfig => (o =>
         {
             o.Dsn = new Dsn(Constants.ValidDsn);
-            o.Http(h => { h.SentryHttpClientFactory = new FakeHttpClientFactory(); });
+            o.SentryHttpClientFactory = new FakeHttpClientFactory();
         });
 
         [GlobalSetup(Target = nameof(CaptureException_WithDupliacteDetection))]

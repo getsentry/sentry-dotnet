@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Tests;
+using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace - To test Logger emitting events:
 // It filters events coming from 'Sentry.' namespace.
@@ -33,7 +34,7 @@ namespace SentryTest.AspNetCore.Tests
                 builder.UseSentry(options =>
                 {
                     options.Dsn = DsnSamples.ValidDsnWithSecret;
-                    options.Worker(w => w.BackgroundWorker = Worker);
+                    options.BackgroundWorker = Worker;
 
                     Configure?.Invoke(options);
                 });
@@ -41,7 +42,7 @@ namespace SentryTest.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task DisabledSdk_UnhadledException_NoEventCaptured()
+        public async Task DisabledSdk_UnhandledException_NoEventCaptured()
         {
             Configure = o => o.InitializeSdk = false;
 
@@ -75,6 +76,23 @@ namespace SentryTest.AspNetCore.Tests
             logger.LogError(expectedMessage);
 
             Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
+        }
+
+        [Fact]
+        public void DiagnosticLogger_DebugEnabled_ReplacedWithMelLogger()
+        {
+            Configure = o => o.Debug = true;
+            Build();
+            var options = ServiceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
+            Assert.IsType<MelDiagnosticLogger>(options.Value.DiagnosticLogger);
+        }
+
+        [Fact]
+        public void DiagnosticLogger_ByDefault_ReplacedWithMelLogger()
+        {
+            Build();
+            var options = ServiceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
+            Assert.Null(options.Value.DiagnosticLogger);
         }
 
         [Fact]
@@ -152,7 +170,7 @@ namespace SentryTest.AspNetCore.Tests
                     c.SetBasePath(Directory.GetCurrentDirectory()); // fails on net462 without this
                     c.AddJsonFile("allsettings.json", optional: false);
                 });
-                b.UseSentry(o => o.Worker(w => w.BackgroundWorker = Worker));
+                b.UseSentry(o => o.BackgroundWorker = Worker);
             };
 
             Build();

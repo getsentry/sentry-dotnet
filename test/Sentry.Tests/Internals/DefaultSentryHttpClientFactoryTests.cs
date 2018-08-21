@@ -13,9 +13,13 @@ namespace Sentry.Tests.Internals
     {
         private class Fixture
         {
-            public HttpOptions HttpOptions { get; set; } = new HttpOptions(new Uri("https://sentry.yo/store"));
-            public Action<HttpClientHandler, Dsn, HttpOptions> ConfigureHandler { get; set; }
-            public Action<HttpClient, Dsn, HttpOptions> ConfigureClient { get; set; }
+            public SentryOptions HttpOptions { get; set; } = new SentryOptions
+            {
+                Dsn = DsnSamples.Valid
+            };
+
+            public Action<HttpClientHandler, Dsn> ConfigureHandler { get; set; }
+            public Action<HttpClient, Dsn> ConfigureClient { get; set; }
 
             public DefaultSentryHttpClientFactory GetSut()
                 => new DefaultSentryHttpClientFactory(ConfigureHandler, ConfigureClient);
@@ -98,7 +102,7 @@ namespace Sentry.Tests.Internals
             _fixture.HttpOptions.DecompressionMethods = DecompressionMethods.None;
 
             var configureHandlerInvoked = false;
-            _fixture.ConfigureHandler = (handler, dsn, arg3) =>
+            _fixture.ConfigureHandler = (handler, dsn) =>
             {
                 Assert.Equal(DecompressionMethods.None, handler.AutomaticDecompression);
                 configureHandlerInvoked = true;
@@ -114,9 +118,8 @@ namespace Sentry.Tests.Internals
         public void Create_DecompressionMethodDefault_AllBitsSet()
         {
             var configureHandlerInvoked = false;
-            _fixture.ConfigureHandler = (handler, dsn, o) =>
+            _fixture.ConfigureHandler = (handler, dsn) =>
             {
-                Assert.Same(_fixture.HttpOptions, o);
                 Assert.Equal(~DecompressionMethods.None, handler.AutomaticDecompression);
                 configureHandlerInvoked = true;
             };
@@ -131,9 +134,8 @@ namespace Sentry.Tests.Internals
         public void Create_DefaultHeaders_AcceptJson()
         {
             var configureHandlerInvoked = false;
-            _fixture.ConfigureClient = (client, dsn, o) =>
+            _fixture.ConfigureClient = (client, dsn) =>
             {
-                Assert.Same(_fixture.HttpOptions, o);
                 Assert.Equal("application/json", client.DefaultRequestHeaders.Accept.ToString());
                 configureHandlerInvoked = true;
             };
@@ -149,9 +151,8 @@ namespace Sentry.Tests.Internals
         {
             _fixture.HttpOptions.Proxy = new WebProxy("https://proxy.sentry.io:31337");
             var configureHandlerInvoked = false;
-            _fixture.ConfigureHandler = (handler, dsn, o) =>
+            _fixture.ConfigureHandler = (handler, dsn) =>
             {
-                Assert.Same(_fixture.HttpOptions, o);
                 Assert.Same(_fixture.HttpOptions.Proxy, handler.Proxy);
                 configureHandlerInvoked = true;
             };

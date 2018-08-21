@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Protocol;
@@ -64,7 +65,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariabl_DisabledSdk()
+        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariable_DisabledSdk()
         {
             EnvironmentVariableGuard.WithVariable(
                 DsnEnvironmentVariable,
@@ -121,6 +122,42 @@ namespace Sentry.Tests
         {
             using (SentrySdk.Init(string.Empty))
                 Assert.False(SentrySdk.IsEnabled);
+        }
+
+        [Fact]
+        public void Init_EmptyDsn_LogsWarning()
+        {
+            var logger = Substitute.For<IDiagnosticLogger>();
+            logger.IsEnabled(SentryLevel.Warning).Returns(true);
+
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = logger,
+                Debug = true
+            };
+
+            using (SentrySdk.Init(options))
+            {
+                logger.Received(1).Log(SentryLevel.Warning, "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+            }
+        }
+
+        [Fact]
+        public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogsWarning()
+        {
+            var logger = Substitute.For<IDiagnosticLogger>();
+            logger.IsEnabled(SentryLevel.Warning).Returns(true);
+
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = logger,
+                Debug = false,
+            };
+
+            using (SentrySdk.Init(options))
+            {
+                logger.DidNotReceive().Log(Arg.Any<SentryLevel>(), Arg.Any<string>());
+            }
         }
 
         [Fact]
@@ -274,7 +311,7 @@ namespace Sentry.Tests
             using (SentrySdk.Init(o =>
             {
                 o.Dsn = Valid;
-                o.Worker(w => w.BackgroundWorker = worker);
+                o.BackgroundWorker = worker;
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);

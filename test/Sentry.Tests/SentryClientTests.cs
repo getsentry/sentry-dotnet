@@ -249,7 +249,7 @@ namespace Sentry.Tests
             var invoked = false;
             _fixture.BackgroundWorker = null;
             _fixture.SentryOptions.Dsn = DsnSamples.Valid;
-            _fixture.SentryOptions.Http(h => h.ConfigureClient = (client, dsn, arg3) => invoked = true);
+            _fixture.SentryOptions.ConfigureClient = (client, dsn) => invoked = true;
 
             using (_fixture.GetSut())
             {
@@ -263,7 +263,7 @@ namespace Sentry.Tests
             var invoked = false;
             _fixture.BackgroundWorker = null;
             _fixture.SentryOptions.Dsn = DsnSamples.Valid;
-            _fixture.SentryOptions.Http(h => h.ConfigureHandler = (handler, dsn, arg3) => invoked = true);
+            _fixture.SentryOptions.ConfigureHandler = (handler, dsn) => invoked = true;
 
             using (_fixture.GetSut())
             {

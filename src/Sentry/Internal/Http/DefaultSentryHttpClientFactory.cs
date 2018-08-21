@@ -1,6 +1,7 @@
 using System;
 using System.IO.Compression;
 using System.Net.Http;
+using Sentry.Extensibility;
 using Sentry.Http;
 
 namespace Sentry.Internal.Http
@@ -11,8 +12,8 @@ namespace Sentry.Internal.Http
     /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
-        private readonly Action<HttpClientHandler, Dsn, HttpOptions> _configureHandler;
-        private readonly Action<HttpClient, Dsn, HttpOptions> _configureClient;
+        private readonly Action<HttpClientHandler, Dsn> _configureHandler;
+        private readonly Action<HttpClient, Dsn> _configureClient;
 
         /// <summary>
         /// Creates a new instance of <see cref="DefaultSentryHttpClientFactory"/>
@@ -20,8 +21,8 @@ namespace Sentry.Internal.Http
         /// <param name="configureHandler">An optional configuration callback</param>
         /// <param name="configureClient">An optional HttpClient configuration callback</param>
         public DefaultSentryHttpClientFactory(
-            Action<HttpClientHandler, Dsn, HttpOptions> configureHandler = null,
-            Action<HttpClient, Dsn, HttpOptions> configureClient = null)
+            Action<HttpClientHandler, Dsn> configureHandler = null,
+            Action<HttpClient, Dsn> configureClient = null)
         {
             _configureHandler = configureHandler;
             _configureClient = configureClient;
@@ -34,7 +35,7 @@ namespace Sentry.Internal.Http
         /// <param name="options">The HTTP options.</param>
         /// <returns></returns>
         /// <inheritdoc />
-        public HttpClient Create(Dsn dsn, HttpOptions options)
+        public HttpClient Create(Dsn dsn, SentryOptions options)
         {
             if (dsn == null)
             {
@@ -50,6 +51,7 @@ namespace Sentry.Internal.Http
             if (options.Proxy != null)
             {
                 httpClientHandler.Proxy = options.Proxy;
+                options.DiagnosticLogger?.LogInfo("Using Proxy: {0}", options.Proxy);
             }
 
             // If the platform supports automatic decompression
@@ -58,8 +60,16 @@ namespace Sentry.Internal.Http
                 // if the SDK is configured to accept compressed data
                 httpClientHandler.AutomaticDecompression = options.DecompressionMethods;
             }
+            else
+            {
+                options.DiagnosticLogger?.LogDebug("No response compression supported by HttpClientHandler.");
+            }
 
-            _configureHandler?.Invoke(httpClientHandler, dsn, options);
+            if (_configureHandler is Action<HttpClientHandler, Dsn> configureHandler)
+            {
+                options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClientHandler configuration action.");
+                configureHandler.Invoke(httpClientHandler, dsn);
+            }
 
             HttpMessageHandler handler = httpClientHandler;
 
@@ -68,11 +78,17 @@ namespace Sentry.Internal.Http
                 if (options.RequestBodyCompressionBuffered)
                 {
                     handler = new GzipBufferedRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
+                    options.DiagnosticLogger?.LogDebug("Using 'GzipBufferedRequestBodyHandler' body compression strategy with level {0}.", options.RequestBodyCompressionLevel);
                 }
                 else
                 {
                     handler = new GzipRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
+                    options.DiagnosticLogger?.LogDebug("Using 'GzipRequestBodyHandler' body compression strategy with level {0}.", options.RequestBodyCompressionLevel);
                 }
+            }
+            else
+            {
+                options.DiagnosticLogger?.LogDebug("Using no request body compression strategy.");
             }
 
             // Adding retry after last for it to run first in the pipeline
@@ -82,7 +98,11 @@ namespace Sentry.Internal.Http
 
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-            _configureClient?.Invoke(client, dsn, options);
+            if (_configureClient is Action<HttpClient, Dsn> configureClient)
+            {
+                options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClient configuration action.");
+                configureClient?.Invoke(client, dsn);
+            }
 
             return client;
         }

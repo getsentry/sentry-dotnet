@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Extensions.Logging;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -52,6 +53,17 @@ namespace Sentry.AspNetCore.Tests
         }
 
         private readonly Fixture _fixture = new Fixture();
+
+        [Fact]
+        public void UseSentry_DiagnosticSet_NoOverriden()
+        {
+            var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
+            _fixture.SentryAspNetCoreOptions.DiagnosticLogger = diagnosticLogger;
+            var sut = _fixture.GetSut();
+            sut.UseSentry();
+
+            Assert.Same(diagnosticLogger, _fixture.SentryAspNetCoreOptions.DiagnosticLogger);
+        }
 
         [Fact]
         public void UseSentry_SentryEventProcessor_AccessibleThroughSentryOptions()

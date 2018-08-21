@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using Sentry;
 using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
@@ -25,7 +26,14 @@ namespace Microsoft.Extensions.Logging
             Action<SentryLoggingOptions> optionsConfiguration = null)
         {
             var options = new SentryLoggingOptions();
+
             optionsConfiguration?.Invoke(options);
+
+            if (options.DiagnosticLogger == null)
+            {
+                var logger = factory.CreateLogger<ISentryClient>();
+                options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticsLevel);
+            }
 
             factory.AddProvider(new SentryLoggerProvider(Options.Options.Create(options)));
             return factory;

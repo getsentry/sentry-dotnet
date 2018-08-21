@@ -11,8 +11,8 @@ namespace Sentry.Http
         /// Creates an HttpClient using the specified options.
         /// </summary>
         /// <param name="dsn">The DSN.</param>
-        /// <param name="options">The HTTP options.</param>
+        /// <param name="options">The options.</param>
         /// <returns><see cref="HttpClient"/></returns>
-        HttpClient Create(Dsn dsn, HttpOptions options);
+        HttpClient Create(Dsn dsn, SentryOptions options);
     }
 }

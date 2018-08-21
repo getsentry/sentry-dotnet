@@ -21,6 +21,8 @@ namespace Sentry.Internal
         {
             Debug.Assert(sentryEvent != null);
 
+            _options.DiagnosticLogger?.LogDebug("Running processor on exception: {0}", exception.Message);
+
             if (exception != null)
             {
                 var sentryExceptions = CreateSentryException(exception)
@@ -109,6 +111,10 @@ namespace Sentry.Internal
                 {
                     sentryEx.Stacktrace.Frames.Add(frame);
                 }
+            }
+            else
+            {
+                _options.DiagnosticLogger?.LogDebug("No stack frames found on Exception: {0}", exception.Message);
             }
 
             yield return sentryEx;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Integrations;
 
@@ -110,5 +111,21 @@ namespace Sentry
         /// <returns></returns>
         public static IEnumerable<ISentryEventExceptionProcessor> GetAllExceptionProcessors(this SentryOptions options)
             => options.ExceptionProcessorsProviders.SelectMany(p => p());
+
+        internal static void SetupLogging(this SentryOptions options)
+        {
+            if (options.Debug)
+            {
+                if (options.DiagnosticLogger == null)
+                {
+                    options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
+                    options.DiagnosticLogger?.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", options.DiagnosticsLevel);
+                }
+            }
+            else
+            {
+                options.DiagnosticLogger = null;
+            }
+        }
     }
 }

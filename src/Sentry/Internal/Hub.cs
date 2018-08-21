@@ -2,15 +2,15 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Integrations;
 using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
-    // TODO Hub being the entry point, here's the place to capture
-    // unhandled exceptions and notify via logging or callback
     internal class Hub : IHub, IDisposable
     {
+        private readonly SentryOptions _options;
         private readonly ImmutableList<ISdkIntegration> _integrations;
 
         public IInternalScopeManager ScopeManager { get; }
@@ -21,6 +21,9 @@ namespace Sentry.Internal
         public Hub(SentryOptions options)
         {
             Debug.Assert(options != null);
+            _options = options;
+
+            options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
             _ownedClient = new SentryClient(options);
             ScopeManager = new SentryScopeManager(options, _ownedClient);
@@ -31,16 +34,35 @@ namespace Sentry.Internal
             {
                 foreach (var integration in _integrations)
                 {
+                    options.DiagnosticLogger?.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
                     integration.Register(this);
                 }
             }
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
-            => ScopeManager.ConfigureScope(configureScope);
+        {
+            try
+            {
+                ScopeManager.ConfigureScope(configureScope);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to ConfigureScope", e);
+            }
+        }
 
-        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
-            => ScopeManager.ConfigureScopeAsync(configureScope);
+        public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+        {
+            try
+            {
+                await ScopeManager.ConfigureScopeAsync(configureScope).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to ConfigureScopeAsync", e);
+            }
+        }
 
         public IDisposable PushScope() => ScopeManager.PushScope();
 
@@ -50,12 +72,22 @@ namespace Sentry.Internal
 
         public Guid CaptureEvent(SentryEvent evt, Scope scope = null)
         {
-            var (currentScope, client) = ScopeManager.GetCurrent();
-            return client.CaptureEvent(evt, scope ?? currentScope);
+            try
+            {
+                var (currentScope, client) = ScopeManager.GetCurrent();
+                return client.CaptureEvent(evt, scope ?? currentScope);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
+                return Guid.Empty;
+            }
         }
 
         public void Dispose()
         {
+            _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
+
             if (_integrations?.Count > 0)
             {
                 foreach (var integration in _integrations)

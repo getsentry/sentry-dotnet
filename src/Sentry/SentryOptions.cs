@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO.Compression;
+using System.Net;
+using System.Net.Http;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
@@ -20,10 +23,6 @@ namespace Sentry
         internal string ClientVersion { get; } = SdkName;
 
         internal int SentryVersion { get; } = ProtocolVersion;
-
-        internal Action<BackgroundWorkerOptions> ConfigureBackgroundWorkerOptions { get; private set; }
-
-        internal List<Action<HttpOptions>> ConfigureHttpTransportOptions { get; private set; }
 
         /// <summary>
         /// A list of exception processors
@@ -49,6 +48,10 @@ namespace Sentry
         /// A list of integrations to be added when the SDK is initialized
         /// </summary>
         internal ImmutableList<ISdkIntegration> Integrations { get; set; }
+
+        internal IBackgroundWorker BackgroundWorker { get; set; }
+
+        internal ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
 
         /// <summary>
         /// A list of namespaces (or prefixes) considered not part of application code
@@ -158,23 +161,114 @@ namespace Sentry
         /// </remarks>
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
 
+        private int _maxQueueItems = 30;
         /// <summary>
-        /// Configure the background worker options
+        /// The maximum number of events to keep while the worker attempts to send them
         /// </summary>
-        /// <param name="configure">The callback to configure background worker options</param>
-        public void Worker(Action<BackgroundWorkerOptions> configure) => ConfigureBackgroundWorkerOptions = configure;
+        public int MaxQueueItems
+        {
+            get => _maxQueueItems;
+            set
+            {
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the queue.");
+                }
+                _maxQueueItems = value;
+            }
+        }
 
         /// <summary>
-        /// Configure HTTP related options
+        /// How long to wait for events to be sent before shutdown
         /// </summary>
-        /// <param name="configure"></param>
-        public void Http(Action<HttpOptions> configure)
+        /// <remarks>
+        /// In case there are events queued when the SDK is closed, upper bound limit to wait
+        /// for the worker to send the events to Sentry.
+        /// </remarks>
+        /// <example>
+        /// The SDK is closed while the queue has 1 event queued.
+        /// The worker takes 50 milliseconds to send an event to Sentry.
+        /// Even though default settings say 2 seconds, closing the SDK would block for 50ms.
+        /// </example>
+        public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(2);
+
+        /// <summary>
+        /// Decompression methods accepted
+        /// </summary>
+        /// <remarks>
+        /// By default accepts all available compression methods supported by the platform
+        /// </remarks>
+        public DecompressionMethods DecompressionMethods { get; set; }
+            // Note the ~ enabling all bits
+            = ~DecompressionMethods.None;
+
+        /// <summary>
+        /// The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry
+        /// </summary>
+        /// <remarks>
+        /// To disable request body compression, use <see cref="CompressionLevel.NoCompression"/>
+        /// </remarks>
+        public CompressionLevel RequestBodyCompressionLevel { get; set; } = CompressionLevel.Optimal;
+
+        /// <summary>
+        /// Whether the body compression is buffered and the request 'Content-Length' known in advance.
+        /// </summary>
+        /// <remarks>
+        /// Without reading through the Gzip stream to have its final size, it's no possible to use 'Content-Length'
+        /// header value. That means 'Content-Encoding: chunked' has to be used which is sometimes not supported.
+        /// Sentry on-premise without a reverse-proxy, for example, does not support 'chunked' requests.
+        /// </remarks>
+        /// <see href="https://github.com/getsentry/sentry-dotnet/issues/71"/>
+        public bool RequestBodyCompressionBuffered { get; set; } = true;
+
+        /// <summary>
+        /// An optional web proxy
+        /// </summary>
+        public IWebProxy Proxy { get; set; }
+
+        /// <summary>
+        /// A callback invoked when a <see cref="SentryClient"/> is created.
+        /// </summary>
+        public Action<HttpClientHandler, Dsn> ConfigureHandler { get; set; }
+
+        /// <summary>
+        /// A callback invoked when a <see cref="SentryClient"/> is created.
+        /// </summary>
+        public Action<HttpClient, Dsn> ConfigureClient { get; set; }
+
+        /// <summary>
+        /// Whether to log diagnostics messages
+        /// </summary>
+        /// <remarks>
+        /// The verbosity can be controlled through <see cref="DiagnosticsLevel"/>
+        /// and the implementation via <see cref="DiagnosticLogger"/>.
+        /// </remarks>
+        public bool Debug { get; set; }
+
+        /// <summary>
+        /// The diagnostics level to be used
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="Debug"/> flag has to be switched on for this setting to take effect.
+        /// </remarks>
+        public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Debug;
+
+        private volatile IDiagnosticLogger _diagnosticLogger;
+        /// <summary>
+        /// The implementation of the logger.
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="Debug"/> flag has to be switched on for this logger to be used at all.
+        /// When debugging is turned off, this property is made null and any internal logging results in a no-op.
+        /// </remarks>
+        public IDiagnosticLogger DiagnosticLogger
         {
-            if (ConfigureHttpTransportOptions == null)
+            get => _diagnosticLogger;
+            set
             {
-                ConfigureHttpTransportOptions = new List<Action<HttpOptions>>(1);
+                _diagnosticLogger?.LogInfo("Replacing current logger with: '{0}'.", value?.GetType().Name);
+                _diagnosticLogger = value;
             }
-            ConfigureHttpTransportOptions.Add(configure);
         }
 
         /// <summary>
@@ -192,7 +286,7 @@ namespace Sentry
 
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
-                     new DuplicateEventDetectionEventProcessor(),
+                     new DuplicateEventDetectionEventProcessor(this),
                      new MainSentryEventProcessor(this));
 
             ExceptionProcessors

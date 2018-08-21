@@ -8,60 +8,42 @@ namespace Sentry.Internal
     internal class SdkComposer
     {
         private readonly SentryOptions _options;
-        private readonly HttpOptions _httpOptions;
-        private readonly BackgroundWorkerOptions _workerOptions;
 
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             if (options.Dsn == null) throw new ArgumentException("No DSN defined in the SentryOptions");
-
-            var httpOptions = new HttpOptions(options.Dsn.SentryUri);
-            // TODO: ensure correct order
-            options.ConfigureHttpTransportOptions?.ForEach(o => o.Invoke(httpOptions));
-            _httpOptions = httpOptions;
-
-            var workerOptions = new BackgroundWorkerOptions();
-            options.ConfigureBackgroundWorkerOptions?.Invoke(workerOptions);
-            _workerOptions = workerOptions;
         }
 
         public IBackgroundWorker CreateBackgroundWorker()
         {
-            return _workerOptions.BackgroundWorker
-                        ?? CreateBackgroundWorker(
-                                CreateHttpTransport(
-                                    _httpOptions.SentryHttpClientFactory
-                                        ?? new DefaultSentryHttpClientFactory(
-                                            _httpOptions.ConfigureHandler,
-                                            _httpOptions.ConfigureClient),
-                                        _options,
-                                        _httpOptions),
-                                    _workerOptions);
-        }
+            if (_options.BackgroundWorker is IBackgroundWorker worker)
+            {
+                _options.DiagnosticLogger?.LogDebug("Using IBackgroundWorker set through options: {0}.",
+                    worker.GetType().Name);
 
-        private static BackgroundWorker CreateBackgroundWorker(
-            ITransport transport,
-            BackgroundWorkerOptions options)
-            => new BackgroundWorker(transport, options);
+                return worker;
+            }
 
-        private static HttpTransport CreateHttpTransport(
-            ISentryHttpClientFactory sentryHttpClientFactory,
-            SentryOptions options,
-            HttpOptions httpOptions)
-        {
             var addAuth = SentryHeaders.AddSentryAuth(
-               options.SentryVersion,
-               options.ClientVersion,
-               options.Dsn.PublicKey,
-               options.Dsn.SecretKey);
+                _options.SentryVersion,
+                _options.ClientVersion,
+                _options.Dsn.PublicKey,
+                _options.Dsn.SecretKey);
 
-            var httpClient = sentryHttpClientFactory.Create(options.Dsn, httpOptions);
+            if (_options.SentryHttpClientFactory is ISentryHttpClientFactory factory)
+            {
+                _options.DiagnosticLogger?.LogDebug("Using ISentryHttpClientFactory set through options: {0}.",
+                    factory.GetType().Name);
+            }
+            else
+            {
+                factory = new DefaultSentryHttpClientFactory(_options.ConfigureHandler, _options.ConfigureClient);
+            }
 
-            return new HttpTransport(
-                httpOptions,
-                httpClient,
-                addAuth);
+            var httpClient = factory.Create(_options.Dsn, _options);
+
+            return new BackgroundWorker(new HttpTransport(_options, httpClient, addAuth), _options);
         }
     }
 }
