@@ -206,7 +206,6 @@ namespace Sentry.Tests
         [InlineData("System.")]
         [InlineData("FSharp.")]
         [InlineData("Giraffe.")]
-        [InlineData("Newtonsoft.")]
         [InlineData("Newtonsoft.Json")]
         public void Integrations_Includes_MajorSystemPrefixes(string expected)
         {
