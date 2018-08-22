@@ -19,7 +19,7 @@ using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace - To test Logger emitting events:
 // It filters events coming from 'Sentry.' namespace.
-namespace SentryTest.AspNetCore.Tests
+namespace Else.AspNetCore.Tests
 {
     [Collection(nameof(SentrySdkCollection))]
     public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
