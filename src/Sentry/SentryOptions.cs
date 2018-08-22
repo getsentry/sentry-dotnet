@@ -292,14 +292,15 @@ namespace Sentry
                 = ImmutableList.Create<Func<IEnumerable<ISentryEventExceptionProcessor>>>(
                     () => ExceptionProcessors);
 
+            var sentryStackTraceFactory = new SentryStackTraceFactory(this);
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
                      new DuplicateEventDetectionEventProcessor(this),
-                     new MainSentryEventProcessor(this, new SentryStackTraceFactory(this)));
+                     new MainSentryEventProcessor(this, sentryStackTraceFactory));
 
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
-                    new MainExceptionProcessor(this));
+                    new MainExceptionProcessor(this, sentryStackTraceFactory));
 
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(

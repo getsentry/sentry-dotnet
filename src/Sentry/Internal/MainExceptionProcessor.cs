@@ -11,9 +11,15 @@ namespace Sentry.Internal
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
         private readonly SentryOptions _options;
+        private readonly ISentryStackTraceFactory _sentryStackTraceFactory;
 
-        public MainExceptionProcessor(SentryOptions options)
-            => _options = options ?? throw new ArgumentNullException(nameof(options));
+        public MainExceptionProcessor(SentryOptions options, ISentryStackTraceFactory sentryStackTraceFactory)
+        {
+            Debug.Assert(options != null);
+            Debug.Assert(sentryStackTraceFactory != null);
+            _options = options;
+            _sentryStackTraceFactory = sentryStackTraceFactory;
+        }
 
         public void Process(Exception exception, SentryEvent sentryEvent)
         {
@@ -95,25 +101,7 @@ namespace Sentry.Internal
                 }
             }
 
-            //var stackTrace = new StackTrace(exception, true);
-
-            //// Sentry expects the frames to be sent in reversed order
-            //var frames = stackTrace.GetFrames()
-            //    ?.Reverse()
-            //    .Select(CreateSentryStackFrame);
-
-            //if (frames != null)
-            //{
-            //    sentryEx.Stacktrace = new SentryStackTrace();
-            //    foreach (var frame in frames)
-            //    {
-            //        sentryEx.Stacktrace.Frames.Add(frame);
-            //    }
-            //}
-            //else
-            //{
-            //    _options.DiagnosticLogger?.LogDebug("No stack frames found on Exception: {0}", exception.Message);
-            //}
+            sentryEx.Stacktrace = _sentryStackTraceFactory.Create(exception);
 
             yield return sentryEx;
         }
@@ -134,50 +122,5 @@ namespace Sentry.Internal
 
             return mechanism;
         }
-
-        //internal SentryStackFrame CreateSentryStackFrame(StackFrame stackFrame)
-        //{
-        //    const string unknownRequiredField = "(unknown)";
-
-        //    var frame = new SentryStackFrame();
-
-        //    // stackFrame.HasMethod() throws NotImplemented on Mono 5.12
-        //    if (stackFrame.GetMethod() is MethodBase method)
-        //    {
-        //        // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
-        //        frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
-        //        frame.Package = method.DeclaringType?.Assembly.FullName;
-        //        frame.Function = method.Name;
-        //        frame.ContextLine = method.ToString();
-        //    }
-
-        //    frame.InApp = !IsSystemModuleName(frame.Module);
-        //    frame.FileName = stackFrame.GetFileName();
-
-        //    // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
-        //    var ilOffset = stackFrame.GetILOffset();
-        //    if (ilOffset != 0)
-        //    {
-        //        frame.InstructionOffset = stackFrame.GetILOffset();
-        //    }
-
-        //    var lineNo = stackFrame.GetFileLineNumber();
-        //    if (lineNo != 0)
-        //    {
-        //        frame.LineNumber = lineNo;
-        //    }
-
-        //    var colNo = stackFrame.GetFileColumnNumber();
-        //    if (lineNo != 0)
-        //    {
-        //        frame.ColumnNumber = colNo;
-        //    }
-
-        //    // TODO: Consider Ben.Demystifier
-        //    DemangleAsyncFunctionName(frame);
-        //    DemangleAnonymousFunction(frame);
-
-        //    return frame;
-        //}
     }
 }

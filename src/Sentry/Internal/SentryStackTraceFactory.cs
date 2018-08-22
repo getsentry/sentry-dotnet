@@ -21,8 +21,11 @@ namespace Sentry.Internal
 
             if (exception == null && !isCurrentStackTrace)
             {
+                _options.DiagnosticLogger?.LogDebug("No Exception and AttachStacktrace is off. No stack trace will be collected.");
                 return null;
             }
+
+            _options.DiagnosticLogger?.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
             var stackTrace = isCurrentStackTrace
                 ? new StackTrace(true)
@@ -44,7 +47,9 @@ namespace Sentry.Internal
                 stacktrace.Frames.Add(frame);
             }
 
-            return stacktrace;
+            return stacktrace.Frames.Count == 0
+                ? null
+                : stacktrace;
         }
 
         internal IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)

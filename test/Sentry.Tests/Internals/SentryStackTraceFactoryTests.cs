@@ -42,11 +42,38 @@ namespace Other.Tests.Internals
         }
 
         [Fact]
-        public void Create_NWithExceptionAndDefaultAttachStackTraceOption_NotNullResult()
+        public void Create_WithExceptionAndDefaultAttachStackTraceOption_HasStackTrace()
         {
             var sut = _fixture.GetSut();
 
-            Assert.NotNull(sut.Create(new Exception()));
+            Exception exception;
+            try
+            {
+                Throw();
+                void Throw() => throw null;
+            }
+            catch (Exception e) { exception = e; }
+
+            Assert.NotNull(sut.Create(exception));
+        }
+
+        [Fact]
+        public void Create_WithExceptionAndAttachStackTraceOptionOn_HasStackTrace()
+        {
+            _fixture.SentryOptions.AttachStacktrace = true;
+            var sut = _fixture.GetSut();
+
+            Exception exception;
+            try
+            {
+                Throw();
+                void Throw() => throw null;
+            }
+            catch (Exception e) { exception = e; }
+
+            var stackTrace = sut.Create(exception);
+
+            Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace.Frames.Count);
         }
 
         [Fact]
