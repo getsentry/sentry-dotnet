@@ -1,8 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -110,52 +108,6 @@ namespace Sentry.Tests.Internals
             Assert.Equal(2, evt.Extra.Count);
             Assert.Contains(evt.Extra, e => e.Key == "Exception[0][first]" && e.Value == firstValue);
             Assert.Contains(evt.Extra, e => e.Key == "Exception[1][second]" && e.Value == secondValue);
-        }
-
-        [Fact]
-        public void CreateSentryStackFrame_AppNamespace_InAppFrame()
-        {
-            var frame = new StackFrame();
-
-            var actual = Sut.CreateSentryStackFrame(frame);
-
-            Assert.True(actual.InApp);
-        }
-
-        [Fact]
-        public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
-        {
-            SentryOptions.AddInAppExclude(GetType().Namespace);
-            var frame = new StackFrame();
-
-            var actual = Sut.CreateSentryStackFrame(frame);
-
-            Assert.False(actual.InApp);
-        }
-
-        // https://github.com/getsentry/sentry-dotnet/issues/64
-        [Fact]
-        public void DemangleAnonymousFunction_NullFunction_ContinuesNull()
-        {
-            var stackFrame = new SentryStackFrame
-            {
-                Function = null
-            };
-
-            MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
-            Assert.Null(stackFrame.Function);
-        }
-
-        [Fact]
-        public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
-        {
-            var stackFrame = new SentryStackFrame
-            {
-                Module = null
-            };
-
-            MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
-            Assert.Null(stackFrame.Module);
         }
 
         [Fact]

@@ -100,7 +100,9 @@ namespace Sentry.Extensions.Logging
                 => _options.MinimumEventLevel != LogLevel.None
                    && logLevel >= _options.MinimumEventLevel
                    // No events from Sentry code using ILogger
-                   && !CategoryName.StartsWith("Sentry.")
+                   // A type from the main SDK could be used to resolve a logger
+                   //(hence 'Sentry' and not 'Sentry.'
+                   && !CategoryName.StartsWith("Sentry") 
                    && (_options.Filters == null
                         || _options.Filters.All(
                            f => !f.Filter(

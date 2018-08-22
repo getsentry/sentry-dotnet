@@ -77,6 +77,14 @@ namespace Sentry
         public bool SendDefaultPii { get; set; }
 
         /// <summary>
+        /// Whether to send the stack trace of a event captured without an exception
+        /// </summary>
+        /// <remarks>
+        /// Append stack trace of the call to the SDK to capture a message or event without Exception
+        /// </remarks>
+        public bool AttachStacktrace { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum breadcrumbs.
         /// </summary>
         /// <remarks>
@@ -287,7 +295,7 @@ namespace Sentry
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
                      new DuplicateEventDetectionEventProcessor(this),
-                     new MainSentryEventProcessor(this));
+                     new MainSentryEventProcessor(this, new SentryStackTraceFactory(this)));
 
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
