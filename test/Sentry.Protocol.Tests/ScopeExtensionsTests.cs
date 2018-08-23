@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using NSubstitute;
 using Xunit;
@@ -15,7 +14,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetFingerprint_NullArgument_ReplacesCurrentWithNull()
         {
-            var scope = new Scope { InternalFingerprint = ImmutableList<string>.Empty };
+            var scope = new Scope { InternalFingerprint = Enumerable.Empty<string>() };
 
             scope.SetFingerprint(null);
 
@@ -25,7 +24,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetFingerprint_NewFingerprint_ReplacesCurrent()
         {
-            var scope = new Scope { InternalFingerprint = ImmutableList.Create("to be dropped") };
+            var scope = new Scope { InternalFingerprint = new[] { "to be dropped" } };
             var expectedFingerprint = new[] { "fingerprint" };
 
             scope.SetFingerprint(expectedFingerprint);
@@ -330,7 +329,7 @@ namespace Sentry.Protocol.Tests
             const string expectedMessage = "original Message";
             const string expectedCategory = "original Category";
             const string expectedType = "original Type";
-            var expectedData = ImmutableDictionary<string, string>.Empty.Add("key", "val");
+            var expectedData = new Dictionary<string, string>() { { "key", "val" } };
             const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
 
             _sut.AddBreadcrumb(
