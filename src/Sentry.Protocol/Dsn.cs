@@ -48,14 +48,12 @@ namespace Sentry
             var parsed = Parse(dsn, throwOnError: true);
             Debug.Assert(parsed != null, "Parse should throw instead of returning null!");
 
-            var (projectId, path, secretKey, publicKey, sentryUri) = parsed.Value;
-
-            _dsn = dsn;
-            ProjectId = projectId;
-            Path = path;
-            SecretKey = secretKey;
-            PublicKey = publicKey;
-            SentryUri = sentryUri;
+            _dsn = parsed.Item1;
+            ProjectId = parsed.Item2;
+            Path = parsed.Item3;
+            SecretKey = parsed.Item4;
+            PublicKey = parsed.Item5;
+            SentryUri = parsed.Item6;
         }
 
         private Dsn(string dsn, string projectId, string path, string secretKey, string publicKey, Uri sentryUri)
@@ -89,22 +87,13 @@ namespace Sentry
             try
             {
                 var parsed = Parse(dsn, throwOnError: false);
-                if (!parsed.HasValue)
+                if (parsed == null)
                 {
                     finalDsn = null;
                     return false;
                 }
 
-                var (projectId, path, secretKey, publicKey, sentryUri) = parsed.Value;
-
-                finalDsn = new Dsn(
-                    dsn,
-                    projectId,
-                    path,
-                    secretKey,
-                    publicKey,
-                    sentryUri);
-
+                finalDsn = new Dsn(parsed.Item1, parsed.Item2, parsed.Item3, parsed.Item4, parsed.Item5, parsed.Item6);
                 return true;
             }
             catch
@@ -115,8 +104,7 @@ namespace Sentry
             }
         }
 
-        private static (string projectId, string path, string secretKey, string publicKey, Uri sentryUri)?
-            Parse(string dsn, bool throwOnError)
+        private static Tuple<string, string, string, string, string, Uri> Parse(string dsn, bool throwOnError)
         {
             Uri uri;
             if (throwOnError)
@@ -179,7 +167,7 @@ namespace Sentry
                 Path = $"{path}/api/{projectId}/store/"
             };
 
-            return (projectId, path, secretKey, publicKey, builder.Uri);
+            return Tuple.Create(dsn, projectId, path, secretKey, publicKey, builder.Uri);
         }
 
         /// <summary>

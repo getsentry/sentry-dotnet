@@ -12,6 +12,7 @@ namespace Sentry
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ScopeExtensions
     {
+#if NETSTANDARD2_0
         /// <summary>
         /// Adds a breadcrumb to the scope
         /// </summary>
@@ -46,6 +47,7 @@ namespace Sentry
                 data: data,
                 level: level);
         }
+#endif
 
         /// <summary>
         /// Adds a breadcrumb to the scope.
@@ -287,12 +289,14 @@ namespace Sentry
 
                         break;
                     }
+#if NETSTANDARD2_0
                 case ValueTuple<string, string> tupleStringString:
                     if (!string.IsNullOrEmpty(tupleStringString.Item2))
                     {
                         scope.SetTag(tupleStringString.Item1, tupleStringString.Item2);
                     }
                     break;
+#endif
                 default:
                     scope.SetExtra("state", state);
                     break;

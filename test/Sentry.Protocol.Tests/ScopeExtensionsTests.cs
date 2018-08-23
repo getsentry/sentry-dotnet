@@ -271,6 +271,7 @@ namespace Sentry.Protocol.Tests
             Assert.Equal("5", scope.Breadcrumbs.Last().Message);
         }
 
+#if NETCOREAPP2_1
         [Fact]
         public void AddBreadcrumb_ValueTuple_AllArgumentsMatch()
         {
@@ -295,6 +296,7 @@ namespace Sentry.Protocol.Tests
             Assert.Equal(expectedData.value, actual.Data.Single().Value);
             Assert.Equal(expectedLevel, actual.Level);
         }
+#endif
 
         [Fact]
         public void AddBreadcrumb_Dictionary_AllArgumentsMatch()
