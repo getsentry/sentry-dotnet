@@ -145,6 +145,7 @@ The SDK is configurable, many of the settings are demonstrated through the sampl
 * Add event processor
 * Add exception processor
 * Enable SDK debug mode
+* Attach stack trace for captured messages (opt-in)
 
 and more...
 
