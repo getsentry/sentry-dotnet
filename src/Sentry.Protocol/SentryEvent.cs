@@ -102,6 +102,13 @@ namespace Sentry
         internal SentryValues<SentryThread> SentryThreadValues { get; set; }
 
         /// <summary>
+        /// Stack trace
+        /// </summary>
+        /// <see href="https://docs.sentry.io/clientdev/interfaces/stacktrace/"/>
+        [DataMember(Name = "stacktrace", EmitDefaultValue = false)]
+        public SentryStackTrace Stacktrace { get; set; }
+
+        /// <summary>
         /// The Sentry Exception interface
         /// </summary>
         public IEnumerable<SentryException> SentryExceptions
