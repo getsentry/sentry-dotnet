@@ -113,14 +113,11 @@ namespace Sentry.Internal
             else
             {
                 // Test is if works hanging off the root SentryEvent
-                @event.SentryExceptionValues = new SentryValues<SentryException>(
-                    new[]
-                    {
-                        new SentryException
-                        {
-                            Stacktrace = _sentryStackTraceFactory.Create()
-                        }
-                    });
+                var stackTrace = _sentryStackTraceFactory.Create();
+                if (stackTrace != null)
+                {
+                    @event.Stacktrace = stackTrace;
+                }
             }
 
             var builder = ImmutableDictionary.CreateBuilder<string, string>();
