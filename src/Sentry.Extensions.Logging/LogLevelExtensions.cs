@@ -45,5 +45,26 @@ namespace Sentry.Extensions.Logging
                     return LogLevel.Debug;
             }
         }
+
+        public static SentryLevel ToSentryLevel(this LogLevel level)
+        {
+            switch (level)
+            {
+                case LogLevel.None:
+                case LogLevel.Trace:
+                case LogLevel.Debug:
+                    return SentryLevel.Debug;
+                case LogLevel.Information:
+                    return SentryLevel.Info;
+                case LogLevel.Warning:
+                    return SentryLevel.Warning;
+                case LogLevel.Error:
+                    return SentryLevel.Error;
+                case LogLevel.Critical:
+                    return SentryLevel.Fatal;
+                default:
+                    return SentryLevel.Debug;
+            }
+        }
     }
 }

@@ -59,6 +59,7 @@ namespace Sentry.Extensions.Logging
                 {
                     Logger = CategoryName,
                     Message = message,
+                    Level = logLevel.ToSentryLevel()
                 };
 
                 var tuple = eventId.ToTupleOrNull();
@@ -102,7 +103,7 @@ namespace Sentry.Extensions.Logging
                    // No events from Sentry code using ILogger
                    // A type from the main SDK could be used to resolve a logger
                    //(hence 'Sentry' and not 'Sentry.'
-                   && !CategoryName.StartsWith("Sentry") 
+                   && !CategoryName.StartsWith("Sentry")
                    && (_options.Filters == null
                         || _options.Filters.All(
                            f => !f.Filter(
