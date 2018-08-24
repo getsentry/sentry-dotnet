@@ -112,7 +112,6 @@ namespace Sentry.Internal
             }
             else
             {
-                // Test is if works hanging off the root SentryEvent
                 var stackTrace = _sentryStackTraceFactory.Create();
                 if (stackTrace != null)
                 {
