@@ -64,9 +64,9 @@ namespace NotSentry.Tests
             sut.CaptureMessage("test");
 
             _fixture.Worker.Received(1)
-                .EnqueueEvent(Arg.Is<SentryEvent>(
-                    e => e.SentryExceptions.Single().Stacktrace.Frames.Any(
-                        f => f.Function == nameof(CaptureMessage_AttachStacktraceTrue_IncludesStackTrace))));
+                .EnqueueEvent(Arg.Do<SentryEvent>(
+                    e => Assert.DoesNotContain(e.SentryExceptions.Single().Stacktrace.Frames,
+                        p => p.Function == nameof(CaptureMessage_AttachStacktraceTrue_IncludesStackTrace))));
         }
 
         [Fact]
