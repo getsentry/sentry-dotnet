@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Sentry.Samples.AspNetCore.Mvc
+namespace Samples.AspNetCore.Mvc
 {
     public class GameService : IGameService
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Sentry.Samples.AspNetCore.Mvc
+namespace Samples.AspNetCore.Mvc
 {
     public class SpecialException : Exception
     {

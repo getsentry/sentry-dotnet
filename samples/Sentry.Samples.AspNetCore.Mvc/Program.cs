@@ -2,9 +2,8 @@ using System;
 using System.Net;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 
-namespace Sentry.Samples.AspNetCore.Mvc
+namespace Samples.AspNetCore.Mvc
 {
     public class Program
     {
@@ -32,16 +31,14 @@ namespace Sentry.Samples.AspNetCore.Mvc
 
                     options.MaxBreadcrumbs = 200;
 
-                    //options.HttpProxy = new WebProxy("https://localhost:3128");
+                    // Set a proxy for outgoing HTTP connections
+                    options.HttpProxy = null; // new WebProxy("https://localhost:3128");
 
                     // Example: Disabling support to compressed responses:
                     options.DecompressionMethods = DecompressionMethods.None;
 
                     options.MaxQueueItems = 100;
                     options.ShutdownTimeout = TimeSpan.FromSeconds(5);
-
-                    // Hard-coding here will override any value set on appsettings.json:
-                    options.MinimumEventLevel = LogLevel.Error;
                 })
                 .Build();
     }

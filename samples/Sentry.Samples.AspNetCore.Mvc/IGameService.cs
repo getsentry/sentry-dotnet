@@ -1,4 +1,4 @@
-﻿namespace Sentry.Samples.AspNetCore.Mvc
+namespace Samples.AspNetCore.Mvc
 {
     public interface IGameService
     {
