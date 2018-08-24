@@ -1,4 +1,4 @@
-namespace Sentry.Samples.AspNetCore.Mvc.Models
+namespace Samples.AspNetCore.Mvc.Models
 {
     public class ErrorViewModel
     {

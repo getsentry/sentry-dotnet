@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Protocol;

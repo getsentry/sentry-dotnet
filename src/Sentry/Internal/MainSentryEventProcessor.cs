@@ -17,30 +17,35 @@ namespace Sentry.Internal
         private readonly Lazy<string> _environment = new Lazy<string>(EnvironmentLocator.GetCurrent);
         private readonly Lazy<Runtime> _runtime = new Lazy<Runtime>(() =>
         {
-           var current = PlatformAbstractions.Runtime.Current;
-           return current != null
-                  ? new Runtime
-                  {
-                      Name = current.Name,
-                      Version = current.Version,
-                      RawDescription = current.Raw
-                  }
-                  : null;
+            var current = PlatformAbstractions.Runtime.Current;
+            return current != null
+                   ? new Runtime
+                   {
+                       Name = current.Name,
+                       Version = current.Version,
+                       RawDescription = current.Raw
+                   }
+                   : null;
         });
 
         private static readonly (string Name, string Version) NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
 
         private readonly SentryOptions _options;
+        private readonly ISentryStackTraceFactory _sentryStackTraceFactory;
 
         internal string Release => _release.Value;
         internal string Environment => _environment.Value;
         internal Runtime Runtime => _runtime.Value;
 
-        public MainSentryEventProcessor(SentryOptions options)
+        public MainSentryEventProcessor(
+            SentryOptions options,
+            ISentryStackTraceFactory sentryStackTraceFactory)
         {
             Debug.Assert(options != null);
+            Debug.Assert(sentryStackTraceFactory != null);
             _options = options;
+            _sentryStackTraceFactory = sentryStackTraceFactory;
         }
 
         public SentryEvent Process(SentryEvent @event)
@@ -103,6 +108,15 @@ namespace Sentry.Internal
                 foreach (var processor in _options.GetAllExceptionProcessors())
                 {
                     processor.Process(@event.Exception, @event);
+                }
+            }
+            else
+            {
+                // Test is if works hanging off the root SentryEvent
+                var stackTrace = _sentryStackTraceFactory.Create();
+                if (stackTrace != null)
+                {
+                    @event.Stacktrace = stackTrace;
                 }
             }
 

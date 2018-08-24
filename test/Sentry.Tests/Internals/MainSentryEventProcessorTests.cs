@@ -12,17 +12,22 @@ namespace Sentry.Tests.Internals
 {
     public class MainSentryEventProcessorTests
     {
-        public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-        internal MainSentryEventProcessor Sut { get; set; }
+        private class Fixture
+        {
+            public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public MainSentryEventProcessor GetSut() => new MainSentryEventProcessor(SentryOptions, SentryStackTraceFactory);
+        }
 
-        public MainSentryEventProcessorTests() => Sut = new MainSentryEventProcessor(SentryOptions);
+        private readonly Fixture _fixture = new Fixture();
 
         [Fact]
         public void Process_DefaultOptions_NoUserNameSet()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Null(evt.User.Username);
         }
@@ -32,8 +37,10 @@ namespace Sentry.Tests.Internals
         {
             var evt = new SentryEvent();
 
-            SentryOptions.SendDefaultPii = true;
-            Sut.Process(evt);
+            _fixture.SentryOptions.SendDefaultPii = true;
+            var sut = _fixture.GetSut();
+
+            sut.Process(evt);
 
             Assert.Equal(Environment.UserName, evt.User.Username);
         }
@@ -41,9 +48,10 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_DefaultOptions_NoServerNameSet()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Null(evt.ServerName);
         }
@@ -51,10 +59,11 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_SendDefaultPiiTrue_ServerNameSet()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            SentryOptions.SendDefaultPii = true;
-            Sut.Process(evt);
+            _fixture.SentryOptions.SendDefaultPii = true;
+            sut.Process(evt);
 
             Assert.Equal(Environment.MachineName, evt.ServerName);
         }
@@ -63,10 +72,11 @@ namespace Sentry.Tests.Internals
         public void Process_ReleaseOnOptions_SetToEvent()
         {
             const string expectedVersion = "1.0 - f4d6b23";
-            SentryOptions.Release = expectedVersion;
+            _fixture.SentryOptions.Release = expectedVersion;
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Equal(expectedVersion, evt.Release);
         }
@@ -74,21 +84,23 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_NoReleaseOnOptions_SameAsCachedVersion()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
-            Assert.Equal(Sut.Release, evt.Release);
+            Assert.Equal(sut.Release, evt.Release);
         }
 
         [Fact]
         public void Process_EnvironmentOnOptions_SetToEvent()
         {
             const string expected = "Production";
-            SentryOptions.Environment = expected;
+            _fixture.SentryOptions.Environment = expected;
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Equal(expected, evt.Environment);
         }
@@ -97,6 +109,7 @@ namespace Sentry.Tests.Internals
         public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable()
         {
             const string expected = "Staging";
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
             EnvironmentVariableGuard.WithVariable(
@@ -104,7 +117,7 @@ namespace Sentry.Tests.Internals
                 expected,
                 () =>
                 {
-                    Sut.Process(evt);
+                    sut.Process(evt);
                 });
 
             Assert.Equal(expected, evt.Environment);
@@ -113,12 +126,13 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_NoLevelOnEvent_SetToError()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent
             {
                 Level = null
             };
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Equal(SentryLevel.Error, evt.Level);
         }
@@ -127,14 +141,15 @@ namespace Sentry.Tests.Internals
         public void Process_ExceptionProcessors_Invoked()
         {
             var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
-            SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
+            _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
+            var sut = _fixture.GetSut();
 
             var evt = new SentryEvent
             {
                 Exception = new Exception()
             };
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             exceptionProcessor.Received(1).Process(evt.Exception, evt);
         }
@@ -144,14 +159,15 @@ namespace Sentry.Tests.Internals
         {
             var invoked = false;
 
-            SentryOptions.AddExceptionProcessorProvider(() =>
+            _fixture.SentryOptions.AddExceptionProcessorProvider(() =>
             {
                 invoked = true;
                 return new[] { Substitute.For<ISentryEventExceptionProcessor>() };
             });
+            var sut = _fixture.GetSut();
 
             var evt = new SentryEvent();
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.False(invoked);
         }
@@ -159,8 +175,9 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_Platform_CSharp()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Equal(Protocol.Constants.Platform, evt.Platform);
         }
@@ -168,8 +185,9 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_Modules_NotEmpty()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.NotEmpty(evt.Modules);
         }
@@ -177,9 +195,10 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_SdkNameAndVersion_ToDefault()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Equal(Constants.SdkName, evt.Sdk.Name);
             Assert.Equal(typeof(ISentryClient).Assembly.GetNameAndVersion().Version, evt.Sdk.Version);
@@ -190,6 +209,7 @@ namespace Sentry.Tests.Internals
         {
             const string expectedName = "TestSdk";
             const string expectedVersion = "1.0";
+            var sut = _fixture.GetSut();
 
             var evt = new SentryEvent
             {
@@ -200,7 +220,7 @@ namespace Sentry.Tests.Internals
                 }
             };
 
-            Sut.Process(evt);
+            sut.Process(evt);
 
             Assert.Equal(expectedName, evt.Sdk.Name);
             Assert.Equal(expectedVersion, evt.Sdk.Version);

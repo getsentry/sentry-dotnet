@@ -41,6 +41,10 @@ namespace Sentry.Samples.Console.Customized
                 o.AddEventProcessor(new SomeEventProcessor());
                 o.AddExceptionProcessor(new ArgumentExceptionProcessor());
 
+                // Send stack trace for events that were not created from an exception
+                // e.g: CaptureMessage, log.LogDebug, log.LogInformation ...
+                o.AttachStacktrace = true;
+
                 // Sentry won't consider code from namespace LibraryX.* as part of the app code and will hide it from the stacktrace by default
                 // To see the lines from non `AppCode`, select `Full`. That'll include non App code like System.*, Microsoft.* and LibraryX.*
                 o.AddInAppExclude("LibraryX.");

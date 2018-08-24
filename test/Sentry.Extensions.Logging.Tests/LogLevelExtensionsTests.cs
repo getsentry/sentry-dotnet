@@ -37,5 +37,20 @@ namespace Sentry.Extensions.Logging.Tests
             yield return new object[] { (LogLevel.Error, SentryLevel.Error) };
             yield return new object[] { (LogLevel.Critical, SentryLevel.Fatal) };
         }
+
+        [Theory]
+        [MemberData(nameof(LogLevelToSentryLevel))]
+        public void ToSentryLevel_TestCases((SentryLevel expected, LogLevel sut) @case)
+            => Assert.Equal(@case.expected, @case.sut.ToSentryLevel());
+
+        public static IEnumerable<object[]> LogLevelToSentryLevel()
+        {
+            yield return new object[] { (SentryLevel.Debug, LogLevel.Trace) };
+            yield return new object[] { (SentryLevel.Debug, LogLevel.Debug) };
+            yield return new object[] { (SentryLevel.Info, LogLevel.Information) };
+            yield return new object[] { (SentryLevel.Warning, LogLevel.Warning) };
+            yield return new object[] { (SentryLevel.Error, LogLevel.Error) };
+            yield return new object[] { (SentryLevel.Fatal, LogLevel.Critical) };
+        }
     }
 }

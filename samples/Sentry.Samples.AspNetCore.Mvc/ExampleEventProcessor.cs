@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Http;
+using Sentry;
 using Sentry.Extensibility;
 
-namespace Sentry.Samples.AspNetCore.Mvc
+namespace Samples.AspNetCore.Mvc
 {
     public class ExampleEventProcessor : ISentryEventProcessor
     {

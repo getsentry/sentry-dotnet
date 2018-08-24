@@ -1,15 +1,26 @@
+using System.Linq;
+using NSubstitute;
+using Sentry;
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
 
-namespace Sentry.Tests
+// ReSharper disable once CheckNamespace
+// Tests code path which excludes frames with namespace Sentry
+namespace NotSentry.Tests
 {
     public class HubTests
     {
         private class Fixture
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public IBackgroundWorker Worker { get; set; } = Substitute.For<IBackgroundWorker>();
 
-            public Fixture() => SentryOptions.Dsn = new Dsn(DsnSamples.ValidDsnWithoutSecret);
+            public Fixture()
+            {
+                SentryOptions.Dsn = DsnSamples.Valid;
+                SentryOptions.BackgroundWorker = Worker;
+            }
 
             public Hub GetSut() => new Hub(SentryOptions);
         }
@@ -41,6 +52,34 @@ namespace Sentry.Tests
                 sut.ConfigureScope(s => Assert.True(s.Locked));
             }
             sut.ConfigureScope(s => Assert.False(s.Locked));
+        }
+
+        [Fact]
+        public void CaptureMessage_AttachStacktraceTrue_IncludesStackTrace()
+        {
+            _fixture.SentryOptions.AttachStacktrace = true;
+
+            var sut = _fixture.GetSut();
+
+            sut.CaptureMessage("test");
+
+            _fixture.Worker.Received(1)
+                .EnqueueEvent(Arg.Do<SentryEvent>(
+                    e => Assert.DoesNotContain(e.SentryExceptions.Single().Stacktrace.Frames,
+                        p => p.Function == nameof(CaptureMessage_AttachStacktraceTrue_IncludesStackTrace))));
+        }
+
+        [Fact]
+        public void CaptureMessage_AttachStacktraceFalse_IncludesStackTrace()
+        {
+            _fixture.SentryOptions.AttachStacktrace = false;
+
+            var sut = _fixture.GetSut();
+
+            sut.CaptureMessage("test");
+
+            _fixture.Worker.Received(1)
+                .EnqueueEvent(Arg.Is<SentryEvent>(e => e.SentryExceptionValues == null));
         }
     }
 }

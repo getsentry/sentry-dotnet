@@ -3,9 +3,10 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Sentry.Samples.AspNetCore.Mvc.Models;
+using Samples.AspNetCore.Mvc.Models;
+using Sentry;
 
-namespace Sentry.Samples.AspNetCore.Mvc.Controllers
+namespace Samples.AspNetCore.Mvc.Controllers
 {
     public class HomeController : Controller
     {
@@ -55,8 +56,15 @@ namespace Sentry.Samples.AspNetCore.Mvc.Controllers
         }
 
         // Example: The view rendering throws: see about.cshtml
-        public IActionResult About()
+        public IActionResult About(string who = null)
         {
+            if (who == null)
+            {
+                // Exemplifies using the logger to raise a warning which will be sent as an event because MinimumEventLevel was configured to Warning
+                // ALso, the stack trace of this location will be sent (even though there was no exception) because of the configuration AttachStackTrace
+                _logger.LogWarning("A /About 'null' was requested.");
+            }
+
             return View();
         }
 

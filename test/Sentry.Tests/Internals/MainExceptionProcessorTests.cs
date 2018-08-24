@@ -1,24 +1,28 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
+using NSubstitute;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests.Internals
 {
     public class MainExceptionProcessorTests
-    {
-        public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-        internal MainExceptionProcessor Sut { get; set; }
+    {   
+        private class Fixture
+        {
+            public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public MainExceptionProcessor GetSut() => new MainExceptionProcessor(SentryOptions, SentryStackTraceFactory);
+        }
 
-        public MainExceptionProcessorTests() => Sut = new MainExceptionProcessor(SentryOptions);
+        private readonly Fixture _fixture = new Fixture();
 
         [Fact]
         public void Process_NullException_NoSentryException()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            Sut.Process(null, evt);
+            sut.Process(null, evt);
 
             Assert.Null(evt.Exception);
             Assert.Null(evt.SentryExceptionValues);
@@ -27,8 +31,9 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_ExceptionAndEventWithoutExtra_ExtraIsNull()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            Sut.Process(new Exception(), evt);
+            sut.Process(new Exception(), evt);
 
             Assert.Null(evt.InternalExtra);
         }
@@ -36,8 +41,9 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_ExceptionsWithoutData_ExtraIsNull()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            Sut.Process(new Exception("ex", new Exception()), evt);
+            sut.Process(new Exception("ex", new Exception()), evt);
 
             Assert.Null(evt.InternalExtra);
         }
@@ -48,13 +54,15 @@ namespace Sentry.Tests.Internals
             const string expectedKey = "extra";
             const int expectedValue = 1;
 
+            var sut = _fixture.GetSut();
+
             var evt = new SentryEvent();
             evt.SetExtra(expectedKey, expectedValue);
 
             var ex = new Exception();
             ex.Data.Add("other extra", 2);
 
-            Sut.Process(ex, evt);
+            sut.Process(ex, evt);
 
             Assert.Equal(2, evt.Extra.Count);
             Assert.Contains(evt.Extra, p => p.Key == expectedKey && (int)p.Value == expectedValue);
@@ -66,12 +74,14 @@ namespace Sentry.Tests.Internals
             const string expectedKey = "extra";
             const int expectedValue = 1;
 
+            var sut = _fixture.GetSut();
+
             var evt = new SentryEvent();
 
             var ex = new Exception();
             ex.Data.Add(expectedKey, expectedValue);
 
-            Sut.Process(ex, evt);
+            sut.Process(ex, evt);
 
             var actual = Assert.Single(evt.Extra);
 
@@ -82,13 +92,14 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_EventHasExtrasExceptionDoesnt_NotModified()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
             evt.SetExtra("extra", 1);
             var expected = evt.Extra;
 
             var ex = new Exception();
 
-            Sut.Process(ex, evt);
+            sut.Process(ex, evt);
 
             Assert.Same(expected, evt.Extra);
         }
@@ -96,6 +107,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_TwoExceptionsWithData_DataOnEventExtra()
         {
+            var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
             var first = new Exception();
@@ -105,7 +117,7 @@ namespace Sentry.Tests.Internals
             var secondValue = new object();
             second.Data.Add("second", secondValue);
 
-            Sut.Process(second, evt);
+            sut.Process(second, evt);
 
             Assert.Equal(2, evt.Extra.Count);
             Assert.Contains(evt.Extra, e => e.Key == "Exception[0][first]" && e.Value == firstValue);
@@ -113,58 +125,13 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void CreateSentryStackFrame_AppNamespace_InAppFrame()
-        {
-            var frame = new StackFrame();
-
-            var actual = Sut.CreateSentryStackFrame(frame);
-
-            Assert.True(actual.InApp);
-        }
-
-        [Fact]
-        public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
-        {
-            SentryOptions.AddInAppExclude(GetType().Namespace);
-            var frame = new StackFrame();
-
-            var actual = Sut.CreateSentryStackFrame(frame);
-
-            Assert.False(actual.InApp);
-        }
-
-        // https://github.com/getsentry/sentry-dotnet/issues/64
-        [Fact]
-        public void DemangleAnonymousFunction_NullFunction_ContinuesNull()
-        {
-            var stackFrame = new SentryStackFrame
-            {
-                Function = null
-            };
-
-            MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
-            Assert.Null(stackFrame.Function);
-        }
-
-        [Fact]
-        public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
-        {
-            var stackFrame = new SentryStackFrame
-            {
-                Module = null
-            };
-
-            MainExceptionProcessor.DemangleAnonymousFunction(stackFrame);
-            Assert.Null(stackFrame.Module);
-        }
-
-        [Fact]
         public void CreateSentryException_DataHasObjectAsKey_ItemIgnored()
         {
+            var sut = _fixture.GetSut();
             var ex = new Exception();
             ex.Data[new object()] = new object();
 
-            var actual = Sut.CreateSentryException(ex);
+            var actual = sut.CreateSentryException(ex);
 
             Assert.Empty(actual.Single().Data);
         }
