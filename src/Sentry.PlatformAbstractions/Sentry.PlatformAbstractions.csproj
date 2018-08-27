@@ -10,9 +10,12 @@
     <Authors>Sentry Team and Contributors</Authors>
     <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-platform-abstractions/master/.assets/sentry-nuget.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/getsentry/sentry-dotnet-platform-abstractions</PackageProjectUrl>
+    <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/getsentry/sentry-dotnet-platform-abstractions/blob/master/LICENSE</PackageLicenseUrl>
-  </PropertyGroup>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <RepositoryUrl>https://github.com/getsentry/sentry-dotnet-platform-abstractions</RepositoryUrl>
+   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
   </ItemGroup>
