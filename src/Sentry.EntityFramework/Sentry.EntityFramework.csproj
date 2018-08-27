@@ -18,7 +18,7 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-ef/master/.assets/sentry-nuget.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/getsentry/sentry-dotnet-ef</PackageProjectUrl>
+    <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-ef/master/LICENSE</PackageLicenseUrl>
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet-ef/releases</PackageReleaseNotes>
     <PackageId>Sentry.EntityFramework</PackageId>
