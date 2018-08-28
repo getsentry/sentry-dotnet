@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sentry.Extensions.Logging;
 using Sentry.Protocol;
 
-class Program
+internal class Program
 {
-    static void Main()
+    private static void Main()
     {
         using (var loggerFactory = new LoggerFactory()
             .AddConsole(LogLevel.Trace)
@@ -23,6 +24,10 @@ class Program
                 // Optionally configure options: The default values are:
                 o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
                 o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
+
+                // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
+                o.AddLogEntryFilter((category, level, eventId, exception)
+                    => level < LogLevel.Critical && exception?.GetType() == typeof(DivideByZeroException));
             }))
         {
             var logger = loggerFactory.CreateLogger<Program>();
@@ -70,7 +75,7 @@ class Program
     }
 }
 
-class Dependency
+internal class Dependency
 {
     private static int _counter;
 

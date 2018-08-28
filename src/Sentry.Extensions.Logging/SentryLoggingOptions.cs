@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
 
@@ -51,8 +52,8 @@ namespace Sentry.Extensions.Logging
         public bool InitializeSdk { get; set; } = true;
 
         /// <summary>
-        /// Event filters
+        /// Log entry filters
         /// </summary>
-        public IReadOnlyCollection<ILogEventFilter> Filters { get; set; }
+        internal ImmutableList<ILogEntryFilter> Filters { get; set; } = ImmutableList<ILogEntryFilter>.Empty;
     }
 }
