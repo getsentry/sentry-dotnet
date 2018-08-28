@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -96,11 +97,9 @@ namespace Sentry.Extensions.Logging.Tests
         public void LogCritical_MatchingFilter_DoesNotCapturesEvent()
         {
             const string expected = "message";
-            _fixture.Options.Filters = new[]
-            {
-                new DelegateLogEventFilter((_, __, ___, ____) => false),
-                new DelegateLogEventFilter((_, __, ___, ____) => true)
-            };
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => true);
+
             var sut = _fixture.GetSut();
 
             sut.LogCritical(expected);
@@ -113,11 +112,9 @@ namespace Sentry.Extensions.Logging.Tests
         public void LogCritical_NotMatchingFilter_CapturesEvent()
         {
             const string expected = "message";
-            _fixture.Options.Filters = new[]
-            {
-                new DelegateLogEventFilter((_, __, ___, ____) => false),
-                new DelegateLogEventFilter((_, __, ___, ____) => false)
-            };
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+
             var sut = _fixture.GetSut();
 
             sut.LogCritical(expected);
