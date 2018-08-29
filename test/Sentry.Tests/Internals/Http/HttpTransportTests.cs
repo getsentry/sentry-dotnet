@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
-using Sentry.Http;
 using Sentry.Internal.Http;
 using Sentry.Protocol;
 using Sentry.Testing;

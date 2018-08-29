@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
-using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.AspNetCore.Builder

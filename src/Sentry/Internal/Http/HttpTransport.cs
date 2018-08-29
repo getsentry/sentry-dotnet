@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Http;
 using Sentry.Protocol;
 
 namespace Sentry.Internal.Http

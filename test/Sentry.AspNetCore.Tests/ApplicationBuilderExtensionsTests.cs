@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sentry.Extensibility;
-using Sentry.Extensions.Logging;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
