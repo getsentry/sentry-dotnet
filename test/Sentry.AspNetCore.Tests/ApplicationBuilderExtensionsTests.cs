@@ -64,78 +64,78 @@ namespace Sentry.AspNetCore.Tests
             Assert.Same(diagnosticLogger, _fixture.SentryAspNetCoreOptions.DiagnosticLogger);
         }
 
-        [Fact]
-        public void UseSentry_SentryEventProcessor_AccessibleThroughSentryOptions()
-        {
-            var sut = _fixture.GetSut();
+        //[Fact]
+        //public void UseSentry_SentryEventProcessor_AccessibleThroughSentryOptions()
+        //{
+        //    var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+        //    sut.UseSentry();
 
-            Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllEventProcessors(),
-                actual => actual == _fixture.SentryEventProcessor);
-        }
+        //    Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllEventProcessors(),
+        //        actual => actual == _fixture.SentryEventProcessor);
+        //}
 
-        [Fact]
-        public void UseSentry_OriginalEventProcessor_StillAvailable()
-        {
-            var originalProviders = _fixture.SentryAspNetCoreOptions.EventProcessorsProviders;
+        //[Fact]
+        //public void UseSentry_OriginalEventProcessor_StillAvailable()
+        //{
+        //    var originalProviders = _fixture.SentryAspNetCoreOptions.EventProcessorsProviders;
 
-            var sut = _fixture.GetSut();
+        //    var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+        //    sut.UseSentry();
 
-            var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.EventProcessorsProviders);
-            Assert.Empty(missing);
-        }
+        //    var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.EventProcessorsProviders);
+        //    Assert.Empty(missing);
+        //}
 
-        [Fact]
-        public void UseSentry_SentryEventExceptionProcessor_AccessibleThroughSentryOptions()
-        {
-            var sut = _fixture.GetSut();
+        //[Fact]
+        //public void UseSentry_SentryEventExceptionProcessor_AccessibleThroughSentryOptions()
+        //{
+        //    var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+        //    sut.UseSentry();
 
-            Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllExceptionProcessors(),
-                actual => actual == _fixture.SentryEventExceptionProcessor);
-        }
+        //    Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllExceptionProcessors(),
+        //        actual => actual == _fixture.SentryEventExceptionProcessor);
+        //}
 
-        [Fact]
-        public void UseSentry_OriginalEventExceptionProcessor_StillAvailable()
-        {
-            var originalProviders = _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders;
+        //[Fact]
+        //public void UseSentry_OriginalEventExceptionProcessor_StillAvailable()
+        //{
+        //    var originalProviders = _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders;
 
-            var sut = _fixture.GetSut();
+        //    var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+        //    sut.UseSentry();
 
-            var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders);
-            Assert.Empty(missing);
-        }
+        //    var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders);
+        //    Assert.Empty(missing);
+        //}
 
-        [Fact]
-        public void UseSentry_NoEventProcessor_OriginalCallbackNotPatched()
-        {
-            _fixture.SentryEventProcessor = null;
-            var originalProviders = _fixture.SentryAspNetCoreOptions.EventProcessorsProviders;
+        //[Fact]
+        //public void UseSentry_NoEventProcessor_OriginalCallbackNotPatched()
+        //{
+        //    _fixture.SentryEventProcessor = null;
+        //    var originalProviders = _fixture.SentryAspNetCoreOptions.EventProcessorsProviders;
 
-            var sut = _fixture.GetSut();
+        //    var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+        //    sut.UseSentry();
 
-            Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.EventProcessorsProviders);
-        }
+        //    Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.EventProcessorsProviders);
+        //}
 
-        [Fact]
-        public void UseSentry_NoEventExceptionProcessor_OriginalCallbackNotPatched()
-        {
-            _fixture.SentryEventExceptionProcessor = null;
-            var originalProviders = _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders;
+        //[Fact]
+        //public void UseSentry_NoEventExceptionProcessor_OriginalCallbackNotPatched()
+        //{
+        //    _fixture.SentryEventExceptionProcessor = null;
+        //    var originalProviders = _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders;
 
-            var sut = _fixture.GetSut();
+        //    var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+        //    sut.UseSentry();
 
-            Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders);
-        }
+        //    Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders);
+        //}
     }
 }

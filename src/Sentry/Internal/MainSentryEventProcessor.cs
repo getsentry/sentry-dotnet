@@ -101,16 +101,7 @@ namespace Sentry.Internal
                 @event.Environment = _options.Environment ?? Environment;
             }
 
-            if (@event.Exception != null)
-            {
-                // Depends on Options instead of the processors to allow application adding new processors
-                // after the SDK is initialized. Useful for example once a DI container is up
-                foreach (var processor in _options.GetAllExceptionProcessors())
-                {
-                    processor.Process(@event.Exception, @event);
-                }
-            }
-            else
+            if (@event.Exception == null)
             {
                 var stackTrace = _sentryStackTraceFactory.Create();
                 if (stackTrace != null)

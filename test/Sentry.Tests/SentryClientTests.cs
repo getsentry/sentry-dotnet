@@ -24,7 +24,7 @@ namespace Sentry.Tests
         public void CaptureEvent_NullEventWithScope_EmptyGuid()
         {
             var sut = _fixture.GetSut();
-            Assert.Equal(default, sut.CaptureEvent(null, new Scope()));
+            Assert.Equal(default, sut.CaptureEvent(null, new Scope(_fixture.SentryOptions)));
         }
 
         [Fact]
@@ -56,14 +56,14 @@ namespace Sentry.Tests
 
             var sut = _fixture.GetSut();
 
-            var actualId = sut.CaptureEvent(expectedEvent, new Scope());
+            var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
             Assert.Equal(expectedId, actualId);
         }
 
         [Fact]
         public void CaptureEvent_EventAndScope_EvaluatesScope()
         {
-            var scope = new Scope();
+            var scope = new Scope(_fixture.SentryOptions);
             var sut = _fixture.GetSut();
 
             var evaluated = false;
@@ -84,7 +84,7 @@ namespace Sentry.Tests
         public void CaptureEvent_EventAndScope_CopyScopeIntoEvent()
         {
             const string expectedBreadcrumb = "test";
-            var scope = new Scope();
+            var scope = new Scope(_fixture.SentryOptions);
             scope.AddBreadcrumb(expectedBreadcrumb);
             var @event = new SentryEvent();
 
@@ -101,7 +101,7 @@ namespace Sentry.Tests
             var expectedEvent = new SentryEvent();
 
             var sut = _fixture.GetSut();
-            var actualId = sut.CaptureEvent(expectedEvent, new Scope());
+            var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
 
             Assert.Equal(default, actualId);
             _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());

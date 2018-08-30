@@ -11,15 +11,15 @@ namespace Sentry.Internal
     internal class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly AsyncLocal<ImmutableStack<(InternalScope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ImmutableStack<(InternalScope, ISentryClient)>>();
+        private readonly AsyncLocal<ImmutableStack<(Scope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ImmutableStack<(Scope, ISentryClient)>>();
 
-        internal ImmutableStack<(InternalScope scope, ISentryClient client)> ScopeAndClientStack
+        internal ImmutableStack<(Scope scope, ISentryClient client)> ScopeAndClientStack
         {
             get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = NewStack());
             set => _asyncLocalScope.Value = value;
         }
 
-        private Func<ImmutableStack<(InternalScope, ISentryClient)>> NewStack { get; }
+        private Func<ImmutableStack<(Scope, ISentryClient)>> NewStack { get; }
 
         public SentryScopeManager(
             SentryOptions options,
@@ -27,7 +27,7 @@ namespace Sentry.Internal
         {
             Debug.Assert(rootClient != null);
             _options = options;
-            NewStack = () => ImmutableStack.Create((new InternalScope(options), rootClient));
+            NewStack = () => ImmutableStack.Create((new Scope(options), rootClient));
         }
 
         public (Scope Scope, ISentryClient Client) GetCurrent() => ScopeAndClientStack.Peek();
@@ -60,8 +60,7 @@ namespace Sentry.Internal
                 return DisabledHub.Instance;
             }
 
-            var clonedScope = new InternalScope(scope.Options);
-            scope.Apply(clonedScope);
+            var clonedScope = scope.Clone();
 
             if (state != null)
             {
@@ -87,12 +86,12 @@ namespace Sentry.Internal
         private class ScopeSnapshot : IDisposable
         {
             private readonly SentryOptions _options;
-            private readonly ImmutableStack<(InternalScope scope, ISentryClient client)> _snapshot;
+            private readonly ImmutableStack<(Scope scope, ISentryClient client)> _snapshot;
             private readonly SentryScopeManager _scopeManager;
 
             public ScopeSnapshot(
                 SentryOptions options,
-                ImmutableStack<(InternalScope, ISentryClient)> snapshot,
+                ImmutableStack<(Scope, ISentryClient)> snapshot,
                 SentryScopeManager scopeManager)
             {
                 Debug.Assert(snapshot != null);

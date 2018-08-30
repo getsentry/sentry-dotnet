@@ -11,7 +11,7 @@ namespace Sentry.AspNetCore.Tests
 {
     public class ScopeExtensionsTests
     {
-        private readonly Scope _sut = new Scope();
+        private readonly Scope _sut = new Scope(new SentryOptions());
         private readonly HttpContext _httpContext = Substitute.For<HttpContext>();
         private readonly HttpRequest _httpRequest = Substitute.For<HttpRequest>();
         private readonly IServiceProvider _provider = Substitute.For<IServiceProvider>();

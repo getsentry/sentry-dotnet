@@ -35,7 +35,7 @@ namespace Sentry.Internal
                 foreach (var integration in _integrations)
                 {
                     options.DiagnosticLogger?.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                    integration.Register(this);
+                    integration.Register(this, options);
                 }
             }
         }
@@ -92,7 +92,10 @@ namespace Sentry.Internal
             {
                 foreach (var integration in _integrations)
                 {
-                    integration.Unregister(this);
+                    if (integration is IInternalSdkIntegration internalIntegration)
+                    {
+                        internalIntegration.Unregister(this);
+                    }
                 }
             }
 

@@ -12,14 +12,7 @@ namespace Sentry.Integrations
         /// This method is invoked when the Hub is created.
         /// </remarks>
         /// <param name="hub">The hub.</param>
-        void Register(IHub hub);
-        /// <summary>
-        /// Unregisters this integration with the hub
-        /// </summary>
-        /// <remarks>
-        /// This method is invoked when the Hub is disposed.
-        /// </remarks>
-        /// <param name="hub">The hub.</param>
-        void Unregister(IHub hub);
+        /// <param name="options">The options.</param>
+        void Register(IHub hub, SentryOptions options);
     }
 }
