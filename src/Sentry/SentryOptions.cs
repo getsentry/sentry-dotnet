@@ -24,25 +24,25 @@ namespace Sentry
 
         internal int SentryVersion { get; } = ProtocolVersion;
 
-        /// <summary>
-        /// A list of exception processors
-        /// </summary>
-        internal ImmutableList<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
+        ///// <summary>
+        ///// A list of exception processors
+        ///// </summary>
+        //internal ImmutableList<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
 
-        /// <summary>
-        /// A list of event processors
-        /// </summary>
-        internal ImmutableList<ISentryEventProcessor> EventProcessors { get; set; }
+        ///// <summary>
+        ///// A list of event processors
+        ///// </summary>
+        //internal ImmutableList<ISentryEventProcessor> EventProcessors { get; set; }
 
-        /// <summary>
-        /// A list of providers of <see cref="ISentryEventProcessor"/>
-        /// </summary>
-        internal ImmutableList<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
+        ///// <summary>
+        ///// A list of providers of <see cref="ISentryEventProcessor"/>
+        ///// </summary>
+        //internal ImmutableList<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
 
-        /// <summary>
-        /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
-        /// </summary>
-        internal ImmutableList<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
+        ///// <summary>
+        ///// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
+        ///// </summary>
+        //internal ImmutableList<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of integrations to be added when the SDK is initialized
@@ -284,23 +284,23 @@ namespace Sentry
         /// </summary>
         public SentryOptions()
         {
-            EventProcessorsProviders
-                = ImmutableList.Create<Func<IEnumerable<ISentryEventProcessor>>>(
-                    () => EventProcessors);
+            //EventProcessorsProviders
+            //    = ImmutableList.Create<Func<IEnumerable<ISentryEventProcessor>>>(
+            //        () => EventProcessors);
 
-            ExceptionProcessorsProviders
-                = ImmutableList.Create<Func<IEnumerable<ISentryEventExceptionProcessor>>>(
-                    () => ExceptionProcessors);
+            //ExceptionProcessorsProviders
+            //    = ImmutableList.Create<Func<IEnumerable<ISentryEventExceptionProcessor>>>(
+            //        () => ExceptionProcessors);
 
-            var sentryStackTraceFactory = new SentryStackTraceFactory(this);
-            EventProcessors
-                = ImmutableList.Create<ISentryEventProcessor>(
-                     new DuplicateEventDetectionEventProcessor(this),
-                     new MainSentryEventProcessor(this, sentryStackTraceFactory));
+            //var sentryStackTraceFactory = new SentryStackTraceFactory(this);
+            //EventProcessors
+            //    = ImmutableList.Create<ISentryEventProcessor>(
+            //         new DuplicateEventDetectionEventProcessor(this),
+            //         new MainSentryEventProcessor(this, sentryStackTraceFactory));
 
-            ExceptionProcessors
-                = ImmutableList.Create<ISentryEventExceptionProcessor>(
-                    new MainExceptionProcessor(this, sentryStackTraceFactory));
+            //ExceptionProcessors
+            //    = ImmutableList.Create<ISentryEventExceptionProcessor>(
+            //        new MainExceptionProcessor(this, sentryStackTraceFactory));
 
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(

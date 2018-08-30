@@ -38,9 +38,6 @@ namespace Sentry.Samples.Console.Customized
             // Enable the SDK
             using (SentrySdk.Init(o =>
             {
-                o.AddEventProcessor(new SomeEventProcessor());
-                o.AddExceptionProcessor(new ArgumentExceptionProcessor());
-
                 // Send stack trace for events that were not created from an exception
                 // e.g: CaptureMessage, log.LogDebug, log.LogInformation ...
                 o.AttachStacktrace = true;
@@ -96,8 +93,13 @@ namespace Sentry.Samples.Console.Customized
                 };
             }))
             {
+                // Data added to the root scope (no PushScope called up to this point)
+                // The modifications done here will affect all events sent and will propagate to child scopes.
                 await SentrySdk.ConfigureScopeAsync(async scope =>
                 {
+                    scope.AddEventProcessor(new SomeEventProcessor());
+                    scope.AddExceptionProcessor(new ArgumentExceptionProcessor());
+
                     // This could be any async I/O operation, like a DB query
                     await Task.Yield();
                     scope.SetExtra("SomeExtraInfo",

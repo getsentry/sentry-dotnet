@@ -12,8 +12,12 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Sentry.PlatformAbstractions" Version="1.0.0-rc" />
-    <PackageReference Include="Sentry.Protocol" Version="1.0.0-rc" />
+    <!--<PackageReference Include="Sentry.Protocol" Version="1.0.0-rc" />-->
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\sentry-dotnet-protocol\src\Sentry.Protocol\Sentry.Protocol.csproj" />
   </ItemGroup>
 
 </Project>
