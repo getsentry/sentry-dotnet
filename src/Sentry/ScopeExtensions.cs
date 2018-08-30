@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using Sentry.Extensibility;
 
 // ReSharper disable once CheckNamespace
@@ -17,7 +16,20 @@ namespace Sentry
         /// <param name="scope">The Scope which holds the processor providers.</param>
         /// <returns></returns>
         public static IEnumerable<ISentryEventProcessor> GetAllEventProcessors(this Scope scope)
-            => scope.EventProcessorsProviders.SelectMany(p => p());
+        {
+            if (scope.Options is SentryOptions options)
+            {
+                foreach (var processor in options.GetAllEventProcessors())
+                {
+                    yield return processor;
+                }
+            }
+
+            foreach (var processor in scope.EventProcessors)
+            {
+                yield return processor;
+            }
+        }
 
         /// <summary>
         /// Invokes all exception processor providers available
@@ -25,7 +37,20 @@ namespace Sentry
         /// <param name="scope">The Scope which holds the processor providers.</param>
         /// <returns></returns>
         public static IEnumerable<ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Scope scope)
-            => scope.ExceptionProcessorsProviders.SelectMany(p => p());
+        {
+            if (scope.Options is SentryOptions options)
+            {
+                foreach (var processor in options.GetAllExceptionProcessors())
+                {
+                    yield return processor;
+                }
+            }
+
+            foreach (var processor in scope.ExceptionProcessors)
+            {
+                yield return processor;
+            }
+        }
 
         /// <summary>
         /// Add an exception processor
@@ -68,21 +93,5 @@ namespace Sentry
                 scope.EventProcessors.Add(processor);
             }
         }
-
-        /// <summary>
-        /// Adds an event processor provider which is invoked when creating a <see cref="SentryEvent"/>.
-        /// </summary>
-        /// <param name="scope">The SentryOptions to hold the processor provider.</param>
-        /// <param name="processorProvider">The event processor provider.</param>
-        public static void AddEventProcessorProvider(this Scope scope, Func<IEnumerable<ISentryEventProcessor>> processorProvider)
-            => scope.EventProcessorsProviders.Add(processorProvider);
-
-        /// <summary>
-        /// Add the exception processor provider
-        /// </summary>
-        /// <param name="scope">The SentryOptions to hold the processor provider.</param>
-        /// <param name="processorProvider">The exception processor provider.</param>
-        public static void AddExceptionProcessorProvider(this Scope scope, Func<IEnumerable<ISentryEventExceptionProcessor>> processorProvider)
-            => scope.ExceptionProcessorsProviders.Add(processorProvider);
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Reflection;
 
@@ -21,8 +20,8 @@ namespace Sentry.Extensions.Logging
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
-        public SentryLoggerProvider(IOptions<SentryLoggingOptions> options)
-            : this(HubAdapter.Instance,
+        public SentryLoggerProvider(IOptions<SentryLoggingOptions> options, IHub hub)
+            : this(hub,
                 SystemClock.Clock,
                 options.Value)
         { }
@@ -40,20 +39,12 @@ namespace Sentry.Extensions.Logging
             _clock = clock;
             _options = options;
 
-            // SDK is being initialized through this integration
-            // Lifetime is owned by this instance:
-            if (_options.InitializeSdk)
+            _scope = hub.PushScope();
+            hub.ConfigureScope(s =>
             {
-                _sdk = SentrySdk.Init(_options);
-
-                // Creates a scope so that Integration added below can be dropped when the logger is disposed
-                _scope = hub.PushScope();
-                hub.ConfigureScope(s =>
-                {
-                    s.Sdk.Name = NameAndVersion.Name;
-                    s.Sdk.Version = NameAndVersion.Version;
-                });
-            }
+                s.Sdk.Name = NameAndVersion.Name;
+                s.Sdk.Version = NameAndVersion.Version;
+            });
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, _hub);

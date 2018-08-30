@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
-using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
@@ -22,6 +21,13 @@ namespace Sentry.Internal
         {
             Debug.Assert(options != null);
             _options = options;
+
+            if (options.Dsn == null)
+            {
+                const string msg = "Attempt to instantiate a Hub without a DSN.";
+                options.DiagnosticLogger?.LogFatal(msg);
+                throw new InvalidOperationException(msg);
+            }
 
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 

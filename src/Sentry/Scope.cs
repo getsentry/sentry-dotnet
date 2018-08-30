@@ -17,11 +17,11 @@ namespace Sentry
     /// <inheritdoc />
     public class Scope : BaseScope
     {
-        private readonly SentryOptions _options;
         private volatile bool _hasEvaluated;
         private readonly object _evaluationSync = new object();
 
         internal bool Locked { get; set; }
+        internal SentryOptions Options { get; }
 
         /// <summary>
         /// Whether the <see cref="OnEvaluating"/> event has already fired.
@@ -39,18 +39,6 @@ namespace Sentry
         /// </summary>
         internal ConcurrentBag<ISentryEventProcessor> EventProcessors { get; set; }
             = new ConcurrentBag<ISentryEventProcessor>();
-
-        /// <summary>
-        /// A list of providers of <see cref="ISentryEventProcessor"/>
-        /// </summary>
-        internal ConcurrentBag<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
-            = new ConcurrentBag<Func<IEnumerable<ISentryEventProcessor>>>();
-
-        /// <summary>
-        /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
-        /// </summary>
-        internal ConcurrentBag<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
-            = new ConcurrentBag<Func<IEnumerable<ISentryEventExceptionProcessor>>>();
 
         /// <summary>
         /// An event that fires when the scope evaluates
@@ -83,30 +71,23 @@ namespace Sentry
         internal Scope(SentryOptions options, bool addMainProcessor)
         : base(options.MaxBreadcrumbs)
         {
-            _options = options;
-
-            if (addMainProcessor)
-            {
-                EventProcessorsProviders.Add(() => EventProcessors);
-
-                ExceptionProcessorsProviders.Add(() => ExceptionProcessors);
-
-                var sentryStackTraceFactory = new SentryStackTraceFactory(options);
-
-                EventProcessors.Add(new MainSentryEventProcessor(options, sentryStackTraceFactory));
-                ExceptionProcessors.Add(new MainExceptionProcessor(options, sentryStackTraceFactory));
-            }
+            Options = options;
         }
 
         public Scope Clone()
         {
-            var clone = new Scope(_options, false);
+            var clone = new Scope(Options, false);
             this.Apply(clone);
 
-            clone.EventProcessors = new ConcurrentBag<ISentryEventProcessor>(EventProcessors);
-            clone.ExceptionProcessors =  new ConcurrentBag<ISentryEventExceptionProcessor>(ExceptionProcessors);
-            clone.ExceptionProcessorsProviders = new ConcurrentBag<Func<IEnumerable<ISentryEventExceptionProcessor>>>(ExceptionProcessorsProviders);
-            clone.EventProcessorsProviders = new ConcurrentBag<Func<IEnumerable<ISentryEventProcessor>>>(EventProcessorsProviders);
+            if (EventProcessors != null)
+            {
+                clone.EventProcessors = new ConcurrentBag<ISentryEventProcessor>(EventProcessors);
+            }
+
+            if (ExceptionProcessors == null)
+            {
+                clone.ExceptionProcessors = new ConcurrentBag<ISentryEventExceptionProcessor>(ExceptionProcessors);
+            }
 
             return clone;
         }

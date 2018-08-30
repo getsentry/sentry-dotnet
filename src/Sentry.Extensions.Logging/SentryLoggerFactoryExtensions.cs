@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using Sentry;
+using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace
@@ -35,7 +36,7 @@ namespace Microsoft.Extensions.Logging
                 options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticsLevel);
             }
 
-            factory.AddProvider(new SentryLoggerProvider(Options.Options.Create(options)));
+            factory.AddProvider(new SentryLoggerProvider(Options.Options.Create(options), HubAdapter.Instance));
             return factory;
         }
     }

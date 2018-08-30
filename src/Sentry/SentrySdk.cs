@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
-using Sentry.Protocol;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -73,30 +73,19 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
-            options.SetupLogging();
-
-            if (options.Dsn == null)
-            {
-                if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
-                {
-                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    return DisabledHub.Instance;
-                }
-                options.Dsn = dsn;
-            }
-
-            var hub = new Hub(options);
+            var hub = new HubWrapper(options);
             // Push the first scope so the async local starts from here
             hub.PushScope();
 
-            var oldHub = Interlocked.Exchange(ref _hub, hub);
-            (oldHub as IDisposable)?.Dispose();
-
-            return new DisposeHandle(hub);
+            return UseHub(hub);
         }
 
-        // For testing
-        internal static void UseHub(IHub hub) => _hub = hub;
+        internal static IDisposable UseHub(IHub hub)
+        {
+            var oldHub = Interlocked.Exchange(ref _hub, hub);
+            (oldHub as IDisposable)?.Dispose();
+            return new DisposeHandle(hub);
+        }
 
         /// <summary>
         /// Close the SDK
