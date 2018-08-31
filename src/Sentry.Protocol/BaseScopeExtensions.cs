@@ -10,7 +10,7 @@ namespace Sentry
 {
     ///
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class ScopeExtensions
+    public static class BaseScopeExtensions
     {
 #if NETSTANDARD2_0
         /// <summary>
@@ -23,7 +23,7 @@ namespace Sentry
         /// <param name="dataPair">The data key-value pair.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-                    this Scope scope,
+                    this BaseScope scope,
                     string message,
                     string category,
                     string type,
@@ -59,7 +59,7 @@ namespace Sentry
         /// <param name="data">The data.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-            this Scope scope,
+            this BaseScope scope,
             string message,
             string category = null,
             string type = null,
@@ -89,7 +89,7 @@ namespace Sentry
         /// <param name="data">The data</param>
         /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static void AddBreadcrumb(this Scope scope,
+        public static void AddBreadcrumb(this BaseScope scope,
             DateTimeOffset? timestamp,
             string message,
             string category = null,
@@ -107,16 +107,15 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Adds a breadcrumb to the <see cref="Scope"/>
+        /// Adds a breadcrumb to the <see cref="BaseScope"/>
         /// </summary>
         /// <param name="scope">Scope</param>
         /// <param name="breadcrumb">The breadcrumb.</param>
-        internal static void AddBreadcrumb(this Scope scope, Breadcrumb breadcrumb)
+        internal static void AddBreadcrumb(this BaseScope scope, Breadcrumb breadcrumb)
         {
             var breadcrumbs = (ConcurrentQueue<Breadcrumb>)scope.Breadcrumbs;
 
-            var overflow = breadcrumbs.Count - (scope.Options?.MaxBreadcrumbs
-                                                ?? Constants.DefaultMaxBreadcrumbs) + 1;
+            var overflow = breadcrumbs.Count - scope.MaxBreadcrumbs + 1;
             if (overflow > 0)
             {
                 breadcrumbs.TryDequeue(out _);
@@ -126,28 +125,28 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Sets the fingerprint to the <see cref="Scope"/>
+        /// Sets the fingerprint to the <see cref="BaseScope"/>
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
-        public static void SetFingerprint(this Scope scope, IEnumerable<string> fingerprint)
+        public static void SetFingerprint(this BaseScope scope, IEnumerable<string> fingerprint)
             => scope.InternalFingerprint = fingerprint;
 
         /// <summary>
-        /// Sets the extra key-value to the <see cref="Scope"/>
+        /// Sets the extra key-value to the <see cref="BaseScope"/>
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void SetExtra(this Scope scope, string key, object value)
+        public static void SetExtra(this BaseScope scope, string key, object value)
             => ((ConcurrentDictionary<string, object>)scope.Extra).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
-        /// Sets the extra key-value pairs to the <see cref="Scope"/>
+        /// Sets the extra key-value pairs to the <see cref="BaseScope"/>
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="values">The values.</param>
-        public static void SetExtras(this Scope scope, IEnumerable<KeyValuePair<string, object>> values)
+        public static void SetExtras(this BaseScope scope, IEnumerable<KeyValuePair<string, object>> values)
         {
             var extra = (ConcurrentDictionary<string, object>)scope.Extra;
             foreach (var keyValuePair in values)
@@ -157,12 +156,12 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Sets the tag to the <see cref="Scope"/>
+        /// Sets the tag to the <see cref="BaseScope"/>
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void SetTag(this Scope scope, string key, string value)
+        public static void SetTag(this BaseScope scope, string key, string value)
             => ((ConcurrentDictionary<string, string>)scope.Tags).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
@@ -170,7 +169,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="tags"></param>
-        public static void SetTags(this Scope scope, IEnumerable<KeyValuePair<string, string>> tags)
+        public static void SetTags(this BaseScope scope, IEnumerable<KeyValuePair<string, string>> tags)
         {
             var internalTags = (ConcurrentDictionary<string, string>)scope.Tags;
             foreach (var keyValuePair in tags)
@@ -180,11 +179,11 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Removes a tag from the <see cref="Scope"/>
+        /// Removes a tag from the <see cref="BaseScope"/>
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
-        public static void UnsetTag(this Scope scope, string key)
+        public static void UnsetTag(this BaseScope scope, string key)
             => scope.InternalTags?.TryRemove(key, out _);
 
         /// <summary>
@@ -198,7 +197,7 @@ namespace Sentry
         /// Conflicting keys are not overriden
         /// This is a shallow copy.
         /// </remarks>
-        public static void Apply(this Scope from, Scope to)
+        public static void Apply(this BaseScope from, BaseScope to)
         {
             if (from == null || to == null)
             {
@@ -267,7 +266,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope to apply the data.</param>
         /// <param name="state">The state object to apply.</param>
-        public static void Apply(this Scope scope, object state)
+        public static void Apply(this BaseScope scope, object state)
         {
             switch (state)
             {

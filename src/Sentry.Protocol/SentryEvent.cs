@@ -13,10 +13,9 @@ namespace Sentry
     /// An event to be sent to Sentry
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/attributes/" />
-    /// <inheritdoc />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public class SentryEvent : Scope
+    public class SentryEvent : BaseScope
     {
         internal Exception Exception { get; set; }
 
@@ -151,6 +150,7 @@ namespace Sentry
             Exception exception = null,
             DateTimeOffset? timestamp = null,
             Guid id = default)
+            : base(Constants.DefaultMaxBreadcrumbs)
         {
             EventId = id == default ? Guid.NewGuid() : id;
 
