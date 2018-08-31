@@ -39,12 +39,15 @@ namespace Sentry.Extensions.Logging
             _clock = clock;
             _options = options;
 
-            _scope = hub.PushScope();
-            hub.ConfigureScope(s =>
+            if (hub.IsEnabled)
             {
-                s.Sdk.Name = NameAndVersion.Name;
-                s.Sdk.Version = NameAndVersion.Version;
-            });
+                _scope = hub.PushScope();
+                hub.ConfigureScope(s =>
+                {
+                    s.Sdk.Name = NameAndVersion.Name;
+                    s.Sdk.Version = NameAndVersion.Version;
+                });
+            }
         }
 
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, _hub);
