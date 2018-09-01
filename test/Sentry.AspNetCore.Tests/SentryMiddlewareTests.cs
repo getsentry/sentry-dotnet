@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests

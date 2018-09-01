@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -19,29 +18,30 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">The services.</param>
         /// <returns></returns>
-        public static IServiceCollection AddSentry(this IServiceCollection services)
+        public static IServiceCollection AddSentry<TOptions>(this IServiceCollection services)
+            where TOptions : SentryLoggingOptions, new()
         {
             services.TryAddSingleton<SentryOptions>(
-                c => c.GetRequiredService<IOptions<SentryLoggingOptions>>().Value);
+                c => c.GetRequiredService<IOptions<TOptions>>().Value);
 
-            services.TryAddSingleton<HubWrapper>();
+            services.TryAddSingleton<OptionalHub>();
 
-            // If another Hub or Client wasn't registered by the app, always read the accessible through `SentrySdk`
-            services.TryAddSingleton<IHub>(c =>
+            services.TryAddSingleton(c =>
             {
-                var options = c.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
+                var options = c.GetRequiredService<IOptions<TOptions>>().Value;
 
+                IHub hub;
                 if (options.InitializeSdk)
                 {
-                    var hub = c.GetRequiredService<HubWrapper>();
-                    var disposable = SentrySdk.UseHub(hub);
-                    var lifetime = c.GetService<IApplicationLifetime>();
-                    lifetime?.ApplicationStopped.Register(() => disposable.Dispose());
-                    return hub;
+                    hub = c.GetRequiredService<OptionalHub>();
+                }
+                else
+                {
+                    // Access to whatever the SentrySdk points to (disabled or initialized via SentrySdk.Init)
+                    hub = HubAdapter.Instance;
                 }
 
-                // Access to whatever the static Hub points to (disabled or initialized via SentrySdk.Init)
-                return HubAdapter.Instance;
+                return hub;
             });
 
             services.TryAddSingleton<ISentryClient>(c => c.GetService<IHub>());

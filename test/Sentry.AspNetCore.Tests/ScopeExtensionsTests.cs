@@ -4,7 +4,6 @@ using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using NSubstitute;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests

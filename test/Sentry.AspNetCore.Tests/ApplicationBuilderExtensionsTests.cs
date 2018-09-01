@@ -58,6 +58,7 @@ namespace Sentry.AspNetCore.Tests
         {
             var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
             _fixture.SentryAspNetCoreOptions.DiagnosticLogger = diagnosticLogger;
+            _fixture.SentryAspNetCoreOptions.Debug = true;
             var sut = _fixture.GetSut();
             sut.UseSentry();
 

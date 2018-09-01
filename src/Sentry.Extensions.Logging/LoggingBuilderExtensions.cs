@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.Logging
 
             builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
 
-            builder.Services.AddSentry();
+            builder.Services.AddSentry<SentryLoggingOptions>();
             return builder;
         }
     }

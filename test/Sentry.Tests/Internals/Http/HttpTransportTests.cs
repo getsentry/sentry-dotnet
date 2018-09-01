@@ -70,12 +70,13 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
-        public async Task CaptureEventAsync_ResponseNotOkWithMessage_CallbackFired()
+        public async Task CaptureEventAsync_ResponseNotOkWithMessage_LogsError()
         {
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             const string expectedMessage = "Bad Gateway!";
             var expectedEvent = new SentryEvent();
 
+            _fixture.SentryOptions.Debug = true;
             _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
             _fixture.HttpMessageHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage));
@@ -92,11 +93,12 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
-        public async Task CaptureEventAsync_ResponseNotOkNoMessage_CallbackFired()
+        public async Task CaptureEventAsync_ResponseNotOkNoMessage_LogsError()
         {
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             var expectedEvent = new SentryEvent();
 
+            _fixture.SentryOptions.Debug = true;
             _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
             _fixture.HttpMessageHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, null));

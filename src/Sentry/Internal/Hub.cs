@@ -11,9 +11,11 @@ namespace Sentry.Internal
     {
         private readonly SentryOptions _options;
         private readonly ImmutableList<ISdkIntegration> _integrations;
+        private readonly IDisposable _rootScope;
 
-        public IInternalScopeManager ScopeManager { get; }
-        private SentryClient _ownedClient;
+        private readonly SentryClient _ownedClient;
+
+        internal SentryScopeManager ScopeManager { get; }
 
         public bool IsEnabled => true;
 
@@ -24,9 +26,13 @@ namespace Sentry.Internal
 
             if (options.Dsn == null)
             {
-                const string msg = "Attempt to instantiate a Hub without a DSN.";
-                options.DiagnosticLogger?.LogFatal(msg);
-                throw new InvalidOperationException(msg);
+                if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
+                {
+                    const string msg = "Attempt to instantiate a Hub without a DSN.";
+                    options.DiagnosticLogger?.LogFatal(msg);
+                    throw new InvalidOperationException(msg);
+                }
+                options.Dsn = dsn;
             }
 
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
@@ -44,6 +50,9 @@ namespace Sentry.Internal
                     integration.Register(this, options);
                 }
             }
+
+            // Push the first scope so the async local starts from here
+            _rootScope = PushScope();
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
@@ -106,8 +115,8 @@ namespace Sentry.Internal
             }
 
             _ownedClient?.Dispose();
-            _ownedClient = null;
-            (ScopeManager as IDisposable)?.Dispose();
+            _rootScope.Dispose();
+            ScopeManager?.Dispose();
         }
     }
 }

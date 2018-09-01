@@ -4,14 +4,18 @@ using Sentry.Extensibility;
 
 namespace Sentry.Internal
 {
-    // An enabled hub or not depending on Options
-    internal class HubWrapper : IHub
+    // Depending on Options:
+    // - A proxy to a new Hub instance
+    // or
+    // - A proxy to SentrySdk which could hold a Hub if SentrySdk.Init was called, or a disabled Hub
+    internal class OptionalHub : IHub, IDisposable
     {
         private readonly IHub _hub;
+        private readonly IDisposable _disposable;
 
         public bool IsEnabled => _hub.IsEnabled;
 
-        public HubWrapper(SentryOptions options)
+        public OptionalHub(SentryOptions options)
         {
             options.SetupLogging();
 
@@ -20,13 +24,14 @@ namespace Sentry.Internal
                 if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
                 {
                     options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    _hub =  DisabledHub.Instance;
+                    _hub = HubAdapter.Instance;
                     return;
                 }
                 options.Dsn = dsn;
             }
 
             _hub = new Hub(options);
+            _disposable = SentrySdk.UseHub(_hub);
         }
 
         public Guid CaptureEvent(SentryEvent evt, Scope scope = null) => _hub.CaptureEvent(evt, scope);
@@ -40,5 +45,7 @@ namespace Sentry.Internal
         public IDisposable PushScope() => _hub.PushScope();
 
         public IDisposable PushScope<TState>(TState state) => _hub.PushScope(state);
+
+        public void Dispose() => _disposable.Dispose();
     }
 }

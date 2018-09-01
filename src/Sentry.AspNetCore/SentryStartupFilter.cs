@@ -15,20 +15,17 @@ namespace Sentry.AspNetCore
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
             => e =>
             {
-                var options = e.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>()?.Value;
-                if (options?.InitializeSdk == true)
+                // Container is built so resolve a logger and modify the SDK internal logger
+                var options = e.ApplicationServices.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+                if (options.Debug && (options.DiagnosticLogger == null || options.DiagnosticLogger.GetType() == typeof(ConsoleDiagnosticLogger)))
                 {
-                    var logger = e.ApplicationServices.GetService<ILogger<ISentryClient>>();
-                    if (options.Debug && (options.DiagnosticLogger == null || options.DiagnosticLogger.GetType() == typeof(ConsoleDiagnosticLogger)))
-                    {
-                        options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticsLevel);
-                    }
-
-                    var hub = e.ApplicationServices.GetRequiredService<IHub>();
-                    var lifetime = e.ApplicationServices.GetRequiredService<IApplicationLifetime>();
-                    var disposable = SentrySdk.UseHub(hub);
-                    lifetime.ApplicationStopped.Register(() => disposable.Dispose());
+                    var logger = e.ApplicationServices.GetRequiredService<ILogger<ISentryClient>>();
+                    options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticsLevel);
                 }
+
+
+                var lifetime = e.ApplicationServices.GetService<IApplicationLifetime>();
+                lifetime?.ApplicationStopped.Register(SentrySdk.Close);
 
                 e.UseSentry();
 

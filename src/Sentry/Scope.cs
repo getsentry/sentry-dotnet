@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry

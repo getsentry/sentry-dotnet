@@ -242,6 +242,8 @@ namespace Sentry
         /// </summary>
         public Action<HttpClient, Dsn> ConfigureClient { get; set; }
 
+        private volatile bool _debug;
+
         /// <summary>
         /// Whether to log diagnostics messages
         /// </summary>
@@ -249,7 +251,11 @@ namespace Sentry
         /// The verbosity can be controlled through <see cref="DiagnosticsLevel"/>
         /// and the implementation via <see cref="DiagnosticLogger"/>.
         /// </remarks>
-        public bool Debug { get; set; }
+        public bool Debug
+        {
+            get => _debug;
+            set => _debug = value;
+        }
 
         /// <summary>
         /// The diagnostics level to be used
@@ -269,7 +275,7 @@ namespace Sentry
         /// </remarks>
         public IDiagnosticLogger DiagnosticLogger
         {
-            get => _diagnosticLogger;
+            get => Debug ? _diagnosticLogger : null;
             set
             {
                 _diagnosticLogger?.LogInfo("Replacing current logger with: '{0}'.", value?.GetType().Name);

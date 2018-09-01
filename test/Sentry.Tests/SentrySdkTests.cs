@@ -142,7 +142,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogsWarning()
+        public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogWarning()
         {
             var logger = Substitute.For<IDiagnosticLogger>();
             logger.IsEnabled(SentryLevel.Warning).Returns(true);

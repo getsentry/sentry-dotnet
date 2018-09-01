@@ -1,7 +1,6 @@
 using System;
 using NSubstitute;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests

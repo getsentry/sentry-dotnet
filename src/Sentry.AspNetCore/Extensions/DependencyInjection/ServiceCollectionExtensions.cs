@@ -1,11 +1,8 @@
 using System.ComponentModel;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
-using Sentry.Internal;
+using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.Extensions.DependencyInjection
@@ -31,29 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 // Last
                 .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
 
-            services.TryAddSingleton<SentryOptions>(
-                c => c.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value);
-
-            services.TryAddSingleton<HubWrapper>();
-
-            services.TryAddSingleton<IHub>(c =>
-            {
-                var options = c.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
-
-                if (options.InitializeSdk)
-                {
-                    var hub = c.GetRequiredService<HubWrapper>();
-                    var disposable = SentrySdk.UseHub(hub);
-                    var lifetime = c.GetService<IApplicationLifetime>();
-                    lifetime?.ApplicationStopped.Register(() => disposable.Dispose());
-                    return hub;
-                }
-
-                // Access to whatever the static Hub points to (disabled or initialized via SentrySdk.Init)
-                return HubAdapter.Instance;
-            });
-
-            services.TryAddSingleton<ISentryClient>(c => c.GetService<IHub>());
+            services.AddSentry<SentryAspNetCoreOptions>();
 
             return services;
         }
