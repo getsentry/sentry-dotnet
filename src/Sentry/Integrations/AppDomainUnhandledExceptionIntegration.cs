@@ -4,7 +4,7 @@ using Sentry.Internal;
 
 namespace Sentry.Integrations
 {
-    public class AppDomainUnhandledExceptionIntegration : IInternalSdkIntegration
+    internal class AppDomainUnhandledExceptionIntegration : IInternalSdkIntegration
     {
         private readonly IAppDomain _appDomain;
         private IHub _hub;

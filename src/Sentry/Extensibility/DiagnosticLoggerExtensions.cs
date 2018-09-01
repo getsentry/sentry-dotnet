@@ -4,7 +4,7 @@ using Sentry.Protocol;
 namespace Sentry.Extensibility
 {
     // The generic overloads avoid boxing in case logging is disabled for that level
-    public static class DiagnosticLoggerExtensions
+    internal static class DiagnosticLoggerExtensions
     {
         public static void LogDebug<TArg>(
             this IDiagnosticLogger logger,
