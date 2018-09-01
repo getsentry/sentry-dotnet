@@ -21,28 +21,6 @@ namespace Sentry.Protocol
             return target;
         }
 
-        public static ConcurrentDictionary<TKey, TValue> SetItems<TKey, TValue>(
-            this ConcurrentDictionary<TKey, TValue> target,
-            IEnumerable<KeyValuePair<TKey, TValue>> items)
-        {
-            foreach (var keyValuePair in items)
-            {
-                target[keyValuePair.Key] = keyValuePair.Value;
-            }
-            return target;
-        }
-
-        public static ConcurrentBag<TValue> AddRange<TValue>(
-            this ConcurrentBag<TValue> target,
-            IEnumerable<TValue> items)
-        {
-            foreach (var item in items)
-            {
-                target.Add(item);
-            }
-            return target;
-        }
-
         public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
         {
             if (from == null || to == null)
