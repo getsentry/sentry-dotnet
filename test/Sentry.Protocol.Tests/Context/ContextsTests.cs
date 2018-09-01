@@ -79,5 +79,20 @@ namespace Sentry.Protocol.Tests.Context
 
             Assert.Equal("{\"os\":{\"type\":\"os\",\"name\":\"BeOS 1\"}}", actual);
         }
+
+        [Fact]
+        public void Clone_CopyValues()
+        {
+            var sut = new Contexts();
+            sut.App.Name = "name";
+            const string expectedKey = "key";
+            var expectedObject = new object();
+            sut[expectedKey] = expectedObject;
+
+            var clone = sut.Clone();
+
+            Assert.Equal(sut.App.Name, clone.App.Name);
+            Assert.Same(sut[expectedKey], clone[expectedKey]);
+        }
     }
 }

@@ -31,6 +31,29 @@ namespace Sentry.Protocol.Tests.Context
                     actual);
         }
 
+        [Fact]
+        public void Clone_CopyValues()
+        {
+            var sut = new OperatingSystem()
+            {
+                Name = "name",
+                KernelVersion = "KernelVersion",
+                RawDescription = "RawDescription",
+                Rooted = true,
+                Build = "build",
+                Version = "version"
+            };
+
+            var clone = sut.Clone();
+
+            Assert.Equal(sut.Name, clone.Name);
+            Assert.Equal(sut.KernelVersion, clone.KernelVersion);
+            Assert.Equal(sut.RawDescription, clone.RawDescription);
+            Assert.Equal(sut.Rooted, clone.Rooted);
+            Assert.Equal(sut.Build, clone.Build);
+            Assert.Equal(sut.Version, clone.Version);
+        }
+
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((OperatingSystem os, string serialized) @case)

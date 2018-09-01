@@ -22,6 +22,25 @@ namespace Sentry.Protocol.Tests.Context
             Assert.Equal("{\"type\":\"runtime\",\"name\":\".NET Framework\",\"version\":\"4.7.2\",\"raw_description\":\".NET Framework 4.7.2\",\"build\":\"461814\"}", actual);
         }
 
+        [Fact]
+        public void Clone_CopyValues()
+        {
+            var sut = new Runtime
+            {
+                Name = "name",
+                RawDescription = "RawDescription",
+                Build = "build",
+                Version = "version"
+            };
+
+            var clone = sut.Clone();
+
+            Assert.Equal(sut.Name, clone.Name);
+            Assert.Equal(sut.RawDescription, clone.RawDescription);
+            Assert.Equal(sut.Build, clone.Build);
+            Assert.Equal(sut.Version, clone.Version);
+        }
+
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Runtime runtime, string serialized) @case)
