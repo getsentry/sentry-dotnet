@@ -239,6 +239,29 @@ namespace Sentry.Protocol.Tests
         }
 
         [Fact]
+        public void AddBreadcrumb_BeforeBreadcrumbDropsCrumb_NoBreadcrumbInEvent()
+        {
+            _fixture.ScopeOptions.BeforeBreadcrumb.Returns((Breadcrumb c) => null);
+            var sut = _fixture.GetSut();
+
+            sut.AddBreadcrumb("no expected");
+
+            Assert.Null(sut.InternalBreadcrumbs);
+        }
+
+        [Fact]
+        public void AddBreadcrumb_BeforeBreadcrumbNewCrumb_NewCrumbUsed()
+        {
+            var expected = new Breadcrumb();
+            _fixture.ScopeOptions.BeforeBreadcrumb.Returns(_ => expected);
+            var sut = _fixture.GetSut();
+
+            sut.AddBreadcrumb("no expected");
+
+            Assert.Same(expected, sut.InternalBreadcrumbs.Single());
+        }
+
+        [Fact]
         public void AddBreadcrumb_WithoutOptions_NoMoreThanDefaultMaxBreadcrumbs()
         {
             _fixture.ScopeOptions = null;
