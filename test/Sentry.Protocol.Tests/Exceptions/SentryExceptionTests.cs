@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Xunit;
 
-namespace Sentry.Protocol.Tests
+namespace Sentry.Protocol.Tests.Exceptions
 {
     public class SentryExceptionTests
     {
