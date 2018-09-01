@@ -15,7 +15,7 @@ namespace Sentry.Protocol
     /// </remarks>
     [DataContract]
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count ?? 0}")]
-    public abstract class BaseScope
+    public class BaseScope
     {
         internal int MaxBreadcrumbs { get; }
 
@@ -147,6 +147,6 @@ namespace Sentry.Protocol
         /// Creates a scope with the specified options
         /// </summary>
         /// <param name="maxBreadcrumbs"></param>
-        protected BaseScope(int maxBreadcrumbs) => MaxBreadcrumbs = maxBreadcrumbs;
+        public BaseScope(int maxBreadcrumbs = Constants.DefaultMaxBreadcrumbs) => MaxBreadcrumbs = maxBreadcrumbs;
     }
 }

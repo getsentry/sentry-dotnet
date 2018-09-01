@@ -2,19 +2,18 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using NSubstitute;
 using Xunit;
 
 namespace Sentry.Protocol.Tests
 {
     public class ScopeExtensionsTests
     {
-        private Scope _sut = new Scope();
+        private BaseScope _sut = new BaseScope();
 
         [Fact]
         public void SetFingerprint_NullArgument_ReplacesCurrentWithNull()
         {
-            var scope = new Scope { InternalFingerprint = Enumerable.Empty<string>() };
+            var scope = new BaseScope(1) { InternalFingerprint = Enumerable.Empty<string>() };
 
             scope.SetFingerprint(null);
 
@@ -24,7 +23,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetFingerprint_NewFingerprint_ReplacesCurrent()
         {
-            var scope = new Scope { InternalFingerprint = new[] { "to be dropped" } };
+            var scope = new BaseScope(1) { InternalFingerprint = new[] { "to be dropped" } };
             var expectedFingerprint = new[] { "fingerprint" };
 
             scope.SetFingerprint(expectedFingerprint);
@@ -35,7 +34,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetExtra_FirstExtra_NewDictionary()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
             var expectedExtra = new Dictionary<string, object>
             {
                 {"expected Extra", new object()}
@@ -51,7 +50,7 @@ namespace Sentry.Protocol.Tests
         {
             var originalExtra = new ConcurrentDictionary<string, object>();
             originalExtra.TryAdd("original", new object());
-            var scope = new Scope { InternalExtra = originalExtra };
+            var scope = new BaseScope(1) { InternalExtra = originalExtra };
 
             var expectedExtra = new Dictionary<string, object>
             {
@@ -67,7 +66,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetExtras_FirstExtra_NewDictionary()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
             var expectedExtra = new Dictionary<string, object>
             {
                 {"expected Extra", new object()}
@@ -84,7 +83,7 @@ namespace Sentry.Protocol.Tests
             var originalExtra = new ConcurrentDictionary<string, object>();
             originalExtra.TryAdd("original", new object());
 
-            var scope = new Scope { InternalExtra = originalExtra };
+            var scope = new BaseScope(1) { InternalExtra = originalExtra };
 
             var expectedExtra = new Dictionary<string, object>
             {
@@ -100,7 +99,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetExtras_DuplicateExtra_LastSet()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
 
             var expectedExtra = new List<KeyValuePair<string, object>>
             {
@@ -117,7 +116,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetTag_FirstTag_NewDictionary()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
 
             var expectedTag = new Dictionary<string, string>
             {
@@ -132,7 +131,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void UnsetTag_NullDictionary_DoesNotCreateDictionary()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
 
             scope.UnsetTag("non existent");
 
@@ -143,7 +142,7 @@ namespace Sentry.Protocol.Tests
         public void UnsetTag_MatchingKey_RemovesFromDictionary()
         {
             const string expected = "expected";
-            var scope = new Scope();
+            var scope = new BaseScope();
             scope.SetTag(expected, expected);
             scope.UnsetTag(expected);
 
@@ -156,7 +155,7 @@ namespace Sentry.Protocol.Tests
             var originalTag = new ConcurrentDictionary<string, string>();
             originalTag.TryAdd("original", "value");
 
-            var scope = new Scope { InternalTags = originalTag };
+            var scope = new BaseScope(1) { InternalTags = originalTag };
 
             var expectedTag = new Dictionary<string, string>
             {
@@ -172,7 +171,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetTags_FirstTag_NewDictionary()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
             var expectedTag = new Dictionary<string, string>
             {
                 {"expected", "tag"}
@@ -189,7 +188,7 @@ namespace Sentry.Protocol.Tests
             var originalTag = new ConcurrentDictionary<string, string>();
             originalTag.TryAdd("original", "value");
 
-            var scope = new Scope { InternalTags = originalTag };
+            var scope = new BaseScope(1) { InternalTags = originalTag };
 
             var expectedTags = new Dictionary<string, string>
             {
@@ -205,7 +204,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SetTags_DuplicateTag_LastSet()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
 
             var expectedTag = new List<KeyValuePair<string, string>>
             {
@@ -222,7 +221,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void AddBreadcrumb_WithoutOptions_NoMoreThanDefaultMaxBreadcrumbs()
         {
-            var scope = new Scope();
+            var scope = new BaseScope();
 
             for (var i = 0; i < Constants.DefaultMaxBreadcrumbs + 1; i++)
             {
@@ -238,10 +237,7 @@ namespace Sentry.Protocol.Tests
         [InlineData(10)]
         public void AddBreadcrumb_WithOptions_BoundOptionsLimit(int limit)
         {
-            var options = Substitute.For<IScopeOptions>();
-            options.MaxBreadcrumbs.Returns(limit);
-
-            var scope = new Scope(options);
+            var scope = new BaseScope(limit);
 
             for (var i = 0; i < limit + 1; i++)
             {
@@ -255,10 +251,8 @@ namespace Sentry.Protocol.Tests
         public void AddBreadcrumb_DropOldest()
         {
             const int limit = 5;
-            var options = Substitute.For<IScopeOptions>();
-            options.MaxBreadcrumbs.Returns(limit);
 
-            var scope = new Scope(options);
+            var scope = new BaseScope(limit);
 
             for (var i = 0; i < limit + 1; i++)
             {
@@ -378,7 +372,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Null_Source_DoesNotThrow()
         {
-            Scope sut = null;
+            BaseScope sut = null;
             sut.Apply(null);
         }
 
@@ -388,7 +382,7 @@ namespace Sentry.Protocol.Tests
             _sut.InternalFingerprint = null;
 
             const string expected = "fingerprint";
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetFingerprint(new[] { expected });
 
             _sut.Apply(target);
@@ -402,7 +396,7 @@ namespace Sentry.Protocol.Tests
             const string expected = "fingerprint";
             _sut.SetFingerprint(new[] { expected });
 
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -412,7 +406,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Fingerprint_OnTarget_NotOverwritenBySource()
         {
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetFingerprint(new[] { "fingerprint" });
             var expected = target.InternalFingerprint;
 
@@ -426,7 +420,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Breadcrumbs_OnTarget_MergedWithSource()
         {
             _sut.AddBreadcrumb("test sut");
-            var target = new Scope();
+            var target = new BaseScope();
             target.AddBreadcrumb("test target");
 
             _sut.Apply(target);
@@ -437,7 +431,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Breadcrumbs_NullOnSource_TargetIsNull()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -449,7 +443,7 @@ namespace Sentry.Protocol.Tests
         {
             _sut.AddBreadcrumb("test sut");
 
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Apply(target);
 
             Assert.Single(target.InternalBreadcrumbs);
@@ -458,7 +452,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Breadcrumbs_NotOnSource_TargetUnmodified()
         {
-            var target = new Scope();
+            var target = new BaseScope();
             target.AddBreadcrumb("test target");
             var expected = target.InternalBreadcrumbs;
 
@@ -471,7 +465,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Extra_OnTarget_MergedWithSource()
         {
             _sut.SetExtra("sut", "sut");
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetExtra("target", "target");
 
             _sut.Apply(target);
@@ -482,7 +476,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Extra_NullOnSource_TargetIsNull()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -495,7 +489,7 @@ namespace Sentry.Protocol.Tests
             const string conflictingKey = "conflict";
             const string expectedValue = "expected";
             _sut.SetExtra(conflictingKey, "sut");
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetExtra(conflictingKey, expectedValue);
 
             _sut.Apply(target);
@@ -509,7 +503,7 @@ namespace Sentry.Protocol.Tests
         {
             _sut.SetExtra("sut", "sut");
 
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Apply(target);
 
             Assert.Single(target.InternalExtra);
@@ -518,7 +512,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Extra_NotOnSource_TargetUnmodified()
         {
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetExtra("target", "target");
             var expected = target.InternalExtra;
 
@@ -531,7 +525,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Tags_OnTarget_MergedWithSource()
         {
             _sut.SetTag("sut", "sut");
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetTag("target", "target");
 
             _sut.Apply(target);
@@ -542,7 +536,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Tag_NullOnSource_TargetIsNull()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -555,7 +549,7 @@ namespace Sentry.Protocol.Tests
             const string conflictingKey = "conflict";
             const string expectedValue = "expected";
             _sut.SetTag(conflictingKey, "sut");
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetTag(conflictingKey, expectedValue);
 
             _sut.Apply(target);
@@ -569,7 +563,7 @@ namespace Sentry.Protocol.Tests
         {
             _sut.SetTag("sut", "sut");
 
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Apply(target);
 
             Assert.Single(target.InternalTags);
@@ -578,7 +572,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Tags_NotOnSource_TargetUnmodified()
         {
-            var target = new Scope();
+            var target = new BaseScope();
             target.SetTag("target", "target");
             var expected = target.InternalTags;
 
@@ -591,7 +585,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Contexts_KnownType_App_InstanceCloned()
         {
             _sut.Contexts.App.Name = "name";
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -603,7 +597,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Contexts_KnownType_Browser_InstanceCloned()
         {
             _sut.Contexts.Browser.Name = "name";
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -615,7 +609,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Contexts_KnownType_Device_InstanceCloned()
         {
             _sut.Contexts.Device.Name = "name";
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -627,7 +621,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Contexts_KnownType_OperatingSystem_InstanceCloned()
         {
             _sut.Contexts.OperatingSystem.Name = "name";
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -639,7 +633,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Contexts_KnownType_Runtime_InstanceCloned()
         {
             _sut.Contexts.Runtime.Name = "name";
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -651,7 +645,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Contexts_OnTarget_MergedWithSource()
         {
             _sut.Contexts["sut"] = "sut";
-            var target = new Scope();
+            var target = new BaseScope();
             target.Contexts["target"] = "target";
 
             _sut.Apply(target);
@@ -662,7 +656,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Contexts_NullOnSource_TargetIsNull()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -675,7 +669,7 @@ namespace Sentry.Protocol.Tests
             const string conflictingKey = "conflict";
             const string expectedValue = "expected";
             _sut.Contexts[conflictingKey] = "sut";
-            var target = new Scope();
+            var target = new BaseScope();
             target.Contexts[conflictingKey] = expectedValue;
 
             _sut.Apply(target);
@@ -689,7 +683,7 @@ namespace Sentry.Protocol.Tests
         {
             _sut.Contexts["target"] = "target";
 
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Apply(target);
 
             Assert.Single(target.Contexts);
@@ -698,7 +692,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Contexts_NotOnSource_TargetUnmodified()
         {
-            var target = new Scope();
+            var target = new BaseScope();
             target.Contexts["target"] = "target";
             var expected = target.Contexts;
 
@@ -715,7 +709,7 @@ namespace Sentry.Protocol.Tests
             _sut.Sdk.Name = expectedName;
             _sut.Sdk.Version = expectedVersion;
 
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 Sdk =
                 {
@@ -738,7 +732,7 @@ namespace Sentry.Protocol.Tests
             _sut.Sdk.Name = expectedName;
             _sut.Sdk.Version = expectedVersion;
 
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 Sdk =
                 {
@@ -761,7 +755,7 @@ namespace Sentry.Protocol.Tests
             _sut.Sdk.Name = null;
             _sut.Sdk.Version = null;
 
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 Sdk =
                 {
@@ -779,11 +773,11 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Sdk_SourceSingle_TargetNone_CopiesIntegrations()
         {
-            _sut = new Scope();
+            _sut = new BaseScope();
 
             _sut.Sdk.AddIntegration("integration 1");
 
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -793,10 +787,10 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Sdk_SourceSingle_AddsIntegrations()
         {
-            _sut = new Scope();
+            _sut = new BaseScope();
             _sut.Sdk.AddIntegration("integration 1");
 
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Sdk.AddIntegration("integration 2");
 
             _sut.Apply(target);
@@ -809,7 +803,7 @@ namespace Sentry.Protocol.Tests
         {
             var expected = new ConcurrentBag<string> { "integration" };
 
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 Sdk = { InternalIntegrations = expected }
             };
@@ -822,7 +816,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Environment_Null()
         {
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Environment = null;
 
             _sut.Apply(target);
@@ -834,7 +828,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Environment_NotOnTarget_SetFromSource()
         {
             const string expected = "env";
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Environment = expected;
             _sut.Apply(target);
@@ -846,7 +840,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Environment_OnTarget_NotOverwritten()
         {
             const string expected = "env";
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 Environment = expected
             };
@@ -860,7 +854,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_User_NullOnSource_TargetIsNull()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -870,7 +864,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_User_NotSameReference()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.User = new User();
             _sut.Apply(target);
@@ -881,7 +875,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_User_OnTarget_MergedWithSource()
         {
-            var target = new Scope();
+            var target = new BaseScope();
             target.User.Email = "target";
 
             _sut.User.Id = "sut";
@@ -899,7 +893,7 @@ namespace Sentry.Protocol.Tests
             _sut.User.IpAddress = "IpAddress";
             _sut.User.Username = "Username";
 
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Apply(target);
 
             Assert.Equal("Id", target.User.Id);
@@ -911,7 +905,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_User_BothOnSourceAndTarget_TargetUnmodified()
         {
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 User =
                 {
@@ -939,7 +933,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Request_NullOnSource_TargetIsNull()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Apply(target);
 
@@ -949,7 +943,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Request_NotSameReference()
         {
-            var target = new Scope();
+            var target = new BaseScope();
 
             _sut.Request = new Request
             {
@@ -963,7 +957,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Apply_Request_OnTarget_MergedWithSource()
         {
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 Request =
                 {
@@ -1002,7 +996,7 @@ namespace Sentry.Protocol.Tests
                 Url = "sut: /something"
             };
 
-            var target = new Scope();
+            var target = new BaseScope();
             _sut.Apply(target);
 
             Assert.Equal(_sut.Request.Cookies, target.Request.Cookies);
@@ -1019,7 +1013,7 @@ namespace Sentry.Protocol.Tests
         public void Apply_Request_BothOnSourceAndTarget_TargetUnmodified()
         {
             var targetData = new object();
-            var target = new Scope
+            var target = new BaseScope(1)
             {
                 Request =
                 {
