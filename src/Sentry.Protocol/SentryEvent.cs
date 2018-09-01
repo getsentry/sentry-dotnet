@@ -149,8 +149,9 @@ namespace Sentry
         internal SentryEvent(
             Exception exception = null,
             DateTimeOffset? timestamp = null,
-            Guid id = default)
-            : base(Constants.DefaultMaxBreadcrumbs)
+            Guid id = default,
+            IScopeOptions options = null)
+            : base (options)
         {
             EventId = id == default ? Guid.NewGuid() : id;
 

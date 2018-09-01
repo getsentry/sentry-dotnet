@@ -17,8 +17,6 @@ namespace Sentry.Protocol
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count ?? 0}")]
     public class BaseScope
     {
-        internal int MaxBreadcrumbs { get; }
-
         // Default values are null so no serialization of empty objects or arrays
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
@@ -40,6 +38,18 @@ namespace Sentry.Protocol
 
         [DataMember(Name = "tags", EmitDefaultValue = false)]
         internal ConcurrentDictionary<string, string> InternalTags { get; set; }
+
+        /// <summary>
+        /// An optional scope option
+        /// </summary>
+        /// <remarks>
+        /// Options are not mandatory. it allows defining callback for deciding
+        /// on adding breadcrumbs and the max breadcrumbs allowed
+        /// </remarks>
+        /// <returns>
+        /// The options or null, if no options were defined.
+        /// </returns>
+        public IScopeOptions ScopeOptions { get; }
 
         /// <summary>
         /// The name of the transaction in which there was an event.
@@ -146,7 +156,6 @@ namespace Sentry.Protocol
         /// <summary>
         /// Creates a scope with the specified options
         /// </summary>
-        /// <param name="maxBreadcrumbs"></param>
-        public BaseScope(int maxBreadcrumbs = Constants.DefaultMaxBreadcrumbs) => MaxBreadcrumbs = maxBreadcrumbs;
+        public BaseScope(IScopeOptions options) => ScopeOptions = options;
     }
 }

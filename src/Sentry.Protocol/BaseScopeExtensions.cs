@@ -96,15 +96,13 @@ namespace Sentry
             string type = null,
             IReadOnlyDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-        {
-            scope.AddBreadcrumb(new Breadcrumb(
+            => scope.AddBreadcrumb(new Breadcrumb(
                 timestamp: timestamp,
                 message: message,
                 type: type,
                 data: data,
                 category: category,
                 level: level));
-        }
 
         /// <summary>
         /// Adds a breadcrumb to the <see cref="BaseScope"/>
@@ -113,9 +111,25 @@ namespace Sentry
         /// <param name="breadcrumb">The breadcrumb.</param>
         internal static void AddBreadcrumb(this BaseScope scope, Breadcrumb breadcrumb)
         {
+            if (scope == null)
+            {
+                return;
+            }
+
+            if (scope.ScopeOptions?.BeforeBreadcrumb is Func<Breadcrumb, Breadcrumb> callback)
+            {
+                breadcrumb = callback(breadcrumb);
+
+                if (breadcrumb == null)
+                {
+                    return;
+                }
+            }
+
             var breadcrumbs = (ConcurrentQueue<Breadcrumb>)scope.Breadcrumbs;
 
-            var overflow = breadcrumbs.Count - scope.MaxBreadcrumbs + 1;
+            var overflow = breadcrumbs.Count - (scope.ScopeOptions?.MaxBreadcrumbs
+                                                ?? Constants.DefaultMaxBreadcrumbs) + 1;
             if (overflow > 0)
             {
                 breadcrumbs.TryDequeue(out _);
