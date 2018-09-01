@@ -12,7 +12,7 @@ namespace Sentry.Extensions.Logging.Tests
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public SentryLoggingOptions SentryLoggingOptions { get; set; } = new SentryLoggingOptions();
-            public SentryLoggerProvider GetSut() => new SentryLoggerProvider(Hub, Clock, SentryLoggingOptions);
+            public SentryLoggerProvider GetSut() => new SentryLoggerProvider(Hub, Clock, false, SentryLoggingOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();

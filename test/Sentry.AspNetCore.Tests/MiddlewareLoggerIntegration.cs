@@ -42,7 +42,7 @@ namespace Sentry.AspNetCore.Tests
                 var hub = new Hub(new SentryOptions { Dsn = DsnSamples.Valid });
                 hub.BindClient(Client);
                 Hub = hub;
-                var provider = new SentryLoggerProvider(hub, Clock, loggingOptions);
+                var provider = new SentryLoggerProvider(hub, Clock, false, loggingOptions);
                 _disposable = provider;
                 SentryLogger = provider.CreateLogger(nameof(SentryLogger));
                 HttpContext.Features.Returns(FeatureCollection);
