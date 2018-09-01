@@ -137,40 +137,23 @@ namespace Sentry.Tests.Internals
             Assert.Equal(SentryLevel.Error, evt.Level);
         }
 
-        //[Fact]
-        //public void Process_ExceptionProcessors_Invoked()
-        //{
-        //    var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
-        //    _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
-        //    var sut = _fixture.GetSut();
+        [Fact]
+        public void Process_NoExceptionOnEvent_ExceptionProcessorsNotInvoked()
+        {
+            var invoked = false;
 
-        //    var evt = new SentryEvent
-        //    {
-        //        Exception = new Exception()
-        //    };
+            _fixture.SentryOptions.AddExceptionProcessorProvider(() =>
+            {
+                invoked = true;
+                return new[] { Substitute.For<ISentryEventExceptionProcessor>() };
+            });
+            var sut = _fixture.GetSut();
 
-        //    sut.Process(evt);
+            var evt = new SentryEvent();
+            sut.Process(evt);
 
-        //    exceptionProcessor.Received(1).Process(evt.Exception, evt);
-        //}
-
-        //[Fact]
-        //public void Process_NoExceptionOnEvent_ExceptionProcessorsNotInvoked()
-        //{
-        //    var invoked = false;
-
-        //    _fixture.SentryOptions.AddExceptionProcessorProvider(() =>
-        //    {
-        //        invoked = true;
-        //        return new[] { Substitute.For<ISentryEventExceptionProcessor>() };
-        //    });
-        //    var sut = _fixture.GetSut();
-
-        //    var evt = new SentryEvent();
-        //    sut.Process(evt);
-
-        //    Assert.False(invoked);
-        //}
+            Assert.False(invoked);
+        }
 
         [Fact]
         public void Process_Platform_CSharp()

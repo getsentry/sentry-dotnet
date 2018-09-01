@@ -17,8 +17,7 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
-    /// <inheritdoc />
-    public class SentryOptions : IScopeOptions
+    public class SentryOptions
     {
         internal string ClientVersion { get; } = SdkName;
 
@@ -94,7 +93,6 @@ namespace Sentry
         /// <value>
         /// The maximum breadcrumbs per scope.
         /// </value>
-        /// <inheritdoc />
         public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
         /// <summary>
@@ -295,6 +293,8 @@ namespace Sentry
             var sentryStackTraceFactory = new SentryStackTraceFactory(this);
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
+                    // de-dupe to be the first to run
+                    new DuplicateEventDetectionEventProcessor(this),
                     new MainSentryEventProcessor(this, sentryStackTraceFactory));
 
             ExceptionProcessors
@@ -303,7 +303,6 @@ namespace Sentry
 
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(
-                    new DuplicateEventDetectionIntegration(),
                     new AppDomainUnhandledExceptionIntegration());
 
             InAppExclude

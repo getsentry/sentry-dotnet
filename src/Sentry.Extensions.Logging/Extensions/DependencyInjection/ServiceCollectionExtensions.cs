@@ -21,6 +21,11 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddSentry(this IServiceCollection services)
         {
+            services.TryAddSingleton<SentryOptions>(
+                c => c.GetRequiredService<IOptions<SentryLoggingOptions>>().Value);
+
+            services.TryAddSingleton<HubWrapper>();
+
             // If another Hub or Client wasn't registered by the app, always read the accessible through `SentrySdk`
             services.TryAddSingleton<IHub>(c =>
             {
@@ -38,6 +43,8 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
                 // Access to whatever the static Hub points to (disabled or initialized via SentrySdk.Init)
                 return HubAdapter.Instance;
             });
+
+            services.TryAddSingleton<ISentryClient>(c => c.GetService<IHub>());
 
             return services;
         }

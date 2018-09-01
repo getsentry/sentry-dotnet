@@ -39,8 +39,17 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
-        public void Ctor_CreatesScope()
+        public void Ctor_DisabledHub_DoesNotCreatesScope()
         {
+            _fixture.Hub.IsEnabled.Returns(false);
+            _fixture.GetSut();
+            _fixture.Hub.DidNotReceive().PushScope();
+        }
+
+        [Fact]
+        public void Ctor_EnabledHub_CreatesScope()
+        {
+            _fixture.Hub.IsEnabled.Returns(true);
             _fixture.GetSut();
             _fixture.Hub.Received(1).PushScope();
         }
@@ -48,6 +57,7 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void Dispose_DisposesNewScope()
         {
+            _fixture.Hub.IsEnabled.Returns(true);
             var disposable = Substitute.For<IDisposable>();
             _fixture.Hub.PushScope().Returns(disposable);
 
@@ -67,6 +77,7 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void Ctor_ScopeSdk_ContainNameAndVersion()
         {
+            _fixture.Hub.IsEnabled.Returns(true);
             var scope = new Scope(new SentryOptions());
 
             _fixture.Hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))

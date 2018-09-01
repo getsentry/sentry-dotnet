@@ -4,7 +4,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Internal
 {
-    // A valid hub or not depending on Options
+    // An enabled hub or not depending on Options
     internal class HubWrapper : IHub
     {
         private readonly IHub _hub;

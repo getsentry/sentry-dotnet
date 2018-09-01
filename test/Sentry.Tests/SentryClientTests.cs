@@ -3,7 +3,6 @@ using System.Linq;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests
@@ -19,6 +18,42 @@ namespace Sentry.Tests
         }
 
         private readonly Fixture _fixture = new Fixture();
+
+        [Fact]
+        public void CaptureEvent_ExceptionProcessorsOnOptions_Invoked()
+        {
+            var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+            _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
+            var sut = _fixture.GetSut();
+
+            var evt = new SentryEvent
+            {
+                Exception = new Exception()
+            };
+
+            sut.CaptureEvent(evt);
+
+            exceptionProcessor.Received(1).Process(evt.Exception, evt);
+        }
+
+        [Fact]
+        public void CaptureEvent_ExceptionProcessorsOnScope_Invoked()
+        {
+            var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+            var scope = new Scope();
+            scope.AddExceptionProcessor(exceptionProcessor);
+
+            var sut = _fixture.GetSut();
+
+            var evt = new SentryEvent
+            {
+                Exception = new Exception()
+            };
+
+            sut.CaptureEvent(evt, scope);
+
+            exceptionProcessor.Received(1).Process(evt.Exception, evt);
+        }
 
         [Fact]
         public void CaptureEvent_NullEventWithScope_EmptyGuid()

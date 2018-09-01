@@ -101,13 +101,10 @@ namespace Sentry.Internal
                 @event.Environment = _options.Environment ?? Environment;
             }
 
-            if (@event.Exception == null)
+            var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
+            if (stackTrace != null)
             {
-                var stackTrace = _sentryStackTraceFactory.Create();
-                if (stackTrace != null)
-                {
-                    @event.Stacktrace = stackTrace;
-                }
+                @event.Stacktrace = stackTrace;
             }
 
             var builder = ImmutableDictionary.CreateBuilder<string, string>();

@@ -53,7 +53,6 @@ namespace Sentry
         /// <see cref="Evaluate"/>
         public event EventHandler OnEvaluating;
 
-
         /// <summary>
         /// Creates a scope with the specified options
         /// </summary>
@@ -84,7 +83,7 @@ namespace Sentry
                 clone.EventProcessors = new ConcurrentBag<ISentryEventProcessor>(EventProcessors);
             }
 
-            if (ExceptionProcessors == null)
+            if (ExceptionProcessors != null)
             {
                 clone.ExceptionProcessors = new ConcurrentBag<ISentryEventExceptionProcessor>(ExceptionProcessors);
             }
