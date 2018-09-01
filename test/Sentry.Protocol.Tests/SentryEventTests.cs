@@ -98,5 +98,48 @@ namespace Sentry.Protocol.Tests
             var evt = new SentryEvent(e);
             Assert.Same(e, evt.Exception);
         }
+
+        [Fact]
+        public void SentryThreads_Getter_NotNull()
+        {
+            var evt = new SentryEvent();
+            Assert.NotNull(evt.SentryThreads);
+        }
+
+        [Fact]
+        public void SentryThreads_SetToNUll_Getter_NotNull()
+        {
+            var evt = new SentryEvent
+            {
+                SentryThreads = null
+            };
+
+            Assert.NotNull(evt.SentryThreads);
+        }
+
+        [Fact]
+        public void SentryExceptions_Getter_NotNull()
+        {
+            var evt = new SentryEvent();
+            Assert.NotNull(evt.SentryExceptions);
+        }
+
+        [Fact]
+        public void SentryExceptions_SetToNUll_Getter_NotNull()
+        {
+            var evt = new SentryEvent
+            {
+                SentryExceptions = null
+            };
+
+            Assert.NotNull(evt.SentryExceptions);
+        }
+
+        [Fact]
+        public void Modules_Getter_NotNull()
+        {
+            var evt = new SentryEvent();
+            Assert.NotNull(evt.Modules);
+        }
     }
 }
