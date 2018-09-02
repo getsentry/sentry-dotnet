@@ -61,6 +61,18 @@ internal static class Program
                 return @event;
             };
 
+            // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
+            o.BeforeBreadcrumb = crumb =>
+            {
+                // Don't add breadcrumbs with message containing:
+                if (crumb.Message?.Contains("bad breadcrumb") == true)
+                {
+                    return null;
+                }
+
+                return crumb;
+            };
+
             // Configure the background worker which sends events to sentry:
             // Wait up to 5 seconds before shutdown while there are events to send.
             o.ShutdownTimeout = TimeSpan.FromSeconds(5);
@@ -90,6 +102,9 @@ internal static class Program
             };
         }))
         {
+            SentrySdk.AddBreadcrumb(
+                "A 'bad breadcrumb' that will be rejected because of 'BeforeBreadcrumb callback above.'");
+
             // Data added to the root scope (no PushScope called up to this point)
             // The modifications done here will affect all events sent and will propagate to child scopes.
             await SentrySdk.ConfigureScopeAsync(async scope =>

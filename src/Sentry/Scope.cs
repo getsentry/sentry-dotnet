@@ -66,7 +66,7 @@ namespace Sentry
         { }
 
         internal Scope(SentryOptions options, bool addMainProcessor)
-        : base(options.MaxBreadcrumbs)
+        : base(options)
         {
             Options = options;
         }
