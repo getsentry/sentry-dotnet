@@ -25,6 +25,25 @@ namespace Sentry.Protocol.Tests
                     actual);
         }
 
+        [Fact]
+        public void Clone_CopyValues()
+        {
+            var sut = new User()
+            {
+                Id = "id",
+                Email = "emal@sentry.io",
+                IpAddress = "::1",
+                Username = "user"
+            };
+
+            var clone = sut.Clone();
+
+            Assert.Equal(sut.Id, clone.Id);
+            Assert.Equal(sut.Email, clone.Email);
+            Assert.Same(sut.IpAddress, clone.IpAddress);
+            Assert.Equal(sut.Username, clone.Username);
+        }
+
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((User user, string serialized) @case)

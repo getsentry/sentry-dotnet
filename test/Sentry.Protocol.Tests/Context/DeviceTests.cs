@@ -64,6 +64,51 @@ namespace Sentry.Protocol.Tests.Context
                 actual);
         }
 
+        [Fact]
+        public void Clone_CopyValues()
+        {
+            var sut = new Device
+            {
+                Name = "name",
+                Family = "family",
+                Model = "Model",
+                ModelId = "ModelId",
+                Architecture = "Architecture",
+                BatteryLevel = 2,
+                Orientation = DeviceOrientation.Portrait,
+                Simulator = true,
+                MemorySize = 3,
+                FreeMemory = 4,
+                UsableMemory = 5,
+                StorageSize = 6,
+                FreeStorage = 7,
+                ExternalStorageSize = 8,
+                ExternalFreeStorage = 9,
+                BootTime = DateTimeOffset.UtcNow,
+                Timezone = TimeZoneInfo.Utc,
+            };
+
+            var clone = sut.Clone();
+
+            Assert.Equal(sut.Name, clone.Name);
+            Assert.Equal(sut.Family, clone.Family);
+            Assert.Equal(sut.Model, clone.Model);
+            Assert.Equal(sut.ModelId, clone.ModelId);
+            Assert.Equal(sut.Architecture, clone.Architecture);
+            Assert.Equal(sut.BatteryLevel, clone.BatteryLevel);
+            Assert.Equal(sut.Orientation, clone.Orientation);
+            Assert.Equal(sut.Simulator, clone.Simulator);
+            Assert.Equal(sut.MemorySize, clone.MemorySize);
+            Assert.Equal(sut.FreeMemory, clone.FreeMemory);
+            Assert.Equal(sut.UsableMemory, clone.UsableMemory);
+            Assert.Equal(sut.StorageSize, clone.StorageSize);
+            Assert.Equal(sut.FreeStorage, clone.FreeStorage);
+            Assert.Equal(sut.ExternalStorageSize, clone.ExternalStorageSize);
+            Assert.Equal(sut.ExternalFreeStorage, clone.ExternalFreeStorage);
+            Assert.Equal(sut.BootTime, clone.BootTime);
+            Assert.Equal(sut.Timezone, clone.Timezone);
+        }
+
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Device device, string serialized) @case)

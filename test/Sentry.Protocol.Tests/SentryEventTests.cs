@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using Xunit;
 
 namespace Sentry.Protocol.Tests
@@ -26,7 +27,7 @@ namespace Sentry.Protocol.Tests
                 {
                     Message = "structured_message"
                 },
-                Modules = { {"module_key", "module_value"}},
+                Modules = { { "module_key", "module_value" } },
                 Release = "release",
                 SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
@@ -34,10 +35,13 @@ namespace Sentry.Protocol.Tests
                 Transaction = "transaction"
             };
 
-            sut.AddBreadcrumb(timestamp, "crumb");
-            sut.SetExtra("extra_key", "extra_value");
-            sut.SetFingerprint(new[] { "fingerprint" });
-            sut.SetTag("tag_key", "tag_value");
+            sut.InternalBreadcrumbs = new ConcurrentQueue<Breadcrumb>();
+            sut.InternalBreadcrumbs.Enqueue(new Breadcrumb(timestamp, "crumb"));
+            sut.InternalExtra = new ConcurrentDictionary<string, object>();
+            sut.InternalExtra.TryAdd("extra_key", "extra_value");
+            sut.InternalFingerprint = new[] { "fingerprint" };
+            sut.InternalTags = new ConcurrentDictionary<string, string>();
+            sut.InternalTags.TryAdd("tag_key", "tag_value");
 
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -93,6 +97,49 @@ namespace Sentry.Protocol.Tests
             var e = new Exception();
             var evt = new SentryEvent(e);
             Assert.Same(e, evt.Exception);
+        }
+
+        [Fact]
+        public void SentryThreads_Getter_NotNull()
+        {
+            var evt = new SentryEvent();
+            Assert.NotNull(evt.SentryThreads);
+        }
+
+        [Fact]
+        public void SentryThreads_SetToNUll_Getter_NotNull()
+        {
+            var evt = new SentryEvent
+            {
+                SentryThreads = null
+            };
+
+            Assert.NotNull(evt.SentryThreads);
+        }
+
+        [Fact]
+        public void SentryExceptions_Getter_NotNull()
+        {
+            var evt = new SentryEvent();
+            Assert.NotNull(evt.SentryExceptions);
+        }
+
+        [Fact]
+        public void SentryExceptions_SetToNUll_Getter_NotNull()
+        {
+            var evt = new SentryEvent
+            {
+                SentryExceptions = null
+            };
+
+            Assert.NotNull(evt.SentryExceptions);
+        }
+
+        [Fact]
+        public void Modules_Getter_NotNull()
+        {
+            var evt = new SentryEvent();
+            Assert.NotNull(evt.Modules);
         }
     }
 }

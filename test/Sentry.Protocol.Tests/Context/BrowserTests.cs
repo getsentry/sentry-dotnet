@@ -20,6 +20,21 @@ namespace Sentry.Protocol.Tests.Context
             Assert.Equal("{\"type\":\"browser\",\"name\":\"Internet Explorer\",\"version\":\"6\"}", actual);
         }
 
+        [Fact]
+        public void Clone_CopyValues()
+        {
+            var sut = new Browser()
+            {
+                Name = "name",
+                Version = "version"
+            };
+
+            var clone = sut.Clone();
+
+            Assert.Equal(sut.Name, clone.Name);
+            Assert.Equal(sut.Version, clone.Version);
+        }
+
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Browser browser, string serialized) @case)

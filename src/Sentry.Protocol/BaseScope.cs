@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,23 +7,16 @@ using System.Runtime.Serialization;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Scope data to be sent with the event
+    /// The Scoped part of the protocol
     /// </summary>
     /// <remarks>
-    /// Scope data is sent together with any event captured
-    /// during the lifetime of the scope.
+    /// Members are included in the event but often modified as part
+    /// of a scope manipulation which could affect multiple outgoing events.
     /// </remarks>
     [DataContract]
     [DebuggerDisplay("Breadcrumbs: {InternalBreadcrumbs?.Count ?? 0}")]
-    public class Scope
+    public class BaseScope
     {
-        private volatile bool _hasEvaluated;
-        private readonly object _evaluationSync = new object();
-
-        internal IScopeOptions Options { get; }
-
-        internal bool Locked { get; set; }
-
         // Default values are null so no serialization of empty objects or arrays
         [DataMember(Name = "user", EmitDefaultValue = false)]
         internal User InternalUser { get; private set; }
@@ -48,9 +40,16 @@ namespace Sentry.Protocol
         internal ConcurrentDictionary<string, string> InternalTags { get; set; }
 
         /// <summary>
-        /// Whether the <see cref="OnEvaluating"/> event has already fired.
+        /// An optional scope option
         /// </summary>
-        public bool HasEvaluated => _hasEvaluated;
+        /// <remarks>
+        /// Options are not mandatory. it allows defining callback for deciding
+        /// on adding breadcrumbs and the max breadcrumbs allowed
+        /// </remarks>
+        /// <returns>
+        /// The options or null, if no options were defined.
+        /// </returns>
+        public IScopeOptions ScopeOptions { get; }
 
         /// <summary>
         /// The name of the transaction in which there was an event.
@@ -155,69 +154,8 @@ namespace Sentry.Protocol
             Tags => InternalTags ?? (InternalTags = new ConcurrentDictionary<string, string>());
 
         /// <summary>
-        /// An event that fires when the scope evaluates
-        /// </summary>
-        /// <remarks>
-        /// This allows registering an event handler that is invoked in case
-        /// an event is about to be sent to Sentry. If an event is never sent,
-        /// this event is never fired and the resources spared.
-        /// It also allows registration at an early stage of the processing
-        /// but execution at a later time, when more data is available.
-        /// </remarks>
-        /// <see cref="Evaluate"/>
-        public event EventHandler OnEvaluating;
-
-        /// <summary>
         /// Creates a scope with the specified options
         /// </summary>
-        /// <param name="options"></param>
-        public Scope(IScopeOptions options) => Options = options;
-
-        /// <summary>
-        /// Creates a new scope with default options
-        /// </summary>
-        /// <inheritdoc />
-        protected internal Scope()
-            : this(null)
-        { }
-
-        internal void Evaluate()
-        {
-            if (_hasEvaluated)
-            {
-                return;
-            }
-
-            lock (_evaluationSync)
-            {
-                if (_hasEvaluated)
-                {
-                    return;
-                }
-
-                try
-                {
-                    OnEvaluating?.Invoke(this, EventArgs.Empty);
-                }
-                catch (Exception e)
-                {
-                    this.AddBreadcrumb("Failed invoking event handler: " + e,
-                        level: BreadcrumbLevel.Error);
-                }
-                finally
-                {
-                    _hasEvaluated = true;
-                }
-            }
-        }
-
-        internal Scope Clone()
-        {
-            Debug.Assert(!Locked);
-
-            var scope = new Scope(Options);
-            this.Apply(scope);
-            return scope;
-        }
+        public BaseScope(IScopeOptions options) => ScopeOptions = options;
     }
 }

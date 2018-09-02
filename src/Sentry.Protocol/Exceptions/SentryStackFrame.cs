@@ -21,8 +21,7 @@ namespace Sentry.Protocol
         internal Dictionary<string, string> InternalVars { get; private set; }
 
         [DataMember(Name = "frames_omitted ", EmitDefaultValue = false)]
-        internal List<int> InternalFramesOmmitted { get; private set; }
-
+        internal List<int> InternalFramesOmitted { get; private set; }
 
         /// <summary>
         /// The relative file path to the call
@@ -105,7 +104,7 @@ namespace Sentry.Protocol
         /// and went until the 9th (the number of frames omitted is end-start).
         /// The values should be based on a one-index.
         /// </example>
-        public IList<int> FramesOmmitted => InternalFramesOmmitted ?? (InternalFramesOmmitted = new List<int>());
+        public IList<int> FramesOmitted => InternalFramesOmitted ?? (InternalFramesOmitted = new List<int>());
 
         /// <summary>
         /// The assembly where the code resides

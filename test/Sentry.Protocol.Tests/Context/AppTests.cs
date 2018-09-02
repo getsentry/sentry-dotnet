@@ -32,6 +32,31 @@ namespace Sentry.Protocol.Tests.Context
                     actual);
         }
 
+        [Fact]
+        public void Clone_CopyValues()
+        {
+            var sut = new App()
+            {
+                Build = "build",
+                BuildType = "build type",
+                Hash = "hash",
+                Identifier = "identifier",
+                Name = "name",
+                StartTime = DateTimeOffset.UtcNow,
+                Version = "version"
+            };
+
+            var clone = sut.Clone();
+
+            Assert.Equal(sut.Build, clone.Build);
+            Assert.Equal(sut.BuildType, clone.BuildType);
+            Assert.Equal(sut.Hash, clone.Hash);
+            Assert.Equal(sut.Identifier, clone.Identifier);
+            Assert.Equal(sut.Name, clone.Name);
+            Assert.Equal(sut.StartTime, clone.StartTime);
+            Assert.Equal(sut.Version, clone.Version);
+        }
+
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((App app, string serialized) @case)
