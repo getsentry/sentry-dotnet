@@ -23,6 +23,28 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void LastEventId_StartsOfFalse()
+        {
+            Assert.Equal(default, SentrySdk.LastEventId);
+        }
+
+        [Fact]
+        public void LastEventId_SetToEventId()
+        {
+            EnvironmentVariableGuard.WithVariable(
+                DsnEnvironmentVariable,
+                ValidDsnWithSecret,
+                () =>
+                {
+                    using (SentrySdk.Init())
+                    {
+                        var id = SentrySdk.CaptureMessage("test");
+                        Assert.Equal(id, SentrySdk.LastEventId);
+                    }
+                });
+        }
+
+        [Fact]
         public void Init_BrokenDsn_Throws()
         {
             Assert.Throws<UriFormatException>(() => SentrySdk.Init("invalid stuff"));

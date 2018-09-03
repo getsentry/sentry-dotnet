@@ -21,6 +21,27 @@ namespace Sentry
         internal bool Locked { get; set; }
         internal SentryOptions Options { get; }
 
+        private readonly object _lastEventIdSync = new object();
+
+        private Guid _lastEventId;
+        internal Guid LastEventId
+        {
+            get
+            {
+                lock (_lastEventIdSync)
+                {
+                    return _lastEventId;
+                }
+            }
+            set
+            {
+                lock (_lastEventIdSync)
+                {
+                    _lastEventId = value;
+                }
+            }
+        }
+
         /// <summary>
         /// Whether the <see cref="OnEvaluating"/> event has already fired.
         /// </summary>

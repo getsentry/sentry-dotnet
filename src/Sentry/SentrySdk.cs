@@ -24,6 +24,11 @@ namespace Sentry
         private static IHub _hub = DisabledHub.Instance;
 
         /// <summary>
+        /// Last event id recorded in the current scope
+        /// </summary>
+        public static Guid LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
+
+        /// <summary>
         /// Initializes the SDK while attempting to locate the DSN
         /// </summary>
         /// <remarks>

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using NSubstitute;
 using Sentry;
@@ -80,6 +81,31 @@ namespace NotSentry.Tests
 
             _fixture.Worker.Received(1)
                 .EnqueueEvent(Arg.Is<SentryEvent>(e => e.SentryExceptionValues == null));
+        }
+
+        [Fact]
+        public void CaptureMessage_FailedQueue_LastEventIdSetToEmpty()
+        {
+            var expectedId = Guid.Empty;
+            _fixture.Worker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(false);
+            var sut = _fixture.GetSut();
+
+            var actualId = sut.CaptureMessage("test");
+
+            Assert.Equal(expectedId, actualId);
+            Assert.Equal(expectedId, sut.LastEventId);
+        }
+
+        [Fact]
+        public void CaptureMessage_SuccessQueued_LastEventIdSetToReturnedId()
+        {
+            _fixture.Worker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(true);
+            var sut = _fixture.GetSut();
+
+            var actualId = sut.CaptureMessage("test");
+
+            Assert.NotEqual(default, actualId);
+            Assert.Equal(actualId, sut.LastEventId);
         }
     }
 }

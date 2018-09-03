@@ -90,7 +90,10 @@ namespace Sentry.Internal
             try
             {
                 var (currentScope, client) = ScopeManager.GetCurrent();
-                return client.CaptureEvent(evt, scope ?? currentScope);
+                var actualScope = scope ?? currentScope;
+                var id = client.CaptureEvent(evt, actualScope);
+                actualScope.LastEventId = id;
+                return id;
             }
             catch (Exception e)
             {
@@ -117,6 +120,15 @@ namespace Sentry.Internal
             _ownedClient?.Dispose();
             _rootScope.Dispose();
             ScopeManager?.Dispose();
+        }
+
+        public Guid LastEventId
+        {
+            get
+            {
+                var (currentScope, _) = ScopeManager.GetCurrent();
+                return currentScope.LastEventId;
+            }
         }
     }
 }

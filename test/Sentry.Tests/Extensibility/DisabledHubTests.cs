@@ -11,15 +11,18 @@ namespace Sentry.Tests.Extensibility
         public void IsEnabled_False() => Assert.False(DisabledHub.Instance.IsEnabled);
 
         [Fact]
+        public void LastEventId_EmptyGuid() => Assert.Equal(default, DisabledHub.Instance.LastEventId);
+
+        [Fact]
         public void ConfigureScopeAsync_ReturnsCompletedTask()
             => Assert.Same(Task.CompletedTask, DisabledHub.Instance.ConfigureScopeAsync(null));
 
         [Fact]
-        public void PushScope_ReturnsSeld()
+        public void PushScope_ReturnsSelf()
             => Assert.Same(DisabledHub.Instance, DisabledHub.Instance.PushScope());
 
         [Fact]
-        public void PushScope_WithState_ReturnsSeld()
+        public void PushScope_WithState_ReturnsSelf()
             => Assert.Same(DisabledHub.Instance, DisabledHub.Instance.PushScope(null as object));
 
         [Fact]

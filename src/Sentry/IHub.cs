@@ -1,3 +1,5 @@
+using System;
+
 namespace Sentry
 {
     /// <summary>
@@ -14,5 +16,9 @@ namespace Sentry
         ISentryClient,
         ISentryScopeManager
     {
+        /// <summary>
+        /// Last event id recorded in the current scope
+        /// </summary>
+        Guid LastEventId { get; }
     }
 }
