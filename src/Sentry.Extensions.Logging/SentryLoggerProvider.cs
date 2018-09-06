@@ -10,11 +10,12 @@ namespace Sentry.Extensions.Logging
     [ProviderAlias("Sentry")]
     public class SentryLoggerProvider : ILoggerProvider
     {
-        private readonly IHub _hub;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
         private readonly IDisposable _scope;
         private readonly IDisposable _disposableHub;
+
+        internal IHub Hub { get; }
 
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
@@ -22,26 +23,21 @@ namespace Sentry.Extensions.Logging
         public SentryLoggerProvider(IOptions<SentryLoggingOptions> options, IHub hub)
             : this(hub,
                 SystemClock.Clock,
-                false,
                 options.Value)
         { }
 
         internal SentryLoggerProvider(
             IHub hub,
             ISystemClock clock,
-            bool ownsHub,
             SentryLoggingOptions options)
         {
             Debug.Assert(options != null);
             Debug.Assert(clock != null);
             Debug.Assert(hub != null);
 
-            if (ownsHub)
-            {
-                _disposableHub = hub as IDisposable;
-            }
+            _disposableHub = hub as IDisposable;
 
-            _hub = hub;
+            Hub = hub;
             _clock = clock;
             _options = options;
 
@@ -56,7 +52,7 @@ namespace Sentry.Extensions.Logging
             }
         }
 
-        public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, _hub);
+        public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub);
 
         public void Dispose()
         {

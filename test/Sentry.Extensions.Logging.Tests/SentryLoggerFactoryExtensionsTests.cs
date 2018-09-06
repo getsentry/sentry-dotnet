@@ -1,12 +1,35 @@
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests
 {
     public class SentryLoggerFactoryExtensionsTests
     {
+        [Fact]
+        public void AddSentry_InitializeSdkFalse_HubAdapter()
+        {
+            var sut = Substitute.For<ILoggerFactory>();
+
+            sut.AddSentry(o => o.InitializeSdk = false);
+
+            sut.Received(1)
+                .AddProvider(Arg.Is<SentryLoggerProvider>(p => p.Hub == HubAdapter.Instance));
+        }
+
+        [Fact]
+        public void AddSentry_DefaultOptions_InstantiateOptionalHub()
+        {
+            var sut = Substitute.For<ILoggerFactory>();
+
+            sut.AddSentry();
+
+            sut.Received(1)
+                .AddProvider(Arg.Is<SentryLoggerProvider>(p => p.Hub is OptionalHub));
+        }
+
         [Fact]
         public void AddSentry_NoDiagnosticSet_MelSet()
         {

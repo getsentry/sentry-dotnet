@@ -39,20 +39,17 @@ namespace Microsoft.Extensions.Logging
             }
 
             IHub hub;
-            bool ownsHub;
             if (options.InitializeSdk)
             {
                 hub = new OptionalHub(options);
-                ownsHub = true;
             }
             else
             {
                 // Access to whatever the SentrySdk points to (disabled or initialized via SentrySdk.Init)
                 hub = HubAdapter.Instance;
-                ownsHub = false;
             }
 
-            factory.AddProvider(new SentryLoggerProvider(hub, SystemClock.Clock, ownsHub, options));
+            factory.AddProvider(new SentryLoggerProvider(hub, SystemClock.Clock, options));
             return factory;
         }
     }
