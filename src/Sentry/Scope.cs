@@ -46,7 +46,7 @@ namespace Sentry
         /// <summary>
         /// Whether the <see cref="OnEvaluating"/> event has already fired.
         /// </summary>
-        public bool HasEvaluated => _hasEvaluated;
+        internal bool HasEvaluated => _hasEvaluated;
 
         private readonly Lazy<ConcurrentBag<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
             new Lazy<ConcurrentBag<ISentryEventExceptionProcessor>>(LazyThreadSafetyMode.PublicationOnly);
@@ -74,7 +74,7 @@ namespace Sentry
         /// but execution at a later time, when more data is available.
         /// </remarks>
         /// <see cref="Evaluate"/>
-        public event EventHandler OnEvaluating;
+        internal event EventHandler OnEvaluating;
 
         /// <summary>
         /// Creates a scope with the specified options
