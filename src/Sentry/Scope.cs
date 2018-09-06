@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 
@@ -47,17 +48,20 @@ namespace Sentry
         /// </summary>
         public bool HasEvaluated => _hasEvaluated;
 
+        private readonly Lazy<ConcurrentBag<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
+            new Lazy<ConcurrentBag<ISentryEventExceptionProcessor>>(LazyThreadSafetyMode.PublicationOnly);
         /// <summary>
         /// A list of exception processors
         /// </summary>
-        internal ConcurrentBag<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
-            = new ConcurrentBag<ISentryEventExceptionProcessor>();
+        internal ConcurrentBag<ISentryEventExceptionProcessor> ExceptionProcessors => _lazyExceptionProcessors.Value;
 
+
+        private readonly Lazy<ConcurrentBag<ISentryEventProcessor>> _lazyEventProcessors =
+            new Lazy<ConcurrentBag<ISentryEventProcessor>>(LazyThreadSafetyMode.PublicationOnly);
         /// <summary>
         /// A list of event processors
         /// </summary>
-        internal ConcurrentBag<ISentryEventProcessor> EventProcessors { get; set; }
-            = new ConcurrentBag<ISentryEventProcessor>();
+        internal ConcurrentBag<ISentryEventProcessor> EventProcessors => _lazyEventProcessors.Value;
 
         /// <summary>
         /// An event that fires when the scope evaluates
@@ -76,35 +80,37 @@ namespace Sentry
         /// Creates a scope with the specified options
         /// </summary>
         /// <param name="options"></param>
+        /// <inheritdoc />
         public Scope(SentryOptions options)
-            : this(options ?? new SentryOptions(), true)
+        : base(options)
         {
+            Options = options ?? new SentryOptions();
         }
 
         // For testing. Should explicitly require SentryOptions
         internal Scope()
-            : this(new SentryOptions(), true)
+            : this(new SentryOptions())
         { }
-
-        internal Scope(SentryOptions options, bool addMainProcessor)
-        : base(options)
-        {
-            Options = options;
-        }
 
         public Scope Clone()
         {
-            var clone = new Scope(Options, false);
+            var clone = new Scope(Options);
             this.Apply(clone);
 
             if (EventProcessors != null)
             {
-                clone.EventProcessors = new ConcurrentBag<ISentryEventProcessor>(EventProcessors);
+                foreach (var processor in EventProcessors)
+                {
+                    clone.EventProcessors.Add(processor);
+                }
             }
 
             if (ExceptionProcessors != null)
             {
-                clone.ExceptionProcessors = new ConcurrentBag<ISentryEventExceptionProcessor>(ExceptionProcessors);
+                foreach (var processor in ExceptionProcessors)
+                {
+                    clone.ExceptionProcessors.Add(processor);
+                }
             }
 
             return clone;
