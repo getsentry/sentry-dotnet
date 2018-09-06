@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -54,7 +56,7 @@ namespace Sentry
         /// <summary>
         /// Add an exception processor
         /// </summary>
-        /// <param name="scope">The SentryOptions to hold the processor.</param>
+        /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="processor">The exception processor.</param>
         public static void AddExceptionProcessor(this Scope scope, ISentryEventExceptionProcessor processor)
             => scope.ExceptionProcessors.Add(processor);
@@ -62,7 +64,7 @@ namespace Sentry
         /// <summary>
         /// Add the exception processors
         /// </summary>
-        /// <param name="scope">The SentryOptions to hold the processor.</param>
+        /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="processors">The exception processors.</param>
         public static void AddExceptionProcessors(this Scope scope, IEnumerable<ISentryEventExceptionProcessor> processors)
         {
@@ -75,15 +77,23 @@ namespace Sentry
         /// <summary>
         /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
         /// </summary>
-        /// <param name="scope">The SentryOptions to hold the processor.</param>
+        /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="processor">The event processor.</param>
         public static void AddEventProcessor(this Scope scope, ISentryEventProcessor processor)
             => scope.EventProcessors.Add(processor);
 
         /// <summary>
+        /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
+        /// </summary>
+        /// <param name="scope">The Scope to hold the processor.</param>
+        /// <param name="processor">The event processor.</param>
+        public static void AddEventProcessor(this Scope scope, Func<SentryEvent, SentryEvent> processor)
+            => scope.AddEventProcessor(new DelegateEventProcessor(processor));
+
+        /// <summary>
         /// Adds event processors which are invoked when creating a <see cref="SentryEvent"/>.
         /// </summary>
-        /// <param name="scope">The SentryOptions to hold the processor.</param>
+        /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="processors">The event processors.</param>
         public static void AddEventProcessors(this Scope scope, IEnumerable<ISentryEventProcessor> processors)
         {
