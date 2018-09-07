@@ -64,10 +64,7 @@ void Main()
     using (SentrySdk.Init(o =>
     {
         o.Dsn = new Dsn("dsn");
-        o.Http(h =>
-        {
-            h.Proxy = new WebProxy("https://localhost:3128");
-        });
+        o.Proxy = new WebProxy("https://localhost:3128");
     }))
     {
         // App code
@@ -132,6 +129,7 @@ The SDK is configurable, many of the settings are demonstrated through the sampl
 * Send PII data (Personal Identifiable Information, requires opt-in)
 * Read [diagnostics activity data]("https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md)
 * BeforeSend: Callback to modify/reject event before sending
+* BeforeBreadcrumb: Callback to modify/reject a breadcrumb
 * LogEventFilter: Filter events by inspecting log data
 * Maximum number of breadcrumbs to store
 * Event queue depth
@@ -182,7 +180,7 @@ An example using `IHub` for testability is [SentryLogger](https://github.com/get
 
 The packages target **.NET Standard 2.0**. That means [it is compatible with](https://docs.microsoft.com/en-us/dotnet/standard/net-standard) the following versions or newer:
 
-* .NET Framework 4.6.1
+* .NET Framework 4.6.1 (4.7.2 advised)
 * .NET Core 2.0
 * Mono 5.4
 * Xamarin.Android 8.0
@@ -192,20 +190,14 @@ The packages target **.NET Standard 2.0**. That means [it is compatible with](ht
 
 Of those, we've tested (we run our unit/integration tests) against:
 
-* .NET Framework 4.6.2 on Windows (AppVeyor)
+* .NET Framework 4.7.2 on Windows
 * Mono 5.12 macOS and Linux (Travis-CI)
-* .NET Core 2.0 Windows (AppVeyor), macOS and Linux (Travis-CI)
-* .NET Core 2.1 Windows (AppVeyor), macOS and Linux (Travis-CI)
-
+* .NET Core 2.0 Windows, macOS and Linux
+* .NET Core 2.1 Windows, macOS and Linux
 
 ### Legacy frameworks
 
-Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 300.000 downloads on NuGet has support to .NET Framework 3.5+.
-
-## Get involved
-Join the discussion in our
-[tracking issue](https://github.com/getsentry/sentry-dotnet/issues/1) and let us
-know what you think of the new API and new features.
+Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 400.000 downloads on NuGet has support to .NET Framework 3.5+.
 
 ## Resources
 * [![Gitter chat](https://img.shields.io/gitter/room/getsentry/dotnet.svg)](https://gitter.im/getsentry/dotnet)
