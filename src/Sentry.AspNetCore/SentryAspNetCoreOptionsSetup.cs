@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
+using Sentry.Internal;
 
 namespace Sentry.AspNetCore
 {
@@ -22,6 +23,7 @@ namespace Sentry.AspNetCore
 
             options.Environment
                 = options.Environment // Don't override user defined value
+                  ?? EnvironmentLocator.Locate() // Sentry specific environment takes precedence #92
                   ?? _hostingEnvironment?.EnvironmentName;
 
             options.AddLogEntryFilter((category, level, eventId, exception)

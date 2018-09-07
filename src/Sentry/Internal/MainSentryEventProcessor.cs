@@ -14,7 +14,6 @@ namespace Sentry.Internal
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
         private readonly Lazy<string> _release = new Lazy<string>(ReleaseLocator.GetCurrent);
-        private readonly Lazy<string> _environment = new Lazy<string>(EnvironmentLocator.GetCurrent);
         private readonly Lazy<Runtime> _runtime = new Lazy<Runtime>(() =>
         {
             var current = PlatformAbstractions.Runtime.Current;
@@ -35,7 +34,6 @@ namespace Sentry.Internal
         private readonly ISentryStackTraceFactory _sentryStackTraceFactory;
 
         internal string Release => _release.Value;
-        internal string Environment => _environment.Value;
         internal Runtime Runtime => _runtime.Value;
 
         public MainSentryEventProcessor(
@@ -98,7 +96,7 @@ namespace Sentry.Internal
 
             if (@event.Environment == null)
             {
-                @event.Environment = _options.Environment ?? Environment;
+                @event.Environment = _options.Environment ?? EnvironmentLocator.Locate();
             }
 
             var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
