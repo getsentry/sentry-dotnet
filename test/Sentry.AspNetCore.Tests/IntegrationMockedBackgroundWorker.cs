@@ -88,7 +88,7 @@ namespace Else.AspNetCore.Tests
         }
 
         [Fact]
-        public void DiagnosticLogger_ByDefault_ReplacedWithMelLogger()
+        public void DiagnosticLogger_ByDefault_IsNull()
         {
             Build();
             var options = ServiceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();

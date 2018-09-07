@@ -101,22 +101,10 @@ namespace Sentry.Internal
                 @event.Environment = _options.Environment ?? Environment;
             }
 
-            if (@event.Exception != null)
+            var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
+            if (stackTrace != null)
             {
-                // Depends on Options instead of the processors to allow application adding new processors
-                // after the SDK is initialized. Useful for example once a DI container is up
-                foreach (var processor in _options.GetAllExceptionProcessors())
-                {
-                    processor.Process(@event.Exception, @event);
-                }
-            }
-            else
-            {
-                var stackTrace = _sentryStackTraceFactory.Create();
-                if (stackTrace != null)
-                {
-                    @event.Stacktrace = stackTrace;
-                }
+                @event.Stacktrace = stackTrace;
             }
 
             var builder = ImmutableDictionary.CreateBuilder<string, string>();

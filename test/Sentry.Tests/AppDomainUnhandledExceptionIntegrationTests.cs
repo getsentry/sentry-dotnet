@@ -1,6 +1,7 @@
 using System;
 using NSubstitute;
 using Sentry.Integrations;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Tests
@@ -19,12 +20,13 @@ namespace Sentry.Tests
         }
 
         private readonly Fixture _fixture = new Fixture();
+        public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
         [Fact]
         public void Handle_WithException_CaptureEvent()
         {
             var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub);
+            sut.Register(_fixture.Hub, SentryOptions);
 
             sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
 
@@ -35,7 +37,7 @@ namespace Sentry.Tests
         public void Handle_NoException_NoCaptureEvent()
         {
             var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub);
+            sut.Register(_fixture.Hub, SentryOptions);
 
             sut.Handle(this, new UnhandledExceptionEventArgs(new object(), true));
 
@@ -46,7 +48,7 @@ namespace Sentry.Tests
         public void Handle_TerminatingTrue_DisposesHub()
         {
             var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub);
+            sut.Register(_fixture.Hub, SentryOptions);
 
             sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
 
@@ -58,7 +60,7 @@ namespace Sentry.Tests
         public void Handle_TerminatingTrue_NoException_DisposesHub()
         {
             var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub);
+            sut.Register(_fixture.Hub, SentryOptions);
 
             sut.Handle(this, new UnhandledExceptionEventArgs(null, true));
 
@@ -70,7 +72,7 @@ namespace Sentry.Tests
         public void Handle_TerminatingFalse_DoesNotDisposesHub()
         {
             var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub);
+            sut.Register(_fixture.Hub, SentryOptions);
 
             sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), false));
 
@@ -82,7 +84,7 @@ namespace Sentry.Tests
         public void Register_UnhandledException_Subscribes()
         {
             var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub);
+            sut.Register(_fixture.Hub, SentryOptions);
 
             _fixture.AppDomain.Received().UnhandledException += sut.Handle;
         }
@@ -91,7 +93,7 @@ namespace Sentry.Tests
         public void Unregister_UnhandledException_Unsubscribes()
         {
             var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub);
+            sut.Register(_fixture.Hub, SentryOptions);
             sut.Unregister(_fixture.Hub);
 
             _fixture.AppDomain.Received(1).UnhandledException -= sut.Handle;

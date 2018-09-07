@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
 {
@@ -16,11 +18,33 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">The services.</param>
         /// <returns></returns>
-        public static IServiceCollection AddSentry(this IServiceCollection services)
+        public static IServiceCollection AddSentry<TOptions>(this IServiceCollection services)
+            where TOptions : SentryLoggingOptions, new()
         {
-            // If another Hub or Client wasn't registered by the app, always read the accessible through `SentrySdk`
-            services.TryAddTransient(p => HubAdapter.Instance as IHub);
-            services.TryAddTransient(p => HubAdapter.Instance as ISentryClient);
+            services.TryAddSingleton<SentryOptions>(
+                c => c.GetRequiredService<IOptions<TOptions>>().Value);
+
+            services.TryAddSingleton<OptionalHub>();
+
+            services.TryAddSingleton(c =>
+            {
+                var options = c.GetRequiredService<IOptions<TOptions>>().Value;
+
+                IHub hub;
+                if (options.InitializeSdk)
+                {
+                    hub = c.GetRequiredService<OptionalHub>();
+                }
+                else
+                {
+                    // Access to whatever the SentrySdk points to (disabled or initialized via SentrySdk.Init)
+                    hub = HubAdapter.Instance;
+                }
+
+                return hub;
+            });
+
+            services.TryAddSingleton<ISentryClient>(c => c.GetService<IHub>());
 
             return services;
         }

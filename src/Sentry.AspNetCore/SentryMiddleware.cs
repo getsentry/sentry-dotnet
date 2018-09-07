@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore

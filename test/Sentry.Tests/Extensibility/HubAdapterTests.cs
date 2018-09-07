@@ -58,6 +58,13 @@ namespace Sentry.Tests.Extensibility
         }
 
         [Fact]
+        public void LastEventId_MockInvoked()
+        {
+            _ = HubAdapter.Instance.LastEventId;
+            _ = Hub.Received(1).LastEventId;
+        }
+
+        [Fact]
         public void ConfigureScopeAsync_MockInvoked()
         {
             Task Expected(Scope _) => Task.CompletedTask;

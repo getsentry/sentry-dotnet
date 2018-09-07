@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
+using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.Extensions.DependencyInjection
@@ -28,9 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 // Last
                 .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
 
-            // If another Hub or Client wasn't registered by the app, always read the accessible through `SentrySdk`
-            services.TryAddTransient(p => HubAdapter.Instance as IHub);
-            services.TryAddTransient(p => HubAdapter.Instance as ISentryClient);
+            services.AddSentry<SentryAspNetCoreOptions>();
 
             return services;
         }

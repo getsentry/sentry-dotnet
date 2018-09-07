@@ -103,14 +103,25 @@ namespace Sentry
                     return Guid.Empty;
                 }
             }
+            scope = scope ?? new Scope(_options);
 
-            _options.DiagnosticLogger?.LogInfo("Capturing event. Has scope: {0}", scope != null);
+            _options.DiagnosticLogger?.LogInfo("Capturing event.");
 
             // Evaluate and copy before invoking the callback
-            scope?.Evaluate();
-            scope?.Apply(@event);
+            scope.Evaluate();
+            scope.Apply(@event);
 
-            foreach (var processor in _options.GetAllEventProcessors())
+            if (@event.Exception != null)
+            {
+                // Depends on Options instead of the processors to allow application adding new processors
+                // after the SDK is initialized. Useful for example once a DI container is up
+                foreach (var processor in scope.GetAllExceptionProcessors())
+                {
+                    processor.Process(@event.Exception, @event);
+                }
+            }
+
+            foreach (var processor in scope.GetAllEventProcessors())
             {
                 @event = processor.Process(@event);
                 if (@event == null)

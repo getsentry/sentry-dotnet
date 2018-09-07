@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Reflection;
 
@@ -11,18 +10,18 @@ namespace Sentry.Extensions.Logging
     [ProviderAlias("Sentry")]
     public class SentryLoggerProvider : ILoggerProvider
     {
-        private readonly IHub _hub;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
+        private readonly IDisposable _scope;
+        private readonly IDisposable _disposableHub;
 
-        private IDisposable _scope;
-        private IDisposable _sdk;
+        internal IHub Hub { get; }
 
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
-        public SentryLoggerProvider(IOptions<SentryLoggingOptions> options)
-            : this(HubAdapter.Instance,
+        public SentryLoggerProvider(IOptions<SentryLoggingOptions> options, IHub hub)
+            : this(hub,
                 SystemClock.Clock,
                 options.Value)
         { }
@@ -36,17 +35,14 @@ namespace Sentry.Extensions.Logging
             Debug.Assert(clock != null);
             Debug.Assert(hub != null);
 
-            _hub = hub;
+            _disposableHub = hub as IDisposable;
+
+            Hub = hub;
             _clock = clock;
             _options = options;
 
-            // SDK is being initialized through this integration
-            // Lifetime is owned by this instance:
-            if (_options.InitializeSdk)
+            if (hub.IsEnabled)
             {
-                _sdk = SentrySdk.Init(_options);
-
-                // Creates a scope so that Integration added below can be dropped when the logger is disposed
                 _scope = hub.PushScope();
                 hub.ConfigureScope(s =>
                 {
@@ -56,14 +52,12 @@ namespace Sentry.Extensions.Logging
             }
         }
 
-        public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, _hub);
+        public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub);
 
         public void Dispose()
         {
             _scope?.Dispose();
-            _scope = null;
-            _sdk?.Dispose();
-            _sdk = null;
+            _disposableHub?.Dispose();
         }
     }
 }

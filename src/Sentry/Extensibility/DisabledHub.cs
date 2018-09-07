@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {
@@ -23,5 +22,7 @@ namespace Sentry.Extensibility
         public Guid CaptureEvent(SentryEvent evt, Scope scope = null) => Guid.Empty;
 
         public void Dispose() { }
+
+        public Guid LastEventId => Guid.Empty;
     }
 }

@@ -138,23 +138,6 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void Process_ExceptionProcessors_Invoked()
-        {
-            var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
-            _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
-            var sut = _fixture.GetSut();
-
-            var evt = new SentryEvent
-            {
-                Exception = new Exception()
-            };
-
-            sut.Process(evt);
-
-            exceptionProcessor.Received(1).Process(evt.Exception, evt);
-        }
-
-        [Fact]
         public void Process_NoExceptionOnEvent_ExceptionProcessorsNotInvoked()
         {
             var invoked = false;

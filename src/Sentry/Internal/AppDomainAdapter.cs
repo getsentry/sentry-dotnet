@@ -1,6 +1,6 @@
 using System;
 
-namespace Sentry.Integrations
+namespace Sentry.Internal
 {
     internal interface IAppDomain
     {

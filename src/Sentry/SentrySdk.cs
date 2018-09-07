@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
-using Sentry.Protocol;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -22,6 +22,11 @@ namespace Sentry
     public static class SentrySdk
     {
         private static IHub _hub = DisabledHub.Instance;
+
+        /// <summary>
+        /// Last event id recorded in the current scope
+        /// </summary>
+        public static Guid LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
 
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN
@@ -73,8 +78,6 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
-            options.SetupLogging();
-
             if (options.Dsn == null)
             {
                 if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
@@ -85,18 +88,15 @@ namespace Sentry
                 options.Dsn = dsn;
             }
 
-            var hub = new Hub(options);
-            // Push the first scope so the async local starts from here
-            hub.PushScope();
-
-            var oldHub = Interlocked.Exchange(ref _hub, hub);
-            (oldHub as IDisposable)?.Dispose();
-
-            return new DisposeHandle(hub);
+            return UseHub(new Hub(options));
         }
 
-        // For testing
-        internal static void UseHub(IHub hub) => _hub = hub;
+        internal static IDisposable UseHub(IHub hub)
+        {
+            var oldHub = Interlocked.Exchange(ref _hub, hub);
+            (oldHub as IDisposable)?.Dispose();
+            return new DisposeHandle(hub);
+        }
 
         /// <summary>
         /// Close the SDK

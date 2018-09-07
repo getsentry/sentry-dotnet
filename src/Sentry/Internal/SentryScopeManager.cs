@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
@@ -61,6 +60,7 @@ namespace Sentry.Internal
             }
 
             var clonedScope = scope.Clone();
+
             if (state != null)
             {
                 clonedScope.Apply(state);

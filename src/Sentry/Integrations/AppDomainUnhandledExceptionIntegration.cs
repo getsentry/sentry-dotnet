@@ -1,17 +1,18 @@
 using System;
 using System.Diagnostics;
+using Sentry.Internal;
 
 namespace Sentry.Integrations
 {
-    internal class AppDomainUnhandledExceptionIntegration : ISdkIntegration
+    internal class AppDomainUnhandledExceptionIntegration : IInternalSdkIntegration
     {
         private readonly IAppDomain _appDomain;
         private IHub _hub;
 
-        public AppDomainUnhandledExceptionIntegration(IAppDomain appDomain = null)
+        internal AppDomainUnhandledExceptionIntegration(IAppDomain appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
-        public void Register(IHub hub)
+        public void Register(IHub hub, SentryOptions _)
         {
             Debug.Assert(hub != null);
             _hub = hub;
@@ -29,7 +30,7 @@ namespace Sentry.Integrations
         {
             if (e.ExceptionObject is Exception ex)
             {
-                _hub.CaptureException(ex);
+                _hub?.CaptureException(ex);
             }
 
             if (e.IsTerminating)

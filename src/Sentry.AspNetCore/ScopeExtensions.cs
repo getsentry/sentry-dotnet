@@ -5,7 +5,6 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
-using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {

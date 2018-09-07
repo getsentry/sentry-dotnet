@@ -7,8 +7,8 @@ namespace Sentry.AspNetCore
     [ProviderAlias("Sentry")]
     internal class SentryAspNetCoreLoggerProvider : SentryLoggerProvider
     {
-        public SentryAspNetCoreLoggerProvider(IOptions<SentryAspNetCoreOptions> options)
-            : base(options)
+        public SentryAspNetCoreLoggerProvider(IOptions<SentryAspNetCoreOptions> options, IHub hub)
+            : base(options, hub)
         {
         }
     }

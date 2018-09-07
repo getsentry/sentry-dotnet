@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
-using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
@@ -12,9 +11,11 @@ namespace Sentry.Internal
     {
         private readonly SentryOptions _options;
         private readonly ImmutableList<ISdkIntegration> _integrations;
+        private readonly IDisposable _rootScope;
 
-        public IInternalScopeManager ScopeManager { get; }
-        private SentryClient _ownedClient;
+        private readonly SentryClient _ownedClient;
+
+        internal SentryScopeManager ScopeManager { get; }
 
         public bool IsEnabled => true;
 
@@ -22,6 +23,17 @@ namespace Sentry.Internal
         {
             Debug.Assert(options != null);
             _options = options;
+
+            if (options.Dsn == null)
+            {
+                if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
+                {
+                    const string msg = "Attempt to instantiate a Hub without a DSN.";
+                    options.DiagnosticLogger?.LogFatal(msg);
+                    throw new InvalidOperationException(msg);
+                }
+                options.Dsn = dsn;
+            }
 
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
@@ -35,9 +47,12 @@ namespace Sentry.Internal
                 foreach (var integration in _integrations)
                 {
                     options.DiagnosticLogger?.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                    integration.Register(this);
+                    integration.Register(this, options);
                 }
             }
+
+            // Push the first scope so the async local starts from here
+            _rootScope = PushScope();
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
@@ -75,7 +90,10 @@ namespace Sentry.Internal
             try
             {
                 var (currentScope, client) = ScopeManager.GetCurrent();
-                return client.CaptureEvent(evt, scope ?? currentScope);
+                var actualScope = scope ?? currentScope;
+                var id = client.CaptureEvent(evt, actualScope);
+                actualScope.LastEventId = id;
+                return id;
             }
             catch (Exception e)
             {
@@ -92,13 +110,25 @@ namespace Sentry.Internal
             {
                 foreach (var integration in _integrations)
                 {
-                    integration.Unregister(this);
+                    if (integration is IInternalSdkIntegration internalIntegration)
+                    {
+                        internalIntegration.Unregister(this);
+                    }
                 }
             }
 
             _ownedClient?.Dispose();
-            _ownedClient = null;
-            (ScopeManager as IDisposable)?.Dispose();
+            _rootScope.Dispose();
+            ScopeManager?.Dispose();
+        }
+
+        public Guid LastEventId
+        {
+            get
+            {
+                var (currentScope, _) = ScopeManager.GetCurrent();
+                return currentScope.LastEventId;
+            }
         }
     }
 }

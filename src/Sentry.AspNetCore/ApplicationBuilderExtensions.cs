@@ -1,12 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
+using Sentry.Extensions.Logging;
+using Sentry.Infrastructure;
+
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.AspNetCore.Builder
@@ -24,26 +28,31 @@ namespace Microsoft.AspNetCore.Builder
         /// <returns></returns>
         public static IApplicationBuilder UseSentry(this IApplicationBuilder app)
         {
-            UseServiceProviderProcessors(app.ApplicationServices);
-
-            return app.UseMiddleware<SentryMiddleware>();
-        }
-
-        private static void UseServiceProviderProcessors(IServiceProvider provider)
-        {
-            var options = provider.GetService<IOptions<SentryAspNetCoreOptions>>();
+            // Container is built so resolve a logger and modify the SDK internal logger
+            var options = app.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>();
             if (options?.Value is SentryAspNetCoreOptions o)
             {
-                if (provider.GetService<IEnumerable<ISentryEventProcessor>>().Any())
+                if (o.Debug && (o.DiagnosticLogger == null || o.DiagnosticLogger.GetType() == typeof(ConsoleDiagnosticLogger)))
                 {
-                    o.AddEventProcessorProvider(provider.GetServices<ISentryEventProcessor>);
+                    var logger = app.ApplicationServices.GetRequiredService<ILogger<ISentryClient>>();
+                    o.DiagnosticLogger = new MelDiagnosticLogger(logger, o.DiagnosticsLevel);
                 }
 
-                if (provider.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
+                if (app.ApplicationServices.GetService<IEnumerable<ISentryEventProcessor>>().Any())
                 {
-                    o.AddExceptionProcessorProvider(provider.GetServices<ISentryEventExceptionProcessor>);
+                    o.AddEventProcessorProvider(app.ApplicationServices.GetServices<ISentryEventProcessor>);
+                }
+
+                if (app.ApplicationServices.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
+                {
+                    o.AddExceptionProcessorProvider(app.ApplicationServices.GetServices<ISentryEventExceptionProcessor>);
                 }
             }
+
+            var lifetime = app.ApplicationServices.GetService<IApplicationLifetime>();
+            lifetime?.ApplicationStopped.Register(SentrySdk.Close);
+
+            return app.UseMiddleware<SentryMiddleware>();
         }
     }
 }

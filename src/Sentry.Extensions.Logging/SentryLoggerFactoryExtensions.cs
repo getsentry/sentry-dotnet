@@ -1,7 +1,10 @@
 using System;
 using System.ComponentModel;
 using Sentry;
+using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
+using Sentry.Infrastructure;
+using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace
 // Ensures 'AddSentry' can be found without: 'using Sentry;'
@@ -35,7 +38,18 @@ namespace Microsoft.Extensions.Logging
                 options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticsLevel);
             }
 
-            factory.AddProvider(new SentryLoggerProvider(Options.Options.Create(options)));
+            IHub hub;
+            if (options.InitializeSdk)
+            {
+                hub = new OptionalHub(options);
+            }
+            else
+            {
+                // Access to whatever the SentrySdk points to (disabled or initialized via SentrySdk.Init)
+                hub = HubAdapter.Instance;
+            }
+
+            factory.AddProvider(new SentryLoggerProvider(hub, SystemClock.Clock, options));
             return factory;
         }
     }

@@ -28,6 +28,8 @@ namespace Sentry.Extensibility
 
         public bool IsEnabled { [DebuggerStepThrough] get => SentrySdk.IsEnabled; }
 
+        public Guid LastEventId { [DebuggerStepThrough] get => SentrySdk.LastEventId; }
+
         [DebuggerStepThrough]
         public void ConfigureScope(Action<Scope> configureScope)
             => SentrySdk.ConfigureScope(configureScope);

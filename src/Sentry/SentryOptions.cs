@@ -17,7 +17,6 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
-    /// <inheritdoc />
     public class SentryOptions : IScopeOptions
     {
         internal string ClientVersion { get; } = SdkName;
@@ -94,7 +93,6 @@ namespace Sentry
         /// <value>
         /// The maximum breadcrumbs per scope.
         /// </value>
-        /// <inheritdoc />
         public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
         /// <summary>
@@ -168,6 +166,14 @@ namespace Sentry
         /// should not be sent at all, return null from the callback.
         /// </remarks>
         public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
+
+        /// <summary>
+        /// A callback invoked when a breadcrumb is about to be stored.
+        /// </summary>
+        /// <remarks>
+        /// Gives a chance to inspect and modify/reject a breadcrumb.
+        /// </remarks>
+        public Func<Breadcrumb, Breadcrumb> BeforeBreadcrumb { get; set; }
 
         private int _maxQueueItems = 30;
         /// <summary>
@@ -244,6 +250,8 @@ namespace Sentry
         /// </summary>
         public Action<HttpClient, Dsn> ConfigureClient { get; set; }
 
+        private volatile bool _debug;
+
         /// <summary>
         /// Whether to log diagnostics messages
         /// </summary>
@@ -251,7 +259,11 @@ namespace Sentry
         /// The verbosity can be controlled through <see cref="DiagnosticsLevel"/>
         /// and the implementation via <see cref="DiagnosticLogger"/>.
         /// </remarks>
-        public bool Debug { get; set; }
+        public bool Debug
+        {
+            get => _debug;
+            set => _debug = value;
+        }
 
         /// <summary>
         /// The diagnostics level to be used
@@ -271,7 +283,7 @@ namespace Sentry
         /// </remarks>
         public IDiagnosticLogger DiagnosticLogger
         {
-            get => _diagnosticLogger;
+            get => Debug ? _diagnosticLogger : null;
             set
             {
                 _diagnosticLogger?.LogInfo("Replacing current logger with: '{0}'.", value?.GetType().Name);
@@ -295,8 +307,9 @@ namespace Sentry
             var sentryStackTraceFactory = new SentryStackTraceFactory(this);
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
-                     new DuplicateEventDetectionEventProcessor(this),
-                     new MainSentryEventProcessor(this, sentryStackTraceFactory));
+                    // de-dupe to be the first to run
+                    new DuplicateEventDetectionEventProcessor(this),
+                    new MainSentryEventProcessor(this, sentryStackTraceFactory));
 
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
