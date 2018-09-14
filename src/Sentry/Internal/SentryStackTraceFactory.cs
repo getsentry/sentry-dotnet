@@ -29,7 +29,7 @@ namespace Sentry.Internal
 
             var stackTrace = isCurrentStackTrace
                 ? new StackTrace(true)
-                : new StackTrace(exception, true);
+                : new EnhancedStackTrace(exception);
 
             return Create(stackTrace, isCurrentStackTrace);
         }
@@ -77,7 +77,7 @@ namespace Sentry.Internal
 
                 firstFrames = false;
 
-                var frame = CreateFrame(stackFrame);
+                var frame = CreateFrame(stackFrame, isCurrentStackTrace);
                 if (frame != null)
                 {
                     yield return frame;
@@ -85,7 +85,7 @@ namespace Sentry.Internal
             }
         }
 
-        internal SentryStackFrame CreateFrame(StackFrame stackFrame)
+        internal SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace = true)
         {
             const string unknownRequiredField = "(unknown)";
             var frame = new SentryStackFrame();
@@ -120,9 +120,11 @@ namespace Sentry.Internal
                 frame.ColumnNumber = colNo;
             }
 
-            // TODO: Consider Ben.Demystifier
-            DemangleAsyncFunctionName(frame);
-            DemangleAnonymousFunction(frame);
+            if (isCurrentStackTrace)
+            {
+                DemangleAsyncFunctionName(frame);
+                DemangleAnonymousFunction(frame);
+            }
 
             return frame;
         }
