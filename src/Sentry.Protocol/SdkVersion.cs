@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
 
 namespace Sentry.Protocol
 {
@@ -13,8 +15,20 @@ namespace Sentry.Protocol
     [DataContract]
     public class SdkVersion
     {
-        [DataMember(Name = "integrations", EmitDefaultValue = false)]
-        internal ConcurrentBag<string> InternalIntegrations { get; set; }
+        private readonly Lazy<ConcurrentBag<Package>> _lazyPackages =
+            new Lazy<ConcurrentBag<Package>>(LazyThreadSafetyMode.PublicationOnly);
+
+        [DataMember(Name = "packages", EmitDefaultValue = false)]
+        internal ConcurrentBag<Package> InternalPackages
+            => _lazyPackages.IsValueCreated
+                ? _lazyPackages.Value
+                : null;
+
+        /// <summary>
+        /// SDK packages
+        /// </summary>
+        /// <remarks>This property is not required</remarks>
+        public IEnumerable<Package> Packages => _lazyPackages.Value;
 
         /// <summary>
         /// SDK name
@@ -40,16 +54,14 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Any integration configured with the SDK
+        /// Add a package used to compose the SDK
         /// </summary>
-        /// <remarks>This property is not required</remarks>
-        public IEnumerable<string> Integrations => InternalIntegrations ?? Enumerable.Empty<string>();
+        /// <param name="name">The package name.</param>
+        /// <param name="version">The package version.</param>
+        public void AddPackage(string name, string version)
+            => AddPackage(new Package(name, version));
 
-        /// <summary>
-        /// Adds an integration.
-        /// </summary>
-        /// <param name="integration">The integration.</param>
-        public void AddIntegration(string integration)
-            => (InternalIntegrations ?? (InternalIntegrations = new ConcurrentBag<string>())).Add(integration);
+        internal void AddPackage(Package package)
+            => _lazyPackages.Value.Add(package);
     }
 }
