@@ -52,6 +52,12 @@ namespace Sentry.Protocol
         public IScopeOptions ScopeOptions { get; }
 
         /// <summary>
+        /// Sentry level
+        /// </summary>
+        [DataMember(Name = "level", EmitDefaultValue = false)]
+        public SentryLevel? Level { get; set; }
+
+        /// <summary>
         /// The name of the transaction in which there was an event.
         /// </summary>
         /// <remarks>
