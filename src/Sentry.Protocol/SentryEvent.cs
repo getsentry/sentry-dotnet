@@ -66,12 +66,6 @@ namespace Sentry
         public string Platform { get; set; }
 
         /// <summary>
-        /// Sentry level
-        /// </summary>
-        [DataMember(Name = "level", EmitDefaultValue = false)]
-        public SentryLevel? Level { get; set; }
-
-        /// <summary>
         /// The culprit
         /// </summary>
         /// <remarks>

@@ -52,7 +52,6 @@ namespace Sentry.Protocol.Tests
                          "\"logentry\":{\"message\":\"structured_message\"}," +
                          "\"logger\":\"logger\"," +
                          "\"platform\":\"csharp\"," +
-                         "\"level\":\"fatal\"," +
                          "\"culprit\":\"culprit\"," +
                          "\"server_name\":\"server_name\"," +
                          "\"release\":\"release\"," +
@@ -64,6 +63,7 @@ namespace Sentry.Protocol.Tests
                          "\"fingerprint\":[\"fingerprint\"]," +
                          "\"breadcrumbs\":[{\"timestamp\":\"9999-12-31T23:59:59Z\",\"message\":\"crumb\"}]," +
                          "\"extra\":{\"extra_key\":\"extra_value\"},\"tags\":{\"tag_key\":\"tag_value\"}," +
+                         "\"level\":\"fatal\"," +
                          "\"transaction\":\"transaction\"," +
                          "\"environment\":\"environment\"," +
                          "\"sdk\":{\"name\":\"SDK-test\"}}",
