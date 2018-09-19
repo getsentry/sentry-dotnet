@@ -6,6 +6,7 @@ namespace Sentry.Internal
         public const string ReleaseEnvironmentVariable = "SENTRY_RELEASE";
         public const string EnvironmentEnvironmentVariable = "SENTRY_ENVIRONMENT";
 
-        public const string SdkName = "Sentry.NET";
+        // See: https://github.com/getsentry/sentry-release-registry
+        public const string SdkName = "sentry.dotnet";
     }
 }

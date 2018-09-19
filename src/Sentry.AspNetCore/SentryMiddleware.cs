@@ -117,8 +117,9 @@ namespace Sentry.AspNetCore
 
         internal void PopulateScope(HttpContext context, Scope scope)
         {
-            scope.Sdk.Name = NameAndVersion.Name;
+            scope.Sdk.Name = Constants.SdkName;
             scope.Sdk.Version = NameAndVersion.Version;
+            scope.Sdk.AddPackage(NameAndVersion.Name, NameAndVersion.Version);
 
             if (_hostingEnvironment != null)
             {

@@ -65,14 +65,12 @@ namespace Sentry.Log4Net
             var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
             var evt = new SentryEvent(exception)
             {
-                Sdk =
-                {
-                    Name = NameAndVersion.Name,
-                    Version = NameAndVersion.Version
-                },
+                Sdk = { Version = NameAndVersion.Version },
                 Logger = loggingEvent.LoggerName,
                 Level = loggingEvent.ToSentryLevel()
             };
+
+            evt.Sdk.AddPackage(NameAndVersion.Name, NameAndVersion.Version);
 
             if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
             {

@@ -263,11 +263,11 @@ namespace Sentry
                     to.Sdk.Version = from.Sdk.Version;
                 }
 
-                if (from.Sdk.InternalIntegrations != null)
+                if (from.Sdk.InternalPackages != null)
                 {
-                    foreach (var integration in from.Sdk.Integrations)
+                    foreach (var integration in from.Sdk.InternalPackages)
                     {
-                        to.Sdk.AddIntegration(integration);
+                        to.Sdk.AddPackage(integration);
                     }
                 }
             }
