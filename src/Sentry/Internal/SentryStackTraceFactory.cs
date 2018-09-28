@@ -27,12 +27,11 @@ namespace Sentry.Internal
 
             _options.DiagnosticLogger?.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
-            var stackTrace = isCurrentStackTrace
-                ? new StackTrace(true)
-                : new EnhancedStackTrace(exception);
-
-            return Create(stackTrace, isCurrentStackTrace);
+            return Create(CreateStackTrace(exception, isCurrentStackTrace), isCurrentStackTrace);
         }
+
+        protected virtual StackTrace CreateStackTrace(Exception exception, bool isCurrentStackTrace) =>
+            isCurrentStackTrace ? new StackTrace(true) : new StackTrace(exception, true);
 
         internal SentryStackTrace Create(StackTrace stackTrace, bool isCurrentStackTrace)
         {
@@ -85,7 +84,11 @@ namespace Sentry.Internal
             }
         }
 
-        internal SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace = true)
+        internal SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
+
+        protected virtual SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) => InternalCreateFrame(stackFrame, true);
+
+        protected SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
         {
             const string unknownRequiredField = "(unknown)";
             var frame = new SentryStackFrame();
@@ -120,7 +123,7 @@ namespace Sentry.Internal
                 frame.ColumnNumber = colNo;
             }
 
-            if (isCurrentStackTrace)
+            if (demangle)
             {
                 DemangleAsyncFunctionName(frame);
                 DemangleAnonymousFunction(frame);

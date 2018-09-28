@@ -1,21 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Sentry;
+using Sentry.Ben.Demystifier;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Xunit;
 
 // ReSharper disable once CheckNamespace
-// Stack trace filters out Sentry frames by namespace
-namespace Other.Tests.Internals
+namespace Other.Ben.Demystifier.Tests
 {
-    public class SentryStackTraceFactoryTests
+    public class AsyncStackTraceFactoryTests
     {
         private class Fixture
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public SentryStackTraceFactory GetSut() => new SentryStackTraceFactory(SentryOptions);
+            public AsyncStackTraceFactory GetSut() => new AsyncStackTraceFactory(SentryOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -99,29 +100,63 @@ namespace Other.Tests.Internals
             Assert.False(actual.InApp);
         }
 
-        // https://github.com/getsentry/sentry-dotnet/issues/64
         [Fact]
-        public void DemangleAnonymousFunction_NullFunction_ContinuesNull()
+        public async Task Create_WithAsyncExceptionAndAttachStackTraceOptionOn_HasStackTraceAsync()
         {
-            var stackFrame = new SentryStackFrame
+            var sut = _fixture.GetSut();
+            Exception exception;
+            try
             {
-                Function = null
-            };
-
-            SentryStackTraceFactory.DemangleAnonymousFunction(stackFrame);
-            Assert.Null(stackFrame.Function);
+                await new AsyncMethodClass().MethodAsync(1, 2, 3, 4);
+                Assert.False(true);
+                return;
+            }
+            catch (Exception e) { exception = e.Demystify(); }
+            var stackTrace = sut.Create(exception);
+            Assert.NotNull(stackTrace);
+            Assert.Equal(new EnhancedStackTrace(exception).FrameCount, stackTrace.Frames.Count);
+            Assert.NotEqual(new StackTrace(exception).FrameCount, stackTrace.Frames.Count);
         }
-
-        [Fact]
-        public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
+        private class AsyncMethodClass
         {
-            var stackFrame = new SentryStackFrame
+            private Dictionary<int, int> _dict = new Dictionary<int, int>();
+            public async Task<int> MethodAsync(int v0, int v1, int v2, int v3)
+              => await MethodAsync(v0, v1, v2);
+            private async Task<int> MethodAsync(int v0, int v1, int v2)
+               => await MethodAsync(v0, v1);
+            private async Task<int> MethodAsync(int v0, int v1)
+               => await MethodAsync(v0);
+            private async Task<int> MethodAsync(int v0)
+               => await MethodAsync();
+            private async Task<int> MethodAsync()
             {
-                Module = null
-            };
-
-            SentryStackTraceFactory.DemangleAnonymousFunction(stackFrame);
-            Assert.Null(stackFrame.Module);
+                await Task.Delay(1000);
+                int value = 0;
+                foreach (var i in Sequence(0, 5))
+                {
+                    value += i;
+                }
+                return value;
+            }
+            private IEnumerable<int> Sequence(int start, int end)
+            {
+                for (var i = start; i <= end; i++)
+                {
+                    foreach (var item in Sequence(i))
+                    {
+                        yield return item;
+                    }
+                }
+            }
+            private IEnumerable<int> Sequence(int start)
+            {
+                var end = start + 10;
+                for (var i = start; i <= end; i++)
+                {
+                    _dict[i] = _dict[i] + 1; // Throws exception
+                    yield return i;
+                }
+            }
         }
     }
 }

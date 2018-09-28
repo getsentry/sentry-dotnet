@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Official Microsoft.Extensions.Logging integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ben.Demystifier" Version="0.1.1" />
+
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+</Project>

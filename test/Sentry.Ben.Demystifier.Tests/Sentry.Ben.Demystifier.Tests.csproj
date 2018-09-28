@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net462</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Sentry.Ben.Demystifier/Sentry.Ben.Demystifier.csproj" />
+    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+  </ItemGroup>
+
+</Project>
