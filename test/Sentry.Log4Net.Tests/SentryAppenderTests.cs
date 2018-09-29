@@ -89,7 +89,7 @@ namespace Sentry.Log4Net.Tests
 
             Assert.NotNull(actual);
             var package = Assert.Single(actual.Sdk.Packages);
-            Assert.Equal(expected.Name, package.Name);
+            Assert.Equal("nuget:" + expected.Name, package.Name);
             Assert.Equal(expected.Version, package.Version);
 
         }

@@ -30,6 +30,8 @@ namespace Sentry.Internal
         private static readonly (string Name, string Version) NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
 
+        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
+
         private readonly SentryOptions _options;
         private readonly ISentryStackTraceFactory _sentryStackTraceFactory;
 
@@ -74,7 +76,7 @@ namespace Sentry.Internal
                 @event.Sdk.Version = NameAndVersion.Version;
             }
 
-            @event.Sdk.AddPackage(NameAndVersion.Name, NameAndVersion.Version);
+            @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
             if (@event.InternalUser == null && _options.SendDefaultPii)
             {

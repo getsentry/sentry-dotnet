@@ -853,7 +853,7 @@ namespace Sentry.Tests
         {
             var sut = _fixture.GetSut();
 
-            sut.Sdk.AddPackage("Sentry.Extensions.Logging", "2.0.0-preview10");
+            sut.Sdk.AddPackage("nuget:Sentry.Extensions.Logging", "2.0.0-preview10");
 
             var target = new Scope();
 
@@ -867,10 +867,10 @@ namespace Sentry.Tests
         {
             var sut = _fixture.GetSut();
 
-            sut.Sdk.AddPackage("Sentry.Extensions.Logging", "2.0.0-preview10");
+            sut.Sdk.AddPackage("nuget:Sentry.Extensions.Logging", "2.0.0-preview10");
 
             var target = new Scope();
-            sut.Sdk.AddPackage("Sentry.AspNetCore", "1.0.0");
+            sut.Sdk.AddPackage("nuget:Sentry.AspNetCore", "1.0.0");
 
             sut.Apply(target);
 
@@ -882,7 +882,7 @@ namespace Sentry.Tests
         {
             var sut = _fixture.GetSut();
             var target = new Scope();
-            target.Sdk.AddPackage("Sentry", "1.0");
+            target.Sdk.AddPackage("nuget:Sentry", "1.0");
             var expected = target.Sdk.Packages.Single();
 
             sut.Apply(target);

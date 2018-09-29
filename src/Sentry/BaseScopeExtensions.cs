@@ -265,9 +265,9 @@ namespace Sentry
 
                 if (from.Sdk.InternalPackages != null)
                 {
-                    foreach (var integration in from.Sdk.InternalPackages)
+                    foreach (var package in from.Sdk.InternalPackages)
                     {
-                        to.Sdk.AddPackage(integration);
+                        to.Sdk.AddPackage(package);
                     }
                 }
             }
