@@ -849,45 +849,45 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Apply_Sdk_SourceSingle_TargetNone_CopiesIntegrations()
+        public void Apply_Sdk_SourceSingle_TargetNone_CopiesPackage()
         {
             var sut = _fixture.GetSut();
 
-            sut.Sdk.AddIntegration("integration 1");
+            sut.Sdk.AddPackage("Sentry.Extensions.Logging", "2.0.0-preview10");
 
-            var target = _fixture.GetSut();
+            var target = new Scope();
 
             sut.Apply(target);
 
-            Assert.Equal(sut.Sdk.InternalIntegrations, target.Sdk.InternalIntegrations);
+            Assert.Equal(sut.Sdk.InternalPackages, target.Sdk.InternalPackages);
         }
 
         [Fact]
         public void Apply_Sdk_SourceSingle_AddsIntegrations()
         {
             var sut = _fixture.GetSut();
-            sut.Sdk.AddIntegration("integration 1");
 
-            var target = _fixture.GetSut();
-            sut.Sdk.AddIntegration("integration 2");
+            sut.Sdk.AddPackage("Sentry.Extensions.Logging", "2.0.0-preview10");
+
+            var target = new Scope();
+            sut.Sdk.AddPackage("Sentry.AspNetCore", "1.0.0");
 
             sut.Apply(target);
 
-            Assert.Equal(2, target.Sdk.InternalIntegrations.Count);
+            Assert.Equal(2, target.Sdk.InternalPackages.Count);
         }
 
         [Fact]
         public void Apply_Sdk_SourceNone_TargetSingle_DoesNotModifyTarget()
         {
             var sut = _fixture.GetSut();
-            var expected = new ConcurrentBag<string> { "integration" };
-
-            var target = _fixture.GetSut();
-            target.Sdk.InternalIntegrations = expected;
+            var target = new Scope();
+            target.Sdk.AddPackage("Sentry", "1.0");
+            var expected = target.Sdk.Packages.Single();
 
             sut.Apply(target);
 
-            Assert.Equal(expected, target.Sdk.InternalIntegrations);
+            Assert.Same(expected, target.Sdk.InternalPackages.Single());
         }
 
         [Fact]

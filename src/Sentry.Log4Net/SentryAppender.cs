@@ -67,12 +67,14 @@ namespace Sentry.Log4Net
             {
                 Sdk =
                 {
-                    Name = NameAndVersion.Name,
+                    Name = Constants.SdkName,
                     Version = NameAndVersion.Version
                 },
                 Logger = loggingEvent.LoggerName,
                 Level = loggingEvent.ToSentryLevel()
             };
+
+            evt.Sdk.AddPackage(NameAndVersion.Name, NameAndVersion.Version);
 
             if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
             {

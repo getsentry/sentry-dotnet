@@ -66,13 +66,15 @@ namespace Sentry.Internal
 
             @event.Platform = Protocol.Constants.Platform;
 
-            // An integration (e.g: ASP.NET Core) can set itself as the SDK
-            // Else, it's the base package: Sentry
-            if (@event.Sdk.Name == null || @event.Sdk.Version == null)
+            // SDK Name/Version might have be already set by an outer package
+            // e.g: ASP.NET Core can set itself as the SDK
+            if (@event.Sdk.Version == null && @event.Sdk.Name == null)
             {
                 @event.Sdk.Name = Constants.SdkName;
                 @event.Sdk.Version = NameAndVersion.Version;
             }
+
+            @event.Sdk.AddPackage(NameAndVersion.Name, NameAndVersion.Version);
 
             if (@event.InternalUser == null && _options.SendDefaultPii)
             {
