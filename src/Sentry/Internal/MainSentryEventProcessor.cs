@@ -102,10 +102,13 @@ namespace Sentry.Internal
                 @event.Environment = _options.Environment ?? EnvironmentLocator.Locate();
             }
 
-            var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
-            if (stackTrace != null)
+            if (@event.Exception == null)
             {
-                @event.Stacktrace = stackTrace;
+                var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
+                if (stackTrace != null)
+                {
+                    @event.Stacktrace = stackTrace;
+                }
             }
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
