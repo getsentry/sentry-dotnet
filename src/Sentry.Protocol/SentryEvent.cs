@@ -13,17 +13,26 @@ namespace Sentry
     /// An event to be sent to Sentry
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/attributes/" />
+    /// <inheritdoc />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
     public class SentryEvent : BaseScope
     {
-        internal Exception Exception { get; set; }
-
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string> InternalModules { get; set; }
 
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
         private string SerializableEventId => EventId.ToString("N");
+
+        /// <summary>
+        /// The <see cref="System.Exception"/> used to create this event.
+        /// </summary>
+        /// <remarks>
+        /// The information from this exception is used by the Sentry SDK
+        /// to add the relevant data to the event prior to sending to Sentry.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Exception Exception { get; }
 
         /// <summary>
         /// The unique identifier of this event

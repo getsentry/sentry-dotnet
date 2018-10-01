@@ -24,4 +24,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Condition="'$(TargetFramework)' != 'net45'" Version="2.8.2" />
   </ItemGroup>
 
+  <!--nca2.1 tests the NS2.0 version which has value tuples. nca2.0 tests ns1.3 which doesn't.-->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
 </Project>

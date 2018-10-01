@@ -6,6 +6,10 @@ namespace Sentry.Protocol
         public const string DisableSdkDsnValue = "";
         public const int DefaultMaxBreadcrumbs = 100;
         public const int ProtocolVersion = 7;
-        internal const string Platform = "csharp";
+
+        /// <summary>
+        /// Platform key that defines an events is coming from any .NET implementation
+        /// </summary>
+        public const string Platform = "csharp";
     }
 }
