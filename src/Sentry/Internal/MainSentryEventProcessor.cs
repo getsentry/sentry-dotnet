@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Sentry.Extensibility;
@@ -78,7 +77,7 @@ namespace Sentry.Internal
 
             @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
-            if (@event.InternalUser == null && _options.SendDefaultPii)
+            if (_options.SendDefaultPii && !@event.HasUser())
             {
                 @event.User.Username = System.Environment.UserName;
             }
@@ -109,7 +108,6 @@ namespace Sentry.Internal
                 @event.Stacktrace = stackTrace;
             }
 
-            var builder = ImmutableDictionary.CreateBuilder<string, string>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 if (assembly.IsDynamic)
@@ -118,11 +116,8 @@ namespace Sentry.Internal
                 }
 
                 var asmName = assembly.GetName();
-                builder[asmName.Name] = asmName.Version.ToString();
+                @event.Modules[asmName.Name] = asmName.Version.ToString();
             }
-
-            @event.InternalModules = builder.ToImmutable();
-
             return @event;
         }
     }
