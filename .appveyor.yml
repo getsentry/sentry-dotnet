@@ -4,8 +4,6 @@ environment:
   global:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
     DOTNET_CLI_TELEMETRY_OPTOUT: 1
-  ZEUS_HOOK_BASE:
-    secure: dcqtt6sxxBV0tDkXmPZOy/mS9w6lpsiR4cz0HHfryT5/NHNfboPH5/VaOFvOXnh2gD3ftUutQ6h0GDUWT9HrKhZoqq2kqv20pevaRU0MOBTCJ92HiW6vSSkT2niMA/ZvWFtQGO2tdPURILtZ99aeZ7sirOjrSwRRoy/bZpo6Uzg=
 test: off
 branches:
   only:
