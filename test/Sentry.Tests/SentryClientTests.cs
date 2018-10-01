@@ -26,10 +26,7 @@ namespace Sentry.Tests
             _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
             var sut = _fixture.GetSut();
 
-            var evt = new SentryEvent
-            {
-                Exception = new Exception()
-            };
+            var evt = new SentryEvent(new Exception());
 
             sut.CaptureEvent(evt);
 
@@ -45,10 +42,7 @@ namespace Sentry.Tests
 
             var sut = _fixture.GetSut();
 
-            var evt = new SentryEvent
-            {
-                Exception = new Exception()
-            };
+            var evt = new SentryEvent(new Exception());
 
             sut.CaptureEvent(evt, scope);
 

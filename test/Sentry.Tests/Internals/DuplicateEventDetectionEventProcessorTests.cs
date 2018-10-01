@@ -32,10 +32,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Process_FirstEventWithException_ReturnsEvent()
         {
-            var expected = new SentryEvent
-            {
-                Exception = new Exception()
-            };
+            var expected = new SentryEvent(new Exception());
 
             var actual = _sut.Process(expected);
 
@@ -46,14 +43,8 @@ namespace Sentry.Tests.Internals
         public void Process_SecondEventWithException_ReturnsNull()
         {
             var duplicate = new Exception();
-            var first = new SentryEvent
-            {
-                Exception = duplicate
-            };
-            var second = new SentryEvent
-            {
-                Exception = duplicate
-            };
+            var first = new SentryEvent(duplicate);
+            var second = new SentryEvent(duplicate);
 
             _ = _sut.Process(first);
             var actual = _sut.Process(second);
@@ -65,14 +56,8 @@ namespace Sentry.Tests.Internals
         public void Process_AggregateExceptionDupe_ReturnsNull()
         {
             var duplicate = new Exception();
-            var first = new SentryEvent
-            {
-                Exception = new AggregateException(duplicate)
-            };
-            var second = new SentryEvent
-            {
-                Exception = duplicate
-            };
+            var first = new SentryEvent(new AggregateException(duplicate));
+            var second = new SentryEvent(duplicate);
 
             _ = _sut.Process(first);
             var actual = _sut.Process(second);
@@ -84,14 +69,9 @@ namespace Sentry.Tests.Internals
         public void Process_InnerExceptionHasAggregateExceptionDupe_ReturnsNull()
         {
             var duplicate = new Exception();
-            var first = new SentryEvent
-            {
-                Exception = new InvalidOperationException("test", new AggregateException(duplicate))
-            };
-            var second = new SentryEvent
-            {
-                Exception = new InvalidOperationException("another test", new Exception("testing", new AggregateException(duplicate)))
-            };
+            var first = new SentryEvent(new InvalidOperationException("test", new AggregateException(duplicate)));
+            var second = new SentryEvent(new InvalidOperationException("another test",
+                new Exception("testing", new AggregateException(duplicate))));
 
             _ = _sut.Process(first);
             var actual = _sut.Process(second);
