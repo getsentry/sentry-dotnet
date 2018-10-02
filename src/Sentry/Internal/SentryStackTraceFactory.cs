@@ -92,7 +92,7 @@ namespace Sentry.Internal
         {
             const string unknownRequiredField = "(unknown)";
             var frame = new SentryStackFrame();
-            if (stackFrame.GetMethod() is MethodBase method)
+            if (GetMethod(stackFrame) is MethodBase method)
             {
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
@@ -131,6 +131,8 @@ namespace Sentry.Internal
 
             return frame;
         }
+
+        protected virtual MethodBase GetMethod(StackFrame stackFrame) => stackFrame.GetMethod();
 
         private bool IsSystemModuleName(string moduleName)
         {

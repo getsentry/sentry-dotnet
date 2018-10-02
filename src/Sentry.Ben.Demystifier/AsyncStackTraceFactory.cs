@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -14,5 +15,8 @@ namespace Sentry.Ben.Demystifier
 
         protected override SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) =>
             InternalCreateFrame(stackFrame, isCurrentStackTrace);
+
+        protected override MethodBase GetMethod(StackFrame stackFrame) =>
+            stackFrame is EnhancedStackFrame esf ? esf.MethodInfo.MethodBase : base.GetMethod(stackFrame);
     }
 }
