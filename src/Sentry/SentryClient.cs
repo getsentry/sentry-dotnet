@@ -111,6 +111,13 @@ namespace Sentry
             scope.Evaluate();
             scope.Apply(@event);
 
+            if (scope.Level != null)
+            {
+                // Level on scope takes precedence over the one on event
+                _options.DiagnosticLogger?.LogInfo("Overriding level set on event '{0}' with level set on scope '{1}'.", @event.Level, scope.Level);
+                @event.Level = scope.Level;
+            }
+
             if (@event.Exception != null)
             {
                 // Depends on Options instead of the processors to allow application adding new processors
