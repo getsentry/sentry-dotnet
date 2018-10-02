@@ -83,6 +83,18 @@ namespace Sentry.Internal
 
         public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
+        public void WithScope(Action<Scope> scopeCallback)
+        {
+            try
+            {
+                ScopeManager.WithScope(scopeCallback);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to run callback WithScope", e);
+            }
+        }
+
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
         public Guid CaptureEvent(SentryEvent evt, Scope scope = null)

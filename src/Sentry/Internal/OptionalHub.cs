@@ -46,6 +46,8 @@ namespace Sentry.Internal
 
         public IDisposable PushScope<TState>(TState state) => _hub.PushScope(state);
 
+        public void WithScope(Action<Scope> scopeCallback) => _hub.WithScope(scopeCallback);
+
         public Guid LastEventId => _hub.LastEventId;
 
         public void Dispose() => _disposable.Dispose();

@@ -3,6 +3,7 @@ using System.Linq;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests
@@ -148,6 +149,25 @@ namespace Sentry.Tests
             sut.CaptureEvent(@event);
 
             Assert.Same(@event, received);
+        }
+
+        [Fact]
+        public void CaptureEvent_LevelOnScope_OverridesLevelOnEvent()
+        {
+            const SentryLevel expected = SentryLevel.Fatal;
+            var @event = new SentryEvent
+            {
+                Level = SentryLevel.Fatal
+            };
+            var scope = new Scope
+            {
+                Level = expected
+            };
+
+            var sut = _fixture.GetSut();
+            sut.CaptureEvent(@event, scope);
+
+            Assert.Equal(expected, @event.Level);
         }
 
         [Fact]
