@@ -17,6 +17,8 @@ namespace Other.Ben.Demystifier.Tests
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
             public AsyncStackTraceFactory GetSut() => new AsyncStackTraceFactory(SentryOptions);
+
+            public SentryStackTraceFactory GetSut2() => new SentryStackTraceFactory(SentryOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -122,6 +124,8 @@ namespace Other.Ben.Demystifier.Tests
         public async Task Create_WithAsyncExceptionFramesAsync()
         {
             var sut = _fixture.GetSut();
+            var sut2 = _fixture.GetSut2();
+
             Exception exception;
             try
             {
@@ -138,8 +142,7 @@ namespace Other.Ben.Demystifier.Tests
                     Assert.DoesNotContain("GetResult", frame.Function);
                 });
 
-            if (new SentryStackTraceFactory(_fixture.SentryOptions)
-                .Create(exception).Frames
+            if (sut2.Create(exception).Frames
                 .Any(frame => frame.Function.Contains("GetResult")))
                 return;
 
