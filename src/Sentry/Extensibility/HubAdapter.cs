@@ -47,6 +47,10 @@ namespace Sentry.Extensibility
             => SentrySdk.PushScope(state);
 
         [DebuggerStepThrough]
+        public void WithScope(Action<Scope> scopeCallback)
+            => SentrySdk.WithScope(scopeCallback);
+
+        [DebuggerStepThrough]
         public void BindClient(ISentryClient client)
             => SentrySdk.BindClient(client);
 
