@@ -4,7 +4,6 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
-    <Version>1.0.0-rc2</Version>
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
