@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Official Microsoft.Extensions.Logging integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <Description>Ben.Demystifier extension which improves the readability of async stack traces.</Description>
   </PropertyGroup>
 
   <ItemGroup>
