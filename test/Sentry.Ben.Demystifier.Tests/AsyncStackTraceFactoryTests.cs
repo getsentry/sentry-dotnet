@@ -132,6 +132,9 @@ namespace Other.Ben.Demystifier.Tests
             }
             catch (Exception e) { exception = e; }
 
+            if (Type.GetType("Mono.Runtime") != null)
+                return; //Unsupport Mono
+
             foreach (var frame in sut.Create(exception).Frames)
             {
                 Assert.DoesNotContain("MoveNext", frame.Function);
