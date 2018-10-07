@@ -84,7 +84,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             _fixture.GetSut();
 
-            Assert.Equal(SentryLoggerProvider.NameAndVersion.Name, scope.Sdk.Name);
+            Assert.Equal(Constants.SdkName, scope.Sdk.Name);
             Assert.Equal(SentryLoggerProvider.NameAndVersion.Version, scope.Sdk.Version);
         }
     }

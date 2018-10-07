@@ -26,6 +26,8 @@ namespace Sentry.AspNetCore
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
 
+        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SentryMiddleware"/> class.
         /// </summary>
@@ -117,8 +119,9 @@ namespace Sentry.AspNetCore
 
         internal void PopulateScope(HttpContext context, Scope scope)
         {
-            scope.Sdk.Name = NameAndVersion.Name;
+            scope.Sdk.Name = Constants.SdkName;
             scope.Sdk.Version = NameAndVersion.Version;
+            scope.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
             if (_hostingEnvironment != null)
             {

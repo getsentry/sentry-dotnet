@@ -19,6 +19,8 @@ namespace Sentry.Log4Net
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryAppender).Assembly.GetNameAndVersion();
 
+        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
+
         internal IHub Hub { get; set; }
 
         public string Dsn { get; set; }
@@ -67,12 +69,14 @@ namespace Sentry.Log4Net
             {
                 Sdk =
                 {
-                    Name = NameAndVersion.Name,
+                    Name = Constants.SdkName,
                     Version = NameAndVersion.Version
                 },
                 Logger = loggingEvent.LoggerName,
                 Level = loggingEvent.ToSentryLevel()
             };
+
+            evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
             if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
             {

@@ -82,6 +82,15 @@ namespace Sentry.Tests.Extensibility
         }
 
         [Fact]
+        public void WithScope_MockInvoked()
+        {
+            void Expected(Scope _)
+            { }
+            HubAdapter.Instance.WithScope(Expected);
+            Hub.Received(1).WithScope(Expected);
+        }
+
+        [Fact]
         public void PushScope_MockInvoked()
         {
             HubAdapter.Instance.PushScope();

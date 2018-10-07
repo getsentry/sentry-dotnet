@@ -17,6 +17,8 @@ namespace Sentry.Extensibility
         public IDisposable PushScope() => this;
         public IDisposable PushScope<TState>(TState state) => this;
 
+        public void WithScope(Action<Scope> scopeCallback) { }
+
         public void BindClient(ISentryClient client) { }
 
         public Guid CaptureEvent(SentryEvent evt, Scope scope = null) => Guid.Empty;

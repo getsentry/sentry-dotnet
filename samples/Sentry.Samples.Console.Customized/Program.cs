@@ -122,6 +122,16 @@ internal static class Program
                     });
             });
 
+            // Configures a scope which is only valid within the callback
+            SentrySdk.WithScope(s =>
+            {
+                s.Level = SentryLevel.Fatal;
+                s.Transaction = "main";
+                s.Environment = "SpecialEnvironment";
+
+                SentrySdk.CaptureMessage("Fatal message!");
+            });
+
             SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
 
             var error = new Exception("Attempting to send this multiple times");

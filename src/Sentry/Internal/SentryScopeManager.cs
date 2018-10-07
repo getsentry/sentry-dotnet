@@ -72,6 +72,15 @@ namespace Sentry.Internal
             return scopeSnapshot;
         }
 
+        public void WithScope(Action<Scope> scopeCallback)
+        {
+            using (PushScope())
+            {
+                var scope = GetCurrent();
+                scopeCallback?.Invoke(scope.Scope);
+            }
+        }
+
         public void BindClient(ISentryClient client)
         {
             _options?.DiagnosticLogger?.LogDebug("Binding a new client to the current scope.");

@@ -35,7 +35,7 @@ namespace Sentry.Internal
 
                 MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
 
-                sentryEvent.SentryExceptionValues = new SentryValues<SentryException>(sentryExceptions);
+                sentryEvent.SentryExceptions = sentryExceptions;
             }
         }
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Sentry.Extensibility;
@@ -29,6 +28,8 @@ namespace Sentry.Internal
 
         private static readonly (string Name, string Version) NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
+
+        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
         private readonly SentryOptions _options;
         private readonly ISentryStackTraceFactory _sentryStackTraceFactory;
@@ -66,15 +67,17 @@ namespace Sentry.Internal
 
             @event.Platform = Protocol.Constants.Platform;
 
-            // An integration (e.g: ASP.NET Core) can set itself as the SDK
-            // Else, it's the base package: Sentry
-            if (@event.Sdk.Name == null || @event.Sdk.Version == null)
+            // SDK Name/Version might have be already set by an outer package
+            // e.g: ASP.NET Core can set itself as the SDK
+            if (@event.Sdk.Version == null && @event.Sdk.Name == null)
             {
                 @event.Sdk.Name = Constants.SdkName;
                 @event.Sdk.Version = NameAndVersion.Version;
             }
 
-            if (@event.InternalUser == null && _options.SendDefaultPii)
+            @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+
+            if (_options.SendDefaultPii && !@event.HasUser())
             {
                 @event.User.Username = System.Environment.UserName;
             }
@@ -99,13 +102,15 @@ namespace Sentry.Internal
                 @event.Environment = _options.Environment ?? EnvironmentLocator.Locate();
             }
 
-            var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
-            if (stackTrace != null)
+            if (@event.Exception == null)
             {
-                @event.Stacktrace = stackTrace;
+                var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
+                if (stackTrace != null)
+                {
+                    @event.Stacktrace = stackTrace;
+                }
             }
 
-            var builder = ImmutableDictionary.CreateBuilder<string, string>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 if (assembly.IsDynamic)
@@ -114,11 +119,8 @@ namespace Sentry.Internal
                 }
 
                 var asmName = assembly.GetName();
-                builder[asmName.Name] = asmName.Version.ToString();
+                @event.Modules[asmName.Name] = asmName.Version.ToString();
             }
-
-            @event.InternalModules = builder.ToImmutable();
-
             return @event;
         }
     }
