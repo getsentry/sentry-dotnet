@@ -23,7 +23,7 @@ New .NET SDK for Sentry
 
 Below you will find a basic introduction to the SDK and its API. 
 
-For more details, please: **refer to the [SDK documentation](https://getsentry.github.io/sentry-dotnet/index.html)**.
+For more details, please: refer to the [SDK](https://docs.sentry.io/quickstart/?platform=csharp) or [API](https://getsentry.github.io/sentry-dotnet/index.html) Documentation.
 Looking for samples using the NuGet packages? Check out [sentry-dotnet-samples](https://github.com/getsentry/sentry-dotnet-samples) repository.
 
 ## Usage
