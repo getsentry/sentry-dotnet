@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Sentry.Ben.Demystifier;
 
 namespace Samples.AspNetCore.Mvc
 {
@@ -39,6 +40,8 @@ namespace Samples.AspNetCore.Mvc
 
                     options.MaxQueueItems = 100;
                     options.ShutdownTimeout = TimeSpan.FromSeconds(5);
+
+                    options.UseEnhancedStackTrace();
                 })
                 .Build();
     }

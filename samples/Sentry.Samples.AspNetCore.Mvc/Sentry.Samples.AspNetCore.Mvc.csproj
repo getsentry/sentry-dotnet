@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Ben.Demystifier\Sentry.Ben.Demystifier.csproj" />
   </ItemGroup>
 
 </Project>
