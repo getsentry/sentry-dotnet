@@ -402,7 +402,7 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             sut.PopulateScope(_fixture.HttpContext, scope);
 
-            Assert.Equal(SentryMiddleware.NameAndVersion.Name, scope.Sdk.Name);
+            Assert.Equal(Constants.SdkName, scope.Sdk.Name);
             Assert.Equal(SentryMiddleware.NameAndVersion.Version, scope.Sdk.Version);
         }
     }

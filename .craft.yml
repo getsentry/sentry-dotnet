@@ -1,0 +1,23 @@
+---
+github:
+  owner: getsentry
+  repo: sentry-dotnet
+targets:
+  - name: nuget
+  - name: github
+  - name: registry
+    type: sdk
+    config:
+      canonical: "nuget:Sentry"
+  - name: registry
+    type: sdk
+    config:
+      canonical: "nuget:Sentry.Extensions.Logging"
+  - name: registry
+    type: sdk
+    config:
+      canonical: "nuget:Sentry.AspNetCore"
+  - name: registry
+    type: sdk
+    config:
+      canonical: "nuget:Sentry.Log4Net"

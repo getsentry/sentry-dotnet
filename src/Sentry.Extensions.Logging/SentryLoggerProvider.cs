@@ -20,6 +20,8 @@ namespace Sentry.Extensions.Logging
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
+        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
+
         public SentryLoggerProvider(IOptions<SentryLoggingOptions> options, IHub hub)
             : this(hub,
                 SystemClock.Clock,
@@ -46,8 +48,9 @@ namespace Sentry.Extensions.Logging
                 _scope = hub.PushScope();
                 hub.ConfigureScope(s =>
                 {
-                    s.Sdk.Name = NameAndVersion.Name;
+                    s.Sdk.Name = Constants.SdkName;
                     s.Sdk.Version = NameAndVersion.Version;
+                    s.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
                 });
             }
         }

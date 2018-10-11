@@ -208,5 +208,29 @@ namespace Sentry.Tests.Internals
             Assert.Equal(expectedName, evt.Sdk.Name);
             Assert.Equal(expectedVersion, evt.Sdk.Version);
         }
+
+        [Fact]
+        public void Process_AttachStacktraceTrueAndNoExceptionInEvent_CallsStacktraceFactory()
+        {
+            _fixture.SentryOptions.AttachStacktrace = true;
+            var sut = _fixture.GetSut();
+
+            var evt = new SentryEvent();
+            sut.Process(evt);
+
+            _fixture.SentryStackTraceFactory.Received(1).Create();
+        }
+
+        [Fact]
+        public void Process_AttachStacktraceTrueAndExceptionInEvent_DoesNotCallStacktraceFactory()
+        {
+            _fixture.SentryOptions.AttachStacktrace = true;
+            var sut = _fixture.GetSut();
+
+            var evt = new SentryEvent(new Exception());
+            sut.Process(evt);
+
+            _fixture.SentryStackTraceFactory.DidNotReceive().Create();
+        }
     }
 }

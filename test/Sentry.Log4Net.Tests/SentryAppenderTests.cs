@@ -68,8 +68,30 @@ namespace Sentry.Log4Net.Tests
 
             var expected = typeof(SentryAppender).Assembly.GetNameAndVersion();
             _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == expected.Name
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
                                                        && e.Sdk.Version == expected.Version));
+        }
+
+        [Fact]
+        public void Append_Log4NetSdk_Packages()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new LoggingEvent(new LoggingEventData());
+
+            SentryEvent actual = null;
+            _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
+                .Do(c => actual = c.Arg<SentryEvent>());
+
+            sut.DoAppend(evt);
+
+            var expected = typeof(SentryAppender).Assembly.GetNameAndVersion();
+
+            Assert.NotNull(actual);
+            var package = Assert.Single(actual.Sdk.Packages);
+            Assert.Equal("nuget:" + expected.Name, package.Name);
+            Assert.Equal(expected.Version, package.Version);
+
         }
 
         [Fact]

@@ -53,7 +53,7 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processor">The exception processor.</param>
-        internal static void AddExceptionProcessor(this SentryOptions options, ISentryEventExceptionProcessor processor)
+        public static void AddExceptionProcessor(this SentryOptions options, ISentryEventExceptionProcessor processor)
             => options.ExceptionProcessors = options.ExceptionProcessors.Add(processor);
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processors">The exception processors.</param>
-        internal static void AddExceptionProcessors(this SentryOptions options, IEnumerable<ISentryEventExceptionProcessor> processors)
+        public static void AddExceptionProcessors(this SentryOptions options, IEnumerable<ISentryEventExceptionProcessor> processors)
             => options.ExceptionProcessors = options.ExceptionProcessors.AddRange(processors);
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processor">The event processor.</param>
-        internal static void AddEventProcessor(this SentryOptions options, ISentryEventProcessor processor)
+        public static void AddEventProcessor(this SentryOptions options, ISentryEventProcessor processor)
             => options.EventProcessors = options.EventProcessors.Add(processor);
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processors">The event processors.</param>
-        internal static void AddEventProcessors(this SentryOptions options, IEnumerable<ISentryEventProcessor> processors)
+        public static void AddEventProcessors(this SentryOptions options, IEnumerable<ISentryEventProcessor> processors)
             => options.EventProcessors = options.EventProcessors.AddRange(processors);
 
         /// <summary>
