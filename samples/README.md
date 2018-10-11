@@ -10,4 +10,4 @@ For example the `Console.Customized` sample will show you many of the settings w
 
 It's worth noting that although most if not all integrations are able to **initialize** the SDK. That doesn't mean you need to provide all of them with your `DSN`. In fact, the SDK should be initialized only once. Once initialized, all the available integrations will start working together.
 
-Make sure to check out the [documentation for more](https://getsentry.github.io/sentry-dotnet/).
+Make sure to check out the [documentation for more](https://docs.sentry.io/?platform=csharp).
