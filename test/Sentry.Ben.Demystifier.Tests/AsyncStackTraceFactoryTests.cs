@@ -111,12 +111,37 @@ namespace Other.Ben.Demystifier.Tests
                 Assert.False(true);
                 return;
             }
-            catch (Exception e) { exception = e.Demystify(); }
+            catch (Exception e) { exception = e; }
             var stackTrace = sut.Create(exception);
             Assert.NotNull(stackTrace);
             Assert.Equal(new EnhancedStackTrace(exception).FrameCount, stackTrace.Frames.Count);
             Assert.NotEqual(new StackTrace(exception).FrameCount, stackTrace.Frames.Count);
         }
+
+        [Fact]
+        public async Task Create_WithAsyncExceptionFramesAsync()
+        {
+            var sut = _fixture.GetSut();
+
+            Exception exception;
+            try
+            {
+                await new AsyncMethodClass().MethodAsync(1, 2, 3, 4);
+                Assert.False(true);
+                return;
+            }
+            catch (Exception e) { exception = e; }
+
+            if (Type.GetType("Mono.Runtime") != null)
+                return; //Unsupport Mono
+
+            foreach (var frame in sut.Create(exception).Frames)
+            {
+                Assert.DoesNotContain("MoveNext", frame.Function);
+                Assert.DoesNotContain("GetResult", frame.Function);
+            }
+        }
+
         private class AsyncMethodClass
         {
             private Dictionary<int, int> _dict = new Dictionary<int, int>();
