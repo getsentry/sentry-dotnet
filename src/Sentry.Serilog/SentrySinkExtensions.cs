@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Serilog;
 using Serilog.Configuration;
+using Serilog.Events;
 
 namespace Sentry.Serilog
 {
@@ -10,10 +11,11 @@ namespace Sentry.Serilog
     {
         public static LoggerConfiguration Sentry(
             this LoggerSinkConfiguration loggerConfiguration,
-			string dsn = null,
+            string dsn = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider formatProvider = null)
         {
-            return loggerConfiguration.Sink(new SentrySink(formatProvider) { Dsn = dsn });
+            return loggerConfiguration.Sink(new SentrySink(formatProvider) { Dsn = dsn }, restrictedToMinimumLevel);
         }
     }
 }
