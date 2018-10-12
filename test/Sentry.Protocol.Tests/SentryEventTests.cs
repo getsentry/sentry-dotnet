@@ -23,7 +23,7 @@ namespace Sentry.Protocol.Tests
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
                 Message = "message",
-                StructuredMessage = new SentryMessage
+                LogEntry = new LogEntry
                 {
                     Message = "structured_message"
                 },

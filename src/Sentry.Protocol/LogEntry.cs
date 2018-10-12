@@ -17,7 +17,7 @@ namespace Sentry.Protocol
     /// </example>
     /// <seealso href="https://docs.sentry.io/clientdev/interfaces/message/"/>
     [DataContract]
-    public class SentryMessage
+    public class LogEntry
     {
         /// <summary>
         /// The raw message string (uninterpolated)
