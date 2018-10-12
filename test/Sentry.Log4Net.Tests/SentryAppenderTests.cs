@@ -179,6 +179,18 @@ namespace Sentry.Log4Net.Tests
         }
 
         [Fact]
+        public void Append_WithEnabledHub_InitNotCalled()
+        {
+            _fixture.Hub.IsEnabled.Returns(true);
+            var sut = _fixture.GetSut();
+
+            var evt = new LoggingEvent(new LoggingEventData());
+            sut.DoAppend(evt);
+
+            Assert.False(_fixture.InitInvoked);
+        }
+
+        [Fact]
         public void Append_WithDsn_InitCalled()
         {
             var sut = _fixture.GetSut();
@@ -194,6 +206,20 @@ namespace Sentry.Log4Net.Tests
         public void Append_NoDsn_HubNotCalled()
         {
             _fixture.Dsn = null;
+            var sut = _fixture.GetSut();
+
+            var evt = new LoggingEvent(new LoggingEventData());
+            sut.DoAppend(evt);
+
+            Assert.False(_fixture.InitInvoked);
+            _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(null);
+        }
+
+        [Fact]
+        public void Append_NoDsnAndDisabledHub_HubNotCalled()
+        {
+            _fixture.Dsn = null;
+            _fixture.Hub.IsEnabled.Returns(false);
             var sut = _fixture.GetSut();
 
             var evt = new LoggingEvent(new LoggingEventData());
