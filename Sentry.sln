@@ -77,6 +77,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Serilog", "src\Sentr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Serilog.Tests", "test\Sentry.Serilog.Tests\Sentry.Serilog.Tests.csproj", "{EBABB411-4481-478B-BEAD-009D1EE6D259}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Serilog", "samples\Sentry.Samples.Serilog\Sentry.Samples.Serilog.csproj", "{B7EDB922-4024-4546-B6E4-E5AB9016369F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +161,10 @@ Global
 		{EBABB411-4481-478B-BEAD-009D1EE6D259}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBABB411-4481-478B-BEAD-009D1EE6D259}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBABB411-4481-478B-BEAD-009D1EE6D259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7EDB922-4024-4546-B6E4-E5AB9016369F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7EDB922-4024-4546-B6E4-E5AB9016369F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7EDB922-4024-4546-B6E4-E5AB9016369F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7EDB922-4024-4546-B6E4-E5AB9016369F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -183,6 +189,7 @@ Global
 		{5CBEFF17-71BF-407B-868F-C784E6385DC8} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{2CF1FBEF-93C4-404E-94F6-543D08842633} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{EBABB411-4481-478B-BEAD-009D1EE6D259} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{B7EDB922-4024-4546-B6E4-E5AB9016369F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
