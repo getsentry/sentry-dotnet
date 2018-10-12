@@ -50,7 +50,7 @@ namespace Sentry.Serilog
                 return;
             }
 
-            if (_sdkHandle == null)
+            if (!Hub.IsEnabled && _sdkHandle == null)
             {
                 if (Dsn == null)
                 {

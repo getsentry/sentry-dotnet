@@ -10,9 +10,10 @@ namespace Sentry.Serilog
     {
         public static LoggerConfiguration Sentry(
             this LoggerSinkConfiguration loggerConfiguration,
+			string dsn = null,
             IFormatProvider formatProvider = null)
         {
-            return loggerConfiguration.Sink(new SentrySink(formatProvider));
+            return loggerConfiguration.Sink(new SentrySink(formatProvider) { Dsn = dsn });
         }
     }
 }
