@@ -76,7 +76,11 @@ namespace Sentry.Serilog
                     Name = Constants.SdkName,
                     Version = NameAndVersion.Version
                 },
-                Message = logEvent.RenderMessage(_formatProvider),
+                LogEntry = new LogEntry
+                {
+                    Formatted = logEvent.RenderMessage(_formatProvider),
+                    Message = logEvent.MessageTemplate.Text
+                },
                 Level = logEvent.Level.ToSentryLevel()
             };
 

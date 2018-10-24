@@ -64,7 +64,8 @@ namespace Sentry.Serilog.Tests
         {
             var sut = _fixture.GetSut();
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+                Enumerable.Empty<LogEventProperty>());
 
             sut.Emit(evt);
 
@@ -79,7 +80,8 @@ namespace Sentry.Serilog.Tests
         {
             var sut = _fixture.GetSut();
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+                Enumerable.Empty<LogEventProperty>());
 
             SentryEvent actual = null;
             _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
@@ -93,7 +95,6 @@ namespace Sentry.Serilog.Tests
             var package = Assert.Single(actual.Sdk.Packages);
             Assert.Equal("nuget:" + expected.Name, package.Name);
             Assert.Equal(expected.Version, package.Version);
-
         }
 
         [Fact]
@@ -103,7 +104,8 @@ namespace Sentry.Serilog.Tests
 
             var sut = _fixture.GetSut();
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+                Enumerable.Empty<LogEventProperty>());
 
             sut.Emit(evt);
 
@@ -118,13 +120,13 @@ namespace Sentry.Serilog.Tests
 
             var sut = _fixture.GetSut();
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, new MessageTemplate(string.Empty,
-                new[] { new TextToken(expected) }), Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse(expected), Enumerable.Empty<LogEventProperty>());
 
             sut.Emit(evt);
 
             _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message == expected));
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.LogEntry.Formatted == expected));
         }
 
         [Fact]
@@ -133,7 +135,8 @@ namespace Sentry.Serilog.Tests
             _fixture.Dsn = null;
             var sut = _fixture.GetSut();
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+                Enumerable.Empty<LogEventProperty>());
             sut.Emit(evt);
 
             Assert.False(_fixture.InitInvoked);
@@ -144,7 +147,8 @@ namespace Sentry.Serilog.Tests
         {
             var sut = _fixture.GetSut();
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+                Enumerable.Empty<LogEventProperty>());
             sut.Emit(evt);
 
             Assert.True(_fixture.InitInvoked);
@@ -157,7 +161,8 @@ namespace Sentry.Serilog.Tests
             _fixture.Dsn = null;
             var sut = _fixture.GetSut();
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+                Enumerable.Empty<LogEventProperty>());
             sut.Emit(evt);
 
             Assert.False(_fixture.InitInvoked);
@@ -187,7 +192,8 @@ namespace Sentry.Serilog.Tests
             var sut = _fixture.GetSut();
             sut.Dsn = expectedDsn;
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty, Enumerable.Empty<LogEventProperty>());
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+                Enumerable.Empty<LogEventProperty>());
             sut.Emit(evt);
 
             _fixture.SdkDisposeHandle.DidNotReceive().Dispose();
@@ -195,6 +201,25 @@ namespace Sentry.Serilog.Tests
             sut.Dispose();
 
             _fixture.SdkDisposeHandle.Received(1).Dispose();
+        }
+
+        [Fact]
+        public void Sink_WithFormat_EventCaptured()
+        {
+            const string expectedMessage = "Test {structured} log";
+            const int param = 10;
+
+            var sut = _fixture.GetSut();
+
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse(expectedMessage),
+                new[] { new LogEventProperty("structured", new ScalarValue(param)) });
+
+            sut.Emit(evt);
+
+            _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+                p.LogEntry.Formatted == $"Test {param} log"
+                && p.LogEntry.Message == expectedMessage));
         }
     }
 }
