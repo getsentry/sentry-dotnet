@@ -36,7 +36,13 @@ internal class Program
 
             logger.LogInformation("2 - Information messages are stored as Breadcrumb, sent with the next event.");
 
-            logger.LogError("3 - This generates an event, captured by sentry and includes breadcrumbs (2) tracked in this transaction.");
+            // Log messages with variables are grouped together.
+            // This way a log message like: 'User {userId} logged in' doesn't generate 1 issue in Sentry for each user you have.
+            // When visualizing this issue in Sentry, you can press Next and Back to see the individual log entries:
+            logger.LogError("3 - This generates an event {id}, captured by sentry and includes breadcrumbs (2) tracked in this transaction.",
+                100);
+            logger.LogError("3 - This generates an event {id}, captured by sentry and includes breadcrumbs (2) tracked in this transaction.",
+                999);
 
             using (logger.BeginScope(new Dictionary<string, string>
                 {
