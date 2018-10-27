@@ -74,7 +74,7 @@ namespace Sentry
         /// but execution at a later time, when more data is available.
         /// </remarks>
         /// <see cref="Evaluate"/>
-        internal event EventHandler OnEvaluating;
+        public event EventHandler OnEvaluating;
 
         /// <summary>
         /// Creates a scope with the specified options
