@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
+using Sentry.Protocol;
 
 namespace Sentry.Extensions.Logging
 {
@@ -61,6 +63,24 @@ namespace Sentry.Extensions.Logging
                     Message = message,
                     Level = logLevel.ToSentryLevel()
                 };
+
+                if (state is IEnumerable<KeyValuePair<string, object>> pairs)
+                {
+                    foreach (var property in pairs)
+                    {
+                        if (property.Key == "{OriginalFormat}" && property.Value is string template)
+                        {
+                            // Original format found, use Sentry logEntry interface
+                            @event.Message = null;
+                            @event.LogEntry = new LogEntry
+                            {
+                                Formatted = message,
+                                Message = template
+                            };
+                            break;
+                        }
+                    }
+                }
 
                 var tuple = eventId.ToTupleOrNull();
                 if (tuple.HasValue)

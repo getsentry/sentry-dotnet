@@ -12,7 +12,7 @@ namespace Sentry.Extensions.Logging
         /// Add an log event filter
         /// </summary>
         /// <remarks>
-        /// Filters are called before recording a log message as a breadcrumb or sending event.
+        /// Filters are called before sending an event.
         /// This allows the filter to decide whether the log message should not be recorded at all.
         /// </remarks>
         /// <param name="options">The <see cref="SentryLoggingOptions"/> to hold the filter.</param>
@@ -24,7 +24,7 @@ namespace Sentry.Extensions.Logging
         /// Add an log event filter
         /// </summary>
         /// <remarks>
-        /// Filters are called before recording a log message as a breadcrumb or sending event.
+        /// Filters are called before sending an event.
         /// This allows the filter to decide whether the log message should not be recorded at all.
         /// </remarks>
         /// <param name="options">The <see cref="SentryLoggingOptions"/> to hold the filter.</param>
