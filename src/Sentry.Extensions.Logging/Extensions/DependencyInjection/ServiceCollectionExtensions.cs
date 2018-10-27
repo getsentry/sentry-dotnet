@@ -11,7 +11,7 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
     /// Extension methods for <see cref="IServiceCollection"/>
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static class ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         /// <summary>
         /// Adds Sentry's services to the <see cref="IServiceCollection"/>
