@@ -33,14 +33,14 @@ namespace Sentry.Serilog
         internal SentrySink(
             IFormatProvider formatProvider,
             Func<string, IDisposable> initAction,
-            IHub hubGetter)
+            IHub hub)
         {
             Debug.Assert(initAction != null);
-            Debug.Assert(hubGetter != null);
+            Debug.Assert(hub != null);
 
             _formatProvider = formatProvider;
             _initAction = initAction;
-            Hub = hubGetter;
+            Hub = hub;
         }
 
         public void Emit(LogEvent logEvent)
