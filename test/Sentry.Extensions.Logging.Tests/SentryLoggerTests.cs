@@ -160,6 +160,33 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
+        public void Log_SentryRootCategory_DoesNotSendEvent()
+        {
+            var expectedException = new Exception("expected message");
+            _fixture.CategoryName = "Sentry";
+            var sut = _fixture.GetSut();
+
+            sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
+
+            _fixture.Hub.DidNotReceive()
+                .CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        // https://github.com/getsentry/sentry-dotnet/issues/132
+        [Fact]
+        public void Log_SentrySomethingCategory_SendEvent()
+        {
+            var expectedException = new Exception("expected message");
+            _fixture.CategoryName = "SentrySomething";
+            var sut = _fixture.GetSut();
+
+            sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
         public void LogCritical_SentryCategory_RecordsBreadcrumbs()
         {
             _fixture.CategoryName = "Sentry.Some.Class";
