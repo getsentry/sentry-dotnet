@@ -15,7 +15,8 @@ namespace Sentry.Tests.Extensibility
 
         [Fact]
         public void ConfigureScopeAsync_ReturnsCompletedTask()
-            => Assert.Same(Task.CompletedTask, DisabledHub.Instance.ConfigureScopeAsync(null));
+            // net45 doesn't have `CompletedTask` and returns `Task<object>`
+            => Assert.Same(Task.CompletedTask.Status, DisabledHub.Instance.ConfigureScopeAsync(null).Status);
 
         [Fact]
         public void PushScope_ReturnsSelf()

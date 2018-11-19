@@ -90,7 +90,8 @@ namespace Sentry.Tests.Internals
         public void ConfigureScopeAsync_NullArgument_ReturnsCompletedTask()
         {
             var sut = _fixture.GetSut();
-            Assert.Same(Task.CompletedTask, sut.ConfigureScopeAsync(null));
+            // net45 doesn't have `CompletedTask` and returns `Task<object>`
+            Assert.Same(Task.CompletedTask.Status, sut.ConfigureScopeAsync(null).Status);
         }
 
         [Fact]

@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
+#if LACKS_ASYNCLOCAL
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Lifetime;
+using System.Runtime.Remoting.Messaging;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -10,12 +15,63 @@ namespace Sentry.Internal
     internal class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         private readonly SentryOptions _options;
+
+#if LACKS_ASYNCLOCAL
+        static readonly string DataSlotName = typeof(SentryScopeManager).FullName + "@" + Guid.NewGuid();
+
+        private ImmutableStack<(Scope, ISentryClient)> LocalScope
+        {
+            get
+            {
+                var objectHandle = CallContext.LogicalGetData(DataSlotName) as ObjectHandle;
+
+                return objectHandle?.Unwrap() as ImmutableStack<(Scope, ISentryClient)>;
+            }
+            set
+            {
+                if (CallContext.LogicalGetData(DataSlotName) is IDisposable oldHandle)
+                {
+                    oldHandle.Dispose();
+                }
+
+                CallContext.LogicalSetData(DataSlotName, new DisposableObjectHandle(value));
+            }
+        }
+
+        private sealed class DisposableObjectHandle : ObjectHandle, IDisposable
+        {
+            private static readonly ISponsor LifeTimeSponsor = new ClientSponsor();
+
+            public DisposableObjectHandle(object o) : base(o) { }
+
+            public override object InitializeLifetimeService()
+            {
+                var lease = base.InitializeLifetimeService() as ILease;
+                lease?.Register(LifeTimeSponsor);
+                return lease;
+            }
+
+            public void Dispose()
+            {
+                if (GetLifetimeService() is ILease lease)
+                {
+                    lease.Unregister(LifeTimeSponsor);
+                }
+            }
+        }
+#else
         private readonly AsyncLocal<ImmutableStack<(Scope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ImmutableStack<(Scope, ISentryClient)>>();
+        private ImmutableStack<(Scope, ISentryClient)> LocalScope
+        {
+            get => _asyncLocalScope.Value;
+            set => _asyncLocalScope.Value = value;
+        }
+#endif
 
         internal ImmutableStack<(Scope scope, ISentryClient client)> ScopeAndClientStack
         {
-            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = NewStack());
-            set => _asyncLocalScope.Value = value;
+            get => LocalScope ?? (LocalScope = NewStack());
+            set => LocalScope = value;
         }
 
         private Func<ImmutableStack<(Scope, ISentryClient)>> NewStack { get; }
@@ -42,7 +98,12 @@ namespace Sentry.Internal
         {
             _options?.DiagnosticLogger?.LogDebug("Configuring the scope asynchronously.");
             var scope = GetCurrent();
-            return configureScope?.Invoke(scope.Scope) ?? Task.CompletedTask;
+            return configureScope?.Invoke(scope.Scope) ??
+#if NET45
+                   Task.FromResult(null as object);
+#else
+                   Task.CompletedTask;
+#endif
         }
 
         public IDisposable PushScope() => PushScope<object>(null);
@@ -128,7 +189,7 @@ namespace Sentry.Internal
         public void Dispose()
         {
             _options?.DiagnosticLogger?.LogDebug("Disposing SentryClient.");
-            _asyncLocalScope.Value = null;
+            LocalScope = null;
         }
     }
 }

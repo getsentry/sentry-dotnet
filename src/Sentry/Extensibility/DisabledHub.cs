@@ -12,7 +12,12 @@ namespace Sentry.Extensibility
         private DisabledHub() { }
 
         public void ConfigureScope(Action<Scope> configureScope) { }
-        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => Task.CompletedTask;
+        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) =>
+#if NET45
+            Task.FromResult(null as object);
+#else
+            Task.CompletedTask;
+#endif
 
         public IDisposable PushScope() => this;
         public IDisposable PushScope<TState>(TState state) => this;

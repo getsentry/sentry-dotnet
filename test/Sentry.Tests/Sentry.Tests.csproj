@@ -1,12 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net462;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
 
+  <!--Since testing libraries don't support net45, use net461 to test the build for net45
+  net462 will pick the net461 build (highest available to itself and netcore builds will test netstandard-->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" Properties="TargetFramework=net45" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+  </ItemGroup>
 </Project>
