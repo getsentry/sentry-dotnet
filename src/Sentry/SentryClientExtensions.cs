@@ -16,10 +16,10 @@ namespace Sentry
         /// <param name="client">The Sentry client.</param>
         /// <param name="ex">The exception.</param>
         /// <returns>The Id of the event</returns>
-        public static Guid CaptureException(this ISentryClient client, Exception ex)
+        public static SentryId CaptureException(this ISentryClient client, Exception ex)
         {
             return !client.IsEnabled
-                ? Guid.Empty
+                ? new SentryId(Guid.Empty)
                 : client.CaptureEvent(new SentryEvent(ex));
         }
 
@@ -30,14 +30,14 @@ namespace Sentry
         /// <param name="message">The message to send.</param>
         /// <param name="level">The message level.</param>
         /// <returns>The Id of the event</returns>
-        public static Guid CaptureMessage(
+        public static SentryId CaptureMessage(
             this ISentryClient client,
             string message,
             SentryLevel level = SentryLevel.Info)
         {
             return !client.IsEnabled
                    || string.IsNullOrWhiteSpace(message)
-                ? Guid.Empty
+                ? new SentryId(Guid.Empty)
                 : client.CaptureEvent(new SentryEvent
                 {
                     Message = message,

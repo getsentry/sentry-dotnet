@@ -26,7 +26,7 @@ namespace Sentry
         /// <summary>
         /// Last event id recorded in the current scope
         /// </summary>
-        public static Guid LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
+        public static SentryId LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
 
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN
@@ -249,7 +249,7 @@ namespace Sentry
         /// <param name="evt">The event.</param>
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
-        public static Guid CaptureEvent(SentryEvent evt)
+        public static SentryId CaptureEvent(SentryEvent evt)
             => _hub.CaptureEvent(evt);
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static Guid CaptureEvent(SentryEvent evt, Scope scope)
+        public static SentryId CaptureEvent(SentryEvent evt, Scope scope)
             => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Sentry
         /// <param name="exception">The exception.</param>
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
-        public static Guid CaptureException(Exception exception)
+        public static SentryId CaptureException(Exception exception)
             => _hub.CaptureException(exception);
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace Sentry
         /// <param name="level">The message level.</param>
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
-        public static Guid CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
+        public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
             => _hub.CaptureMessage(message, level);
     }
 }

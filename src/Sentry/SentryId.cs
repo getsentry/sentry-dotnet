@@ -8,6 +8,11 @@ namespace Sentry
     {
        public Guid eventID;
 
+        public SentryId(Guid eventID)
+        {
+            this.eventID = eventID;
+        }
+
         public override string ToString()
         {
           return eventID.ToString("n");

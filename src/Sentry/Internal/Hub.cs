@@ -97,7 +97,7 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public Guid CaptureEvent(SentryEvent evt, Scope scope = null)
+        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace Sentry.Internal
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
-                return Guid.Empty;
+                return new SentryId(Guid.Empty);
             }
         }
 
@@ -134,7 +134,7 @@ namespace Sentry.Internal
             ScopeManager?.Dispose();
         }
 
-        public Guid LastEventId
+        public SentryId LastEventId
         {
             get
             {
