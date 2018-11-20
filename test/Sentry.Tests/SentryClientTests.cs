@@ -74,7 +74,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             var actualId = sut.CaptureEvent(expectedEvent);
-            Assert.Equal(expectedId, actualId);
+            Assert.Equal(expectedId, (Guid)actualId);
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
-            Assert.Equal(expectedId, actualId);
+            Assert.Equal(expectedId, (Guid)actualId);
         }
 
         [Fact]

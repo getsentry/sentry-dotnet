@@ -19,7 +19,7 @@ namespace Sentry
         public static SentryId CaptureException(this ISentryClient client, Exception ex)
         {
             return !client.IsEnabled
-                ? new SentryId(Guid.Empty)
+                ? new SentryId()
                 : client.CaptureEvent(new SentryEvent(ex));
         }
 
@@ -37,7 +37,7 @@ namespace Sentry
         {
             return !client.IsEnabled
                    || string.IsNullOrWhiteSpace(message)
-                ? new SentryId(Guid.Empty)
+                ? new SentryId()
                 : client.CaptureEvent(new SentryEvent
                 {
                     Message = message,

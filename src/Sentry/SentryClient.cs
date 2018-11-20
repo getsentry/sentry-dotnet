@@ -79,7 +79,7 @@ namespace Sentry
 
             if (@event == null)
             {
-                return new SentryId(Guid.Empty);
+                return SentryId.Empty;
             }
 
             try
@@ -89,7 +89,7 @@ namespace Sentry
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("An error occured when capturing the event {0}.", e, @event.EventId);
-                return new SentryId(Guid.Empty);
+                return SentryId.Empty;
             }
         }
 
@@ -100,7 +100,7 @@ namespace Sentry
                 if (Random.NextDouble() > sample)
                 {
                     _options.DiagnosticLogger?.LogDebug("Event sampled.");
-                    return new SentryId(Guid.Empty);
+                    return SentryId.Empty;
                 }
             }
             scope = scope ?? new Scope(_options);
@@ -134,7 +134,7 @@ namespace Sentry
                 if (@event == null)
                 {
                     _options.DiagnosticLogger?.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                    return new SentryId(Guid.Empty);
+                    return SentryId.Empty;
                 }
             }
 
@@ -142,18 +142,18 @@ namespace Sentry
             if (@event == null) // Rejected event
             {
                 _options.DiagnosticLogger?.LogInfo("Event dropped by BeforeSend callback.");
-                return new SentryId(Guid.Empty);
+                return SentryId.Empty;
             }
 
             if (Worker.EnqueueEvent(@event))
             {
                 _options.DiagnosticLogger?.LogDebug("Event queued up.");
-                return new SentryId(@event.EventId);
+                return (SentryId)@event.EventId;
             }
 
             _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
                 Worker.QueuedItems);
-            return new SentryId(Guid.Empty);
+            return SentryId.Empty;
         }
 
         private SentryEvent BeforeSend(SentryEvent @event)

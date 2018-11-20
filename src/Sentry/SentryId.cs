@@ -4,23 +4,18 @@ using System.Text;
 
 namespace Sentry
 {
-   public struct SentryId
+    public readonly struct SentryId
     {
-       public Guid eventID;
+        private readonly Guid _eventId;
 
-        public SentryId(Guid eventID)
-        {
-            this.eventID = eventID;
-        }
+        public static readonly Guid Empty;
 
-        public override string ToString()
-        {
-          return eventID.ToString("n");
-        }
+        public SentryId(Guid guid) => _eventId = guid;
 
-        public static implicit operator Guid(SentryId d)
-        {
-            return d.eventID;
-        }
+        public override string ToString() => _eventId.ToString("n");
+
+        public static implicit operator Guid(SentryId sentryId) => sentryId._eventId;
+
+        public static implicit operator SentryId(Guid guid) => new SentryId(guid);
     }
 }

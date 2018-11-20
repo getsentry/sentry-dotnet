@@ -110,7 +110,7 @@ namespace Sentry.Internal
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
-                return new SentryId(Guid.Empty);
+                return SentryId.Empty;
             }
         }
 

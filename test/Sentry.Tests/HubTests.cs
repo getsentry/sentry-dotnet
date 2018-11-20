@@ -92,8 +92,8 @@ namespace NotSentry.Tests
 
             var actualId = sut.CaptureMessage("test");
 
-            Assert.Equal(expectedId, actualId);
-            Assert.Equal(expectedId, sut.LastEventId);
+            Assert.Equal(expectedId, (Guid)actualId);
+            Assert.Equal(expectedId, (Guid)sut.LastEventId);
         }
 
         [Fact]
