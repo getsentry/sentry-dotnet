@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
@@ -27,7 +26,8 @@ namespace Sentry.Serilog
 
         public string Dsn { get; set; }
 
-        public SentrySink(IFormatProvider formatProvider) : this(formatProvider, SentrySdk.Init, HubAdapter.Instance)
+        public SentrySink(IFormatProvider formatProvider)
+            : this(formatProvider, SentrySdk.Init, HubAdapter.Instance)
         { }
 
         internal SentrySink(
