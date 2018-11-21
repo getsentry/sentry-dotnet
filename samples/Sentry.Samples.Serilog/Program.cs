@@ -15,30 +15,40 @@ internal class Program
             .WriteTo.Sentry("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141", restrictedToMinimumLevel: LogEventLevel.Information)
             .CreateLogger();
 
-        // The following anonymous object gets serialized and sent with log messages
-        using (LogContext.PushProperty("inventory", new
+        try
         {
-            SmallPotion = 3,
-            BigPotion = 0,
-            CheeseWheels = 512
-        }))
-        {
-            // Logger config enables the Sink only for level INFO or higher so the Debug
-            // Does not result in an event in Sentry
-            Log.Debug("Debug message which is not sent.");
+            // The following anonymous object gets serialized and sent with log messages
+            using (LogContext.PushProperty("inventory", new
+            {
+                SmallPotion = 3,
+                BigPotion = 0,
+                CheeseWheels = 512
+            }))
+            {
+                // Logger config enables the Sink only for level INFO or higher so the Debug
+                // Does not result in an event in Sentry
+                Log.Debug("Debug message which is not sent.");
 
-            try
-            {
-                DoWork();
-            }
-            catch (Exception e)
-            {
-                e.Data.Add("details", "Do work always throws.");
-                Log.Error(e, "Error: with exception");
+                try
+                {
+                    DoWork();
+                }
+                catch (Exception e)
+                {
+                    e.Data.Add("details", "Do work always throws.");
+                    Log.Error(e, "Error: with exception");
+                }
             }
         }
-
-        Log.CloseAndFlush();
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 
     private static void DoWork()
