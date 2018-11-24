@@ -9,11 +9,14 @@ using Serilog.Events;
 
 namespace Sentry.Serilog
 {
+    /// <summary>
+    /// Sentry Sink for Serilog
+    /// </summary>
+    /// <inheritdoc cref="IDisposable" />
+    /// <inheritdoc cref="ILogEventSink" />
     public sealed class SentrySink : ILogEventSink, IDisposable
     {
-        private readonly IFormatProvider _formatProvider;
-        private readonly Func<string, IDisposable> _initAction;
-        private volatile IDisposable _sdkHandle;
+        private SentrySerilogOptions _options;
 
         private readonly object _initSync = new object();
 
@@ -22,24 +25,23 @@ namespace Sentry.Serilog
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
-        internal IHub Hub { get; set; }
+        private IHub _hub;
 
-        public string Dsn { get; set; }
-
-        public SentrySink(IFormatProvider formatProvider)
-            : this(formatProvider, SentrySdk.Init, HubAdapter.Instance)
+        /// <summary>
+        /// Creates a new instance of <see cref="SentrySink"/>.
+        /// </summary>
+        /// <param name="options">The Sentry Serilog options to configure the sink.</param>
+        public SentrySink(SentrySerilogOptions options)
+            : this(options, HubAdapter.Instance)
         { }
 
         internal SentrySink(
-            IFormatProvider formatProvider,
-            Func<string, IDisposable> initAction,
+            SentrySerilogOptions options,
             IHub hub)
         {
-            Debug.Assert(initAction != null);
+            Debug.Assert(options != null);
             Debug.Assert(hub != null);
 
-            _formatProvider = formatProvider;
-            _initAction = initAction;
             Hub = hub;
         }
 
@@ -78,7 +80,7 @@ namespace Sentry.Serilog
                 },
                 LogEntry = new LogEntry
                 {
-                    Formatted = logEvent.RenderMessage(_formatProvider),
+                    Formatted = logEvent.RenderMessage(_options.FormatProvider),
                     Message = logEvent.MessageTemplate.Text
                 },
                 Level = logEvent.Level.ToSentryLevel()
@@ -109,9 +111,6 @@ namespace Sentry.Serilog
             }
         }
 
-        public void Dispose()
-        {
-            _sdkHandle?.Dispose();
-        }
+        public void Dispose() => _sdkHandle?.Dispose();
     }
 }
