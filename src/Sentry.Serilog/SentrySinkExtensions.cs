@@ -40,29 +40,14 @@ namespace Sentry.Serilog
             var options = new SentrySerilogOptions();
             configureOptions?.Invoke(options);
 
-
-            if (options.DiagnosticLogger == null)
-            {
-                /var logger = factory.CreateLogger<ISentryClient>();
-                //options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticsLevel);
-            }
-
-            IHub hub;
+            IDisposable sdkDisposable = null;
             if (options.InitializeSdk)
             {
-                hub = new OptionalHub(options);
-            }
-            else
-            {
-                // Access to whatever the SentrySdk points to (disabled or initialized via SentrySdk.Init)
-                hub = HubAdapter.Instance;
+                sdkDisposable = SentrySdk.Init(options);
             }
 
-            //factory.AddProvider(new SentryLoggerProvider(hub, SystemClock.Clock, options));
-            //return factory;
-
-            var minimalOverall = (LogEventLevel)Math.Min((int)options.MinimumBreadcrumbLevel, (int)options.MinimumEventLevel);
-            return loggerConfiguration.Sink(new SentrySink(formatProvider) { Dsn = dsn }, minimalOverall);
+            var minimumOverall = (LogEventLevel)Math.Min((int)options.MinimumBreadcrumbLevel, (int)options.MinimumEventLevel);
+            return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable), minimumOverall);
         }
     }
 }

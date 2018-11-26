@@ -1,4 +1,5 @@
 using System;
+using Sentry;
 using Sentry.Serilog;
 using Serilog;
 using Serilog.Context;
@@ -12,7 +13,17 @@ internal class Program
             .Enrich.FromLogContext()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.Sentry("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141", restrictedToMinimumLevel: LogEventLevel.Information)
+            // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
+            .WriteTo.Sentry(o =>
+            {
+                o.MinimumBreadcrumbLevel = LogEventLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
+                o.MinimumEventLevel = LogEventLevel.Error; // Error and higher is sent as event (default is Error)
+                // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If nothing is found, SDK is disabled.
+                o.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
+                o.AttachStacktrace = true;
+                o.SendDefaultPii = true; // send PII like the username of the user logged in to the device
+                // Other configuration
+            })
             .CreateLogger();
 
         try
@@ -25,9 +36,16 @@ internal class Program
                 CheeseWheels = 512
             }))
             {
-                // Logger config enables the Sink only for level INFO or higher so the Debug
-                // Does not result in an event in Sentry
-                Log.Debug("Debug message which is not sent.");
+                // Minimum Breadcrumb and Event log levels are set to levels higher than Verbose
+                // In this case, Verbose messages are ignored
+                Log.Verbose("Verbose message which is not sent.");
+
+                // Minimum Breadcrumb level is set to Debug so the following message is stored in memory
+                // and sent with following events of the same Scope
+                Log.Debug("Debug message stored as breadcrumb.");
+
+                // Sends an event and stores the message as a breadcrumb too, to be sent with any upcoming events.
+                Log.Error("Some event that includes the previous breadcrumbs");
 
                 try
                 {
@@ -36,7 +54,8 @@ internal class Program
                 catch (Exception e)
                 {
                     e.Data.Add("details", "Do work always throws.");
-                    Log.Error(e, "Error: with exception");
+                    Log.Fatal(e, "Error: with exception");
+                    throw;
                 }
             }
         }

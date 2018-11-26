@@ -79,6 +79,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Serilog.Tests", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Serilog", "samples\Sentry.Samples.Serilog\Sentry.Samples.Serilog.csproj", "{B7EDB922-4024-4546-B6E4-E5AB9016369F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Serilog", "samples\Sentry.Samples.AspNetCore.Serilog\Sentry.Samples.AspNetCore.Serilog.csproj", "{1930A5D5-356B-43F9-AEDF-CB76254C5933}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -165,6 +167,10 @@ Global
 		{B7EDB922-4024-4546-B6E4-E5AB9016369F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7EDB922-4024-4546-B6E4-E5AB9016369F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7EDB922-4024-4546-B6E4-E5AB9016369F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1930A5D5-356B-43F9-AEDF-CB76254C5933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1930A5D5-356B-43F9-AEDF-CB76254C5933}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1930A5D5-356B-43F9-AEDF-CB76254C5933}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1930A5D5-356B-43F9-AEDF-CB76254C5933}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -190,6 +196,7 @@ Global
 		{2CF1FBEF-93C4-404E-94F6-543D08842633} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{EBABB411-4481-478B-BEAD-009D1EE6D259} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{B7EDB922-4024-4546-B6E4-E5AB9016369F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{1930A5D5-356B-43F9-AEDF-CB76254C5933} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
