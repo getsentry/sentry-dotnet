@@ -78,6 +78,11 @@ namespace Sentry.Extensions.Logging
                             };
                             break;
                         }
+
+                        if (property.Value is string tagValue)
+                        {
+                            @event.SetTag(property.Key, tagValue);
+                        }
                     }
                 }
 
