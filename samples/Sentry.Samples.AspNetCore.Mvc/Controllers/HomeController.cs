@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -62,7 +63,10 @@ namespace Samples.AspNetCore.Mvc.Controllers
             {
                 // Exemplifies using the logger to raise a warning which will be sent as an event because MinimumEventLevel was configured to Warning
                 // ALso, the stack trace of this location will be sent (even though there was no exception) because of the configuration AttachStackTrace
-                _logger.LogWarning("A /About 'null' was requested.");
+                _logger.LogWarning("A {route} '{value}' was requested.",
+                    // example structured logging where keys (in the template above) go as tag keys and values below:
+                    "/about",
+                    "null");
             }
 
             return View();

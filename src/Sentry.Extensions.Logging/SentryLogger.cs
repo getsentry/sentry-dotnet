@@ -76,7 +76,7 @@ namespace Sentry.Extensions.Logging
                                 Formatted = message,
                                 Message = template
                             };
-                            break;
+                            continue;
                         }
 
                         if (property.Value is string tagValue)
