@@ -1,46 +1,62 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Sentry;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Reflection;
+using Sentry.Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Constants = Sentry.Serilog.Constants;
 
-namespace Sentry.Serilog
+// ReSharper disable once CheckNamespace - Discoverability
+namespace Serilog
 {
-    public sealed class SentrySink : ILogEventSink, IDisposable
+    /// <summary>
+    /// Sentry Sink for Serilog
+    /// </summary>
+    /// <inheritdoc cref="IDisposable" />
+    /// <inheritdoc cref="ILogEventSink" />
+    internal sealed class SentrySink : ILogEventSink, IDisposable
     {
-        private readonly IFormatProvider _formatProvider;
-        private readonly Func<string, IDisposable> _initAction;
-        private volatile IDisposable _sdkHandle;
-
-        private readonly object _initSync = new object();
+        private readonly IDisposable _sdkDisposable;
+        private readonly SentrySerilogOptions _options;
 
         internal static readonly (string Name, string Version) NameAndVersion
             = typeof(SentrySink).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
-        internal IHub Hub { get; set; }
+        private readonly Func<IHub> _hubAccessor;
+        private readonly ISystemClock _clock;
 
-        public string Dsn { get; set; }
-
-        public SentrySink(IFormatProvider formatProvider)
-            : this(formatProvider, SentrySdk.Init, HubAdapter.Instance)
-        { }
+        public SentrySink(
+            SentrySerilogOptions options,
+            IDisposable sdkDisposable)
+            : this(
+                options,
+                () => HubAdapter.Instance,
+                sdkDisposable,
+                SystemClock.Clock)
+        {
+        }
 
         internal SentrySink(
-            IFormatProvider formatProvider,
-            Func<string, IDisposable> initAction,
-            IHub hub)
+            SentrySerilogOptions options,
+            Func<IHub> hubAccessor,
+            IDisposable sdkDisposable,
+            ISystemClock clock)
         {
-            Debug.Assert(initAction != null);
-            Debug.Assert(hub != null);
+            Debug.Assert(options != null);
+            Debug.Assert(hubAccessor != null);
+            Debug.Assert(clock != null);
 
-            _formatProvider = formatProvider;
-            _initAction = initAction;
-            Hub = hub;
+            _options = options;
+            _hubAccessor = hubAccessor;
+            _clock = clock;
+            _sdkDisposable = sdkDisposable;
         }
 
         public void Emit(LogEvent logEvent)
@@ -50,45 +66,62 @@ namespace Sentry.Serilog
                 return;
             }
 
-            if (!Hub.IsEnabled && _sdkHandle == null)
+            var hub = _hubAccessor();
+            if (hub == null || !hub.IsEnabled)
             {
-                if (Dsn == null)
-                {
-                    return;
-                }
-
-                lock (_initSync)
-                {
-                    if (_sdkHandle == null)
-                    {
-                        _sdkHandle = _initAction(Dsn);
-                        Debug.Assert(_sdkHandle != null);
-                    }
-                }
+                return;
             }
 
             var exception = logEvent.Exception;
+            var formatted = logEvent.RenderMessage(_options.FormatProvider);
+            var template = logEvent.MessageTemplate.Text;
 
-            var evt = new SentryEvent(exception)
+            if (logEvent.Level >= _options.MinimumEventLevel)
             {
-                Sdk =
+                var evt = new SentryEvent(exception)
                 {
-                    Name = Constants.SdkName,
-                    Version = NameAndVersion.Version
-                },
-                LogEntry = new LogEntry
+                    Sdk =
+                    {
+                        Name = Constants.SdkName,
+                        Version = NameAndVersion.Version
+                    },
+                    Message = null,
+                    LogEntry = new LogEntry
+                    {
+                        Formatted = formatted,
+                        Message = template
+                    },
+                    Level = logEvent.Level.ToSentryLevel()
+                };
+
+                evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+                evt.SetExtras(GetLoggingEventProperties(logEvent));
+
+                hub.CaptureEvent(evt);
+            }
+
+            // Even if it was sent as event, add breadcrumb so next event includes it
+            if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
+            {
+                Dictionary<string, string> data = null;
+                if (exception != null && !string.IsNullOrWhiteSpace(formatted))
                 {
-                    Formatted = logEvent.RenderMessage(_formatProvider),
-                    Message = logEvent.MessageTemplate.Text
-                },
-                Level = logEvent.Level.ToSentryLevel()
-            };
+                    // Exception.Message won't be used as Breadcrumb message
+                    // Avoid losing it by adding as data:
+                    data = new Dictionary<string, string>
+                    {
+                        {"exception_message", exception.Message}
+                    };
+                }
 
-            evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-
-            evt.SetExtras(GetLoggingEventProperties(logEvent));
-
-            Hub.CaptureEvent(evt);
+                hub.AddBreadcrumb(
+                    _clock,
+                    message: string.IsNullOrWhiteSpace(formatted)
+                        ? exception?.Message
+                        : formatted,
+                    data: data,
+                    level: logEvent.Level.ToBreadcrumbLevel());
+            }
         }
 
         private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEvent logEvent)
@@ -109,9 +142,6 @@ namespace Sentry.Serilog
             }
         }
 
-        public void Dispose()
-        {
-            _sdkHandle?.Dispose();
-        }
+        public void Dispose() => _sdkDisposable?.Dispose();
     }
 }
