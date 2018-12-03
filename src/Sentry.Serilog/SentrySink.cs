@@ -1,18 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Sentry;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Reflection;
-using Sentry.Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using Constants = Sentry.Serilog.Constants;
 
-// ReSharper disable once CheckNamespace - Discoverability
-namespace Serilog
+namespace Sentry.Serilog
 {
     /// <summary>
     /// Sentry Sink for Serilog

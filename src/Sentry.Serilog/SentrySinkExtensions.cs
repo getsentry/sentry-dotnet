@@ -1,9 +1,11 @@
 using System;
-using Serilog;
+using Sentry;
+using Sentry.Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
 
-namespace Sentry.Serilog
+// ReSharper disable once CheckNamespace - Discoverability
+namespace Serilog
 {
     public static class SentrySinkExtensions
     {

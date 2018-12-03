@@ -4,7 +4,6 @@ using NSubstitute;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Reflection;
-using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
 using Xunit;
