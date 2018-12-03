@@ -21,6 +21,19 @@ namespace Sentry.Tests
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
+        public void CaptureEvent_IdReturnedToString_NoDashes()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new SentryEvent(new Exception());
+
+            var actual = sut.CaptureEvent(evt);
+
+            var hasDashes = actual.ToString().Contains('-');
+            Assert.False(hasDashes);
+        }
+
+        [Fact]
         public void CaptureEvent_ExceptionProcessorsOnOptions_Invoked()
         {
             var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
