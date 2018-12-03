@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -71,6 +72,22 @@ namespace Sentry.Extensions.Logging.Tests
             _fixture.Hub.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(
                     e => e.Tags[EventIdExtensions.DataKey] == expectedEventId.ToString()));
+        }
+
+        [Fact]
+        public void Log_WithProperties_SetsTagsInEvent()
+        {
+            var props = new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("foo", "bar")
+            };
+            var sut = _fixture.GetSut();
+
+            sut.Log<object>(LogLevel.Critical, default, props, null, null);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(
+                    e => e.Tags["foo"] == "bar"));
         }
 
         [Fact]
