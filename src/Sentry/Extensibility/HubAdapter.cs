@@ -28,7 +28,7 @@ namespace Sentry.Extensibility
 
         public bool IsEnabled { [DebuggerStepThrough] get => SentrySdk.IsEnabled; }
 
-        public Guid LastEventId { [DebuggerStepThrough] get => SentrySdk.LastEventId; }
+        public SentryId LastEventId { [DebuggerStepThrough] get => SentrySdk.LastEventId; }
 
         [DebuggerStepThrough]
         public void ConfigureScope(Action<Scope> configureScope)
@@ -81,16 +81,16 @@ namespace Sentry.Extensibility
                 level: level);
 
         [DebuggerStepThrough]
-        public Guid CaptureEvent(SentryEvent evt)
+        public SentryId CaptureEvent(SentryEvent evt)
             => SentrySdk.CaptureEvent(evt);
 
         [DebuggerStepThrough]
-        public Guid CaptureException(Exception exception)
+        public SentryId CaptureException(Exception exception)
             => SentrySdk.CaptureException(exception);
 
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public Guid CaptureEvent(SentryEvent evt, Scope scope)
+        public SentryId CaptureEvent(SentryEvent evt, Scope scope)
             => SentrySdk.CaptureEvent(evt, scope);
     }
 }

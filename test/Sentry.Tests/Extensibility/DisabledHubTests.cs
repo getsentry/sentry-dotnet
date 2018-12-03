@@ -27,7 +27,7 @@ namespace Sentry.Tests.Extensibility
 
         [Fact]
         public void CaptureEvent_EmptyGuid()
-            => Assert.Equal(Guid.Empty, DisabledHub.Instance.CaptureEvent(null));
+            => Assert.Equal(Guid.Empty, (Guid)DisabledHub.Instance.CaptureEvent(null));
 
         [Fact]
         public void ConfigureScope_NoOp() => DisabledHub.Instance.ConfigureScope(null);

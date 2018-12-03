@@ -34,7 +34,7 @@ namespace Sentry.Internal
             _disposable = SentrySdk.UseHub(_hub);
         }
 
-        public Guid CaptureEvent(SentryEvent evt, Scope scope = null) => _hub.CaptureEvent(evt, scope);
+        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => _hub.CaptureEvent(evt, scope);
 
         public void ConfigureScope(Action<Scope> configureScope) => _hub.ConfigureScope(configureScope);
 
@@ -48,7 +48,7 @@ namespace Sentry.Internal
 
         public void WithScope(Action<Scope> scopeCallback) => _hub.WithScope(scopeCallback);
 
-        public Guid LastEventId => _hub.LastEventId;
+        public SentryId LastEventId => _hub.LastEventId;
 
         public void Dispose() => _disposable?.Dispose();
     }

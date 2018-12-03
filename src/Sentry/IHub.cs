@@ -19,6 +19,6 @@ namespace Sentry
         /// <summary>
         /// Last event id recorded in the current scope
         /// </summary>
-        Guid LastEventId { get; }
+        SentryId LastEventId { get; }
     }
 }
