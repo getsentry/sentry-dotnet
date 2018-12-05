@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <Version>1.0.1-beta5</Version>
+    <Version>1.1.0</Version>
 
     <LangVersion>7.2</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
