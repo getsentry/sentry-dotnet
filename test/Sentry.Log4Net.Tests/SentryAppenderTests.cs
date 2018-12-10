@@ -276,6 +276,32 @@ namespace Sentry.Log4Net.Tests
         }
 
         [Fact]
+        public void Append_ByDefault_DoesNotSetEnvironment()
+        {
+            var sut = _fixture.GetSut();
+            var evt = new LoggingEvent(new LoggingEventData());
+
+            sut.DoAppend(evt);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == null));
+        }
+
+        [Fact]
+        public void Append_ConfiguredEnvironment()
+        {
+            const string expected = "dev";
+            var sut = _fixture.GetSut();
+            sut.Environment = expected;
+            var evt = new LoggingEvent(new LoggingEventData());
+
+            sut.DoAppend(evt);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
+        }
+
+        [Fact]
         public void Close_DisposesSdk()
         {
             const string expectedDsn = "dsn";
