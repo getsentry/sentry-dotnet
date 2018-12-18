@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ben.Demystifier" Version="0.1.1" />
+    <PackageReference Include="Ben.Demystifier" Version="0.1.3" />
 
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
