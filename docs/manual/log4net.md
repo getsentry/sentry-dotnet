@@ -23,6 +23,7 @@ This can be done, for example, via the `app.config` or `web.config` in case of A
       <Dsn value="dsn"/>
       <!--Sends the log event Identity value as the user-->
       <SendIdentity value="true" />
+      <Environment value="dev" />
       <threshold value="INFO" />
     </appender>
 ```

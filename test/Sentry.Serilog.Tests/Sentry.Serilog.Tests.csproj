@@ -5,11 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.1.1" />
+    <ProjectReference Include="../../src/Sentry.Serilog/Sentry.Serilog.csproj" />
   </ItemGroup>
 
 </Project>

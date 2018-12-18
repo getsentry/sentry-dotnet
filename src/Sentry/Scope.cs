@@ -24,8 +24,8 @@ namespace Sentry
 
         private readonly object _lastEventIdSync = new object();
 
-        private Guid _lastEventId;
-        internal Guid LastEventId
+        private SentryId _lastEventId;
+        internal SentryId LastEventId
         {
             get
             {

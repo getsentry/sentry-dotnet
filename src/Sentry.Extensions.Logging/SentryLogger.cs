@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
@@ -77,7 +76,12 @@ namespace Sentry.Extensions.Logging
                                 Formatted = message,
                                 Message = template
                             };
-                            break;
+                            continue;
+                        }
+
+                        if (property.Value is string tagValue)
+                        {
+                            @event.SetTag(property.Key, tagValue);
                         }
                     }
                 }
@@ -122,8 +126,10 @@ namespace Sentry.Extensions.Logging
                    && logLevel >= _options.MinimumEventLevel
                    // No events from Sentry code using ILogger
                    // A type from the main SDK could be used to resolve a logger
-                   //(hence 'Sentry' and not 'Sentry.'
-                   && !CategoryName.StartsWith("Sentry")
+                   // hence 'Sentry' and also 'Sentry.', won't block SentrySomething
+                   // often used by users experimenting with Sentry
+                   && !CategoryName.StartsWith("Sentry.")
+                   && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal)
                    && (_options.Filters == null
                         || _options.Filters.All(
                            f => !f.Filter(

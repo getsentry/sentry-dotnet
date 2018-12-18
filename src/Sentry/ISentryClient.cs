@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry
 {
     /// <summary>
@@ -18,6 +16,6 @@ namespace Sentry
         /// <param name="evt">The event to be captured</param>
         /// <param name="scope">An optional scope to be applied to the event.</param>
         /// <returns>The Id of the event</returns>
-        Guid CaptureEvent(SentryEvent evt, Scope scope = null);
+        SentryId CaptureEvent(SentryEvent evt, Scope scope = null);
     }
 }

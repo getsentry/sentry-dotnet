@@ -21,10 +21,10 @@ namespace Sentry.Extensibility
 
         public void BindClient(ISentryClient client) { }
 
-        public Guid CaptureEvent(SentryEvent evt, Scope scope = null) => Guid.Empty;
+        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => SentryId.Empty;
 
         public void Dispose() { }
 
-        public Guid LastEventId => Guid.Empty;
+        public SentryId LastEventId => SentryId.Empty;
     }
 }

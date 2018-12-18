@@ -70,7 +70,7 @@ namespace Sentry
         /// <param name="scope">The optional scope to augment the event with.</param>
         /// <returns></returns>
         /// <inheritdoc />
-        public Guid CaptureEvent(SentryEvent @event, Scope scope = null)
+        public SentryId CaptureEvent(SentryEvent @event, Scope scope = null)
         {
             if (_disposed)
             {
@@ -79,7 +79,7 @@ namespace Sentry
 
             if (@event == null)
             {
-                return Guid.Empty;
+                return SentryId.Empty;
             }
 
             try
@@ -89,18 +89,18 @@ namespace Sentry
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("An error occured when capturing the event {0}.", e, @event.EventId);
-                return Guid.Empty;
+                return SentryId.Empty;
             }
         }
 
-        private Guid DoSendEvent(SentryEvent @event, Scope scope)
+        private SentryId DoSendEvent(SentryEvent @event, Scope scope)
         {
             if (_options.SampleRate is float sample)
             {
                 if (Random.NextDouble() > sample)
                 {
                     _options.DiagnosticLogger?.LogDebug("Event sampled.");
-                    return Guid.Empty;
+                    return SentryId.Empty;
                 }
             }
             scope = scope ?? new Scope(_options);
@@ -134,7 +134,7 @@ namespace Sentry
                 if (@event == null)
                 {
                     _options.DiagnosticLogger?.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                    return Guid.Empty;
+                    return SentryId.Empty;
                 }
             }
 
@@ -142,18 +142,18 @@ namespace Sentry
             if (@event == null) // Rejected event
             {
                 _options.DiagnosticLogger?.LogInfo("Event dropped by BeforeSend callback.");
-                return Guid.Empty;
+                return SentryId.Empty;
             }
 
             if (Worker.EnqueueEvent(@event))
             {
                 _options.DiagnosticLogger?.LogDebug("Event queued up.");
-                return @event.EventId;
+                return (SentryId)@event.EventId;
             }
 
             _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
                 Worker.QueuedItems);
-            return Guid.Empty;
+            return SentryId.Empty;
         }
 
         private SentryEvent BeforeSend(SentryEvent @event)

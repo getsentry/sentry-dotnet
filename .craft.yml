@@ -1,4 +1,3 @@
----
 github:
   owner: getsentry
   repo: sentry-dotnet
@@ -21,3 +20,7 @@ targets:
     type: sdk
     config:
       canonical: "nuget:Sentry.Log4Net"
+  - name: registry
+    type: sdk
+    config:
+      canonical: "nuget:Sentry.Serilog"

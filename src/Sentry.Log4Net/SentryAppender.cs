@@ -25,6 +25,7 @@ namespace Sentry.Log4Net
 
         public string Dsn { get; set; }
         public bool SendIdentity { get; set; }
+        public string Environment { get; set; }
 
         public SentryAppender() : this(SentrySdk.Init, HubAdapter.Instance)
         { }
@@ -91,6 +92,11 @@ namespace Sentry.Log4Net
                 {
                     Id = loggingEvent.Identity
                 };
+            }
+
+            if (!string.IsNullOrWhiteSpace(Environment))
+            {
+                evt.Environment = Environment;
             }
 
             Hub.CaptureEvent(evt);

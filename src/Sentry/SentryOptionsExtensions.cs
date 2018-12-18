@@ -85,7 +85,7 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor provider.</param>
         /// <param name="processorProvider">The event processor provider.</param>
-        internal static void AddEventProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryEventProcessor>> processorProvider)
+        public static void AddEventProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryEventProcessor>> processorProvider)
             => options.EventProcessorsProviders = options.EventProcessorsProviders.Add(processorProvider);
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor provider.</param>
         /// <param name="processorProvider">The exception processor provider.</param>
-        internal static void AddExceptionProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryEventExceptionProcessor>> processorProvider)
+        public static void AddExceptionProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryEventExceptionProcessor>> processorProvider)
             => options.ExceptionProcessorsProviders = options.ExceptionProcessorsProviders.Add(processorProvider);
 
         /// <summary>
