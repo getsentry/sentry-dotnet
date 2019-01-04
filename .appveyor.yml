@@ -5,10 +5,5 @@ before_build:
   - nuget restore
 build_script:
 - ps: ./build.ps1
-dotnet_csproj:
-  patch: true
-  file: 'src\**\*.csproj'
-  version: '{version}'
-  package_version: '{version}'
 artifacts:
 - path: 'src\**\*.nupkg'
