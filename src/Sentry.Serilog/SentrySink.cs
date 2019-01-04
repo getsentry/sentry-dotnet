@@ -57,7 +57,12 @@ namespace Sentry.Serilog
 
         public void Emit(LogEvent logEvent)
         {
-            if (logEvent == null)
+            if (logEvent == null
+                || logEvent.Properties.TryGetValue("SourceContext", out var prop)
+                && prop is ScalarValue scalar
+                && scalar.Value is string context
+                && (context.StartsWith("Sentry.")
+                    || string.Equals(context, "Sentry", StringComparison.Ordinal)))
             {
                 return;
             }
@@ -99,6 +104,8 @@ namespace Sentry.Serilog
             // Even if it was sent as event, add breadcrumb so next event includes it
             if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
             {
+
+
                 Dictionary<string, string> data = null;
                 if (exception != null && !string.IsNullOrWhiteSpace(formatted))
                 {
