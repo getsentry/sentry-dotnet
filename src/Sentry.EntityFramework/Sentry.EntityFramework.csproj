@@ -3,7 +3,7 @@
   <PropertyGroup>
     <VersionPrefix>0.0.1</VersionPrefix>
     <VersionSuffix>preview2</VersionSuffix>
-    <TargetFrameworks>net462</TargetFrameworks>
+    <TargetFrameworks>net461</TargetFrameworks>
     <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling;EntityFramework6</PackageTags>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.0.0" />
-    <PackageReference Include="Sentry" Version="0.0.1-preview4" />
+    <PackageReference Include="Sentry" Version="1.1.0" />
   </ItemGroup>
 
 </Project>
