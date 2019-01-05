@@ -252,5 +252,61 @@ namespace Sentry.Serilog.Tests
                 p.LogEntry.Formatted == $"Test {param} log"
                 && p.LogEntry.Message == expectedMessage));
         }
+
+        [Fact]
+        public void Emit_SourceContextMatchesSentry_NoEventSent()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse("message"),
+                new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry.Serilog")) });
+
+            sut.Emit(evt);
+
+            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
+        public void Emit_SourceContextContainsSentry_NoEventSent()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse("message"),
+                new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry")) });
+
+            sut.Emit(evt);
+
+            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
+        public void Emit_SourceContextMatchesSentry_NoScopeConfigured()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse("message"),
+                new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry.Serilog")) });
+
+            sut.Emit(evt);
+
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
+        }
+
+        [Fact]
+        public void Emit_SourceContextContainsSentry_NoScopeConfigured()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse("message"),
+                new[] { new LogEventProperty("SourceContext", new ScalarValue("Sentry")) });
+
+            sut.Emit(evt);
+
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
+        }
     }
 }
