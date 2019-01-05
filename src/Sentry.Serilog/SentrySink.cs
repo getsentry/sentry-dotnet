@@ -57,7 +57,12 @@ namespace Sentry.Serilog
 
         public void Emit(LogEvent logEvent)
         {
-            if (logEvent == null)
+            if (logEvent == null
+                || logEvent.Properties.TryGetValue("SourceContext", out var prop)
+                && prop is ScalarValue scalar
+                && scalar.Value is string context
+                && (context.StartsWith("Sentry.")
+                    || string.Equals(context, "Sentry", StringComparison.Ordinal)))
             {
                 return;
             }
