@@ -898,7 +898,7 @@ namespace Sentry.Protocol.Tests
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Null(target.InternalContexts);
+            Assert.Null(target.Environment);
         }
 
         [Fact]
@@ -926,6 +926,84 @@ namespace Sentry.Protocol.Tests
             sut.Apply(target);
 
             Assert.Equal(expected, target.Environment);
+        }
+
+        [Fact]
+        public void Apply_Transaction_Null()
+        {
+            var sut = _fixture.GetSut();
+            sut.Transaction = null;
+
+            var target = _fixture.GetSut();
+            sut.Apply(target);
+
+            Assert.Null(target.Transaction);
+        }
+
+        [Fact]
+        public void Apply_Transaction_NotOnTarget_SetFromSource()
+        {
+            const string expected = "transaction";
+
+            var sut = _fixture.GetSut();
+            sut.Transaction = expected;
+            var target = _fixture.GetSut();
+            sut.Apply(target);
+
+            Assert.Equal(expected, target.Transaction);
+        }
+
+        [Fact]
+        public void Apply_Transaction_OnTarget_NotOverwritten()
+        {
+            const string expected = "transaction";
+            var sut = _fixture.GetSut();
+            var target = _fixture.GetSut();
+            target.Transaction = expected;
+
+            sut.Transaction = "other";
+            sut.Apply(target);
+
+            Assert.Equal(expected, target.Transaction);
+        }
+
+        [Fact]
+        public void Apply_Level_Null()
+        {
+            var sut = _fixture.GetSut();
+            sut.Level = null;
+
+            var target = _fixture.GetSut();
+            sut.Apply(target);
+
+            Assert.Null(target.Level);
+        }
+
+        [Fact]
+        public void Apply_Level_NotOnTarget_SetFromSource()
+        {
+            const SentryLevel expected = SentryLevel.Fatal;
+
+            var sut = _fixture.GetSut();
+            sut.Level = expected;
+            var target = _fixture.GetSut();
+            sut.Apply(target);
+
+            Assert.Equal(expected, target.Level);
+        }
+
+        [Fact]
+        public void Apply_Level_OnTarget_NotOverwritten()
+        {
+            const SentryLevel expected = SentryLevel.Fatal;
+            var sut = _fixture.GetSut();
+            var target = _fixture.GetSut();
+            target.Level = expected;
+
+            sut.Level = SentryLevel.Info;
+            sut.Apply(target);
+
+            Assert.Equal(expected, target.Level);
         }
 
         [Fact]
