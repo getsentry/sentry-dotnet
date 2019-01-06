@@ -258,6 +258,16 @@ namespace Sentry
                 to.Environment = from.Environment;
             }
 
+            if (to.Transaction == null)
+            {
+                to.Transaction = from.Transaction;
+            }
+
+            if (to.Level == null)
+            {
+                to.Level = from.Level;
+            }
+
             if (from.Sdk != null)
             {
                 if (from.Sdk.Name != null && from.Sdk.Version != null)
