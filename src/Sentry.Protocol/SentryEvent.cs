@@ -22,7 +22,7 @@ namespace Sentry
         internal IDictionary<string, string> InternalModules { get; set; }
 
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
-        private string SerializableEventId => EventId.ToString("N");
+        private string SerializableEventId => EventId.ToString();
 
         /// <summary>
         /// The <see cref="System.Exception"/> used to create this event.
@@ -41,7 +41,7 @@ namespace Sentry
         /// Hexadecimal string representing a uuid4 value.
         /// The length is exactly 32 characters (no dashes!)
         /// </remarks>
-        public Guid EventId { get; }
+        public SentryId EventId { get; }
 
         /// <summary>
         /// Indicates when the event was created
