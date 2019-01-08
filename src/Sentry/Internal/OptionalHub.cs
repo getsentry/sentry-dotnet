@@ -11,7 +11,6 @@ namespace Sentry.Internal
     internal class OptionalHub : IHub, IDisposable
     {
         private readonly IHub _hub;
-        private readonly IDisposable _disposable;
 
         public bool IsEnabled => _hub.IsEnabled;
 
@@ -24,14 +23,13 @@ namespace Sentry.Internal
                 if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
                 {
                     options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    _hub = HubAdapter.Instance;
+                    _hub = DisabledHub.Instance;
                     return;
                 }
                 options.Dsn = dsn;
             }
 
             _hub = new Hub(options);
-            _disposable = SentrySdk.UseHub(_hub);
         }
 
         public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => _hub.CaptureEvent(evt, scope);
@@ -50,6 +48,6 @@ namespace Sentry.Internal
 
         public SentryId LastEventId => _hub.LastEventId;
 
-        public void Dispose() => _disposable?.Dispose();
+        public void Dispose() => (_hub as IDisposable)?.Dispose();
     }
 }
