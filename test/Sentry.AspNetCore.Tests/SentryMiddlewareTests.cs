@@ -19,6 +19,7 @@ namespace Sentry.AspNetCore.Tests
         {
             public RequestDelegate RequestDelegate { get; set; } = _ => Task.CompletedTask;
             public IHub Hub { get; set; } = Substitute.For<IHub>();
+            public Func<IHub> HubAccessor { get; set; }
             public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
             public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
             public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
@@ -27,6 +28,7 @@ namespace Sentry.AspNetCore.Tests
 
             public Fixture()
             {
+                HubAccessor = () => Hub;
                 Hub.IsEnabled.Returns(true);
                 HttpContext.Features.Returns(FeatureCollection);
             }
@@ -34,7 +36,7 @@ namespace Sentry.AspNetCore.Tests
             public SentryMiddleware GetSut()
                 => new SentryMiddleware(
                     RequestDelegate,
-                    Hub,
+                    HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment,
                     Logger);
@@ -340,11 +342,11 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void Ctor_NullHub_ThrowsArgumentNullException()
+        public void Ctor_NullHubAccessor_ThrowsArgumentNullException()
         {
-            _fixture.Hub = null;
+            _fixture.HubAccessor = null;
             var ex = Assert.Throws<ArgumentNullException>(() => _fixture.GetSut());
-            Assert.Equal("sentry", ex.ParamName);
+            Assert.Equal("hubAccessor", ex.ParamName);
         }
 
         [Fact]

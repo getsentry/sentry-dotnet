@@ -42,6 +42,7 @@ namespace Microsoft.Extensions.Logging
             if (options.InitializeSdk)
             {
                 hub = new OptionalHub(options);
+                SentrySdk.UseHub(hub);
             }
             else
             {

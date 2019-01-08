@@ -18,7 +18,7 @@ namespace Sentry.AspNetCore
     internal class SentryMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IHub _sentry;
+        private readonly Func<IHub> _hubAccessor;
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
@@ -32,7 +32,7 @@ namespace Sentry.AspNetCore
         /// Initializes a new instance of the <see cref="SentryMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next.</param>
-        /// <param name="sentry">The sentry.</param>
+        /// <param name="hubAccessor">The sentry Hub accessor.</param>
         /// <param name="options">The options for this integration</param>
         /// <param name="hostingEnvironment">The hosting environment.</param>
         /// <param name="logger">Sentry logger.</param>
@@ -43,13 +43,13 @@ namespace Sentry.AspNetCore
         /// </exception>
         public SentryMiddleware(
             RequestDelegate next,
-            IHub sentry,
+            Func<IHub> hubAccessor,
             IOptions<SentryAspNetCoreOptions> options,
             IHostingEnvironment hostingEnvironment,
             ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
-            _sentry = sentry ?? throw new ArgumentNullException(nameof(sentry));
+            _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
             _options = options?.Value;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
@@ -62,20 +62,21 @@ namespace Sentry.AspNetCore
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
-            if (!_sentry.IsEnabled)
+            var hub = _hubAccessor();
+            if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);
                 return;
             }
 
-            using (_sentry.PushAndLockScope())
+            using (hub.PushAndLockScope())
             {
                 if (_options?.IncludeRequestPayload == true)
                 {
                     context.Request.EnableRewind();
                 }
 
-                _sentry.ConfigureScope(scope =>
+                hub.ConfigureScope(scope =>
                 {
                     // At the point lots of stuff from the request are not yet filled
                     // Identity for example is added later on in the pipeline
@@ -110,7 +111,7 @@ namespace Sentry.AspNetCore
 
                     _logger?.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 
-                    var id = _sentry.CaptureEvent(evt);
+                    var id = hub.CaptureEvent(evt);
 
                     _logger?.LogInformation("Event '{id}' queued.", id);
                 }

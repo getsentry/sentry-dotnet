@@ -21,6 +21,7 @@ namespace Sentry.AspNetCore.Tests
         {
             public RequestDelegate RequestDelegate { get; set; } = _ => Task.CompletedTask;
             public IHub Hub { get; set; }
+            public Func<IHub> HubAccessor { get; set; }
             public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
@@ -33,6 +34,7 @@ namespace Sentry.AspNetCore.Tests
 
             public Fixture()
             {
+                HubAccessor = () => Hub;
                 var loggingOptions = new SentryLoggingOptions
                 {
                     InitializeSdk = false,
@@ -51,7 +53,7 @@ namespace Sentry.AspNetCore.Tests
             public SentryMiddleware GetSut()
                 => new SentryMiddleware(
                     RequestDelegate,
-                    Hub,
+                    HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment,
                     MiddlewareLogger);

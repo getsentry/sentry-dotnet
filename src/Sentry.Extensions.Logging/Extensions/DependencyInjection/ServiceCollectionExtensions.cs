@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,25 +27,21 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
 
             services.TryAddSingleton<OptionalHub>();
 
-            services.TryAddSingleton(c =>
+            services.TryAddTransient<ISentryClient>(c => c.GetRequiredService<IHub>());
+            services.TryAddTransient(c => c.GetRequiredService<Func<IHub>>()());
+
+            services.TryAddSingleton<Func<IHub>>(c =>
             {
                 var options = c.GetRequiredService<IOptions<TOptions>>().Value;
 
-                IHub hub;
                 if (options.InitializeSdk)
                 {
-                    hub = c.GetRequiredService<OptionalHub>();
-                }
-                else
-                {
-                    // Access to whatever the SentrySdk points to (disabled or initialized via SentrySdk.Init)
-                    hub = HubAdapter.Instance;
+                    var hub = c.GetRequiredService<OptionalHub>();
+                    SentrySdk.UseHub(hub);
                 }
 
-                return hub;
+                return () => HubAdapter.Instance;
             });
-
-            services.TryAddSingleton<ISentryClient>(c => c.GetService<IHub>());
 
             return services;
         }
