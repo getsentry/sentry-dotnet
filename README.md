@@ -193,7 +193,6 @@ Of those, we've tested (we run our unit/integration tests) against:
 
 * .NET Framework 4.7.2 on Windows
 * Mono 5.12 macOS and Linux (Travis-CI)
-* .NET Core 2.0 Windows, macOS and Linux
 * .NET Core 2.1 Windows, macOS and Linux
 
 ### Legacy frameworks
