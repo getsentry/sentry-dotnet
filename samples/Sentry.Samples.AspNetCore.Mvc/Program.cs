@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Sentry;
 
 namespace Samples.AspNetCore.Mvc
 {
@@ -39,6 +40,9 @@ namespace Samples.AspNetCore.Mvc
 
                     options.MaxQueueItems = 100;
                     options.ShutdownTimeout = TimeSpan.FromSeconds(5);
+
+                    // Configures the root scope
+                    options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
                 })
                 .Build();
     }

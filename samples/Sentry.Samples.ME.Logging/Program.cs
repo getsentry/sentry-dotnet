@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sentry;
 using Sentry.Extensions.Logging;
 using Sentry.Protocol;
 
@@ -28,6 +29,8 @@ internal class Program
                 // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
                 o.AddLogEntryFilter((category, level, eventId, exception)
                     => level < LogLevel.Critical && exception?.GetType() == typeof(DivideByZeroException));
+
+                o.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
             }))
         {
             var logger = loggerFactory.CreateLogger<Program>();
