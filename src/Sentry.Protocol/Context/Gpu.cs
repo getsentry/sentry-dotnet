@@ -96,7 +96,6 @@ namespace Sentry.Protocol
         [DataMember(Name = "npot_support", EmitDefaultValue = false)]
         public string NpotSupport { get; set; }
 
-
         /// <summary>
         /// Clones this instance
         /// </summary>

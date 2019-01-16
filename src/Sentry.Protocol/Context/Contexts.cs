@@ -35,6 +35,10 @@ namespace Sentry.Protocol
         /// This describes a runtime in more detail.
         /// </summary>
         public Runtime Runtime => this.GetOrCreate<Runtime>(Runtime.Type);
+        /// <summary>
+        /// This describes a GPU of the device..
+        /// </summary>
+        public Gpu Gpu => this.GetOrCreate<Gpu>(Gpu.Type);
 
         /// <summary>
         /// Creates a deep clone of this context
@@ -79,6 +83,9 @@ namespace Sentry.Protocol
                         break;
                     case Runtime.Type:
                         value = (kv.Value as Runtime)?.Clone();
+                        break;
+                    case Gpu.Type:
+                        value = (kv.Value as Gpu)?.Clone();
                         break;
 
                     default:
