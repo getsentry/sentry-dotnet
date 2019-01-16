@@ -51,6 +51,16 @@ namespace Sentry.Protocol.Tests.Context
         }
 
         [Fact]
+        public void SerializeObject_SingleGpuPropertySet_SerializeSingleProperty()
+        {
+            var sut = new Contexts();
+            sut.Gpu.Name = "My.Gpu";
+            var actual = JsonSerializer.SerializeObject(sut);
+
+            Assert.Equal("{\"gpu\":{\"type\":\"gpu\",\"name\":\"My.Gpu\"}}", actual);
+        }
+
+        [Fact]
         public void SerializeObject_SingleRuntimePropertySet_SerializeSingleProperty()
         {
             var sut = new Contexts();
