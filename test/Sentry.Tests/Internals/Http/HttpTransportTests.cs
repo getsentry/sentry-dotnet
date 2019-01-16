@@ -162,7 +162,7 @@ namespace Sentry.Tests.Internals.Http
             var evt = new SentryEvent();
             var actual = sut.CreateRequest(evt);
 
-            Assert.Contains(evt.EventId.ToString("N"), await actual.Content.ReadAsStringAsync());
+            Assert.Contains(evt.EventId.ToString(), await actual.Content.ReadAsStringAsync());
         }
     }
 }

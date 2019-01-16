@@ -148,7 +148,7 @@ namespace Sentry
             if (Worker.EnqueueEvent(@event))
             {
                 _options.DiagnosticLogger?.LogDebug("Event queued up.");
-                return (SentryId)@event.EventId;
+                return @event.EventId;
             }
 
             _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
