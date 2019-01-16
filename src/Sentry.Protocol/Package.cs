@@ -1,8 +1,11 @@
+using System.Runtime.Serialization;
+
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Represents a package used to compose the SDK
     /// </summary>
+    [DataContract]
     public class Package
     {
         /// <summary>
@@ -12,6 +15,7 @@ namespace Sentry.Protocol
         /// nuget:Sentry
         /// nuget:Sentry.AspNetCore
         /// </example>
+        [DataMember(Name = "name", EmitDefaultValue = false)]
         public string Name { get; }
 
         /// <summary>
@@ -20,6 +24,7 @@ namespace Sentry.Protocol
         /// <example>
         /// 1.0.0-rc1
         /// </example>
+        [DataMember(Name = "version", EmitDefaultValue = false)]
         public string Version { get; }
 
         /// <summary>

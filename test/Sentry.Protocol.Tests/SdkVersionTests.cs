@@ -31,7 +31,7 @@ namespace Sentry.Protocol.Tests
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"packages\":[{\"Name\":\"Sentry\",\"Version\":\"1.0\"},{\"Name\":\"Sentry.AspNetCore\",\"Version\":\"2.0\"}],"
+            Assert.Equal("{\"packages\":[{\"name\":\"Sentry\",\"version\":\"1.0\"},{\"name\":\"Sentry.AspNetCore\",\"version\":\"2.0\"}],"
                         + "\"name\":\"Sentry.Test.SDK\","
                         + "\"version\":\"0.0.1-preview1\"}",
                     actual);
@@ -54,7 +54,7 @@ namespace Sentry.Protocol.Tests
             var sdk = new SdkVersion();
             sdk.AddPackage("b","2");
             sdk.AddPackage("a","1");
-            yield return new object[] { (sdk, "{\"packages\":[{\"Name\":\"a\",\"Version\":\"1\"},{\"Name\":\"b\",\"Version\":\"2\"}]}") };
+            yield return new object[] { (sdk, "{\"packages\":[{\"name\":\"a\",\"version\":\"1\"},{\"name\":\"b\",\"version\":\"2\"}]}") };
         }
     }
 }
