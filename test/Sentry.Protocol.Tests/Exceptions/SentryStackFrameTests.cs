@@ -78,6 +78,5 @@ namespace Sentry.Protocol.Tests.Exceptions
             var sut = new SentryStackFrame();
             Assert.NotNull(sut.FramesOmitted);
         }
-
     }
 }
