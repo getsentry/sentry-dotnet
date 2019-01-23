@@ -31,8 +31,7 @@ on_success:
       $ErrorActionreferencePreference = "stop";
       Resolve-Path -Relative .\src\*\bin\Release\*.nupkg |
         Foreach-Object { zeus upload -t "application/zip+nupkg" $_};
-      if ($?) { zeus job update --status=passed ||
-        echo "%$APPVEYOR_REPO_BRANCH%" | findstr /V "release/">nul }
+      if ($?) { zeus job update --status=passed }
         else { $host.SetShouldExit(1) }
 
 on_failure:
