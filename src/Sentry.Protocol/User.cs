@@ -47,14 +47,19 @@ namespace Sentry.Protocol
         [DataMember(Name = "username", EmitDefaultValue = false)]
         public string Username { get; set; }
 
+        [DataMember(Name = "other", EmitDefaultValue = false)]
+        internal Dictionary<string, string> InternalOther;
+
         /// <summary>
         /// Additional informations about the user
         /// </summary>
         /// <value>
         /// Additional informations about the user
-        /// </value>
-        [DataMember(Name = "extras", EmitDefaultValue = false)]
-        public Dictionary<string, string> Extras { get; set; }
+        /// </value>       
+        public Dictionary<string, string> Other {
+            get => InternalOther ?? (InternalOther = new Dictionary<string, string>());
+            set => InternalOther = value;
+        }
 
         public User Clone()
         {
@@ -92,9 +97,9 @@ namespace Sentry.Protocol
                 user.IpAddress = IpAddress;
             }
 
-            if (user.Extras == null)
+            if (user.InternalOther == null)
             {
-                user.Extras = Extras?.ToDictionary(entry => entry.Key,
+                user.InternalOther = InternalOther?.ToDictionary(entry => entry.Key,
                                                   entry => entry.Value);
             }
         }
