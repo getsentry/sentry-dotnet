@@ -56,9 +56,11 @@ namespace Sentry.Protocol
         /// <value>
         /// Additional informations about the user
         /// </value>       
-        public Dictionary<string, string> Other {
+        public IReadOnlyDictionary<string, string> Other
+        {
             get => InternalOther ?? (InternalOther = new Dictionary<string, string>());
-            set => InternalOther = value;
+            set => InternalOther = value.ToDictionary(entry => entry.Key,
+                                                        entry => entry.Value);
         }
 
         public User Clone()
