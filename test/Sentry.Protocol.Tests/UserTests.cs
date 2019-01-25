@@ -13,15 +13,21 @@ namespace Sentry.Protocol.Tests
                 Id = "user-id",
                 Email = "test@sentry.io",
                 IpAddress = "::1",
-                Username = "user-name"
+                Username = "user-name",
+                Other = new Dictionary<string, string>
+                            {
+                                {"testCustomValueKey", "testCustomValue"}
+                            }
             };
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"email\":\"test@sentry.io\","
+            Assert.Equal("{\"other\":{\"testCustomValueKey\":\"testCustomValue\"},"
+                        + "\"email\":\"test@sentry.io\","
                         + "\"id\":\"user-id\","
                         + "\"ip_address\":\"::1\","
-                        + "\"username\":\"user-name\"}",
+                        + "\"username\":\"user-name\"}"
+                        ,
                     actual);
         }
 
@@ -33,7 +39,11 @@ namespace Sentry.Protocol.Tests
                 Id = "id",
                 Email = "emal@sentry.io",
                 IpAddress = "::1",
-                Username = "user"
+                Username = "user",
+                Other = new Dictionary<string, string>
+                            {
+                                {"testCustomValueKey", "testCustomValue"}
+                            }
             };
 
             var clone = sut.Clone();
@@ -42,6 +52,7 @@ namespace Sentry.Protocol.Tests
             Assert.Equal(sut.Email, clone.Email);
             Assert.Same(sut.IpAddress, clone.IpAddress);
             Assert.Equal(sut.Username, clone.Username);
+            Assert.Equal(sut.Other, clone.Other);
         }
 
         [Theory]
@@ -60,6 +71,12 @@ namespace Sentry.Protocol.Tests
             yield return new object[] { (new User { Email = "some email" }, "{\"email\":\"some email\"}") };
             yield return new object[] { (new User { IpAddress = "some ipAddress" }, "{\"ip_address\":\"some ipAddress\"}") };
             yield return new object[] { (new User { Username = "some username" }, "{\"username\":\"some username\"}") };
+            yield return new object[] { (new User {Other = new Dictionary<string, string>
+                            {
+                                {"testCustomValueKey", "testCustomValue"}
+                            }
+
+            }, "{\"other\":{\"testCustomValueKey\":\"testCustomValue\"}}") };
         }
     }
 }

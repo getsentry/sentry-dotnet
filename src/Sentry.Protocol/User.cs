@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Sentry.Protocol
@@ -45,6 +47,22 @@ namespace Sentry.Protocol
         [DataMember(Name = "username", EmitDefaultValue = false)]
         public string Username { get; set; }
 
+        [DataMember(Name = "other", EmitDefaultValue = false)]
+        internal Dictionary<string, string> InternalOther;
+
+        /// <summary>
+        /// Additional informations about the user
+        /// </summary>
+        /// <value>
+        /// Additional informations about the user
+        /// </value>       
+        public IReadOnlyDictionary<string, string> Other
+        {
+            get => InternalOther ?? (InternalOther = new Dictionary<string, string>());
+            set => InternalOther = value.ToDictionary(entry => entry.Key,
+                                                        entry => entry.Value);
+        }
+
         public User Clone()
         {
             var user = new User();
@@ -79,6 +97,12 @@ namespace Sentry.Protocol
             if (user.IpAddress == null)
             {
                 user.IpAddress = IpAddress;
+            }
+
+            if (user.InternalOther == null)
+            {
+                user.InternalOther = InternalOther?.ToDictionary(entry => entry.Key,
+                                                  entry => entry.Value);
             }
         }
     }
