@@ -41,6 +41,17 @@ namespace Microsoft.AspNetCore.Hosting
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
             Action<SentryAspNetCoreOptions> configureOptions)
+            => builder.UseSentry((context, options) => configureOptions?.Invoke(options));
+
+        /// <summary>
+        /// Uses Sentry integration.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="configureOptions">The configure options.</param>
+        /// <returns></returns>
+        public static IWebHostBuilder UseSentry(
+            this IWebHostBuilder builder,
+            Action<WebHostBuilderContext, SentryAspNetCoreOptions> configureOptions)
         {
             // The earliest we can hook the SDK initialization code with the framework
             // Initialization happens at a later time depending if the default MEL backend is enabled or not.
@@ -54,7 +65,10 @@ namespace Microsoft.AspNetCore.Hosting
 
                 if (configureOptions != null)
                 {
-                    logging.Services.Configure(configureOptions);
+                    logging.Services.Configure<SentryAspNetCoreOptions>(options =>
+                    {
+                        configureOptions(context, options);
+                    });
                 }
 
                 logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
