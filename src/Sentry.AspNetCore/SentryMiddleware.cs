@@ -53,9 +53,10 @@ namespace Sentry.AspNetCore
             _options = options?.Value;
             if (_options != null)
             {
+                var hub = _hubAccessor();
                 foreach (var callback in _options.ConfigureScopeCallbacks)
                 {
-                    _sentry.ConfigureScope(callback);
+                    hub.ConfigureScope(callback);
                 }
             }
             _hostingEnvironment = hostingEnvironment;
