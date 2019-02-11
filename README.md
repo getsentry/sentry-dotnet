@@ -137,8 +137,8 @@ The SDK is configurable, many of the settings are demonstrated through the sampl
 * Shutdown timeout: If there are events to send, how long to wait until shutdown
 * Accept compressed response
 * Compress request body
-* Breadcrumb level: Minimal log level to store as a breadcrumb
-* Event level: Minimal log level to send an event to Sentry
+* Breadcrumb level: Minimum log level to store as a breadcrumb
+* Event level: Minimum log level to send an event to Sentry
 * Disable duplicate event detection
 * Disable capture of global unhandled exceptions
 * Add event processor
@@ -179,9 +179,9 @@ An example using `IHub` for testability is [SentryLogger](https://github.com/get
 
 ## Compatibility
 
-The packages target **.NET Standard 2.0**. That means [it is compatible with](https://docs.microsoft.com/en-us/dotnet/standard/net-standard) the following versions or newer:
+The packages target **.NET Standard 2.0** and **.NET Framework 4.6.1**. That means [it is compatible with](https://docs.microsoft.com/en-us/dotnet/standard/net-standard) the following versions or newer:
 
-* .NET Framework 4.6.1 (4.7.2 advised)
+* .NET Framework 4.6.1
 * .NET Core 2.0
 * Mono 5.4
 * Xamarin.Android 8.0
@@ -195,9 +195,14 @@ Of those, we've tested (we run our unit/integration tests) against:
 * Mono 5.12 macOS and Linux (Travis-CI)
 * .NET Core 2.1 Windows, macOS and Linux
 
+### Sentry Protocol
+
+Looking for the types used by this SDK to send data to Sentry like *SentryEvent* and *SentryException*?
+They are released as a separate [NuGet Package called `Sentry.Protocol`](https://www.nuget.org/packages/Sentry.Protocol/) and [sources are on this GitHub repository](https://github.com/getsentry/sentry-dotnet-protocol).
+
 ### Legacy frameworks
 
-Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 400.000 downloads on NuGet has support to .NET Framework 3.5+.
+Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 640.000 downloads on NuGet has support to .NET Framework 3.5+.
 
 ## Resources
 * [![Gitter chat](https://img.shields.io/gitter/room/getsentry/dotnet.svg)](https://gitter.im/getsentry/dotnet)
