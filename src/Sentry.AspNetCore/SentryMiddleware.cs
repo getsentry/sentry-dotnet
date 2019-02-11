@@ -51,6 +51,14 @@ namespace Sentry.AspNetCore
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
             _options = options?.Value;
+            if (_options != null)
+            {
+                var hub = _hubAccessor();
+                foreach (var callback in _options.ConfigureScopeCallbacks)
+                {
+                    hub.ConfigureScope(callback);
+                }
+            }
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
         }

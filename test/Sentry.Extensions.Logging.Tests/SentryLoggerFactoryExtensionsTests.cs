@@ -1,13 +1,35 @@
+using System;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests
 {
     public class SentryLoggerFactoryExtensionsTests
     {
+        [Fact]
+        public void AddSentry_ConfigureScope_InvokesCallback()
+        {
+            const SentryLevel expected = SentryLevel.Debug;
+            var sut = Substitute.For<ILoggerFactory>();
+            var hub = Substitute.For<IHub>();
+            var scope = new Scope(new SentryOptions());
+            hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(info => info.Arg<Action<Scope>>()(scope));
+            SentrySdk.UseHub(hub);
+
+            sut.AddSentry(o =>
+            {
+                o.InitializeSdk = false; // use the mock above
+                o.ConfigureScope(s => s.Level = expected);
+            });
+
+            Assert.Equal(expected, scope.Level);
+        }
+
         [Fact]
         public void AddSentry_InitializeSdkFalse_HubAdapter()
         {

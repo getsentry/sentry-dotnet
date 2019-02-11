@@ -9,6 +9,7 @@ using NSubstitute;
 using Sentry.Extensions.Logging;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -100,6 +101,21 @@ namespace Sentry.AspNetCore.Tests
             _fixture.Client.Received(1).CaptureEvent(
                 Arg.Any<SentryEvent>(),
                 Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
+        }
+
+        [Fact]
+        public async Task InvokeAsync_OptionsConfigureScope_AffectsAllRequests()
+        {
+            const SentryLevel expected = SentryLevel.Debug;
+            _fixture.Options.ConfigureScope(s => s.Level = expected);
+            _fixture.RequestDelegate = context => throw new Exception();
+            var sut = _fixture.GetSut();
+
+            await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+
+            _fixture.Client.Received(1).CaptureEvent(
+                Arg.Any<SentryEvent>(),
+                Arg.Is<Scope>(e => e.Level == expected));
         }
 
         public void Dispose() => _fixture.Dispose();
