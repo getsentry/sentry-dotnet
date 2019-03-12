@@ -3,7 +3,7 @@ set -e
 
 if [ ! -f ./docfx/docfx.exe ]; then
     echo "Installing docfx"
-    curl -sL https://github.com/dotnet/docfx/releases/download/v2.37/docfx.zip -o docfx.zip
+    curl -sL https://github.com/dotnet/docfx/releases/download/v2.40.12/docfx.zip -o docfx.zip
     unzip -oq docfx.zip -d docfx
 fi
 
