@@ -134,6 +134,14 @@ namespace Sentry.Internal
                 return false;
             }
 
+            foreach (var include in _options.InAppInclude)
+            {
+                if (moduleName.StartsWith(include, StringComparison.Ordinal))
+                {
+                    return false;
+                }
+            }
+
             foreach (var exclude in _options.InAppExclude)
             {
                 if (moduleName.StartsWith(exclude, StringComparison.Ordinal))

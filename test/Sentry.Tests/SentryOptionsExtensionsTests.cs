@@ -44,6 +44,14 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void AddInAppInclude_StoredInOptions()
+        {
+            const string expected = "test";
+            Sut.AddInAppInclude(expected);
+            Assert.Contains(Sut.InAppInclude, actual => actual == expected);
+        }
+
+        [Fact]
         public void AddExceptionProcessor_StoredInOptions()
         {
             var expected = Substitute.For<ISentryEventExceptionProcessor>();

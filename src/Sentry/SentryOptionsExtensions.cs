@@ -49,6 +49,14 @@ namespace Sentry
             => options.InAppExclude = options.InAppExclude.Add(prefix);
 
         /// <summary>
+        /// Add prefix to include as in 'InApp' stack trace.
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="prefix"></param>
+        public static void AddInAppInclude(this SentryOptions options, string prefix)
+            => options.InAppInclude = options.InAppInclude.Add(prefix);
+
+        /// <summary>
         /// Add an exception processor
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor.</param>
