@@ -25,6 +25,16 @@ namespace Sentry.Protocol
         [DataMember(Name = "name", EmitDefaultValue = false)]
         public string Name { get; set; }
         /// <summary>
+        /// The manufacturer of the device
+        /// </summary>
+        [DataMember(Name = "manufacturer", EmitDefaultValue = false)]
+        public string Manufacturer { get; set; }
+        /// <summary>
+        /// The brand of the device
+        /// </summary>
+        [DataMember(Name = "brand", EmitDefaultValue = false)]
+        public string Brand { get; set; }
+        /// <summary>
         /// The family of the device.
         /// </summary>
         /// <remarks>
@@ -59,6 +69,16 @@ namespace Sentry.Protocol
         [DataMember(Name = "battery_level", EmitDefaultValue = false)]
         public short? BatteryLevel { get; set; }
         /// <summary>
+        /// True if the device is charging.
+        /// </summary>
+        [DataMember(Name = "charging", EmitDefaultValue = false)]
+        public bool? IsCharging { get; set; }
+        /// <summary>
+        /// True if the device has a internet connection
+        /// </summary>
+        [DataMember(Name = "online", EmitDefaultValue = false)]
+        public bool? IsOnline { get; set; }
+        /// <summary>
         /// This can be a string portrait or landscape to define the orientation of a device.
         /// </summary>
         [DataMember(Name = "orientation", EmitDefaultValue = false)]
@@ -84,6 +104,11 @@ namespace Sentry.Protocol
         [DataMember(Name = "usable_memory", EmitDefaultValue = false)]
         public long? UsableMemory { get; set; }
         /// <summary>
+        /// True, if the device memory is low.
+        /// </summary>
+        [DataMember(Name = "low_memory")]
+        public bool? LowMemory { get; set; }
+        /// <summary>
         /// Total device storage in bytes.
         /// </summary>
         [DataMember(Name = "storage_size", EmitDefaultValue = false)]
@@ -103,6 +128,24 @@ namespace Sentry.Protocol
         /// </summary>
         [DataMember(Name = "external_free_storage", EmitDefaultValue = false)]
         public long? ExternalFreeStorage { get; set; }
+        /// <summary>
+        /// The resolution of the screen.
+        /// </summary>
+        /// <example>
+        /// 800x600
+        /// </example>
+        [DataMember(Name = "screen_resolution", EmitDefaultValue = false)]
+        public string ScreenResolution { get; set; }
+        /// <summary>
+        /// The logical density of the display.
+        /// </summary>
+        [DataMember(Name = "screen_density", EmitDefaultValue = false)]
+        public float? ScreenDensity { get; set; }
+        /// <summary>
+        /// The screen density as dots-per-inch.
+        /// </summary>
+        [DataMember(Name = "screen_dpi", EmitDefaultValue = false)]
+        public int? ScreenDpi { get; set; }
         /// <summary>
         /// A formatted UTC timestamp when the system was booted.
         /// </summary>
@@ -127,11 +170,18 @@ namespace Sentry.Protocol
             => new Device
             {
                 Name = Name,
+                Manufacturer = Manufacturer,
+                Brand = Brand,
                 Architecture = Architecture,
                 BatteryLevel = BatteryLevel,
+                IsCharging = IsCharging,
+                IsOnline = IsOnline,
                 BootTime = BootTime,
                 ExternalFreeStorage = ExternalFreeStorage,
                 ExternalStorageSize = ExternalStorageSize,
+                ScreenResolution = ScreenResolution,
+                ScreenDensity = ScreenDensity,
+                ScreenDpi = ScreenDpi,
                 Family = Family,
                 FreeMemory = FreeMemory,
                 FreeStorage = FreeStorage,
@@ -142,7 +192,8 @@ namespace Sentry.Protocol
                 Simulator = Simulator,
                 StorageSize = StorageSize,
                 Timezone = Timezone,
-                UsableMemory = UsableMemory
+                UsableMemory = UsableMemory,
+                LowMemory = LowMemory
             };
     }
 }
