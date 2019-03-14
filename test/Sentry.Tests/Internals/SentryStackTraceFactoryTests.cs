@@ -99,6 +99,19 @@ namespace Other.Tests.Internals
             Assert.False(actual.InApp);
         }
 
+        [Fact]
+        public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
+        {
+            _fixture.SentryOptions.AddInAppExclude(GetType().Namespace);
+            _fixture.SentryOptions.AddInAppInclude(GetType().Namespace);
+            var sut = _fixture.GetSut();
+            var frame = new StackFrame();
+
+            var actual = sut.CreateFrame(frame);
+
+            Assert.True(actual.InApp);
+        }
+
         // https://github.com/getsentry/sentry-dotnet/issues/64
         [Fact]
         public void DemangleAnonymousFunction_NullFunction_ContinuesNull()

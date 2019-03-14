@@ -43,6 +43,9 @@ internal static class Program
             // To see the lines from non `AppCode`, select `Full`. That'll include non App code like System.*, Microsoft.* and LibraryX.*
             o.AddInAppExclude("LibraryX.");
 
+            // Before excluding all prefixed 'LibraryX.', any stack trace from a type namespaced 'LibraryX.Core' will be considered InApp.
+            o.AddInAppInclude("LibraryX.Core");
+
             // Send personal identifiable information like the username logged on to the computer and machine name
             o.SendDefaultPii = true;
 

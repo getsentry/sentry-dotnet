@@ -66,6 +66,20 @@ namespace Sentry
         internal ImmutableList<string> InAppExclude { get; set; }
 
         /// <summary>
+        /// A list of namespaces (or prefixes) considered part of application code
+        /// </summary>
+        /// <remarks>
+        /// Sentry by default filters the stacktrace to display only application code.
+        /// A user can optionally click to see all which will include framework and libraries.
+        /// A <see cref="string.StartsWith(string)"/> is executed
+        /// </remarks>
+        /// <example>
+        /// 'System.CustomNamespace', 'Microsoft.Azure.App'
+        /// </example>
+        /// <seealso href="https://docs.sentry.io/error-reporting/configuration/?platform=csharp#in-app-include"/>
+        internal ImmutableList<string> InAppInclude { get; set; }
+
+        /// <summary>
         /// Whether to include default Personal Identifiable information
         /// </summary>
         /// <remarks>
@@ -328,6 +342,8 @@ namespace Sentry
                     "FSharp.",
                     "Serilog",
                     "Giraffe.");
+
+            InAppInclude = ImmutableList<string>.Empty;
         }
     }
 }
