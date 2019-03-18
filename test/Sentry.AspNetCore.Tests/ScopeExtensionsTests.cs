@@ -4,6 +4,7 @@ using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using NSubstitute;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -15,7 +16,13 @@ namespace Sentry.AspNetCore.Tests
         private readonly HttpRequest _httpRequest = Substitute.For<HttpRequest>();
         private readonly IServiceProvider _provider = Substitute.For<IServiceProvider>();
         public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; }
-            = new SentryAspNetCoreOptions { IncludeRequestPayload = true };
+            = new SentryAspNetCoreOptions
+            {
+#pragma warning disable 618
+                IncludeRequestPayload = true,
+#pragma warning restore 618
+                MaxRequestBodySize = RequestSize.Large
+            };
 
         public ScopeExtensionsTests()
         {
@@ -212,7 +219,7 @@ namespace Sentry.AspNetCore.Tests
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            extractor.Received(1).ExtractPayload(Arg.Any<HttpRequest>());
+            extractor.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
         }
 
         [Theory]
@@ -220,14 +227,14 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_PayloadExtractors_DoesNotConsiderInvalidResponse(object expected)
         {
             var first = Substitute.For<IRequestPayloadExtractor>();
-            first.ExtractPayload(Arg.Any<HttpRequest>()).Returns(expected);
+            first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
             _httpContext.RequestServices
                 .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
                 .Returns(new[] { first });
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            first.Received(1).ExtractPayload(Arg.Any<HttpRequest>());
+            first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
 
             Assert.Null(_sut.Request.Data);
         }
@@ -243,7 +250,7 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_PayloadExtractors_StopsOnFirstDictionary(object expected)
         {
             var first = Substitute.For<IRequestPayloadExtractor>();
-            first.ExtractPayload(Arg.Any<HttpRequest>()).Returns(expected);
+            first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
             var second = Substitute.For<IRequestPayloadExtractor>();
             _httpContext.RequestServices
                 .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
@@ -251,7 +258,7 @@ namespace Sentry.AspNetCore.Tests
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            second.DidNotReceive().ExtractPayload(Arg.Any<HttpRequest>());
+            second.DidNotReceive().ExtractPayload(Arg.Any<IHttpRequest>());
 
             Assert.Same(expected, _sut.Request.Data);
         }
@@ -274,8 +281,8 @@ namespace Sentry.AspNetCore.Tests
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            first.Received(1).ExtractPayload(Arg.Any<HttpRequest>());
-            second.Received(1).ExtractPayload(Arg.Any<HttpRequest>());
+            first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+            second.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
         }
 
         [Fact]

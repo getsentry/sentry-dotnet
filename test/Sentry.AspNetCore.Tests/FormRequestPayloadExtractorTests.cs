@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using NSubstitute;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -15,25 +16,25 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void ExtractPayload_SuportedContentType_ReadForm()
+        public void ExtractPayload_SupportedContentType_ReadForm()
         {
             var expected = new Dictionary<string, StringValues> { { "key", new StringValues("val") } };
             var f = new FormCollection(expected);
-            TestFixture.HttpRequest.Form.Returns(f);
+            TestFixture.HttpRequestCore.Form.Returns(f);
 
             var sut = TestFixture.GetSut();
 
             var actual = sut.ExtractPayload(TestFixture.HttpRequest);
             Assert.NotNull(actual);
 
-            var actualDic = actual as IDictionary<string, StringValues>;
+            var actualDic = actual as IDictionary<string, IEnumerable<string>>;
             Assert.NotNull(actualDic);
 
-            Assert.Equal(expected, actualDic);
+            Assert.Equal(expected.Count, actualDic.Count);
         }
 
         [Fact]
-        public void ExtractPayload_UnsuportedContentType_DoesNotReadStream()
+        public void ExtractPayload_UnsupportedContentType_DoesNotReadStream()
         {
             TestFixture.HttpRequest.ContentType.Returns("application/json");
 

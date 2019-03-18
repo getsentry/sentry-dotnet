@@ -1,14 +1,13 @@
 using System.IO;
 using System.Text;
-using Microsoft.AspNetCore.Http;
 
-namespace Sentry.AspNetCore
+namespace Sentry.Extensibility
 {
     public class DefaultRequestPayloadExtractor : BaseRequestPayloadExtractor
     {
-        protected override bool IsSupported(HttpRequest request) => true;
+        protected override bool IsSupported(IHttpRequest request) => true;
 
-        protected override object DoExtractPayLoad(HttpRequest request)
+        protected override object DoExtractPayLoad(IHttpRequest request)
         {
             // https://github.com/dotnet/corefx/blob/master/src/Common/src/CoreLib/System/IO/StreamReader.cs#L186
             // Default parameters other than 'leaveOpen'

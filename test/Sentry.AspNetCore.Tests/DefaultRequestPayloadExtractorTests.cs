@@ -1,4 +1,5 @@
 using System.IO;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests

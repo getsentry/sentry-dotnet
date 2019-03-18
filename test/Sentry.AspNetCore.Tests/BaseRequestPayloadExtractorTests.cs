@@ -1,6 +1,7 @@
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -10,13 +11,15 @@ namespace Sentry.AspNetCore.Tests
     {
         protected class Fixture
         {
-            public HttpRequest HttpRequest { get; set; } = Substitute.For<HttpRequest>();
+            public HttpRequest HttpRequestCore { get; set; } = Substitute.For<HttpRequest>();
+            public IHttpRequest HttpRequest { get; set; } 
             public Stream Stream { get; set; } = Substitute.For<Stream>();
 
             public Fixture()
             {
                 Stream.CanSeek.Returns(true);
                 Stream.CanRead.Returns(true);
+                HttpRequest = new HttpRequestAdapter(HttpRequestCore);
             }
 
             public TExtractor GetSut()
