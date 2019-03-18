@@ -136,7 +136,7 @@ namespace Sentry.Internal
                         }
                         catch (Exception exception)
                         {
-                            options.DiagnosticLogger?.LogError("Error while processing event: {0}. #{1} in queue.", exception, @event.EventId, queue.Count);
+                            options.DiagnosticLogger?.LogError("Error while processing event {1}: {0}. #{2} in queue.", exception, @event.EventId, queue.Count);
                         }
                     }
                     else
