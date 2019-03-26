@@ -80,7 +80,7 @@ namespace Sentry.AspNetCore
 
             using (hub.PushAndLockScope())
             {
-                if (_options?.MaxRequestBodySize != RequestSize.None)
+                if (_options != null && _options.MaxRequestBodySize != RequestSize.None)
                 {
                     context.Request.EnableRewind();
                 }

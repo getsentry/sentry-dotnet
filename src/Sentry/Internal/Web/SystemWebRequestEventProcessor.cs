@@ -7,19 +7,16 @@ namespace Sentry.Internal.Web
 {
     internal class SystemWebRequestEventProcessor : ISentryEventProcessor
     {
-        private readonly RequestBodyExtractionDispatcher _dispatcher;
+        private readonly IRequestPayloadExtractor _payloadExtractor;
 
-        public SystemWebRequestEventProcessor(SentryOptions options)
-        {
-            if (options == null) throw new ArgumentNullException(nameof(options));
-            _dispatcher = new RequestBodyExtractionDispatcher(new IRequestPayloadExtractor[] { }, options, options.MaxRequestBodySize);
-        }
+        public SystemWebRequestEventProcessor(IRequestPayloadExtractor payloadExtractor)
+            => _payloadExtractor = payloadExtractor ?? throw new ArgumentNullException(nameof(payloadExtractor));
 
         public SentryEvent Process(SentryEvent @event)
         {
             if (HttpContext.Current?.Request is HttpRequest request)
             {
-                @event.Request.Data = _dispatcher.Dispatch(new SystemWebHttpRequest(request));
+                @event.Request.Data = _payloadExtractor.ExtractPayload(new SystemWebHttpRequest(request));
             }
             return @event;
         }

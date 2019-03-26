@@ -342,7 +342,16 @@ namespace Sentry
 #if SYSTEM_WEB
             if (MaxRequestBodySize != RequestSize.None)
             {
-                EventProcessors = EventProcessors.Add(new SystemWebRequestEventProcessor(this));
+                EventProcessors = EventProcessors.Add(
+                    new SystemWebRequestEventProcessor(
+                        new RequestBodyExtractionDispatcher(
+                            new IRequestPayloadExtractor[]
+                            {
+                                new FormRequestPayloadExtractor(),
+                                new DefaultRequestPayloadExtractor()
+                            },
+                            this,
+                            MaxRequestBodySize)));
             }
 #endif
             ExceptionProcessors

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Sentry.Extensibility
 {
-    public class RequestBodyExtractionDispatcher
+    public class RequestBodyExtractionDispatcher : IRequestPayloadExtractor
     {
         private readonly IEnumerable<IRequestPayloadExtractor> _extractors;
         private readonly SentryOptions _options;
@@ -15,7 +15,7 @@ namespace Sentry.Extensibility
             _size = size;
         }
 
-        public object Dispatch(IHttpRequest request)
+        public object ExtractPayload(IHttpRequest request)
         {
             if (request == null)
             {
@@ -32,6 +32,7 @@ namespace Sentry.Extensibility
                     extractRequestBody = true;
                     break;
                 case RequestSize.Large:
+                    extractRequestBody = true;
                     break;
                 // Request body extraction is opt-in
                 case RequestSize.None:
