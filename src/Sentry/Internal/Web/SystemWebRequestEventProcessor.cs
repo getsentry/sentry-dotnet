@@ -16,7 +16,11 @@ namespace Sentry.Internal.Web
         {
             if (HttpContext.Current?.Request is HttpRequest request)
             {
-                @event.Request.Data = _payloadExtractor.ExtractPayload(new SystemWebHttpRequest(request));
+                var body = _payloadExtractor.ExtractPayload(new SystemWebHttpRequest(request));
+                if (body != null)
+                {
+                    @event.Request.Data = body;
+                }
             }
             return @event;
         }
