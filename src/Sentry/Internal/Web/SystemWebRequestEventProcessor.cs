@@ -14,7 +14,7 @@ namespace Sentry.Internal.Web
 
         public SentryEvent Process(SentryEvent @event)
         {
-            if (HttpContext.Current?.Request is HttpRequest request)
+            if (@event != null && HttpContext.Current?.Request is HttpRequest request)
             {
                 var body = _payloadExtractor.ExtractPayload(new SystemWebHttpRequest(request));
                 if (body != null)
