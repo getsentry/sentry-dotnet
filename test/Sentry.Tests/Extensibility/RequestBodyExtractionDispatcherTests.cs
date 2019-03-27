@@ -24,7 +24,7 @@ namespace Sentry.Tests.Extensibility
                 Extractors = new[] { Extractor };
             }
 
-            public RequestBodyExtractionDispatcher GetSut() => new RequestBodyExtractionDispatcher(Extractors, SentryOptions, RequestSize);
+            public RequestBodyExtractionDispatcher GetSut() => new RequestBodyExtractionDispatcher(Extractors, SentryOptions, () => RequestSize);
         }
 
         private readonly Fixture _fixture = new Fixture();

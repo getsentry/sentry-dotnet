@@ -104,7 +104,7 @@ namespace Sentry.AspNetCore
             {
                 return;
             }
-            var dispatcher = new RequestBodyExtractionDispatcher(extractors, options, options.MaxRequestBodySize);
+            var dispatcher = new RequestBodyExtractionDispatcher(extractors, options, () => options.MaxRequestBodySize);
 
             var body = dispatcher.ExtractPayload(new HttpRequestAdapter(context.Request));
             if (body != null)
