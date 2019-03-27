@@ -19,8 +19,8 @@ namespace Sentry.Extensibility
         /// </summary>
         Medium,
         /// <summary>
-        /// A large payload is extracted.
+        /// The SDK will always capture the request body. Sentry might truncate or reject the event if too large.
         /// </summary>
-        Large
+        Always
     }
 }

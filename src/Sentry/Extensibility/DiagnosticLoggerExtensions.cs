@@ -53,6 +53,13 @@ namespace Sentry.Extensibility
             TArg arg)
             => logger.LogIfEnabled(SentryLevel.Warning, message, arg);
 
+        public static void LogWarning<TArg, TArg2>(
+            this IDiagnosticLogger logger,
+            string message,
+            TArg arg,
+            TArg2 arg2)
+            => logger.LogIfEnabled(SentryLevel.Warning, message, arg, arg2);
+
         public static void LogError(
             this IDiagnosticLogger logger,
             string message,

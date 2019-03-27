@@ -21,7 +21,7 @@ namespace Sentry.AspNetCore
         {
             get => MaxRequestBodySize != RequestSize.None;
             // As originally there was no truncation, setting to Large.
-            set => MaxRequestBodySize = value ? RequestSize.Large : RequestSize.None;
+            set => MaxRequestBodySize = value ? RequestSize.Always : RequestSize.None;
         }
 
         /// <summary>

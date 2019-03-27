@@ -196,7 +196,7 @@ namespace Else.AspNetCore.Tests
 #pragma warning disable 618
             Assert.True(options.IncludeRequestPayload);
 #pragma warning restore 618
-            Assert.Equal(RequestSize.Large, options.MaxRequestBodySize);
+            Assert.Equal(RequestSize.Always, options.MaxRequestBodySize);
             Assert.True(options.SendDefaultPii);
             Assert.True(options.IncludeActivityData);
             Assert.Equal(LogLevel.Error, options.MinimumBreadcrumbLevel);

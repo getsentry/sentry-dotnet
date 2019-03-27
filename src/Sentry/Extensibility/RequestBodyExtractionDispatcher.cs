@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Sentry.Extensibility
@@ -11,8 +12,8 @@ namespace Sentry.Extensibility
 
         public RequestBodyExtractionDispatcher(IEnumerable<IRequestPayloadExtractor> extractors, SentryOptions options, RequestSize size)
         {
-            Extractors = extractors;
-            _options = options;
+            Extractors = extractors ?? throw new ArgumentNullException(nameof(extractors));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
             _size = size;
         }
 
@@ -23,45 +24,36 @@ namespace Sentry.Extensibility
                 return null;
             }
 
-            var extractRequestBody = false;
             switch (_size)
             {
                 case RequestSize.Small when request.ContentLength < 1_000:
-                    extractRequestBody = true;
-                    break;
                 case RequestSize.Medium when request.ContentLength < 10_000:
-                    extractRequestBody = true;
-                    break;
-                case RequestSize.Large:
-                    extractRequestBody = true;
+                case RequestSize.Always:
+                    _options.DiagnosticLogger.LogDebug("Attempting to read request body of size: {0}, configured max: {1}.",
+                        request.ContentLength, _size);
+
+                    foreach (var extractor in Extractors)
+                    {
+                        var data = extractor.ExtractPayload(request);
+
+                        if (data == null
+                            || data is string dataString
+                            && string.IsNullOrEmpty(dataString))
+                        {
+                            continue;
+                        }
+
+                        return data;
+                    }
                     break;
                 // Request body extraction is opt-in
                 case RequestSize.None:
                     _options.DiagnosticLogger.LogDebug("Skipping request body extraction.");
                     break;
                 default:
-                    _options.DiagnosticLogger.LogWarning("Unknown RequestSize {0}", _size);
+                    _options.DiagnosticLogger.LogWarning("Ignoring request with Size {0} and configuration RequestSize {1}",
+                        request.ContentLength, _size);
                     break;
-            }
-
-            if (extractRequestBody)
-            {
-                _options.DiagnosticLogger.LogDebug("Attempting to read request body of size: {0}, configured max: {1}.",
-                    request.ContentLength, _size);
-
-                foreach (var extractor in Extractors)
-                {
-                    var data = extractor.ExtractPayload(request);
-
-                    if (data == null
-                        || data is string dataString
-                        && string.IsNullOrEmpty(dataString))
-                    {
-                        continue;
-                    }
-
-                    return data;
-                }
             }
 
             return null;

@@ -21,7 +21,7 @@ namespace Sentry.AspNetCore.Tests
 #pragma warning disable 618
                 IncludeRequestPayload = true,
 #pragma warning restore 618
-                MaxRequestBodySize = RequestSize.Large
+                MaxRequestBodySize = RequestSize.Always
             };
 
         public ScopeExtensionsTests()
