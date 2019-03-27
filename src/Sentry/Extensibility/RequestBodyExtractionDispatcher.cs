@@ -4,13 +4,14 @@ namespace Sentry.Extensibility
 {
     public class RequestBodyExtractionDispatcher : IRequestPayloadExtractor
     {
-        private readonly IEnumerable<IRequestPayloadExtractor> _extractors;
         private readonly SentryOptions _options;
         private readonly RequestSize _size;
 
+        internal IEnumerable<IRequestPayloadExtractor> Extractors { get; }
+
         public RequestBodyExtractionDispatcher(IEnumerable<IRequestPayloadExtractor> extractors, SentryOptions options, RequestSize size)
         {
-            _extractors = extractors;
+            Extractors = extractors;
             _options = options;
             _size = size;
         }
@@ -48,7 +49,7 @@ namespace Sentry.Extensibility
                 _options.DiagnosticLogger.LogDebug("Attempting to read request body of size: {0}, configured max: {1}.",
                     request.ContentLength, _size);
 
-                foreach (var extractor in _extractors)
+                foreach (var extractor in Extractors)
                 {
                     var data = extractor.ExtractPayload(request);
 

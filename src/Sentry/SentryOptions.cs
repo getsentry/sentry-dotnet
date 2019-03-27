@@ -340,19 +340,16 @@ namespace Sentry
                     new MainSentryEventProcessor(this, sentryStackTraceFactory));
 
 #if SYSTEM_WEB
-            if (MaxRequestBodySize != RequestSize.None)
-            {
-                EventProcessors = EventProcessors.Add(
-                    new SystemWebRequestEventProcessor(
-                        new RequestBodyExtractionDispatcher(
-                            new IRequestPayloadExtractor[]
-                            {
+            EventProcessors = EventProcessors.Add(
+                new SystemWebRequestEventProcessor(
+                    new RequestBodyExtractionDispatcher(
+                        new IRequestPayloadExtractor[]
+                        {
                                 new FormRequestPayloadExtractor(),
                                 new DefaultRequestPayloadExtractor()
-                            },
-                            this,
-                            MaxRequestBodySize)));
-            }
+                        },
+                        this,
+                        MaxRequestBodySize)));
 #endif
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
