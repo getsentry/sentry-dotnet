@@ -14,6 +14,7 @@ namespace Sentry.Tests.Internals.Web
         private class Fixture
         {
             public IRequestPayloadExtractor RequestPayloadExtractor { get; set; } = Substitute.For<IRequestPayloadExtractor>();
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
             public object MockBody { get; set; } = new object();
             public HttpContext HttpContext { get; set; }
 
@@ -26,7 +27,7 @@ namespace Sentry.Tests.Internals.Web
             public SystemWebRequestEventProcessor GetSut()
             {
                 HttpContext.Current = HttpContext;
-                return new SystemWebRequestEventProcessor(RequestPayloadExtractor);
+                return new SystemWebRequestEventProcessor(RequestPayloadExtractor, SentryOptions);
             }
         }
 
@@ -77,7 +78,7 @@ namespace Sentry.Tests.Internals.Web
 
             var actual = sut.Process(expected);
             Assert.Same(expected, actual);
-            Assert.Null(expected.InternalRequest);
+            Assert.Null(expected.Request.Data);
         }
     }
 }

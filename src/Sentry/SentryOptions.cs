@@ -349,8 +349,10 @@ namespace Sentry
                                 new DefaultRequestPayloadExtractor()
                         },
                         this,
-                        () => MaxRequestBodySize)));
+                        () => MaxRequestBodySize),
+                    this));
 #endif
+
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
                     new MainExceptionProcessor(this, sentryStackTraceFactory));
