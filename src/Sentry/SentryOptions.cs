@@ -314,7 +314,7 @@ namespace Sentry
         /// </summary>
         /// <remarks>
         /// This configuration is visible to any .NET Framework application but is only relevant when running ASP.NET.
-        /// The body from `HttpContext.Current.Request` is read when available.
+        /// When set to a value other than 'None', the body from `HttpContext.Current.Request` is read when available.
         /// </remarks>
         public RequestSize MaxRequestBodySize { get; set; }
 #endif
