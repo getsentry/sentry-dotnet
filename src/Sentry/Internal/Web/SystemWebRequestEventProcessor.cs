@@ -34,7 +34,6 @@ namespace Sentry.Internal.Web
 
             foreach (var key in context.Request.Headers.AllKeys)
             {
-
                 if (!_options.SendDefaultPii
                     // Don't add headers which might contain PII
                     && (key == "Cookie"
@@ -47,6 +46,13 @@ namespace Sentry.Internal.Web
 
             if (_options?.SendDefaultPii == true)
             {
+                if (@event.User.Username == Environment.UserName)
+                {
+                    // if SendDefaultPii is true, Sentry SDK will send the current logged on user
+                    // which doesn't make sense in a server apps
+                    @event.User.Username = null;
+                }
+
                 @event.User.IpAddress = context.Request.UserHostAddress;
                 if (context.User.Identity is IIdentity identity)
                 {
@@ -79,14 +85,7 @@ namespace Sentry.Internal.Web
             {
                 @event.Contexts["server-os"] = os;
             }
-
-            if (_options?.SendDefaultPii == true && @event.User.Username == Environment.UserName)
-            {
-                // if SendDefaultPii is true, Sentry SDK will send the current logged on user
-                // which doesn't make sense in a server apps
-                @event.User.Username = null;
-            }
-
+            
             var body = PayloadExtractor.ExtractPayload(new SystemWebHttpRequest(context.Request));
             if (body != null)
             {
