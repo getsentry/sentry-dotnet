@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -352,7 +353,9 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public async Task InvokeAsync_OptionsReadPayload_CanSeekStream()
         {
+#pragma warning disable 618
             _fixture.Options.IncludeRequestPayload = true;
+#pragma warning restore 618
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();
@@ -376,8 +379,77 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task InvokeAsync_OptionsMaxRequestSize_Small_CanSeekStream()
+        {
+            _fixture.Options.MaxRequestBodySize = RequestSize.Small;
+            var sut = _fixture.GetSut();
+            var request = Substitute.For<HttpRequest>();
+            var stream = Substitute.For<Stream>();
+            request.Body.Returns(stream);
+            var response = Substitute.For<HttpResponse>();
+            _fixture.HttpContext.Response.Returns(response);
+            _fixture.HttpContext.Request.Returns(request);
+            request.HttpContext.Returns(_fixture.HttpContext);
+
+            var invoked = false;
+            request.When(w => w.Body = Arg.Any<Stream>())
+                .Do(d =>
+                {
+                    Assert.True(d.ArgAt<Stream>(0).CanSeek);
+                    invoked = true;
+                });
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            Assert.True(invoked);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_OptionsMaxRequestSize_Large_CanSeekStream()
+        {
+            _fixture.Options.MaxRequestBodySize = RequestSize.Small;
+            var sut = _fixture.GetSut();
+            var request = Substitute.For<HttpRequest>();
+            var stream = Substitute.For<Stream>();
+            request.Body.Returns(stream);
+            var response = Substitute.For<HttpResponse>();
+            _fixture.HttpContext.Response.Returns(response);
+            _fixture.HttpContext.Request.Returns(request);
+            request.HttpContext.Returns(_fixture.HttpContext);
+
+            var invoked = false;
+            request.When(w => w.Body = Arg.Any<Stream>())
+                .Do(d =>
+                {
+                    Assert.True(d.ArgAt<Stream>(0).CanSeek);
+                    invoked = true;
+                });
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            Assert.True(invoked);
+
+        }
+
+        [Fact]
         public async Task InvokeAsync_DefaultOptions_CanNotSeekStream()
         {
+            var sut = _fixture.GetSut();
+            var request = Substitute.For<HttpRequest>();
+            var stream = Substitute.For<Stream>();
+            request.Body.Returns(stream);
+            _fixture.HttpContext.Request.Returns(request);
+            request.HttpContext.Returns(_fixture.HttpContext);
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            request.DidNotReceive().Body = Arg.Any<Stream>();
+        }
+
+        [Fact]
+        public async Task InvokeAsync_OptionsMaxRequestSize_None_CanNotSeekStream()
+        {
+            _fixture.Options.MaxRequestBodySize = RequestSize.None;
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();

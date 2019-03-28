@@ -9,4 +9,8 @@
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
 </Project>

@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Http;
-
-namespace Sentry.AspNetCore
+namespace Sentry.Extensibility
 {
     public abstract class BaseRequestPayloadExtractor : IRequestPayloadExtractor
     {
-        public object ExtractPayload(HttpRequest request)
+        public object ExtractPayload(IHttpRequest request)
         {
             if (!request.Body.CanSeek
                 || !request.Body.CanRead
@@ -26,8 +24,8 @@ namespace Sentry.AspNetCore
             }
         }
 
-        protected abstract bool IsSupported(HttpRequest request);
+        protected abstract bool IsSupported(IHttpRequest request);
 
-        protected abstract object DoExtractPayLoad(HttpRequest request);
+        protected abstract object DoExtractPayLoad(IHttpRequest request);
     }
 }

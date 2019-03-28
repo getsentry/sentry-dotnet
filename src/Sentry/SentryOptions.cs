@@ -8,6 +8,9 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+#if SYSTEM_WEB
+using Sentry.Internal.Web;
+#endif
 using Sentry.Protocol;
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
@@ -305,6 +308,17 @@ namespace Sentry
             }
         }
 
+#if SYSTEM_WEB
+        /// <summary>
+        /// Max request body to be captured when a Web request exists on a ASP.NET Application.
+        /// </summary>
+        /// <remarks>
+        /// This configuration is visible to any .NET Framework application but is only relevant when running ASP.NET.
+        /// When set to a value other than 'None', the body from `HttpContext.Current.Request` is read when available.
+        /// </remarks>
+        public RequestSize MaxRequestBodySize { get; set; }
+#endif
+
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
@@ -324,6 +338,20 @@ namespace Sentry
                     // de-dupe to be the first to run
                     new DuplicateEventDetectionEventProcessor(this),
                     new MainSentryEventProcessor(this, sentryStackTraceFactory));
+
+#if SYSTEM_WEB
+            EventProcessors = EventProcessors.Add(
+                new SystemWebRequestEventProcessor(
+                    new RequestBodyExtractionDispatcher(
+                        new IRequestPayloadExtractor[]
+                        {
+                                new FormRequestPayloadExtractor(),
+                                new DefaultRequestPayloadExtractor()
+                        },
+                        this,
+                        () => MaxRequestBodySize),
+                    this));
+#endif
 
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(

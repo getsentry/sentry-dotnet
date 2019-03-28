@@ -5,6 +5,8 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
+using Sentry.Extensibility;
+using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {
@@ -90,31 +92,24 @@ namespace Sentry.AspNetCore
             }
         }
 
-        private static void SetBody(Scope scope, HttpContext context, SentryAspNetCoreOptions options)
+        private static void SetBody(BaseScope scope, HttpContext context, SentryAspNetCoreOptions options)
         {
-            if (options?.IncludeRequestPayload == true)
+            if (context == null || scope == null || options == null)
             {
-                // GetServices<IRequestPayloadExtractor> throws! Shouldn't it return Enumerable.Empty<T>?
-                var extractors = context.RequestServices.GetService<IEnumerable<IRequestPayloadExtractor>>();
-                if (extractors == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                foreach (var extractor in extractors)
-                {
-                    var data = extractor.ExtractPayload(context.Request);
+            var extractors = context.RequestServices.GetService<IEnumerable<IRequestPayloadExtractor>>();
+            if (extractors == null)
+            {
+                return;
+            }
+            var dispatcher = new RequestBodyExtractionDispatcher(extractors, options, () => options.MaxRequestBodySize);
 
-                    if (data == null
-                        || data is string dataString
-                        && string.IsNullOrEmpty(dataString))
-                    {
-                        continue;
-                    }
-
-                    scope.Request.Data = data;
-                    break;
-                }
+            var body = dispatcher.ExtractPayload(new HttpRequestAdapter(context.Request));
+            if (body != null)
+            {
+                scope.Request.Data = body;
             }
         }
 

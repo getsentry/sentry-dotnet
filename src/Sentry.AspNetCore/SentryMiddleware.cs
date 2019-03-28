@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.Extensibility;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore
@@ -79,7 +80,7 @@ namespace Sentry.AspNetCore
 
             using (hub.PushAndLockScope())
             {
-                if (_options?.IncludeRequestPayload == true)
+                if (_options != null && _options.MaxRequestBodySize != RequestSize.None)
                 {
                     context.Request.EnableRewind();
                 }
