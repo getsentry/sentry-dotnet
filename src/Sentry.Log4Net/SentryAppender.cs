@@ -26,6 +26,7 @@ namespace Sentry.Log4Net
         public string Dsn { get; set; }
         public bool SendIdentity { get; set; }
         public string Environment { get; set; }
+        public Level Breadcrumb { get; set; }
 
         public SentryAppender() : this(SentrySdk.Init, HubAdapter.Instance)
         { }
@@ -65,41 +66,48 @@ namespace Sentry.Log4Net
                 }
             }
 
-            var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
-            var evt = new SentryEvent(exception)
+            if (loggingEvent.Level > Breadcrumb)
             {
-                Sdk =
+                var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
+                var evt = new SentryEvent(exception)
                 {
-                    Name = Constants.SdkName,
-                    Version = NameAndVersion.Version
-                },
-                Logger = loggingEvent.LoggerName,
-                Level = loggingEvent.ToSentryLevel()
-            };
-
-            evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-
-            if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
-            {
-                evt.Message = loggingEvent.RenderedMessage;
-            }
-
-            evt.SetExtras(GetLoggingEventProperties(loggingEvent));
-
-            if (SendIdentity && !string.IsNullOrEmpty(loggingEvent.Identity))
-            {
-                evt.User = new User
-                {
-                    Id = loggingEvent.Identity
+                    Sdk =
+                    {
+                        Name = Constants.SdkName,
+                        Version = NameAndVersion.Version
+                    },
+                    Logger = loggingEvent.LoggerName,
+                    Level = loggingEvent.ToSentryLevel()
                 };
-            }
 
-            if (!string.IsNullOrWhiteSpace(Environment))
+                evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+
+                if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
+                {
+                    evt.Message = loggingEvent.RenderedMessage;
+                }
+
+                evt.SetExtras(GetLoggingEventProperties(loggingEvent));
+
+                if (SendIdentity && !string.IsNullOrEmpty(loggingEvent.Identity))
+                {
+                    evt.User = new User
+                    {
+                        Id = loggingEvent.Identity
+                    };
+                }
+
+                if (!string.IsNullOrWhiteSpace(Environment))
+                {
+                    evt.Environment = Environment;
+                }
+
+                Hub.CaptureEvent(evt);
+            }
+            else
             {
-                evt.Environment = Environment;
+                Hub.AddBreadcrumb(loggingEvent.RenderedMessage, loggingEvent.LoggerName, null, GetLoggingEventPropertiesString(loggingEvent), loggingEvent.ToBreadcrumbLevel());
             }
-
-            Hub.CaptureEvent(evt);
         }
 
         private static IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LoggingEvent loggingEvent)
@@ -162,6 +170,72 @@ namespace Sentry.Log4Net
             {
                 yield return new KeyValuePair<string, object>("log4net-level", loggingEvent.Level.Name);
             }
+        }
+
+        private static Dictionary<string, string> GetLoggingEventPropertiesString(LoggingEvent loggingEvent)
+        {
+
+            Dictionary<string, string> retval = new Dictionary<string, string>();
+            var properties = loggingEvent.GetProperties();
+            if (properties == null)
+            {
+                return retval;
+            }
+
+            foreach (var key in properties.GetKeys())
+            {
+                if (!string.IsNullOrWhiteSpace(key)
+                    && !key.StartsWith("log4net:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var value = properties[key];
+                    if (value != null
+                        && (!(value is string stringValue) || !string.IsNullOrWhiteSpace(stringValue)))
+                    {
+                        retval.Add(key, value as string);
+                    }
+                }
+            }
+
+            var locInfo = loggingEvent.LocationInformation;
+            if (locInfo != null)
+            {
+                if (!string.IsNullOrEmpty(locInfo.ClassName))
+                {
+                    retval.Add(nameof(locInfo.ClassName), locInfo.ClassName);
+                }
+
+                if (!string.IsNullOrEmpty(locInfo.FileName))
+                {
+                    retval.Add(nameof(locInfo.FileName), locInfo.FileName);
+                }
+
+                if (int.TryParse(locInfo.LineNumber, out var lineNumber) && lineNumber != 0)
+                {
+                    retval.Add(nameof(locInfo.LineNumber), lineNumber.ToString());
+                }
+
+                if (!string.IsNullOrEmpty(locInfo.MethodName))
+                {
+                    retval.Add(nameof(locInfo.MethodName), locInfo.MethodName);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(loggingEvent.ThreadName))
+            {
+                retval.Add(nameof(loggingEvent.ThreadName), loggingEvent.ThreadName);
+            }
+
+            if (!string.IsNullOrEmpty(loggingEvent.Domain))
+            {
+                retval.Add(nameof(loggingEvent.Domain), loggingEvent.Domain);
+            }
+
+            if (loggingEvent.Level != null)
+            {
+                retval.Add("log4net-level", loggingEvent.Level.Name);
+            }
+
+            return retval;
         }
 
         protected override void OnClose()
