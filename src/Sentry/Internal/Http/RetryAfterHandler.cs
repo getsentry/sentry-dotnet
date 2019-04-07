@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -80,7 +81,7 @@ namespace Sentry.Internal.Http
                 // Sentry was sending floating point numbers which are not handled by RetryConditionHeaderValue
                 // To be compatible with older versions of sentry on premise: https://github.com/getsentry/sentry/issues/7919
                 else if (response.Headers.TryGetValues("Retry-After", out var values)
-                         && double.TryParse(values?.FirstOrDefault(), out var retryAfterSeconds))
+                         && double.TryParse(values?.FirstOrDefault(), NumberStyles.Any, CultureInfo.InvariantCulture, out var retryAfterSeconds))
                 {
                     var retryAfterSpan = TimeSpan.FromSeconds(retryAfterSeconds);
                     Interlocked.Exchange(ref _retryAfterUtcTicks, _clock.GetUtcNow().AddTicks(retryAfterSpan.Ticks).UtcTicks);
