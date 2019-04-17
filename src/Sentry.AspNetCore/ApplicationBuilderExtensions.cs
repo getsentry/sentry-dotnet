@@ -38,6 +38,12 @@ namespace Microsoft.AspNetCore.Builder
                     o.DiagnosticLogger = new MelDiagnosticLogger(logger, o.DiagnosticsLevel);
                 }
 
+                var stackTraceFactory = app.ApplicationServices.GetService<ISentryStackTraceFactory>();
+                if (stackTraceFactory != null)
+                {
+                    o.UseStackTraceFactory(stackTraceFactory);
+                }
+
                 if (app.ApplicationServices.GetService<IEnumerable<ISentryEventProcessor>>().Any())
                 {
                     o.AddEventProcessorProvider(app.ApplicationServices.GetServices<ISentryEventProcessor>);

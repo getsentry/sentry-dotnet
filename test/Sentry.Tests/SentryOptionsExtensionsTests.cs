@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using NSubstitute;
 using Sentry.Extensibility;
@@ -185,6 +186,32 @@ namespace Sentry.Tests
         public void GetAllEventProcessors_NoAdding_SecondReturned_MainSentryEventProcessor()
         {
             Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().Skip(1).First());
+        }
+
+        [Fact]
+        public void UseStackTraceFactory()
+        {
+            var eventProcessor1 = Sut.GetAllEventProcessors().Skip(1).First();
+            var exceptionProcessor1 = Sut.GetAllExceptionProcessors().First();
+
+            Sut.UseStackTraceFactory(Substitute.For<ISentryStackTraceFactory>());
+
+            var eventProcessor2 = Sut.GetAllEventProcessors().Skip(1).First();
+            var exceptionProcessor2 = Sut.GetAllExceptionProcessors().First();
+
+            Assert.IsType<MainSentryEventProcessor>(eventProcessor1);
+            Assert.IsType<MainExceptionProcessor>(exceptionProcessor1);
+            Assert.IsType<MainSentryEventProcessor>(eventProcessor2);
+            Assert.IsType<MainExceptionProcessor>(exceptionProcessor2);
+
+            Assert.NotEqual(eventProcessor1, eventProcessor2);
+            Assert.NotEqual(exceptionProcessor1, exceptionProcessor2);
+        }
+
+        [Fact]
+        public void UseStackTraceFactory_NotNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => Sut.UseStackTraceFactory(null));
         }
 
         [Fact]
