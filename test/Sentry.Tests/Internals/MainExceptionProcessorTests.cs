@@ -1,13 +1,14 @@
 using System;
 using System.Linq;
 using NSubstitute;
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Tests.Internals
 {
     public class MainExceptionProcessorTests
-    {   
+    {
         private class Fixture
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();

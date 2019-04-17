@@ -4,12 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Sentry.Extensibility;
 using Sentry.Protocol;
 
-namespace Sentry.Internal
+namespace Sentry.Extensibility
 {
-    internal class SentryStackTraceFactory : ISentryStackTraceFactory
+    public class SentryStackTraceFactory : ISentryStackTraceFactory
     {
         private readonly SentryOptions _options;
 
