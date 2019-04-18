@@ -26,11 +26,11 @@ namespace Sentry.Extensibility
 
             _options.DiagnosticLogger?.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
-            return Create(CreateStackTrace(exception, isCurrentStackTrace), isCurrentStackTrace);
+            return Create(CreateStackTrace(exception), isCurrentStackTrace);
         }
 
-        protected virtual StackTrace CreateStackTrace(Exception exception, bool isCurrentStackTrace) =>
-            isCurrentStackTrace ? new StackTrace(true) : new StackTrace(exception, true);
+        protected virtual StackTrace CreateStackTrace(Exception exception) =>
+            exception == null ? new StackTrace(true) : new StackTrace(exception, true);
 
         internal SentryStackTrace Create(StackTrace stackTrace, bool isCurrentStackTrace)
         {
