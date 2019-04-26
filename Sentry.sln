@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27705.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry", "src\Sentry\Sentry.csproj", "{F2486CC8-FAB7-4775-976F-C5A4CF97867F}"
 EndProject
@@ -80,6 +80,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Serilog", "samples\Sentry.Samples.Serilog\Sentry.Samples.Serilog.csproj", "{B7EDB922-4024-4546-B6E4-E5AB9016369F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Serilog", "samples\Sentry.Samples.AspNetCore.Serilog\Sentry.Samples.AspNetCore.Serilog.csproj", "{1930A5D5-356B-43F9-AEDF-CB76254C5933}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.NLog", "src\Sentry.NLog\Sentry.NLog.csproj", "{998AC5A8-8D13-46EA-B889-8A733CA152F7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.NLog.Tests", "test\Sentry.NLog.Tests\Sentry.NLog.Tests.csproj", "{21A360C7-338F-4A9D-A9A3-83152D0C9303}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -171,6 +175,14 @@ Global
 		{1930A5D5-356B-43F9-AEDF-CB76254C5933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1930A5D5-356B-43F9-AEDF-CB76254C5933}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1930A5D5-356B-43F9-AEDF-CB76254C5933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{998AC5A8-8D13-46EA-B889-8A733CA152F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{998AC5A8-8D13-46EA-B889-8A733CA152F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{998AC5A8-8D13-46EA-B889-8A733CA152F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{998AC5A8-8D13-46EA-B889-8A733CA152F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21A360C7-338F-4A9D-A9A3-83152D0C9303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21A360C7-338F-4A9D-A9A3-83152D0C9303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21A360C7-338F-4A9D-A9A3-83152D0C9303}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21A360C7-338F-4A9D-A9A3-83152D0C9303}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -197,6 +209,8 @@ Global
 		{EBABB411-4481-478B-BEAD-009D1EE6D259} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{B7EDB922-4024-4546-B6E4-E5AB9016369F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{1930A5D5-356B-43F9-AEDF-CB76254C5933} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{998AC5A8-8D13-46EA-B889-8A733CA152F7} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{21A360C7-338F-4A9D-A9A3-83152D0C9303} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
