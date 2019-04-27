@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageTags>$(PackageTags);Logging;Serilog</PackageTags>
+    <PackageTags>$(PackageTags);Logging;NLog</PackageTags>
     <PackageId>Sentry.NLog</PackageId>
     <AssemblyName>Sentry.NLog</AssemblyName>
     <RootNamespace>Sentry.NLog</RootNamespace>
@@ -13,7 +13,7 @@
     <PackageReference Include="NLog" Version="4.6.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
 
 </Project>

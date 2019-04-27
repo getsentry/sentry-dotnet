@@ -85,6 +85,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.NLog", "src\Sentry.N
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.NLog.Tests", "test\Sentry.NLog.Tests\Sentry.NLog.Tests.csproj", "{21A360C7-338F-4A9D-A9A3-83152D0C9303}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.NLog", "samples\Sentry.Samples.NLog\Sentry.Samples.NLog.csproj", "{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -183,6 +185,10 @@ Global
 		{21A360C7-338F-4A9D-A9A3-83152D0C9303}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21A360C7-338F-4A9D-A9A3-83152D0C9303}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21A360C7-338F-4A9D-A9A3-83152D0C9303}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -211,6 +217,7 @@ Global
 		{1930A5D5-356B-43F9-AEDF-CB76254C5933} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{998AC5A8-8D13-46EA-B889-8A733CA152F7} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{21A360C7-338F-4A9D-A9A3-83152D0C9303} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

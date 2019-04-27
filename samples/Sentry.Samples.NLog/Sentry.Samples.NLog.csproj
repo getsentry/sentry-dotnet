@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
-  </PropertyGroup>  
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net462</TargetFramework>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj" />
-    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  
 
 </Project>

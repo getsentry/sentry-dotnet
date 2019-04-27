@@ -15,22 +15,7 @@ using Sentry.Reflection;
 
 namespace Sentry.NLog
 {
-    /// <summary>
-    /// Sentry Options for Serilog logging
-    /// </summary>
-    /// <inheritdoc />
-    [NLogConfigurationItem]
-    public class SentryNLogOptions : SentryOptions
-    {
-        public string DefaultEnvironment { get; set; }
-        public LogLevel MinLogLevelForEvent { get; set; }
-        public LogLevel MinimumBreadcrumbLevel { get; set; }
-        public bool IgnoreEventsWithNoException { get; set; }
-        public bool SendLogEventInfoPropertiesAsTags { get; set; }
-
-    }
-
-    [Target("sentry")]
+    [Target("Sentry")]
     public class SentryTarget : TargetWithContext, IDisposable
     {
         private readonly Func<IHub> _hubAccessor;
@@ -44,19 +29,19 @@ namespace Sentry.NLog
         {
 
         }
-
-        private SentryTarget(SentryNLogOptions options) : this(options, SentrySdk.Init(options))
+        
+        private SentryTarget(SentryNLogOptions options) : this(options, SentrySdk.Init)
         {
 
         }
 
-        public SentryTarget(
+        internal SentryTarget(
             SentryNLogOptions options,
-            IDisposable sdkDisposable)
+            Func<SentryNLogOptions, IDisposable> sdkDisposable)
             : this(
                 options,
                 () => HubAdapter.Instance,
-                sdkDisposable,
+                sdkDisposable(options),
                 SystemClock.Clock)
         {
         }
@@ -70,6 +55,8 @@ namespace Sentry.NLog
             Debug.Assert(options != null);
             Debug.Assert(hubAccessor != null);
             Debug.Assert(clock != null);
+
+            Layout = "${message}";
 
             Options = options;
             _hubAccessor = hubAccessor;
@@ -89,13 +76,10 @@ namespace Sentry.NLog
         [ArrayParameter(typeof(TargetPropertyWithContext), "context")]
         public override IList<TargetPropertyWithContext> ContextProperties { get; } = new List<TargetPropertyWithContext>();
 
-        /// <summary>
-        /// Writes logging event to the log target.
-        /// </summary>
-        /// <param name="logEvent">Logging event to be written out.</param>
+        /// <inheritdoc/>
         protected override void Write(LogEventInfo logEvent)
         {
-            if (logEvent == null)
+            if (logEvent?.Message == null)
             {
                 return;
             }
@@ -120,7 +104,7 @@ namespace Sentry.NLog
             {
                 var evt = new SentryEvent(exception)
                 {
-                    Sdk ={
+                    Sdk = {
                         Name = Constants.SdkName,
                         Version = NameAndVersion.Version
                     },
@@ -130,11 +114,29 @@ namespace Sentry.NLog
                         Formatted = formatted,
                         Message = template
                     },
-                    Level = logEvent.Level.ToSentryLevel()
+                    Level = logEvent.Level.ToSentryLevel(),
+                    Release = Options.Release,
+                    Environment = Options.Environment,
                 };
 
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-                evt.SetExtras(GetLoggingEventProperties(logEvent));
+
+                if (Options.SendContextPropertiesAsTags)
+                {
+                    evt.SetTags(GetLoggingContextProperties(logEvent));
+                }
+
+                var eventProps = GetLoggingEventProperties(logEvent).ToList();
+
+                if (Options.SendLogEventInfoPropertiesAsTags)
+                {
+                    evt.SetTags(eventProps.Select(a => new KeyValuePair<string, string>(a.Key, a.Value.ToString())));
+                }
+
+                if (Options.SendLogEventInfoPropertiesAsData)
+                {
+                    evt.SetExtras(eventProps);
+                }
 
                 hub.CaptureEvent(evt);
             }
@@ -143,7 +145,8 @@ namespace Sentry.NLog
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
                 Dictionary<string, string> data = null;
-                if (exception != null && !string.IsNullOrWhiteSpace(formatted))
+                // If this is true, an exception is being logged with no custom message
+                if (exception != null && !string.IsNullOrWhiteSpace(formatted) && logEvent.Message != "{0}")
                 {
                     // Exception.Message won't be used as Breadcrumb message
                     // Avoid losing it by adding as data:
@@ -161,11 +164,25 @@ namespace Sentry.NLog
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
-
-
         }
 
+        private IEnumerable<KeyValuePair<string, string>> GetLoggingContextProperties(LogEventInfo logEvent)
+        {
+            var baseProps = base.GetContextProperties(logEvent) ?? new Dictionary<string, object>();
+            var contextProps = baseProps?.ToDictionary(a => a.Key, a => a.Value.ToString());
 
+            ICollection<KeyValuePair<string, string>> eventContextProperties = new Dictionary<string, string>();
+
+            if (ContextProperties.Count > 0)
+            {
+                foreach (var item in ContextProperties.ToDictionary(a => a.Name, a => a.Layout?.Render(logEvent)).Concat(contextProps))
+                {
+                    eventContextProperties.Add(item);
+                }
+            }
+
+            return eventContextProperties;
+        }
 
         private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
         {
@@ -174,14 +191,6 @@ namespace Sentry.NLog
             if (logEvent.HasProperties)
             {
                 eventProperties = logEvent.Properties.ToDictionary(x => x.Key.ToString(), x => x.Value);
-            }
-
-            if (ContextProperties.Count > 0)
-            {
-                foreach (var item in ContextProperties.ToDictionary(p => p.Name, p => p.Layout?.Render(logEvent)))
-                {
-                    eventProperties.Add(item.Key, item.Value);
-                }
             }
 
             return eventProperties;

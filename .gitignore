@@ -19,3 +19,4 @@ docs/api/*
 docs/_site/*
 docs/docfx/*
 docs/docfx.zip
+/CodeMaid.config
