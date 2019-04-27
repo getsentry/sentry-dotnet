@@ -30,7 +30,7 @@ namespace Sentry.NLog
 
         }
         
-        private SentryTarget(SentryNLogOptions options) : this(options, SentrySdk.Init)
+        public SentryTarget(SentryNLogOptions options) : this(options, SentrySdk.Init)
         {
 
         }
