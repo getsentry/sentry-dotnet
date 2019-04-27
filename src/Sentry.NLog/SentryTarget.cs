@@ -30,18 +30,18 @@ namespace Sentry.NLog
 
         }
         
-        public SentryTarget(SentryNLogOptions options) : this(options, SentrySdk.Init)
+        public SentryTarget(SentryNLogOptions options) : this(options, null)
         {
 
         }
 
         internal SentryTarget(
             SentryNLogOptions options,
-            Func<SentryNLogOptions, IDisposable> sdkDisposable)
+            IDisposable sdkDisposable)
             : this(
                 options,
                 () => HubAdapter.Instance,
-                sdkDisposable(options),
+                sdkDisposable,
                 SystemClock.Clock)
         {
         }
@@ -55,7 +55,7 @@ namespace Sentry.NLog
             Debug.Assert(options != null);
             Debug.Assert(hubAccessor != null);
             Debug.Assert(clock != null);
-
+            
             Layout = "${message}";
 
             Options = options;
@@ -100,7 +100,7 @@ namespace Sentry.NLog
             var formatted = Layout.Render(logEvent);
             var template = logEvent.Message;
 
-            if (logEvent.Level >= Options.MinLogLevelForEvent)
+            if (logEvent.Level >= Options.MinimumEventLevel)
             {
                 var evt = new SentryEvent(exception)
                 {

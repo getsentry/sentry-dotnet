@@ -3,15 +3,38 @@ using System;
 using NLog.Config;
 using NLog.Targets;
 
-namespace Sentry.NLog
+using Sentry;
+using Sentry.NLog;
+
+// ReSharper disable once CheckNamespace
+namespace NLog
 {
     public static class ConfigurationExtensions
     {
         /// <summary>
         /// Adds a target for Sentry to the NLog configuration.
         /// </summary>
+        /// <remarks>
+        /// If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If nothing is
+        /// found, SDK is disabled.
+        /// </remarks>
         /// <param name="configuration">The NLog configuration.</param>
-        /// <param name="dsn">          The sentry DSN.</param>
+        /// <param name="optionsConfig">An optional configuration for the Sentry target.</param>
+        /// <returns>The configuration.</returns>
+        public static LoggingConfiguration AddSentryTarget(this LoggingConfiguration configuration,
+                                                           Action<SentryNLogOptions> optionsConfig = null)
+        {
+            return AddSentryTarget(configuration, null, "sentry", optionsConfig);
+        }
+
+        /// <summary>
+        /// Adds a target for Sentry to the NLog configuration.
+        /// </summary>
+        /// <param name="configuration">The NLog configuration.</param>
+        /// <param name="dsn">          
+        /// The sentry DSN. If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN.
+        /// If nothing is found, SDK is disabled.
+        /// </param>
         /// <param name="optionsConfig">An optional configuration for the Sentry target.</param>
         /// <returns>The configuration.</returns>
         public static LoggingConfiguration AddSentryTarget(this LoggingConfiguration configuration,
@@ -36,12 +59,25 @@ namespace Sentry.NLog
         {
             Target.Register<SentryTarget>("Sentry");
 
-            var options = new SentryNLogOptions
-            {
-                Dsn = new Dsn(dsn)
-            };
+            var options = new SentryNLogOptions();
+
+            if (dsn != null)
+                options.Dsn = new Dsn(dsn);
+            
             optionsConfig?.Invoke(options);
-            configuration?.AddTarget(targetName, new SentryTarget(options));
+            IDisposable sdkDisposable = null;
+            if (options.InitializeSdk)
+            {
+                sdkDisposable = SentrySdk.Init(options);
+            }
+
+            configuration?.AddTarget(targetName, new SentryTarget(options, sdkDisposable)
+            {
+                Name = "sentry",
+                Layout = "${message}",
+            });
+            configuration?.AddRule(options.MinimumBreadcrumbLevel, LogLevel.Fatal, targetName);
+
             return configuration;
         }
     }

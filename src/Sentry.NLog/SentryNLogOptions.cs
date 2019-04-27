@@ -21,9 +21,14 @@ namespace Sentry.NLog
     public class SentryNLogOptions : SentryOptions
     {
         /// <summary>
+        /// Whether to initialize this SDK through this integration
+        /// </summary>
+        public bool InitializeSdk { get; set; } = true;
+
+        /// <summary>
         /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="LogLevel.Error"/>.
         /// </summary>
-        public LogLevel MinLogLevelForEvent { get; set; } = LogLevel.Error;
+        public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
         /// <summary>
         /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="LogLevel.Info"/>.
@@ -31,9 +36,9 @@ namespace Sentry.NLog
         public LogLevel MinimumBreadcrumbLevel { get; set; } = LogLevel.Info;
 
         /// <summary>
-        /// Set to <see langword="true" /> to ignore log messages that don't contain an exception.
+        /// Set this to <see langword="true" /> to ignore log messages that don't contain an exception.
         /// </summary>
-        public bool IgnoreEventsWithNoException { get; set; }
+        public bool IgnoreEventsWithNoException { get; set; } = false;
 
         /// <summary>
         /// Determines whether event properties will be sent to sentry as Tags or not. Defaults to <see langword="false" />.

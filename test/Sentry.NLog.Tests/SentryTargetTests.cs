@@ -132,7 +132,7 @@ namespace Sentry.NLog.Tests
 
             const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Error;
 
-            var logger = _fixture.GetSut(o => o.MinLogLevelForEvent = LogLevel.Fatal);
+            var logger = _fixture.GetSut(o => o.MinimumEventLevel = LogLevel.Fatal);
 
             logger.Error(expectedException);
 
@@ -148,7 +148,7 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Log_NLogSdk_Name()
         {
-            var logger = _fixture.GetSut(o => o.MinLogLevelForEvent = LogLevel.Info);
+            var logger = _fixture.GetSut(o => o.MinimumEventLevel = LogLevel.Info);
 
             var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
             logger.Info(DefaultMessage);
@@ -160,7 +160,7 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Log_SerilogSdk_Packages()
         {
-            var logger = _fixture.GetSut(o => o.MinLogLevelForEvent = LogLevel.Info);
+            var logger = _fixture.GetSut(o => o.MinimumEventLevel = LogLevel.Info);
 
             SentryEvent actual = null;
             _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
