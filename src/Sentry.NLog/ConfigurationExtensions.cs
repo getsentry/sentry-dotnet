@@ -61,24 +61,21 @@ namespace NLog
 
             var options = new SentryNLogOptions();
 
-            if (dsn != null)
-                options.Dsn = new Dsn(dsn);
-            
             optionsConfig?.Invoke(options);
-            IDisposable sdkDisposable = null;
-            if (options.InitializeSdk)
-            {
-                sdkDisposable = SentrySdk.Init(options);
-            }
 
-            configuration?.AddTarget(targetName, new SentryTarget(options, sdkDisposable)
+            if (dsn != null && options.Dsn == null)
+                options.Dsn = new Dsn(dsn);
+
+            configuration?.AddTarget(targetName, new SentryTarget(options)
             {
-                Name = "sentry",
+                Name = targetName,
                 Layout = "${message}",
             });
-            configuration?.AddRule(options.MinimumBreadcrumbLevel, LogLevel.Fatal, targetName);
+
+            configuration?.AddRuleForAllLevels(targetName);
 
             return configuration;
         }
+
     }
 }

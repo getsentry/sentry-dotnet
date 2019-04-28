@@ -1,72 +1,25 @@
 using System;
 
 using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
-
-using Sentry.Infrastructure;
 
 // ReSharper disable ConvertToConstant.Local
 
 namespace Sentry.Samples.NLog
 {
-    internal class Program
+    public static class Program
     {
         private static void Main(string[] args)
         {
-            LogManager.ThrowConfigExceptions = true;
-            LogManager.ThrowExceptions = true;
             try
             {
-                // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
-                var config = new LoggingConfiguration();
-                config.AddTarget(new ColoredConsoleTarget("console"));
-                config.AddRuleForAllLevels("console");
-                config
-                    .AddSentryTarget(o =>
-                    {
-                        //o.DiagnosticLogger = new ConsoleDiagnosticLogger(Protocol.SentryLevel.Debug);
-                        o.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
-                        o.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
+                // You can configure your logger using a configuration file:
+                UsingNLogConfigFile();
 
-                        // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN.
-                        // If nothing is found, SDK is disabled.
-                        o.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
-                        o.AttachStacktrace = true;
-                        o.SendDefaultPii = true; // send Personal Identifiable information like the username of the user logged in to the device
-
-                        // Other configuration
-                    });
-
-                LogManager.Configuration = config;
-
-                var Log = LogManager.GetCurrentClassLogger();
-
-                // Minimum Breadcrumb and Event log levels are set to levels higher than Verbose In this case,
-                // Verbose messages are ignored
-                Log.Trace("Verbose message which is not sent.");
-
-                // Minimum Breadcrumb level is set to Debug so the following message is stored in memory and
-                // sent with following events of the same Scope
-                Log.Debug("Debug message stored as breadcrumb.");
-
-                Log.Info("Informational message is also stored as a breadcrumb");
-
-                Log.Warn("Warning also stored as a breadcrumb here");
-
-                // Sends an event and stores the message as a breadcrumb too, to be sent with any upcoming events.
-                Log.Error("Some event that includes the previous breadcrumbs");
-
-                try
-                {
-                    throw new NotImplementedException();
-                }
-                catch (Exception e)
-                {
-                    e.Data.Add("details", "Do work always throws.");
-                    Log.Fatal(e, "Error: with exception");
-                    throw;
-                }
+                // Or you can configure it with code:
+                UsingCodeConfiguration();
             }
             catch (Exception e)
             {
@@ -77,5 +30,83 @@ namespace Sentry.Samples.NLog
                 LogManager.Shutdown();
             }
         }
+
+        private static void DemoLogger(ILogger logger)
+        {
+            // Minimum Breadcrumb and Event log levels are set to levels higher than Verbose In this case,
+            // Verbose messages are ignored
+            logger.Trace("Verbose message which is not sent.");
+
+            // Minimum Breadcrumb level is set to Debug so the following message is stored in memory and sent
+            // with following events of the same Scope
+            logger.Debug("Debug message stored as breadcrumb.");
+
+            logger.Info("Informational message is also stored as a breadcrumb");
+
+            logger.Warn("Warning also stored as a breadcrumb here");
+
+            // Sends an event and stores the message as a breadcrumb too, to be sent with any upcoming events.
+            logger.Error("Some event that includes the previous breadcrumbs");
+
+            try
+            {
+                DoWork();
+            }
+            catch (Exception e)
+            {
+                e.Data.Add("details", "This method always throws.");
+                logger.Fatal(e, "Error: with exception");
+                LogManager.Flush();
+            }
+        }
+
+        private static void DoWork()
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void UsingNLogConfigFile()
+        {
+            // If using an NLog.config xml file, NLog will load the configuration automatically Or, if using a
+            // different file, you can call the following to load it for you: LogManager.Configuration = LogManager.LoadConfiguration("NLog.config").Configuration;
+
+            var logger = LogManager.GetCurrentClassLogger();
+            DemoLogger(logger);
+        }
+
+        private static void UsingCodeConfiguration()
+        {
+            // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
+            var config = (LogManager.Configuration = new LoggingConfiguration());
+            config
+                .AddSentryTarget(o =>
+                {
+                    o.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
+                    o.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
+
+                    // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If
+                    // nothing is found, SDK is disabled.
+                    o.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
+                    o.AttachStacktrace = true;
+                    o.SendDefaultPii = true; // send Personal Identifiable information like the username of the user logged in to the device
+
+                    o.ShutdownTimeoutSeconds = 5;
+
+                    o.Tags.Add("Logger", "${logger}");  // Send the logger name as a tag
+
+                    // Other configuration
+                });
+
+            config.AddTarget(new DebuggerTarget("debugger"));
+
+            config.AddTarget(new ColoredConsoleTarget("console"));
+            config.AddRuleForAllLevels("console");
+            config.AddRuleForAllLevels("debugger");
+            LogManager.Configuration = config;
+
+            var Log = LogManager.GetCurrentClassLogger();
+            DemoLogger(Log);
+        }
     }
+
 }

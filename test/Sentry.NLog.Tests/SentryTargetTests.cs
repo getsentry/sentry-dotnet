@@ -15,16 +15,23 @@ using Xunit;
 namespace Sentry.NLog.Tests
 {
     using static DsnSamples;
+
     public class SentryTargetTests
     {
         private const string DefaultMessage = "This is a logged message";
-        class Fixture
+
+        private class Fixture
         {
             public SentryNLogOptions Options { get; set; } = new SentryNLogOptions();
+
             public IHub Hub { get; set; } = Substitute.For<IHub>();
+
             public Func<IHub> HubAccessor { get; set; }
-            public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
+
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
+
+            public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
+
             public Scope Scope { get; }
 
             public Fixture()
@@ -34,7 +41,6 @@ namespace Sentry.NLog.Tests
                 Scope = new Scope(new SentryOptions());
                 Hub.ConfigureScope(Arg.Invoke(Scope));
             }
-
 
             public SentryTarget GetTarget(Action<SentryNLogOptions> customConfig = null)
             {
@@ -74,8 +80,10 @@ namespace Sentry.NLog.Tests
 
                 return (factory, factory.Configuration?.FindTargetByName<SentryTarget>("sentry"));
             }
-            public Logger GetSut(Action<SentryNLogOptions> customConfig = null) => GetLoggerFactory(customConfig).GetLogger("sentry");
+
+            public Logger GetLogger(Action<SentryNLogOptions> customConfig = null) => GetLoggerFactory(customConfig).GetLogger("sentry");
         }
+
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
@@ -92,7 +100,7 @@ namespace Sentry.NLog.Tests
                         <target type='Sentry' name='sentry' dsn='{ValidDsnWithoutSecret}'>
                             <options>
                                 <environment>Development</environment>
-                            </options>                
+                            </options>
                         </target>
                     </targets>
                 </nlog>";
@@ -110,6 +118,35 @@ namespace Sentry.NLog.Tests
 
                 throw;
             }
+        }
+
+        [Fact]
+        public void Shutdown_DisposesSdk()
+        {
+            var factory = _fixture.GetLoggerFactory(a => a.InitializeSdk = false);
+            LogManager.Configuration = factory.Configuration;
+
+            var sut = factory.GetCurrentClassLogger();
+
+            sut.Error(DefaultMessage);
+
+            _fixture.SdkDisposeHandle.DidNotReceive().Dispose();
+
+            LogManager.Shutdown();
+
+            _fixture.SdkDisposeHandle.Received(1).Dispose();
+        }
+
+        [Fact]
+        public void Shutdown_NoDisposeHandleProvided_DoesNotThrow()
+        {
+            var factory = _fixture.GetLoggerFactory(a => a.InitializeSdk = false);
+            LogManager.Configuration = factory.Configuration;
+
+            var sut = factory.GetCurrentClassLogger();
+
+            sut.Error(DefaultMessage);
+            LogManager.Shutdown();
         }
 
         [Fact]
@@ -132,7 +169,7 @@ namespace Sentry.NLog.Tests
 
             const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Error;
 
-            var logger = _fixture.GetSut(o => o.MinimumEventLevel = LogLevel.Fatal);
+            var logger = _fixture.GetLogger(o => o.MinimumEventLevel = LogLevel.Fatal);
 
             logger.Error(expectedException);
 
@@ -145,10 +182,11 @@ namespace Sentry.NLog.Tests
             Assert.Null(b.Type);
             Assert.Null(b.Data);
         }
+
         [Fact]
         public void Log_NLogSdk_Name()
         {
-            var logger = _fixture.GetSut(o => o.MinimumEventLevel = LogLevel.Info);
+            var logger = _fixture.GetLogger(o => o.MinimumEventLevel = LogLevel.Info);
 
             var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
             logger.Info(DefaultMessage);
@@ -157,10 +195,11 @@ namespace Sentry.NLog.Tests
                     .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
                                                            && e.Sdk.Version == expected.Version));
         }
+
         [Fact]
-        public void Log_SerilogSdk_Packages()
+        public void Log_NLogSdk_Packages()
         {
-            var logger = _fixture.GetSut(o => o.MinimumEventLevel = LogLevel.Info);
+            var logger = _fixture.GetLogger(o => o.MinimumEventLevel = LogLevel.Info);
 
             SentryEvent actual = null;
             _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
@@ -181,18 +220,18 @@ namespace Sentry.NLog.Tests
         {
             const SentryLevel expectedLevel = SentryLevel.Error;
 
-            var logger = _fixture.GetSut();
+            var logger = _fixture.GetLogger();
 
             logger.Error(DefaultMessage);
             _fixture.Hub.Received(1)
                     .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == expectedLevel));
         }
+
         [Fact]
         public void Log_RenderedMessage_Set()
         {
             const string unFormatted = "This is the message: {data}";
             object[] args = { "data" };
-
 
             var manager = _fixture.GetLoggerFactory();
             var target = manager.Configuration.FindTargetByName<SentryTarget>("sentry");
@@ -200,7 +239,6 @@ namespace Sentry.NLog.Tests
             var evt = new LogEventInfo(LogLevel.Error, "sentry", null, unFormatted, args);
 
             var expected = target.Layout.Render(evt);
-
 
             manager.GetLogger("sentry").Log(evt);
 
@@ -212,7 +250,7 @@ namespace Sentry.NLog.Tests
         public void Log_HubAccessorReturnsNull_DoesNotThrow()
         {
             _fixture.HubAccessor = () => null;
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetLogger();
             sut.Error(DefaultMessage);
         }
 
@@ -220,7 +258,7 @@ namespace Sentry.NLog.Tests
         public void Log_DisabledHub_CaptureNotCalled()
         {
             _fixture.Hub.IsEnabled.Returns(false);
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetLogger();
 
             sut.Error(DefaultMessage);
 
@@ -231,7 +269,7 @@ namespace Sentry.NLog.Tests
         public void Log_EnabledHub_CaptureCalled()
         {
             _fixture.Hub.IsEnabled.Returns(true);
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetLogger();
 
             sut.Error(DefaultMessage);
 
@@ -241,8 +279,9 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Log_NullLogEvent_CaptureNotCalled()
         {
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetLogger();
             string message = null;
+
             // ReSharper disable once AssignNullToNotNullAttribute
             sut.Error(message);
 
@@ -254,35 +293,12 @@ namespace Sentry.NLog.Tests
         {
             const string expectedIp = "127.0.0.1";
 
-            var sut = _fixture.GetSut();
-            
+            var sut = _fixture.GetLogger();
+
             sut.Error("Something happened: {IPAddress}", expectedIp);
 
             _fixture.Hub.Received(1)
                     .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra["IPAddress"].ToString() == expectedIp));
-        }
-        [Fact]
-        public void Close_DisposesSdk()
-        {
-            var (manager, target) = _fixture.GetLoggerFactoryAndTarget();
-
-            var sut = manager.GetLogger("sentry");
-
-            sut.Error(DefaultMessage);
-
-            _fixture.SdkDisposeHandle.DidNotReceive().Dispose();
-
-            target.Dispose();
-
-            _fixture.SdkDisposeHandle.Received(1).Dispose();
-        }
-
-        [Fact]
-        public void Close_NoDisposeHandleProvided_DoesNotThrow()
-        {
-            _fixture.SdkDisposeHandle = null;
-            var target = _fixture.GetTarget();
-            target.Dispose();
         }
 
         [Fact]
@@ -291,7 +307,7 @@ namespace Sentry.NLog.Tests
             const string expectedMessage = "Test {structured} log";
             const int param = 10;
 
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetLogger();
 
             sut.Error(expectedMessage, param);
 
@@ -299,47 +315,26 @@ namespace Sentry.NLog.Tests
                 p.LogEntry.Formatted == $"Test {param} log"
                 && p.LogEntry.Message == expectedMessage));
         }
-
-        [Fact]
-        public void Log_SourceContextMatchesSentry_NoEventSent()
-        {
-            var sut = _fixture.GetSut();
-
-            sut.Error("message {SourceContext}", "Sentry.NLog");
-
-            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-        }
-
-        [Fact]
-        public void Log_SourceContextContainsSentry_NoEventSent()
-        {
-            var sut = _fixture.GetSut();
-
-            sut.Error("message {SourceContext}", "Sentry");
-
-            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-        }
-
+        
         [Fact]
         public void Log_SourceContextMatchesSentry_NoScopeConfigured()
         {
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetLogger();
 
             sut.Error("message {SourceContext}", "Sentry.NLog");
-            
+
             _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
         }
 
         [Fact]
         public void Log_SourceContextContainsSentry_NoScopeConfigured()
         {
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetLogger();
 
             sut.Error("message {SourceContext}", "Sentry");
 
             _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
         }
     }
-
 
 }
