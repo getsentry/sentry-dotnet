@@ -5,7 +5,6 @@ using System.Linq;
 
 using NLog;
 using NLog.Config;
-using NLog.Layouts;
 using NLog.Targets;
 
 using Sentry.Extensibility;
@@ -140,16 +139,17 @@ namespace Sentry.NLog
             var formatted = Layout.Render(logEvent);
             var template = logEvent.Message;
 
-            var eventProps = GetLoggingEventProperties(logEvent).ToList();
+            var eventProps = GetLoggingEventProperties(logEvent);
             var contextProps = GetAllProperties(logEvent);
 
-            var shouldOnlyLogExceptions = logEvent.Exception == null && Options.IgnoreEventsWithNoException;
+            var shouldOnlyLogExceptions = exception == null && Options.IgnoreEventsWithNoException;
 
             if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
             {
                 var evt = new SentryEvent(exception)
                 {
-                    Sdk = {
+                    Sdk =
+                    {
                         Name = Constants.SdkName,
                         Version = NameAndVersion.Version
                     },
@@ -169,25 +169,14 @@ namespace Sentry.NLog
                 // Always apply any manually configured tags
                 evt.SetTags(GetTags(logEvent));
 
-
-                if (Options.SendEventPropertiesAsData)
+                if (IncludeEventProperties)
                 {
                     evt.SetExtras(eventProps);
-                }
-
-                if (Options.SendContextPropertiesAsData)
-                {
-                    evt.SetExtras(contextProps);
                 }
 
                 if (Options.SendEventPropertiesAsTags)
                 {
                     evt.SetTags(eventProps.MapKeys(a => a.ToString()));
-                }
-
-                if (Options.SendContextPropertiesAsTags)
-                {
-                    evt.SetTags(contextProps.MapKeys(a => a.ToString()));
                 }
 
                 hub.CaptureEvent(evt);
@@ -196,18 +185,26 @@ namespace Sentry.NLog
             // Whether or not it was sent as event, add breadcrumb so the next event includes it
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
-                IDictionary<string, string> data = new Dictionary<string,string>();
+                IDictionary<string, string> data = null;
 
                 // If this is true, an exception is being logged with no custom message
-                if (exception != null && !string.IsNullOrWhiteSpace(formatted) && logEvent.Message != "{0}")
+                if (exception != null && !string.IsNullOrWhiteSpace(formatted))
                 {
                     // Exception.Message won't be used as Breadcrumb message Avoid losing it by adding as data:
-                    data.Add("exception_message", exception.Message);
+                    data = new Dictionary<string, string>
+                        {
+                            { "exception_message", exception.Message }
+                        };
                 }
 
                 if (Options.IncludeEventDataOnBreadcrumbs)
                 {
-                    data.AddRange(eventProps.MapKeys(a => a.ToString()));
+                    if (data is null)
+                    {
+                        data = new Dictionary<string, string>();
+                    }
+
+                    data.AddRange(contextProps.MapKeys(a => a.ToString()));
                 }
 
                 var message = string.IsNullOrWhiteSpace(formatted)
@@ -220,7 +217,6 @@ namespace Sentry.NLog
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
-
         }
 
         #endregion Lifecycle methods
@@ -232,16 +228,14 @@ namespace Sentry.NLog
             return Tags.ToKeyValuePairs(a => a.Name, a => a.Layout.Render(logEvent));
         }
 
-        private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
+        private List<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
         {
-            var eventProperties = new Dictionary<string, object>();
-
-            if (logEvent.HasProperties)
+            if (!logEvent.HasProperties)
             {
-                eventProperties = logEvent.Properties.ToDictionary(x => x.Key.ToString(), x => x.Value);
+                return new List<KeyValuePair<string, object>>();
             }
 
-            return eventProperties;
+            return logEvent.Properties.ToKeyValuePairs(x => x.Key.ToString(), x => x.Value).ToList();
         }
 
         #endregion Event & context properties
