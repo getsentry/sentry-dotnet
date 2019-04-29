@@ -77,6 +77,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Any additional tags to apply to each logged message.
         /// </summary>
+        [ArrayParameter(typeof(TargetPropertyWithContext), "tag")]
         public IList<TargetPropertyWithContext> Tags { get; } = new List<TargetPropertyWithContext>();
 
         [Advanced]
