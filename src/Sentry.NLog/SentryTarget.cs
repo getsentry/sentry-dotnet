@@ -193,7 +193,7 @@ namespace Sentry.NLog
                 IDictionary<string, string> data = null;
 
                 // If this is true, an exception is being logged with no custom message
-                if (exception != null && !string.IsNullOrWhiteSpace(formatted))
+                if (exception != null && !string.IsNullOrWhiteSpace(formatted) && logEvent.Message != "{0}")
                 {
                     // Exception.Message won't be used as Breadcrumb message Avoid losing it by adding as data:
                     data = new Dictionary<string, string>
