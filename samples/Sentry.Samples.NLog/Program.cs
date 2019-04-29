@@ -1,7 +1,6 @@
 using System;
 
 using NLog;
-using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 
@@ -16,7 +15,7 @@ namespace Sentry.Samples.NLog
             try
             {
                 // You can configure your logger using a configuration file:
-                //UsingNLogConfigFile();
+                UsingNLogConfigFile();
 
                 // Or you can configure it with code:
                 UsingCodeConfiguration();
@@ -41,10 +40,6 @@ namespace Sentry.Samples.NLog
             // with following events of the same Scope
             logger.Debug("Debug message stored as breadcrumb.");
 
-            logger.Info("Informational message is also stored as a breadcrumb, here's some data: {name} {age} {species}", "Mr. Cuddles", 3, "bunny");
-
-            logger.Warn("Warning also stored as a breadcrumb here mood={mood}", "nervous");
-
             // Sends an event and stores the message as a breadcrumb too, to be sent with any upcoming events.
             logger.Error("Some event that includes the previous breadcrumbs. mood = {mood}", "happy that my error is reported");
 
@@ -54,7 +49,7 @@ namespace Sentry.Samples.NLog
             }
             catch (Exception e)
             {
-                e.Data.Add("details", "This method always throws.");
+                e.Data.Add("details", "DoWork always throws.");
                 logger.Fatal(e, "Error: with exception. {data}", new { title = "compound data object", wowFactor = 11, errorReported = true });
                 LogManager.Flush();
             }
@@ -62,8 +57,13 @@ namespace Sentry.Samples.NLog
 
         private static void DoWork(ILogger logger)
         {
-            logger.Info("About to throw an exception");
-            throw new IndexOutOfRangeException();
+            int a = 0, b = 10;
+
+            logger.Info("Dividing {b} by {a}", b, a);
+
+            logger.Warn("a is 0");
+
+            _ = 10 / a;
         }
 
         private static void UsingNLogConfigFile()
@@ -78,14 +78,10 @@ namespace Sentry.Samples.NLog
         private static void UsingCodeConfiguration()
         {
             // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
-            var config = (LogManager.Configuration = new LoggingConfiguration());
+            var config = LogManager.Configuration = new LoggingConfiguration();
             config
-                .AddSentryTarget(o =>
+                .AddSentry(o =>
                 {
-                    o.EnableDiagnosticConsoleLogging = true;
-                    o.SendEventPropertiesAsData = true;
-                    o.SendContextPropertiesAsData = true;
-
                     o.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
                     o.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
 
@@ -95,9 +91,10 @@ namespace Sentry.Samples.NLog
                     o.AttachStacktrace = true;
                     o.SendDefaultPii = true; // send Personal Identifiable information like the username of the user logged in to the device
 
+                    o.IncludeEventDataOnBreadcrumbs = true;
                     o.ShutdownTimeoutSeconds = 5;
 
-                    o.AddTag("Logger", "${logger}");  // Send the logger name as a tag
+                    o.AddTag("logger", "${logger}");  // Send the logger name as a tag
 
                     // Other configuration
                 });
