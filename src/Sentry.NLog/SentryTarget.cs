@@ -66,9 +66,8 @@ namespace Sentry.NLog
         /// <summary>
         /// Add any desired additional tags that will be sent with every message.
         /// </summary>
-        /// <inheritdoc />
         [ArrayParameter(typeof(TargetPropertyWithContext), "tag")]
-        public override IList<TargetPropertyWithContext> ContextProperties { get; } = new List<TargetPropertyWithContext>();
+        public IList<TargetPropertyWithContext> Tags => Options.Tags;
 
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
@@ -114,11 +113,6 @@ namespace Sentry.NLog
         {
             base.InitializeTarget();
 
-            foreach (var prop in Options.Tags)
-            {
-                ContextProperties?.Add(new TargetPropertyWithContext(prop.Key, prop.Value));
-            }
-
             // If the sdk is not there, set it on up.
             if (Options.InitializeSdk && _sdkDisposable == null)
             {
@@ -146,6 +140,9 @@ namespace Sentry.NLog
             var formatted = Layout.Render(logEvent);
             var template = logEvent.Message;
 
+            var eventProps = GetLoggingEventProperties(logEvent).ToList();
+            var contextProps = GetAllProperties(logEvent);
+
             var shouldOnlyLogExceptions = logEvent.Exception == null && Options.IgnoreEventsWithNoException;
 
             if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
@@ -169,39 +166,48 @@ namespace Sentry.NLog
 
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
-                if (Options.SendContextPropertiesAsTags)
-                {
-                    evt.SetTags(GetLoggingContextProperties(logEvent));
-                }
+                // Always apply any manually configured tags
+                evt.SetTags(GetTags(logEvent));
 
-                var eventProps = GetLoggingEventProperties(logEvent).ToList();
 
-                if (Options.SendLogEventInfoPropertiesAsTags)
-                {
-                    evt.SetTags(eventProps.Select(a => new KeyValuePair<string, string>(a.Key, a.Value.ToString())));
-                }
-
-                if (Options.SendLogEventInfoPropertiesAsData)
+                if (Options.SendEventPropertiesAsData)
                 {
                     evt.SetExtras(eventProps);
+                }
+
+                if (Options.SendContextPropertiesAsData)
+                {
+                    evt.SetExtras(contextProps);
+                }
+
+                if (Options.SendEventPropertiesAsTags)
+                {
+                    evt.SetTags(eventProps.MapKeys(a => a.ToString()));
+                }
+
+                if (Options.SendContextPropertiesAsTags)
+                {
+                    evt.SetTags(contextProps.MapKeys(a => a.ToString()));
                 }
 
                 hub.CaptureEvent(evt);
             }
 
-            // Whether or not it was sent as event, add breadcrumb so next event includes it
+            // Whether or not it was sent as event, add breadcrumb so the next event includes it
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
-                IDictionary<string, string> data = null;
+                IDictionary<string, string> data = new Dictionary<string,string>();
 
                 // If this is true, an exception is being logged with no custom message
                 if (exception != null && !string.IsNullOrWhiteSpace(formatted) && logEvent.Message != "{0}")
                 {
                     // Exception.Message won't be used as Breadcrumb message Avoid losing it by adding as data:
-                    data = new Dictionary<string, string>
-                            {
-                                {"exception_message", exception.Message}
-                            };
+                    data.Add("exception_message", exception.Message);
+                }
+
+                if (Options.IncludeEventDataOnBreadcrumbs)
+                {
+                    data.AddRange(eventProps.MapKeys(a => a.ToString()));
                 }
 
                 var message = string.IsNullOrWhiteSpace(formatted)
@@ -219,15 +225,11 @@ namespace Sentry.NLog
 
         #endregion Lifecycle methods
 
-        private IEnumerable<KeyValuePair<string, string>> GetLoggingContextProperties(LogEventInfo logEvent)
+        #region Event & context properties
+
+        private IEnumerable<KeyValuePair<string, string>> GetTags(LogEventInfo logEvent)
         {
-            var props = ContextProperties.ToKeyValuePairs(a => a.Name, a => a.Layout?.Render(logEvent));
-
-            foreach (var item in props.DistinctBy(a => a.Key))
-            {
-                yield return item;
-            }
-
+            return Tags.ToKeyValuePairs(a => a.Name, a => a.Layout.Render(logEvent));
         }
 
         private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
@@ -241,6 +243,8 @@ namespace Sentry.NLog
 
             return eventProperties;
         }
+
+        #endregion Event & context properties
 
     }
 }

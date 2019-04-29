@@ -1,6 +1,7 @@
 using System;
 
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 
 using Sentry;
@@ -75,6 +76,17 @@ namespace NLog
             configuration?.AddRuleForAllLevels(targetName);
 
             return configuration;
+        }
+
+        /// <summary>
+        /// Add any desired additional tags that will be sent with every message.
+        /// </summary>
+        /// <param name="options">The options being configured.</param>
+        /// <param name="name">The name of the tag.</param>
+        /// <param name="layout">The layout to be rendered for the tag</param>
+        public static void AddTag(this SentryNLogOptions options, string name, Layout layout)
+        {
+            options.Tags.Add(new TargetPropertyWithContext(name, layout));
         }
 
     }

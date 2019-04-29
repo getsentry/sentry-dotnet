@@ -16,7 +16,7 @@ namespace Sentry.Samples.NLog
             try
             {
                 // You can configure your logger using a configuration file:
-                UsingNLogConfigFile();
+                //UsingNLogConfigFile();
 
                 // Or you can configure it with code:
                 UsingCodeConfiguration();
@@ -41,28 +41,29 @@ namespace Sentry.Samples.NLog
             // with following events of the same Scope
             logger.Debug("Debug message stored as breadcrumb.");
 
-            logger.Info("Informational message is also stored as a breadcrumb");
+            logger.Info("Informational message is also stored as a breadcrumb, here's some data: {name} {age} {species}", "Mr. Cuddles", 3, "bunny");
 
-            logger.Warn("Warning also stored as a breadcrumb here");
+            logger.Warn("Warning also stored as a breadcrumb here mood={mood}", "nervous");
 
             // Sends an event and stores the message as a breadcrumb too, to be sent with any upcoming events.
-            logger.Error("Some event that includes the previous breadcrumbs");
+            logger.Error("Some event that includes the previous breadcrumbs. mood = {mood}", "happy that my error is reported");
 
             try
             {
-                DoWork();
+                DoWork(logger);
             }
             catch (Exception e)
             {
                 e.Data.Add("details", "This method always throws.");
-                logger.Fatal(e, "Error: with exception");
+                logger.Fatal(e, "Error: with exception. {data}", new { title = "compound data object", wowFactor = 11, errorReported = true });
                 LogManager.Flush();
             }
         }
 
-        private static void DoWork()
+        private static void DoWork(ILogger logger)
         {
-            throw new NotImplementedException();
+            logger.Info("About to throw an exception");
+            throw new IndexOutOfRangeException();
         }
 
         private static void UsingNLogConfigFile()
@@ -81,6 +82,10 @@ namespace Sentry.Samples.NLog
             config
                 .AddSentryTarget(o =>
                 {
+                    o.EnableDiagnosticConsoleLogging = true;
+                    o.SendEventPropertiesAsData = true;
+                    o.SendContextPropertiesAsData = true;
+
                     o.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
                     o.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
 
@@ -92,7 +97,7 @@ namespace Sentry.Samples.NLog
 
                     o.ShutdownTimeoutSeconds = 5;
 
-                    o.Tags.Add("Logger", "${logger}");  // Send the logger name as a tag
+                    o.AddTag("Logger", "${logger}");  // Send the logger name as a tag
 
                     // Other configuration
                 });

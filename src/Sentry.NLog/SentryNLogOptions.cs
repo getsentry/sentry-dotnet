@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using NLog;
 using NLog.Config;
-using NLog.Layouts;
+using NLog.Targets;
 
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
@@ -43,20 +43,26 @@ namespace Sentry.NLog
         public bool IgnoreEventsWithNoException { get; set; } = false;
 
         /// <summary>
+        /// Determines whether context-level properties will be sent to sentry as additional data. Defaults to <see langword="true" />.
+        /// </summary>
+        /// <seealso cref="SendEventPropertiesAsTags" />
+        public bool SendContextPropertiesAsData { get; set; } = true;
+
+        /// <summary>
+        /// Determines whether event-level properties will be sent to sentry as additional data. Defaults to <see langword="true" />.
+        /// </summary>
+        /// <seealso cref="SendEventPropertiesAsTags" />
+        public bool SendEventPropertiesAsData { get; set; } = true;
+
+        /// <summary>
         /// Determines whether event properties will be sent to sentry as Tags or not. Defaults to <see langword="false" />.
         /// </summary>
         /// <remarks>
         /// If set to <see langword="false" />, event properties will still be sent as additional data unless
-        /// <see cref="SendLogEventInfoPropertiesAsData" /> is set to <see langword="false" />.
+        /// <see cref="SendContextPropertiesAsData" /> is set to <see langword="false" />.
         /// </remarks>
-        /// <seealso cref="SendLogEventInfoPropertiesAsData" />
-        public bool SendLogEventInfoPropertiesAsTags { get; set; } = false;
-
-        /// <summary>
-        /// Determines whether event properties will be sent to sentry as additional data. Defaults to <see langword="true" />.
-        /// </summary>
-        /// <seealso cref="SendLogEventInfoPropertiesAsTags" />
-        public bool SendLogEventInfoPropertiesAsData { get; set; } = true;
+        /// <seealso cref="SendContextPropertiesAsData" />
+        public bool SendEventPropertiesAsTags { get; set; } = false;
 
         /// <summary>
         /// Determines whether event properties will be sent to sentry as Tags or not. Defaults to <see langword="true" />.
@@ -64,9 +70,14 @@ namespace Sentry.NLog
         public bool SendContextPropertiesAsTags { get; set; } = true;
 
         /// <summary>
+        /// Determines whether or not to include event-level data as data in breadcrumbs for future errors. Defaults to <see langword="false"/>.
+        /// </summary>
+        public bool IncludeEventDataOnBreadcrumbs { get; set; } = false;
+
+        /// <summary>
         /// Any additional tags to apply to each logged message.
         /// </summary>
-        public IDictionary<string, Layout> Tags { get; } = new Dictionary<string, Layout>();
+        public IList<TargetPropertyWithContext> Tags { get; } = new List<TargetPropertyWithContext>();
 
         [Advanced]
         public bool InitializeSdk { get; set; } = true;
@@ -97,6 +108,7 @@ namespace Sentry.NLog
         public bool EnableDuplicateEventDetection
         {
             get => _enableDuplicateEventDetection;
+
             set
             {
                 if (value == false)
