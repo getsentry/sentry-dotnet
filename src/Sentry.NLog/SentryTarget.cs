@@ -145,7 +145,6 @@ namespace Sentry.NLog
             var formatted = Layout.Render(logEvent);
             var template = logEvent.Message;
 
-            var eventProps = GetLoggingEventProperties(logEvent);
             var contextProps = GetAllProperties(logEvent);
 
             var shouldOnlyLogExceptions = exception == null && Options.IgnoreEventsWithNoException;
@@ -177,12 +176,12 @@ namespace Sentry.NLog
 
                 if (IncludeEventProperties)
                 {
-                    evt.SetExtras(eventProps);
+                    evt.SetExtras(contextProps);
                 }
 
                 if (Options.SendEventPropertiesAsTags)
                 {
-                    evt.SetTags(eventProps.MapKeys(a => a.ToString()));
+                    evt.SetTags(GetLoggingEventProperties(logEvent).MapKeys(a => a.ToString()));
                 }
 
                 hub.CaptureEvent(evt);
@@ -234,14 +233,14 @@ namespace Sentry.NLog
             return Tags.ToKeyValuePairs(a => a.Name, a => a.Layout.Render(logEvent));
         }
 
-        private List<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
+        private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
         {
             if (!logEvent.HasProperties)
             {
-                return new List<KeyValuePair<string, object>>();
+                return Enumerable.Empty<KeyValuePair<string, object>>();
             }
 
-            return logEvent.Properties.ToKeyValuePairs(x => x.Key.ToString(), x => x.Value).ToList();
+            return logEvent.Properties.ToKeyValuePairs(x => x.Key.ToString(), x => x.Value);
         }
 
         #endregion Event & context properties
