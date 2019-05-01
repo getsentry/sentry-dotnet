@@ -48,19 +48,15 @@ namespace Sentry.Protocol
         public string Username { get; set; }
 
         [DataMember(Name = "other", EmitDefaultValue = false)]
-        internal Dictionary<string, string> InternalOther;
+        internal IDictionary<string, string> InternalOther;
 
         /// <summary>
-        /// Additional informations about the user
+        /// Additional information about the user
         /// </summary>
-        /// <value>
-        /// Additional informations about the user
-        /// </value>       
-        public IReadOnlyDictionary<string, string> Other
+        public IDictionary<string, string> Other
         {
             get => InternalOther ?? (InternalOther = new Dictionary<string, string>());
-            set => InternalOther = value.ToDictionary(entry => entry.Key,
-                                                        entry => entry.Value);
+            set => InternalOther = value;
         }
 
         public User Clone()
