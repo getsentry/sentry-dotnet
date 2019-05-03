@@ -16,7 +16,7 @@ namespace Sentry.Tests.Internals
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public MainSentryEventProcessor GetSut() => new MainSentryEventProcessor(SentryOptions, SentryStackTraceFactory);
+            public MainSentryEventProcessor GetSut() => new MainSentryEventProcessor(SentryOptions, () => SentryStackTraceFactory);
         }
 
         private readonly Fixture _fixture = new Fixture();
