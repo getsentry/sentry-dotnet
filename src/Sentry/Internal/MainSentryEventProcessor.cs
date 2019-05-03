@@ -32,19 +32,19 @@ namespace Sentry.Internal
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
         private readonly SentryOptions _options;
-        private readonly ISentryStackTraceFactory _sentryStackTraceFactory;
+        internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
         internal string Release => _release.Value;
         internal Runtime Runtime => _runtime.Value;
 
         public MainSentryEventProcessor(
             SentryOptions options,
-            ISentryStackTraceFactory sentryStackTraceFactory)
+            Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
         {
             Debug.Assert(options != null);
-            Debug.Assert(sentryStackTraceFactory != null);
+            Debug.Assert(sentryStackTraceFactoryAccessor != null);
             _options = options;
-            _sentryStackTraceFactory = sentryStackTraceFactory;
+            SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
         }
 
         public SentryEvent Process(SentryEvent @event)
@@ -104,7 +104,7 @@ namespace Sentry.Internal
 
             if (@event.Exception == null)
             {
-                var stackTrace = _sentryStackTraceFactory.Create(@event.Exception);
+                var stackTrace = SentryStackTraceFactoryAccessor().Create(@event.Exception);
                 if (stackTrace != null)
                 {
                     @event.Stacktrace = stackTrace;

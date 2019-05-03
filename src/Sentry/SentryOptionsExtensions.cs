@@ -127,13 +127,12 @@ namespace Sentry
         /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
         public static SentryOptions UseStackTraceFactory(this SentryOptions options, ISentryStackTraceFactory sentryStackTraceFactory)
         {
-            if (sentryStackTraceFactory == null) throw new ArgumentNullException(nameof(sentryStackTraceFactory));
+            if (sentryStackTraceFactory == null)
+            {
+                throw new ArgumentNullException(nameof(sentryStackTraceFactory));
+            }
 
-            options.EventProcessors = options.EventProcessors.RemoveAt(1)
-                .Insert(1, new MainSentryEventProcessor(options, sentryStackTraceFactory));
-
-            options.ExceptionProcessors = options.ExceptionProcessors.RemoveAt(0)
-                .Insert(0, new MainExceptionProcessor(options, sentryStackTraceFactory));
+            options.SentryStackTraceFactory = sentryStackTraceFactory;
 
             return options;
         }

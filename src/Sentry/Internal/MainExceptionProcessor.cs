@@ -11,14 +11,14 @@ namespace Sentry.Internal
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
         private readonly SentryOptions _options;
-        private readonly ISentryStackTraceFactory _sentryStackTraceFactory;
+        internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
-        public MainExceptionProcessor(SentryOptions options, ISentryStackTraceFactory sentryStackTraceFactory)
+        public MainExceptionProcessor(SentryOptions options, Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
         {
             Debug.Assert(options != null);
-            Debug.Assert(sentryStackTraceFactory != null);
+            Debug.Assert(sentryStackTraceFactoryAccessor != null);
             _options = options;
-            _sentryStackTraceFactory = sentryStackTraceFactory;
+            SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
         }
 
         public void Process(Exception exception, SentryEvent sentryEvent)
@@ -101,7 +101,7 @@ namespace Sentry.Internal
                 }
             }
 
-            sentryEx.Stacktrace = _sentryStackTraceFactory.Create(exception);
+            sentryEx.Stacktrace = SentryStackTraceFactoryAccessor().Create(exception);
 
             yield return sentryEx;
         }

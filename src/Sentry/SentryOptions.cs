@@ -22,6 +22,9 @@ namespace Sentry
     /// </summary>
     public class SentryOptions : IScopeOptions
     {
+        private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
+        internal ISentryStackTraceFactory SentryStackTraceFactory { get; set; }
+
         internal string ClientVersion { get; } = SdkName;
 
         internal int SentryVersion { get; } = ProtocolVersion;
@@ -332,12 +335,14 @@ namespace Sentry
                 = ImmutableList.Create<Func<IEnumerable<ISentryEventExceptionProcessor>>>(
                     () => ExceptionProcessors);
 
-            var sentryStackTraceFactory = new SentryStackTraceFactory(this);
+            SentryStackTraceFactory = new SentryStackTraceFactory(this);
+            _sentryStackTraceFactoryAccessor = () => SentryStackTraceFactory;
+
             EventProcessors
                 = ImmutableList.Create<ISentryEventProcessor>(
                     // de-dupe to be the first to run
                     new DuplicateEventDetectionEventProcessor(this),
-                    new MainSentryEventProcessor(this, sentryStackTraceFactory));
+                    new MainSentryEventProcessor(this, _sentryStackTraceFactoryAccessor));
 
 #if SYSTEM_WEB
             EventProcessors = EventProcessors.Add(
@@ -355,7 +360,7 @@ namespace Sentry
 
             ExceptionProcessors
                 = ImmutableList.Create<ISentryEventExceptionProcessor>(
-                    new MainExceptionProcessor(this, sentryStackTraceFactory));
+                    new MainExceptionProcessor(this, _sentryStackTraceFactoryAccessor));
 
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(

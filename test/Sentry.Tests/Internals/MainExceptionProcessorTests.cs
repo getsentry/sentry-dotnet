@@ -13,7 +13,7 @@ namespace Sentry.Tests.Internals
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public MainExceptionProcessor GetSut() => new MainExceptionProcessor(SentryOptions, SentryStackTraceFactory);
+            public MainExceptionProcessor GetSut() => new MainExceptionProcessor(SentryOptions, () => SentryStackTraceFactory);
         }
 
         private readonly Fixture _fixture = new Fixture();

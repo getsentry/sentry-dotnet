@@ -189,23 +189,25 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void UseStackTraceFactory()
+        public void UseStackTraceFactory_ReplacesStackTraceFactory()
         {
-            var eventProcessor1 = Sut.GetAllEventProcessors().Skip(1).First();
-            var exceptionProcessor1 = Sut.GetAllExceptionProcessors().First();
+            var expected = Substitute.For<ISentryStackTraceFactory>();
+            Sut.UseStackTraceFactory(expected);
 
-            Sut.UseStackTraceFactory(Substitute.For<ISentryStackTraceFactory>());
+            Assert.Same(expected, Sut.SentryStackTraceFactory);
+        }
 
-            var eventProcessor2 = Sut.GetAllEventProcessors().Skip(1).First();
-            var exceptionProcessor2 = Sut.GetAllExceptionProcessors().First();
+        [Fact]
+        public void UseStackTraceFactory_ReplacesStackTraceFactory_InCurrentProcessors()
+        {
+            var eventProcessor = Sut.GetAllEventProcessors().OfType<MainSentryEventProcessor>().Single();
+            var exceptionProcessor = Sut.GetAllExceptionProcessors().OfType<MainExceptionProcessor>().Single();
 
-            Assert.IsType<MainSentryEventProcessor>(eventProcessor1);
-            Assert.IsType<MainExceptionProcessor>(exceptionProcessor1);
-            Assert.IsType<MainSentryEventProcessor>(eventProcessor2);
-            Assert.IsType<MainExceptionProcessor>(exceptionProcessor2);
+            var expected = Substitute.For<ISentryStackTraceFactory>();
+            Sut.UseStackTraceFactory(expected);
 
-            Assert.NotEqual(eventProcessor1, eventProcessor2);
-            Assert.NotEqual(exceptionProcessor1, exceptionProcessor2);
+            Assert.Same(expected, eventProcessor.SentryStackTraceFactoryAccessor());
+            Assert.Same(expected, exceptionProcessor.SentryStackTraceFactoryAccessor());
         }
 
         [Fact]
