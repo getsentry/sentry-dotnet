@@ -4,12 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Sentry.Extensibility;
 using Sentry.Protocol;
 
-namespace Sentry.Internal
+namespace Sentry.Extensibility
 {
-    internal class SentryStackTraceFactory : ISentryStackTraceFactory
+    public class SentryStackTraceFactory : ISentryStackTraceFactory
     {
         private readonly SentryOptions _options;
 
@@ -27,12 +26,11 @@ namespace Sentry.Internal
 
             _options.DiagnosticLogger?.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
-            var stackTrace = isCurrentStackTrace
-                ? new StackTrace(true)
-                : new StackTrace(exception, true);
-
-            return Create(stackTrace, isCurrentStackTrace);
+            return Create(CreateStackTrace(exception), isCurrentStackTrace);
         }
+
+        protected virtual StackTrace CreateStackTrace(Exception exception) =>
+            exception == null ? new StackTrace(true) : new StackTrace(exception, true);
 
         internal SentryStackTrace Create(StackTrace stackTrace, bool isCurrentStackTrace)
         {
@@ -77,7 +75,7 @@ namespace Sentry.Internal
 
                 firstFrames = false;
 
-                var frame = CreateFrame(stackFrame);
+                var frame = CreateFrame(stackFrame, isCurrentStackTrace);
                 if (frame != null)
                 {
                     yield return frame;
@@ -85,11 +83,15 @@ namespace Sentry.Internal
             }
         }
 
-        internal SentryStackFrame CreateFrame(StackFrame stackFrame)
+        internal SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
+
+        protected virtual SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) => InternalCreateFrame(stackFrame, true);
+
+        protected SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
         {
             const string unknownRequiredField = "(unknown)";
             var frame = new SentryStackFrame();
-            if (stackFrame.GetMethod() is MethodBase method)
+            if (GetMethod(stackFrame) is MethodBase method)
             {
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
@@ -120,12 +122,16 @@ namespace Sentry.Internal
                 frame.ColumnNumber = colNo;
             }
 
-            // TODO: Consider Ben.Demystifier
-            DemangleAsyncFunctionName(frame);
-            DemangleAnonymousFunction(frame);
+            if (demangle)
+            {
+                DemangleAsyncFunctionName(frame);
+                DemangleAnonymousFunction(frame);
+            }
 
             return frame;
         }
+
+        protected virtual MethodBase GetMethod(StackFrame stackFrame) => stackFrame.GetMethod();
 
         private bool IsSystemModuleName(string moduleName)
         {

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Sentry.Protocol;
 
-namespace Sentry.Internal
+namespace Sentry.Extensibility
 {
-    internal interface ISentryStackTraceFactory
+    public interface ISentryStackTraceFactory
     {
         SentryStackTrace Create(Exception exception = null);
     }
