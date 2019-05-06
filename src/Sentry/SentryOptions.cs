@@ -369,7 +369,8 @@ namespace Sentry
                     "Newtonsoft.Json",
                     "FSharp.",
                     "Serilog",
-                    "Giraffe.");
+                    "Giraffe.",
+                    "NLog");
 
             InAppInclude = ImmutableList<string>.Empty;
         }

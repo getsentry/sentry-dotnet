@@ -17,11 +17,6 @@ namespace Sentry.NLog
     [NLogConfigurationItem]
     public class SentryNLogOptions : SentryOptions
     {
-        /// <summary>
-        /// If set to <see langword="true" />, marks namespaces beginning with NLog as external code. Defaults
-        /// to <see langword="true" />.
-        /// </summary>
-        public bool MarkNLogNamespaceAsExternal { get; set; } = true;
 
         /// <summary>
         /// How many seconds to wait after triggering Logmanager.Shutdown() before just shutting down the

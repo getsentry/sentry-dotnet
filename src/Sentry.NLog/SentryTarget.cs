@@ -108,11 +108,6 @@ namespace Sentry.NLog
 
             IncludeEventProperties = Options.SendEventPropertiesAsData;
 
-            if (Options.MarkNLogNamespaceAsExternal)
-            {
-                Options.AddInAppExclude("NLog");
-            }
-
             // If the sdk is not there, set it on up.
             if (Options.InitializeSdk && _sdkDisposable == null)
             {
