@@ -112,7 +112,6 @@ namespace Sentry.NLog
             }
         }
 
-        #region Private members
 
         private bool _enableDuplicateEventDetection = true;
         private bool _enableDiagnosticsLogging;
@@ -120,6 +119,5 @@ namespace Sentry.NLog
         private static readonly Lazy<IDiagnosticLogger> _diagnosticsLogger =
             new Lazy<IDiagnosticLogger>(() => new ConsoleDiagnosticLogger(Protocol.SentryLevel.Debug));
 
-        #endregion Private members
     }
 }

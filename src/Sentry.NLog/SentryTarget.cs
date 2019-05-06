@@ -60,8 +60,6 @@ namespace Sentry.NLog
 
         public SentryNLogOptions Options { get; }
 
-        #region Xml property setters
-
         /// <summary>
         /// Add any desired additional tags that will be sent with every message.
         /// </summary>
@@ -95,10 +93,6 @@ namespace Sentry.NLog
             get => Options.MinimumBreadcrumbLevel?.ToString() ?? LogLevel.Off.ToString();
             set => Options.MinimumBreadcrumbLevel = LogLevel.FromString(value);
         }
-
-        #endregion Xml property setters
-
-        #region Lifecycle methods
 
         /// <inheritdoc />
         protected override void CloseTarget()
@@ -224,10 +218,6 @@ namespace Sentry.NLog
             }
         }
 
-        #endregion Lifecycle methods
-
-        #region Event & context properties
-
         private IEnumerable<KeyValuePair<string, string>> GetTags(LogEventInfo logEvent)
         {
             return Tags.ToKeyValuePairs(a => a.Name, a => a.Layout.Render(logEvent));
@@ -242,8 +232,6 @@ namespace Sentry.NLog
 
             return logEvent.Properties.ToKeyValuePairs(x => x.Key.ToString(), x => x.Value);
         }
-
-        #endregion Event & context properties
 
     }
 }
