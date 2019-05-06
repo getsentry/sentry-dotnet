@@ -17,7 +17,6 @@ namespace Sentry.NLog
     [NLogConfigurationItem]
     public class SentryNLogOptions : SentryOptions
     {
-
         /// <summary>
         /// How many seconds to wait after triggering Logmanager.Shutdown() before just shutting down the
         /// Sentry sdk.
@@ -68,51 +67,5 @@ namespace Sentry.NLog
 
         [Advanced]
         public bool InitializeSdk { get; set; } = true;
-
-        [Advanced]
-        public bool EnableDiagnosticConsoleLogging
-        {
-            get => _enableDiagnosticsLogging;
-
-            set
-            {
-                if (value)
-                {
-                    Debug = true;
-                    DiagnosticLogger = _diagnosticsLogger.Value;
-                    _enableDiagnosticsLogging = true;
-                }
-                else if (_enableDiagnosticsLogging)
-                {
-                    Debug = false;
-                    DiagnosticLogger = null;
-                    EnableDiagnosticConsoleLogging = false;
-                }
-            }
-        }
-
-        [Advanced]
-        public bool EnableDuplicateEventDetection
-        {
-            get => _enableDuplicateEventDetection;
-
-            set
-            {
-                if (value == false)
-                {
-                    this.DisableDuplicateEventDetection();
-                }
-
-                _enableDuplicateEventDetection = value;
-            }
-        }
-
-
-        private bool _enableDuplicateEventDetection = true;
-        private bool _enableDiagnosticsLogging;
-
-        private static readonly Lazy<IDiagnosticLogger> _diagnosticsLogger =
-            new Lazy<IDiagnosticLogger>(() => new ConsoleDiagnosticLogger(Protocol.SentryLevel.Debug));
-
     }
 }
