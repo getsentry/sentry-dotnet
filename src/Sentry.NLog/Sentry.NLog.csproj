@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;NLog</PackageTags>
     <PackageId>Sentry.NLog</PackageId>
     <AssemblyName>Sentry.NLog</AssemblyName>
@@ -10,7 +10,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.6.1" />
+    <PackageReference Include="NLog" Version="4.6.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
