@@ -188,7 +188,7 @@ namespace Sentry.NLog
                 // If this is true, an exception is being logged with no custom message
                 if (exception != null && !message.StartsWith(exception.Message))
                 {
-                    // Exception.Message won't be used as Breadcrumb message Avoid losing it by adding as data:
+                    // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
                     data = new Dictionary<string, string>
                         {
                             { "exception_type", exception.GetType().ToString() },

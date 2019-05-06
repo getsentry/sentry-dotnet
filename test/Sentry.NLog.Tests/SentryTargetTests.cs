@@ -154,7 +154,7 @@ namespace Sentry.NLog.Tests
         }
 
         [Fact]
-        public void Log_WithException_BreadcrumbFromException()
+        public void Log_WithOnlyException_GeneratesBreadcrumbFromException()
         {
             var expectedException = new Exception("expected message");
 
@@ -171,7 +171,9 @@ namespace Sentry.NLog.Tests
             Assert.Null(b.Category);
             Assert.Equal(b.Level, expectedLevel);
             Assert.Null(b.Type);
-            Assert.Null(b.Data);
+            Assert.NotNull(b.Data);
+            Assert.Equal(expectedException.GetType().ToString(), b.Data["exception_type"]);
+            Assert.Equal(expectedException.Message, b.Data["exception_message"]);
         }
 
         [Fact]
