@@ -77,7 +77,7 @@ namespace Sentry.NLog
         }
 
         /// <summary>
-        /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="LogLevel.Error" />.
+        /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
         /// </summary>
         public string MinimumEventLevel
         {
@@ -86,7 +86,7 @@ namespace Sentry.NLog
         }
 
         /// <summary>
-        /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="LogLevel.Info" />.
+        /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="M:LogLevel.Info" />.
         /// </summary>
         public string MinimumBreadcrumbLevel
         {

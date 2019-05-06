@@ -5,9 +5,6 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-
 namespace Sentry.NLog
 {
     /// <summary>
@@ -28,12 +25,12 @@ namespace Sentry.NLog
         }
 
         /// <summary>
-        /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="LogLevel.Error" />.
+        /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
         /// </summary>
         public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
         /// <summary>
-        /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="LogLevel.Info" />.
+        /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="M:LogLevel.Info" />.
         /// </summary>
         public LogLevel MinimumBreadcrumbLevel { get; set; } = LogLevel.Info;
 
