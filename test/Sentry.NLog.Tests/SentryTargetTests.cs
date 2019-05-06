@@ -89,9 +89,7 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Can_configure_from_xml_file()
         {
-            try
-            {
-                string configXml = $@"
+            string configXml = $@"
                 <nlog throwConfigExceptions='true'>
                     <extensions>
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
@@ -105,19 +103,12 @@ namespace Sentry.NLog.Tests
                     </targets>
                 </nlog>";
 
-                var c = XmlLoggingConfiguration.CreateFromXmlString(configXml);
+            var c = XmlLoggingConfiguration.CreateFromXmlString(configXml);
 
-                var t = c.FindTargetByName("sentry") as SentryTarget;
-                Assert.NotNull(t);
-                Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn.ToString());
-                Assert.Equal("Development", t.Options.Environment);
-            }
-            catch (Exception ex)
-            {
-                _ = ex;
-
-                throw;
-            }
+            var t = c.FindTargetByName("sentry") as SentryTarget;
+            Assert.NotNull(t);
+            Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn.ToString());
+            Assert.Equal("Development", t.Options.Environment);
         }
 
         [Fact]
@@ -315,7 +306,7 @@ namespace Sentry.NLog.Tests
                 p.LogEntry.Formatted == $"Test {param} log"
                 && p.LogEntry.Message == expectedMessage));
         }
-        
+
         [Fact]
         public void Log_SourceContextMatchesSentry_NoScopeConfigured()
         {
