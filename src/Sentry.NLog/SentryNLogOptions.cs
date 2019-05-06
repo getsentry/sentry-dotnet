@@ -11,7 +11,7 @@ using Sentry.Infrastructure;
 namespace Sentry.NLog
 {
     /// <summary>
-    /// Sentry Options for NLog logging. All propertiesan be configured via code or in NLog.config xml file.
+    /// Sentry Options for NLog logging. All properties can be configured via code or in NLog.config xml file.
     /// </summary>
     /// <inheritdoc />
     [NLogConfigurationItem]
