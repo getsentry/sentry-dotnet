@@ -191,7 +191,7 @@ namespace Sentry.NLog
                     // Exception.Message won't be used as Breadcrumb message Avoid losing it by adding as data:
                     data = new Dictionary<string, string>
                         {
-                            { "exception_data", exception.GetType().ToString() },
+                            { "exception_type", exception.GetType().ToString() },
                             { "exception_message", exception.Message },
                         };
                 }
