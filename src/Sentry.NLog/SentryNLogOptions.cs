@@ -62,7 +62,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Any additional tags to apply to each logged message.
         /// </summary>
-        [ArrayParameter(typeof(TargetPropertyWithContext), "tag")]
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
         public IList<TargetPropertyWithContext> Tags { get; } = new List<TargetPropertyWithContext>();
 
         [Advanced]
