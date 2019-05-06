@@ -181,7 +181,7 @@ namespace Sentry.NLog
 
                 if (Options.SendEventPropertiesAsTags)
                 {
-                    evt.SetTags(GetLoggingEventProperties(logEvent).MapKeys(a => a.ToString()));
+                    evt.SetTags(GetLoggingEventProperties(logEvent).MapValues(a => a.ToString()));
                 }
 
                 hub.CaptureEvent(evt);
@@ -209,7 +209,7 @@ namespace Sentry.NLog
                         data = new Dictionary<string, string>();
                     }
 
-                    data.AddRange(contextProps.MapKeys(a => a.ToString()));
+                    data.AddRange(contextProps.MapValues(a => a.ToString()));
                 }
 
                 var message = string.IsNullOrWhiteSpace(formatted)
