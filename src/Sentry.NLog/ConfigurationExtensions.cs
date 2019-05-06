@@ -64,47 +64,7 @@ namespace NLog
 
             optionsConfig?.Invoke(options);
 
-            return configuration.AddSentryTargetInternal(dsn, targetName, options);
-        }
 
-        /// <summary>
-        /// Adds a target for Sentry to the NLog configuration, with more configuration available.
-        /// </summary>
-        /// <param name="configuration">The NLog configuration.</param>
-        /// <param name="targetConfig"> An optional configuration for the Sentry target.</param>
-        /// <returns>The configuration.</returns>
-        public static LoggingConfiguration AddSentryTarget(this LoggingConfiguration configuration, Action<SentryTarget> targetConfig)
-        {
-            return configuration.AddSentryTargetInternal(dsn: null, DefaultTargetName, new SentryNLogOptions(), targetConfig);
-        }
-
-        /// <summary>
-        /// Adds a target for Sentry to the NLog configuration, with more configuration available.
-        /// </summary>
-        /// <param name="configuration">The NLog configuration.</param>
-        /// <param name="dsn">          The sentry DSN.</param>
-        /// <param name="targetConfig"> An optional configuration for the Sentry target.</param>
-        /// <returns>The configuration.</returns>
-        public static LoggingConfiguration AddSentryTarget(this LoggingConfiguration configuration, string dsn, Action<SentryTarget> targetConfig)
-        {
-            return configuration.AddSentryTargetInternal(dsn, DefaultTargetName, new SentryNLogOptions(), targetConfig);
-        }
-
-        /// <summary>
-        /// Adds a target for Sentry to the NLog configuration.
-        /// </summary>
-        /// <param name="configuration">The NLog configuration.</param>
-        /// <param name="dsn">          The sentry DSN.</param>
-        /// <param name="targetName">   The name to give the new target.</param>
-        /// <param name="options">      </param>
-        /// <param name="targetConfig"> An optional configuration for the Sentry target.</param>
-        /// <returns>The configuration.</returns>
-        internal static LoggingConfiguration AddSentryTargetInternal(this LoggingConfiguration configuration,
-                                                           string dsn,
-                                                           string targetName,
-                                                           SentryNLogOptions options,
-                                                           Action<SentryTarget> targetConfig = null)
-        {
             Target.Register<SentryTarget>("Sentry");
 
             var target = new SentryTarget(options)
@@ -112,8 +72,6 @@ namespace NLog
                 Name = targetName,
                 Layout = "${message}",
             };
-
-            targetConfig?.Invoke(target);
 
             if (dsn != null && options.Dsn == null)
             {
