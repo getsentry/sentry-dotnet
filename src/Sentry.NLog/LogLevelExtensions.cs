@@ -1,5 +1,3 @@
-﻿using System.Collections.Generic;
-
 using NLog;
 
 using Sentry.Protocol;
@@ -8,37 +6,58 @@ namespace Sentry.NLog
 {
     internal static class LogLevelExtensions
     {
-        private static readonly IDictionary<LogLevel, SentryLevel> SentryLevelMap = new Dictionary<LogLevel, SentryLevel>
-        {
-            { LogLevel.Debug, SentryLevel.Debug },
-            { LogLevel.Error, SentryLevel.Error },
-            { LogLevel.Fatal, SentryLevel.Fatal },
-            { LogLevel.Info,  SentryLevel.Info },
-            { LogLevel.Trace, SentryLevel.Debug },
-            { LogLevel.Warn,  SentryLevel.Warning },
-        };
-
         public static SentryLevel? ToSentryLevel(this LogLevel loggingLevel)
         {
-            if (SentryLevelMap.TryGetValue(loggingLevel, out SentryLevel level))
-                return level;
+            switch (loggingLevel?.Name)
+            {
+                case nameof(LogLevel.Debug):
+                    return SentryLevel.Debug;
 
-            return null;
+                case nameof(LogLevel.Error):
+                    return SentryLevel.Error;
+
+                case nameof(LogLevel.Fatal):
+                    return SentryLevel.Fatal;
+
+                case nameof(LogLevel.Info):
+                    return SentryLevel.Info;
+
+                case nameof(LogLevel.Trace):
+                    return SentryLevel.Debug;
+
+                case nameof(LogLevel.Warn):
+                    return SentryLevel.Warning;
+
+                default:
+                    return null;
+            }
         }
-
-        private static readonly IDictionary<LogLevel, BreadcrumbLevel> BreadcrumbLevelMap = new Dictionary<LogLevel, BreadcrumbLevel>
-        {
-            { LogLevel.Debug, BreadcrumbLevel.Debug },
-            { LogLevel.Error, BreadcrumbLevel.Error },
-            { LogLevel.Fatal, BreadcrumbLevel.Critical },
-            { LogLevel.Info, BreadcrumbLevel.Info },
-            { LogLevel.Trace, BreadcrumbLevel.Debug },
-            { LogLevel.Warn, BreadcrumbLevel.Warning },
-        };
 
         public static BreadcrumbLevel ToBreadcrumbLevel(this LogLevel level)
         {
-            return BreadcrumbLevelMap[level];
+            switch (level.Name)
+            {
+                case nameof(LogLevel.Debug):
+                    return BreadcrumbLevel.Debug;
+
+                case nameof(LogLevel.Error):
+                    return BreadcrumbLevel.Error;
+
+                case nameof(LogLevel.Fatal):
+                    return BreadcrumbLevel.Critical;
+
+                case nameof(LogLevel.Info):
+                    return BreadcrumbLevel.Info;
+
+                case nameof(LogLevel.Trace):
+                    return BreadcrumbLevel.Debug;
+
+                case nameof(LogLevel.Warn):
+                    return BreadcrumbLevel.Warning;
+
+                default:
+                    return BreadcrumbLevel.Info;
+            }
         }
     }
 }
