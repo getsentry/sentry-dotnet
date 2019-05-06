@@ -179,15 +179,20 @@ namespace Sentry.NLog
             // Whether or not it was sent as event, add breadcrumb so the next event includes it
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
+                var message = string.IsNullOrWhiteSpace(formatted)
+                    ? exception?.Message ?? string.Empty
+                    : formatted;
+
                 IDictionary<string, string> data = null;
 
                 // If this is true, an exception is being logged with no custom message
-                if (exception != null && !string.IsNullOrWhiteSpace(formatted) && logEvent.Message != "{0}")
+                if (exception != null && !message.StartsWith(exception.Message))
                 {
                     // Exception.Message won't be used as Breadcrumb message Avoid losing it by adding as data:
                     data = new Dictionary<string, string>
                         {
-                            { "exception_message", exception.Message }
+                            { "exception_data", exception.GetType().ToString() },
+                            { "exception_message", exception.Message },
                         };
                 }
 
@@ -200,10 +205,6 @@ namespace Sentry.NLog
 
                     data.AddRange(contextProps.MapValues(a => a.ToString()));
                 }
-
-                var message = string.IsNullOrWhiteSpace(formatted)
-                    ? exception?.Message
-                    : formatted;
 
                 hub.AddBreadcrumb(
                     _clock,
