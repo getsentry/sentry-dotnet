@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using NLog;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 
 namespace Sentry.NLog
@@ -55,6 +56,18 @@ namespace Sentry.NLog
         /// Defaults to <see langword="false" />.
         /// </summary>
         public bool IncludeEventDataOnBreadcrumbs { get; set; } = false;
+
+        /// <summary>
+        /// Custom layout for breadcrumbs.
+        /// </summary>
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
+        public Layout BreadcrumbLayout { get; set; }
+
+        /// <summary>
+        /// Configured layout for the NLog logger.
+        /// </summary>
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
+        public Layout Layout { get; set; }
 
         /// <summary>
         /// Any additional tags to apply to each logged message.

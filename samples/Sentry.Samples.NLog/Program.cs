@@ -32,8 +32,8 @@ namespace Sentry.Samples.NLog
 
         private static void DemoLogger(ILogger logger)
         {
-            // Minimum Breadcrumb and Event log levels are set to levels higher than Verbose In this case,
-            // Verbose messages are ignored
+            // Minimum Breadcrumb and Event log levels are set to levels higher than Trace.
+            // In this case, Trace messages are ignored
             logger.Trace("Verbose message which is not sent.");
 
             // Minimum Breadcrumb level is set to Debug so the following message is stored in memory and sent
@@ -82,16 +82,20 @@ namespace Sentry.Samples.NLog
             config
                 .AddSentry(o =>
                 {
-                    o.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
+                    o.Layout = "${message}";
+                    o.BreadcrumbLayout = "${logger}: ${message}"; // Optionally specify a separate format for breadcrumbs
+
+                    o.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default is Info)
                     o.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
 
                     // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If
                     // nothing is found, SDK is disabled.
                     o.Dsn = new Dsn("https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141");
-                    o.AttachStacktrace = true;
-                    o.SendDefaultPii = true; // send Personal Identifiable information like the username of the user logged in to the device
 
-                    o.IncludeEventDataOnBreadcrumbs = true;
+                    o.AttachStacktrace = true;
+                    o.SendDefaultPii = true; // Send Personal Identifiable information like the username of the user logged in to the device
+
+                    o.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
                     o.ShutdownTimeoutSeconds = 5;
 
                     o.AddTag("logger", "${logger}");  // Send the logger name as a tag
@@ -104,6 +108,7 @@ namespace Sentry.Samples.NLog
             config.AddTarget(new ColoredConsoleTarget("console"));
             config.AddRuleForAllLevels("console");
             config.AddRuleForAllLevels("debugger");
+
             LogManager.Configuration = config;
 
             var Log = LogManager.GetCurrentClassLogger();

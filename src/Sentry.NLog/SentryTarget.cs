@@ -5,6 +5,7 @@ using System.Linq;
 
 using NLog;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 
 using Sentry.Extensibility;
@@ -77,6 +78,15 @@ namespace Sentry.NLog
         }
 
         /// <summary>
+        /// An optional layout specific to breadcrumbs. If not set, uses the same layout as the standard <see cref="TargetWithContext.Layout"/>.
+        /// </summary>
+        public Layout BreadcrumbLayout
+        {
+            get => Options.BreadcrumbLayout ?? Layout;
+            set => Options.BreadcrumbLayout = value;
+        }
+
+        /// <summary>
         /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
         /// </summary>
         public string MinimumEventLevel
@@ -107,6 +117,10 @@ namespace Sentry.NLog
             base.InitializeTarget();
 
             IncludeEventProperties = Options.SendEventPropertiesAsData;
+
+            // If a layout has been configured on the options, replace the default logger.
+            if (Options.Layout != null)
+                Layout = Options.Layout;
 
             // If the sdk is not there, set it on up.
             if (Options.InitializeSdk && _sdkDisposable == null)
@@ -179,9 +193,11 @@ namespace Sentry.NLog
             // Whether or not it was sent as event, add breadcrumb so the next event includes it
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
-                var message = string.IsNullOrWhiteSpace(formatted)
+                var breadcrumbFormatted = BreadcrumbLayout.Render(logEvent);
+
+                var message = string.IsNullOrWhiteSpace(breadcrumbFormatted)
                     ? exception?.Message ?? string.Empty
-                    : formatted;
+                    : breadcrumbFormatted;
 
                 IDictionary<string, string> data = null;
 

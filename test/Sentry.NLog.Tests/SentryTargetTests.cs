@@ -328,6 +328,22 @@ namespace Sentry.NLog.Tests
 
             _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
         }
-    }
 
+        [Fact]
+        public void Log_WithCustomBreadcrumbLayout_RendersCorrectly()
+        {
+            var logger = _fixture.GetLogger(o =>
+            {
+                o.MinimumBreadcrumbLevel = LogLevel.Trace;
+                o.BreadcrumbLayout = "${logger}: ${message}";
+            });
+            const string message = "This is a breadcrumb";
+
+            logger.Debug(message);
+
+            var b = _fixture.Scope.Breadcrumbs.First();
+
+            Assert.Equal($"{logger.Name}: {message}", b.Message);
+        }
+    }
 }
