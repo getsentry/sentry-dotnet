@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net462</TargetFrameworks>
+    <TargetFrameworks>net461</TargetFrameworks>
     <Version>3.5.234</Version>
   </PropertyGroup>
 
