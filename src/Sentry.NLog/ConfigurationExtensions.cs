@@ -34,7 +34,7 @@ namespace NLog
         /// Adds a target for Sentry to the NLog configuration.
         /// </summary>
         /// <param name="configuration">The NLog configuration.</param>
-        /// <param name="dsn">          
+        /// <param name="dsn">
         /// The sentry DSN. If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN.
         /// If nothing is found, SDK is disabled.
         /// </param>
@@ -63,7 +63,6 @@ namespace NLog
             var options = new SentryNLogOptions();
 
             optionsConfig?.Invoke(options);
-
 
             Target.Register<SentryTarget>("Sentry");
 
@@ -95,6 +94,5 @@ namespace NLog
         {
             options.Tags.Add(new TargetPropertyWithContext(name, layout));
         }
-
     }
 }

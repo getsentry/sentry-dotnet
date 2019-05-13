@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 // ReSharper disable LoopCanBePartlyConvertedToQuery
 // ReSharper disable LoopCanBeConvertedToQuery
-
 namespace Sentry.NLog
 {
     internal static class HelperExtensions
@@ -24,7 +23,9 @@ namespace Sentry.NLog
             }
         }
 
-        internal static IEnumerable<KeyValuePair<TKey, TNewValue>> MapValues<TKey, TValue, TNewValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source, Func<TValue,TNewValue> valueSelector)
+        internal static IEnumerable<KeyValuePair<TKey, TNewValue>> MapValues<TKey, TValue, TNewValue>(
+            this IEnumerable<KeyValuePair<TKey, TValue>> source,
+            Func<TValue,TNewValue> valueSelector)
         {
             if (source is null)
             {

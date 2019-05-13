@@ -244,6 +244,5 @@ namespace Sentry.NLog
 
             return logEvent.Properties.ToKeyValuePairs(x => x.Key.ToString(), x => x.Value);
         }
-
     }
 }
