@@ -2,12 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
-  </PropertyGroup>  
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
-
-  
 
 </Project>

@@ -75,6 +75,13 @@ namespace Sentry.NLog
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
         public IList<TargetPropertyWithContext> Tags { get; } = new List<TargetPropertyWithContext>();
 
+        /// <summary>
+        /// Whether the NLog integration should initialize the SDK.
+        /// </summary>
+        /// <remarks>
+        /// By default, if a DSN is provided to the NLog integration it will initialize the SDK.
+        /// This might be not ideal when using multiple integrations in case you want another one doing the Init.
+        /// </remarks>
         [Advanced]
         public bool InitializeSdk { get; set; } = true;
     }
