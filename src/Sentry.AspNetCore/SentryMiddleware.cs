@@ -82,7 +82,11 @@ namespace Sentry.AspNetCore
             {
                 if (_options != null && _options.MaxRequestBodySize != RequestSize.None)
                 {
-                    context.Request.EnableRewind();
+                    var rewind = _options.InvokeRequestEnableRewind;
+                    if (rewind == null || rewind.Invoke(context))
+                    {
+                        context.Request.EnableRewind();
+                    }
                 }
 
                 hub.ConfigureScope(scope =>

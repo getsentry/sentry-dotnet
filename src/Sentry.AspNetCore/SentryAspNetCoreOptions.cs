@@ -1,4 +1,6 @@
 using System;
+using System.Net.Http;
+using Microsoft.AspNetCore.Http;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 
@@ -42,6 +44,18 @@ namespace Sentry.AspNetCore
         /// If the request body is larger than the accepted size, nothing is sent.
         /// </remarks>
         public RequestSize MaxRequestBodySize { get; set; }
+
+        /// <summary>
+        /// A callback invoked when request body extraction is opted in.
+        /// </summary>
+        /// <remarks>
+        /// When request body extraction is enabled by setting <see cref="MaxRequestBodySize"/> to a value other than
+        /// <see cref="RequestSize.None"/> the SDK needs to enabled buffering of the request body. It does so by
+        /// invoking an extension method of <see cref="HttpRequest"/> called EnableRewind.
+        /// This callback can be used to decided whether to invoke EnableRewind or not by inspecting a specific request.
+        /// </remarks>'
+
+        public Func<HttpContext, bool> InvokeRequestEnableRewind { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryAspNetCoreOptions"/>.
