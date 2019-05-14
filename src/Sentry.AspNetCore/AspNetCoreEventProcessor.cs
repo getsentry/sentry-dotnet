@@ -30,13 +30,6 @@ namespace Sentry.AspNetCore
             // Not PII as this is running on a server
             @event.ServerName = Environment.MachineName;
 
-            if (_options?.SendDefaultPii == true && @event.User.Username == Environment.UserName)
-            {
-                // if SendDefaultPii is true, Sentry SDK will send the current logged on user
-                // which doesn't make sense in a server apps
-                @event.User.Username = null;
-            }
-
             return @event;
         }
     }

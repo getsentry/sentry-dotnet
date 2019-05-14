@@ -42,5 +42,14 @@ namespace Sentry.AspNetCore
         /// If the request body is larger than the accepted size, nothing is sent.
         /// </remarks>
         public RequestSize MaxRequestBodySize { get; set; }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryAspNetCoreOptions"/>.
+        /// </summary>
+        public SentryAspNetCoreOptions()
+        {
+            // Don't report Environment.UserName as the user.
+            IsEnvironmentUser = false;
+        }
     }
 }

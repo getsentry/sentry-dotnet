@@ -30,7 +30,7 @@ namespace Sentry.AspNetCore
                 scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
             }
 
-            if (options?.SendDefaultPii == true)
+            if (options?.SendDefaultPii == true && !scope.HasUser())
             {
                 var userFactory = context.RequestServices?.GetService<IUserFactory>();
                 if (userFactory != null)

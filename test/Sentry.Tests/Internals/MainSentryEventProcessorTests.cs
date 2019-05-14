@@ -33,7 +33,7 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void Process_SendDefaultPiiTrue_UserNameSet()
+        public void Process_SendDefaultPiiTrueIdEnvironmentDefault_UserNameSet()
         {
             var evt = new SentryEvent();
 
@@ -43,6 +43,33 @@ namespace Sentry.Tests.Internals
             sut.Process(evt);
 
             Assert.Equal(Environment.UserName, evt.User.Username);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiTrueIdEnvironmentTrue_UserNameSet()
+        {
+            var evt = new SentryEvent();
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+            _fixture.SentryOptions.IsEnvironmentUser = true;
+            var sut = _fixture.GetSut();
+
+            sut.Process(evt);
+
+            Assert.Equal(Environment.UserName, evt.User.Username);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiTrueIdEnvironmentFalse_UserNameNotSet()
+        {
+            var evt = new SentryEvent();
+            _fixture.SentryOptions.SendDefaultPii = true;
+            _fixture.SentryOptions.IsEnvironmentUser = false;
+
+            var sut = _fixture.GetSut();
+            sut.Process(evt);
+
+            Assert.Null(evt.User.Username);
         }
 
         [Fact]
