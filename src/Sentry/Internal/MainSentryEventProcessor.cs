@@ -77,7 +77,8 @@ namespace Sentry.Internal
 
             @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
-            if (_options.SendDefaultPii && !@event.HasUser())
+            // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
+            if (_options.SendDefaultPii && _options.IsEnvironmentUser && !@event.HasUser())
             {
                 @event.User.Username = System.Environment.UserName;
             }

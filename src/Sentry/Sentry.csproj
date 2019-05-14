@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Sentry.PlatformAbstractions" Version="1.0.0" />
-    <PackageReference Include="Sentry.Protocol" Version="1.0.4" />
+    <PackageReference Include="Sentry.Protocol" Version="1.0.6" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
   </ItemGroup>
 
