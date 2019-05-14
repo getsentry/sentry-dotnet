@@ -12,6 +12,19 @@ namespace Sentry
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class BaseScopeExtensions
     {
+        /// <summary>
+        /// Whether a <see cref="User"/> has been set to the scope with any of its fields non null.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <returns>True if a User was set to the scope. Otherwise, false.</returns>
+        public static bool HasUser(this BaseScope scope)
+            => scope.InternalUser != null
+               && (scope.InternalUser.Email != null
+                   || scope.InternalUser.Id != null
+                   || scope.InternalUser.Username != null
+                   || scope.InternalUser.InternalOther?.Count > 0
+                   || scope.InternalUser.IpAddress != null);
+
 #if HAS_VALUE_TUPLE
         /// <summary>
         /// Adds a breadcrumb to the scope

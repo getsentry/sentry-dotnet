@@ -23,6 +23,77 @@ namespace Sentry.Protocol.Tests
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
+        public void HasUser_DefaultScope_ReturnsFalse()
+        {
+            var sut = _fixture.GetSut();
+            Assert.False(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_NullUser_ReturnsFalse()
+        {
+            var sut = _fixture.GetSut();
+            sut.User = null;
+            Assert.False(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_EmptyUser_ReturnsFalse()
+        {
+            var sut = _fixture.GetSut();
+            sut.User = new User();
+            Assert.False(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_UserWithId_ReturnsTrue()
+        {
+            var sut = _fixture.GetSut();
+            sut.User.Id = "test";
+            Assert.True(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_UserWithUserName_ReturnsTrue()
+        {
+            var sut = _fixture.GetSut();
+            sut.User.Username = "test";
+            Assert.True(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_UserWithIpAddress_ReturnsTrue()
+        {
+            var sut = _fixture.GetSut();
+            sut.User.IpAddress = "test";
+            Assert.True(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_UserWithEmail_ReturnsTrue()
+        {
+            var sut = _fixture.GetSut();
+            sut.User.Email = "test";
+            Assert.True(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_UserWithOther_ReturnsTrue()
+        {
+            var sut = _fixture.GetSut();
+            sut.User.Other.Add("other", "val");
+            Assert.True(sut.HasUser());
+        }
+
+        [Fact]
+        public void HasUser_UserWithEmptyOther_ReturnsFalse()
+        {
+            var sut = _fixture.GetSut();
+            sut.User.Other = new Dictionary<string, string>();
+            Assert.False(sut.HasUser());
+        }
+
+        [Fact]
         public void SetFingerprint_NullArgument_ReplacesCurrentWithNull()
         {
             var sut = _fixture.GetSut();
