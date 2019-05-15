@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentry;
+using Sentry.AsyncStackTrace;
 
 internal static class Program
 {
@@ -22,7 +23,8 @@ internal static class Program
             {
                 l.AddConfiguration(c.Configuration);
                 l.AddConsole();
-                l.AddSentry();
+                //Use Ben.Demystifier
+                l.AddSentry(options => options.UseStackTraceFactory(new AsyncStackTraceFactory(options)));
             })
             .UseConsoleLifetime()
             .Build()
@@ -58,7 +60,7 @@ internal static class Program
                 {
                     var zero = 0;
                     _ = 10 / zero; // Throws DivideByZeroException
-                    }
+                }
                 catch (Exception e)
                 {
                     // Direct control of capturing errors with Sentry
