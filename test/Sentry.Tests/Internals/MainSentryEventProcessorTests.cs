@@ -203,6 +203,17 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
+        public void Process_Modules_IsEmpty_WhenSpecified()
+        {
+            _fixture.SentryOptions.ReportAssemblies = false;
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent();
+            sut.Process(evt);
+
+            Assert.Empty(evt.Modules);
+        }
+
+        [Fact]
         public void Process_SdkNameAndVersion_ToDefault()
         {
             var sut = _fixture.GetSut();
