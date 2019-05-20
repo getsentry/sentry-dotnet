@@ -320,6 +320,11 @@ namespace Sentry
             }
         }
 
+        /// <summary>
+        /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
+        /// </summary>
+        public bool ReportAssemblies { get; set; } = true;
+
 #if SYSTEM_WEB
         /// <summary>
         /// Max request body to be captured when a Web request exists on a ASP.NET Application.

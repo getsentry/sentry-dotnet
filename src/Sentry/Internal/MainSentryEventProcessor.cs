@@ -112,15 +112,18 @@ namespace Sentry.Internal
                 }
             }
 
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            if (_options.ReportAssemblies)
             {
-                if (assembly.IsDynamic)
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    continue;
-                }
+                    if (assembly.IsDynamic)
+                    {
+                        continue;
+                    }
 
-                var asmName = assembly.GetName();
-                @event.Modules[asmName.Name] = asmName.Version.ToString();
+                    var asmName = assembly.GetName();
+                    @event.Modules[asmName.Name] = asmName.Version.ToString();
+                }
             }
             return @event;
         }
