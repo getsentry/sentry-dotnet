@@ -70,7 +70,6 @@ namespace Sentry.NLog
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
         /// </summary>
-        [RequiredParameter]
         public string Dsn
         {
             get => Options.Dsn?.ToString();
