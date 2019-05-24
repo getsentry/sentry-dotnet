@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Tuhu.Sentry.AsyncStackTrace" Version="1.0.0-beta1" />
+    <PackageReference Include="Tuhu.Sentry.AsyncStackTrace" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
