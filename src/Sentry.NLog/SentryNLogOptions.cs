@@ -16,7 +16,7 @@ namespace Sentry.NLog
     public class SentryNLogOptions : SentryOptions
     {
         /// <summary>
-        /// How many seconds to wait after triggering Logmanager.Shutdown() before just shutting down the
+        /// How many seconds to wait after triggering <see cref="LogManager.Shutdown()"/> before just shutting down the
         /// Sentry sdk.
         /// </summary>
         public int ShutdownTimeoutSeconds
@@ -49,6 +49,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Determines whether event properties will be sent to sentry as Tags or not. Defaults to <see langword="false" />.
         /// </summary>
+        /// <seealso cref="SendEventPropertiesAsData"/>
         public bool SendEventPropertiesAsTags { get; set; } = false;
 
         /// <summary>
@@ -82,7 +83,6 @@ namespace Sentry.NLog
         /// By default, if a DSN is provided to the NLog integration it will initialize the SDK.
         /// This might be not ideal when using multiple integrations in case you want another one doing the Init.
         /// </remarks>
-        [Advanced]
         public bool InitializeSdk { get; set; } = true;
     }
 }
