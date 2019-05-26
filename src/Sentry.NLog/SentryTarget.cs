@@ -59,6 +59,10 @@ namespace Sentry.NLog
             }
         }
 
+        /// <summary>
+        /// Options for both the <see cref="SentryTarget"/> and the sentry sdk itself.
+        /// </summary>
+        [Advanced]
         public SentryNLogOptions Options { get; }
 
         /// <summary>
