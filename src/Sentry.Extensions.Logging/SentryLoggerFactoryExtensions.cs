@@ -50,11 +50,6 @@ namespace Microsoft.Extensions.Logging
                 hub = HubAdapter.Instance;
             }
 
-            foreach (var callback in options.ConfigureScopeCallbacks)
-            {
-                hub.ConfigureScope(callback);
-            }
-
             factory.AddProvider(new SentryLoggerProvider(hub, SystemClock.Clock, options));
             return factory;
         }
