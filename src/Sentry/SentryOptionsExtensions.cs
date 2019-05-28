@@ -127,12 +127,7 @@ namespace Sentry
         /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
         public static SentryOptions UseStackTraceFactory(this SentryOptions options, ISentryStackTraceFactory sentryStackTraceFactory)
         {
-            if (sentryStackTraceFactory == null)
-            {
-                throw new ArgumentNullException(nameof(sentryStackTraceFactory));
-            }
-
-            options.SentryStackTraceFactory = sentryStackTraceFactory;
+            options.SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
 
             return options;
         }
@@ -143,7 +138,19 @@ namespace Sentry
             {
                 if (options.DiagnosticLogger == null)
                 {
+#if SYSTEM_WEB && DEBUG
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse - Hosted under IIS/IIS Express: use System.Diagnostic.Debug instead of System.Console.
+                    if (System.Web.HttpRuntime.AppDomainAppId != null)
+                    {
+                        options.DiagnosticLogger = new DebugDiagnosticLogger(options.DiagnosticsLevel);
+                    }
+                    else
+                    {
+                        options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
+                    }
+#else
                     options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
+#endif
                     options.DiagnosticLogger?.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", options.DiagnosticsLevel);
                 }
             }
