@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -92,6 +93,8 @@ namespace Sentry
                 return SentryId.Empty;
             }
         }
+
+        public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
         private SentryId DoSendEvent(SentryEvent @event, Scope scope)
         {
