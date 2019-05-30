@@ -4,33 +4,24 @@
       "src": [
         {
           "src": "../src",
-          "files": [
-            "**.csproj"
-          ],
-          "exclude": [
-            "**/bin/**",
-            "**/obj/**"
-          ]
+          "files": ["**.csproj"],
+          "exclude": ["**/bin/**", "**/obj/**"]
         }
       ],
       "dest": "api",
       "filter": "filterConfig.yml",
       "disableGitFeatures": false,
-      "disableDefaultFilter": false
+      "disableDefaultFilter": false,
+      "properties": { "TargetFramework": "netstandard2.0" }
     }
   ],
   "build": {
-    "sitemap":{
+    "sitemap": {
       "baseUrl": "https://getsentry.github.io/sentry-dotnet/"
     },
     "content": [
       {
-        "files": [
-          "api/**.yml",
-          "api/index.md",
-          "manual/**.yml",
-          "manual/**.md"
-        ]
+        "files": ["api/**.yml", "api/index.md", "manual/**.yml", "manual/**.md"]
       },
       {
         "files": [
@@ -44,9 +35,7 @@
     ],
     "resource": [
       {
-        "files": [
-          "images/**"
-        ]
+        "files": ["images/**"]
       }
     ],
     "dest": "_site",
@@ -58,15 +47,13 @@
       "_appFaviconPath": "images/sentry.ico"
     },
     "fileMetadataFiles": [],
-    "template": [
-      "default"
-    ],
+    "template": ["default"],
     "postProcessors": [],
     "markdownEngineName": "markdig",
     "noLangKeyword": false,
     "keepFileLink": false,
     "cleanupCacheHistory": false,
     "disableGitFeatures": false,
-    "xrefService": [ "https://xref.docs.microsoft.com/query?uid={uid}" ]
+    "xrefService": ["https://xref.docs.microsoft.com/query?uid={uid}"]
   }
 }
