@@ -23,24 +23,21 @@ namespace Sentry.Benchmarks
         [IterationSetup]
         public void IterationSetup()
         {
-            _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 100 });
+            _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 });
             _event = new SentryEvent();
             // Make sure worker spins once.
             _backgroundWorker.EnqueueEvent(_event);
             _backgroundWorker.FlushAsync(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
-        }
-
-        [Params(1, 10, 100)]
-        public int Items;
-
-        [Benchmark(Description = "Enqueue event and FlushAsync")]
-        public async Task FlushAsync_QueueDepthAsync()
-        {
             for (var i = 0; i < Items; i++)
             {
                 _backgroundWorker.EnqueueEvent(_event);
             }
-            await _backgroundWorker.FlushAsync(TimeSpan.FromSeconds(10));
         }
+
+        [Params(1, 10, 100, 1000)]
+        public int Items;
+
+        [Benchmark(Description = "Enqueue event and FlushAsync")]
+        public Task FlushAsync_QueueDepthAsync() => _backgroundWorker.FlushAsync(TimeSpan.FromSeconds(10));
     }
 }

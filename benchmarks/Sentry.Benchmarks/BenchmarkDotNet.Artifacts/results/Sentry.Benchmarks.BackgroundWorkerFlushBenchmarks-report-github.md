@@ -10,8 +10,9 @@ Job=Core  Runtime=Core  InvocationCount=1
 UnrollFactor=1  
 
 ```
-|                         Method | Items |     Mean |    Error |   StdDev | Allocated |
-|------------------------------- |------ |---------:|---------:|---------:|----------:|
-| **&#39;Enqueue event and FlushAsync&#39;** |     **1** | **128.3 us** | **7.478 us** | **21.58 us** |   **1.77 KB** |
-| **&#39;Enqueue event and FlushAsync&#39;** |    **10** | **128.8 us** | **7.144 us** | **20.38 us** |   **1.77 KB** |
-| **&#39;Enqueue event and FlushAsync&#39;** |   **100** | **167.8 us** | **9.121 us** | **26.17 us** |   **4.87 KB** |
+|                         Method | Items |     Mean |     Error |    StdDev |   Median | Allocated |
+|------------------------------- |------ |---------:|----------:|----------:|---------:|----------:|
+| **&#39;Enqueue event and FlushAsync&#39;** |     **1** | **1.849 us** | **0.1244 us** | **0.3189 us** | **1.745 us** |      **40 B** |
+| **&#39;Enqueue event and FlushAsync&#39;** |    **10** | **1.923 us** | **0.1066 us** | **0.2789 us** | **1.909 us** |      **40 B** |
+| **&#39;Enqueue event and FlushAsync&#39;** |   **100** | **1.880 us** | **0.1151 us** | **0.3152 us** | **1.855 us** |      **40 B** |
+| **&#39;Enqueue event and FlushAsync&#39;** |  **1000** | **1.885 us** | **0.1161 us** | **0.3118 us** | **1.770 us** |      **40 B** |
