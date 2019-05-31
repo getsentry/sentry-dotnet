@@ -234,6 +234,9 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+
+        [Fact]
         public void PushScope_InstanceOf_DisabledClient()
         {
             Assert.Same(DisabledHub.Instance, SentrySdk.PushScope());
