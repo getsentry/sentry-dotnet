@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -19,5 +21,12 @@ namespace Sentry
         /// <param name="scope">An optional scope to be applied to the event.</param>
         /// <returns>The Id of the event</returns>
         SentryId CaptureEvent(SentryEvent evt, Scope scope = null);
+
+        /// <summary>
+        /// Flushes events queued up.
+        /// </summary>
+        /// <param name="timeout">How long to wait for flush to finish.</param>
+        /// <returns>A task to await for the flush operation.</returns>
+        Task FlushAsync(TimeSpan timeout);
     }
 }

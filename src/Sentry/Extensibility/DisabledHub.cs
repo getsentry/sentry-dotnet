@@ -24,6 +24,8 @@ namespace Sentry.Extensibility
 
         public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => SentryId.Empty;
 
+        public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
+
         public void Dispose() { }
 
         public SentryId LastEventId => SentryId.Empty;

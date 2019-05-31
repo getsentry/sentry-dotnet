@@ -92,5 +92,10 @@ namespace Sentry.Extensibility
         [EditorBrowsable(EditorBrowsableState.Never)]
         public SentryId CaptureEvent(SentryEvent evt, Scope scope)
             => SentrySdk.CaptureEvent(evt, scope);
+
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public Task FlushAsync(TimeSpan timeout)
+            => SentrySdk.FlushAsync(timeout);
     }
 }

@@ -10,11 +10,13 @@ namespace Sentry.Internal
     internal class BackgroundWorker : IBackgroundWorker, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly IProducerConsumerCollection<SentryEvent> _queue;
-        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly ConcurrentQueue<SentryEvent> _queue;
+        private readonly CancellationTokenSource _shutdownSource;
         private readonly SemaphoreSlim _inSemaphore;
         private readonly SemaphoreSlim _outSemaphore;
         private volatile bool _disposed;
+
+        private event EventHandler OnFlushObjectReceived;
 
         internal Task WorkerTask { get; }
 
@@ -30,7 +32,7 @@ namespace Sentry.Internal
             ITransport transport,
             SentryOptions options,
             CancellationTokenSource cancellationTokenSource = null,
-            IProducerConsumerCollection<SentryEvent> queue = null)
+            ConcurrentQueue<SentryEvent> queue = null)
         {
             Debug.Assert(transport != null);
             Debug.Assert(options != null);
@@ -39,7 +41,7 @@ namespace Sentry.Internal
             _outSemaphore = new SemaphoreSlim(0, options.MaxQueueItems);
             _options = options;
 
-            _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
+            _shutdownSource = cancellationTokenSource ?? new CancellationTokenSource();
             _queue = queue ?? new ConcurrentQueue<SentryEvent>();
 
             WorkerTask = Task.Run(
@@ -49,7 +51,7 @@ namespace Sentry.Internal
                     transport,
                     _inSemaphore,
                     _outSemaphore,
-                    _cancellationTokenSource.Token)
+                    _shutdownSource.Token)
                     .ConfigureAwait(false));
         }
 
@@ -68,14 +70,14 @@ namespace Sentry.Internal
             var acquired = _inSemaphore.Wait(TimeSpan.Zero);
             if (acquired)
             {
-                _queue.TryAdd(@event);
+                _queue.Enqueue(@event);
                 _outSemaphore.Release();
             }
             return acquired;
         }
 
-        private static async Task WorkerAsync(
-           IProducerConsumerCollection<SentryEvent> queue,
+        private async Task WorkerAsync(
+           ConcurrentQueue<SentryEvent> queue,
            SentryOptions options,
            ITransport transport,
            SemaphoreSlim inSemaphore,
@@ -117,17 +119,14 @@ namespace Sentry.Internal
                         }
                     }
 
-                    if (queue.TryTake(out var @event))
+                    if (queue.TryPeek(out var @event)) // Work with the event while it's in the queue
                     {
-                        inSemaphore.Release();
                         try
                         {
-                            // Optionally we can keep multiple requests in-flight concurrently:
-                            // instead of awaiting here, keep reading from the queue while less than
-                            // N events are being sent
-                            var task = transport.CaptureEventAsync(@event, shutdownTimeout.Token).ConfigureAwait(false);
+                            var task = transport.CaptureEventAsync(@event, shutdownTimeout.Token);
                             options.DiagnosticLogger?.LogDebug("Event {0} in-flight to Sentry. #{1} in queue.", @event.EventId, queue.Count);
-                            await task;
+                            await task.ConfigureAwait(false);
+
                         }
                         catch (OperationCanceledException)
                         {
@@ -137,6 +136,12 @@ namespace Sentry.Internal
                         catch (Exception exception)
                         {
                             options.DiagnosticLogger?.LogError("Error while processing event {1}: {0}. #{2} in queue.", exception, @event.EventId, queue.Count);
+                        }
+                        finally
+                        {
+                            queue.TryDequeue(out _);
+                            inSemaphore.Release();
+                            OnFlushObjectReceived?.Invoke(@event, EventArgs.Empty);
                         }
                     }
                     else
@@ -153,6 +158,84 @@ namespace Sentry.Internal
             {
                 inSemaphore.Dispose();
                 outSemaphore.Dispose();
+            }
+        }
+
+        public async Task FlushAsync(TimeSpan timeout)
+        {
+            if (_disposed)
+            {
+                _options.DiagnosticLogger?.LogDebug("Worker disposed. Nothing to flush.");
+                return;
+            }
+
+            if (_queue.Count == 0)
+            {
+                _options.DiagnosticLogger?.LogDebug("No events to flush.");
+                return;
+            }
+
+            // Start timer from here.
+            var timeoutSource = new CancellationTokenSource();
+            timeoutSource.CancelAfter(timeout);
+            var flushSuccessSource = new CancellationTokenSource();
+
+            var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
+                timeoutSource.Token,
+                _shutdownSource.Token,
+                flushSuccessSource.Token);
+
+            var counter = 0;
+            var depth = int.MaxValue;
+
+            void EventFlushedCallback(object objProcessed, EventArgs _)
+            {
+                // ReSharper disable once AccessToModifiedClosure
+                if (Interlocked.Increment(ref counter) >= depth)
+                {
+                    try
+                    {
+                        _options.DiagnosticLogger?.LogDebug("Signaling flush completed.");
+                        // ReSharper disable once AccessToDisposedClosure
+                        flushSuccessSource.Cancel();
+                    }
+                    catch // Timeout or Shutdown might have been called so this token was disposed.
+                    {
+                    } // Flush will release when timeout is hit.
+                }
+            }
+
+            OnFlushObjectReceived += EventFlushedCallback; // Started counting events
+            try
+            {
+                var trackedDepth = _queue.Count;
+                if (trackedDepth == 0) // now we're subscribed and counting, make sure it's not already empty.
+                {
+                    return;
+                }
+
+                Interlocked.Exchange(ref depth, trackedDepth);
+                _options.DiagnosticLogger?.LogDebug("Tracking depth: {0}.", trackedDepth);
+
+                if (counter >= depth) // When the worker finished flushing before we set the depth
+                {
+                    return;
+                }
+
+                // Await until event is flushed or one of the tokens triggers
+                await Task.Delay(timeout, timeoutWithShutdown.Token).ConfigureAwait(false);
+                _options.DiagnosticLogger?.LogDebug("Timeout when trying to flush queue.");
+            }
+            catch (OperationCanceledException)
+            {
+                _options.DiagnosticLogger?.LogDebug(flushSuccessSource.IsCancellationRequested
+                    ? "Successfully flushed all events up to call to FlushAsync."
+                    : "Timeout when trying to flush queue.");
+            }
+            finally
+            {
+                OnFlushObjectReceived -= EventFlushedCallback;
+                timeoutWithShutdown.Dispose();
             }
         }
 
@@ -174,7 +257,7 @@ namespace Sentry.Internal
             try
             {
                 // Immediately requests the Worker to stop.
-                _cancellationTokenSource.Cancel();
+                _shutdownSource.Cancel();
 
                 // If there's anything in the queue, it'll keep running until 'shutdownTimeout' is reached
                 // If the queue is empty it will quit immediately

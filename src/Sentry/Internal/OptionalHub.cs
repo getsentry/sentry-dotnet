@@ -35,6 +35,8 @@ namespace Sentry.Internal
 
         public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => _hub.CaptureEvent(evt, scope);
 
+        public Task FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
+
         public void ConfigureScope(Action<Scope> configureScope) => _hub.ConfigureScope(configureScope);
 
         public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => _hub.ConfigureScopeAsync(configureScope);
