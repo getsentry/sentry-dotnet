@@ -17,7 +17,7 @@ namespace Sentry.Tests.Internals
         {
             public ITransport Transport { get; set; } = Substitute.For<ITransport>();
             public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
-            public ConcurrentQueue<object> Queue { get; set; } = new ConcurrentQueue<object>();
+            public ConcurrentQueue<SentryEvent> Queue { get; set; } = new ConcurrentQueue<SentryEvent>();
             public CancellationTokenSource CancellationTokenSource { get; set; } = new CancellationTokenSource();
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
@@ -337,7 +337,7 @@ namespace Sentry.Tests.Internals
                 transportEvent.WaitOne(); // Wait first event to be in-flight
 
                 var flushTask = sut.FlushAsync(TimeSpan.FromDays(1));
-                Assert.Equal(2, _fixture.Queue.Count); // Event being processed and the flush handle
+                Assert.Single(_fixture.Queue); // Event being processed
 
                 eventsQueuedEvent.Set();
                 await flushTask;
