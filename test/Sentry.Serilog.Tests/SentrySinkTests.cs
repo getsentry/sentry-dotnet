@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
+using NSubstitute.ClearExtensions;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Reflection;
@@ -114,21 +117,36 @@ namespace Sentry.Serilog.Tests
             Assert.Equal("nuget:" + expected.Name, package.Name);
             Assert.Equal(expected.Version, package.Version);
         }
-
-        [Fact]
-        public void Emit_LoggerLevel_Set()
+        
+        internal class EventLogLevelsData : IEnumerable<object[]>
         {
-            const SentryLevel expectedLevel = SentryLevel.Error;
+            public IEnumerator<object[]> GetEnumerator()
+            {
+                yield return new object[]{LogEventLevel.Debug, SentryLevel.Debug};
+                yield return new object[]{LogEventLevel.Verbose, SentryLevel.Debug};
+                yield return new object[]{LogEventLevel.Information, SentryLevel.Info};
+                yield return new object[]{LogEventLevel.Warning, SentryLevel.Warning};
+                yield return new object[]{LogEventLevel.Error, SentryLevel.Error};
+                yield return new object[]{LogEventLevel.Fatal, SentryLevel.Fatal};
+            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        [Theory]  
+        [ClassData(typeof(EventLogLevelsData))]
+        public void Emit_LoggerLevel_Set(LogEventLevel serilogLevel, SentryLevel? sentryLevel)
+        {
 
             var sut = _fixture.GetSut();
+            
 
-            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
+            var evt = new LogEvent(DateTimeOffset.UtcNow, serilogLevel, null, MessageTemplate.Empty,
                 Enumerable.Empty<LogEventProperty>());
 
             sut.Emit(evt);
 
             _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == expectedLevel));
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == sentryLevel));
         }
 
         [Fact]
