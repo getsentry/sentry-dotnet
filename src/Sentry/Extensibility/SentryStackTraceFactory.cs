@@ -105,7 +105,6 @@ namespace Sentry.Extensibility
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
                 frame.Function = method.Name;
-                frame.ContextLine = method.ToString();
             }
 
             frame.InApp = !IsSystemModuleName(frame.Module);
