@@ -18,7 +18,7 @@
 
     <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-protocol/master/.assets/sentry-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-protocol/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet-protocol/releases</PackageReleaseNotes>
