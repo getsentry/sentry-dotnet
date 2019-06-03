@@ -43,12 +43,6 @@ namespace Sentry.Extensions.Logging
             _clock = clock;
             _options = options;
 
-            // Add scope configuration to hub from options
-            foreach (var callback in options.ConfigureScopeCallbacks)
-            {
-                hub.ConfigureScope(callback);
-            }
-
             if (hub.IsEnabled)
             {
                 _scope = hub.PushScope();
@@ -58,6 +52,12 @@ namespace Sentry.Extensions.Logging
                     s.Sdk.Version = NameAndVersion.Version;
                     s.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
                 });
+
+                // Add scope configuration to hub from options
+                foreach (var callback in options.ConfigureScopeCallbacks)
+                {
+                    hub.ConfigureScope(callback);
+                }
             }
         }
 
