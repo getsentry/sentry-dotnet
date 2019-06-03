@@ -11,11 +11,12 @@ namespace Sentry.Extensions.Logging.Tests
     public class SentryLoggerFactoryExtensionsTests
     {
         [Fact]
-        public void AddSentry_ConfigureScope_InvokesCallback()
+        public void AddSentry_ConfigureScope_HubEnabledTrue_InvokesCallback()
         {
             const SentryLevel expected = SentryLevel.Debug;
             var sut = Substitute.For<ILoggerFactory>();
             var hub = Substitute.For<IHub>();
+            hub.IsEnabled.Returns(true);
             var scope = new Scope(new SentryOptions());
             hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(info => info.Arg<Action<Scope>>()(scope));
@@ -28,6 +29,27 @@ namespace Sentry.Extensions.Logging.Tests
             });
 
             Assert.Equal(expected, scope.Level);
+        }
+
+        [Fact]
+        public void AddSentry_ConfigureScope_HubEnabledFalse_DoesNotInvokesCallback()
+        {
+            const SentryLevel expected = SentryLevel.Debug;
+            var sut = Substitute.For<ILoggerFactory>();
+            var hub = Substitute.For<IHub>();
+            hub.IsEnabled.Returns(false);
+            var scope = new Scope(new SentryOptions());
+            hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(info => info.Arg<Action<Scope>>()(scope));
+            SentrySdk.UseHub(hub);
+
+            sut.AddSentry(o =>
+            {
+                o.InitializeSdk = false; // use the mock above
+                o.ConfigureScope(s => s.Level = expected);
+            });
+
+            Assert.NotEqual(expected, scope.Level);
         }
 
         [Fact]
