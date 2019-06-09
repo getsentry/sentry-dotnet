@@ -12,6 +12,10 @@ Sentry.PlatformAbstractions
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/arv807179rg9sg1r/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet-platform-abstractions/branch/master)
 
 
+|      Package name                 |        NuGet         |
+| ----------------------------- | -------------------: |
+|         **Sentry.Protocol**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.PlatformAbstractions.svg)](https://www.nuget.org/packages/Sentry.PlatformAbstractions)   |
+
 The goal of this package is to simplify the [.NET SDK](https://github.com/getsentry/sentry-dotnet/) by leaving the messy `#ifdefs`, platform specific code (operating system, runtime, etc) out into its own library. It also helps by allowing us to share code between the [new .NET SDK](https://github.com/getsentry/sentry-dotnet/) and the [current .NET SDK](https://github.com/getsentry/raven-csharp/).
 
 Most of the platform information used by the SDK goes to Sentry's [Context Interface](https://docs.sentry.io/clientdev/interfaces/contexts/). When implementing this on SharpRaven it was clear that to get reliable information is not as trivial as it seems. This repo is an attempt to create a package which will provide reliable information in different types of apps.
