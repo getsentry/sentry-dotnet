@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 
 using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
@@ -170,7 +171,16 @@ namespace Sentry.NLog
             get => Options.ShutdownTimeoutSeconds;
             set => Options.ShutdownTimeoutSeconds = value;
         }
-        
+
+        /// <summary>
+        /// How long to wait for the flush to finish, in seconds. Defaults to 2 seconds.
+        /// </summary>
+        public int FlushTimeoutSeconds
+        {
+            get => Options.FlushTimeout.Seconds;
+            set => Options.FlushTimeout = TimeSpan.FromSeconds(value);
+        }
+
         /// <inheritdoc />
         protected override void CloseTarget()
         {
@@ -187,12 +197,29 @@ namespace Sentry.NLog
 
             // If a layout has been configured on the options, replace the default logger.
             if (Options.Layout != null)
+            {
                 Layout = Options.Layout;
+            }
 
             // If the sdk is not there, set it on up.
             if (InitializeSdk && _sdkDisposable == null)
             {
                 _sdkDisposable = SentrySdk.Init(Options);
+            }
+        }
+
+        /// <inheritdoc />
+        protected override void FlushAsync(AsyncContinuation asyncContinuation)
+        {
+            try
+            {
+                _hubAccessor().FlushAsync(Options.FlushTimeout);
+
+                asyncContinuation(null);
+            }
+            catch (Exception e)
+            {
+                asyncContinuation(e);
             }
         }
 

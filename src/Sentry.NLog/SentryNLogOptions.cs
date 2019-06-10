@@ -24,6 +24,11 @@ namespace Sentry.NLog
             get => ShutdownTimeout.Seconds;
             set => ShutdownTimeout = TimeSpan.FromSeconds(value);
         }
+        
+        /// <summary>
+        /// How long to wait for the flush to finish. Defaults to 2 seconds.
+        /// </summary>
+        public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
         /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
