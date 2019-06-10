@@ -248,6 +248,7 @@ namespace Sentry.NLog
                         Formatted = formatted,
                         Message = template
                     },
+                    Logger = logEvent.LoggerName,
                     Level = logEvent.Level.ToSentryLevel(),
                     Release = Options.Release,
                     Environment = Options.Environment,
