@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -11,7 +11,7 @@ namespace Sentry.Internal
     internal class Hub : IHub, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly ImmutableList<ISdkIntegration> _integrations;
+        private readonly List<ISdkIntegration> _integrations;
         private readonly IDisposable _rootScope;
 
         private readonly SentryClient _ownedClient;

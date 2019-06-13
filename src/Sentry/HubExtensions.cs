@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 
@@ -34,7 +34,7 @@ namespace Sentry
                 clock: null,
                 message: message,
                 type: type,
-                data: data?.ToImmutableDictionary(),
+                data: data,
                 category: category,
                 level: level);
 
@@ -60,12 +60,20 @@ namespace Sentry
             string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => hub.ConfigureScope(
+        {
+            var readOnlyData = data as IReadOnlyDictionary<string, string>;
+            if (data != null && readOnlyData == null)
+            {
+                readOnlyData = data.ToDictionary(k => k.Key, v => v.Value);
+            }
+
+            hub.ConfigureScope(
                 s => s.AddBreadcrumb(
                     timestamp: (clock ?? SystemClock.Clock).GetUtcNow(),
                     message: message,
                     category: category,
-                    type: type, data: data?.ToImmutableDictionary(), level: level));
+                    type: type, data: readOnlyData, level: level));
+        }
 
         /// <summary>
         /// Pushes a new scope while locking it which stop new scope creation

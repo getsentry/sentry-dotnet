@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
 
@@ -55,16 +55,16 @@ namespace Sentry.Extensions.Logging
         /// Add a callback to configure the scope upon SDK initialization
         /// </summary>
         /// <param name="action">The function to invoke when initializing the SDK</param>
-        public void ConfigureScope(Action<Scope> action) => ConfigureScopeCallbacks = ConfigureScopeCallbacks.Add(action);
+        public void ConfigureScope(Action<Scope> action) => ConfigureScopeCallbacks.Add(action);
 
         /// <summary>
         /// Log entry filters
         /// </summary>
-        internal ImmutableList<ILogEntryFilter> Filters { get; set; } = ImmutableList<ILogEntryFilter>.Empty;
+        internal List<ILogEntryFilter> Filters { get; set; } = new List<ILogEntryFilter>(0);
 
         /// <summary>
         /// List of callbacks to be invoked when initializing the SDK
         /// </summary>
-        internal ImmutableList<Action<Scope>> ConfigureScopeCallbacks { get; set; } = ImmutableList<Action<Scope>>.Empty;
+        internal List<Action<Scope>> ConfigureScopeCallbacks { get; set; } = new List<Action<Scope>>(0);
     }
 }

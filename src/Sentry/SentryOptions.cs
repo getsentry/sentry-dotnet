@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
@@ -32,27 +31,27 @@ namespace Sentry
         /// <summary>
         /// A list of exception processors
         /// </summary>
-        internal ImmutableList<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
+        internal List<ISentryEventExceptionProcessor> ExceptionProcessors { get; set; }
 
         /// <summary>
         /// A list of event processors
         /// </summary>
-        internal ImmutableList<ISentryEventProcessor> EventProcessors { get; set; }
+        internal List<ISentryEventProcessor> EventProcessors { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventProcessor"/>
         /// </summary>
-        internal ImmutableList<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
+        internal List<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
         /// </summary>
-        internal ImmutableList<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
+        internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of integrations to be added when the SDK is initialized
         /// </summary>
-        internal ImmutableList<ISdkIntegration> Integrations { get; set; }
+        internal List<ISdkIntegration> Integrations { get; set; }
 
         internal IBackgroundWorker BackgroundWorker { get; set; }
 
@@ -69,7 +68,7 @@ namespace Sentry
         /// <example>
         /// 'System.', 'Microsoft.'
         /// </example>
-        internal ImmutableList<string> InAppExclude { get; set; }
+        internal List<string> InAppExclude { get; set; }
 
         /// <summary>
         /// A list of namespaces (or prefixes) considered part of application code
@@ -83,7 +82,7 @@ namespace Sentry
         /// 'System.CustomNamespace', 'Microsoft.Azure.App'
         /// </example>
         /// <seealso href="https://docs.sentry.io/error-reporting/configuration/?platform=csharp#in-app-include"/>
-        internal ImmutableList<string> InAppInclude { get; set; }
+        internal List<string> InAppInclude { get; set; }
 
         /// <summary>
         /// Whether to include default Personal Identifiable information
@@ -341,25 +340,28 @@ namespace Sentry
         /// </summary>
         public SentryOptions()
         {
-            EventProcessorsProviders
-                = ImmutableList.Create<Func<IEnumerable<ISentryEventProcessor>>>(
-                    () => EventProcessors);
+            EventProcessorsProviders = new List<Func<IEnumerable<ISentryEventProcessor>>>
+                {
+                   () => EventProcessors
+                };
 
-            ExceptionProcessorsProviders
-                = ImmutableList.Create<Func<IEnumerable<ISentryEventExceptionProcessor>>>(
-                    () => ExceptionProcessors);
+            ExceptionProcessorsProviders = new List<Func<IEnumerable<ISentryEventExceptionProcessor>>>()
+                {
+                    () => ExceptionProcessors
+                };
 
             SentryStackTraceFactory = new SentryStackTraceFactory(this);
             _sentryStackTraceFactoryAccessor = () => SentryStackTraceFactory;
 
-            EventProcessors
-                = ImmutableList.Create<ISentryEventProcessor>(
-                    // de-dupe to be the first to run
-                    new DuplicateEventDetectionEventProcessor(this),
-                    new MainSentryEventProcessor(this, _sentryStackTraceFactoryAccessor));
+            EventProcessors = new List<ISentryEventProcessor>
+            {
+                // de-dupe to be the first to run
+                new DuplicateEventDetectionEventProcessor(this),
+                new MainSentryEventProcessor(this, _sentryStackTraceFactoryAccessor)
+            };
 
 #if SYSTEM_WEB
-            EventProcessors = EventProcessors.Add(
+            EventProcessors.Add(
                 new SystemWebRequestEventProcessor(
                     new RequestBodyExtractionDispatcher(
                         new IRequestPayloadExtractor[]
@@ -372,16 +374,18 @@ namespace Sentry
                     this));
 #endif
 
-            ExceptionProcessors
-                = ImmutableList.Create<ISentryEventExceptionProcessor>(
-                    new MainExceptionProcessor(this, _sentryStackTraceFactoryAccessor));
+            ExceptionProcessors = new List<ISentryEventExceptionProcessor>()
+            {
+                new MainExceptionProcessor(this, _sentryStackTraceFactoryAccessor)
+            };
 
-            Integrations
-                = ImmutableList.Create<ISdkIntegration>(
-                    new AppDomainUnhandledExceptionIntegration());
+            Integrations = new List<ISdkIntegration>
+            {
+                new AppDomainUnhandledExceptionIntegration()
+            };
 
-            InAppExclude
-                = ImmutableList.Create(
+            InAppExclude = new List<string>
+                {
                     "System.",
                     "Microsoft.",
                     "MS", // MS.Win32, MS.Internal, etc: Desktop apps
@@ -389,9 +393,11 @@ namespace Sentry
                     "FSharp.",
                     "Serilog",
                     "Giraffe.",
-                    "NLog");
+                    "NLog"
 
-            InAppInclude = ImmutableList<string>.Empty;
+                };
+
+            InAppInclude = new List<string>(0);
         }
     }
 }

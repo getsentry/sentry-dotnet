@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Immutable;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,15 +10,15 @@ namespace Sentry.Internal
     internal class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly AsyncLocal<ImmutableStack<(Scope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ImmutableStack<(Scope, ISentryClient)>>();
+        private readonly AsyncLocal<ConcurrentStack<(Scope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ConcurrentStack<(Scope, ISentryClient)>>();
 
-        internal ImmutableStack<(Scope scope, ISentryClient client)> ScopeAndClientStack
+        internal ConcurrentStack<(Scope scope, ISentryClient client)> ScopeAndClientStack
         {
             get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = NewStack());
             set => _asyncLocalScope.Value = value;
         }
 
-        private Func<ImmutableStack<(Scope, ISentryClient)>> NewStack { get; }
+        private Func<ConcurrentStack<(Scope, ISentryClient)>> NewStack { get; }
 
         public SentryScopeManager(
             SentryOptions options,
@@ -26,10 +26,14 @@ namespace Sentry.Internal
         {
             Debug.Assert(rootClient != null);
             _options = options;
-            NewStack = () => ImmutableStack.Create((new Scope(options), rootClient));
+            NewStack = () => new ConcurrentStack<(Scope, ISentryClient)>(new[] { (new Scope(options), rootClient) });
         }
 
-        public (Scope Scope, ISentryClient Client) GetCurrent() => ScopeAndClientStack.Peek();
+        public (Scope Scope, ISentryClient Client) GetCurrent()
+        {
+            ScopeAndClientStack.TryPeek(out var tuple);
+            return tuple;
+        } 
 
         public void ConfigureScope(Action<Scope> configureScope)
         {
@@ -50,7 +54,8 @@ namespace Sentry.Internal
         public IDisposable PushScope<TState>(TState state)
         {
             var currentScopeAndClientStack = ScopeAndClientStack;
-            var (scope, client) = currentScopeAndClientStack.Peek();
+            currentScopeAndClientStack.TryPeek(out var tuple);
+            var (scope, client) = tuple;
 
             if (scope.Locked)
             {
@@ -67,7 +72,7 @@ namespace Sentry.Internal
             }
             var scopeSnapshot = new ScopeSnapshot(_options, currentScopeAndClientStack, this);
             _options?.DiagnosticLogger?.LogDebug("New scope pushed.");
-            ScopeAndClientStack = currentScopeAndClientStack.Push((clonedScope, client));
+            currentScopeAndClientStack.Push((clonedScope, client));
 
             return scopeSnapshot;
         }
@@ -86,20 +91,19 @@ namespace Sentry.Internal
             _options?.DiagnosticLogger?.LogDebug("Binding a new client to the current scope.");
 
             var currentScopeAndClientStack = ScopeAndClientStack;
-            currentScopeAndClientStack = currentScopeAndClientStack.Pop(out var top);
-            currentScopeAndClientStack = currentScopeAndClientStack.Push((top.scope, client ?? DisabledHub.Instance));
-            ScopeAndClientStack = currentScopeAndClientStack;
+            currentScopeAndClientStack.TryPop(out var top);
+            currentScopeAndClientStack.Push((top.scope, client ?? DisabledHub.Instance));
         }
 
         private class ScopeSnapshot : IDisposable
         {
             private readonly SentryOptions _options;
-            private readonly ImmutableStack<(Scope scope, ISentryClient client)> _snapshot;
+            private readonly ConcurrentStack<(Scope scope, ISentryClient client)> _snapshot;
             private readonly SentryScopeManager _scopeManager;
 
             public ScopeSnapshot(
                 SentryOptions options,
-                ImmutableStack<(Scope, ISentryClient)> snapshot,
+                ConcurrentStack<(Scope, ISentryClient)> snapshot,
                 SentryScopeManager scopeManager)
             {
                 Debug.Assert(snapshot != null);
@@ -116,7 +120,8 @@ namespace Sentry.Internal
                 // Only reset the parent if this is still the current scope
                 foreach (var (scope, _) in _scopeManager.ScopeAndClientStack)
                 {
-                    if (ReferenceEquals(scope, _snapshot.Peek().scope))
+                    _snapshot.TryPeek(out var tuple);
+                    if (ReferenceEquals(scope, tuple.scope))
                     {
                         _scopeManager.ScopeAndClientStack = _snapshot;
                         break;
