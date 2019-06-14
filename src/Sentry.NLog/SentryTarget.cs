@@ -211,16 +211,9 @@ namespace Sentry.NLog
         /// <inheritdoc />
         protected override void FlushAsync(AsyncContinuation asyncContinuation)
         {
-            try
-            {
-                _hubAccessor().FlushAsync(Options.FlushTimeout);
-
-                asyncContinuation(null);
-            }
-            catch (Exception e)
-            {
-                asyncContinuation(e);
-            }
+            _hubAccessor()
+                .FlushAsync(Options.FlushTimeout)
+                .ContinueWith(t => asyncContinuation(t.Exception));
         }
 
         /// <summary>
