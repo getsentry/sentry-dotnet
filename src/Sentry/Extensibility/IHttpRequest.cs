@@ -15,11 +15,11 @@ namespace Sentry.Extensibility
         /// <summary>
         /// The content type.
         /// </summary>
-        string ContentType { get; }
+        string? ContentType { get; }
         /// <summary>
         /// The request body.
         /// </summary>
-        Stream Body { get; }
+        Stream? Body { get; }
         /// <summary>
         /// Represents the parsed form values sent with the HttpRequest.
         /// </summary>

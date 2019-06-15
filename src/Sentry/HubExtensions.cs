@@ -25,10 +25,10 @@ namespace Sentry
         /// <param name="level">Breadcrumb level</param>
         public static void AddBreadcrumb(
             this IHub hub,
-            string message,
-            string category = null,
-            string type = null,
-            IDictionary<string, string> data = null,
+            string? message,
+            string? category = null,
+            string? type = null,
+            IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => hub.AddBreadcrumb(
                 clock: null,
@@ -54,11 +54,11 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
             this IHub hub,
-            ISystemClock clock,
-            string message,
-            string category = null,
-            string type = null,
-            IDictionary<string, string> data = null,
+            ISystemClock? clock,
+            string? message,
+            string? category = null,
+            string? type = null,
+            IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => hub.ConfigureScope(
                 s => s.AddBreadcrumb(

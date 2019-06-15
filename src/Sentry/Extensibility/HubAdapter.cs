@@ -57,9 +57,9 @@ namespace Sentry.Extensibility
         [DebuggerStepThrough]
         public void AddBreadcrumb(
             string message,
-            string category = null,
-            string type = null,
-            IDictionary<string, string> data = null,
+            string? category = null,
+            string? type = null,
+            IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => SentrySdk.AddBreadcrumb(message, category, type, data, level);
 
@@ -67,10 +67,10 @@ namespace Sentry.Extensibility
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void AddBreadcrumb(
             ISystemClock clock,
-            string message,
-            string category = null,
-            string type = null,
-            IDictionary<string, string> data = null,
+            string? message,
+            string? category = null,
+            string? type = null,
+            IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => SentrySdk.AddBreadcrumb(
                 clock: clock,
@@ -90,7 +90,7 @@ namespace Sentry.Extensibility
 
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope)
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
             => SentrySdk.CaptureEvent(evt, scope);
 
         [DebuggerStepThrough]

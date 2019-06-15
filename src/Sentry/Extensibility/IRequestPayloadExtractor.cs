@@ -10,6 +10,6 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="request">The HTTP Request object.</param>
         /// <returns>The extracted payload.</returns>
-        object ExtractPayload(IHttpRequest request);
+        object? ExtractPayload(IHttpRequest request);
     }
 }

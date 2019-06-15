@@ -10,7 +10,7 @@ namespace Sentry.Internal
     internal class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly AsyncLocal<ImmutableStack<(Scope, ISentryClient)>> _asyncLocalScope = new AsyncLocal<ImmutableStack<(Scope, ISentryClient)>>();
+        private readonly AsyncLocal<ImmutableStack<(Scope, ISentryClient)>?> _asyncLocalScope = new AsyncLocal<ImmutableStack<(Scope, ISentryClient)>?>();
 
         internal ImmutableStack<(Scope scope, ISentryClient client)> ScopeAndClientStack
         {
@@ -45,7 +45,7 @@ namespace Sentry.Internal
             return configureScope?.Invoke(scope.Scope) ?? Task.CompletedTask;
         }
 
-        public IDisposable PushScope() => PushScope<object>(null);
+        public IDisposable PushScope() => PushScope<object?>(null);
 
         public IDisposable PushScope<TState>(TState state)
         {
@@ -114,8 +114,9 @@ namespace Sentry.Internal
                 _options?.DiagnosticLogger?.LogDebug("Disposing scope.");
 
                 // Only reset the parent if this is still the current scope
-                foreach (var (scope, _) in _scopeManager.ScopeAndClientStack)
+                foreach (var tuple in _scopeManager.ScopeAndClientStack)
                 {
+                    var (scope, _) = tuple;
                     if (ReferenceEquals(scope, _snapshot.Peek().scope))
                     {
                         _scopeManager.ScopeAndClientStack = _snapshot;

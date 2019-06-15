@@ -14,6 +14,6 @@ namespace Sentry.Internal
             _func = func;
         }
 
-        public SentryEvent Process(SentryEvent @event) => _func(@event);
+        public SentryEvent? Process(SentryEvent @event) => _func(@event);
     }
 }

@@ -54,9 +54,9 @@ namespace Sentry
         /// </summary>
         internal ImmutableList<ISdkIntegration> Integrations { get; set; }
 
-        internal IBackgroundWorker BackgroundWorker { get; set; }
+        internal IBackgroundWorker? BackgroundWorker { get; set; }
 
-        internal ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
+        internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
         /// <summary>
         /// A list of namespaces (or prefixes) considered not part of application code
@@ -165,7 +165,7 @@ namespace Sentry
         /// default values for new projects, they are not considered valid by the discovery process.
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/learn/releases/"/>
-        public string Release { get; set; }
+        public string? Release { get; set; }
 
         /// <summary>
         /// The environment the application is running
@@ -179,12 +179,12 @@ namespace Sentry
         /// Production, Staging
         /// </example>
         /// <seealso href="https://docs.sentry.io/learn/environments/"/>
-        public string Environment { get; set; }
+        public string? Environment { get; set; }
 
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
         /// </summary>
-        public Dsn Dsn { get; set; }
+        public Dsn? Dsn { get; set; }
 
         /// <summary>
         /// A callback to invoke before sending an event to Sentry
@@ -194,7 +194,7 @@ namespace Sentry
         /// a chance to inspect and/or modify the event before it's sent. If the event
         /// should not be sent at all, return null from the callback.
         /// </remarks>
-        public Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
+        public Func<SentryEvent, SentryEvent>? BeforeSend { get; set; }
 
         /// <summary>
         /// A callback invoked when a breadcrumb is about to be stored.
@@ -202,7 +202,7 @@ namespace Sentry
         /// <remarks>
         /// Gives a chance to inspect and modify/reject a breadcrumb.
         /// </remarks>
-        public Func<Breadcrumb, Breadcrumb> BeforeBreadcrumb { get; set; }
+        public Func<Breadcrumb, Breadcrumb>? BeforeBreadcrumb { get; set; }
 
         private int _maxQueueItems = 30;
         /// <summary>
@@ -267,17 +267,17 @@ namespace Sentry
         /// <summary>
         /// An optional web proxy
         /// </summary>
-        public IWebProxy HttpProxy { get; set; }
+        public IWebProxy? HttpProxy { get; set; }
 
         /// <summary>
         /// A callback invoked when a <see cref="SentryClient"/> is created.
         /// </summary>
-        public Action<HttpClientHandler, Dsn> ConfigureHandler { get; set; }
+        public Action<HttpClientHandler, Dsn>? ConfigureHandler { get; set; }
 
         /// <summary>
         /// A callback invoked when a <see cref="SentryClient"/> is created.
         /// </summary>
-        public Action<HttpClient, Dsn> ConfigureClient { get; set; }
+        public Action<HttpClient, Dsn>? ConfigureClient { get; set; }
 
         private volatile bool _debug;
 
@@ -302,7 +302,7 @@ namespace Sentry
         /// </remarks>
         public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Debug;
 
-        private volatile IDiagnosticLogger _diagnosticLogger;
+        private volatile IDiagnosticLogger? _diagnosticLogger;
         /// <summary>
         /// The implementation of the logger.
         /// </summary>
@@ -310,7 +310,7 @@ namespace Sentry
         /// The <see cref="Debug"/> flag has to be switched on for this logger to be used at all.
         /// When debugging is turned off, this property is made null and any internal logging results in a no-op.
         /// </remarks>
-        public IDiagnosticLogger DiagnosticLogger
+        public IDiagnosticLogger? DiagnosticLogger
         {
             get => Debug ? _diagnosticLogger : null;
             set

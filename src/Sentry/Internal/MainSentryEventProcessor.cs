@@ -15,8 +15,8 @@ namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
-        private readonly Lazy<string> _release = new Lazy<string>(ReleaseLocator.GetCurrent);
-        private readonly Lazy<Runtime> _runtime = new Lazy<Runtime>(() =>
+        private readonly Lazy<string?> _release = new Lazy<string?>(ReleaseLocator.GetCurrent);
+        private readonly Lazy<Runtime?> _runtime = new Lazy<Runtime?>(() =>
         {
             var current = PlatformAbstractions.Runtime.Current;
             return current != null
@@ -37,8 +37,8 @@ namespace Sentry.Internal
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
-        internal string Release => _release.Value;
-        internal Runtime Runtime => _runtime.Value;
+        internal string? Release => _release.Value;
+        internal Runtime? Runtime => _runtime.Value;
 
         public MainSentryEventProcessor(
             SentryOptions options,
@@ -50,7 +50,7 @@ namespace Sentry.Internal
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
         }
 
-        public SentryEvent Process(SentryEvent @event)
+        public SentryEvent? Process(SentryEvent @event)
         {
             _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
 

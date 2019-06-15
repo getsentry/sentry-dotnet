@@ -63,20 +63,20 @@ namespace Sentry.Extensibility
         public static void LogError(
             this IDiagnosticLogger logger,
             string message,
-            Exception exception = null)
+            Exception? exception = null)
             => logger.LogIfEnabled(SentryLevel.Error, message, exception);
 
         public static void LogError<TArg>(
             this IDiagnosticLogger logger,
             string message,
-            Exception exception,
+            Exception? exception,
             TArg arg)
             => logger.LogIfEnabled(SentryLevel.Error, message, exception, arg);
 
         public static void LogError<TArg, TArg2>(
             this IDiagnosticLogger logger,
             string message,
-            Exception exception,
+            Exception? exception,
             TArg arg,
             TArg2 arg2)
             => logger.LogIfEnabled(SentryLevel.Error, message, exception, arg, arg2);
@@ -84,14 +84,14 @@ namespace Sentry.Extensibility
         public static void LogFatal(
             this IDiagnosticLogger logger,
             string message,
-            Exception exception = null)
+            Exception? exception = null)
             => logger.LogIfEnabled(SentryLevel.Fatal, message, exception);
 
         internal static void LogIfEnabled(
             this IDiagnosticLogger logger,
             SentryLevel level,
             string message,
-            Exception exception = null)
+            Exception? exception = null)
         {
             if (logger?.IsEnabled(level) == true)
             {
@@ -104,7 +104,7 @@ namespace Sentry.Extensibility
             SentryLevel level,
             string message,
             TArg arg,
-            Exception exception = null)
+            Exception? exception = null)
         {
             if (logger?.IsEnabled(level) == true)
             {
@@ -118,7 +118,7 @@ namespace Sentry.Extensibility
             string message,
             TArg arg,
             TArg2 arg2,
-            Exception exception = null)
+            Exception? exception = null)
         {
             if (logger?.IsEnabled(level) == true)
             {
@@ -133,7 +133,7 @@ namespace Sentry.Extensibility
             TArg arg,
             TArg2 arg2,
             TArg3 arg3,
-            Exception exception = null)
+            Exception? exception = null)
         {
             if (logger?.IsEnabled(level) == true)
             {

@@ -22,7 +22,7 @@ namespace Sentry.Extensibility
 
         public void BindClient(ISentryClient client) { }
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => SentryId.Empty;
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => SentryId.Empty;
 
         public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
 

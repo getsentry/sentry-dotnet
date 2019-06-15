@@ -98,7 +98,7 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null)
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
             {

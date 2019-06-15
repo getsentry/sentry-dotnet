@@ -17,7 +17,7 @@ namespace Sentry.Extensibility
             _sizeSwitch = sizeSwitch ?? throw new ArgumentNullException(nameof(sizeSwitch));
         }
 
-        public object ExtractPayload(IHttpRequest request)
+        public object? ExtractPayload(IHttpRequest request)
         {
             if (request == null)
             {

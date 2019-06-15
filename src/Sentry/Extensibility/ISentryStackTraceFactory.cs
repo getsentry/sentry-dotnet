@@ -13,6 +13,6 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="exception">The exception to create the stacktrace from.</param>
         /// <returns>A Sentry stack trace.</returns>
-        SentryStackTrace Create(Exception exception = null);
+        SentryStackTrace? Create(Exception? exception = null);
     }
 }

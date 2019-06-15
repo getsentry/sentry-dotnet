@@ -44,10 +44,10 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
-        public static IDisposable Init(string dsn)
+        public static IDisposable Init(string? dsn)
             => string.IsNullOrWhiteSpace(dsn)
                 ? DisabledHub.Instance
-                : Init(c => c.Dsn = new Dsn(dsn));
+                : Init(c => c.Dsn = new Dsn(dsn!));
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
@@ -121,12 +121,12 @@ namespace Sentry
 
         private class DisposeHandle : IDisposable
         {
-            private IHub _localHub;
+            private IHub? _localHub;
             public DisposeHandle(IHub hub) => _localHub = hub;
 
             public void Dispose()
             {
-                Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
+                Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub!);
                 (_localHub as IDisposable)?.Dispose();
                 _localHub = null;
             }
@@ -189,10 +189,10 @@ namespace Sentry
         /// <seealso href="https://docs.sentry.io/clientdev/interfaces/breadcrumbs/"/>
         [DebuggerStepThrough]
         public static void AddBreadcrumb(
-            string message,
-            string category = null,
-            string type = null,
-            IDictionary<string, string> data = null,
+            string? message,
+            string? category = null,
+            string? type = null,
+            IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => _hub.AddBreadcrumb(message, category, type, data, level);
 
@@ -212,11 +212,11 @@ namespace Sentry
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
-            ISystemClock clock,
-            string message,
-            string category = null,
-            string type = null,
-            IDictionary<string, string> data = null,
+            ISystemClock? clock,
+            string? message,
+            string? category = null,
+            string? type = null,
+            IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => _hub.AddBreadcrumb(clock, message, category, type, data, level);
 
@@ -266,7 +266,7 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static SentryId CaptureEvent(SentryEvent evt, Scope scope)
+        public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
             => _hub.CaptureEvent(evt, scope);
 
         /// <summary>

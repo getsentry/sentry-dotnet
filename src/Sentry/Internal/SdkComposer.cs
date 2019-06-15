@@ -28,8 +28,8 @@ namespace Sentry.Internal
             var addAuth = SentryHeaders.AddSentryAuth(
                 _options.SentryVersion,
                 _options.ClientVersion,
-                _options.Dsn.PublicKey,
-                _options.Dsn.SecretKey);
+                _options.Dsn!.PublicKey,
+                _options.Dsn!.SecretKey);
 
             if (_options.SentryHttpClientFactory is ISentryHttpClientFactory factory)
             {

@@ -2,9 +2,10 @@ namespace Sentry.Extensibility
 {
     public abstract class BaseRequestPayloadExtractor : IRequestPayloadExtractor
     {
-        public object ExtractPayload(IHttpRequest request)
+        public object? ExtractPayload(IHttpRequest request)
         {
-            if (!request.Body.CanSeek
+            if (request.Body == null
+                || !request.Body.CanSeek
                 || !request.Body.CanRead
                 || !IsSupported(request))
             {
@@ -26,6 +27,6 @@ namespace Sentry.Extensibility
 
         protected abstract bool IsSupported(IHttpRequest request);
 
-        protected abstract object DoExtractPayLoad(IHttpRequest request);
+        protected abstract object? DoExtractPayLoad(IHttpRequest request);
     }
 }

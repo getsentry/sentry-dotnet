@@ -11,7 +11,7 @@ namespace Sentry.Extensibility
             => SupportedContentType
                 .Equals(request.ContentType, StringComparison.InvariantCulture);
 
-        protected override object DoExtractPayLoad(IHttpRequest request)
+        protected override object? DoExtractPayLoad(IHttpRequest request)
             => request.Form?.ToDictionary(k => k.Key, v => v.Value);
     }
 }

@@ -23,7 +23,7 @@ namespace Sentry.Internal.Http
             string clientVersion,
             string publicKey,
             string secretKey,
-            ISystemClock clock = null)
+            ISystemClock? clock = null)
         {
             clock = clock ?? SystemClock.Clock;
 

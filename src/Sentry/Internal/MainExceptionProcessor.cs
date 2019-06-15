@@ -106,11 +106,11 @@ namespace Sentry.Internal
             yield return sentryEx;
         }
 
-        internal static Mechanism GetMechanism(Exception exception)
+        internal static Mechanism? GetMechanism(Exception exception)
         {
             Debug.Assert(exception != null);
 
-            Mechanism mechanism = null;
+            Mechanism? mechanism = null;
 
             if (exception.HelpLink != null)
             {

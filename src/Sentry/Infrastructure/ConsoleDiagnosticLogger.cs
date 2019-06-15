@@ -30,7 +30,7 @@ namespace Sentry.Infrastructure
         /// <param name="message"></param>
         /// <param name="exception"></param>
         /// <param name="args"></param>
-        public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+        public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
             => Console.Write($@"{logLevel,7}: {string.Format(message, args)}
 {exception}");
     }

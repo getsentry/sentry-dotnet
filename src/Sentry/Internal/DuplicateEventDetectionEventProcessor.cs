@@ -7,11 +7,11 @@ namespace Sentry.Internal
     internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
     {
         private readonly SentryOptions _options;
-        private readonly ConditionalWeakTable<object, object> _capturedEvent = new ConditionalWeakTable<object, object>();
+        private readonly ConditionalWeakTable<object, object?> _capturedEvent = new ConditionalWeakTable<object, object?>();
 
         public DuplicateEventDetectionEventProcessor(SentryOptions options) => _options = options;
 
-        public SentryEvent Process(SentryEvent @event)
+        public SentryEvent? Process(SentryEvent @event)
         {
             if (_capturedEvent.TryGetValue(@event, out _))
             {

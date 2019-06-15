@@ -33,7 +33,7 @@ namespace Sentry.Internal
             _hub = new Hub(options);
         }
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => _hub.CaptureEvent(evt, scope);
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => _hub.CaptureEvent(evt, scope);
 
         public Task FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
 

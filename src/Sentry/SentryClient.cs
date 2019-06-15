@@ -43,7 +43,7 @@ namespace Sentry
 
         internal SentryClient(
             SentryOptions options,
-            IBackgroundWorker worker)
+            IBackgroundWorker? worker)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
@@ -71,7 +71,7 @@ namespace Sentry
         /// <param name="scope">The optional scope to augment the event with.</param>
         /// <returns></returns>
         /// <inheritdoc />
-        public SentryId CaptureEvent(SentryEvent @event, Scope scope = null)
+        public SentryId CaptureEvent(SentryEvent @event, Scope? scope = null)
         {
             if (_disposed)
             {
@@ -101,8 +101,13 @@ namespace Sentry
         /// <returns>A task to await for the flush operation.</returns>
         public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
-        private SentryId DoSendEvent(SentryEvent @event, Scope scope)
+        private SentryId DoSendEvent(SentryEvent? @event, Scope? scope)
         {
+            if (@event == null)
+            {
+                return SentryId.Empty;
+            }
+
             if (_options.SampleRate is float sample)
             {
                 if (Random.NextDouble() > sample)
@@ -164,23 +169,24 @@ namespace Sentry
             return SentryId.Empty;
         }
 
-        private SentryEvent BeforeSend(SentryEvent @event)
+        private SentryEvent? BeforeSend(SentryEvent @event)
         {
+            SentryEvent? returnEvent = @event;
             if (_options.BeforeSend == null)
             {
-                return @event;
+                return returnEvent;
             }
 
             _options.DiagnosticLogger?.LogDebug("Calling the BeforeSend callback");
             try
             {
-                @event = _options.BeforeSend?.Invoke(@event);
+                returnEvent = _options.BeforeSend?.Invoke(@event);
             }
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
 
-                @event.AddBreadcrumb(
+                returnEvent.AddBreadcrumb(
                     "BeforeSend callback failed.",
                     category: "SentryClient",
                     data: new Dictionary<string, string>
@@ -191,7 +197,7 @@ namespace Sentry
                     level: BreadcrumbLevel.Error);
             }
 
-            return @event;
+            return returnEvent;
         }
 
         /// <summary>

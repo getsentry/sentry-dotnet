@@ -22,7 +22,7 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="exception">The exception to create the stacktrace from.</param>
         /// <returns>A Sentry stack trace.</returns>
-        public SentryStackTrace Create(Exception exception = null)
+        public SentryStackTrace? Create(Exception? exception = null)
         {
             var isCurrentStackTrace = exception == null && _options.AttachStacktrace;
 
@@ -37,10 +37,10 @@ namespace Sentry.Extensibility
             return Create(CreateStackTrace(exception), isCurrentStackTrace);
         }
 
-        protected virtual StackTrace CreateStackTrace(Exception exception) =>
+        protected virtual StackTrace? CreateStackTrace(Exception? exception) =>
             exception == null ? new StackTrace(true) : new StackTrace(exception, true);
 
-        internal SentryStackTrace Create(StackTrace stackTrace, bool isCurrentStackTrace)
+        internal SentryStackTrace? Create(StackTrace? stackTrace, bool isCurrentStackTrace)
         {
             var frames = CreateFrames(stackTrace, isCurrentStackTrace)
                 // Sentry expects the frames to be sent in reversed order
@@ -58,7 +58,7 @@ namespace Sentry.Extensibility
                 : stacktrace;
         }
 
-        internal IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
+        internal IEnumerable<SentryStackFrame> CreateFrames(StackTrace? stackTrace, bool isCurrentStackTrace)
         {
             var frames = stackTrace?.GetFrames();
             if (frames == null)

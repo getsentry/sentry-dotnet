@@ -66,6 +66,11 @@ namespace Sentry.Internal.Http
 
         internal HttpRequestMessage CreateRequest(SentryEvent @event)
         {
+            if (_options.Dsn == null)
+            {
+                throw new ArgumentException("Request can't be built without a DSN.");
+            }
+
             var request = new HttpRequestMessage
             {
                 RequestUri = _options.Dsn.SentryUri,

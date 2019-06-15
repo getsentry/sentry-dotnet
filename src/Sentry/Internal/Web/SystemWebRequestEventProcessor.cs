@@ -20,7 +20,7 @@ namespace Sentry.Internal.Web
             PayloadExtractor = payloadExtractor ?? throw new ArgumentNullException(nameof(payloadExtractor));
         }
 
-        public SentryEvent Process(SentryEvent @event)
+        public SentryEvent? Process(SentryEvent @event)
         {
             var context = HttpContext.Current;
             if (context == null || @event == null)
@@ -85,7 +85,7 @@ namespace Sentry.Internal.Web
             {
                 @event.Contexts["server-os"] = os;
             }
-            
+
             var body = PayloadExtractor.ExtractPayload(new SystemWebHttpRequest(context.Request));
             if (body != null)
             {

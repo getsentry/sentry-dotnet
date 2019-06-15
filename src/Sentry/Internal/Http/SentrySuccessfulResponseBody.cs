@@ -18,7 +18,7 @@ namespace Sentry.Internal.Http
 #pragma warning disable IDE1006 // Naming Styles
 #pragma warning disable S1144 // Unused private types or members should be removed
 #pragma warning disable S3459 // Unassigned members should be removed
-        public string id { get; set; }
+        public string? id { get; set; }
     }
 }
 #endif

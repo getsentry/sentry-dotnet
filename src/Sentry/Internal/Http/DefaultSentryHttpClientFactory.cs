@@ -12,8 +12,8 @@ namespace Sentry.Internal.Http
     /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
-        private readonly Action<HttpClientHandler, Dsn> _configureHandler;
-        private readonly Action<HttpClient, Dsn> _configureClient;
+        private readonly Action<HttpClientHandler, Dsn>? _configureHandler;
+        private readonly Action<HttpClient, Dsn>? _configureClient;
 
         /// <summary>
         /// Creates a new instance of <see cref="DefaultSentryHttpClientFactory"/>
@@ -21,8 +21,8 @@ namespace Sentry.Internal.Http
         /// <param name="configureHandler">An optional configuration callback</param>
         /// <param name="configureClient">An optional HttpClient configuration callback</param>
         public DefaultSentryHttpClientFactory(
-            Action<HttpClientHandler, Dsn> configureHandler = null,
-            Action<HttpClient, Dsn> configureClient = null)
+            Action<HttpClientHandler, Dsn>? configureHandler = null,
+            Action<HttpClient, Dsn>? configureClient = null)
         {
             _configureHandler = configureHandler;
             _configureClient = configureClient;

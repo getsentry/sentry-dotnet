@@ -7,7 +7,7 @@ namespace Sentry.Extensibility
     {
         protected override bool IsSupported(IHttpRequest request) => true;
 
-        protected override object DoExtractPayLoad(IHttpRequest request)
+        protected override object? DoExtractPayLoad(IHttpRequest request)
         {
             // https://github.com/dotnet/corefx/blob/master/src/Common/src/CoreLib/System/IO/StreamReader.cs#L186
             // Default parameters other than 'leaveOpen'
@@ -19,7 +19,7 @@ namespace Sentry.Extensibility
                 // A custom serializer that would take the stream and read from it into the output stream would add more value
                 // as it would avoid the need to create the following (possibly huge) string
                 var body = reader.ReadToEnd();
-                return body.Length == 0
+                return body?.Length == 0
                     ? null
                     : body;
             }

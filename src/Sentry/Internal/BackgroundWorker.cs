@@ -31,8 +31,8 @@ namespace Sentry.Internal
         internal BackgroundWorker(
             ITransport transport,
             SentryOptions options,
-            CancellationTokenSource cancellationTokenSource = null,
-            ConcurrentQueue<SentryEvent> queue = null)
+            CancellationTokenSource? cancellationTokenSource = null,
+            ConcurrentQueue<SentryEvent>? queue = null)
         {
             Debug.Assert(transport != null);
             Debug.Assert(options != null);
