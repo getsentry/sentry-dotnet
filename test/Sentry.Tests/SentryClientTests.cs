@@ -110,7 +110,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             var evaluated = false;
-            object actualSender = null;
+            object? actualSender = null;
             scope.OnEvaluating += (sender, args) =>
             {
                 actualSender = sender;
@@ -153,7 +153,7 @@ namespace Sentry.Tests
         [Fact]
         public void CaptureEvent_BeforeEvent_ModifyEvent()
         {
-            SentryEvent received = null;
+            SentryEvent? received = null;
             _fixture.SentryOptions.BeforeSend = e => received = e;
 
             var @event = new SentryEvent();

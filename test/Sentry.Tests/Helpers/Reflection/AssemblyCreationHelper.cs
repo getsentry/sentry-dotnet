@@ -18,7 +18,7 @@ namespace Sentry.Tests.Helpers.Reflection
             return assemblyBuilder;
         }
 
-        public static Assembly CreateAssembly(AssemblyName asmName = null)
+        public static Assembly CreateAssembly(AssemblyName? asmName = null)
         {
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
                 asmName ?? new AssemblyName(Guid.NewGuid().ToString()),
@@ -27,7 +27,7 @@ namespace Sentry.Tests.Helpers.Reflection
             return assemblyBuilder;
         }
 
-        public static Assembly CreateWithInformationalVersion(string version, AssemblyName asmName = null)
+        public static Assembly CreateWithInformationalVersion(string version, AssemblyName? asmName = null)
         {
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
                 asmName ?? new AssemblyName(Guid.NewGuid().ToString()),

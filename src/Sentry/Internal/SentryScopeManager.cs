@@ -116,6 +116,7 @@ namespace Sentry.Internal
                 // Only reset the parent if this is still the current scope
                 foreach (var tuple in _scopeManager.ScopeAndClientStack)
                 {
+                    // TODO: Work around for: https://github.com/dotnet/roslyn/issues/34724
                     var (scope, _) = tuple;
                     if (ReferenceEquals(scope, _snapshot.Peek().scope))
                     {

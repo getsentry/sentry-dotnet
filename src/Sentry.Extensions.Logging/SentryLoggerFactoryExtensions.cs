@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Logging
         /// <returns></returns>
         public static ILoggerFactory AddSentry(
             this ILoggerFactory factory,
-            Action<SentryLoggingOptions> optionsConfiguration = null)
+            Action<SentryLoggingOptions>? optionsConfiguration = null)
         {
             var options = new SentryLoggingOptions();
 

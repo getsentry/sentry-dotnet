@@ -57,7 +57,7 @@ namespace Samples.AspNetCore.Mvc.Controllers
         }
 
         // Example: The view rendering throws: see about.cshtml
-        public IActionResult About(string who = null)
+        public IActionResult About(string? who = null)
         {
             if (who == null)
             {

@@ -170,7 +170,7 @@ namespace Sentry.NLog
             get => Options.ShutdownTimeoutSeconds;
             set => Options.ShutdownTimeoutSeconds = value;
         }
-        
+
         /// <inheritdoc />
         protected override void CloseTarget()
         {
@@ -197,7 +197,7 @@ namespace Sentry.NLog
         }
 
         /// <summary>
-        /// <para> 
+        /// <para>
         /// If the event level &gt;= the <see cref="MinimumEventLevel"/>, the
         /// <paramref name="logEvent"/> is captured as an event by sentry.
         /// </para>
@@ -281,7 +281,7 @@ namespace Sentry.NLog
                     ? exception?.Message ?? string.Empty
                     : breadcrumbFormatted;
 
-                IDictionary<string, string> data = null;
+                IDictionary<string, string>? data = null;
 
                 // If this is true, an exception is being logged with no custom message
                 if (exception != null && !message.StartsWith(exception.Message))

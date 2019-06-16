@@ -20,10 +20,10 @@ namespace Serilog
         /// <returns></returns>
         public static LoggerConfiguration Sentry(
             this LoggerSinkConfiguration loggerConfiguration,
-            string dsn = null,
+            string? dsn = null,
             LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
             LogEventLevel minimumEventLevel = LogEventLevel.Error,
-            IFormatProvider formatProvider = null)
+            IFormatProvider? formatProvider = null)
             => loggerConfiguration.Sentry(o =>
                 {
                     if (dsn != null)
@@ -42,7 +42,7 @@ namespace Serilog
             var options = new SentrySerilogOptions();
             configureOptions?.Invoke(options);
 
-            IDisposable sdkDisposable = null;
+            IDisposable? sdkDisposable = null;
             if (options.InitializeSdk)
             {
                 sdkDisposable = SentrySdk.Init(options);

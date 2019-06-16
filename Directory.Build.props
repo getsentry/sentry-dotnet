@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <Version>2.0.0-beta2</Version>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

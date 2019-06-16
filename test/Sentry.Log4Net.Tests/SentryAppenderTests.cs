@@ -79,7 +79,7 @@ namespace Sentry.Log4Net.Tests
 
             var evt = new LoggingEvent(new LoggingEventData());
 
-            SentryEvent actual = null;
+            SentryEvent? actual = null;
             _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
                 .Do(c => actual = c.Arg<SentryEvent>());
 

@@ -77,7 +77,7 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void AddSentry_NoDiagnosticSet_MelSet()
         {
-            SentryLoggingOptions options = null;
+            SentryLoggingOptions? options = null;
             var sut = Substitute.For<ILoggerFactory>();
             sut.AddSentry(o =>
             {

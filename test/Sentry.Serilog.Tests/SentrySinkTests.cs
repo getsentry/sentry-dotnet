@@ -104,7 +104,7 @@ namespace Sentry.Serilog.Tests
             var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
                 Enumerable.Empty<LogEventProperty>());
 
-            SentryEvent actual = null;
+            SentryEvent? actual = null;
             _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
                 .Do(c => actual = c.Arg<SentryEvent>());
 
@@ -117,28 +117,28 @@ namespace Sentry.Serilog.Tests
             Assert.Equal("nuget:" + expected.Name, package.Name);
             Assert.Equal(expected.Version, package.Version);
         }
-        
+
         internal class EventLogLevelsData : IEnumerable<object[]>
         {
             public IEnumerator<object[]> GetEnumerator()
             {
-                yield return new object[]{LogEventLevel.Debug, SentryLevel.Debug};
-                yield return new object[]{LogEventLevel.Verbose, SentryLevel.Debug};
-                yield return new object[]{LogEventLevel.Information, SentryLevel.Info};
-                yield return new object[]{LogEventLevel.Warning, SentryLevel.Warning};
-                yield return new object[]{LogEventLevel.Error, SentryLevel.Error};
-                yield return new object[]{LogEventLevel.Fatal, SentryLevel.Fatal};
+                yield return new object[] { LogEventLevel.Debug, SentryLevel.Debug };
+                yield return new object[] { LogEventLevel.Verbose, SentryLevel.Debug };
+                yield return new object[] { LogEventLevel.Information, SentryLevel.Info };
+                yield return new object[] { LogEventLevel.Warning, SentryLevel.Warning };
+                yield return new object[] { LogEventLevel.Error, SentryLevel.Error };
+                yield return new object[] { LogEventLevel.Fatal, SentryLevel.Fatal };
             }
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
-        [Theory]  
+        [Theory]
         [ClassData(typeof(EventLogLevelsData))]
         public void Emit_LoggerLevel_Set(LogEventLevel serilogLevel, SentryLevel? sentryLevel)
         {
 
             var sut = _fixture.GetSut();
-            
+
 
             var evt = new LogEvent(DateTimeOffset.UtcNow, serilogLevel, null, MessageTemplate.Empty,
                 Enumerable.Empty<LogEventProperty>());

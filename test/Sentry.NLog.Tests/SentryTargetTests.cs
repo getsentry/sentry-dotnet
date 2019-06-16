@@ -194,7 +194,7 @@ namespace Sentry.NLog.Tests
         {
             var logger = _fixture.GetLogger(o => o.MinimumEventLevel = LogLevel.Info);
 
-            SentryEvent actual = null;
+            SentryEvent? actual = null;
             _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
                     .Do(c => actual = c.Arg<SentryEvent>());
 
@@ -273,7 +273,7 @@ namespace Sentry.NLog.Tests
         public void Log_NullLogEvent_CaptureNotCalled()
         {
             var sut = _fixture.GetLogger();
-            string message = null;
+            string? message = null;
 
             // ReSharper disable once AssignNullToNotNullAttribute
             sut.Error(message);

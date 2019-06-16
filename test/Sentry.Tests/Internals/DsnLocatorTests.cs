@@ -73,7 +73,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void FindDsn_NullDsnInAsm_ReturnsNull()
         {
-            const string expected = null;
+            const string? expected = null;
 
             var asm = AssemblyCreationHelper.CreateAssemblyWithDsnAttribute(expected);
             var actual = DsnLocator.FindDsn(asm);

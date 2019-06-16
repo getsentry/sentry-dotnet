@@ -25,7 +25,7 @@ namespace NLog
         /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
         /// <returns>The configuration.</returns>
         public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
-                                                           Action<SentryNLogOptions> optionsConfig = null)
+                                                           Action<SentryNLogOptions>? optionsConfig = null)
         {
             return configuration.AddSentry(null, DefaultTargetName, optionsConfig);
         }
@@ -42,7 +42,7 @@ namespace NLog
         /// <returns>The configuration.</returns>
         public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
                                                            string dsn,
-                                                           Action<SentryNLogOptions> optionsConfig = null)
+                                                           Action<SentryNLogOptions>? optionsConfig = null)
         {
             return configuration.AddSentry(dsn, DefaultTargetName, optionsConfig);
         }
@@ -58,7 +58,7 @@ namespace NLog
         public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
                                                            string dsn,
                                                            string targetName,
-                                                           Action<SentryNLogOptions> optionsConfig = null)
+                                                           Action<SentryNLogOptions>? optionsConfig = null)
         {
             var options = new SentryNLogOptions();
 
