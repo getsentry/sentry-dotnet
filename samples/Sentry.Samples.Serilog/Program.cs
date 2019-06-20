@@ -15,6 +15,7 @@ internal class Program
             // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
             .WriteTo.Sentry(o =>
             {
+                o.Debug = true;
                 o.MinimumBreadcrumbLevel = LogEventLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
                 o.MinimumEventLevel = LogEventLevel.Error; // Error and higher is sent as event (default is Error)
                 // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If nothing is found, SDK is disabled.
