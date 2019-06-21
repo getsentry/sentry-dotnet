@@ -19,6 +19,9 @@ Sentry Protocol
 
 This is the base of any .NET SDK
 
+**Looking for the Sentry SDK for .NET? 
+Please refer to [getsentry/sentry-dotnet repository](https://github.com/getsentry/sentry-dotnet).**
+
 For more details, please: **refer to the [documentation](https://getsentry.github.io/sentry-dotnet-protocol/index.html)**
 
 
