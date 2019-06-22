@@ -32,4 +32,14 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
     <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="2.0.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Release'" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />
+
+    <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to .Shipped.txt -->
+    <None Remove="PublicAPI.Shipped.txt" />
+    <None Remove="PublicAPI.Unshipped.txt"/>
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
 </Project>
