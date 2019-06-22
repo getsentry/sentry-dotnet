@@ -26,17 +26,17 @@ namespace Sentry.NLog
         }
         
         /// <summary>
-        /// How long to wait for the flush to finish. Defaults to 2 seconds.
+        /// How long to wait for the flush to finish. Defaults to 15 seconds (same as NLog default).
         /// </summary>
-        public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
+        public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(15);
 
         /// <summary>
-        /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
+        /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="LogLevel.Error" />.
         /// </summary>
         public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
         /// <summary>
-        /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="M:LogLevel.Info" />.
+        /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="LogLevel.Info" />.
         /// </summary>
         public LogLevel MinimumBreadcrumbLevel { get; set; } = LogLevel.Info;
 

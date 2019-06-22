@@ -388,7 +388,7 @@ namespace Sentry.NLog.Tests
 
             factory.Flush(continuation, timeout);
 
-            await Task.Delay(TimeSpan.FromSeconds(NLogTimeout));
+            await Task.Delay(timeout);
             
             testDisposable.Received().Dispose();
             hub.Received().FlushAsync(Arg.Any<TimeSpan>()).GetAwaiter().GetResult();
