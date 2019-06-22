@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
-
+using System.Threading.Tasks;
 using NLog;
+using NLog.Common;
 using NLog.Config;
-
+using NLog.Targets;
+using NLog.Targets.Wrappers;
 using NSubstitute;
 
 using Sentry.Infrastructure;
@@ -42,7 +44,7 @@ namespace Sentry.NLog.Tests
                 Hub.ConfigureScope(Arg.Invoke(Scope));
             }
 
-            public SentryTarget GetTarget(Action<SentryNLogOptions> customConfig = null)
+            public Target GetTarget(Action<SentryNLogOptions> customConfig = null, bool asyncTarget = false)
             {
                 var options = Options;
                 if (customConfig != null)
@@ -51,20 +53,30 @@ namespace Sentry.NLog.Tests
                     customConfig(options);
                 }
 
-                var target = new SentryTarget(
+                Target target = new SentryTarget(
                     options,
                     HubAccessor,
                     SdkDisposeHandle,
                     Clock)
                 {
+                    Name = "sentry",
                     Dsn = ValidDsnWithoutSecret,
                 };
+
+                if (asyncTarget)
+                {
+                    target = new AsyncTargetWrapper(target)
+                    {
+                        Name = "sentry_async"
+                    };
+                }
                 return target;
             }
 
-            public LogFactory GetLoggerFactory(Action<SentryNLogOptions> customConfig = null)
+            public LogFactory GetLoggerFactory(Action<SentryNLogOptions> customConfig = null, bool asyncTarget = false)
             {
-                var target = GetTarget(customConfig);
+                Target target = GetTarget(customConfig, asyncTarget);
+
                 var config = new LoggingConfiguration();
                 config.AddTarget("sentry", target);
                 config.AddRule(LogLevel.Trace, LogLevel.Fatal, target);
@@ -74,11 +86,11 @@ namespace Sentry.NLog.Tests
                 return factory;
             }
 
-            public (LogFactory factory, SentryTarget target) GetLoggerFactoryAndTarget(Action<SentryNLogOptions> customConfig = null)
+            public (LogFactory factory, Target target) GetLoggerFactoryAndTarget(Action<SentryNLogOptions> customConfig = null, bool asyncTarget = false)
             {
-                var factory = GetLoggerFactory(customConfig);
+                var factory = GetLoggerFactory(customConfig, asyncTarget);
 
-                return (factory, factory.Configuration?.FindTargetByName<SentryTarget>("sentry"));
+                return (factory, factory.Configuration.AllTargets.OfType<SentryTarget>().FirstOrDefault());
             }
 
             public Logger GetLogger(Action<SentryNLogOptions> customConfig = null) => GetLoggerFactory(customConfig).GetLogger("sentry");
@@ -344,6 +356,42 @@ namespace Sentry.NLog.Tests
             var b = _fixture.Scope.Breadcrumbs.First();
 
             Assert.Equal($"{logger.Name}: {message}", b.Message);
+        }
+
+        [Fact]
+        public async Task LogManager_WhenFlushCalled_CallsSentryFlushAsync()
+        {
+            const int NLogTimeout = 2;
+            var timeout = TimeSpan.FromSeconds(NLogTimeout);
+
+            LogFactory factory = _fixture.GetLoggerFactory(o => o.FlushTimeout = timeout, asyncTarget: true);
+
+            LogManager.Configuration = factory.Configuration;
+
+            // Verify that it's asynchronous
+            Assert.NotEmpty(factory.Configuration.AllTargets.OfType<AsyncTargetWrapper>());
+
+            var logger = factory.GetLogger("sentry");
+
+            var hub = _fixture.Hub;
+
+            logger.Info("Here's a message");
+            logger.Debug("Here's another message");
+            logger.Error(new Exception(DefaultMessage));
+
+            var testDisposable = Substitute.For<IDisposable>();
+
+            AsyncContinuation continuation = e =>
+            {
+                testDisposable.Dispose();
+            };
+
+            factory.Flush(continuation, timeout);
+
+            await Task.Delay(TimeSpan.FromSeconds(NLogTimeout));
+            
+            testDisposable.Received().Dispose();
+            hub.Received().FlushAsync(Arg.Any<TimeSpan>()).GetAwaiter().GetResult();
         }
     }
 }
