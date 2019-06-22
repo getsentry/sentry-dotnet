@@ -144,6 +144,8 @@ Sentry.SentryOptions.IsEnvironmentUser.get -> bool
 Sentry.SentryOptions.IsEnvironmentUser.set -> void
 Sentry.SentryOptions.MaxBreadcrumbs.get -> int
 Sentry.SentryOptions.MaxBreadcrumbs.set -> void
+Sentry.SentryOptions.MaxRequestBodySize.get -> Sentry.Extensibility.RequestSize
+Sentry.SentryOptions.MaxRequestBodySize.set -> void
 Sentry.SentryOptions.MaxQueueItems.get -> int
 Sentry.SentryOptions.MaxQueueItems.set -> void
 Sentry.SentryOptions.Release.get -> string

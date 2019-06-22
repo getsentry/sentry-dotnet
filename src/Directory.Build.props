@@ -22,7 +22,9 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet/releases</PackageReleaseNotes>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!--RS0017 will show errors because some things are only available in some configurations. Turn that warning off.-->
+    <NoWarn>$(NoWarn);CS1591;RS0017</NoWarn>
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -36,7 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />
 
-    <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to .Shipped.txt -->
+    <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to PublicAPI.Shipped.txt -->
     <None Remove="PublicAPI.Shipped.txt" />
     <None Remove="PublicAPI.Unshipped.txt"/>
     <AdditionalFiles Include="PublicAPI.Shipped.txt" />
