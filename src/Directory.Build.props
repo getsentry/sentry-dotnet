@@ -23,8 +23,7 @@
 
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet/releases</PackageReleaseNotes>
 
-    <!--RS0017 will show errors because some things are only available in some configurations. Turn that warning off.-->
-    <NoWarn>$(NoWarn);CS1591;RS0017</NoWarn>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
