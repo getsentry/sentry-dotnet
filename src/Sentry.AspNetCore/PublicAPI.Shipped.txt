@@ -1,0 +1,18 @@
+﻿Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions
+Sentry.AspNetCore.IUserFactory
+Sentry.AspNetCore.IUserFactory.Create(Microsoft.AspNetCore.Http.HttpContext context) -> Sentry.Protocol.User
+Sentry.AspNetCore.ScopeExtensions
+Sentry.AspNetCore.SentryAspNetCoreOptions
+Sentry.AspNetCore.SentryAspNetCoreOptions.IncludeActivityData.get -> bool
+Sentry.AspNetCore.SentryAspNetCoreOptions.IncludeActivityData.set -> void
+Sentry.AspNetCore.SentryAspNetCoreOptions.IncludeRequestPayload.get -> bool
+Sentry.AspNetCore.SentryAspNetCoreOptions.IncludeRequestPayload.set -> void
+Sentry.AspNetCore.SentryAspNetCoreOptions.MaxRequestBodySize.get -> Sentry.Extensibility.RequestSize
+Sentry.AspNetCore.SentryAspNetCoreOptions.MaxRequestBodySize.set -> void
+Sentry.AspNetCore.SentryAspNetCoreOptions.SentryAspNetCoreOptions() -> void
+static Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions.UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder) -> Microsoft.AspNetCore.Hosting.IWebHostBuilder
+static Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions.UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Microsoft.AspNetCore.Hosting.WebHostBuilderContext, Sentry.AspNetCore.SentryAspNetCoreOptions> configureOptions) -> Microsoft.AspNetCore.Hosting.IWebHostBuilder
+static Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions.UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Sentry.AspNetCore.SentryAspNetCoreOptions> configureOptions) -> Microsoft.AspNetCore.Hosting.IWebHostBuilder
+static Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions.UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, string dsn) -> Microsoft.AspNetCore.Hosting.IWebHostBuilder
+static Sentry.AspNetCore.ScopeExtensions.Populate(this Sentry.Scope scope, Microsoft.AspNetCore.Http.HttpContext context, Sentry.AspNetCore.SentryAspNetCoreOptions options) -> void
+static Sentry.AspNetCore.ScopeExtensions.Populate(this Sentry.Scope scope, System.Diagnostics.Activity activity) -> void
