@@ -83,17 +83,6 @@ namespace Sentry
         public string Platform { get; set; }
 
         /// <summary>
-        /// The culprit
-        /// </summary>
-        /// <remarks>
-        /// This value is essentially obsolete in favor of Transaction.
-        /// </remarks>
-        // TODO: Delete?
-        [DataMember(Name = "culprit", EmitDefaultValue = false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public string Culprit { get; set; }
-
-        /// <summary>
         /// Identifies the host SDK from which the event was recorded.
         /// </summary>
         [DataMember(Name = "server_name", EmitDefaultValue = false)]

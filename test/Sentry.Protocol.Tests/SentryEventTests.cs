@@ -18,7 +18,6 @@ namespace Sentry.Protocol.Tests
                 Request = new Request { Method = "POST" },
                 Contexts = new Contexts { ["context_key"] = "context_value" },
                 Sdk = new SdkVersion { Name = "SDK-test" },
-                Culprit = "culprit",
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
@@ -52,7 +51,6 @@ namespace Sentry.Protocol.Tests
                          "\"logentry\":{\"message\":\"structured_message\"}," +
                          "\"logger\":\"logger\"," +
                          "\"platform\":\"csharp\"," +
-                         "\"culprit\":\"culprit\"," +
                          "\"server_name\":\"server_name\"," +
                          "\"release\":\"release\"," +
                          "\"exception\":{\"values\":[{\"value\":\"exception_value\"}]}," +
