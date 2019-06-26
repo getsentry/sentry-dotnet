@@ -14,7 +14,7 @@ Sentry.PlatformAbstractions
 
 |      Package name                 |        NuGet         |
 | ----------------------------- | -------------------: |
-|         **Sentry.Protocol**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.PlatformAbstractions.svg)](https://www.nuget.org/packages/Sentry.PlatformAbstractions)   |
+|         **Sentry.PlatformAbstractions**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.PlatformAbstractions.svg)](https://www.nuget.org/packages/Sentry.PlatformAbstractions)   |
 
 The goal of this package is to simplify the [.NET SDK](https://github.com/getsentry/sentry-dotnet/) by leaving the messy `#ifdefs`, platform specific code (operating system, runtime, etc) out into its own library. It also helps by allowing us to share code between the [new .NET SDK](https://github.com/getsentry/sentry-dotnet/) and the [current .NET SDK](https://github.com/getsentry/raven-csharp/).
 
