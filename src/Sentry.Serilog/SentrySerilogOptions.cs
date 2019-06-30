@@ -24,7 +24,7 @@ namespace Sentry.Serilog
         /// <value>
         /// The minimum event level.
         /// </value>
-        public LogEventLevel MinimumEventLevel { get; set; }
+        public LogEventLevel MinimumEventLevel { get; set; } = LogEventLevel.Error;
 
         /// <summary>
         /// Minimum log level to record a breadcrumb.
@@ -33,7 +33,7 @@ namespace Sentry.Serilog
         /// <value>
         /// The minimum breadcrumb level.
         /// </value>
-        public LogEventLevel MinimumBreadcrumbLevel { get; set; }
+        public LogEventLevel MinimumBreadcrumbLevel { get; set; } = LogEventLevel.Information;
 
         /// <summary>
         /// Optional <see cref="IFormatProvider"/>
