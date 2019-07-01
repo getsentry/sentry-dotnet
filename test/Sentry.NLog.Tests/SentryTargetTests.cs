@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NLog;
@@ -220,16 +222,26 @@ namespace Sentry.NLog.Tests
             Assert.Equal(expected.Version, package.Version);
         }
 
-        [Fact]
-        public void Log_LoggerLevel_Set()
+        [Theory]
+        [ClassData(typeof(LogLevelData))]
+        public void Log_LoggerLevel_Set(LogLevel nlogLevel, SentryLevel? sentryLevel)
         {
-            const SentryLevel expectedLevel = SentryLevel.Error;
+            // Make sure test cases are not filtered out by the default min levels:
+            _fixture.Options.MinimumEventLevel = LogLevel.Trace;
+            _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Trace;
 
             var logger = _fixture.GetLogger();
 
-            logger.Error(DefaultMessage);
+            var evt = new LogEventInfo()
+            {
+                Message = DefaultMessage,
+                Level = nlogLevel
+            };
+
+            logger.Log(evt);
+
             _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == expectedLevel));
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == sentryLevel));
         }
 
         [Fact]
@@ -389,9 +401,23 @@ namespace Sentry.NLog.Tests
             factory.Flush(continuation, timeout);
 
             await Task.Delay(timeout);
-            
+
             testDisposable.Received().Dispose();
             hub.Received().FlushAsync(Arg.Any<TimeSpan>()).GetAwaiter().GetResult();
+        }
+
+        internal class LogLevelData : IEnumerable<object[]>
+        {
+            public IEnumerator<object[]> GetEnumerator()
+            {
+                yield return new object[] { LogLevel.Debug, SentryLevel.Debug };
+                yield return new object[] { LogLevel.Trace, SentryLevel.Debug };
+                yield return new object[] { LogLevel.Info, SentryLevel.Info };
+                yield return new object[] { LogLevel.Warn, SentryLevel.Warning };
+                yield return new object[] { LogLevel.Error, SentryLevel.Error };
+                yield return new object[] { LogLevel.Fatal, SentryLevel.Fatal };
+            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }
