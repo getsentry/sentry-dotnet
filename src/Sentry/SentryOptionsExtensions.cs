@@ -33,6 +33,13 @@ namespace Sentry
             => options.Integrations = options.Integrations.RemoveAll(p => p.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
 
         /// <summary>
+        /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableAppDomainProcessExitFlush(this SentryOptions options)
+            => options.Integrations = options.Integrations.RemoveAll(p => p.GetType() == typeof(AppDomainProcessExitIntegration));
+
+        /// <summary>
         /// Add an integration
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor.</param>
