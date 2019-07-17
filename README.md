@@ -203,7 +203,7 @@ They are released as a separate [NuGet Package called `Sentry.Protocol`](https:/
 
 ### Legacy frameworks
 
-Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 640.000 downloads on NuGet has support to .NET Framework 3.5+.
+Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 1.000.000 downloads on NuGet has support to .NET Framework 3.5+.
 
 ## Resources
 * [![Gitter chat](https://img.shields.io/gitter/room/getsentry/dotnet.svg)](https://gitter.im/getsentry/dotnet)
