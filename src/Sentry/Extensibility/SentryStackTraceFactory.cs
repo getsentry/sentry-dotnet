@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+using System.Text;
 using System.Text.RegularExpressions;
 using Sentry.Protocol;
 
@@ -28,11 +32,13 @@ namespace Sentry.Extensibility
 
             if (exception == null && !isCurrentStackTrace)
             {
-                _options.DiagnosticLogger?.LogDebug("No Exception and AttachStacktrace is off. No stack trace will be collected.");
+                _options.DiagnosticLogger?.LogDebug(
+                    "No Exception and AttachStacktrace is off. No stack trace will be collected.");
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
+            _options.DiagnosticLogger?.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.",
+                isCurrentStackTrace);
 
             return Create(CreateStackTrace(exception), isCurrentStackTrace);
         }
@@ -63,7 +69,8 @@ namespace Sentry.Extensibility
             var frames = stackTrace?.GetFrames();
             if (frames == null)
             {
-                _options.DiagnosticLogger?.LogDebug("No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
+                _options.DiagnosticLogger?.LogDebug(
+                    "No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
                     _options.AttachStacktrace, isCurrentStackTrace);
 
                 yield break;
@@ -93,7 +100,73 @@ namespace Sentry.Extensibility
 
         internal SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
 
-        protected virtual SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) => InternalCreateFrame(stackFrame, true);
+        protected virtual SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) =>
+            InternalCreateFrame(stackFrame, true);
+
+        private MetadataReaderProvider GetMetadataReaderProvider(Assembly assembly)
+        {
+            if (assembly.IsDynamic || !(assembly.Location is string assemblyLocation))
+            {
+                return null;
+            }
+
+            MetadataReaderProvider GetProviderFromDebugSymbol()
+            {
+                var pdbLocation = assemblyLocation;
+                if (assemblyLocation.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase)
+                    || assemblyLocation.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    pdbLocation = assemblyLocation.Substring(0, assemblyLocation.Length - 4);
+                }
+
+                pdbLocation += ".pdb";
+
+                try
+                {
+                    var pdbStream = File.OpenRead(pdbLocation);
+                    return MetadataReaderProvider.FromPortablePdbStream(pdbStream);
+                }
+                catch (Exception e)
+                {
+                    _options.DiagnosticLogger?.LogError("Failed loading debug symbol at location {0}.", e,
+                        pdbLocation);
+                    return null;
+                }
+            }
+
+            MetadataReaderProvider GetProviderFromAssembly()
+            {
+                try
+                {
+                    var assemblyStream = File.OpenRead(assemblyLocation);
+                    var reader = new PEReader(assemblyStream);
+                    if (!reader.HasMetadata)
+                    {
+                        return null;
+                    }
+
+                    foreach (var debugDirectoryEntry in reader.ReadDebugDirectory())
+                    {
+                        if (debugDirectoryEntry.Type == DebugDirectoryEntryType.EmbeddedPortablePdb)
+                        {
+                            return reader.ReadEmbeddedPortablePdbDebugDirectoryData(debugDirectoryEntry);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    _options.DiagnosticLogger?.LogError("Failed loading assembly at location {0}.", e,
+                        assemblyLocation);
+                }
+
+                return null;
+            }
+
+            return GetProviderFromDebugSymbol() ?? GetProviderFromAssembly();
+        }
+
+        public static readonly Guid EmbeddedSource = new Guid("0E8A571B-6926-466E-B4AD-8AB04611F5FE");
+        public static readonly Guid SourceLinkId = new Guid("CC110556-A091-4D38-9FEC-25AB9A351A6A");
 
         protected SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
         {
@@ -102,9 +175,50 @@ namespace Sentry.Extensibility
             if (GetMethod(stackFrame) is MethodBase method)
             {
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
-                frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
-                frame.Package = method.DeclaringType?.Assembly.FullName;
+
                 frame.Function = method.Name;
+                if (method.DeclaringType is Type declaringType)
+                {
+                    frame.Module = declaringType.FullName ?? unknownRequiredField;
+                    frame.Package = declaringType.Assembly.FullName;
+                    // TODO: Cache this
+                    // TODO: Make async
+                    try
+                    {
+                        if (GetMetadataReaderProvider(declaringType.Assembly) is MetadataReaderProvider provider)
+                        {
+                            using (provider)
+                            {
+                                var metadataReader = provider.GetMetadataReader();
+                                if (metadataReader == null)
+                                {
+                                    return null;
+                                }
+
+                                var blobHandle = default(BlobHandle);
+                                foreach (var cdih in metadataReader.GetCustomDebugInformation(EntityHandle.ModuleDefinition)
+                                )
+                                {
+                                    var cdi = metadataReader.GetCustomDebugInformation(cdih);
+                                    if (metadataReader.GetGuid(cdi.Kind) == SourceLinkId)
+                                        blobHandle = cdi.Value;
+                                }
+
+                                if (blobHandle.IsNil)
+                                {
+                                    return null;
+                                }
+
+                                var bytes = metadataReader.GetBlobBytes(blobHandle);
+                                frame.Vars.Add("source-link", Encoding.UTF8.GetString(bytes));
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _options.DiagnosticLogger?.LogError("Failed getting soucelink.", e);
+                    }
+                }
             }
 
             frame.InApp = !IsSystemModuleName(frame.Module);
