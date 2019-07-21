@@ -51,7 +51,7 @@ namespace Sentry.Extensibility
                 // Request body extraction is opt-in
                 case RequestSize.None:
                     _options.DiagnosticLogger?.LogDebug("Skipping request body extraction.");
-                    break;
+                    return null;
             }
 
             _options.DiagnosticLogger?.LogWarning("Ignoring request with Size {0} and configuration RequestSize {1}",
