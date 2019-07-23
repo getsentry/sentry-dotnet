@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using Sentry.Internal;
 
 namespace Sentry.Integrations
@@ -19,31 +18,18 @@ namespace Sentry.Integrations
         {
             Debug.Assert(hub != null);
             _hub = hub;
-            _appDomain.ProcessExit += HandlerAsync;
+            _appDomain.ProcessExit += Handle;
         }
 
         public void Unregister(IHub hub)
         {
-            _appDomain.ProcessExit -= HandlerAsync;
+            _appDomain.ProcessExit -= Handle;
             _hub = null;
         }
 
-        private static readonly TimeSpan _flushTimeOut = TimeSpan.FromSeconds(1);
-
-        internal async void HandlerAsync(object sender, EventArgs e)
+        internal void Handle(object sender, EventArgs e)
         {
-            await FlushAsync(sender, e).ConfigureAwait(false);
-        }
-
-        internal async Task FlushAsync(object sender, EventArgs e)
-        {
-            if (_hub != null)
-            {
-                await _hub.FlushAsync(_flushTimeOut).ConfigureAwait(false);
-                (_hub as IDisposable)?.Dispose();
-            }
+            (_hub as IDisposable)?.Dispose();
         }
     }
-
-
 }
