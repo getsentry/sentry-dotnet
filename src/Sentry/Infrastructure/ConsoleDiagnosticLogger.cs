@@ -14,6 +14,10 @@ namespace Sentry.Infrastructure
     {
         private readonly SentryLevel _minimalLevel;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="ConsoleDiagnosticLogger"/>.
+        /// </summary>
+        /// <param name="minimalLevel"></param>
         public ConsoleDiagnosticLogger(SentryLevel minimalLevel) => _minimalLevel = minimalLevel;
 
         /// <summary>

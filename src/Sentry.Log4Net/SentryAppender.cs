@@ -9,6 +9,9 @@ using Sentry.Reflection;
 
 namespace Sentry.Log4Net
 {
+    /// <summary>
+    /// Sentry appender for log4net.
+    /// </summary>
     public class SentryAppender : AppenderSkeleton
     {
         private readonly Func<string, IDisposable> _initAction;
@@ -23,10 +26,22 @@ namespace Sentry.Log4Net
 
         internal IHub Hub { get; set; }
 
+        /// <summary>
+        /// Sentry DSN.
+        /// </summary>
         public string Dsn { get; set; }
+        /// <summary>
+        /// Whether to send the Identity or not.
+        /// </summary>
         public bool SendIdentity { get; set; }
+        /// <summary>
+        /// Environment to send in the event.
+        /// </summary>
         public string Environment { get; set; }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="SentryAppender"/>.
+        /// </summary>
         public SentryAppender() : this(SentrySdk.Init, HubAdapter.Instance)
         { }
 
@@ -41,6 +56,10 @@ namespace Sentry.Log4Net
             Hub = hubGetter;
         }
 
+        /// <summary>
+        /// Append log.
+        /// </summary>
+        /// <param name="loggingEvent">The event.</param>
         protected override void Append(LoggingEvent loggingEvent)
         {
             if (loggingEvent == null)
@@ -164,6 +183,9 @@ namespace Sentry.Log4Net
             }
         }
 
+        /// <summary>
+        /// Disposes the SDK if initialized.
+        /// </summary>
         protected override void OnClose()
         {
             base.OnClose();
