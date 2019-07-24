@@ -18,16 +18,16 @@ namespace Sentry.Integrations
         {
             Debug.Assert(hub != null);
             _hub = hub;
-            _appDomain.ProcessExit += Handle;
+            _appDomain.ProcessExit += HandleProcessExit;
         }
 
         public void Unregister(IHub hub)
         {
-            _appDomain.ProcessExit -= Handle;
+            _appDomain.ProcessExit -= HandleProcessExit;
             _hub = null;
         }
 
-        internal void Handle(object sender, EventArgs e)
+        internal void HandleProcessExit(object sender, EventArgs e)
         {
             (_hub as IDisposable)?.Dispose();
         }

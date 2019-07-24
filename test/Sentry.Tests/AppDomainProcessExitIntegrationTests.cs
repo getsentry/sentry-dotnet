@@ -21,17 +21,18 @@ namespace Sentry.Tests
         }
 
         private readonly Fixture _fixture = new Fixture();
+
         public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
         [Fact]
-        public async Task Handle_WithException_CaptureEvent()
+        public void Handle_WithException_CaptureEvent()
         {
             var sut = _fixture.GetSut();
             sut.Register(_fixture.Hub, SentryOptions);
 
-            await sut.FlushAsync(this, EventArgs.Empty).ConfigureAwait(false);
+            sut.HandleProcessExit(this, EventArgs.Empty);
 
-            await _fixture.Hub.Received(1).FlushAsync(Arg.Any<TimeSpan>());
+            (_fixture.Hub as IDisposable).Received(1).Dispose();
         }
 
         [Fact]
@@ -40,7 +41,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut.Register(_fixture.Hub, SentryOptions);
 
-            _fixture.AppDomain.Received().ProcessExit += sut.HandlerAsync;
+            _fixture.AppDomain.Received().ProcessExit += sut.HandleProcessExit;
         }
 
         [Fact]
@@ -51,7 +52,7 @@ namespace Sentry.Tests
             sut.Register(_fixture.Hub, SentryOptions);
             sut.Unregister(_fixture.Hub);
 
-            _fixture.AppDomain.Received(1).ProcessExit -= sut.HandlerAsync;
+            _fixture.AppDomain.Received(1).ProcessExit -= sut.HandleProcessExit;
         }
     }
 }
