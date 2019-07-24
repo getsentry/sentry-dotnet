@@ -378,7 +378,8 @@ namespace Sentry
 
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(
-                    new AppDomainUnhandledExceptionIntegration());
+                    new AppDomainUnhandledExceptionIntegration(),
+                    new AppDomainProcessExitIntegration());
 
             InAppExclude
                 = ImmutableList.Create(

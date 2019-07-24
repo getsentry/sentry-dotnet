@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using Sentry.Extensibility;
@@ -29,9 +30,14 @@ namespace Sentry
         /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
-        public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options)
-            => options.Integrations = options.Integrations.RemoveAll(p => p.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
+        public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) => options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
 
+        /// <summary>
+        /// Disables the capture of errors through <see cref="AppDomain.ProcessExit"/>
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableAppDomainProcessExitFlush(this SentryOptions options) => options.RemoveIntegration<AppDomainProcessExitIntegration>();
+        
         /// <summary>
         /// Add an integration
         /// </summary>
@@ -39,6 +45,15 @@ namespace Sentry
         /// <param name="integration">The integration.</param>
         public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
             => options.Integrations = options.Integrations.Add(integration);
+
+        /// <summary>
+        /// Removes all integrations of type <typeparamref name="TIntegration"/>.
+        /// </summary>
+        /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
+        /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
+        /// <returns></returns>
+        internal static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
+            => options.Integrations = options.Integrations.RemoveAll(p => p.GetType() == typeof(TIntegration));
 
         /// <summary>
         /// Add prefix to exclude from 'InApp' stack trace list
@@ -159,5 +174,6 @@ namespace Sentry
                 options.DiagnosticLogger = null;
             }
         }
+
     }
 }

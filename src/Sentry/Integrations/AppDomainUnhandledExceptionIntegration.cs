@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Sentry.Internal;
 
 namespace Sentry.Integrations
