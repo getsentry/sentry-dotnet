@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using Sentry.Extensibility;
@@ -37,7 +36,7 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableAppDomainProcessExitFlush(this SentryOptions options) => options.RemoveIntegration<AppDomainProcessExitIntegration>();
-        
+
         /// <summary>
         /// Add an integration
         /// </summary>

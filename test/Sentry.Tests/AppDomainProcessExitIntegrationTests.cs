@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Integrations;
 using Sentry.Internal;
