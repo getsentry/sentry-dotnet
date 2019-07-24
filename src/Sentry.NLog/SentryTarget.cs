@@ -16,6 +16,9 @@ using Sentry.Reflection;
 
 namespace Sentry.NLog
 {
+    /// <summary>
+    /// Sentry NLog Target.
+    /// </summary>
     [Target("Sentry")]
     public sealed class SentryTarget : TargetWithContext
     {
@@ -27,10 +30,16 @@ namespace Sentry.NLog
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryTarget"/>.
+        /// </summary>
         public SentryTarget() : this(new SentryNLogOptions())
         {
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryTarget"/>.
+        /// </summary>
         public SentryTarget(SentryNLogOptions options)
             : this(
                 options,
@@ -217,7 +226,7 @@ namespace Sentry.NLog
         }
 
         /// <summary>
-        /// <para> 
+        /// <para>
         /// If the event level &gt;= the <see cref="MinimumEventLevel"/>, the
         /// <paramref name="logEvent"/> is captured as an event by sentry.
         /// </para>

@@ -92,6 +92,10 @@ namespace Sentry
             : this(new SentryOptions())
         { }
 
+        /// <summary>
+        /// Clones the current <see cref="Scope"/>.
+        /// </summary>
+        /// <returns></returns>
         public Scope Clone()
         {
             var clone = new Scope(Options);

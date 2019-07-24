@@ -16,6 +16,9 @@ namespace Sentry.Extensions.Logging
         private readonly ILogger<ISentryClient> _logger;
         private readonly SentryLevel _level;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="MelDiagnosticLogger"/>.
+        /// </summary>
         public MelDiagnosticLogger(ILogger<ISentryClient> logger, SentryLevel level)
         {
             _logger = logger;
@@ -34,6 +37,9 @@ namespace Sentry.Extensions.Logging
         /// <returns></returns>
         public bool IsEnabled(SentryLevel level) => _logger.IsEnabled(level.ToMicrosoft()) && level >= _level;
 
+        /// <summary>
+        /// Logs the message.
+        /// </summary>
         public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
         {
             if (!IsEnabled(logLevel))
