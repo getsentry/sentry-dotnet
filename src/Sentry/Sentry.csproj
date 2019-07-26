@@ -7,6 +7,7 @@
     <AssemblyName>Sentry</AssemblyName>
     <RootNamespace>Sentry</RootNamespace>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
@@ -17,8 +18,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.0.0" />
-    <PackageReference Include="Sentry.Protocol" Version="1.0.6" />
+    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.0-beta" />
+    <PackageReference Include="Sentry.Protocol" Version="2.0.0-beta2" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
   </ItemGroup>
 

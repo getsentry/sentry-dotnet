@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 
 using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
@@ -15,6 +16,9 @@ using Sentry.Reflection;
 
 namespace Sentry.NLog
 {
+    /// <summary>
+    /// Sentry NLog Target.
+    /// </summary>
     [Target("Sentry")]
     public sealed class SentryTarget : TargetWithContext
     {
@@ -26,10 +30,16 @@ namespace Sentry.NLog
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryTarget"/>.
+        /// </summary>
         public SentryTarget() : this(new SentryNLogOptions())
         {
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryTarget"/>.
+        /// </summary>
         public SentryTarget(SentryNLogOptions options)
             : this(
                 options,
@@ -59,6 +69,10 @@ namespace Sentry.NLog
             }
         }
 
+        /// <summary>
+        /// Options for both the <see cref="SentryTarget"/> and the sentry sdk itself.
+        /// </summary>
+        [Advanced]
         public SentryNLogOptions Options { get; }
 
         /// <summary>
@@ -70,7 +84,6 @@ namespace Sentry.NLog
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
         /// </summary>
-        [RequiredParameter]
         public string Dsn
         {
             get => Options.Dsn?.ToString();
@@ -104,6 +117,79 @@ namespace Sentry.NLog
             set => Options.MinimumBreadcrumbLevel = LogLevel.FromString(value);
         }
 
+        /// <summary>
+        /// Whether the NLog integration should initialize the SDK.
+        /// </summary>
+        /// <remarks>
+        /// By default, if a DSN is provided to the NLog integration it will initialize the SDK.
+        /// This might be not ideal when using multiple integrations in case you want another one doing the Init.
+        /// </remarks>
+        public bool InitializeSdk
+        {
+            get => Options.InitializeSdk;
+            set => Options.InitializeSdk = value;
+        }
+
+        /// <summary>
+        /// Set this to <see langword="true" /> to ignore log messages that don't contain an exception.
+        /// </summary>
+        public bool IgnoreEventsWithNoException
+        {
+            get => Options.IgnoreEventsWithNoException;
+            set => Options.IgnoreEventsWithNoException = value;
+        }
+
+        /// <summary>
+        /// Determines whether event-level properties will be sent to sentry as additional data.
+        /// Defaults to <see langword="true" />.
+        /// </summary>
+        /// <seealso cref="SendEventPropertiesAsTags" />
+        public bool SendEventPropertiesAsData
+        {
+            get => Options.SendEventPropertiesAsData;
+            set => Options.SendEventPropertiesAsData = value;
+        }
+
+        /// <summary>
+        /// Determines whether event properties will be sent to sentry as Tags or not.
+        /// Defaults to <see langword="false" />.
+        /// </summary>
+        /// <seealso cref="SendEventPropertiesAsData"/>
+        public bool SendEventPropertiesAsTags
+        {
+            get => Options.SendEventPropertiesAsTags;
+            set => Options.SendEventPropertiesAsTags = value;
+        }
+
+        /// <summary>
+        /// Determines whether or not to include event-level data as data in breadcrumbs for future errors.
+        /// Defaults to <see langword="false" />.
+        /// </summary>
+        public bool IncludeEventDataOnBreadcrumbs
+        {
+            get => Options.IncludeEventDataOnBreadcrumbs;
+            set => Options.IncludeEventDataOnBreadcrumbs = value;
+        }
+
+        /// <summary>
+        /// How many seconds to wait after triggering <see cref="LogManager.Shutdown()"/> before just shutting down the
+        /// Sentry sdk.
+        /// </summary>
+        public int ShutdownTimeoutSeconds
+        {
+            get => Options.ShutdownTimeoutSeconds;
+            set => Options.ShutdownTimeoutSeconds = value;
+        }
+
+        /// <summary>
+        /// How long to wait for the flush to finish, in seconds. Defaults to 2 seconds.
+        /// </summary>
+        public int FlushTimeoutSeconds
+        {
+            get => Options.FlushTimeout.Seconds;
+            set => Options.FlushTimeout = TimeSpan.FromSeconds(value);
+        }
+
         /// <inheritdoc />
         protected override void CloseTarget()
         {
@@ -120,15 +206,39 @@ namespace Sentry.NLog
 
             // If a layout has been configured on the options, replace the default logger.
             if (Options.Layout != null)
+            {
                 Layout = Options.Layout;
+            }
 
             // If the sdk is not there, set it on up.
-            if (Options.InitializeSdk && _sdkDisposable == null)
+            if (InitializeSdk && _sdkDisposable == null)
             {
                 _sdkDisposable = SentrySdk.Init(Options);
             }
         }
 
+        /// <inheritdoc />
+        protected override void FlushAsync(AsyncContinuation asyncContinuation)
+        {
+            _hubAccessor()
+                .FlushAsync(Options.FlushTimeout)
+                .ContinueWith(t => asyncContinuation(t.Exception));
+        }
+
+        /// <summary>
+        /// <para>
+        /// If the event level &gt;= the <see cref="MinimumEventLevel"/>, the
+        /// <paramref name="logEvent"/> is captured as an event by sentry.
+        /// </para>
+        /// <para>
+        /// If the event level is &gt;= the <see cref="MinimumBreadcrumbLevel"/>, the event is added
+        /// as a breadcrumb to the Sentry Sdk.
+        /// </para>
+        /// <para>
+        /// If sentry is not enabled, this is a No-op.
+        /// </para>
+        /// </summary>
+        /// <param name="logEvent">The event that is being logged.</param>
         /// <inheritdoc />
         protected override void Write(LogEventInfo logEvent)
         {
@@ -150,7 +260,7 @@ namespace Sentry.NLog
 
             var contextProps = GetAllProperties(logEvent);
 
-            var shouldOnlyLogExceptions = exception == null && Options.IgnoreEventsWithNoException;
+            var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
 
             if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
             {
@@ -167,6 +277,7 @@ namespace Sentry.NLog
                         Formatted = formatted,
                         Message = template
                     },
+                    Logger = logEvent.LoggerName,
                     Level = logEvent.Level.ToSentryLevel(),
                     Release = Options.Release,
                     Environment = Options.Environment,
@@ -212,7 +323,7 @@ namespace Sentry.NLog
                         };
                 }
 
-                if (Options.IncludeEventDataOnBreadcrumbs)
+                if (IncludeEventDataOnBreadcrumbs)
                 {
                     if (data is null)
                     {

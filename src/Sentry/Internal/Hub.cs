@@ -115,6 +115,19 @@ namespace Sentry.Internal
             }
         }
 
+        public async Task FlushAsync(TimeSpan timeout)
+        {
+            try
+            {
+                var (_, client) = ScopeManager.GetCurrent();
+                await client.FlushAsync(timeout).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to Flush events", e);
+            }
+        }
+
         public void Dispose()
         {
             _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");

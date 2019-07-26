@@ -10,6 +10,9 @@ using Sentry.NLog;
 // ReSharper disable once CheckNamespace
 namespace NLog
 {
+    /// <summary>
+    /// NLog configuration extensions.
+    /// </summary>
     public static class ConfigurationExtensions
     {
         private const string DefaultTargetName = "sentry";

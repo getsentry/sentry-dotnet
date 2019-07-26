@@ -29,8 +29,13 @@ namespace Sentry
         /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
-        public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options)
-            => options.Integrations = options.Integrations.RemoveAll(p => p.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
+        public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) => options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
+
+        /// <summary>
+        /// Disables the capture of errors through <see cref="AppDomain.ProcessExit"/>
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableAppDomainProcessExitFlush(this SentryOptions options) => options.RemoveIntegration<AppDomainProcessExitIntegration>();
 
         /// <summary>
         /// Add an integration
@@ -39,6 +44,15 @@ namespace Sentry
         /// <param name="integration">The integration.</param>
         public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
             => options.Integrations = options.Integrations.Add(integration);
+
+        /// <summary>
+        /// Removes all integrations of type <typeparamref name="TIntegration"/>.
+        /// </summary>
+        /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
+        /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
+        /// <returns></returns>
+        internal static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
+            => options.Integrations = options.Integrations.RemoveAll(p => p.GetType() == typeof(TIntegration));
 
         /// <summary>
         /// Add prefix to exclude from 'InApp' stack trace list
@@ -127,12 +141,7 @@ namespace Sentry
         /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
         public static SentryOptions UseStackTraceFactory(this SentryOptions options, ISentryStackTraceFactory sentryStackTraceFactory)
         {
-            if (sentryStackTraceFactory == null)
-            {
-                throw new ArgumentNullException(nameof(sentryStackTraceFactory));
-            }
-
-            options.SentryStackTraceFactory = sentryStackTraceFactory;
+            options.SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
 
             return options;
         }
@@ -143,7 +152,19 @@ namespace Sentry
             {
                 if (options.DiagnosticLogger == null)
                 {
+#if SYSTEM_WEB && DEBUG
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse - Hosted under IIS/IIS Express: use System.Diagnostic.Debug instead of System.Console.
+                    if (System.Web.HttpRuntime.AppDomainAppId != null)
+                    {
+                        options.DiagnosticLogger = new DebugDiagnosticLogger(options.DiagnosticsLevel);
+                    }
+                    else
+                    {
+                        options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
+                    }
+#else
                     options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
+#endif
                     options.DiagnosticLogger?.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", options.DiagnosticsLevel);
                 }
             }
@@ -152,5 +173,6 @@ namespace Sentry
                 options.DiagnosticLogger = null;
             }
         }
+
     }
 }

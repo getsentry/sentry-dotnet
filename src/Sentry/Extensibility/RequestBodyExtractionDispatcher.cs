@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Sentry.Extensibility
 {
+    /// <summary>
+    /// Dispatches request body extractions if enabled and within limits.
+    /// </summary>
     public class RequestBodyExtractionDispatcher : IRequestPayloadExtractor
     {
         private readonly SentryOptions _options;
@@ -10,6 +13,12 @@ namespace Sentry.Extensibility
 
         internal IEnumerable<IRequestPayloadExtractor> Extractors { get; }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="RequestBodyExtractionDispatcher"/>
+        /// </summary>
+        /// <param name="extractors">Extractors to use.</param>
+        /// <param name="options">Sentry Options.</param>
+        /// <param name="sizeSwitch">The max request size to capture.</param>
         public RequestBodyExtractionDispatcher(IEnumerable<IRequestPayloadExtractor> extractors, SentryOptions options, Func<RequestSize> sizeSwitch)
         {
             Extractors = extractors ?? throw new ArgumentNullException(nameof(extractors));
@@ -17,6 +26,11 @@ namespace Sentry.Extensibility
             _sizeSwitch = sizeSwitch ?? throw new ArgumentNullException(nameof(sizeSwitch));
         }
 
+        /// <summary>
+        /// Extract the payload using the provided extractors.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>A serializable representation of the payload.</returns>
         public object ExtractPayload(IHttpRequest request)
         {
             if (request == null)

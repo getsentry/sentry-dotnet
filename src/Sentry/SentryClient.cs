@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -92,6 +93,13 @@ namespace Sentry
                 return SentryId.Empty;
             }
         }
+
+        /// <summary>
+        /// Flushes events asynchronously.
+        /// </summary>
+        /// <param name="timeout">How long to wait for flush to finish.</param>
+        /// <returns>A task to await for the flush operation.</returns>
+        public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
         private SentryId DoSendEvent(SentryEvent @event, Scope scope)
         {

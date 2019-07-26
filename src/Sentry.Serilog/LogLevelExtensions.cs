@@ -18,6 +18,7 @@ namespace Sentry.Serilog
                 case LogEventLevel.Information:
                     return SentryLevel.Info;
                 case LogEventLevel.Debug:
+                case LogEventLevel.Verbose:
                     return SentryLevel.Debug;
             }
 

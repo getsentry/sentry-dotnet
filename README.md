@@ -5,7 +5,7 @@
   <br />
 </p>
 
-New .NET SDK for Sentry
+.NET SDK for Sentry
 ===========
 [![Travis](https://travis-ci.org/getsentry/sentry-dotnet.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
@@ -19,6 +19,7 @@ New .NET SDK for Sentry
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/v/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 | **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/v/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 | **Sentry.Serilog** | [![NuGet](https://img.shields.io/nuget/v/Sentry.Serilog.svg)](https://www.nuget.org/packages/Sentry.Serilog)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Serilog.svg)](https://www.nuget.org/packages/Sentry.Serilog)   |
+| **Sentry.NLog** | [![NuGet](https://img.shields.io/nuget/v/Sentry.NLog.svg)](https://www.nuget.org/packages/Sentry.NLog)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.NLog.svg)](https://www.nuget.org/packages/Sentry.NLog)   |
 
 ## Documentation
 
@@ -202,7 +203,7 @@ They are released as a separate [NuGet Package called `Sentry.Protocol`](https:/
 
 ### Legacy frameworks
 
-Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 640.000 downloads on NuGet has support to .NET Framework 3.5+.
+Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 1.000.000 downloads on NuGet has support to .NET Framework 3.5+.
 
 ## Resources
 * [![Gitter chat](https://img.shields.io/gitter/room/getsentry/dotnet.svg)](https://gitter.im/getsentry/dotnet)

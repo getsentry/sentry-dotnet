@@ -135,6 +135,10 @@ namespace Sentry
         /// </example>
         /// <see href="https://docs.sentry.io/clientdev/features/#event-sampling"/>
         private float? _sampleRate;
+        /// <summary>
+        /// The optional sample rate.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
         public float? SampleRate
         {
             get => _sampleRate;
@@ -320,6 +324,11 @@ namespace Sentry
             }
         }
 
+        /// <summary>
+        /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
+        /// </summary>
+        public bool ReportAssemblies { get; set; } = true;
+
 #if SYSTEM_WEB
         /// <summary>
         /// Max request body to be captured when a Web request exists on a ASP.NET Application.
@@ -373,7 +382,8 @@ namespace Sentry
 
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(
-                    new AppDomainUnhandledExceptionIntegration());
+                    new AppDomainUnhandledExceptionIntegration(),
+                    new AppDomainProcessExitIntegration());
 
             InAppExclude
                 = ImmutableList.Create(

@@ -18,11 +18,10 @@
 
     <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet/master/.assets/sentry-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet/releases</PackageReleaseNotes>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -31,5 +30,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
     <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="2.0.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Release'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />
+
+    <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to PublicAPI.Shipped.txt -->
+    <None Remove="PublicAPI.Shipped.txt" />
+    <None Remove="PublicAPI.Unshipped.txt"/>
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
   </ItemGroup>
 </Project>

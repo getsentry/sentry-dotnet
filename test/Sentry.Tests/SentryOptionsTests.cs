@@ -1,8 +1,8 @@
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
-using Sentry.Extensibility;
 #if SYSTEM_WEB
+using System.Linq;
+using Sentry.Extensibility;
 using Sentry.Internal.Web;
 #endif
 using Xunit;

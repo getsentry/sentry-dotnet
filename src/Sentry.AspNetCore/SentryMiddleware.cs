@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
@@ -82,7 +81,7 @@ namespace Sentry.AspNetCore
             {
                 if (_options != null && _options.MaxRequestBodySize != RequestSize.None)
                 {
-                    context.Request.EnableRewind();
+                    context.Request.EnableBuffering();
                 }
 
                 hub.ConfigureScope(scope =>

@@ -147,6 +147,24 @@ internal static class Program
                 SentrySdk.CaptureException(error);
             }
 
+
+            var count = 10;
+            for (var i = 0; i < count; i++)
+            {
+                const string msg = "{0} of {1} items we'll wait to flush to Sentry!";
+                SentrySdk.CaptureEvent(new SentryEvent
+                {
+                    LogEntry = new LogEntry
+                    {
+                        Message = msg,
+                        Formatted = string.Format(msg, i, count)
+                    },
+                    Level = SentryLevel.Debug
+                });
+            }
+            // Console output will show queue being flushed. Task completes then and timeout is never reached (you don't need to wait a day :)
+            await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+
             // -------------------------
 
             // A custom made client, that could be registered with DI,
