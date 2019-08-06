@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sentry;
+using Sentry.AsyncStackTrace;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Protocol;
@@ -32,7 +33,7 @@ internal class Program
                     => level < LogLevel.Critical && exception?.GetType() == typeof(DivideByZeroException));
 
                 //Use Ben.Demystifier
-                o.UseStackTraceFactory(new SentryStackTraceFactory(o));
+                o.UseAsyncStackTraceFactory();
 
                 o.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
             }))

@@ -24,7 +24,7 @@ internal static class Program
                 l.AddConfiguration(c.Configuration);
                 l.AddConsole();
                 //Use Ben.Demystifier
-                l.AddSentry(options => options.UseStackTraceFactory(new AsyncStackTraceFactory(options)));
+                l.AddSentry(options => options.UseAsyncStackTraceFactory());
             })
             .UseConsoleLifetime()
             .Build()

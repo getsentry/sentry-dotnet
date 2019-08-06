@@ -2,10 +2,8 @@ using System;
 using System.Net;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Sentry;
 using Sentry.AsyncStackTrace;
-using Sentry.Extensibility;
 
 namespace Samples.AspNetCore.Mvc
 {
@@ -20,8 +18,6 @@ namespace Samples.AspNetCore.Mvc
             WebHost.CreateDefaultBuilder(args)
                 .UseShutdownTimeout(TimeSpan.FromSeconds(10))
                 .UseStartup<Startup>()
-                //Use Ben.Demystifier
-                .ConfigureServices(services => services.AddTransient<ISentryStackTraceFactory, AsyncStackTraceFactory>())
                 // Example integration with advanced configuration scenarios:
                 .UseSentry(options =>
                 {
@@ -47,6 +43,9 @@ namespace Samples.AspNetCore.Mvc
 
                     // Configures the root scope
                     options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
+
+                    //Use Ben.Demystifier
+                    options.UseAsyncStackTraceFactory();
                 })
                 .Build();
     }
