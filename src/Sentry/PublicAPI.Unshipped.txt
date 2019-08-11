@@ -1,1 +1,1 @@
-﻿static Sentry.SentryOptionsExtensions.DisableAppDomainProcessExitFlush(this Sentry.SentryOptions options) -> void
+﻿

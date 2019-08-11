@@ -202,6 +202,7 @@ static Sentry.SentryOptionsExtensions.DisableDuplicateEventDetection(this Sentry
 static Sentry.SentryOptionsExtensions.GetAllEventProcessors(this Sentry.SentryOptions options) -> System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor>
 static Sentry.SentryOptionsExtensions.GetAllExceptionProcessors(this Sentry.SentryOptions options) -> System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor>
 static Sentry.SentryOptionsExtensions.UseStackTraceFactory(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) -> Sentry.SentryOptions
+static Sentry.SentryOptionsExtensions.DisableAppDomainProcessExitFlush(this Sentry.SentryOptions options) -> void
 static Sentry.SentrySdk.AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string category = null, string type = null, System.Collections.Generic.IDictionary<string, string> data = null, Sentry.Protocol.BreadcrumbLevel level = Sentry.Protocol.BreadcrumbLevel.Info) -> void
 static Sentry.SentrySdk.AddBreadcrumb(string message, string category = null, string type = null, System.Collections.Generic.IDictionary<string, string> data = null, Sentry.Protocol.BreadcrumbLevel level = Sentry.Protocol.BreadcrumbLevel.Info) -> void
 static Sentry.SentrySdk.BindClient(Sentry.ISentryClient client) -> void
