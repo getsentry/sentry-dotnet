@@ -9,6 +9,7 @@
 ===========
 [![Travis](https://travis-ci.org/getsentry/sentry-dotnet.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
+[![Tests](https://img.shields.io/appveyor/tests/sentry/sentry-dotnet.svg?compact_message)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master/tests)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/master/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
 
 
