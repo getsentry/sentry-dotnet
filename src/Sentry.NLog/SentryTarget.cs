@@ -348,7 +348,7 @@ namespace Sentry.NLog
             }
         }
 
-        internal IEnumerable<KeyValuePair<string, string>> GetTagsFromProperties(LogEventInfo logEvent)
+        internal static IEnumerable<KeyValuePair<string, string>> GetTagsFromProperties(LogEventInfo logEvent)
         {
             if (!logEvent.HasProperties)
             {
@@ -359,7 +359,6 @@ namespace Sentry.NLog
             {
                 yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
             }
-
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetDefaultTags(LogEventInfo logEvent)

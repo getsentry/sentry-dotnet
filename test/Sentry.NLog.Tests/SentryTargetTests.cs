@@ -397,6 +397,23 @@ namespace Sentry.NLog.Tests
         }
 
         [Fact]
+        public void InitializeTarget_InitializesSdk()
+        {
+            _fixture.Options.Dsn = null;
+            _fixture.Options.Debug = true;
+            _fixture.SdkDisposeHandle = null;
+            _fixture.Options.InitializeSdk = true;
+            var logger = Substitute.For<IDiagnosticLogger>();
+
+            logger.IsEnabled(SentryLevel.Warning).Returns(true);
+            _fixture.Options.DiagnosticLogger = logger;
+
+            _ = _fixture.GetLoggerFactory();
+            logger.Received(1).Log(SentryLevel.Warning,
+                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.", null);
+        }
+
+        [Fact]
         public void Dsn_ReturnsDsnFromOptions_Null()
         {
             _fixture.Options.Dsn = null;
@@ -611,6 +628,23 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Ctor_Options_UseHubAdapter()
             => Assert.Equal(HubAdapter.Instance, new SentryTarget(new SentryNLogOptions()).HubAccessor());
+
+        [Fact]
+        public void GetTagsFromProperties_NoProperties()
+        {
+            var logEvent = new LogEventInfo();
+            Assert.Empty(SentryTarget.GetTagsFromProperties(logEvent));
+        }
+
+        [Fact]
+        public void GetTagsFromProperties_PropertiesMapped()
+        {
+            var logEvent = new LogEventInfo();
+            logEvent.Properties["a"] = "b";
+            var actual = Assert.Single(SentryTarget.GetTagsFromProperties(logEvent));
+            Assert.Equal("a", actual.Key);
+            Assert.Equal("b", actual.Value);
+        }
 
         internal class LogLevelData : IEnumerable<object[]>
         {
