@@ -1,9 +1,7 @@
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
-#if HAS_RUNTIME_INFORMATION
 using System.Runtime.InteropServices;
-#endif
 
 namespace Sentry.PlatformAbstractions
 {
@@ -19,15 +17,8 @@ namespace Sentry.PlatformAbstractions
         /// <returns>A new instance for the current runtime</returns>
         internal static Runtime GetRuntime()
         {
-#if HAS_RUNTIME_INFORMATION
-            var runtime = GetFromRuntimeInformation();
-#else
-            var runtime = GetFromMonoRuntime();
-#endif
-
-#if HAS_ENVIRONMENT_VERSION
-            runtime = runtime ?? GetFromEnvironmentVariable();
-#endif
+            var runtime = GetFromRuntimeInformation()
+                          ?? GetFromEnvironmentVariable();
 
 #if NETFX
             SetReleaseAndVersionNetFx(runtime);
@@ -102,7 +93,6 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
-#if HAS_RUNTIME_INFORMATION
         internal static Runtime GetFromRuntimeInformation()
         {
             // Prefered API: netstandard2.0
@@ -113,26 +103,7 @@ namespace Sentry.PlatformAbstractions
 
             return Parse(frameworkDescription);
         }
-#endif
 
-        internal static Runtime GetFromMonoRuntime()
-            => Type.GetType("Mono.Runtime", false)
-#if HAS_TYPE_INFO
-                ?.GetTypeInfo()
-#endif
-                ?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)
-                ?.Invoke(null, null) is string monoVersion
-                // The implementation of Mono to RuntimeInformation:
-                // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs#L40
-                // Examples:
-                // Mono 5.10.1.47 (2017-12/8eb8f7d5e74 Fri Apr 13 20:18:12 EDT 2018)
-                // Mono 5.10.1.47 (tarball Tue Apr 17 09:23:16 UTC 2018)
-                // Mono 5.10.0 (Visual Studio built mono)
-                ? Parse(monoVersion, "Mono")
-                : null;
-
-
-#if HAS_ENVIRONMENT_VERSION
         // This should really only be used on .NET 1.0, 1.1, 2.0, 3.0, 3.5 and 4.0
         internal static Runtime GetFromEnvironmentVariable()
         {
@@ -157,7 +128,5 @@ namespace Sentry.PlatformAbstractions
             }
             return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
         }
-#endif
-
     }
 }

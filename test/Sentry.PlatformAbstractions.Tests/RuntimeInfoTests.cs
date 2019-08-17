@@ -41,22 +41,18 @@ namespace Sentry.PlatformAbstractions.Tests
         }
 
 #if NETFX
-        [Fact]
+        [SkippableFact]
         public void SetReleaseAndVersionNetFx_OnNetFx_NonNullReleaseAndVersion()
         {
-            if (RuntimeInfo.GetRuntime().IsMono())
-            {
-                Assert.True(true, "This test is only relevant when running on CLR.");
-            }
-            else
-            {
-                var input = new Runtime(".NET Framework");
-                RuntimeInfo.SetReleaseAndVersionNetFx(input);
+            // This test is only relevant when running on CLR.
+            Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
-                Assert.NotNull(input.Version);
-                Assert.NotNull(input.FrameworkInstallation);
-                Assert.NotNull(input.FrameworkInstallation.Version);
-            }
+            var input = new Runtime(".NET Framework");
+            RuntimeInfo.SetReleaseAndVersionNetFx(input);
+
+            Assert.NotNull(input.Version);
+            Assert.NotNull(input.FrameworkInstallation);
+            Assert.NotNull(input.FrameworkInstallation.Version);
         }
 #endif
 
@@ -69,25 +65,6 @@ namespace Sentry.PlatformAbstractions.Tests
 
             Assert.NotNull(input.Version);
             Assert.Equal(".NET Core", input.Name);
-        }
-#else
-
-        [Fact]
-        public void GetFromMonoRuntime_OnMono_VersionNotNull()
-        {
-            if (!RuntimeInfo.GetRuntime().IsMono())
-            {
-                Assert.True(true, "This test is only relevant when running on Mono.");
-            }
-            else
-            {
-                var actual = RuntimeInfo.GetFromMonoRuntime();
-
-                Assert.Equal("Mono", actual.Name);
-                Assert.NotNull(actual.Version);
-                Assert.Null(actual.FrameworkInstallation);
-                Assert.NotNull(actual.Raw);
-            }
         }
 #endif
 

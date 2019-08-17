@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard1.5;net471;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net471;net461</TargetFrameworks>
     <DisableImplicitFrameworkReferences Condition="!$(TargetFramework.StartsWith('netstandard'))">true</DisableImplicitFrameworkReferences>
     <!-- <GenerateDocumentationFile Condition="'$(Configuration)' == 'Release'">true</GenerateDocumentationFile> -->
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
@@ -19,29 +19,18 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>NETSTANDARD;NETCOREAPP;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETSTANDARD;NETCOREAPP;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-  </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
-    <DefineConstants>NETSTANDARD;NETCOREAPP;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_TYPE_INFO;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net471'">
-    <DefineConstants>NETFX;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <DefineConstants>NETFX;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
-    <Reference Include="System" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
-    <DefineConstants>NETFX;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
 
 </Project>
