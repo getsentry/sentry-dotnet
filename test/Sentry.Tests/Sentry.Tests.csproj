@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+<!--    <TargetFrameworks>netcoreapp2.1;net471;net461</TargetFrameworks>-->
     <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
@@ -9,8 +10,24 @@
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <PackageReference Include="Xunit.SkippableFact" Version="1.3.12" />
     <Reference Include="System.Web" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net471'">
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" Properties="TargetFramework=net471" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" Properties="TargetFramework=net461" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <DefineConstants>NETFX;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netcoreapp'))">
+    <DefineConstants>NETCOREAPP;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
 
 </Project>
