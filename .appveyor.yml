@@ -25,10 +25,6 @@ install:
 on_success:
   - ps: >
         $ErrorActionreferencePreference = "stop";
-
-        Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
-        bash codecov.sh -f "coverage.xml"
-
         Resolve-Path -Relative .\src\*\bin\Release\*.nupkg |
           Foreach-Object { zeus upload -t "application/zip+nupkg" $_};
         if ($?) { zeus job update --status=passed }
