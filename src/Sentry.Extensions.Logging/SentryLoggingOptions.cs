@@ -34,7 +34,7 @@ namespace Sentry.Extensions.Logging
         /// <summary>
         /// The DSN which defines where events are sent
         /// </summary>
-        public new string Dsn
+        public new string? Dsn
         {
             get => base.Dsn?.ToString();
             set

@@ -39,7 +39,7 @@ namespace Microsoft.Extensions.Logging
         /// <returns></returns>
         public static ILoggingBuilder AddSentry(
             this ILoggingBuilder builder,
-            Action<SentryLoggingOptions> optionsConfiguration)
+            Action<SentryLoggingOptions>? optionsConfiguration)
         {
             builder.AddConfiguration();
 

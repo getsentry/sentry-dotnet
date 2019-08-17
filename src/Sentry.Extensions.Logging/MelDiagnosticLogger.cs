@@ -34,7 +34,7 @@ namespace Sentry.Extensions.Logging
         /// <returns></returns>
         public bool IsEnabled(SentryLevel level) => _logger.IsEnabled(level.ToMicrosoft()) && level >= _level;
 
-        public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object[] args)
+        public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
         {
             if (!IsEnabled(logLevel))
             {
