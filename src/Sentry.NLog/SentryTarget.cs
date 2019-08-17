@@ -295,7 +295,20 @@ namespace Sentry.NLog
 
                 if (Options.SendEventPropertiesAsTags)
                 {
-                    evt.SetTags(GetLoggingEventProperties(logEvent).MapValues(a => a.ToString()));
+                    IEnumerable<KeyValuePair<string, string>> GetTags()
+                    {
+                        if (!logEvent.HasProperties)
+                        {
+                            yield break;
+                        }
+
+                        foreach (var kv in logEvent.Properties)
+                        {
+                            yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+                        }
+
+                    }
+                    evt.SetTags(GetTags());
                 }
 
                 hub.CaptureEvent(evt);
@@ -330,7 +343,10 @@ namespace Sentry.NLog
                         data = new Dictionary<string, string>();
                     }
 
-                    data.AddRange(contextProps.MapValues(a => a.ToString()));
+                    foreach (var contextProp in contextProps)
+                    {
+                        data.Add(contextProp.Key, contextProp.Value.ToString());
+                    }
                 }
 
                 hub.AddBreadcrumb(
@@ -342,18 +358,7 @@ namespace Sentry.NLog
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetTags(LogEventInfo logEvent)
-        {
-            return Tags.ToKeyValuePairs(a => a.Name, a => a.Layout.Render(logEvent));
-        }
-
-        private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
-        {
-            if (!logEvent.HasProperties)
-            {
-                return Enumerable.Empty<KeyValuePair<string, object>>();
-            }
-
-            return logEvent.Properties.ToKeyValuePairs(x => x.Key.ToString(), x => x.Value);
-        }
+            => Tags.Select(tag =>
+                new KeyValuePair<string, string>(tag.Name, tag.Layout.Render(logEvent)));
     }
 }
