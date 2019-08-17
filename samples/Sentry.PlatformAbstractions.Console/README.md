@@ -1,8 +1,5 @@
 ﻿# PlatformAbstractions sample console
 
-The `run` scripts expect the artifacts to be already built!
-You can build the sample with Visual Studio or from the command line at the root of the repository with `build.ps1` or `build.sh`
-
 Running it will output to console some of the APIs defined in the library.
 
 

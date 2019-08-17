@@ -12,7 +12,7 @@ namespace Sentry.PlatformAbstractions.Console
     Version:                  {Runtime.Current.Version}
     Raw:                      {Runtime.Current.Raw}");
 
-#if !NETCOREAPP2_0 &&  !NETCOREAPP1_1
+#if NET461
             System.Console.WriteLine($@"
 Runtime.Current.FrameworkInstallation:
     ShortName:                {Runtime.Current.FrameworkInstallation?.ShortName}
