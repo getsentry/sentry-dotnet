@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 
@@ -17,8 +16,7 @@ namespace Sentry.PlatformAbstractions
         /// <returns>A new instance for the current runtime</returns>
         internal static Runtime GetRuntime()
         {
-            var runtime = GetFromRuntimeInformation()
-                          ?? GetFromEnvironmentVariable();
+            var runtime = GetFromRuntimeInformation();
 
 #if NETFX
             SetReleaseAndVersionNetFx(runtime);
@@ -81,7 +79,7 @@ namespace Sentry.PlatformAbstractions
             if (runtime?.IsNetCore() == true)
             {
                 // https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-308424100
-                var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
+                var assembly = typeof(System.Runtime.GCSettings).Assembly;
                 var assemblyPath = assembly.CodeBase.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 var netCoreAppIndex = Array.IndexOf(assemblyPath, "Microsoft.NETCore.App");
                 if (netCoreAppIndex > 0
@@ -102,31 +100,6 @@ namespace Sentry.PlatformAbstractions
             var frameworkDescription = RuntimeInformation.FrameworkDescription;
 
             return Parse(frameworkDescription);
-        }
-
-        // This should really only be used on .NET 1.0, 1.1, 2.0, 3.0, 3.5 and 4.0
-        internal static Runtime GetFromEnvironmentVariable()
-        {
-            // Environment.Version: NET Framework 4, 4.5, 4.5.1, 4.5.2 = 4.0.30319.xxxxx
-            // .NET Framework 4.6, 4.6.1, 4.6.2, 4.7, 4.7.1 =  4.0.30319.42000
-            // Not recommended on NET45+ (which has RuntimeInformation)
-            var version = Environment.Version;
-
-            string friendlyVersion;
-            switch (version.Major)
-            {
-                case 1:
-                    friendlyVersion = "";
-                    break;
-                //case "4.0.30319.42000":
-                //    Debug.Fail("This is .NET Framework 4.6 or later which support RuntimeInformation");
-                //    break;
-                default:
-                    friendlyVersion = version.ToString();
-                    break;
-
-            }
-            return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
         }
     }
 }
