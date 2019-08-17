@@ -21,10 +21,10 @@ namespace Sentry.NLog
         /// </summary>
         public int ShutdownTimeoutSeconds
         {
-            get => ShutdownTimeout.Seconds;
+            get => (int)ShutdownTimeout.TotalSeconds;
             set => ShutdownTimeout = TimeSpan.FromSeconds(value);
         }
-        
+
         /// <summary>
         /// How long to wait for the flush to finish. Defaults to 15 seconds (same as NLog default).
         /// </summary>

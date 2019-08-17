@@ -15,7 +15,8 @@ namespace NLog
     /// </summary>
     public static class ConfigurationExtensions
     {
-        private const string DefaultTargetName = "sentry";
+        // Internal for testability
+        internal const string DefaultTargetName = "sentry";
 
         /// <summary>
         /// Adds a target for Sentry to the NLog configuration.
