@@ -13,11 +13,7 @@ namespace Sentry.PlatformAbstractions
         /// The map between release number and version number
         /// </summary>
         /// <see href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed" />
-#if HAS_READONLY_COLLECTION
         public static IReadOnlyDictionary<int, string> NetFxReleaseVersionMap { get; set; }
-#else
-        public static IDictionary<int, string> NetFxReleaseVersionMap { get; set; }
-#endif
             = new Dictionary<int, string>
             {
                 {378389, "4.5"},

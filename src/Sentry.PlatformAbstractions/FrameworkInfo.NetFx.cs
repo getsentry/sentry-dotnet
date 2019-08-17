@@ -31,7 +31,6 @@ namespace Sentry.PlatformAbstractions
                 return null;
             }
 
-#if NET45PLUS
             if (clrVersion == 4)
             {
                 var release = Get45PlusLatestInstallationFromRegistry();
@@ -44,7 +43,7 @@ namespace Sentry.PlatformAbstractions
                     };
                 }
             }
-#endif
+
             FrameworkInstallation latest = null;
             foreach (var installation in GetInstallations())
             {
@@ -175,7 +174,6 @@ namespace Sentry.PlatformAbstractions
             };
         }
 
-#if NET45PLUS
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
         internal static int? Get45PlusLatestInstallationFromRegistry()
         {
@@ -185,7 +183,6 @@ namespace Sentry.PlatformAbstractions
                 return ndpKey?.GetInt("Release");
             }
         }
-#endif
 
         internal static Version GetNetFxVersionFromRelease(int release)
         {
