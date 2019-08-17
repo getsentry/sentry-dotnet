@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <!--Generate xml docs for all projects under 'src'-->
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+<!--    <GenerateDocumentationFile>true</GenerateDocumentationFile>-->
 
     <!-- CS1591: Missing XML comment for publicly visible type or member -->
     <NoWarn Condition="'$(Configuration)' == 'Debug'">$(NoWarn);CS1591</NoWarn>
@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />
+<!--    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />-->
 
     <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to PublicAPI.Shipped.txt -->
     <None Remove="PublicAPI.Shipped.txt" />
