@@ -30,7 +30,7 @@ namespace Sentry.NLog
         private readonly ISystemClock _clock;
         private IDisposable _sdkDisposable;
 
-        internal static readonly (string Name, string Version) NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
+        internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
