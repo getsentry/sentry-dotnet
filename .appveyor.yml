@@ -33,5 +33,9 @@ on_success:
           Foreach-Object { zeus upload -t "application/zip+nupkg" $_};
         if ($?) { zeus job update --status=passed }
           else { $host.SetShouldExit(1) }
+  - bash: >
+        curl -s https://codecov.io/bash > codecov
+        chmod +x codecov
+        ./codecov -f "*opencover.xml"
 on_failure:
   - zeus job update --status=failed
