@@ -1,22 +1,22 @@
 #if !NETFX
-using NUnit.Framework;
+using Xunit;
 
 namespace Sentry.PlatformAbstractions.Tests
 {
     public class FrameworkInfoNetStandardTests
     {
-        [Test]
+        [Fact]
         public void GetLatest_Returns_Null()
         {
             var latest = FrameworkInfo.GetLatest(4);
             Assert.Null(latest);
         }
 
-        [Test]
+        [Fact]
         public void GetInstallations_Returns_Empty()
         {
             var allInstallations = FrameworkInfo.GetInstallations();
-            Assert.IsEmpty(allInstallations);
+            Assert.Empty(allInstallations);
         }
     }
 }

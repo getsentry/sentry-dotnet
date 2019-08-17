@@ -1,44 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0;net471;net452</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net471;net452</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.10.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.0'">
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.0.2" />
-    <PackageReference Include="NSubstitute" Version="3.1.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.1'">
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=netstandard2.0" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp2.0'">
-    <DefineConstants>NETCOREAPP;$(AdditionalConstants)</DefineConstants>
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp2.1'">
+    <DefineConstants>NETCOREAPP;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net471'">
-    <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="1.1.3" />
-    <PackageReference Include="NSubstitute" Version="3.1.0" />
-    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.3.12" />
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net471" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net471'">
-    <DefineConstants>NETFX;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETFX;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net452'">
-    <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="1.1.3" />
-    <PackageReference Include="NSubstitute" Version="3.1.0" />
-    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.3.12" />
     <ProjectReference Include="..\..\src\Sentry.PlatformAbstractions\Sentry.PlatformAbstractions.csproj" Properties="TargetFramework=net45" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net452'">
-    <DefineConstants>NETFX;$(AdditionalConstants)</DefineConstants>
+    <DefineConstants>NETFX;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
 </Project>

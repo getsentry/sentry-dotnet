@@ -1,13 +1,13 @@
-using NUnit.Framework;
+using Xunit;
 
 namespace Sentry.PlatformAbstractions.Tests
 {
     public class RuntimeTests
     {
-        [Test]
+        [Fact]
         public void Current_SameInstance()
         {
-            Assert.AreSame(Runtime.Current, Runtime.Current);
+            Assert.Same(Runtime.Current, Runtime.Current);
         }
     }
 }
