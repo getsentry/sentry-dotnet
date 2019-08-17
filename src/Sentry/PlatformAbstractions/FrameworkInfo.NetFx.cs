@@ -10,7 +10,6 @@ namespace Sentry.PlatformAbstractions
     /// </summary>
     public static partial class FrameworkInfo
     {
-
         /// <summary>
         /// Get the latest Framework installation for the specified CLR
         /// </summary>
@@ -192,19 +191,8 @@ namespace Sentry.PlatformAbstractions
 
         private static Version ParseOrNull(string version)
         {
-#if NET35
-            try
-            {
-                return new Version(version);
-            }
-            catch
-            {
-                return null;
-            }
-#else
             Version.TryParse(version, out var parsed);
             return parsed;
-#endif
         }
     }
 }
