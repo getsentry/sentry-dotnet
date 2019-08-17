@@ -23,6 +23,10 @@ namespace Sentry.NLog
     public sealed class SentryTarget : TargetWithContext
     {
         private readonly Func<IHub> _hubAccessor;
+
+        // For testing:
+        internal Func<IHub> HubAccessor => _hubAccessor;
+
         private readonly ISystemClock _clock;
         private IDisposable _sdkDisposable;
 
@@ -87,7 +91,7 @@ namespace Sentry.NLog
         public string Dsn
         {
             get => Options.Dsn?.ToString();
-            set => Options.Dsn = new Dsn(value);
+            set => Options.Dsn = value == null ? null : new Dsn(value);
         }
 
         /// <summary>
@@ -186,7 +190,7 @@ namespace Sentry.NLog
         /// </summary>
         public int FlushTimeoutSeconds
         {
-            get => Options.FlushTimeout.Seconds;
+            get => (int)Options.FlushTimeout.TotalSeconds;
             set => Options.FlushTimeout = TimeSpan.FromSeconds(value);
         }
 
@@ -286,7 +290,7 @@ namespace Sentry.NLog
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
                 // Always apply any manually configured tags
-                evt.SetTags(GetTags(logEvent));
+                evt.SetTags(GetTagsFromRenderedLayout(logEvent));
 
                 if (IncludeEventProperties)
                 {
@@ -295,20 +299,7 @@ namespace Sentry.NLog
 
                 if (Options.SendEventPropertiesAsTags)
                 {
-                    IEnumerable<KeyValuePair<string, string>> GetTags()
-                    {
-                        if (!logEvent.HasProperties)
-                        {
-                            yield break;
-                        }
-
-                        foreach (var kv in logEvent.Properties)
-                        {
-                            yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
-                        }
-
-                    }
-                    evt.SetTags(GetTags());
+                    evt.SetTags(GetTagsFromProperties(logEvent));
                 }
 
                 hub.CaptureEvent(evt);
@@ -357,7 +348,21 @@ namespace Sentry.NLog
             }
         }
 
-        private IEnumerable<KeyValuePair<string, string>> GetTags(LogEventInfo logEvent)
+        internal IEnumerable<KeyValuePair<string, string>> GetTagsFromProperties(LogEventInfo logEvent)
+        {
+            if (!logEvent.HasProperties)
+            {
+                yield break;
+            }
+
+            foreach (var kv in logEvent.Properties)
+            {
+                yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+            }
+
+        }
+
+        private IEnumerable<KeyValuePair<string, string>> GetTagsFromRenderedLayout(LogEventInfo logEvent)
             => Tags.Select(tag =>
                 new KeyValuePair<string, string>(tag.Name, tag.Layout.Render(logEvent)));
     }
