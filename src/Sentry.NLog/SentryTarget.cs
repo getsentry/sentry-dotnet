@@ -290,7 +290,7 @@ namespace Sentry.NLog
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
                 // Always apply any manually configured tags
-                evt.SetTags(GetTagsFromRenderedLayout(logEvent));
+                evt.SetTags(GetDefaultTags(logEvent));
 
                 if (IncludeEventProperties)
                 {
@@ -362,7 +362,7 @@ namespace Sentry.NLog
 
         }
 
-        private IEnumerable<KeyValuePair<string, string>> GetTagsFromRenderedLayout(LogEventInfo logEvent)
+        private IEnumerable<KeyValuePair<string, string>> GetDefaultTags(LogEventInfo logEvent)
             => Tags.Select(tag =>
                 new KeyValuePair<string, string>(tag.Name, tag.Layout.Render(logEvent)));
     }
