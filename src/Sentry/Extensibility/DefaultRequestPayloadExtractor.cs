@@ -3,10 +3,23 @@ using System.Text;
 
 namespace Sentry.Extensibility
 {
+    /// <summary>
+    /// Default request payload extractor tat will read the body as a string.
+    /// </summary>
     public class DefaultRequestPayloadExtractor : BaseRequestPayloadExtractor
     {
+        /// <summary>
+        /// Whether the <see cref="IHttpRequest"/> is supported.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         protected override bool IsSupported(IHttpRequest request) => true;
 
+        /// <summary>
+        /// Extracts the request body of the <see cref="IHttpRequest"/> as a string.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         protected override object DoExtractPayLoad(IHttpRequest request)
         {
             // https://github.com/dotnet/corefx/blob/master/src/Common/src/CoreLib/System/IO/StreamReader.cs#L186

@@ -134,6 +134,10 @@ namespace Sentry
         /// </example>
         /// <see href="https://docs.sentry.io/clientdev/features/#event-sampling"/>
         private float? _sampleRate;
+        /// <summary>
+        /// The optional sample rate.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
         public float? SampleRate
         {
             get => _sampleRate;
@@ -381,7 +385,8 @@ namespace Sentry
 
             Integrations = new List<ISdkIntegration>
             {
-                new AppDomainUnhandledExceptionIntegration()
+                new AppDomainUnhandledExceptionIntegration(),
+                new AppDomainProcessExitIntegration()
             };
 
             InAppExclude = new List<string>

@@ -15,6 +15,10 @@ namespace Sentry.Extensibility
     {
         private readonly SentryOptions _options;
 
+        /// <summary>
+        /// Creates an instance of <see cref="SentryStackTraceFactory"/>
+        /// </summary>
+        /// <param name="options"></param>
         public SentryStackTraceFactory(SentryOptions options) => _options = options;
 
         /// <summary>
@@ -37,9 +41,20 @@ namespace Sentry.Extensibility
             return Create(CreateStackTrace(exception), isCurrentStackTrace);
         }
 
+        /// <summary>
+        /// Creates a s<see cref="StackTrace"/> from the <see cref="Exception"/>.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <returns>A StackTrace.</returns>
         protected virtual StackTrace CreateStackTrace(Exception exception) =>
             exception == null ? new StackTrace(true) : new StackTrace(exception, true);
 
+        /// <summary>
+        /// Creates a <see cref="SentryStackTrace"/> from the <see cref="StackTrace"/>.
+        /// </summary>
+        /// <param name="stackTrace">The stack trace.</param>
+        /// <param name="isCurrentStackTrace">Whether this is the current stack trace.</param>
+        /// <returns>SentryStackTrace</returns>
         internal SentryStackTrace Create(StackTrace stackTrace, bool isCurrentStackTrace)
         {
             var frames = CreateFrames(stackTrace, isCurrentStackTrace)
@@ -58,6 +73,12 @@ namespace Sentry.Extensibility
                 : stacktrace;
         }
 
+        /// <summary>
+        /// Creates an enumerator of <see cref="SentryStackFrame"/> from a <see cref="StackTrace"/>.
+        /// </summary>
+        /// <param name="stackTrace"></param>
+        /// <param name="isCurrentStackTrace"></param>
+        /// <returns></returns>
         internal IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
         {
             var frames = stackTrace?.GetFrames();
@@ -93,8 +114,17 @@ namespace Sentry.Extensibility
 
         internal SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
 
+        /// <summary>
+        /// Create a <see cref="SentryStackFrame"/> from a <see cref="StackFrame"/>.
+        /// </summary>
+        /// <param name="stackFrame"></param>
+        /// <param name="isCurrentStackTrace"></param>
+        /// <returns></returns>
         protected virtual SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) => InternalCreateFrame(stackFrame, true);
 
+        /// <summary>
+        /// Default the implementation of CreateFrame.
+        /// </summary>
         protected SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
         {
             const string unknownRequiredField = "(unknown)";
@@ -138,6 +168,11 @@ namespace Sentry.Extensibility
             return frame;
         }
 
+        /// <summary>
+        /// Get a <see cref="MethodBase"/> from <see cref="StackFrame"/>.
+        /// </summary>
+        /// <param name="stackFrame">The <see cref="StackFrame"/></param>.
+        /// <returns></returns>
         protected virtual MethodBase GetMethod(StackFrame stackFrame) => stackFrame.GetMethod();
 
         private bool IsSystemModuleName(string moduleName)
