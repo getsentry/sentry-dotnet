@@ -1,5 +1,7 @@
 #!/bin/bash
 
+dotnet build -c Release
+
 for sampleDll in bin/Release/*/*Console.dll; do
     [ -e "$sampleDll" ] || continue
     printf "\nRunning: $sampleDll\n"
