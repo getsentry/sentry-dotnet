@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
+using Sentry.Extensions.Logging;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
@@ -29,6 +30,8 @@ namespace Sentry.AspNetCore
 
             // Not PII as this is running on a server
             @event.ServerName = Environment.MachineName;
+
+            _options.ApplyDefaultTags(@event);
 
             return @event;
         }

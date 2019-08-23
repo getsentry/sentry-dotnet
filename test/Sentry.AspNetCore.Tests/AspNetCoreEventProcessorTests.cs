@@ -6,7 +6,13 @@ namespace Sentry.AspNetCore.Tests
 {
     public class AspNetCoreEventProcessorTests
     {
-        private readonly AspNetCoreEventProcessor _sut = new AspNetCoreEventProcessor(Options.Create(new SentryAspNetCoreOptions()));
+        private readonly SentryAspNetCoreOptions _options = new SentryAspNetCoreOptions();
+        private readonly AspNetCoreEventProcessor _sut;
+
+        public AspNetCoreEventProcessorTests()
+        {
+            _sut = new AspNetCoreEventProcessor(Options.Create(_options));
+        }
 
         [Fact]
         public void Process_WithRuntime_MovesToServerRuntime()
@@ -49,6 +55,20 @@ namespace Sentry.AspNetCore.Tests
             _sut.Process(target);
 
             Assert.False(target.Contexts.ContainsKey("server-os"));
+        }
+
+
+        [Fact]
+        public void Process_AppliesDefaultTags()
+        {
+            const string key = "key";
+            const string expected = "default tag value";
+            var target = new SentryEvent();
+            _options.DefaultTags[key] = expected;
+
+            _sut.Process(target);
+
+            Assert.Equal(expected, target.Tags[key]);
         }
     }
 }
