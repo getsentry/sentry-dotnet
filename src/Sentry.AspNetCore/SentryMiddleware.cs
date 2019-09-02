@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore
@@ -23,7 +24,7 @@ namespace Sentry.AspNetCore
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
 
-        internal static readonly (string Name, string Version) NameAndVersion
+        internal static readonly SdkVersion NameAndVersion
             = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
