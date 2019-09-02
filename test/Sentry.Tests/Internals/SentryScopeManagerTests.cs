@@ -21,10 +21,10 @@ namespace Sentry.Tests.Internals
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
-        public void GetCurrent_Scope_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Scope);
+        public void GetCurrent_Scope_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Item1);
 
         [Fact]
-        public void GetCurrent_Client_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Client);
+        public void GetCurrent_Client_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Item2);
 
         [Fact]
         public void GetCurrent_Equality_SameOnInstance()
@@ -76,7 +76,7 @@ namespace Sentry.Tests.Internals
             var (scope, _) = sut.GetCurrent();
 
             sut.BindClient(Substitute.For<ISentryClient>());
-            Assert.Same(scope, sut.GetCurrent().Scope);
+            Assert.Same(scope, sut.GetCurrent().Item1);
         }
 
         [Fact]
@@ -255,8 +255,8 @@ namespace Sentry.Tests.Internals
         {
             var sut = _fixture.GetSut();
             var root = sut.GetCurrent();
-            void AddRandomTag() => sut.GetCurrent().Scope.SetTag(Guid.NewGuid().ToString(), "1");
-            void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Scope.Tags.Count);
+            void AddRandomTag() => sut.GetCurrent().Item1.SetTag(Guid.NewGuid().ToString(), "1");
+            void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Item1.Tags.Count);
 
             AddRandomTag();
             AssertTagCount(1);

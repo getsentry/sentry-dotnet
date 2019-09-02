@@ -63,6 +63,24 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
+        public void SentryOptions_DefaultTags_ValuesApplied()
+        {
+            const string expectedKey = "expected_key";
+            const string expectedValue = "expected value";
+            var dict = new Dictionary<string, string>
+            {
+                {"Sentry:DefaultTags:" + expectedKey, expectedValue},
+            };
+
+            _fixture.Builder.AddInMemoryCollection(dict);
+
+            var provider = _fixture.GetSut();
+            var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
+
+            Assert.Equal(expectedValue, sentryLoggingOptions.DefaultTags[expectedKey]);
+        }
+
+        [Fact]
         public void SentryLoggerProvider_ResolvedFromILoggerProvider()
         {
             var provider = _fixture.GetSut();
