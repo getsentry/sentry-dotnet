@@ -102,9 +102,9 @@ namespace Sentry.Internal
         {
             try
             {
-                var (currentScope, client) = ScopeManager.GetCurrent();
-                var actualScope = scope ?? currentScope;
-                var id = client.CaptureEvent(evt, actualScope);
+                var ctx = ScopeManager.GetCurrent();
+                var actualScope = scope ?? ctx.Item1;
+                var id = ctx.Item2.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
                 return id;
             }
@@ -119,8 +119,8 @@ namespace Sentry.Internal
         {
             try
             {
-                var (_, client) = ScopeManager.GetCurrent();
-                await client.FlushAsync(timeout).ConfigureAwait(false);
+                var ctx = ScopeManager.GetCurrent();
+                await ctx.Item2.FlushAsync(timeout).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -152,8 +152,8 @@ namespace Sentry.Internal
         {
             get
             {
-                var (currentScope, _) = ScopeManager.GetCurrent();
-                return currentScope.LastEventId;
+                var ctx = ScopeManager.GetCurrent();
+                return ctx.Item1.LastEventId;
             }
         }
     }

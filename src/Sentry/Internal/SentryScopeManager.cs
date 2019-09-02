@@ -60,16 +60,16 @@ namespace Sentry.Internal
         {
             var currentScopeAndClientStack = ScopeAndClientStack;
             currentScopeAndClientStack.TryPeek(out var tuple);
-            var (scope, client) = tuple;
+            var ctx = tuple;
 
-            if (scope.Locked)
+            if (ctx.Item1.Locked)
             {
                 // TODO: keep state on current scope?
                 _options?.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
                 return DisabledHub.Instance;
             }
 
-            var clonedScope = scope.Clone();
+            var clonedScope = ctx.Item1.Clone();
 
             if (state != null)
             {
@@ -77,7 +77,7 @@ namespace Sentry.Internal
             }
             var scopeSnapshot = new ScopeSnapshot(_options, currentScopeAndClientStack, this);
             _options?.DiagnosticLogger?.LogDebug("New scope pushed.");
-            currentScopeAndClientStack.Push(new Tuple<Scope, ISentryClient>(clonedScope, client));
+            currentScopeAndClientStack.Push(new Tuple<Scope, ISentryClient>(clonedScope, ctx.Item2));
 
             return scopeSnapshot;
         }
@@ -123,10 +123,10 @@ namespace Sentry.Internal
                 _options?.DiagnosticLogger?.LogDebug("Disposing scope.");
 
                 // Only reset the parent if this is still the current scope
-                foreach (var (scope, _) in _scopeManager.ScopeAndClientStack)
+                foreach (var ctx in _scopeManager.ScopeAndClientStack)
                 {
                     _snapshot.TryPeek(out var tuple);
-                    if (ReferenceEquals(scope, tuple.Item1))
+                    if (ReferenceEquals(ctx.Item1, tuple.Item1))
                     {
                         _scopeManager.ScopeAndClientStack = _snapshot;
                         break;
