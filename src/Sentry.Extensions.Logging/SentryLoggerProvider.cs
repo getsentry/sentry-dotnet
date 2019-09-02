@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
+using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.Extensions.Logging
@@ -20,7 +21,7 @@ namespace Sentry.Extensions.Logging
 
         internal IHub Hub { get; }
 
-        internal static readonly (string Name, string Version) NameAndVersion
+        internal static readonly SdkVersion NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;

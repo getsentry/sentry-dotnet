@@ -19,7 +19,7 @@ namespace Sentry.Log4Net
 
         private readonly object _initSync = new object();
 
-        internal static readonly (string Name, string Version) NameAndVersion
+        internal static readonly SdkVersion NameAndVersion
             = typeof(SentryAppender).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;

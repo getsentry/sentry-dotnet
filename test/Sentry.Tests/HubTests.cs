@@ -36,10 +36,10 @@ namespace NotSentry.Tests
             using (sut.PushScope())
             {
                 sut.ConfigureScope(s => s.AddBreadcrumb("test"));
-                Assert.Single(sut.ScopeManager.GetCurrent().Scope.Breadcrumbs);
+                Assert.Single(sut.ScopeManager.GetCurrent().Item1.Breadcrumbs);
             }
 
-            Assert.Empty(sut.ScopeManager.GetCurrent().Scope.Breadcrumbs);
+            Assert.Empty(sut.ScopeManager.GetCurrent().Item1.Breadcrumbs);
         }
 
         [Fact]
