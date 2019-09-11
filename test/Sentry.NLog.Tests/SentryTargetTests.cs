@@ -72,12 +72,13 @@ namespace Sentry.NLog.Tests
             {
                 var target = GetTarget(asyncTarget);
 
-                var config = new LoggingConfiguration();
+                var factory = new LogFactory();
+
+                var config = new LoggingConfiguration(factory);
                 config.AddTarget("sentry", target);
                 config.AddRule(LogLevel.Trace, LogLevel.Fatal, target);
 
-                var factory = new LogFactory(config);
-
+                factory.Configuration = config;
                 return factory;
             }
 
@@ -103,7 +104,9 @@ namespace Sentry.NLog.Tests
                     </targets>
                 </nlog>";
 
-            var c = XmlLoggingConfiguration.CreateFromXmlString(configXml);
+            var stringReader = new System.IO.StringReader(configXml);
+            var xmlReader = System.Xml.XmlReader.Create(stringReader);
+            var c = new XmlLoggingConfiguration(xmlReader, null);
 
             var t = c.FindTargetByName("sentry") as SentryTarget;
             Assert.NotNull(t);
@@ -115,10 +118,10 @@ namespace Sentry.NLog.Tests
         public void Shutdown_DisposesSdk()
         {
             _fixture.Options.InitializeSdk = false;
-            var factory = _fixture.GetLoggerFactory();
-            LogManager.Configuration = factory.Configuration;
+            var target = _fixture.GetTarget();
+            SimpleConfigurator.ConfigureForTargetLogging(target);
 
-            var sut = factory.GetCurrentClassLogger();
+            var sut = LogManager.GetCurrentClassLogger();
 
             sut.Error(DefaultMessage);
 
@@ -134,7 +137,6 @@ namespace Sentry.NLog.Tests
         {
             _fixture.Options.InitializeSdk = false;
             var factory = _fixture.GetLoggerFactory();
-            LogManager.Configuration = factory.Configuration;
 
             var sut = factory.GetCurrentClassLogger();
 
@@ -349,14 +351,21 @@ namespace Sentry.NLog.Tests
         {
             _fixture.Options.BreadcrumbLayout = "${logger}: ${message}";
             _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Trace;
-            var logger = _fixture.GetLogger();
+
+            var factory = _fixture.GetLoggerFactory();
+            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
+            sentryTarget.IncludeEventDataOnBreadcrumbs = true;
+            var logger = factory.GetLogger("sentry");
+
             const string message = "This is a breadcrumb";
 
-            logger.Debug(message);
+            var evt = LogEventInfo.Create(LogLevel.Debug, logger.Name, message);
+            evt.Properties["a"] = "b";
+            logger.Log(evt);
 
             var b = _fixture.Scope.Breadcrumbs.First();
-
             Assert.Equal($"{logger.Name}: {message}", b.Message);
+            Assert.Equal("b", b.Data["a"]);
         }
 
         [Fact]
@@ -367,8 +376,6 @@ namespace Sentry.NLog.Tests
 
             _fixture.Options.FlushTimeout = timeout;
             var factory = _fixture.GetLoggerFactory(asyncTarget: true);
-
-            LogManager.Configuration = factory.Configuration;
 
             // Verify that it's asynchronous
             Assert.NotEmpty(factory.Configuration.AllTargets.OfType<AsyncTargetWrapper>());
@@ -630,20 +637,33 @@ namespace Sentry.NLog.Tests
             => Assert.Equal(HubAdapter.Instance, new SentryTarget(new SentryNLogOptions()).HubAccessor());
 
         [Fact]
-        public void GetTagsFromProperties_NoProperties()
+        public void GetTagsFromLogEvent_ContextProperties()
         {
-            var logEvent = new LogEventInfo();
-            Assert.Empty(SentryTarget.GetTagsFromProperties(logEvent));
+            var factory = _fixture.GetLoggerFactory();
+            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
+            sentryTarget.Tags.Add(new TargetPropertyWithContext("Logger", "${logger:shortName=true}"));
+            sentryTarget.SendEventPropertiesAsTags = true;
+
+            var logger = factory.GetLogger("sentry");
+            logger.Fatal(DefaultMessage);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["Logger"] == "sentry"));
         }
 
+
         [Fact]
-        public void GetTagsFromProperties_PropertiesMapped()
+        public void GetTagsFromLogEvent_PropertiesMapped()
         {
-            var logEvent = new LogEventInfo();
-            logEvent.Properties["a"] = "b";
-            var actual = Assert.Single(SentryTarget.GetTagsFromProperties(logEvent));
-            Assert.Equal("a", actual.Key);
-            Assert.Equal("b", actual.Value);
+            var factory = _fixture.GetLoggerFactory();
+            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
+            sentryTarget.SendEventPropertiesAsTags = true;
+
+            var logger = factory.GetLogger("sentry");
+            logger.Fatal("{a}", "b");
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == "b"));
         }
 
         internal class LogLevelData : IEnumerable<object[]>

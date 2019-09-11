@@ -259,12 +259,11 @@ namespace Sentry.NLog
             }
 
             var exception = logEvent.Exception;
-            var formatted = Layout.Render(logEvent);
+            var formatted = RenderLogEvent(Layout, logEvent);
             var template = logEvent.Message;
 
-            var contextProps = GetAllProperties(logEvent);
-
             var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
+            var shouldIncludeProperties = ContextProperties?.Count > 0 || ShouldIncludeProperties(logEvent);
 
             if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
             {
@@ -289,17 +288,15 @@ namespace Sentry.NLog
 
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
-                // Always apply any manually configured tags
-                evt.SetTags(GetDefaultTags(logEvent));
-
-                if (IncludeEventProperties)
+                if (Tags.Count > 0 || SendEventPropertiesAsTags)
                 {
-                    evt.SetExtras(contextProps);
+                    evt.SetTags(GetTagsFromLogEvent(logEvent));
                 }
 
-                if (Options.SendEventPropertiesAsTags)
+                if (shouldIncludeProperties)
                 {
-                    evt.SetTags(GetTagsFromProperties(logEvent));
+                    var contextProps = GetAllProperties(logEvent);
+                    evt.SetExtras(contextProps);
                 }
 
                 hub.CaptureEvent(evt);
@@ -329,14 +326,14 @@ namespace Sentry.NLog
 
                 if (IncludeEventDataOnBreadcrumbs)
                 {
-                    if (data is null)
+                    if (shouldIncludeProperties)
                     {
-                        data = new Dictionary<string, string>();
-                    }
-
-                    foreach (var contextProp in contextProps)
-                    {
-                        data.Add(contextProp.Key, contextProp.Value.ToString());
+                        var contextProps = GetAllProperties(logEvent);
+                        data = data ?? new Dictionary<string, string>(contextProps.Count);
+                        foreach (var contextProp in contextProps)
+                        {
+                            data.Add(contextProp.Key, contextProp.Value.ToString());
+                        }
                     }
                 }
 
@@ -348,21 +345,30 @@ namespace Sentry.NLog
             }
         }
 
-        internal static IEnumerable<KeyValuePair<string, string>> GetTagsFromProperties(LogEventInfo logEvent)
+        private IEnumerable<KeyValuePair<string, string>> GetTagsFromLogEvent(LogEventInfo logEvent)
         {
-            if (!logEvent.HasProperties)
+            if (SendEventPropertiesAsTags)
             {
-                yield break;
+                if (logEvent.HasProperties)
+                {
+                    foreach (var kv in logEvent.Properties)
+                    {
+                        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+                    }
+                }
             }
 
-            foreach (var kv in logEvent.Properties)
+            if (Tags.Count > 0)
             {
-                yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+                foreach (var tag in Tags)
+                {
+                    var tagValue = RenderLogEvent(tag.Layout, logEvent);
+                    if (!tag.IncludeEmptyValue && string.IsNullOrEmpty(tagValue))
+                        continue;
+
+                    yield return new KeyValuePair<string, string>(tag.Name, tagValue);
+                }
             }
         }
-
-        private IEnumerable<KeyValuePair<string, string>> GetDefaultTags(LogEventInfo logEvent)
-            => Tags.Select(tag =>
-                new KeyValuePair<string, string>(tag.Name, tag.Layout.Render(logEvent)));
     }
 }
