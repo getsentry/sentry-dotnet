@@ -388,6 +388,7 @@ namespace Sentry
             InAppExclude
                 = ImmutableList.Create(
                     "System.",
+                    "Sentry.",
                     "Microsoft.",
                     "MS", // MS.Win32, MS.Internal, etc: Desktop apps
                     "Newtonsoft.Json",
