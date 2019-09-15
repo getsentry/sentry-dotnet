@@ -25,7 +25,7 @@ namespace Sentry.Samples.AspNetCore3.Mvc.Controllers
 
         public IActionResult Privacy()
         {
-            return View();
+            return View("DoesNotExist");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
