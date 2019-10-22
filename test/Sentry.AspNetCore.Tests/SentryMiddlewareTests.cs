@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -26,6 +27,7 @@ namespace Sentry.AspNetCore.Tests
             public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
+            public ISentryClient sentryClient { get; set; }
 
             public Fixture()
             {
@@ -40,7 +42,8 @@ namespace Sentry.AspNetCore.Tests
                     HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment,
-                    Logger);
+                    Logger,
+                    sentryClient);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -478,6 +481,38 @@ namespace Sentry.AspNetCore.Tests
 
             Assert.Equal(Constants.SdkName, scope.Sdk.Name);
             Assert.Equal(SentryMiddleware.NameAndVersion.Version, scope.Sdk.Version);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_DefaultOptions_CanNotFlush()
+        {
+            var sut = _fixture.GetSut();
+            await sut.InvokeAsync(_fixture.HttpContext);
+            
+            _fixture.Options.DiagnosticLogger.Log(SentryLevel.Debug, "No events to flush.");            
+        }
+
+        [Fact]
+        public async Task InvokeAsync_FlushOnCompletedRequestFasl_CanNotFlush()
+        {
+            var sut = _fixture.GetSut(); 
+            _fixture.Options.FlushOnCompletedRequest = false;
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            _fixture.Options.DiagnosticLogger.Log(SentryLevel.Debug, "No events to flush.");
+        }
+
+        [Fact]
+        public async Task InvokeAsyn_FullQueue_RespectsTimeout()
+        {
+            var sut = _fixture.GetSut();
+            _fixture.Options.FlushOnCompletedRequest = true;
+            _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(1);
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            _fixture.Options.DiagnosticLogger.Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
         }
     }
 }
