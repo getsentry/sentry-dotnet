@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -493,7 +492,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsync_FlushOnCompletedRequestFasl_CanNotFlush()
+        public async Task InvokeAsync_FlushOnCompletedRequestWhenFalse_CanNotFlush()
         {
             var sut = _fixture.GetSut(); 
             _fixture.Options.FlushOnCompletedRequest = false;
@@ -504,7 +503,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsyn_FullQueue_RespectsTimeout()
+        public async Task InvokeAsyn_FlushOnCompletedRequestTrue_RespectsTimeout()
         {
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;
