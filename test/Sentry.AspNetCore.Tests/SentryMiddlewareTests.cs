@@ -26,7 +26,6 @@ namespace Sentry.AspNetCore.Tests
             public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
-            public ISentryClient sentryClient { get; set; }
 
             public Fixture()
             {
@@ -41,8 +40,7 @@ namespace Sentry.AspNetCore.Tests
                     HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment,
-                    Logger,
-                    sentryClient);
+                    Logger);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -487,8 +485,8 @@ namespace Sentry.AspNetCore.Tests
         {
             var sut = _fixture.GetSut();
             await sut.InvokeAsync(_fixture.HttpContext);
-            
-            _fixture.Options.DiagnosticLogger.Log(SentryLevel.Debug, "No events to flush.");            
+
+            await _fixture.Hub.FlushAsync(Arg.Any<TimeSpan>()).DidNotReceive();
         }
 
         [Fact]
@@ -499,7 +497,7 @@ namespace Sentry.AspNetCore.Tests
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            _fixture.Options.DiagnosticLogger.Log(SentryLevel.Debug, "No events to flush.");
+            await _fixture.Hub.FlushAsync(Arg.Any<TimeSpan>()).DidNotReceive();
         }
 
         [Fact]
@@ -511,7 +509,7 @@ namespace Sentry.AspNetCore.Tests
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            _fixture.Options.DiagnosticLogger.Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
+            await _fixture.Hub.FlushAsync(Arg.Any<TimeSpan>()).Received();
         }
     }
 }

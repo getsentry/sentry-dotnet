@@ -23,7 +23,6 @@ namespace Sentry.AspNetCore
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
-        private readonly ISentryClient _sentryClient;
 
         internal static readonly SdkVersion NameAndVersion
             = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
@@ -38,7 +37,6 @@ namespace Sentry.AspNetCore
         /// <param name="options">The options for this integration</param>
         /// <param name="hostingEnvironment">The hosting environment.</param>
         /// <param name="logger">Sentry logger.</param>
-        /// <param name="sentryClient">The sentry Client</param>
         /// <exception cref="ArgumentNullException">
         /// next
         /// or
@@ -49,8 +47,7 @@ namespace Sentry.AspNetCore
             Func<IHub> hubAccessor,
             IOptions<SentryAspNetCoreOptions> options,
             IHostingEnvironment hostingEnvironment,
-            ILogger<SentryMiddleware> logger,
-            ISentryClient sentryClient)
+            ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
@@ -65,7 +62,6 @@ namespace Sentry.AspNetCore
             }
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
-            _sentryClient = sentryClient;
         }
 
         /// <summary>
@@ -74,18 +70,16 @@ namespace Sentry.AspNetCore
         /// <param name="context">The context.</param>
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
-        {
+        {           
+            var hub = _hubAccessor();
             if (_options.FlushOnCompletedRequest)
             {
                 context.Response.OnCompleted(async () =>
                 {
-                    await _sentryClient.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
+                    await _hubAccessor().FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
                 });
 
-                await _next(context).ConfigureAwait(false);
             }
-
-            var hub = _hubAccessor();
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);

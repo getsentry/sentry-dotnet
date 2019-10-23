@@ -58,8 +58,7 @@ namespace Sentry.AspNetCore.Tests
                     HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment,
-                    MiddlewareLogger,
-                    sentryClient);
+                    MiddlewareLogger);
 
             public void Dispose() => _disposable.Dispose();
         }
