@@ -486,7 +486,7 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            await _fixture.Hub.FlushAsync(Arg.Any<TimeSpan>()).DidNotReceive();
+            await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
         }
 
         [Fact]
