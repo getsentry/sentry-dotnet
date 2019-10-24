@@ -490,7 +490,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsync_FlushOnCompletedRequestWhenFalse_CanNotFlush()
+        public async Task InvokeAsync_FlushOnCompletedRequestWhenFalse_DoesNotCallFlushAsync()
         {
             var sut = _fixture.GetSut(); 
             _fixture.Options.FlushOnCompletedRequest = false;
