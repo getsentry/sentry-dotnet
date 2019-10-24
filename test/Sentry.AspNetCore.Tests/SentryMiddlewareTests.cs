@@ -481,7 +481,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsync_DefaultOptions_CanNotFlush()
+        public async Task InvokeAsync_DefaultOptions_DoesNotCallFlushAsync()
         {
             var sut = _fixture.GetSut();
             await sut.InvokeAsync(_fixture.HttpContext);
