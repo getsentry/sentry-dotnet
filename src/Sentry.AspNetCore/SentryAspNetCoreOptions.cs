@@ -49,7 +49,7 @@ namespace Sentry.AspNetCore
         public bool FlushOnCompletedRequest { get; set; }
 
         /// <summary>
-        /// How long to wait for the flush to finish,Defaults to 2 seconds.
+        /// How long to wait for the flush to finish. Defaults to 2 seconds.
         /// </summary>
         public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
