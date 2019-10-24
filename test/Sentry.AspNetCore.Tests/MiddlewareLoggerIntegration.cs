@@ -30,7 +30,6 @@ namespace Sentry.AspNetCore.Tests
             public ILogger<SentryMiddleware> MiddlewareLogger { get; set; }
             public ILogger SentryLogger { get; set; }
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
-            public ISentryClient sentryClient { get; set; }
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
             private readonly IDisposable _disposable;
 
