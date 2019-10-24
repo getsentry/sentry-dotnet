@@ -509,7 +509,7 @@ namespace Sentry.AspNetCore.Tests
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            await _fixture.Hub.FlushAsync(Arg.Any<TimeSpan>()).Received();
+            await _fixture.Hub.FlushAsync(_fixture.Options.FlushTimeout).Received(1);
         }
     }
 }
