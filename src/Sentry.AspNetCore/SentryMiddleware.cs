@@ -76,7 +76,7 @@ namespace Sentry.AspNetCore
             {
                 context.Response.OnCompleted(async () =>
                 {
-                    await _hubAccessor().FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
+                    await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
                 });
 
             }
