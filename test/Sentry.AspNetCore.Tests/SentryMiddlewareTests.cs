@@ -503,13 +503,19 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public async Task InvokeAsyn_FlushOnCompletedRequestTrue_RespectsTimeout()
         {
+            // ARRANGE
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;
             _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(1);
 
+            // ACT
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            await _fixture.Hub.Received(1).FlushAsync(_fixture.Options.FlushTimeout);
+            // ASSERT
+            if (_fixture.HttpContext.Response.HasStarted)
+            {
+                await _fixture.Hub.Received(1).FlushAsync(_fixture.Options.FlushTimeout);
+            }            
         }
     }
 }

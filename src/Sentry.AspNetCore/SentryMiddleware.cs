@@ -78,7 +78,7 @@ namespace Sentry.AspNetCore
                 {
                     await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
                 });
-            }
+            }            
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);
