@@ -72,7 +72,7 @@ namespace Sentry.AspNetCore
         public async Task InvokeAsync(HttpContext context)
         {
             var hub = _hubAccessor();
-            if (_options.FlushOnCompletedRequest)
+            if (_options?.FlushOnCompletedRequest == true)
             {
                 context.Response.OnCompleted(async () =>
                 {
