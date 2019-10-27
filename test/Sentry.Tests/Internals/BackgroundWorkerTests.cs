@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -7,7 +8,6 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Sentry.Tests.Internals
 {
@@ -17,6 +17,7 @@ namespace Sentry.Tests.Internals
         {
             public ITransport Transport { get; set; } = Substitute.For<ITransport>();
             public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
+            public ConcurrentQueue<SentryEvent> Queue { get; set; } = new ConcurrentQueue<SentryEvent>();
             public CancellationTokenSource CancellationTokenSource { get; set; } = new CancellationTokenSource();
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
@@ -31,7 +32,8 @@ namespace Sentry.Tests.Internals
                 => new BackgroundWorker(
                     Transport,
                     SentryOptions,
-                    CancellationTokenSource);
+                    CancellationTokenSource,
+                    Queue);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -127,8 +129,7 @@ namespace Sentry.Tests.Internals
 
                 // First event was sent, second hit transport with a cancelled token.
                 // Third never taken from the queue
-                Assert.Equal(1, sut.QueuedItems);
-            }
+                Assert.Single(_fixture.Queue);             }
         }
 
         [Fact]
@@ -164,7 +165,7 @@ namespace Sentry.Tests.Internals
                 sut.Dispose(); // Since token was already cancelled, it's basically blocking to wait on the task completion
 
                 Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
-                Assert.Equal(0, sut.QueuedItems);
+                Assert.Empty(_fixture.Queue);
             }
         }
 
@@ -298,7 +299,9 @@ namespace Sentry.Tests.Internals
                 .Do(_ => signal.Wait());
             using (var sut = _fixture.GetSut())
             {
-                Assert.Equal(1, sut.QueuedItems);
+                sut.EnqueueEvent(new SentryEvent());
+                Assert.Single(_fixture.Queue);
+                signal.Set();
             }
         }
 
@@ -347,7 +350,7 @@ namespace Sentry.Tests.Internals
                 await flushTask;
 
                 _fixture.Logger.Received().Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
-                Assert.Equal(0, sut.QueuedItems); // Only the item being processed at the blocked callback
+                Assert.Empty(_fixture.Queue); // Only the item being processed at the blocked callback
             }
         }
 

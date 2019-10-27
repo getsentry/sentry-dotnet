@@ -26,14 +26,15 @@ namespace Sentry.Internal
         public BackgroundWorker(
             ITransport transport,
             SentryOptions options)
-            : this(transport, options, null)
+            : this(transport, options, null, null)
         {
         }
 
         internal BackgroundWorker(
             ITransport transport,
             SentryOptions options,
-            CancellationTokenSource shutdownSource = null)
+            CancellationTokenSource shutdownSource = null,
+            ConcurrentQueue<SentryEvent> queue = null)
         {
             Debug.Assert(transport != null);
             Debug.Assert(options != null);
@@ -44,7 +45,7 @@ namespace Sentry.Internal
             _options = options;
 
             _shutdownSource = shutdownSource ?? new CancellationTokenSource();
-            _queue = new ConcurrentQueue<SentryEvent>();
+            _queue = queue ?? new ConcurrentQueue<SentryEvent>();
 
             WorkerTask = Task.Run(
                 async () => await WorkerAsync(
