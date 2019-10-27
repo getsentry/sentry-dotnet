@@ -129,7 +129,8 @@ namespace Sentry.Tests.Internals
 
                 // First event was sent, second hit transport with a cancelled token.
                 // Third never taken from the queue
-                Assert.Single(_fixture.Queue);             }
+                Assert.Single(_fixture.Queue);
+            }
         }
 
         [Fact]
@@ -290,18 +291,10 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void QueuedItems_ReflectsQueue()
         {
-            // Arrange
-            _fixture.SentryOptions.MaxQueueItems = 1;
-            var signal = new ManualResetEventSlim();
-            var evt = new SentryEvent();
-            _fixture.Transport
-                .When(t => t.CaptureEventAsync(evt, Arg.Any<CancellationToken>()))
-                .Do(_ => signal.Wait());
+            _fixture.Queue.Enqueue(null);
             using (var sut = _fixture.GetSut())
             {
-                sut.EnqueueEvent(new SentryEvent());
-                Assert.Single(_fixture.Queue);
-                signal.Set();
+                Assert.Equal(1, sut.QueuedItems);
             }
         }
 
@@ -344,7 +337,7 @@ namespace Sentry.Tests.Internals
                 transportEvent.WaitOne(); // Wait first event to be in-flight
 
                 var flushTask = sut.FlushAsync(TimeSpan.FromDays(1));
-                Assert.Equal(1, sut.QueuedItems); // Event being processed
+                Assert.Single(_fixture.Queue); // Event being processed
 
                 eventsQueuedEvent.Set();
                 await flushTask;
@@ -394,26 +387,17 @@ namespace Sentry.Tests.Internals
                     transportEvent.Set(); // Processing first event
                     eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
                 });
+
             using (var sut = _fixture.GetSut())
             {
                 // Act
-                Assert.Equal(0, sut.QueuedItems);
-                try
-                {
-                    sut.EnqueueEvent(expected);
-                    Assert.Equal(1, sut.QueuedItems);
-                }
-                finally
-                {
-                    eventsQueuedEvent.Set();
-                }
                 sut.EnqueueEvent(expected);
                 transportEvent.WaitOne(); // Wait first event to be in-flight
 
                 await sut.FlushAsync(TimeSpan.FromSeconds(1));
 
                 _fixture.Logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
-                Assert.Equal(1, sut.QueuedItems); // Only the item being processed at the blocked callback
+                Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
             }
         }
     }
