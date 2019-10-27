@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -7,6 +6,7 @@ using NSubstitute.ExceptionExtensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Sentry.Tests.Internals
 {
@@ -15,7 +15,6 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public ITransport Transport { get; set; } = Substitute.For<ITransport>();
-            public IProducerConsumerCollection<SentryEvent> Queue { get; set; } = new ConcurrentQueue<SentryEvent>();
             public CancellationTokenSource CancellationTokenSource { get; set; } = new CancellationTokenSource();
             public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
@@ -23,8 +22,7 @@ namespace Sentry.Tests.Internals
                 => new BackgroundWorker(
                     Transport,
                     SentryOptions,
-                    CancellationTokenSource,
-                    Queue);
+                    CancellationTokenSource);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -120,7 +118,7 @@ namespace Sentry.Tests.Internals
 
                 // First event was sent, second hit transport with a cancelled token.
                 // Third never taken from the queue
-                Assert.Single(_fixture.Queue);
+                Assert.Equal(1, sut.QueuedItems);
             }
         }
 
@@ -157,7 +155,7 @@ namespace Sentry.Tests.Internals
                 sut.Dispose(); // Since token was already cancelled, it's basically blocking to wait on the task completion
 
                 Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
-                Assert.Empty(_fixture.Queue);
+                Assert.Equal(0, sut.QueuedItems);
             }
         }
 
@@ -283,12 +281,27 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void QueuedItems_ReflectsQueue()
         {
-            const int expectedCount = int.MaxValue;
-            _fixture.Queue = Substitute.For<IProducerConsumerCollection<SentryEvent>>();
-            _fixture.Queue.Count.Returns(expectedCount);
+            // Arrange
+            _fixture.SentryOptions.MaxQueueItems = 1;
+            var signal = new ManualResetEventSlim();
+            var evt = new SentryEvent();
+            _fixture.Transport
+                .When(t => t.CaptureEventAsync(evt, Arg.Any<CancellationToken>()))
+                .Do(_ => signal.Wait());
+
             using (var sut = _fixture.GetSut())
             {
-                Assert.Equal(expectedCount, sut.QueuedItems);
+                // Act
+                Assert.Equal(0, sut.QueuedItems);
+                try
+                {
+                    sut.EnqueueEvent(evt);
+                    Assert.Equal(1, sut.QueuedItems);
+                }
+                finally
+                {
+                    signal.Set();
+                }
             }
         }
     }

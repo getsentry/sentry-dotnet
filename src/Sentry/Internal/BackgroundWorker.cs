@@ -10,10 +10,9 @@ namespace Sentry.Internal
     internal class BackgroundWorker : IBackgroundWorker, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly IProducerConsumerCollection<SentryEvent> _queue;
+        private readonly BlockingCollection<SentryEvent> _queue;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly SemaphoreSlim _inSemaphore;
-        private readonly SemaphoreSlim _outSemaphore;
+        private readonly SemaphoreSlim _queuedEventSemaphore;
         private volatile bool _disposed;
 
         internal Task WorkerTask { get; }
@@ -23,32 +22,30 @@ namespace Sentry.Internal
         public BackgroundWorker(
             ITransport transport,
             SentryOptions options)
-        : this(transport, options, null, null)
-        { }
+            : this(transport, options, null)
+        {
+        }
 
         internal BackgroundWorker(
             ITransport transport,
             SentryOptions options,
-            CancellationTokenSource cancellationTokenSource = null,
-            IProducerConsumerCollection<SentryEvent> queue = null)
+            CancellationTokenSource cancellationTokenSource = null)
         {
             Debug.Assert(transport != null);
             Debug.Assert(options != null);
 
-            _inSemaphore = new SemaphoreSlim(options.MaxQueueItems, options.MaxQueueItems);
-            _outSemaphore = new SemaphoreSlim(0, options.MaxQueueItems);
+            _queuedEventSemaphore = new SemaphoreSlim(0, options.MaxQueueItems);
             _options = options;
 
             _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
-            _queue = queue ?? new ConcurrentQueue<SentryEvent>();
+            _queue = new BlockingCollection<SentryEvent>(options.MaxQueueItems);
 
             WorkerTask = Task.Run(
                 async () => await WorkerAsync(
                     _queue,
                     _options,
                     transport,
-                    _inSemaphore,
-                    _outSemaphore,
+                    _queuedEventSemaphore,
                     _cancellationTokenSource.Token)
                     .ConfigureAwait(false));
         }
@@ -60,27 +57,21 @@ namespace Sentry.Internal
                 throw new ObjectDisposedException(nameof(BackgroundWorker));
             }
 
-            if (@event == null)
+            if (@event == null || !_queue.TryAdd(@event, TimeSpan.Zero))
             {
                 return false;
             }
 
-            var acquired = _inSemaphore.Wait(TimeSpan.Zero);
-            if (acquired)
-            {
-                _queue.TryAdd(@event);
-                _outSemaphore.Release();
-            }
-            return acquired;
+            _queuedEventSemaphore.Release();
+            return true;
         }
 
         private static async Task WorkerAsync(
-           IProducerConsumerCollection<SentryEvent> queue,
-           SentryOptions options,
-           ITransport transport,
-           SemaphoreSlim inSemaphore,
-           SemaphoreSlim outSemaphore,
-           CancellationToken cancellation)
+            BlockingCollection<SentryEvent> queue,
+            SentryOptions options,
+            ITransport transport,
+            SemaphoreSlim queuedEventSemaphore,
+            CancellationToken cancellation)
         {
             var shutdownTimeout = new CancellationTokenSource();
             var shutdownRequested = false;
@@ -91,25 +82,28 @@ namespace Sentry.Internal
                 {
                     // If the cancellation was signaled,
                     // set the latest we can keep reading off of the queue (while there's still stuff to read)
-                    // No longer synchronized with outSemaphore (Enqueue will throw object disposed),
+                    // No longer synchronized with queuedEventSemaphore (Enqueue will throw object disposed),
                     // run until the end of the queue or shutdownTimeout
                     if (!shutdownRequested)
                     {
                         try
                         {
-                            await outSemaphore.WaitAsync(cancellation).ConfigureAwait(false);
+                            await queuedEventSemaphore.WaitAsync(cancellation).ConfigureAwait(false);
                         }
                         // Cancellation requested, scheduled shutdown but continue in case there are more items
                         catch (OperationCanceledException)
                         {
                             if (options.ShutdownTimeout == TimeSpan.Zero)
                             {
-                                options.DiagnosticLogger?.LogDebug("Exiting immediately due to 0 shutdown timeout. #{0} in queue.", queue.Count);
+                                options.DiagnosticLogger?.LogDebug(
+                                    "Exiting immediately due to 0 shutdown timeout. #{0} in queue.", queue.Count);
                                 return;
                             }
                             else
                             {
-                                options.DiagnosticLogger?.LogDebug("Shutdown scheduled. Stopping by: {0}. #{1} in queue.", options.ShutdownTimeout, queue.Count);
+                                options.DiagnosticLogger?.LogDebug(
+                                    "Shutdown scheduled. Stopping by: {0}. #{1} in queue.", options.ShutdownTimeout,
+                                    queue.Count);
                                 shutdownTimeout.CancelAfter(options.ShutdownTimeout);
                             }
 
@@ -119,24 +113,26 @@ namespace Sentry.Internal
 
                     if (queue.TryTake(out var @event))
                     {
-                        inSemaphore.Release();
                         try
                         {
                             // Optionally we can keep multiple requests in-flight concurrently:
                             // instead of awaiting here, keep reading from the queue while less than
                             // N events are being sent
                             var task = transport.CaptureEventAsync(@event, shutdownTimeout.Token).ConfigureAwait(false);
-                            options.DiagnosticLogger?.LogDebug("Event {0} in-flight to Sentry. #{1} in queue.", @event.EventId, queue.Count);
+                            options.DiagnosticLogger?.LogDebug("Event {0} in-flight to Sentry. #{1} in queue.",
+                                @event.EventId, queue.Count);
                             await task;
                         }
                         catch (OperationCanceledException)
                         {
-                            options.DiagnosticLogger?.LogInfo("Shutdown token triggered. Time to exit. #{0} in queue.", queue.Count);
+                            options.DiagnosticLogger?.LogInfo("Shutdown token triggered. Time to exit. #{0} in queue.",
+                                queue.Count);
                             return;
                         }
                         catch (Exception exception)
                         {
-                            options.DiagnosticLogger?.LogError("Error while processing event {1}: {0}. #{2} in queue.", exception, @event.EventId, queue.Count);
+                            options.DiagnosticLogger?.LogError("Error while processing event {1}: {0}. #{2} in queue.",
+                                exception, @event.EventId, queue.Count);
                         }
                     }
                     else
@@ -149,10 +145,14 @@ namespace Sentry.Internal
                     }
                 }
             }
+            catch (Exception e)
+            {
+                options.DiagnosticLogger?.LogFatal("Exception in the background worker.", e);
+                throw;
+            }
             finally
             {
-                inSemaphore.Dispose();
-                outSemaphore.Dispose();
+                queuedEventSemaphore.Dispose();
             }
         }
 
@@ -187,7 +187,8 @@ namespace Sentry.Internal
 
             if (_queue.Count > 0)
             {
-                _options.DiagnosticLogger?.LogWarning("Worker stopped while {0} were still in the queue.", _queue.Count);
+                _options.DiagnosticLogger?.LogWarning("Worker stopped while {0} were still in the queue.",
+                    _queue.Count);
             }
         }
     }
