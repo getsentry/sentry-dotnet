@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Sentry.Internal;
 using Xunit;
 
@@ -11,6 +13,13 @@ namespace Sentry.Tests.Internals
         {
             var sut = new OptionalHub(new SentryOptions());
             sut.Dispose();
+        }
+
+        [Fact]
+        public Task Ctor_NoDsn_FlushAsyncDoesNotThrow()
+        {
+            var sut = new OptionalHub(new SentryOptions());
+            return sut.FlushAsync(TimeSpan.FromDays(1));
         }
     }
 }

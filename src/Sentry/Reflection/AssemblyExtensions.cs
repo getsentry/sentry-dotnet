@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Reflection;
+using Sentry.Protocol;
 
 namespace Sentry.Reflection
 {
@@ -17,8 +18,8 @@ namespace Sentry.Reflection
         /// If not available, falls back to <see cref="AssemblyName.Version"/>
         /// </remarks>
         /// <param name="asm">The assembly to get the name and version from</param>
-        /// <returns>A tuple of name and version</returns>
-        public static (string Name, string Version) GetNameAndVersion(this Assembly asm)
+        /// <returns>The SdkVersion.</returns>
+        public static SdkVersion GetNameAndVersion(this Assembly asm)
         {
             var asmName = asm.GetName();
             var name = asmName.Name;
@@ -26,7 +27,7 @@ namespace Sentry.Reflection
                           ?.InformationalVersion
                       ?? asmName.Version.ToString();
 
-            return (name, version);
+            return new SdkVersion { Name = name, Version = version };
         }
     }
 }

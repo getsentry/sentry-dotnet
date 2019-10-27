@@ -24,3 +24,7 @@ targets:
     type: sdk
     config:
       canonical: "nuget:Sentry.Serilog"
+  - name: registry
+    type: sdk
+    config:
+      canonical: "nuget:Sentry.NLog"

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Sentry.Extensibility;
 using Sentry.PlatformAbstractions;
 using Sentry.Protocol;
@@ -26,7 +29,7 @@ namespace Sentry.Internal
                    : null;
         });
 
-        private static readonly (string Name, string Version) NameAndVersion
+        private static readonly SdkVersion NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
@@ -108,7 +111,18 @@ namespace Sentry.Internal
                 var stackTrace = SentryStackTraceFactoryAccessor().Create(@event.Exception);
                 if (stackTrace != null)
                 {
-                    @event.Stacktrace = stackTrace;
+                    var thread = new SentryThread
+                    {
+                        Crashed = false,
+                        Current = true,
+                        Name = Thread.CurrentThread.Name,
+                        Id = Thread.CurrentThread.ManagedThreadId,
+                        Stacktrace = stackTrace
+                    };
+
+                    @event.SentryThreads = @event.SentryThreads.Any()
+                        ? new List<SentryThread>(@event.SentryThreads) { thread }
+                        : new[] { thread } as IEnumerable<SentryThread>;
                 }
             }
 

@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Threading;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -257,6 +259,23 @@ namespace Sentry.Tests.Internals
             sut.Process(evt);
 
             _fixture.SentryStackTraceFactory.Received(1).Create();
+        }
+
+        [Fact]
+        public void Process_AttachStacktraceTrueAndExistentThreadInEvent_AddsNewThread()
+        {
+            var expected = new SentryStackTrace();
+            _fixture.SentryStackTraceFactory.Create(Arg.Any<Exception>()).Returns(expected);
+            _fixture.SentryOptions.AttachStacktrace = true;
+            var sut = _fixture.GetSut();
+
+            Thread.CurrentThread.Name = "second";
+            var evt = new SentryEvent { SentryThreads = new []{ new SentryThread { Name = "first" }}};
+            sut.Process(evt);
+
+            Assert.Equal(2, evt.SentryThreads.Count());
+            Assert.Equal("first", evt.SentryThreads.First().Name);
+            Assert.Equal("second", evt.SentryThreads.Last().Name);
         }
 
         [Fact]
