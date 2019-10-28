@@ -484,6 +484,11 @@ namespace Sentry.AspNetCore.Tests
         public async Task InvokeAsync_DefaultOptions_DoesNotCallFlushAsync()
         {
             var sut = _fixture.GetSut();
+            var response = Substitute.For<HttpResponse>();
+            _fixture.HttpContext.Response.Returns(response);
+            response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
+
             await sut.InvokeAsync(_fixture.HttpContext);
 
             await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
@@ -492,8 +497,12 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public async Task InvokeAsync_FlushOnCompletedRequestWhenFalse_DoesNotCallFlushAsync()
         {
-            var sut = _fixture.GetSut(); 
+            var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = false;
+            var response = Substitute.For<HttpResponse>();
+            _fixture.HttpContext.Response.Returns(response);
+            response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
@@ -501,21 +510,36 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsyn_FlushOnCompletedRequestTrue_RespectsTimeout()
+        public async Task InvokeAsync_DisabledHub_DoesNotCallFlushAync()
         {
-            // ARRANGE
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;
-            _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(1);
+            _fixture.Hub.IsEnabled.Returns(false);
+            var response = Substitute.For<HttpResponse>();
+            _fixture.HttpContext.Response.Returns(response);
+            response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
-            // ACT
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            // ASSERT
-            if (_fixture.HttpContext.Response.HasStarted)
-            {
-                await _fixture.Hub.Received(1).FlushAsync(_fixture.Options.FlushTimeout);
-            }            
+            await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
+        }
+
+        [Fact]
+        public async Task InvokeAsync_FlushOnCompletedRequestTrue_RespectsTimeout()
+        {
+            var timeout = TimeSpan.FromSeconds(10);
+            var sut = _fixture.GetSut();
+            _fixture.Options.FlushOnCompletedRequest = true;
+            _fixture.Options.FlushTimeout = timeout;
+            var response = Substitute.For<HttpResponse>();
+            _fixture.HttpContext.Response.Returns(response);
+            response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            await _fixture.Hub.Received(1).FlushAsync(timeout);
         }
     }
 }
