@@ -72,6 +72,13 @@ namespace Sentry.AspNetCore
         public async Task InvokeAsync(HttpContext context)
         {
             var hub = _hubAccessor();
+            if (_options?.FlushOnCompletedRequest == true)
+            {
+                context.Response.OnCompleted(async () =>
+                {
+                    await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
+                });
+            }            
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);

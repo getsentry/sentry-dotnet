@@ -479,5 +479,43 @@ namespace Sentry.AspNetCore.Tests
             Assert.Equal(Constants.SdkName, scope.Sdk.Name);
             Assert.Equal(SentryMiddleware.NameAndVersion.Version, scope.Sdk.Version);
         }
+
+        [Fact]
+        public async Task InvokeAsync_DefaultOptions_DoesNotCallFlushAsync()
+        {
+            var sut = _fixture.GetSut();
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
+        }
+
+        [Fact]
+        public async Task InvokeAsync_FlushOnCompletedRequestWhenFalse_DoesNotCallFlushAsync()
+        {
+            var sut = _fixture.GetSut(); 
+            _fixture.Options.FlushOnCompletedRequest = false;
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
+        }
+
+        [Fact]
+        public async Task InvokeAsyn_FlushOnCompletedRequestTrue_RespectsTimeout()
+        {
+            // ARRANGE
+            var sut = _fixture.GetSut();
+            _fixture.Options.FlushOnCompletedRequest = true;
+            _fixture.Options.FlushTimeout = TimeSpan.FromSeconds(1);
+
+            // ACT
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            // ASSERT
+            if (_fixture.HttpContext.Response.HasStarted)
+            {
+                await _fixture.Hub.Received(1).FlushAsync(_fixture.Options.FlushTimeout);
+            }            
+        }
     }
 }
