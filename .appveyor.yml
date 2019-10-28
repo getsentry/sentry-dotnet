@@ -21,7 +21,8 @@ artifacts:
 install:
   # Push job information to Zeus
   - npm install -g @zeus-ci/cli
-  - zeus job update --status=pending -B "%APPVEYOR_PULL_REQUEST_TITLE%" -J "%APPVEYOR_JOB_NAME%"
+  - zeus job update --status=pending -B "%APPVEYOR_PULL_REQUEST_TITLE%" -J "%APPVEYOR_JOB_NAME%" ||
+    echo "%$APPVEYOR_REPO_BRANCH%" | findstr /V "release/">nul
 on_success:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
@@ -33,4 +34,5 @@ on_success:
       if ($?) { zeus job update --status=passed }
         else { $host.SetShouldExit(1) }
 on_failure:
-  - zeus job update --status=failed
+  - zeus job update --status=failed ||
+    echo "%$APPVEYOR_REPO_BRANCH%" | findstr /V "release/">nul
