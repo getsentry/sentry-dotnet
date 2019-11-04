@@ -21,8 +21,7 @@ artifacts:
 install:
   # Push job information to Zeus
   - npm install -g @zeus-ci/cli
-  - zeus job update --status=pending -B "%APPVEYOR_PULL_REQUEST_TITLE%" -J "%APPVEYOR_JOB_NAME%" ||
-    echo "%$APPVEYOR_REPO_BRANCH%" | findstr /V "release/">nul
+  - C:\msys64\usr\bin\bash script\zeus.sh report_pending
 on_success:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
@@ -30,7 +29,6 @@ on_success:
       bash codecov.sh -f "**\coverage.xml"
 
       # Upload *.nupkg files to Zeus
-      bash scripts/upload-zeus-artifacts.sh
+      bash scripts/zeus.sh upload_artifacts
 on_failure:
-  - zeus job update --status=failed ||
-    echo "%$APPVEYOR_REPO_BRANCH%" | findstr /V "release/">nul
+  - C:\msys64\usr\bin\bash script\zeus.sh report_failed
