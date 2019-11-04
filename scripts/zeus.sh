@@ -3,6 +3,7 @@
 exec 2>&1
 set -x
 
+export PATH=./node_modules/.bin:$PATH
 
 upload_artifacts() {
   zeus upload -t "application/zip+nupkg" ./src/*/bin/Release/*.nupkg

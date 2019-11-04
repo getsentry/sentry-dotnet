@@ -21,9 +21,7 @@ artifacts:
 install:
   # Push job information to Zeus
   - npm install -g @zeus-ci/cli
-  - C:\msys64\usr\bin\bash -c 'pwd'
-  - bash -c 'pwd'
-  - C:\msys64\usr\bin\bash scripts\zeus.sh report_pending
+  - bash scripts\zeus.sh report_pending
 on_success:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
@@ -33,4 +31,4 @@ on_success:
       # Upload *.nupkg files to Zeus
       bash scripts/zeus.sh upload_artifacts
 on_failure:
-  - C:\msys64\usr\bin\bash scripts\zeus.sh report_failed
+  - bash scripts\zeus.sh report_failed
