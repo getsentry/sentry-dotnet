@@ -26,9 +26,15 @@ install:
 on_success:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
-      bash -c 'ls -alh; echo 123; pwd'
       Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
       bash codecov.sh -f "**\coverage.xml"
+
+      # Powershell is pain :/
+      bash -c '
+        echo $PATH
+        ls ./src/*/bin/Release/*.nupkg
+        zeus upload -t "application/zip+nupkg" ./src/*/bin/Release/*.nupkg
+        zeus job update --status=passed'
 
       Resolve-Path -Relative .\src\*\bin\Release\*.nupkg |
         Foreach-Object { zeus upload -t "application/zip+nupkg" $_};
