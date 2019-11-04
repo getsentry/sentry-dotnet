@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Redirect stderr to stdout to avoid weird Powershell errors
 exec 2>&1
+set -x
 
 
 upload_artifacts() {
@@ -30,7 +31,7 @@ check_branch() {
 
 trap check_branch EXIT
 
-command="${1-}"
+command="${1:-}"
 if [[ "$command" == "upload_artifacts" ]]; then
   upload_artifacts
 elif [[ "$command" == "report_pending" ]]; then
