@@ -1,23 +1,23 @@
-version: '{build}'
+version: "{build}"
 image: Visual Studio 2017
 environment:
   global:
-    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
+    DOTNET_CLI_TELEMETRY_OPTOUT: "1"
 test: off
 branches:
   only:
     - master
     - /^release\/.*$/
 build_script:
-- ps: ./build.ps1
+  - ps: ./build.ps1
 dotnet_csproj:
   patch: true
   file: 'src\**\*.csproj'
-  version: '{version}'
-  package_version: '{version}'
+  version: "{version}"
+  package_version: "{version}"
 artifacts:
-- path: '**\*.nupkg'
+  - path: '**\*.nupkg'
 install:
   # Push job information to Zeus
   - npm install -g @zeus-ci/cli
@@ -26,6 +26,7 @@ install:
 on_success:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
+      bash -c 'ls -alh; echo 123; pwd'
       Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
       bash codecov.sh -f "**\coverage.xml"
 
