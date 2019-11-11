@@ -3,10 +3,14 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
+using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.Extensions.Logging
 {
+    /// <summary>
+    /// Sentry Logger Provider.
+    /// </summary>
     [ProviderAlias("Sentry")]
     public class SentryLoggerProvider : ILoggerProvider
     {
@@ -17,11 +21,16 @@ namespace Sentry.Extensions.Logging
 
         internal IHub Hub { get; }
 
-        internal static readonly (string Name, string Version) NameAndVersion
+        internal static readonly SdkVersion NameAndVersion
             = typeof(SentryLogger).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryLoggerProvider"/>.
+        /// </summary>
+        /// <param name="options">The Options.</param>
+        /// <param name="hub">The Hub.</param>
         public SentryLoggerProvider(IOptions<SentryLoggingOptions> options, IHub hub)
             : this(hub,
                 SystemClock.Clock,
@@ -61,8 +70,16 @@ namespace Sentry.Extensions.Logging
             }
         }
 
+        /// <summary>
+        /// Creates a logger for the category.
+        /// </summary>
+        /// <param name="categoryName">Category name.</param>
+        /// <returns>A logger.</returns>
         public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub);
 
+        /// <summary>
+        /// Dispose.
+        /// </summary>
         public void Dispose()
         {
             _scope?.Dispose();

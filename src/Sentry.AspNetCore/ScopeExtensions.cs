@@ -39,7 +39,14 @@ namespace Sentry.AspNetCore
                 }
             }
 
-            SetBody(scope, context, options);
+            try
+            {
+                SetBody(scope, context, options);
+            }
+            catch (Exception e)
+            {
+                options?.DiagnosticLogger?.LogError("Failed to extract body.", e);
+            }
             SetEnv(scope, context, options);
 
             // TODO: From MVC route template, ideally

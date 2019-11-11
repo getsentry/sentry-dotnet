@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
-using NSubstitute.ClearExtensions;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Reflection;
@@ -56,7 +55,6 @@ namespace Sentry.Serilog.Tests
             _fixture.Hub.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
         }
-
 
         [Fact]
         public void Emit_WithException_BreadcrumbFromException()
@@ -136,9 +134,11 @@ namespace Sentry.Serilog.Tests
         [ClassData(typeof(EventLogLevelsData))]
         public void Emit_LoggerLevel_Set(LogEventLevel serilogLevel, SentryLevel? sentryLevel)
         {
+            // Make sure test cases are not filtered out by the default min levels:
+            _fixture.Options.MinimumEventLevel = LogEventLevel.Verbose;
+            _fixture.Options.MinimumBreadcrumbLevel = LogEventLevel.Verbose;
 
             var sut = _fixture.GetSut();
-
 
             var evt = new LogEvent(DateTimeOffset.UtcNow, serilogLevel, null, MessageTemplate.Empty,
                 Enumerable.Empty<LogEventProperty>());

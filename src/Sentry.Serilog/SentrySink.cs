@@ -20,7 +20,7 @@ namespace Sentry.Serilog
         private readonly IDisposable _sdkDisposable;
         private readonly SentrySerilogOptions _options;
 
-        internal static readonly (string Name, string Version) NameAndVersion
+        internal static readonly SdkVersion NameAndVersion
             = typeof(SentrySink).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;

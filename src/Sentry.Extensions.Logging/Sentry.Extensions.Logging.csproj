@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);Logging;Microsoft.Extensions.Logging</PackageTags>
     <PackageId>Sentry.Extensions.Logging</PackageId>
     <AssemblyName>Sentry.Extensions.Logging</AssemblyName>

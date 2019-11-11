@@ -74,7 +74,7 @@ namespace Sentry
         /// but execution at a later time, when more data is available.
         /// </remarks>
         /// <see cref="Evaluate"/>
-        internal event EventHandler OnEvaluating;
+        internal event EventHandler? OnEvaluating;
 
         /// <summary>
         /// Creates a scope with the specified options
@@ -92,6 +92,10 @@ namespace Sentry
             : this(new SentryOptions())
         { }
 
+        /// <summary>
+        /// Clones the current <see cref="Scope"/>.
+        /// </summary>
+        /// <returns></returns>
         public Scope Clone()
         {
             var clone = new Scope(Options);

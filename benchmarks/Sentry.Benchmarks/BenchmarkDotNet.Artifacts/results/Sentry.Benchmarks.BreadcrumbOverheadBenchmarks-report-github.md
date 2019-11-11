@@ -1,27 +1,27 @@
 ``` ini
 
-BenchmarkDotNet=v0.11.0, OS=Windows 10.0.17134.228 (1803/April2018Update/Redstone4)
-Intel Core i7-7920HQ CPU 3.10GHz (Max: 3.00GHz) (Kaby Lake), 1 CPU, 8 logical and 4 physical cores
-.NET Core SDK=2.1.301
-  [Host] : .NET Core 2.1.3 (CoreCLR 4.6.26725.06, CoreFX 4.6.26725.05), 64bit RyuJIT
-  Core   : .NET Core 2.1.3 (CoreCLR 4.6.26725.06, CoreFX 4.6.26725.05), 64bit RyuJIT
+BenchmarkDotNet=v0.11.1, OS=centos 7
+Intel Xeon CPU E3-1245 V2 3.40GHz, 1 CPU, 8 logical and 4 physical cores
+.NET Core SDK=2.2.300
+  [Host] : .NET Core 2.1.6 (CoreCLR 4.6.27019.06, CoreFX 4.6.27019.05), 64bit RyuJIT
+  Core   : .NET Core 2.1.6 (CoreCLR 4.6.27019.06, CoreFX 4.6.27019.05), 64bit RyuJIT
 
 Job=Core  Runtime=Core  
 
 ```
-|                                                 Method | BreadcrumbsCount |         Mean |         Error |        StdDev | Scaled | ScaledSD |   Gen 0 |   Gen 1 |  Gen 2 | Allocated |
-|------------------------------------------------------- |----------------- |-------------:|--------------:|--------------:|-------:|---------:|--------:|--------:|-------:|----------:|
-|                        **&#39;Disabled SDK: Add breadcrumbs&#39;** |                **1** |     **454.1 ns** |     **0.5344 ns** |     **0.4999 ns** |   **1.00** |     **0.00** |  **0.0682** |       **-** |      **-** |     **288 B** |
-|                         &#39;Enabled SDK: Add breadcrumbs&#39; |                1 |   2,176.6 ns |     2.7491 ns |     2.2956 ns |   4.79 |     0.01 |  0.2480 |  0.1221 | 0.0038 |    1320 B |
-| &#39;Disabled SDK: Push scope, add breadcrumbs, pop scope&#39; |                1 |     452.1 ns |     0.6559 ns |     0.5814 ns |   1.00 |     0.00 |  0.0682 |       - |      - |     288 B |
-|  &#39;Enabled SDK: Push scope, add breadcrumbs, pop scope&#39; |                1 |   1,292.8 ns |     3.4002 ns |     3.0142 ns |   2.85 |     0.01 |  0.4826 |       - |      - |    2032 B |
-|                                                        |                  |              |               |               |        |          |         |         |        |           |
-|                        **&#39;Disabled SDK: Add breadcrumbs&#39;** |               **10** |   **4,513.5 ns** |     **5.0130 ns** |     **4.4439 ns** |   **1.00** |     **0.00** |  **0.6790** |       **-** |      **-** |    **2880 B** |
-|                         &#39;Enabled SDK: Add breadcrumbs&#39; |               10 |  21,660.4 ns |    56.7390 ns |    53.0737 ns |   4.80 |     0.01 |  2.5024 |  1.2207 | 0.0305 |   13200 B |
-| &#39;Disabled SDK: Push scope, add breadcrumbs, pop scope&#39; |               10 |   4,423.4 ns |     9.1530 ns |     7.6431 ns |   0.98 |     0.00 |  0.6790 |       - |      - |    2880 B |
-|  &#39;Enabled SDK: Push scope, add breadcrumbs, pop scope&#39; |               10 |   7,012.3 ns |    15.4773 ns |    14.4775 ns |   1.55 |     0.00 |  1.2512 |       - |      - |    5272 B |
-|                                                        |                  |              |               |               |        |          |         |         |        |           |
-|                        **&#39;Disabled SDK: Add breadcrumbs&#39;** |              **100** |  **45,074.1 ns** |    **45.3122 ns** |    **42.3851 ns** |   **1.00** |     **0.00** |  **6.8359** |       **-** |      **-** |   **28800 B** |
-|                         &#39;Enabled SDK: Add breadcrumbs&#39; |              100 | 214,683.2 ns | 1,213.2726 ns | 1,134.8958 ns |   4.76 |     0.02 | 24.9023 | 12.2070 | 0.2441 |  132000 B |
-| &#39;Disabled SDK: Push scope, add breadcrumbs, pop scope&#39; |              100 |  43,996.0 ns |    58.8701 ns |    55.0672 ns |   0.98 |     0.00 |  6.8359 |       - |      - |   28800 B |
-|  &#39;Enabled SDK: Push scope, add breadcrumbs, pop scope&#39; |              100 |  66,607.8 ns |   107.5510 ns |    89.8100 ns |   1.48 |     0.00 | 10.4980 |       - |      - |   44520 B |
+|                                                 Method | BreadcrumbsCount |         Mean |        Error |       StdDev | Scaled | ScaledSD |   Gen 0 |   Gen 1 |  Gen 2 | Allocated |
+|------------------------------------------------------- |----------------- |-------------:|-------------:|-------------:|-------:|---------:|--------:|--------:|-------:|----------:|
+|                        **&#39;Disabled SDK: Add breadcrumbs&#39;** |                **1** |     **488.2 ns** |     **4.061 ns** |     **3.799 ns** |   **1.00** |     **0.00** |  **0.0677** |       **-** |      **-** |     **288 B** |
+|                         &#39;Enabled SDK: Add breadcrumbs&#39; |                1 |   2,248.5 ns |    23.790 ns |    21.089 ns |   4.61 |     0.05 |  0.2480 |  0.1221 | 0.0038 |    1320 B |
+| &#39;Disabled SDK: Push scope, add breadcrumbs, pop scope&#39; |                1 |     558.9 ns |     5.259 ns |     4.662 ns |   1.14 |     0.01 |  0.0677 |       - |      - |     288 B |
+|  &#39;Enabled SDK: Push scope, add breadcrumbs, pop scope&#39; |                1 |   1,559.4 ns |    11.097 ns |     9.837 ns |   3.19 |     0.03 |  0.4921 |       - |      - |    2072 B |
+|                                                        |                  |              |              |              |        |          |         |         |        |           |
+|                        **&#39;Disabled SDK: Add breadcrumbs&#39;** |               **10** |   **4,843.3 ns** |    **34.109 ns** |    **30.237 ns** |   **1.00** |     **0.00** |  **0.6790** |       **-** |      **-** |    **2880 B** |
+|                         &#39;Enabled SDK: Add breadcrumbs&#39; |               10 |  22,352.6 ns |   140.069 ns |   124.167 ns |   4.62 |     0.04 |  2.5024 |  1.2207 | 0.0305 |   13200 B |
+| &#39;Disabled SDK: Push scope, add breadcrumbs, pop scope&#39; |               10 |   4,873.5 ns |    44.437 ns |    39.392 ns |   1.01 |     0.01 |  0.6790 |       - |      - |    2880 B |
+|  &#39;Enabled SDK: Push scope, add breadcrumbs, pop scope&#39; |               10 |   8,789.9 ns |    73.532 ns |    65.185 ns |   1.81 |     0.02 |  1.2512 |       - |      - |    5312 B |
+|                                                        |                  |              |              |              |        |          |         |         |        |           |
+|                        **&#39;Disabled SDK: Add breadcrumbs&#39;** |              **100** |  **48,274.3 ns** |   **391.861 ns** |   **327.221 ns** |   **1.00** |     **0.00** |  **6.8359** |       **-** |      **-** |   **28800 B** |
+|                         &#39;Enabled SDK: Add breadcrumbs&#39; |              100 | 234,847.7 ns | 1,751.352 ns | 1,462.458 ns |   4.87 |     0.04 | 24.9023 | 12.2070 | 0.2441 |  132000 B |
+| &#39;Disabled SDK: Push scope, add breadcrumbs, pop scope&#39; |              100 |  48,537.5 ns |   276.534 ns |   258.670 ns |   1.01 |     0.01 |  6.8359 |       - |      - |   28800 B |
+|  &#39;Enabled SDK: Push scope, add breadcrumbs, pop scope&#39; |              100 |  85,206.9 ns |   333.575 ns |   295.705 ns |   1.77 |     0.01 | 10.6201 |       - |      - |   44560 B |

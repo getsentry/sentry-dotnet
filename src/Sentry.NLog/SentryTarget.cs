@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 
 using NLog;
+using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
@@ -15,21 +16,34 @@ using Sentry.Reflection;
 
 namespace Sentry.NLog
 {
+    /// <summary>
+    /// Sentry NLog Target.
+    /// </summary>
     [Target("Sentry")]
     public sealed class SentryTarget : TargetWithContext
     {
         private readonly Func<IHub> _hubAccessor;
+
+        // For testing:
+        internal Func<IHub> HubAccessor => _hubAccessor;
+
         private readonly ISystemClock _clock;
         private IDisposable _sdkDisposable;
 
-        internal static readonly (string Name, string Version) NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
+        internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryTarget"/>.
+        /// </summary>
         public SentryTarget() : this(new SentryNLogOptions())
         {
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryTarget"/>.
+        /// </summary>
         public SentryTarget(SentryNLogOptions options)
             : this(
                 options,
@@ -77,7 +91,7 @@ namespace Sentry.NLog
         public string Dsn
         {
             get => Options.Dsn?.ToString();
-            set => Options.Dsn = new Dsn(value);
+            set => Options.Dsn = value == null ? null : new Dsn(value);
         }
 
         /// <summary>
@@ -171,6 +185,15 @@ namespace Sentry.NLog
             set => Options.ShutdownTimeoutSeconds = value;
         }
 
+        /// <summary>
+        /// How long to wait for the flush to finish, in seconds. Defaults to 2 seconds.
+        /// </summary>
+        public int FlushTimeoutSeconds
+        {
+            get => (int)Options.FlushTimeout.TotalSeconds;
+            set => Options.FlushTimeout = TimeSpan.FromSeconds(value);
+        }
+
         /// <inheritdoc />
         protected override void CloseTarget()
         {
@@ -187,13 +210,23 @@ namespace Sentry.NLog
 
             // If a layout has been configured on the options, replace the default logger.
             if (Options.Layout != null)
+            {
                 Layout = Options.Layout;
+            }
 
             // If the sdk is not there, set it on up.
             if (InitializeSdk && _sdkDisposable == null)
             {
                 _sdkDisposable = SentrySdk.Init(Options);
             }
+        }
+
+        /// <inheritdoc />
+        protected override void FlushAsync(AsyncContinuation asyncContinuation)
+        {
+            _hubAccessor()
+                .FlushAsync(Options.FlushTimeout)
+                .ContinueWith(t => asyncContinuation(t.Exception));
         }
 
         /// <summary>
@@ -226,12 +259,11 @@ namespace Sentry.NLog
             }
 
             var exception = logEvent.Exception;
-            var formatted = Layout.Render(logEvent);
+            var formatted = RenderLogEvent(Layout, logEvent);
             var template = logEvent.Message;
 
-            var contextProps = GetAllProperties(logEvent);
-
             var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
+            var shouldIncludeProperties = ContextProperties?.Count > 0 || ShouldIncludeProperties(logEvent);
 
             if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
             {
@@ -256,17 +288,15 @@ namespace Sentry.NLog
 
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
-                // Always apply any manually configured tags
-                evt.SetTags(GetTags(logEvent));
-
-                if (IncludeEventProperties)
+                if (Tags.Count > 0 || SendEventPropertiesAsTags)
                 {
-                    evt.SetExtras(contextProps);
+                    evt.SetTags(GetTagsFromLogEvent(logEvent));
                 }
 
-                if (Options.SendEventPropertiesAsTags)
+                if (shouldIncludeProperties)
                 {
-                    evt.SetTags(GetLoggingEventProperties(logEvent).MapValues(a => a.ToString()));
+                    var contextProps = GetAllProperties(logEvent);
+                    evt.SetExtras(contextProps);
                 }
 
                 hub.CaptureEvent(evt);
@@ -296,12 +326,15 @@ namespace Sentry.NLog
 
                 if (IncludeEventDataOnBreadcrumbs)
                 {
-                    if (data is null)
+                    if (shouldIncludeProperties)
                     {
-                        data = new Dictionary<string, string>();
+                        var contextProps = GetAllProperties(logEvent);
+                        data = data ?? new Dictionary<string, string>(contextProps.Count);
+                        foreach (var contextProp in contextProps)
+                        {
+                            data.Add(contextProp.Key, contextProp.Value.ToString());
+                        }
                     }
-
-                    data.AddRange(contextProps.MapValues(a => a.ToString()));
                 }
 
                 hub.AddBreadcrumb(
@@ -312,19 +345,30 @@ namespace Sentry.NLog
             }
         }
 
-        private IEnumerable<KeyValuePair<string, string>> GetTags(LogEventInfo logEvent)
+        private IEnumerable<KeyValuePair<string, string>> GetTagsFromLogEvent(LogEventInfo logEvent)
         {
-            return Tags.ToKeyValuePairs(a => a.Name, a => a.Layout.Render(logEvent));
-        }
-
-        private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEventInfo logEvent)
-        {
-            if (!logEvent.HasProperties)
+            if (SendEventPropertiesAsTags)
             {
-                return Enumerable.Empty<KeyValuePair<string, object>>();
+                if (logEvent.HasProperties)
+                {
+                    foreach (var kv in logEvent.Properties)
+                    {
+                        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+                    }
+                }
             }
 
-            return logEvent.Properties.ToKeyValuePairs(x => x.Key.ToString(), x => x.Value);
+            if (Tags.Count > 0)
+            {
+                foreach (var tag in Tags)
+                {
+                    var tagValue = RenderLogEvent(tag.Layout, logEvent);
+                    if (!tag.IncludeEmptyValue && string.IsNullOrEmpty(tagValue))
+                        continue;
+
+                    yield return new KeyValuePair<string, string>(tag.Name, tagValue);
+                }
+            }
         }
     }
 }

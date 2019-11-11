@@ -29,7 +29,7 @@ namespace Sentry.Internal
                    : null;
         });
 
-        private static readonly (string Name, string Version) NameAndVersion
+        private static readonly SdkVersion NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;

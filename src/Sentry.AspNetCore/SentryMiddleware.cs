@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore
@@ -24,7 +24,7 @@ namespace Sentry.AspNetCore
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
 
-        internal static readonly (string Name, string Version) NameAndVersion
+        internal static readonly SdkVersion NameAndVersion
             = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
@@ -80,9 +80,20 @@ namespace Sentry.AspNetCore
 
             using (hub.PushAndLockScope())
             {
-                if (_options != null && _options.MaxRequestBodySize != RequestSize.None)
+                if (_options != null)
                 {
-                    context.Request.EnableRewind();
+                    if (_options.MaxRequestBodySize != RequestSize.None)
+                    {
+                        context.Request.EnableBuffering();
+                    }
+                    if (_options.FlushOnCompletedRequest)
+                    {
+                        context.Response.OnCompleted(async () =>
+                        {
+                            // Serverless environments flush the queue at the end of each request
+                            await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
+                        });
+                    }
                 }
 
                 hub.ConfigureScope(scope =>
