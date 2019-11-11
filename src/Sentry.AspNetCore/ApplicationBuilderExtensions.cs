@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,6 +9,7 @@ using Sentry.AspNetCore;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Infrastructure;
+using Microsoft.Extensions.Hosting;
 
 
 // ReSharper disable once CheckNamespace -- Discoverability
