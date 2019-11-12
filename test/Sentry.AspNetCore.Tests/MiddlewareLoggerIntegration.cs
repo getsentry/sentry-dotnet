@@ -1,7 +1,11 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+#if NETCOREAPP2_1 || NET461
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
 using Microsoft.AspNetCore.Hosting;
+#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
@@ -26,7 +30,7 @@ namespace Sentry.AspNetCore.Tests
             public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
-            public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
+            public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
             public ILogger<SentryMiddleware> MiddlewareLogger { get; set; }
             public ILogger SentryLogger { get; set; }
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();

@@ -1,19 +1,23 @@
 using System;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Internal;
+#if NETSTANDARD2_0
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
+using Microsoft.AspNetCore.Hosting;
+#endif
 
 namespace Sentry.AspNetCore
 {
     internal class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
         public SentryAspNetCoreOptionsSetup(
             ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider> providerConfiguration,
-            IHostingEnvironment hostingEnvironment)
+            IWebHostEnvironment hostingEnvironment)
             : base(providerConfiguration.Configuration)
             => _hostingEnvironment = hostingEnvironment;
 

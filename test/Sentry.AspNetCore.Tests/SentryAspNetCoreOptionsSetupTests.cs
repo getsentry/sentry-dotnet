@@ -1,5 +1,9 @@
 using System;
+#if NETCOREAPP2_1 || NET461
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
 using Microsoft.AspNetCore.Hosting;
+#endif
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using NSubstitute;
@@ -11,7 +15,7 @@ namespace Sentry.AspNetCore.Tests
     {
         private readonly SentryAspNetCoreOptionsSetup _sut = new SentryAspNetCoreOptionsSetup(
             Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-            Substitute.For<IHostingEnvironment>());
+            Substitute.For<IWebHostEnvironment>());
 
         private readonly SentryAspNetCoreOptions _target = new SentryAspNetCoreOptions();
 

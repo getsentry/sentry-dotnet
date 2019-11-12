@@ -3,7 +3,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
+#if NETCOREAPP2_1 || NET461
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
 using Microsoft.AspNetCore.Hosting;
+#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
@@ -22,7 +26,7 @@ namespace Sentry.AspNetCore.Tests
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public Func<IHub> HubAccessor { get; set; }
             public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
-            public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
+            public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
             public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();

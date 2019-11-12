@@ -3,7 +3,11 @@ using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
+#if NETSTANDARD2_0
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
 using Microsoft.AspNetCore.Hosting;
+#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,7 +25,7 @@ namespace Sentry.AspNetCore
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _hubAccessor;
         private readonly SentryAspNetCoreOptions _options;
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
 
         internal static readonly SdkVersion NameAndVersion
@@ -46,7 +50,7 @@ namespace Sentry.AspNetCore
             RequestDelegate next,
             Func<IHub> hubAccessor,
             IOptions<SentryAspNetCoreOptions> options,
-            IHostingEnvironment hostingEnvironment,
+            IWebHostEnvironment hostingEnvironment,
             ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
@@ -146,7 +150,7 @@ namespace Sentry.AspNetCore
 
             if (_hostingEnvironment != null)
             {
-                scope.SetWebRoot(_hostingEnvironment.WebRootPath);
+                scope.SetWebRoot(_hostingEnvironment.RootPath());
             }
 
             scope.Populate(context, _options);
