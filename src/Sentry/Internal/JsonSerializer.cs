@@ -10,6 +10,7 @@ namespace Sentry.Internal
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             NullValueHandling = NullValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Formatting = Formatting.None,
             Converters = new[] { StringEnumConverter }
         };
