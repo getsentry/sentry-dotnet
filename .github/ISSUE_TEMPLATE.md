@@ -25,6 +25,6 @@ Please mark the NuGet packages used:
 - [ ] Sentry.Extensions.Logging
 - [ ] Sentry.AspNetCore
 
-Please describe the the steps to reproduce the issue or link to a repository with a small reproducible code.
+* Version:
 
-<!-- Describe the issue -->
+<!-- Please describe the the steps to reproduce the issue or link to a repository with a small reproducible code. -->

@@ -1,36 +1,34 @@
-version: '{build}'
+version: "{build}"
 image: Visual Studio 2017
 environment:
   global:
-    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
+    DOTNET_CLI_TELEMETRY_OPTOUT: "1"
 test: off
 branches:
   only:
     - master
     - /^release\/.*$/
 build_script:
-- ps: ./build.ps1
+  - ps: ./build.ps1
 dotnet_csproj:
   patch: true
   file: 'src\**\*.csproj'
-  version: '{version}'
-  package_version: '{version}'
+  version: "{version}"
+  package_version: "{version}"
 artifacts:
-- path: '**\*.nupkg'
+  - path: '**\*.nupkg'
 install:
   # Push job information to Zeus
   - npm install -g @zeus-ci/cli
-  - zeus job update --status=pending -B "%APPVEYOR_PULL_REQUEST_TITLE%" -J "%APPVEYOR_JOB_NAME%"
+  - bash scripts\zeus.sh report_pending
 on_success:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
       Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
       bash codecov.sh -f "**\coverage.xml"
 
-      Resolve-Path -Relative .\src\*\bin\Release\*.nupkg |
-        Foreach-Object { zeus upload -t "application/zip+nupkg" $_};
-      if ($?) { zeus job update --status=passed }
-        else { $host.SetShouldExit(1) }
+      # Upload *.nupkg files to Zeus
+      bash scripts/zeus.sh upload_artifacts
 on_failure:
-  - zeus job update --status=failed
+  - bash scripts\zeus.sh report_failed
