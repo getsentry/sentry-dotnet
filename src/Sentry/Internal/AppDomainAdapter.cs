@@ -25,10 +25,6 @@ namespace Sentry.Internal
 
         private void OnProcessExit(object sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
 
-        private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Console.WriteLine("OnUnhandledException!!");
-            UnhandledException?.Invoke(this, e);
-        }
+        private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e) => UnhandledException?.Invoke(this, e);
     }
 }
