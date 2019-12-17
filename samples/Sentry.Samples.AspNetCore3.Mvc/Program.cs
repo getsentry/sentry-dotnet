@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Sentry.Extensibility;
 
 namespace Sentry.Samples.AspNetCore3.Mvc
 {
@@ -20,6 +21,12 @@ namespace Sentry.Samples.AspNetCore3.Mvc
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseSentry(o =>
+                    {
+                        o.Debug = true;
+                        o.MaxRequestBodySize = RequestSize.Always;
+                        o.Dsn = "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141";
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
     }

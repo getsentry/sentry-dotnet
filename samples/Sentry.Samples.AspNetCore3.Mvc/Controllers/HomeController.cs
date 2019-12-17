@@ -13,18 +13,18 @@ namespace Sentry.Samples.AspNetCore3.Mvc.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
+        public HomeController(ILogger<HomeController> logger) => _logger = logger;
 
         public IActionResult Index()
         {
+            // Raises an error event:
+            _logger.LogError("Index was called.");
             return View();
         }
 
         public IActionResult Privacy()
         {
+            // Raises an event only when looking for the view (after returning).
             return View("DoesNotExist");
         }
 
