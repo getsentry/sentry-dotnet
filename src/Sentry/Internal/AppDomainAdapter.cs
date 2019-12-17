@@ -18,7 +18,7 @@ namespace Sentry.Internal
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
         }
-        
+
         public event UnhandledExceptionEventHandler UnhandledException;
 
         public event EventHandler ProcessExit;
@@ -26,6 +26,9 @@ namespace Sentry.Internal
         private void OnProcessExit(object sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-            => UnhandledException?.Invoke(this, e);
+        {
+            Console.WriteLine("OnUnhandledException!!");
+            UnhandledException?.Invoke(this, e);
+        }
     }
 }

@@ -1,18 +1,13 @@
 #if NETSTANDARD2_0
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
-using Microsoft.AspNetCore.Hosting;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 
 namespace Sentry.AspNetCore
 {
     internal static class HostingEnvironmentExtensions
     {
-        public static string RootPath(this IWebHostEnvironment env) => env.
-#if NETSTANDARD2_0
-            WebRootPath;
-#else
-            ContentRootPath;
-#endif
+        public static string RootPath(this IHostingEnvironment env) => env.WebRootPath;
     }
 }
