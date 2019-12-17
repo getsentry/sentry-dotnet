@@ -332,7 +332,7 @@ namespace Sentry.NLog
                         data = data ?? new Dictionary<string, string>(contextProps.Count);
                         foreach (var contextProp in contextProps)
                         {
-                            data.Add(contextProp.Key, contextProp.Value.ToString());
+                            data.Add(contextProp.Key, contextProp.Value?.ToString());
                         }
                     }
                 }
