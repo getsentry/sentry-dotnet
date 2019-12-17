@@ -13,6 +13,7 @@ lcov.info
 bin/
 obj/
 .DS_Store
+Thumbs.db
 **/BenchmarkDotNet.Artifacts/*.log
 !**/BenchmarkDotNet.Artifacts/results/*github.md
 docs/api/*
