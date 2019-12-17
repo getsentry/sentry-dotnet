@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27705.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AF6AF4C7-8AA2-4D59-8064-2D79560904EB}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{83263231-1A2A-4733-B759-EEFF14E8C5D5}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Solution Items", "1 - Solution Items", "{9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}"
+	ProjectSection(SolutionItems) = preProject
+		.appveyor.yml = .appveyor.yml
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		.travis.yml = .travis.yml
+		build.ps1 = build.ps1
+		build.sh = build.sh
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		global.json = global.json
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Protocol", "src\Sentry.Protocol\Sentry.Protocol.csproj", "{C7322BBE-1ED3-4150-9715-489FA3768DAC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Protocol.Tests", "test\Sentry.Protocol.Tests\Sentry.Protocol.Tests.csproj", "{DCC03769-10A4-4D15-B449-2E3F226AAD03}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C7322BBE-1ED3-4150-9715-489FA3768DAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7322BBE-1ED3-4150-9715-489FA3768DAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7322BBE-1ED3-4150-9715-489FA3768DAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7322BBE-1ED3-4150-9715-489FA3768DAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCC03769-10A4-4D15-B449-2E3F226AAD03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCC03769-10A4-4D15-B449-2E3F226AAD03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCC03769-10A4-4D15-B449-2E3F226AAD03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCC03769-10A4-4D15-B449-2E3F226AAD03}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C7322BBE-1ED3-4150-9715-489FA3768DAC} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{DCC03769-10A4-4D15-B449-2E3F226AAD03} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
+	EndGlobalSection
+EndGlobal

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 github:
   owner: getsentry
   repo: sentry-dotnet
@@ -28,3 +29,12 @@ targets:
     type: sdk
     config:
       canonical: "nuget:Sentry.NLog"
+=======
+---
+github:
+  owner: getsentry
+  repo: sentry-dotnet-protocol
+targets:
+  - name: nuget
+  - name: github
+>>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8

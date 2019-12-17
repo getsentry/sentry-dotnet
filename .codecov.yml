@@ -1,8 +1,13 @@
 coverage:
   status:
+<<<<<<< HEAD
     patch:
       default:
         threshold: 0.5%
     project:
       default:
         threshold: 0.5%
+=======
+    patch: false
+    changes: false
+>>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8

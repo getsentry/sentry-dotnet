@@ -1,14 +1,33 @@
 version: "{build}"
+<<<<<<< HEAD
 image: Visual Studio 2019
 environment:
   global:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1" # Used by the dotnet SDK prior to v3.0
     DOTNET_CLI_TELEMETRY_OPTOUT: "1"
 test: off
+=======
+image: Visual Studio 2017
+environment:
+  global:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  ZEUS_HOOK_BASE:
+    secure: dcqtt6sxxBV0tDkXmPZOy0iOx17uW6ZfrPOivyLDzHaS9JeWUES653Lly9ZHQm7qZn1qbs4hL4BYaNSrhD5kraY9FXBkwtNmUC9eAxL/n8QtRFJu5uXrkSpewn+UAqbghVXAKCxOhD9WJYG72g+QcqmEBTZiO1RxRJhwsLBR5YY=
+>>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
 branches:
   only:
     - master
     - /^release\/.*$/
+<<<<<<< HEAD
+=======
+install:
+  # Push job information to Zeus
+  - npm install -g @zeus-ci/cli
+  - zeus job update --status=pending -B "%APPVEYOR_PULL_REQUEST_TITLE%" -J "%APPVEYOR_JOB_NAME%" ||
+    echo "%$APPVEYOR_REPO_BRANCH%" | findstr /V "release/">nul
+test: off
+>>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
 build_script:
   - ps: ./build.ps1
 dotnet_csproj:
@@ -18,6 +37,7 @@ dotnet_csproj:
   package_version: "{version}"
 artifacts:
   - path: '**\*.nupkg'
+<<<<<<< HEAD
 install:
   # Push job information to Zeus
   - npm install -g @zeus-ci/cli
@@ -32,3 +52,17 @@ on_success:
       bash scripts/zeus.sh upload_artifacts
 on_failure:
   - bash scripts\zeus.sh report_failed
+=======
+
+on_success:
+  - ps: >
+      $ErrorActionreferencePreference = "stop";
+      Resolve-Path -Relative .\src\*\bin\Release\*.nupkg |
+        Foreach-Object { zeus upload -t "application/zip+nupkg" $_};
+      if ($?) { zeus job update --status=passed }
+        else { $host.SetShouldExit(1) }
+
+on_failure:
+  - zeus job update --status=failed ||
+    echo "%$APPVEYOR_REPO_BRANCH%" | findstr /V "release/">nul
+>>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8

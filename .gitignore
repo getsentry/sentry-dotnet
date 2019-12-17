@@ -8,12 +8,18 @@
 *.userprefs
 *.user
 *opencover.xml
+<<<<<<< HEAD
 codecov.sh
+=======
+>>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
 lcov.info
 bin/
 obj/
 .DS_Store
+<<<<<<< HEAD
 Thumbs.db
+=======
+>>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
 **/BenchmarkDotNet.Artifacts/*.log
 !**/BenchmarkDotNet.Artifacts/results/*github.md
 docs/api/*
