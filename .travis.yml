@@ -2,7 +2,6 @@ language: csharp
 env:
   global:
     - DOTNET_CLI_TELEMETRY_OPTOUT=1
-dotnet: 3.1.100
 mono: 6.6.0
 branches:
   only:
@@ -17,7 +16,9 @@ matrix:
       sudo: required
       group: edge
 script:
-  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --installdir /usr/local/share/dotnet/ --version 2.1.507
+  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 2.1.507
+  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 3.1.100
+  - export PATH=$PATH:~/.dotnet
   - dotnet --info
   - ./build.sh
 after_success:
