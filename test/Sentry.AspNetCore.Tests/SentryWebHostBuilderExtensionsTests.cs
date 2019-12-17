@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
-#if NETCOREAPP2_1 || NET461
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#if NETCOREAPP2_1
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +18,7 @@ namespace Sentry.AspNetCore.Tests
         public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
         public ServiceCollection Services { get; set; } = new ServiceCollection();
         public IConfiguration Configuration { get; set; } = Substitute.For<IConfiguration>();
-        public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
+        public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
 
         public SentryWebHostBuilderExtensionsTests()
         {
