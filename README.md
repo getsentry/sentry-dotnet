@@ -11,6 +11,7 @@
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
 [![Tests](https://img.shields.io/appveyor/tests/sentry/sentry-dotnet/master?compact_message)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master/tests)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/master/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
+[![Discord Chat](https://img.shields.io/discord/621778831602221064.svg)](https://discord.gg/Ww9hbqr)  
 
 
 |      Integrations             |    Downloads     |    NuGet Stable     |    NuGet Preview     |
@@ -208,7 +209,6 @@ They are released as a separate [NuGet Package called `Sentry.Protocol`](https:/
 Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 1.000.000 downloads on NuGet has support to .NET Framework 3.5+.
 
 ## Resources
-* [![Discord](https://img.shields.io/discord/621778831602221064)](https://discord.gg/Ww9hbqr)
 * [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-sentry-green.svg)](http://stackoverflow.com/questions/tagged/sentry)
 * [![Forum](https://img.shields.io/badge/forum-sentry-green.svg)](https://forum.sentry.io/c/sdks)
 * Follow [@getsentry](https://twitter.com/getsentry) on Twitter for updates
