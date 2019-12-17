@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 #if NETCOREAPP2_1 || NET461
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
-using Microsoft.AspNetCore.Hosting;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +22,7 @@ namespace Sentry.AspNetCore.Tests
         {
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
 
         }
