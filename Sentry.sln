@@ -89,6 +89,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.NLog", "samp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.PlatformAbstractions.Console", "samples\Sentry.PlatformAbstractions.Console\Sentry.PlatformAbstractions.Console.csproj", "{5CE1E975-5E85-417C-A78F-DB6C860BA5F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore3.Mvc", "samples\Sentry.Samples.AspNetCore3.Mvc\Sentry.Samples.AspNetCore3.Mvc.csproj", "{3CCB5D82-1D19-4FDE-B92D-CA726C418171}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -195,6 +197,10 @@ Global
 		{5CE1E975-5E85-417C-A78F-DB6C860BA5F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CE1E975-5E85-417C-A78F-DB6C860BA5F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CE1E975-5E85-417C-A78F-DB6C860BA5F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CCB5D82-1D19-4FDE-B92D-CA726C418171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CCB5D82-1D19-4FDE-B92D-CA726C418171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CCB5D82-1D19-4FDE-B92D-CA726C418171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CCB5D82-1D19-4FDE-B92D-CA726C418171}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -225,6 +231,7 @@ Global
 		{21A360C7-338F-4A9D-A9A3-83152D0C9303} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{5CE1E975-5E85-417C-A78F-DB6C860BA5F0} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{3CCB5D82-1D19-4FDE-B92D-CA726C418171} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

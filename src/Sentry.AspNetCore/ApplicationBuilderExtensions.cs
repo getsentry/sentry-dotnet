@@ -1,7 +1,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Microsoft.AspNetCore.Hosting;
+#if NETSTANDARD2_0
+using IHostApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
+#else
+using Microsoft.Extensions.Hosting;
+#endif
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,7 +14,6 @@ using Sentry.AspNetCore;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Infrastructure;
-
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.AspNetCore.Builder
@@ -55,7 +58,7 @@ namespace Microsoft.AspNetCore.Builder
                 }
             }
 
-            var lifetime = app.ApplicationServices.GetService<IApplicationLifetime>();
+            var lifetime = app.ApplicationServices.GetService<IHostApplicationLifetime>();
             lifetime?.ApplicationStopped.Register(SentrySdk.Close);
 
             return app.UseMiddleware<SentryMiddleware>();

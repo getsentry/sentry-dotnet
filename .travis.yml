@@ -1,23 +1,26 @@
 language: csharp
 env:
   global:
-    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1 # Used by the dotnet SDK prior to v3.0
     - DOTNET_CLI_TELEMETRY_OPTOUT=1
-dotnet: 2.2.105
-mono: 5.12.0
+mono: 6.6.0
 branches:
   only:
     - master
     - /^release\/.*$/
 matrix:
   include:
-    - os: osx # osx_image: xcode8.3 Default	Xcode 8.3.3	OS X 10.12	1.8.0_112-b16
-      osx_image: xcode9.2
+    - os: osx
+      osx_image: xcode11.2
     - os: linux
       dist: bionic
       sudo: required
       group: edge
 script:
+  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 2.1.507
+  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 3.1.100
+  - export PATH=$PATH:~/.dotnet
+  - dotnet --info
   - ./build.sh
 after_success:
   - curl -s https://codecov.io/bash > codecov

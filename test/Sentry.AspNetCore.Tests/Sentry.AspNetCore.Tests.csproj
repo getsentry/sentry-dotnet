@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
   <!-- Running these tests on Mono just hangs -->
@@ -14,12 +14,11 @@
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.2" />
   </ItemGroup>
-
 
   <ItemGroup>
     <None Update="*.json">
