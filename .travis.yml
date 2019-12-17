@@ -18,6 +18,7 @@ matrix:
       group: edge
 script:
   - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 2.1.507
+  - dotnet --info
   - ./build.sh
 after_success:
   - curl -s https://codecov.io/bash > codecov
