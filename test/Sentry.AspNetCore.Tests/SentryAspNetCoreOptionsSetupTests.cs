@@ -1,5 +1,9 @@
 using System;
-using Microsoft.AspNetCore.Hosting;
+#if NETCOREAPP2_1 || NET461
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
+#endif
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using NSubstitute;
