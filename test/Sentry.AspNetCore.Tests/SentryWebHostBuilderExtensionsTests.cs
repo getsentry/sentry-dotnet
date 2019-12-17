@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-#if NETCOREAPP2_1
+#if NETCOREAPP2_1 || NET461
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
