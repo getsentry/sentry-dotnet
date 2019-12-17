@@ -196,9 +196,9 @@ The packages target **.NET Standard 2.0** and **.NET Framework 4.6.1**. That mea
 Of those, we've tested (we run our unit/integration tests) against:
 
 * .NET Framework 4.8 on Windows
-* Mono 6.6 macOS and Linux (Travis-CI)
-* .NET Core 2.1 Windows, macOS and Linux
-* .NET Core 3.1 Windows, macOS and Linux
+* Mono 6.6 on macOS and Linux
+* .NET Core 2.1 on Windows, macOS and Linux
+* .NET Core 3.1 on Windows, macOS and Linux
 
 ### Sentry Protocol
 
