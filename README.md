@@ -5,7 +5,7 @@
   <br />
 </p>
 
-.NET SDK for Sentry
+Sentry SDK for .NET 
 ===========
 [![Travis](https://travis-ci.org/getsentry/sentry-dotnet.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
