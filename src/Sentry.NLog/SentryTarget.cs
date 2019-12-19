@@ -305,10 +305,10 @@ namespace Sentry.NLog
             // Whether or not it was sent as event, add breadcrumb so the next event includes it
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
-                var breadcrumbFormatted = BreadcrumbLayout.Render(logEvent);
+                var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
 
                 var message = string.IsNullOrWhiteSpace(breadcrumbFormatted)
-                    ? exception?.Message ?? string.Empty
+                    ? (exception?.Message ?? logEvent.FormattedMessage)
                     : breadcrumbFormatted;
 
                 IDictionary<string, string> data = null;
@@ -353,7 +353,7 @@ namespace Sentry.NLog
                 {
                     foreach (var kv in logEvent.Properties)
                     {
-                        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+                        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value?.ToString());
                     }
                 }
             }
