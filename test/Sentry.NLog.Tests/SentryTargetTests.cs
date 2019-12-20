@@ -666,6 +666,25 @@ namespace Sentry.NLog.Tests
                 .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == "b"));
         }
 
+        [Fact]
+        public void GetTagsFromLogEvent_NullPropertiesMapped()
+        {
+            var factory = _fixture.GetLoggerFactory();
+            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
+            sentryTarget.SendEventPropertiesAsTags = true;
+            sentryTarget.IncludeEventDataOnBreadcrumbs = true;
+
+            var logger = factory.GetLogger("sentry");
+            logger.Fatal("{a}", (string)null);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == null));
+
+            var b = _fixture.Scope.Breadcrumbs.First();
+            Assert.Single(b.Data);
+            Assert.Null(b.Data["a"]);
+        }
+
         internal class LogLevelData : IEnumerable<object[]>
         {
             public IEnumerator<object[]> GetEnumerator()
