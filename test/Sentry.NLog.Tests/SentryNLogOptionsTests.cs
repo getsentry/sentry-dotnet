@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Sentry.NLog.Tests
 {
-    public class SentrySerilogOptionsTests
+    public class SentryNLogOptionsTests
     {
         [Fact]
         public void Ctor_MinimumBreadcrumbLevel_Information()
