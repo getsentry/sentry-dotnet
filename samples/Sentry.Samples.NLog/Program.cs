@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
+using Sentry.NLog;
 
 // ReSharper disable ConvertToConstant.Local
 namespace Sentry.Samples.NLog
@@ -83,7 +85,7 @@ namespace Sentry.Samples.NLog
         {
             // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
             var config = LogManager.Configuration = new LoggingConfiguration();
-            config
+            _ = config
                 .AddSentry(o =>
                 {
                     o.Layout = "${message}";
@@ -101,6 +103,18 @@ namespace Sentry.Samples.NLog
 
                     o.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
                     o.ShutdownTimeoutSeconds = 5;
+
+                    //Optionally specify user properties via NLog (here using GlobalDiagnosticsContext as an example)
+                    o.User = new SentryNLogUser
+                    {
+                        Id = "${gdc:item=id}",
+                        Username = "${gdc:item=id}",
+                        Email= "${gdc:item=id}",
+                        Other =
+                        {
+                            new TargetPropertyWithContext("mood", "joyous")
+                        },
+                    };
 
                     o.AddTag("logger", "${logger}");  // Send the logger name as a tag
 

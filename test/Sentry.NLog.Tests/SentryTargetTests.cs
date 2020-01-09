@@ -115,6 +115,36 @@ namespace Sentry.NLog.Tests
         }
 
         [Fact]
+        public void Can_configure_user_from_xml_file()
+        {
+            var configXml = $@"
+                <nlog throwConfigExceptions='true'>
+                    <extensions>
+                        <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
+                    </extensions>
+                    <targets>
+                        <target type='Sentry' name='sentry' dsn='{ValidDsnWithoutSecret}'>
+                            <user username=""myUser"">
+                                <other name='mood' layout='joyous'/>
+                            </user>   
+                        </target>
+                    </targets>
+                </nlog>";
+
+            var stringReader = new System.IO.StringReader(configXml);
+            var xmlReader = System.Xml.XmlReader.Create(stringReader);
+            var c = new XmlLoggingConfiguration(xmlReader, null);
+            
+            var t = c.FindTargetByName("sentry") as SentryTarget;
+            Assert.NotNull(t);
+            Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn.ToString());
+            Assert.Equal("'myUser'", t.User.Username.ToString());
+            Assert.NotEmpty(t.User.Other);
+            Assert.Equal("mood", t.User.Other[0].Name);
+            Assert.Equal("'joyous'", t.User.Other[0].Layout.ToString());
+        }
+
+        [Fact]
         public void Shutdown_DisposesSdk()
         {
             _fixture.Options.InitializeSdk = false;
@@ -683,6 +713,25 @@ namespace Sentry.NLog.Tests
             var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Single(b.Data);
             Assert.Null(b.Data["a"]);
+        }
+
+        [Fact]
+        public void GetUserFromLayouts_PropertiesMapped()
+        {
+            var factory = _fixture.GetLoggerFactory();
+            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
+            sentryTarget.User = new SentryNLogUser
+            {
+                Username = "${logger:shortName=true}"
+            };
+
+            var logger = factory.GetLogger("sentry");
+
+            logger.Fatal(DefaultMessage);
+
+            _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Username == "sentry"));
+
         }
 
         internal class LogLevelData : IEnumerable<object[]>

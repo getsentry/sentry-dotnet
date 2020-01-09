@@ -1,1 +1,15 @@
-﻿
+﻿Sentry.NLog.SentryNLogOptions.User.get -> Sentry.NLog.SentryNLogUser
+Sentry.NLog.SentryNLogOptions.User.set -> void
+Sentry.NLog.SentryNLogUser
+Sentry.NLog.SentryNLogUser.Email.get -> NLog.Layouts.Layout
+Sentry.NLog.SentryNLogUser.Email.set -> void
+Sentry.NLog.SentryNLogUser.Id.get -> NLog.Layouts.Layout
+Sentry.NLog.SentryNLogUser.Id.set -> void
+Sentry.NLog.SentryNLogUser.IpAddress.get -> NLog.Layouts.Layout
+Sentry.NLog.SentryNLogUser.IpAddress.set -> void
+Sentry.NLog.SentryNLogUser.Other.get -> System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext>
+Sentry.NLog.SentryNLogUser.SentryNLogUser() -> void
+Sentry.NLog.SentryNLogUser.Username.get -> NLog.Layouts.Layout
+Sentry.NLog.SentryNLogUser.Username.set -> void
+Sentry.NLog.SentryTarget.User.get -> Sentry.NLog.SentryNLogUser
+Sentry.NLog.SentryTarget.User.set -> void

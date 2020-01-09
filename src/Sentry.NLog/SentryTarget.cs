@@ -194,6 +194,15 @@ namespace Sentry.NLog
             set => Options.FlushTimeout = TimeSpan.FromSeconds(value);
         }
 
+        /// <summary>
+        /// Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout
+        /// </summary>
+        public SentryNLogUser User
+        {
+            get => Options.User;
+            set => Options.User = value;
+        }
+
         /// <inheritdoc />
         protected override void CloseTarget()
         {
@@ -284,6 +293,7 @@ namespace Sentry.NLog
                     Level = logEvent.Level.ToSentryLevel(),
                     Release = Options.Release,
                     Environment = Options.Environment,
+                    User = GetUser(logEvent),
                 };
 
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
@@ -343,6 +353,21 @@ namespace Sentry.NLog
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
+        }
+
+        private User GetUser(LogEventInfo logEvent)
+        {
+            if (User == null)
+                return null;
+
+            return new User
+            {
+                Email = User.Email?.Render(logEvent),
+                Id = User.Id?.Render(logEvent),
+                IpAddress = User.IpAddress?.Render(logEvent),
+                Username = User.Username?.Render(logEvent),
+                Other = User.Other.ToDictionary(a => a.Name, b => b.Layout.Render(logEvent)),
+            };
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetTagsFromLogEvent(LogEventInfo logEvent)
