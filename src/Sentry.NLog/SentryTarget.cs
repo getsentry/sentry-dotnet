@@ -358,7 +358,9 @@ namespace Sentry.NLog
         private User GetUser(LogEventInfo logEvent)
         {
             if (User == null)
+            {
                 return null;
+            }
 
             return new User
             {
@@ -389,7 +391,9 @@ namespace Sentry.NLog
                 {
                     var tagValue = RenderLogEvent(tag.Layout, logEvent);
                     if (!tag.IncludeEmptyValue && string.IsNullOrEmpty(tagValue))
+                    {
                         continue;
+                    }
 
                     yield return new KeyValuePair<string, string>(tag.Name, tagValue);
                 }

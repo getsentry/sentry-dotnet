@@ -731,7 +731,6 @@ namespace Sentry.NLog.Tests
 
             _fixture.Hub.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Username == "sentry"));
-
         }
 
         internal class LogLevelData : IEnumerable<object[]>
