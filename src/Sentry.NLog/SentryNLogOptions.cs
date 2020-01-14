@@ -89,5 +89,11 @@ namespace Sentry.NLog
         /// This might be not ideal when using multiple integrations in case you want another one doing the Init.
         /// </remarks>
         public bool InitializeSdk { get; set; } = true;
+
+        /// <summary>
+        /// Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout
+        /// </summary>
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
+        public SentryNLogUser User { get; set; } = new SentryNLogUser();
     }
 }
