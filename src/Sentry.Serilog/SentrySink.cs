@@ -96,7 +96,7 @@ namespace Sentry.Serilog
                         Name = Constants.SdkName,
                         Version = NameAndVersion.Version
                     },
-                    Logger = logger,
+                    Logger = context,
                     Message = null,
                     LogEntry = new LogEntry
                     {
