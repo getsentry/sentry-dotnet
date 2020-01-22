@@ -84,7 +84,7 @@
            "request": "launch",
            "preLaunchTask": "build",
            // If you have changed target frameworks, make sure to update the program path.
-           "program": "${workspaceFolder}/samples/Sentry.Samples.Console.Customized/bin/Debug/netcoreapp2.1/Sentry.Samples.Console.Customized.dll",
+           "program": "${workspaceFolder}/samples/Sentry.Samples.Console.Customized/bin/Debug/netcoreapp2.0/Sentry.Samples.Console.Customized.dll",
            "args": [],
            "cwd": "${workspaceFolder}/samples/Sentry.Samples.Console.Customized",
            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
