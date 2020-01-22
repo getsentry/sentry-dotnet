@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Sentry;
 using Sentry.Extensibility;
@@ -113,8 +114,9 @@ internal static class Program
             await SentrySdk.ConfigureScopeAsync(async scope =>
             {
                 scope.AddEventProcessor(new SomeEventProcessor());
+                scope.AddIgnoredExceptions(typeof(CustomException));
+                // scope.AddEventProcessor(new SentryEventExceptionFilterProcessor(typeof(CustomException)));
                 scope.AddExceptionProcessor(new ArgumentExceptionProcessor());
-
                 // This could be any async I/O operation, like a DB query
                 await Task.Yield();
                 scope.SetExtra("SomeExtraInfo",
@@ -171,11 +173,11 @@ internal static class Program
             // would get disposed by the container on app shutdown
 
             var evt = new SentryEvent();
-            evt.Message ="Starting new client";
+            evt.Message = "Starting new client";
             evt.AddBreadcrumb("Breadcrumb directly to the event");
             evt.User.Username = "some@user";
             // Group all events with the following fingerprint:
-            evt.SetFingerprint(new [] { "NewClientDebug"});
+            evt.SetFingerprint(new[] { "NewClientDebug" });
             evt.Level = SentryLevel.Debug;
             SentrySdk.CaptureEvent(evt);
 
@@ -190,9 +192,9 @@ internal static class Program
 
             } // Dispose the client which flushes any queued events
 
-            SentrySdk.CaptureException(
-                new Exception("Error outside of the admin section: Goes to the default DSN"));
-
+            SentrySdk.CaptureException(new Exception("Error outside of the admin section: Goes to the default DSN"));
+            SentrySdk.CaptureException(new CustomException("Error outside of the admin section: Goes to the default DSN"));
+            SentrySdk.CaptureException(new Exception("Error outside of the admin section: Goes to the default DSN", new CustomException()));
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
@@ -250,6 +252,25 @@ internal static class Program
         {
             // Handle specific types of exceptions and add more data to the event
             sentryEvent.SetTag("parameter-name", exception.ParamName);
+        }
+    }
+
+    public class CustomException : Exception
+    {
+        public CustomException()
+        {
+        }
+
+        public CustomException(string message) : base(message)
+        {
+        }
+
+        public CustomException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected CustomException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
     }
 }

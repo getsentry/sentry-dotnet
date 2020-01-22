@@ -178,6 +178,7 @@ static Sentry.HubExtensions.AddBreadcrumb(this Sentry.IHub hub, string message, 
 static Sentry.HubExtensions.LockScope(this Sentry.IHub hub) -> void
 static Sentry.HubExtensions.PushAndLockScope(this Sentry.IHub hub) -> System.IDisposable
 static Sentry.HubExtensions.UnlockScope(this Sentry.IHub hub) -> void
+static Sentry.ScopeExtensions.AddIgnoredExceptions(this Sentry.Scope scope, params System.Type[] ignoredTypes) -> void
 static Sentry.ScopeExtensions.AddEventProcessor(this Sentry.Scope scope, Sentry.Extensibility.ISentryEventProcessor processor) -> void
 static Sentry.ScopeExtensions.AddEventProcessor(this Sentry.Scope scope, System.Func<Sentry.SentryEvent, Sentry.SentryEvent> processor) -> void
 static Sentry.ScopeExtensions.AddEventProcessors(this Sentry.Scope scope, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> processors) -> void
@@ -228,3 +229,6 @@ static readonly Sentry.Infrastructure.SystemClock.Clock -> Sentry.Infrastructure
 virtual Sentry.Extensibility.SentryStackTraceFactory.CreateFrame(System.Diagnostics.StackFrame stackFrame, bool isCurrentStackTrace) -> Sentry.Protocol.SentryStackFrame
 virtual Sentry.Extensibility.SentryStackTraceFactory.CreateStackTrace(System.Exception exception) -> System.Diagnostics.StackTrace
 virtual Sentry.Extensibility.SentryStackTraceFactory.GetMethod(System.Diagnostics.StackFrame stackFrame) -> System.Reflection.MethodBase
+Sentry.Extensibility.SentryEventExceptionFilterProcessor
+Sentry.Extensibility.SentryEventExceptionFilterProcessor.Process(Sentry.SentryEvent event) -> Sentry.SentryEvent
+Sentry.Extensibility.SentryEventExceptionFilterProcessor.SentryEventExceptionFilterProcessor(params System.Type[] types) -> void

@@ -82,6 +82,15 @@ namespace Sentry
         public static void AddEventProcessor(this Scope scope, ISentryEventProcessor processor)
             => scope.EventProcessors.Add(processor);
 
+
+        /// <summary>
+        /// Adds expection to be ingored.
+        /// </summary>
+        /// <param name="scope">The Scope to hold the processor.</param>
+        /// <param name="ignoredTypes">The exception types to be ignored.</param>
+        public static void AddIgnoredExceptions(this Scope scope, params Type[] ignoredTypes)
+        => scope.EventProcessors.Add(new SentryEventExceptionFilterProcessor(ignoredTypes));
+
         /// <summary>
         /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
         /// </summary>
