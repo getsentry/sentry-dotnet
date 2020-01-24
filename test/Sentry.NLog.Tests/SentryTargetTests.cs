@@ -55,7 +55,7 @@ namespace Sentry.NLog.Tests
                     Clock)
                 {
                     Name = "sentry",
-                    Dsn = Options.Dsn?.ToString(),
+                    Dsn = Options.Dsn?.ToString() ?? Options.DsnLayout,
                 };
 
                 if (asyncTarget)
@@ -96,9 +96,9 @@ namespace Sentry.NLog.Tests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' dsn='{ValidDsnWithoutSecret}'>
+                        <target type='Sentry' name='sentry' dsn='{ValidDsnWithoutSecret}' release='1.2.3' environment='test'>
                             <options>
-                                <environment>Development</environment>
+                                <attachStacktrace>True</attachStacktrace>
                             </options>
                         </target>
                     </targets>
@@ -106,12 +106,15 @@ namespace Sentry.NLog.Tests
 
             var stringReader = new System.IO.StringReader(configXml);
             var xmlReader = System.Xml.XmlReader.Create(stringReader);
-            var c = new XmlLoggingConfiguration(xmlReader, null);
+            var logFactory = new LogFactory();
+            logFactory.Configuration = new XmlLoggingConfiguration(xmlReader, null, logFactory);
 
-            var t = c.FindTargetByName("sentry") as SentryTarget;
+            var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
             Assert.NotNull(t);
             Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn.ToString());
-            Assert.Equal("Development", t.Options.Environment);
+            Assert.Equal("test", t.Options.Environment);
+            Assert.Equal("1.2.3", t.Options.Release);
+            Assert.True(t.Options.AttachStacktrace);
         }
 
         [Fact]
@@ -133,9 +136,10 @@ namespace Sentry.NLog.Tests
 
             var stringReader = new System.IO.StringReader(configXml);
             var xmlReader = System.Xml.XmlReader.Create(stringReader);
-            var c = new XmlLoggingConfiguration(xmlReader, null);
-            
-            var t = c.FindTargetByName("sentry") as SentryTarget;
+            var logFactory = new LogFactory();
+            logFactory.Configuration = new XmlLoggingConfiguration(xmlReader, null, logFactory);
+
+            var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
             Assert.NotNull(t);
             Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn.ToString());
             Assert.Equal("'myUser'", t.User.Username.ToString());
@@ -464,7 +468,21 @@ namespace Sentry.NLog.Tests
             var expectedDsn = new Dsn("https://a@sentry.io/1");
             _fixture.Options.Dsn = expectedDsn;
             var target = (SentryTarget)_fixture.GetTarget();
-            Assert.Equal(expectedDsn.ToString(), target.Dsn);
+            Assert.Equal(expectedDsn.ToString(), target.Options.Dsn.ToString());
+        }
+
+        [Fact]
+        public void Dsn_SupportsNLogLayout_Lookup()
+        {
+            var expectedDsn = new Dsn("https://a@sentry.io/1");
+            var target = (SentryTarget)_fixture.GetTarget();
+            target.Dsn = "${var:mydsn}";
+            var logFactory = new LogFactory();
+            var logConfig = new LoggingConfiguration(logFactory);
+            logConfig.Variables["mydsn"] = expectedDsn.ToString();
+            logConfig.AddRuleForAllLevels(target);
+            logFactory.Configuration = logConfig;
+            Assert.Equal(expectedDsn.ToString(), target.Options.Dsn.ToString());
         }
 
         [Fact]
@@ -525,48 +543,31 @@ namespace Sentry.NLog.Tests
         public void SendEventPropertiesAsData_Default_True()
         {
             var target = (SentryTarget)_fixture.GetTarget();
-            Assert.True(target.SendEventPropertiesAsData);
-        }
-
-        [Fact]
-        public void SendEventPropertiesAsData_ValueFromOptions()
-        {
-            _fixture.Options.SendEventPropertiesAsData = false;
-            var target = (SentryTarget)_fixture.GetTarget();
-            Assert.False(target.SendEventPropertiesAsData);
-        }
-
-        [Fact]
-        public void SendEventPropertiesAsData_SetterReplacesOptions()
-        {
-            _fixture.Options.SendEventPropertiesAsData = true;
-            var target = (SentryTarget)_fixture.GetTarget();
-            target.SendEventPropertiesAsData = false;
-            Assert.False(target.SendEventPropertiesAsData);
+            Assert.True(target.IncludeEventProperties);
         }
 
         [Fact]
         public void SendEventPropertiesAsTags_Default_False()
         {
             var target = (SentryTarget)_fixture.GetTarget();
-            Assert.False(target.SendEventPropertiesAsTags);
+            Assert.False(target.IncludeEventPropertiesAsTags);
         }
 
         [Fact]
         public void SendEventPropertiesAsTags_ValueFromOptions()
         {
-            _fixture.Options.SendEventPropertiesAsTags = false;
+            _fixture.Options.IncludeEventPropertiesAsTags = false;
             var target = (SentryTarget)_fixture.GetTarget();
-            Assert.False(target.SendEventPropertiesAsTags);
+            Assert.False(target.IncludeEventPropertiesAsTags);
         }
 
         [Fact]
         public void SendEventPropertiesAsTags_SetterReplacesOptions()
         {
-            _fixture.Options.SendEventPropertiesAsTags = true;
+            _fixture.Options.IncludeEventPropertiesAsTags = true;
             var target = (SentryTarget)_fixture.GetTarget();
-            target.SendEventPropertiesAsTags = false;
-            Assert.False(target.SendEventPropertiesAsTags);
+            target.IncludeEventPropertiesAsTags = false;
+            Assert.False(target.IncludeEventPropertiesAsTags);
         }
 
         [Fact]
@@ -672,7 +673,7 @@ namespace Sentry.NLog.Tests
             var factory = _fixture.GetLoggerFactory();
             var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
             sentryTarget.Tags.Add(new TargetPropertyWithContext("Logger", "${logger:shortName=true}"));
-            sentryTarget.SendEventPropertiesAsTags = true;
+            sentryTarget.IncludeEventPropertiesAsTags = true;
 
             var logger = factory.GetLogger("sentry");
             logger.Fatal(DefaultMessage);
@@ -687,7 +688,7 @@ namespace Sentry.NLog.Tests
         {
             var factory = _fixture.GetLoggerFactory();
             var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
-            sentryTarget.SendEventPropertiesAsTags = true;
+            sentryTarget.IncludeEventPropertiesAsTags = true;
 
             var logger = factory.GetLogger("sentry");
             logger.Fatal("{a}", "b");
@@ -701,7 +702,7 @@ namespace Sentry.NLog.Tests
         {
             var factory = _fixture.GetLoggerFactory();
             var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
-            sentryTarget.SendEventPropertiesAsTags = true;
+            sentryTarget.IncludeEventPropertiesAsTags = true;
             sentryTarget.IncludeEventDataOnBreadcrumbs = true;
 
             var logger = factory.GetLogger("sentry");

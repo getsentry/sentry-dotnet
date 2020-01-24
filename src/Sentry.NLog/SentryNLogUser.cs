@@ -9,6 +9,7 @@ namespace Sentry.NLog
     /// <summary>
     /// A helper class used to configure Sentry user properties using NLog layouts
     /// </summary>
+    [NLogConfigurationItem]
     public class SentryNLogUser
     {
         /// <summary>

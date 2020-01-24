@@ -46,16 +46,9 @@ namespace Sentry.NLog
         public bool IgnoreEventsWithNoException { get; set; } = false;
 
         /// <summary>
-        /// Determines whether event-level properties will be sent to sentry as additional data. Defaults to <see langword="true" />.
-        /// </summary>
-        /// <seealso cref="SendEventPropertiesAsTags" />
-        public bool SendEventPropertiesAsData { get; set; } = true;
-
-        /// <summary>
         /// Determines whether event properties will be sent to sentry as Tags or not. Defaults to <see langword="false" />.
         /// </summary>
-        /// <seealso cref="SendEventPropertiesAsData"/>
-        public bool SendEventPropertiesAsTags { get; set; } = false;
+        public bool IncludeEventPropertiesAsTags { get; set; } = false;
 
         /// <summary>
         /// Determines whether or not to include event-level data as data in breadcrumbs for future errors.
@@ -70,10 +63,28 @@ namespace Sentry.NLog
         public Layout BreadcrumbLayout { get; set; }
 
         /// <summary>
-        /// Configured layout for the NLog logger.
+        /// Configured layout for rendering SentryEvent message
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
         public Layout Layout { get; set; }
+
+        /// <summary>
+        /// Configured layout for Dsn-Address to Sentry
+        /// </summary>
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
+        public Layout DsnLayout { get; set; }
+
+        /// <summary>
+        /// Configured layout for application Release version to Sentry
+        /// </summary>
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
+        public Layout ReleaseLayout { get; set; }
+
+        /// <summary>
+        /// Configured layout for application Environment to Sentry
+        /// </summary>
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
+        public Layout EnvironmentLayout { get; set; }
 
         /// <summary>
         /// Any additional tags to apply to each logged message.
