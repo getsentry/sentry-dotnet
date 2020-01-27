@@ -194,7 +194,7 @@ internal static class Program
 
             SentrySdk.CaptureException(new Exception("Error outside of the admin section: Goes to the default DSN"));
             SentrySdk.CaptureException(new CustomException("This exception will be dropped because of its type."));
-            SentrySdk.CaptureException(new Exception("Error outside of the admin section: Goes to the default DSN", new CustomException()));
+            SentrySdk.CaptureException(new Exception("This event will be ignored because of the inner type's exception", new CustomException()));
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
