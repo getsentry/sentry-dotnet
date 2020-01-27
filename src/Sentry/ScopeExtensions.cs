@@ -84,7 +84,7 @@ namespace Sentry
 
 
         /// <summary>
-        /// Adds expection to be ingored.
+        /// Adds exception to be ignored.
         /// </summary>
         /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="ignoredTypes">The exception types to be ignored.</param>
