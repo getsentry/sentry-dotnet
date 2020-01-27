@@ -255,7 +255,7 @@ internal static class Program
         }
     }
 
-    public class CustomException : Exception
+    public class IgnoredException : Exception
     {
         public CustomException()
         {
