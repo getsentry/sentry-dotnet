@@ -193,7 +193,7 @@ internal static class Program
             } // Dispose the client which flushes any queued events
 
             SentrySdk.CaptureException(new Exception("Error outside of the admin section: Goes to the default DSN"));
-            SentrySdk.CaptureException(new CustomException("Error outside of the admin section: Goes to the default DSN"));
+            SentrySdk.CaptureException(new CustomException("This exception will be dropped because of its type."));
             SentrySdk.CaptureException(new Exception("Error outside of the admin section: Goes to the default DSN", new CustomException()));
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
