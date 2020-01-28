@@ -117,7 +117,7 @@ Log messages of level `Information` will be kept as _breadcrumbs_ and if an even
 
 These levels can be configured so that the level you define tracks breadcrumbs or sends events or completely disable it.
 
-**That means that log mesages logged by you or the framework, related to the failed transaction, will be added to the event!**
+**That means that log messages logged by you or the framework, related to the failed transaction, will be added to the event!**
 
 ## DSN
 
