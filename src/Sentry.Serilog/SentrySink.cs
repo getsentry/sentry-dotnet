@@ -57,14 +57,24 @@ namespace Sentry.Serilog
 
         public void Emit(LogEvent logEvent)
         {
-            if (logEvent == null
-                || logEvent.Properties.TryGetValue("SourceContext", out var prop)
-                && prop is ScalarValue scalar
-                && scalar.Value is string context
-                && (context.StartsWith("Sentry.")
-                    || string.Equals(context, "Sentry", StringComparison.Ordinal)))
+            if (logEvent == null)
             {
                 return;
+            }
+
+            string context = null;
+
+            if (logEvent.Properties.TryGetValue("SourceContext", out var prop)
+                && prop is ScalarValue scalar
+                && scalar.Value is string sourceContextValue)
+            {
+                if (sourceContextValue.StartsWith("Sentry.")
+                    || string.Equals(sourceContextValue, "Sentry", StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                context = sourceContextValue;
             }
 
             var hub = _hubAccessor();
@@ -86,6 +96,7 @@ namespace Sentry.Serilog
                         Name = Constants.SdkName,
                         Version = NameAndVersion.Version
                     },
+                    Logger = context,
                     Message = null,
                     LogEntry = new LogEntry
                     {
@@ -120,6 +131,7 @@ namespace Sentry.Serilog
                     message: string.IsNullOrWhiteSpace(formatted)
                         ? exception?.Message
                         : formatted,
+                    category: context,
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
