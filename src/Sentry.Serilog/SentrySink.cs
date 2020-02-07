@@ -62,19 +62,19 @@ namespace Sentry.Serilog
                 return;
             }
 
-            string logger = null;
+            string context = null;
 
             if (logEvent.Properties.TryGetValue("SourceContext", out var prop)
                 && prop is ScalarValue scalar
-                && scalar.Value is string context)
+                && scalar.Value is string sourceContextValue)
             {
-                if (context.StartsWith("Sentry.")
-                    || string.Equals(context, "Sentry", StringComparison.Ordinal))
+                if (sourceContextValue.StartsWith("Sentry.")
+                    || string.Equals(sourceContextValue, "Sentry", StringComparison.Ordinal))
                 {
                     return;
                 }
 
-                logger = context;
+                context = sourceContextValue;
             }
 
             var hub = _hubAccessor();
