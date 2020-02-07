@@ -12,7 +12,8 @@ namespace Sentry.Internal
             NullValueHandling = NullValueHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Formatting = Formatting.None,
-            Converters = new[] { StringEnumConverter }
+            Converters = new[] { StringEnumConverter },
+            DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 
         public static string SerializeObject<T>(T @object) => JsonConvert.SerializeObject(@object, Settings);
