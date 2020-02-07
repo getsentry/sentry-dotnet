@@ -1,4 +1,4 @@
-﻿Sentry.Serilog.SentrySerilogOptions
+Sentry.Serilog.SentrySerilogOptions
 Sentry.Serilog.SentrySerilogOptions.FormatProvider.get -> System.IFormatProvider
 Sentry.Serilog.SentrySerilogOptions.FormatProvider.set -> void
 Sentry.Serilog.SentrySerilogOptions.InitializeSdk.get -> bool

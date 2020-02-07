@@ -1,2 +1,0 @@
-﻿static Sentry.Extensions.Logging.SentryLoggingOptionsExtensions.ApplyDefaultTags(this Sentry.Extensions.Logging.SentryLoggingOptions options, Sentry.SentryEvent event) -> void
-Sentry.Extensions.Logging.SentryLoggingOptions.DefaultTags.get -> System.Collections.Generic.Dictionary<string, string>

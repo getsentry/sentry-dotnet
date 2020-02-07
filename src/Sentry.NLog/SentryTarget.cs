@@ -62,6 +62,7 @@ namespace Sentry.NLog
             // Overrides default layout. Still will be explicitly overwritten if manually configured in the
             // NLog.config file.
             Layout = "${message}";
+            IncludeEventProperties = true;
 
             Options = options;
             _hubAccessor = hubAccessor;
@@ -86,12 +87,30 @@ namespace Sentry.NLog
         public IList<TargetPropertyWithContext> Tags => Options.Tags;
 
         /// <summary>
-        /// The Data Source Name of a given project in Sentry.
+        /// Configured layout for Data Source Name of a given project in Sentry
         /// </summary>
-        public string Dsn
+        public Layout Dsn
         {
-            get => Options.Dsn?.ToString();
-            set => Options.Dsn = value == null ? null : new Dsn(value);
+            get => Options.DsnLayout;
+            set => Options.DsnLayout = value;
+        }
+
+        /// <summary>
+        /// Configured layout for application Release version to Sentry
+        /// </summary>
+        public Layout Release
+        {
+            get => Options.ReleaseLayout;
+            set => Options.ReleaseLayout = value;
+        }
+
+        /// <summary>
+        /// Configured layout for application Environment to Sentry
+        /// </summary>
+        public Layout Environment
+        {
+            get => Options.EnvironmentLayout;
+            set => Options.EnvironmentLayout = value;
         }
 
         /// <summary>
@@ -144,25 +163,36 @@ namespace Sentry.NLog
         }
 
         /// <summary>
+        /// Determines whether event properties will be sent to sentry as Tags or not.
+        /// Defaults to <see langword="false" />.
+        /// </summary>
+        public bool IncludeEventPropertiesAsTags
+        {
+            get => Options.IncludeEventPropertiesAsTags;
+            set => Options.IncludeEventPropertiesAsTags = value;
+        }
+
+        /// <summary>
         /// Determines whether event-level properties will be sent to sentry as additional data.
         /// Defaults to <see langword="true" />.
         /// </summary>
-        /// <seealso cref="SendEventPropertiesAsTags" />
-        public bool SendEventPropertiesAsData
+        /// <seealso cref="IncludeEventPropertiesAsTags" />
+        [Obsolete("Use IncludeEventProperties instead")]
+        public bool SendEventPropertiesAsData 
         {
-            get => Options.SendEventPropertiesAsData;
-            set => Options.SendEventPropertiesAsData = value;
+            get => IncludeEventProperties;
+            set => IncludeEventProperties = value;
         }
 
         /// <summary>
         /// Determines whether event properties will be sent to sentry as Tags or not.
         /// Defaults to <see langword="false" />.
         /// </summary>
-        /// <seealso cref="SendEventPropertiesAsData"/>
+        [Obsolete("Use IncludeEventPropertiesAsTags instead")]
         public bool SendEventPropertiesAsTags
         {
-            get => Options.SendEventPropertiesAsTags;
-            set => Options.SendEventPropertiesAsTags = value;
+            get => IncludeEventPropertiesAsTags;
+            set => IncludeEventPropertiesAsTags = value;
         }
 
         /// <summary>
@@ -194,6 +224,15 @@ namespace Sentry.NLog
             set => Options.FlushTimeout = TimeSpan.FromSeconds(value);
         }
 
+        /// <summary>
+        /// Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout
+        /// </summary>
+        public SentryNLogUser User
+        {
+            get => Options.User;
+            set => Options.User = value;
+        }
+
         /// <inheritdoc />
         protected override void CloseTarget()
         {
@@ -206,7 +245,23 @@ namespace Sentry.NLog
         {
             base.InitializeTarget();
 
-            IncludeEventProperties = Options.SendEventPropertiesAsData;
+            var customDsn = Dsn?.Render(LogEventInfo.CreateNullEvent());
+            if (!string.IsNullOrEmpty(customDsn))
+            {
+                Options.Dsn = new Dsn(customDsn);
+            }
+
+            var customRelease = Release?.Render(LogEventInfo.CreateNullEvent());
+            if (!string.IsNullOrEmpty(customRelease))
+            {
+                Options.Release = customRelease;
+            }
+
+            var customEnvironment = Environment?.Render(LogEventInfo.CreateNullEvent());
+            if (!string.IsNullOrEmpty(customEnvironment))
+            {
+                Options.Environment = customEnvironment;
+            }
 
             // If a layout has been configured on the options, replace the default logger.
             if (Options.Layout != null)
@@ -284,11 +339,12 @@ namespace Sentry.NLog
                     Level = logEvent.Level.ToSentryLevel(),
                     Release = Options.Release,
                     Environment = Options.Environment,
+                    User = GetUser(logEvent),
                 };
 
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
-                if (Tags.Count > 0 || SendEventPropertiesAsTags)
+                if (Tags.Count > 0 || IncludeEventPropertiesAsTags)
                 {
                     evt.SetTags(GetTagsFromLogEvent(logEvent));
                 }
@@ -305,15 +361,14 @@ namespace Sentry.NLog
             // Whether or not it was sent as event, add breadcrumb so the next event includes it
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
-                var breadcrumbFormatted = BreadcrumbLayout.Render(logEvent);
+                var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
 
                 var message = string.IsNullOrWhiteSpace(breadcrumbFormatted)
-                    ? exception?.Message ?? string.Empty
+                    ? (exception?.Message ?? logEvent.FormattedMessage)
                     : breadcrumbFormatted;
 
                 IDictionary<string, string> data = null;
-
-                // If this is true, an exception is being logged with no custom message
+// If this is true, an exception is being logged with no custom message
                 if (exception != null && !message.StartsWith(exception.Message))
                 {
                     // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
@@ -332,7 +387,7 @@ namespace Sentry.NLog
                         data = data ?? new Dictionary<string, string>(contextProps.Count);
                         foreach (var contextProp in contextProps)
                         {
-                            data.Add(contextProp.Key, contextProp.Value.ToString());
+                            data.Add(contextProp.Key, contextProp.Value?.ToString());
                         }
                     }
                 }
@@ -345,15 +400,32 @@ namespace Sentry.NLog
             }
         }
 
+        private User GetUser(LogEventInfo logEvent)
+        {
+            if (User == null)
+            {
+                return null;
+            }
+
+            return new User
+            {
+                Email = User.Email?.Render(logEvent),
+                Id = User.Id?.Render(logEvent),
+                IpAddress = User.IpAddress?.Render(logEvent),
+                Username = User.Username?.Render(logEvent),
+                Other = User.Other.ToDictionary(a => a.Name, b => b.Layout.Render(logEvent)),
+            };
+        }
+
         private IEnumerable<KeyValuePair<string, string>> GetTagsFromLogEvent(LogEventInfo logEvent)
         {
-            if (SendEventPropertiesAsTags)
+            if (IncludeEventPropertiesAsTags)
             {
                 if (logEvent.HasProperties)
                 {
                     foreach (var kv in logEvent.Properties)
                     {
-                        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value.ToString());
+                        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value?.ToString());
                     }
                 }
             }
@@ -364,7 +436,9 @@ namespace Sentry.NLog
                 {
                     var tagValue = RenderLogEvent(tag.Layout, logEvent);
                     if (!tag.IncludeEmptyValue && string.IsNullOrEmpty(tagValue))
+                    {
                         continue;
+                    }
 
                     yield return new KeyValuePair<string, string>(tag.Name, tagValue);
                 }

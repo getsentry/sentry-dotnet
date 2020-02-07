@@ -1,4 +1,4 @@
-﻿Microsoft.Extensions.Logging.LoggingBuilderExtensions
+Microsoft.Extensions.Logging.LoggingBuilderExtensions
 Microsoft.Extensions.Logging.SentryLoggerFactoryExtensions
 Sentry.Extensions.Logging.DelegateLogEntryFilter
 Sentry.Extensions.Logging.DelegateLogEntryFilter.DelegateLogEntryFilter(System.Func<string, Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.EventId, System.Exception, bool> filter) -> void
@@ -33,3 +33,5 @@ static Microsoft.Extensions.Logging.SentryLoggerFactoryExtensions.AddSentry(this
 static Sentry.Extensions.Logging.Extensions.DependencyInjection.ServiceCollectionExtensions.AddSentry<TOptions>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
 static Sentry.Extensions.Logging.SentryLoggingOptionsExtensions.AddLogEntryFilter(this Sentry.Extensions.Logging.SentryLoggingOptions options, Sentry.Extensions.Logging.ILogEntryFilter filter) -> void
 static Sentry.Extensions.Logging.SentryLoggingOptionsExtensions.AddLogEntryFilter(this Sentry.Extensions.Logging.SentryLoggingOptions options, System.Func<string, Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.EventId, System.Exception, bool> filter) -> void
+static Sentry.Extensions.Logging.SentryLoggingOptionsExtensions.ApplyDefaultTags(this Sentry.Extensions.Logging.SentryLoggingOptions options, Sentry.SentryEvent event) -> void
+Sentry.Extensions.Logging.SentryLoggingOptions.DefaultTags.get -> System.Collections.Generic.Dictionary<string, string>

@@ -1,1 +1,0 @@
-﻿static Sentry.Reflection.AssemblyExtensions.GetNameAndVersion(this System.Reflection.Assembly asm) -> Sentry.Protocol.SdkVersion

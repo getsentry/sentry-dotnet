@@ -1,4 +1,4 @@
-﻿Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions
+Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions
 Sentry.AspNetCore.IUserFactory
 Sentry.AspNetCore.IUserFactory.Create(Microsoft.AspNetCore.Http.HttpContext context) -> Sentry.Protocol.User
 Sentry.AspNetCore.ScopeExtensions
@@ -10,6 +10,10 @@ Sentry.AspNetCore.SentryAspNetCoreOptions.IncludeRequestPayload.set -> void
 Sentry.AspNetCore.SentryAspNetCoreOptions.MaxRequestBodySize.get -> Sentry.Extensibility.RequestSize
 Sentry.AspNetCore.SentryAspNetCoreOptions.MaxRequestBodySize.set -> void
 Sentry.AspNetCore.SentryAspNetCoreOptions.SentryAspNetCoreOptions() -> void
+Sentry.AspNetCore.SentryAspNetCoreOptions.FlushOnCompletedRequest.get -> bool
+Sentry.AspNetCore.SentryAspNetCoreOptions.FlushOnCompletedRequest.set -> void
+Sentry.AspNetCore.SentryAspNetCoreOptions.FlushTimeout.get -> System.TimeSpan
+Sentry.AspNetCore.SentryAspNetCoreOptions.FlushTimeout.set -> void
 static Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions.UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder) -> Microsoft.AspNetCore.Hosting.IWebHostBuilder
 static Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions.UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Microsoft.AspNetCore.Hosting.WebHostBuilderContext, Sentry.AspNetCore.SentryAspNetCoreOptions> configureOptions) -> Microsoft.AspNetCore.Hosting.IWebHostBuilder
 static Microsoft.AspNetCore.Hosting.SentryWebHostBuilderExtensions.UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Sentry.AspNetCore.SentryAspNetCoreOptions> configureOptions) -> Microsoft.AspNetCore.Hosting.IWebHostBuilder
