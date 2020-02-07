@@ -131,7 +131,7 @@ namespace Sentry.Serilog
                     message: string.IsNullOrWhiteSpace(formatted)
                         ? exception?.Message
                         : formatted,
-                    category: logger,
+                    category: context,
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
