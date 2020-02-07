@@ -326,5 +326,36 @@ namespace Sentry.Serilog.Tests
 
             _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
         }
+
+        [Fact]
+        public void Emit_WithSourceContext_LoggerNameEquals()
+        {
+            var sut = _fixture.GetSut();
+
+            const string expectedLogger = "LoggerName";
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse("message"),
+                new[] { new LogEventProperty("SourceContext", new ScalarValue(expectedLogger)) });
+
+            sut.Emit(evt);
+
+            _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+                p.Logger == expectedLogger));
+        }
+
+        [Fact]
+        public void Emit_NoSourceContext_LoggerNameNull()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse("message"),
+                new LogEventProperty[0]);
+
+            sut.Emit(evt);
+
+            _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+                p.Logger == null));
+        }
     }
 }
