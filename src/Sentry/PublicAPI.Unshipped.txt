@@ -1,0 +1,2 @@
+Sentry.SentryOptions.ServerName.get -> string
+Sentry.SentryOptions.ServerName.set -> void

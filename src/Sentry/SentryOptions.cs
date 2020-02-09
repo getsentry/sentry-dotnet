@@ -105,6 +105,16 @@ namespace Sentry
         public bool IsEnvironmentUser { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets the name of the server running the application.
+        /// </summary>
+        /// <remarks>
+        /// When <see cref="SendDefaultPii"/> is set to <c>true</c>, <see cref="System.Environment.MachineName"/> is
+        /// automatically set as ServerName. This property can serve as an override.
+        /// This is relevant only to server applications. 
+        /// </remarks>
+        public string ServerName { get; set; }
+
+        /// <summary>
         /// Whether to send the stack trace of a event captured without an exception
         /// </summary>
         /// <remarks>
