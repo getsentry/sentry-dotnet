@@ -1,2 +1,4 @@
 Sentry.SentryOptions.ServerName.get -> string
 Sentry.SentryOptions.ServerName.set -> void
+Sentry.SentryOptions.CreateHttpClientHandler.get -> System.Func<Sentry.Dsn, System.Net.Http.HttpClientHandler>
+Sentry.SentryOptions.CreateHttpClientHandler.set -> void

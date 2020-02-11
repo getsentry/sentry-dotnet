@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using NSubstitute;
 using Sentry.Internal.Http;
 using Xunit;
 
@@ -160,6 +161,40 @@ namespace Sentry.Tests.Internals
             sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
 
             Assert.True(configureHandlerInvoked);
+        }
+
+        [Fact]
+        public void Create_ProvidedCreateHttpClientHandler_ReturnedHandlerUsed()
+        {
+            var handler = Substitute.For<HttpClientHandler>();
+            _fixture.HttpOptions.CreateHttpClientHandler = _ => handler;
+            var sut = _fixture.GetSut();
+
+            var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            Assert.Contains(client.GetMessageHandlers(), h => ReferenceEquals(handler, h));
+        }
+
+        [Fact]
+        public void Create_NullCreateHttpClientHandler_HttpClientHandlerUsed()
+        {
+            _fixture.HttpOptions.CreateHttpClientHandler = null;
+            var sut = _fixture.GetSut();
+
+            var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            Assert.Contains(client.GetMessageHandlers(), h => h.GetType() == typeof(HttpClientHandler));
+        }
+
+        [Fact]
+        public void Create_NullReturnedCreateHttpClientHandler_HttpClientHandlerUsed()
+        {
+            _fixture.HttpOptions.CreateHttpClientHandler = _ => null;
+            var sut = _fixture.GetSut();
+
+            var client = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+
+            Assert.Contains(client.GetMessageHandlers(), h => h.GetType() == typeof(HttpClientHandler));
         }
     }
 }
