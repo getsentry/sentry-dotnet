@@ -346,6 +346,35 @@ namespace Sentry.NLog.Tests
         }
 
         [Fact]
+        public void Log_AdditionalGroupingKeyProperty_OverrideDefaultFingerprint()
+        {
+            var expectedGroupingKey = "someGroupingKey";
+            var expectedFingerprint = new []
+            {
+                "{{ default }}",
+                expectedGroupingKey
+            };
+            
+            var logger = _fixture.GetLogger();
+
+            var evt = LogEventInfo.Create(LogLevel.Error, logger.Name, DefaultMessage);
+            
+            evt.Properties[SentryTarget.AdditionalGroupingKeyProperty] = expectedGroupingKey;
+            
+            var actualSentryEvent = default(SentryEvent);
+            _fixture.Hub.When(h => h.CaptureEvent(Arg.Is<SentryEvent>(
+                    e => e.Extra[SentryTarget.AdditionalGroupingKeyProperty].ToString() == expectedGroupingKey)))
+                .Do(c => actualSentryEvent = c.Arg<SentryEvent>());
+    
+            
+            logger.Log(evt);
+           
+            
+            Assert.NotNull(actualSentryEvent);
+            Assert.Equal(expectedFingerprint, actualSentryEvent.Fingerprint);
+        }
+
+        [Fact]
         public void Log_WithFormat_EventCaptured()
         {
             const string expectedMessage = "Test {structured} log";
