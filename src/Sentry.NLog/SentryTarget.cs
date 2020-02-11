@@ -353,6 +353,19 @@ namespace Sentry.NLog
                 {
                     var contextProps = GetAllProperties(logEvent);
                     evt.SetExtras(contextProps);
+                    
+                    if (contextProps.TryGetValue("AdditionalGroupingKey", out var additionalGroupingKey)
+                        && additionalGroupingKey != null)
+                    {
+                        var overridenFingerprint = evt.Fingerprint.ToList();
+                        if (!evt.Fingerprint.Any())
+                        {
+                            overridenFingerprint.Add("{{ default }}");
+                        }
+                        overridenFingerprint.Add(additionalGroupingKey.ToString());
+                        
+                        evt.SetFingerprint(overridenFingerprint);
+                    }
                 }
 
                 hub.CaptureEvent(evt);
