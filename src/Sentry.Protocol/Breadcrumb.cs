@@ -14,15 +14,15 @@ namespace Sentry.Protocol
     [DebuggerDisplay("Message: {" + nameof(Message) + "}, Type: {" + nameof(Type) + "}")]
     public sealed class Breadcrumb
     {
+        [DataMember(Name = "timestamp", EmitDefaultValue = false)]
+        private string SerializableTimestamp => Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ssZ", DateTimeFormatInfo.InvariantInfo);
+
         /// <summary>
         /// A timestamp representing when the breadcrumb occurred.
         /// </summary>
         /// <remarks>
         /// This can be either an ISO datetime string, or a Unix timestamp.
         /// </remarks>
-        [DataMember(Name = "timestamp", EmitDefaultValue = false)]
-        private string SerializableTimestamp => Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ssZ", DateTimeFormatInfo.InvariantInfo);
-
         public DateTimeOffset Timestamp { get; }
 
         /// <summary>

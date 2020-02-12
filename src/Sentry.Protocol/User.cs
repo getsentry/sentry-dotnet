@@ -59,6 +59,10 @@ namespace Sentry.Protocol
             set => InternalOther = value;
         }
 
+        /// <summary>
+        /// Clones the current <see cref="User"/> instance.
+        /// </summary>
+        /// <returns>The cloned user.</returns>
         public User Clone()
         {
             var user = new User();
