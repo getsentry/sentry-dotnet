@@ -38,7 +38,9 @@ namespace Sentry.Internal
             }
             else
             {
+#pragma warning disable 618 // Tests will be removed once obsolete code gets removed
                 factory = new DefaultSentryHttpClientFactory(_options.ConfigureHandler, _options.ConfigureClient);
+#pragma warning restore 618
             }
 
             var httpClient = factory.Create(_options.Dsn, _options);

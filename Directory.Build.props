@@ -1,30 +1,18 @@
 <Project>
   <PropertyGroup>
-<<<<<<< HEAD
-    <Version>2.0.0-beta7</Version>
-    <LangVersion>7.3</LangVersion>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-=======
+    <Version>2.0.2</Version>
     <LangVersion>7.3</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <Version>2.0.0-beta2</Version>
->>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <Deterministic>True</Deterministic>
   </PropertyGroup>
-<<<<<<< HEAD
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>SYSTEM_WEB;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
    <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="2.9.2" PrivateAssets="All" />
-=======
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-preview.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="2.9.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.2" PrivateAssets="All" />
->>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
   </ItemGroup>
 </Project>

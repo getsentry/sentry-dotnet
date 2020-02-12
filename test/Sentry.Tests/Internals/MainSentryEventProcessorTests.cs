@@ -98,6 +98,47 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
+        public void Process_SendDefaultPiiTrueNameOnOptionAndOnEvent_ServerNameNotOverwritten()
+        {
+            var expectedServerName = "expected server name";
+            _fixture.SentryOptions.ServerName = "Value on options doesn't take precedence over the event";
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent { ServerName = expectedServerName };
+            _fixture.SentryOptions.SendDefaultPii = true;
+            sut.Process(evt);
+
+            Assert.Equal(expectedServerName, evt.ServerName);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiTrueAndNameOnOption_ServerNameSetToOptionsValue()
+        {
+            var expectedServerName = "expected server name";
+            _fixture.SentryOptions.ServerName = expectedServerName;
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent();
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+            sut.Process(evt);
+
+            Assert.Equal(expectedServerName, evt.ServerName);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiFalseAndNameOnOption_ServerNameSetToOptionsValue()
+        {
+            var expectedServerName = "expected server name";
+            _fixture.SentryOptions.ServerName = expectedServerName;
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent();
+
+            _fixture.SentryOptions.SendDefaultPii = false;
+            sut.Process(evt);
+
+            Assert.Equal(expectedServerName, evt.ServerName);
+        }
+
+        [Fact]
         public void Process_ReleaseOnOptions_SetToEvent()
         {
             const string expectedVersion = "1.0 - f4d6b23";

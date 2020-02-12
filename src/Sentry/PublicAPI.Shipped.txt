@@ -1,4 +1,4 @@
-﻿Sentry.DsnAttribute
+Sentry.DsnAttribute
 Sentry.DsnAttribute.Dsn.get -> string
 Sentry.DsnAttribute.DsnAttribute(string dsn) -> void
 Sentry.Extensibility.BaseRequestPayloadExtractor
@@ -225,6 +225,7 @@ static Sentry.SentrySdk.PushScope<TState>(TState state) -> System.IDisposable
 static Sentry.SentrySdk.WithScope(System.Action<Sentry.Scope> scopeCallback) -> void
 static readonly Sentry.Extensibility.HubAdapter.Instance -> Sentry.Extensibility.HubAdapter
 static readonly Sentry.Infrastructure.SystemClock.Clock -> Sentry.Infrastructure.SystemClock
+static Sentry.Reflection.AssemblyExtensions.GetNameAndVersion(this System.Reflection.Assembly asm) -> Sentry.Protocol.SdkVersion
 virtual Sentry.Extensibility.SentryStackTraceFactory.CreateFrame(System.Diagnostics.StackFrame stackFrame, bool isCurrentStackTrace) -> Sentry.Protocol.SentryStackFrame
 virtual Sentry.Extensibility.SentryStackTraceFactory.CreateStackTrace(System.Exception exception) -> System.Diagnostics.StackTrace
 virtual Sentry.Extensibility.SentryStackTraceFactory.GetMethod(System.Diagnostics.StackFrame stackFrame) -> System.Reflection.MethodBase

@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using Sentry.Internal;
+using System.Runtime.ExceptionServices;
+using System.Security;
 
 namespace Sentry.Integrations
 {
@@ -26,6 +28,7 @@ namespace Sentry.Integrations
         }
 
         // Internal for testability
+        [HandleProcessCorruptedStateExceptions, SecurityCritical]
         internal void Handle(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.ExceptionObject is Exception ex)

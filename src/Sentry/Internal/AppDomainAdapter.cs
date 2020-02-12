@@ -1,4 +1,6 @@
 using System;
+using System.Runtime.ExceptionServices;
+using System.Security;
 
 namespace Sentry.Internal
 {
@@ -25,6 +27,7 @@ namespace Sentry.Internal
 
         private void OnProcessExit(object sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
 
+        [HandleProcessCorruptedStateExceptions, SecurityCritical]
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e) => UnhandledException?.Invoke(this, e);
     }
 }

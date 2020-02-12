@@ -34,7 +34,7 @@ namespace Sentry.NLog.Tests
             var actual = _sut.AddSentry(expectedDsn, o => o.FlushTimeout = expectedTimeout);
             var sentryTarget = Assert.IsType<SentryTarget>(actual.AllTargets[0]);
             Assert.Equal(expectedTimeout.TotalSeconds, sentryTarget.FlushTimeoutSeconds);
-            Assert.Equal(expectedDsn, sentryTarget.Dsn);
+            Assert.Equal(expectedDsn, sentryTarget.Options.Dsn.ToString());
         }
 
         [Fact]

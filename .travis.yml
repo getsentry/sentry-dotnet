@@ -1,8 +1,7 @@
 language: csharp
 env:
   global:
-<<<<<<< HEAD
-    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1 # Used by the dotnet SDK prior to v3.0
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 # Used by the dotnet SDK prior to v3.0
     - DOTNET_CLI_TELEMETRY_OPTOUT=1
 mono: 6.6.0
 branches:
@@ -13,33 +12,15 @@ matrix:
   include:
     - os: osx
       osx_image: xcode11.2
-=======
-    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-    - DOTNET_CLI_TELEMETRY_OPTOUT=1
-dotnet: 2.2.105
-mono: 5.12.0
-matrix:
-  include:
-    - os: osx # osx_image: xcode8.3 Default	Xcode 8.3.3	OS X 10.12	1.8.0_112-b16
-      osx_image: xcode9.2
->>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
     - os: linux
       dist: bionic
       sudo: required
       group: edge
-<<<<<<< HEAD
 script:
   - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 2.1.507
   - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 3.1.100
   - export PATH=$PATH:~/.dotnet
   - dotnet --info
-=======
-branches:
-  only:
-    - master
-    - /^release\/.*$/
-script:
->>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
   - ./build.sh
 after_success:
   - curl -s https://codecov.io/bash > codecov
@@ -48,11 +29,7 @@ after_success:
 notifications:
   webhooks:
     urls:
-<<<<<<< HEAD
       - https://zeus.ci/hooks/b6bbaf86-c598-11e8-aa19-0a580a280112/public/provider/travis/webhook
-=======
-      - https://zeus.ci/hooks/fea4a5b0-91a3-11e8-901f-0a580a280573/public/provider/travis/webhook
->>>>>>> afd65b92ed7122a628dc3631711b407f56e9a8a8
     on_success: always
     on_failure: always
     on_start: always

@@ -83,12 +83,20 @@ namespace Sentry.Internal
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
             if (_options.SendDefaultPii && _options.IsEnvironmentUser && !@event.HasUser())
             {
-                @event.User.Username = System.Environment.UserName;
+                @event.User.Username = Environment.UserName;
             }
 
-            if (@event.ServerName == null && _options.SendDefaultPii)
+            if (@event.ServerName == null)
             {
-                @event.ServerName = System.Environment.MachineName;
+                // Value set on the options take precedence over device name.
+                if (!string.IsNullOrEmpty(_options.ServerName))
+                {
+                    @event.ServerName = _options.ServerName;
+                }
+                else if (_options.SendDefaultPii)
+                {
+                    @event.ServerName = Environment.MachineName;
+                }
             }
 
             if (@event.Level == null)

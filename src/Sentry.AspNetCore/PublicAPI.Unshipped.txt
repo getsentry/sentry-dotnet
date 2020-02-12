@@ -1,4 +1,0 @@
-﻿Sentry.AspNetCore.SentryAspNetCoreOptions.FlushOnCompletedRequest.get -> bool
-Sentry.AspNetCore.SentryAspNetCoreOptions.FlushOnCompletedRequest.set -> void
-Sentry.AspNetCore.SentryAspNetCoreOptions.FlushTimeout.get -> System.TimeSpan
-Sentry.AspNetCore.SentryAspNetCoreOptions.FlushTimeout.set -> void

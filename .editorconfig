@@ -117,6 +117,8 @@ csharp_style_var_for_built_in_types = true : suggestion
 csharp_style_var_when_type_is_apparent = true : suggestion
 csharp_style_var_elsewhere = true : suggestion
 
+csharp_style_unused_value_expression_statement_preference = discard_variable : warning
+
 # No take on method-like constructs to have a block body or be expression-bodied
 csharp_style_expression_bodied_methods = false : none
 csharp_style_expression_bodied_constructors = false : none
@@ -140,6 +142,7 @@ csharp_style_deconstructed_variable_declaration = true : suggestion
 # Code style defaults
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = false
+csharp_prefer_braces = true : suggestion
 
 # Indentation
 csharp_indent_block_contents = true
@@ -180,3 +183,4 @@ csharp_new_line_before_finally = true
 csharp_new_line_before_members_in_object_initializers = true
 csharp_new_line_before_members_in_anonymous_types = true
 csharp_new_line_between_query_expression_clauses = true
+

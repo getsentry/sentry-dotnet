@@ -20,5 +20,3 @@ Looking at @Sentry.Extensions.Logging.SentryLoggerProvider you'll notice:
 > `Assembly: Sentry.Extensions.Logging.dll`
 
 That assembly is found on NuGet [Sentry.Extensions.Logging](https://www.nuget.org/packages/Sentry.Extensions.Logging)
-=======
-Welcome to the API documentation of the Sentry.Protocol
