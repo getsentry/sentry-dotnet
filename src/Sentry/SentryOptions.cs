@@ -110,7 +110,7 @@ namespace Sentry
         /// <remarks>
         /// When <see cref="SendDefaultPii"/> is set to <c>true</c>, <see cref="System.Environment.MachineName"/> is
         /// automatically set as ServerName. This property can serve as an override.
-        /// This is relevant only to server applications. 
+        /// This is relevant only to server applications.
         /// </remarks>
         public string ServerName { get; set; }
 
@@ -286,7 +286,17 @@ namespace Sentry
         /// <summary>
         /// A callback invoked when a <see cref="SentryClient"/> is created.
         /// </summary>
+        /// <remarks>
+        /// This callback is invoked once configuration has been applied to the inner most <see cref="HttpClientHandler"/>.
+        /// </remarks>
+        [Obsolete("Please use '" + nameof(CreateHttpClientHandler) + "' instead. " +
+                  "You can create an instance of '" + nameof(HttpClientHandler) + "' and modify it at once.")]
         public Action<HttpClientHandler, Dsn> ConfigureHandler { get; set; }
+
+        /// <summary>
+        /// Creates the inner most <see cref="HttpClientHandler"/>.
+        /// </summary>
+        public Func<Dsn, HttpClientHandler> CreateHttpClientHandler { get; set; }
 
         /// <summary>
         /// A callback invoked when a <see cref="SentryClient"/> is created.

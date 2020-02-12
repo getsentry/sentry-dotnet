@@ -47,7 +47,7 @@ namespace Sentry.Internal.Http
                 throw new ArgumentNullException(nameof(options));
             }
 
-            var httpClientHandler = new HttpClientHandler();
+            var httpClientHandler = options.CreateHttpClientHandler?.Invoke(dsn) ?? new HttpClientHandler();
             if (options.HttpProxy != null)
             {
                 httpClientHandler.Proxy = options.HttpProxy;

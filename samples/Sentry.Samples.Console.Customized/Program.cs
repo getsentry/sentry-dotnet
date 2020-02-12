@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Sentry;
@@ -91,11 +92,10 @@ internal static class Program
             o.HttpProxy = null; //new WebProxy("https://localhost:3128");
 
             // Example customizing the HttpClientHandlers created
-            o.ConfigureHandler = (handler, dsn) =>
+            o.CreateHttpClientHandler = dsn => new HttpClientHandler
             {
-                handler.ServerCertificateCustomValidationCallback =
-                    // A custom certificate validation
-                    (sender, certificate, chain, sslPolicyErrors) => !certificate.Archived;
+                ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+                    !certificate.Archived
             };
 
             // Access to the HttpClient created to serve the SentryClint

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net.Http;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -325,7 +326,9 @@ namespace Sentry.Tests
             var invoked = false;
             _fixture.BackgroundWorker = null;
             _fixture.SentryOptions.Dsn = DsnSamples.Valid;
+#pragma warning disable 618 // Tests will be removed once obsolete code gets removed
             _fixture.SentryOptions.ConfigureHandler = (handler, dsn) => invoked = true;
+#pragma warning restore 618
 
             using (_fixture.GetSut())
             {
@@ -334,7 +337,25 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Ctor_NullBackgrondWorker_ConcreteBackgroundWorker()
+        public void Ctor_CreateHttpClientHandler_InvokedConfigureHandler()
+        {
+            var invoked = false;
+            _fixture.BackgroundWorker = null;
+            _fixture.SentryOptions.Dsn = DsnSamples.Valid;
+            _fixture.SentryOptions.CreateHttpClientHandler = (dsn) =>
+            {
+                invoked = true;
+                return Substitute.For<HttpClientHandler>();
+            };
+
+            using (_fixture.GetSut())
+            {
+                Assert.True(invoked);
+            }
+        }
+
+        [Fact]
+        public void Ctor_NullBackgroundWorker_ConcreteBackgroundWorker()
         {
             _fixture.SentryOptions.Dsn = DsnSamples.Valid;
 
