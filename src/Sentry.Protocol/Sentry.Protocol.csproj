@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard1.3;net46;net45</TargetFrameworks>
+    <Description>The Sentry Protocol used to communicate with Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+</Project>

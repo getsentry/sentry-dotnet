@@ -122,6 +122,8 @@ Sentry.SentryOptions.BeforeBreadcrumb.get -> System.Func<Sentry.Protocol.Breadcr
 Sentry.SentryOptions.BeforeBreadcrumb.set -> void
 Sentry.SentryOptions.BeforeSend.get -> System.Func<Sentry.SentryEvent, Sentry.SentryEvent>
 Sentry.SentryOptions.BeforeSend.set -> void
+Sentry.SentryOptions.CreateHttpClientHandler.get -> System.Func<Sentry.Dsn, System.Net.Http.HttpClientHandler>
+Sentry.SentryOptions.CreateHttpClientHandler.set -> void
 Sentry.SentryOptions.ConfigureClient.get -> System.Action<System.Net.Http.HttpClient, Sentry.Dsn>
 Sentry.SentryOptions.ConfigureClient.set -> void
 Sentry.SentryOptions.ConfigureHandler.get -> System.Action<System.Net.Http.HttpClientHandler, Sentry.Dsn>
@@ -161,6 +163,8 @@ Sentry.SentryOptions.SampleRate.set -> void
 Sentry.SentryOptions.SendDefaultPii.get -> bool
 Sentry.SentryOptions.SendDefaultPii.set -> void
 Sentry.SentryOptions.SentryOptions() -> void
+Sentry.SentryOptions.ServerName.get -> string
+Sentry.SentryOptions.ServerName.set -> void
 Sentry.SentryOptions.ShutdownTimeout.get -> System.TimeSpan
 Sentry.SentryOptions.ShutdownTimeout.set -> void
 Sentry.SentryOptionsExtensions

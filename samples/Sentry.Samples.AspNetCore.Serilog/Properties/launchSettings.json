@@ -16,14 +16,13 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Sentry.Samples.AspNetCore.Basic": {
+    "Sentry.Samples.AspNetCore.Serilog": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "throw",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:59540/"
+      "applicationUrl": "http://localhost:5002"
     }
   }
 }

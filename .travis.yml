@@ -1,7 +1,7 @@
 language: csharp
 env:
   global:
-    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1 # Used by the dotnet SDK prior to v3.0
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 # Used by the dotnet SDK prior to v3.0
     - DOTNET_CLI_TELEMETRY_OPTOUT=1
 mono: 6.6.0
 branches:

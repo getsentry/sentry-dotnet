@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <Reference Include="System.Threading.Tasks" />
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=net45" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=netstandard1.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=netstandard2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Condition="'$(TargetFramework)' != 'net45'" Version="3.1.0" />
+  </ItemGroup>
+
+  <!--nca3.1 tests the ns2.0 version which has value tuples. nca2.1 tests ns1.3 which doesn't.-->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+</Project>

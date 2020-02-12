@@ -7,6 +7,7 @@
 
 Sentry SDK for .NET 
 ===========
+
 [![Travis](https://travis-ci.org/getsentry/sentry-dotnet.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
 [![Tests](https://img.shields.io/appveyor/tests/sentry/sentry-dotnet/master?compact_message)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master/tests)
@@ -22,6 +23,7 @@ Sentry SDK for .NET
 | **Sentry.Serilog**            | [![Downloads](https://img.shields.io/nuget/dt/Sentry.Serilog.svg)](https://www.nuget.org/packages/Serilog) | [![NuGet](https://img.shields.io/nuget/v/Sentry.Serilog.svg)](https://www.nuget.org/packages/Sentry.Serilog)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Serilog.svg)](https://www.nuget.org/packages/Sentry.Serilog)   |
 | **Sentry.Log4Net**            | [![Downloads](https://img.shields.io/nuget/dt/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net) | [![NuGet](https://img.shields.io/nuget/v/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 | **Sentry.NLog**               | [![Downloads](https://img.shields.io/nuget/dt/Sentry.NLog.svg)](https://www.nuget.org/packages/Sentry.NLog) | [![NuGet](https://img.shields.io/nuget/v/Sentry.NLog.svg)](https://www.nuget.org/packages/Sentry.NLog)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.NLog.svg)](https://www.nuget.org/packages/Sentry.NLog)   |
+|  **Sentry.Protocol**          | [![Downloads](https://img.shields.io/nuget/dt/Sentry.Protocol.svg)](https://www.nuget.org/packages/Sentry.Protocol) | [![NuGet](https://img.shields.io/nuget/v/Sentry.Protocol.svg)](https://www.nuget.org/packages/Sentry.Protocol)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Protocol.svg)](https://www.nuget.org/packages/Sentry.Protocol)   |
 
 
 ## Documentation
@@ -202,14 +204,14 @@ Of those, we've tested (we run our unit/integration tests) against:
 
 ### Sentry Protocol
 
-Looking for the types used by this SDK to send data to Sentry like *SentryEvent* and *SentryException*?
-They are released as a separate [NuGet Package called `Sentry.Protocol`](https://www.nuget.org/packages/Sentry.Protocol/) and [sources are on this GitHub repository](https://github.com/getsentry/sentry-dotnet-protocol).
+For more details, please: **refer to the [documentation](https://getsentry.github.io/sentry-dotnet-protocol/index.html)**
 
 ### Legacy frameworks
 
 Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 1.000.000 downloads on NuGet has support to .NET Framework 3.5+.
 
 ## Resources
+
 * [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-sentry-green.svg)](http://stackoverflow.com/questions/tagged/sentry)
 * [![Forum](https://img.shields.io/badge/forum-sentry-green.svg)](https://forum.sentry.io/c/sdks)
 * Follow [@getsentry](https://twitter.com/getsentry) on Twitter for updates

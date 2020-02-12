@@ -4,11 +4,17 @@ environment:
   global:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1" # Used by the dotnet SDK prior to v3.0
     DOTNET_CLI_TELEMETRY_OPTOUT: "1"
-test: off
+  ZEUS_HOOK_BASE:
+    secure: dcqtt6sxxBV0tDkXmPZOy0iOx17uW6ZfrPOivyLDzHaS9JeWUES653Lly9ZHQm7qZn1qbs4hL4BYaNSrhD5kraY9FXBkwtNmUC9eAxL/n8QtRFJu5uXrkSpewn+UAqbghVXAKCxOhD9WJYG72g+QcqmEBTZiO1RxRJhwsLBR5YY=
 branches:
   only:
     - master
     - /^release\/.*$/
+install:
+  # Push job information to Zeus
+  - npm install -g @zeus-ci/cli
+  - bash scripts\zeus.sh report_pending
+test: off
 build_script:
   - ps: ./build.ps1
 dotnet_csproj:
@@ -18,10 +24,6 @@ dotnet_csproj:
   package_version: "{version}"
 artifacts:
   - path: '**\*.nupkg'
-install:
-  # Push job information to Zeus
-  - npm install -g @zeus-ci/cli
-  - bash scripts\zeus.sh report_pending
 on_success:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
