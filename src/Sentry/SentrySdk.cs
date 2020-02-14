@@ -101,7 +101,7 @@ namespace Sentry
         /// <summary>
         /// Flushes events queued up.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerStepThrough]
         public static Task FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
 
         /// <summary>
