@@ -349,6 +349,14 @@ namespace Sentry
         /// </summary>
         public bool ReportAssemblies { get; set; } = true;
 
+        /// <summary>
+        /// What modes to use for event automatic deduplication
+        /// </summary>
+        /// <remarks>
+        /// By default will not drop an event solely for including an inner exception that was already captured.
+        /// </remarks>
+        public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
+
 #if SYSTEM_WEB
         /// <summary>
         /// Max request body to be captured when a Web request exists on a ASP.NET Application.
