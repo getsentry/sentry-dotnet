@@ -350,6 +350,11 @@ namespace Sentry
         public bool ReportAssemblies { get; set; } = true;
 
         /// <summary>
+        /// Whether the SDK should raise events if unoptimized assemblies are loaded.
+        /// </summary>
+        public bool NotifyUnoptimizedAssembly { get; set; }
+
+        /// <summary>
         /// What modes to use for event automatic deduplication
         /// </summary>
         /// <remarks>
@@ -411,7 +416,8 @@ namespace Sentry
             Integrations
                 = ImmutableList.Create<ISdkIntegration>(
                     new AppDomainUnhandledExceptionIntegration(),
-                    new AppDomainProcessExitIntegration());
+                    new AppDomainProcessExitIntegration(),
+                    new UnoptimizedAssemblyIntegration());
 
             InAppExclude
                 = ImmutableList.Create(

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using Sentry.Protocol;
 
@@ -28,6 +29,21 @@ namespace Sentry.Reflection
                       ?? asmName.Version.ToString();
 
             return new SdkVersion { Name = name, Version = version };
+        }
+
+        /// <summary>
+        /// Whether the assembly was compiled with the optimize+ flag
+        /// </summary>
+        /// <param name="asm">The assembly to verify the optimization flag</param>
+        /// <returns>
+        /// true if no <see cref="DebuggableAttribute"/> exists or
+        /// <see cref="DebuggableAttribute.IsJITOptimizerDisabled"/> is false,
+        /// otherwise, false.
+        /// </returns>
+        public static bool IsOptimized(this Assembly asm)
+        {
+            var att = asm.GetCustomAttribute<DebuggableAttribute>();
+            return att == null || att.IsJITOptimizerDisabled == false;
         }
     }
 }

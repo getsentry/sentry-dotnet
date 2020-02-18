@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Sentry;
 using Sentry.Extensibility;
@@ -46,6 +47,9 @@ internal static class Program
 
             // Before excluding all prefixed 'LibraryX.', any stack trace from a type namespaced 'LibraryX.Core' will be considered InApp.
             o.AddInAppInclude("LibraryX.Core");
+
+            // Send events whe unoptimized assemblies are detected
+            o.NotifyUnoptimizedAssembly = true;
 
             // Send personal identifiable information like the username logged on to the computer and machine name
             o.SendDefaultPii = true;
@@ -108,6 +112,10 @@ internal static class Program
             SentrySdk.AddBreadcrumb(
                 "A 'bad breadcrumb' that will be rejected because of 'BeforeBreadcrumb callback above.'");
 
+            // Because 'NotifyUnoptimizedAssembly' is enabled, calling this method will raise an event to alert
+            // that an Assembly that is compiled for Debug was loaded.
+            LoadUnoptimizedAssembly();
+
             // Data added to the root scope (no PushScope called up to this point)
             // The modifications done here will affect all events sent and will propagate to child scopes.
             await SentrySdk.ConfigureScopeAsync(async scope =>
@@ -146,7 +154,6 @@ internal static class Program
                 // This is useful, for example, when multiple loggers log the same exception. Or exception is re-thrown and recaptured.
                 SentrySdk.CaptureException(error);
             }
-
 
             var count = 10;
             for (var i = 0; i < count; i++)
@@ -194,6 +201,13 @@ internal static class Program
                 new Exception("Error outside of the admin section: Goes to the default DSN"));
 
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void LoadUnoptimizedAssembly()
+    {
+        // https://twitter.com/jeremydmiller/status/777571510919630848
+        Console.WriteLine(typeof(StructureMap.Container).Assembly.GetName().Version);
     }
 
     private class AdminPartMiddleware
