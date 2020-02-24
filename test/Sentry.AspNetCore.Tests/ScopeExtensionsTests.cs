@@ -55,8 +55,16 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void Populate_Request_Url_SetToScope()
         {
-            const string expected = "/request/path";
-            _httpContext.Request.Path.Returns(new PathString(expected));
+            const string expectedPath = "/request/path";
+            _httpContext.Request.Path.Returns(new PathString(expectedPath));
+
+            const string expectedHost = "host.com";
+            _httpContext.Request.Host.Returns(new HostString(expectedHost));
+
+            const string expectedScheme = "http";
+            _httpContext.Request.Scheme.Returns(expectedScheme);
+
+            const string expected = "http://host.com/request/path";
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -73,6 +81,25 @@ namespace Sentry.AspNetCore.Tests
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
             Assert.False(_sut.Tags.ContainsKey("RequestPath"));
+        }
+
+        [Fact]
+        public void Populate_Request_Url_IncludesPortWhenOnContext()
+        {
+            const string expectedPath = "/request/path";
+            _httpContext.Request.Path.Returns(new PathString(expectedPath));
+
+            const string expectedHost = "host.com:9000";
+            _httpContext.Request.Host.Returns(new HostString(expectedHost));
+
+            const string expectedScheme = "http";
+            _httpContext.Request.Scheme.Returns(expectedScheme);
+
+            const string expected = "http://host.com:9000/request/path";
+
+            _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+            Assert.Equal(expected, _sut.Request.Url);
         }
 
         [Fact]

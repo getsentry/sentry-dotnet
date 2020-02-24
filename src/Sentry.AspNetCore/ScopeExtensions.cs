@@ -65,7 +65,12 @@ namespace Sentry.AspNetCore
 
             // Logging integration, if enabled, sets the following tag which ends up as duplicate
             // to Request.Url. Prefer the interface value and remove tag.
-            scope.Request.Url = context.Request.Path;
+            var host = context.Request.Host.Host;
+            if (context.Request.Host.Port != null)
+            {
+                host += $":{context.Request.Host.Port}";
+            }
+            scope.Request.Url = $"{context.Request.Scheme}://{host}{context.Request.Path}";
             scope.UnsetTag("RequestPath");
 
             scope.Request.QueryString = context.Request.QueryString.ToString();
