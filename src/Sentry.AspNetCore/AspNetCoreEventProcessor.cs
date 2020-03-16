@@ -29,7 +29,13 @@ namespace Sentry.AspNetCore
             }
 
             // Not PII as this is running on a server
-            @event.ServerName = Environment.MachineName;
+            if (@event.ServerName == null)
+            {
+                // ServerName from the environment machine name is set by the Sentry base package.
+                // That is guarded by the SendDefaultPii since the SDK can be used in desktop apps.
+                // For ASP.NET Core apps, we always set the machine name if not explicitly set by the user.
+                @event.ServerName = Environment.MachineName;
+            }
 
             _options.ApplyDefaultTags(@event);
 
