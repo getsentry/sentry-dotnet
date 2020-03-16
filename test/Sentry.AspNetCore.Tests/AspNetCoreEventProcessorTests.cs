@@ -1,6 +1,8 @@
+using System;
 using Microsoft.Extensions.Options;
 using Sentry.Protocol;
 using Xunit;
+using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
 namespace Sentry.AspNetCore.Tests
 {
@@ -57,6 +59,27 @@ namespace Sentry.AspNetCore.Tests
             Assert.False(target.Contexts.ContainsKey("server-os"));
         }
 
+        [Fact]
+        public void Process_ServerName_NotOverwritten()
+        {
+            var target = new SentryEvent();
+            const string expectedServerName = "original";
+            target.ServerName = expectedServerName;
+
+            _sut.Process(target);
+
+            Assert.Equal(expectedServerName, target.ServerName);
+        }
+
+        [Fact]
+        public void Process_ServerName_SetToEnvironmentMachineName()
+        {
+            var target = new SentryEvent();
+
+            _sut.Process(target);
+
+            Assert.Equal(Environment.MachineName, target.ServerName);
+        }
 
         [Fact]
         public void Process_AppliesDefaultTags()
