@@ -17,6 +17,7 @@ namespace Serilog
         /// </summary>
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="dsn">The Sentry DSN.</param>
+        /// <param name="environment">The application environment.</param>
         /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb.</param>
         /// <param name="minimumEventLevel">Minimum log level to send an event.</param>
         /// <param name="formatProvider">The Serilog format provider.</param>
@@ -24,6 +25,7 @@ namespace Serilog
         public static LoggerConfiguration Sentry(
             this LoggerSinkConfiguration loggerConfiguration,
             string dsn = null,
+            string environment = null,
             LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
             LogEventLevel minimumEventLevel = LogEventLevel.Error,
             IFormatProvider formatProvider = null)
@@ -33,6 +35,7 @@ namespace Serilog
                     {
                         o.Dsn = new Dsn(dsn);
                     }
+                    o.Environment = environment;
                     o.MinimumBreadcrumbLevel = minimumBreadcrumbLevel;
                     o.MinimumEventLevel = minimumEventLevel;
                     o.FormatProvider = formatProvider;
