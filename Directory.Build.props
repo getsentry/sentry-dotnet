@@ -7,9 +7,15 @@
     <SignAssembly>true</SignAssembly>
     <Deterministic>True</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) And $(Godot) != '1'">
     <DefineConstants>SYSTEM_WEB;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) And $(Godot) == '1'">
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
    <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="2.9.2" PrivateAssets="All" />

@@ -9,13 +9,19 @@
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461' And $(Godot) == 1">
+    <PackageReference Include="Newtonsoft.Json" Version="6.0.8" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461' And $(Godot) != 1">
     <PackageReference Include="Newtonsoft.Json" Version="6.0.8" />
     <Reference Include="System.Web" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
