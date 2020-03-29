@@ -6,7 +6,6 @@ using Sentry.Protocol;
 using Sentry.Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
-using Constants = Sentry.Protocol.Constants;
 
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Serilog
@@ -111,69 +110,140 @@ namespace Serilog
         /// </example>
         public static LoggerConfiguration Sentry(
             this LoggerSinkConfiguration loggerConfiguration,
-            bool sendDefaultPii = false,
-            bool isEnvironmentUser = true,
+            bool? sendDefaultPii = null,
+            bool? isEnvironmentUser = null,
             string serverName = null,
-            bool attachStackTrace = false,
-            int maxBreadcrumbs = Constants.DefaultMaxBreadcrumbs,
+            bool? attachStackTrace = null,
+            int? maxBreadcrumbs = null,
             float? sampleRate = null,
             string release = null,
             string environment = null,
             string dsn = null,
-            int maxQueueItems = 30,
-            TimeSpan shutdownTimeout = default,
-            DecompressionMethods decompressionMethods = ~DecompressionMethods.None,
-            CompressionLevel requestBodyCompressionLevel = CompressionLevel.Optimal,
-            bool requestBodyCompressionBuffered = true,
-            bool debug = false,
-            SentryLevel diagnosticsLevel = SentryLevel.Debug,
-            bool reportAssemblies = true,
-            DeduplicateMode deduplicateMode = DeduplicateMode.All ^ DeduplicateMode.InnerException,
-            bool initializeSdk = true,
-            LogEventLevel minimumEventLevel = LogEventLevel.Error,
-            LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
+            int? maxQueueItems = null,
+            TimeSpan? shutdownTimeout = null,
+            DecompressionMethods? decompressionMethods = null,
+            CompressionLevel? requestBodyCompressionLevel = null,
+            bool? requestBodyCompressionBuffered = null,
+            bool? debug = null,
+            SentryLevel? diagnosticsLevel = null,
+            bool? reportAssemblies = null,
+            DeduplicateMode? deduplicateMode = null,
+            bool? initializeSdk = null,
+            LogEventLevel? minimumEventLevel = null,
+            LogEventLevel? minimumBreadcrumbLevel = null,
             IFormatProvider formatProvider = null)
             => loggerConfiguration.Sentry(o =>
             {
-                o.SendDefaultPii = sendDefaultPii;
-                o.IsEnvironmentUser = isEnvironmentUser;
-                o.ServerName = serverName;
-                o.AttachStacktrace = attachStackTrace;
-                o.MaxBreadcrumbs = maxBreadcrumbs;
+                if (sendDefaultPii.HasValue)
+                {
+                    o.SendDefaultPii = sendDefaultPii.Value;
+                }
 
-                if (sampleRate != null)
+                if (isEnvironmentUser.HasValue)
+                {
+                    o.IsEnvironmentUser = isEnvironmentUser.Value;
+                }
+
+                if (!string.IsNullOrWhiteSpace(serverName))
+                {
+                    o.ServerName = serverName;
+                }
+
+                if (attachStackTrace.HasValue)
+                {
+                    o.AttachStacktrace = attachStackTrace.Value;
+                }
+
+                if (maxBreadcrumbs.HasValue)
+                {
+                    o.MaxBreadcrumbs = maxBreadcrumbs.Value;
+                }
+
+                if (sampleRate != null) // .HasValue instead?
                 {
                     o.SampleRate = sampleRate;
                 }
 
-                o.Release = release;
-                o.Environment = environment;
+                if (!string.IsNullOrWhiteSpace(release))
+                {
+                    o.Release = release;
+                }
 
-                if (dsn != null)
+                if (!string.IsNullOrWhiteSpace(environment))
+                {
+                    o.Environment = environment;
+                }
+
+                if (!string.IsNullOrWhiteSpace(dsn))
                 {
                     o.Dsn = new Dsn(dsn);
                 }
 
-                o.MaxQueueItems = maxQueueItems;
-
-                if (shutdownTimeout != default)
+                if (maxQueueItems.HasValue)
                 {
-                    o.ShutdownTimeout = shutdownTimeout;
+                    o.MaxQueueItems = maxQueueItems.Value;
                 }
 
-                o.DecompressionMethods = decompressionMethods;
-                o.RequestBodyCompressionLevel = requestBodyCompressionLevel;
-                o.RequestBodyCompressionBuffered = requestBodyCompressionBuffered;
-                o.Debug = debug;
-                o.DiagnosticsLevel = diagnosticsLevel;
-                o.ReportAssemblies = reportAssemblies;
-                o.DeduplicateMode = deduplicateMode;
+                if (shutdownTimeout.HasValue)
+                {
+                    o.ShutdownTimeout = shutdownTimeout.Value;
+                }
+
+                if (decompressionMethods.HasValue)
+                {
+                    o.DecompressionMethods = decompressionMethods.Value;
+                }
+
+                if (requestBodyCompressionLevel.HasValue)
+                {
+                    o.RequestBodyCompressionLevel = requestBodyCompressionLevel.Value;
+                }
+
+                if (requestBodyCompressionBuffered.HasValue)
+                {
+                    o.RequestBodyCompressionBuffered = requestBodyCompressionBuffered.Value;
+                }
+
+                if (debug.HasValue)
+                {
+                    o.Debug = debug.Value;
+                }
+
+                if (diagnosticsLevel.HasValue)
+                {
+                    o.DiagnosticsLevel = diagnosticsLevel.Value;
+                }
+
+                if(reportAssemblies.HasValue)
+                {
+                    o.ReportAssemblies = reportAssemblies.Value;
+                }
+
+                if (deduplicateMode.HasValue)
+                {
+                    o.DeduplicateMode = deduplicateMode.Value;
+                }
 
                 // Serilog-specific items
-                o.InitializeSdk = initializeSdk;
-                o.MinimumEventLevel = minimumEventLevel;
-                o.MinimumBreadcrumbLevel = minimumBreadcrumbLevel;
-                o.FormatProvider = formatProvider;
+                if (initializeSdk.HasValue)
+                {
+                    o.InitializeSdk = initializeSdk.Value;
+                }
+
+                if (minimumEventLevel.HasValue)
+                {
+                    o.MinimumEventLevel = minimumEventLevel.Value;
+                }
+
+                if (minimumBreadcrumbLevel.HasValue)
+                {
+                    o.MinimumBreadcrumbLevel = minimumBreadcrumbLevel.Value;
+                }
+
+                if (formatProvider != null)
+                {
+                    o.FormatProvider = formatProvider;
+                }
             });
 
         /// <summary>
