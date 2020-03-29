@@ -81,9 +81,9 @@ namespace Serilog
         ///                 "Args": {
         ///                     "sendDefaultPii": false,
         ///                     "isEnvironmentUser": false,
-        ///                     "serverName": "MyServerName"
+        ///                     "serverName": "MyServerName",
         ///                     "attachStackTrace": false,
-        ///                     "maxBreadcrumbs": 20
+        ///                     "maxBreadcrumbs": 20,
         ///                     "sampleRate": 0.5,
         ///                     "release": "0.0.1",
         ///                     "environment": "staging",
@@ -95,7 +95,7 @@ namespace Serilog
         ///                     "requestBodyCompressionBuffered": false,
         ///                     "debug": false,
         ///                     "diagnosticsLevel": "Debug",
-        ///                     "reportAssemblies": false
+        ///                     "reportAssemblies": false,
         ///                     "deduplicateMode": "All",
         ///                     "initializeSdk": true,
         ///                     "minimumBreadcrumbLevel": "Verbose",
