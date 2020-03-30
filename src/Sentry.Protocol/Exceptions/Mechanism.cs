@@ -16,6 +16,12 @@ namespace Sentry.Protocol
     [DataContract]
     public class Mechanism
     {
+        /// <summary>
+        /// Keys found inside of the Exception Dictionary to inform if the exception was handled and which mechanism tracked it
+        /// </summary>
+        public static readonly string HandledKey = "Sentry:Handled";
+        public static readonly string MechanismKey = "Sentry:Mechanism";
+
         [DataMember(Name = "data", EmitDefaultValue = false)]
         internal Dictionary<string, object> InternalData { get; private set; }
 

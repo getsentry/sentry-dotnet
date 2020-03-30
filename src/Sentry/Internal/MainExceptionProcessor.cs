@@ -110,24 +110,21 @@ namespace Sentry.Internal
         {
             Debug.Assert(exception != null);
 
-            Mechanism mechanism = new Mechanism()
-            {
-                Handled = true
-            };
+            var mechanism = new Mechanism();
 
             if (exception.HelpLink != null)
             {
                 mechanism.HelpLink = exception.HelpLink;
             }
-            if (exception.Data?.Contains("Sentry:Handled") == true)
+            if (exception.Data[Mechanism.HandledKey] is bool handled)
             {
-                mechanism.Handled = (exception.Data["Sentry:Handled"] as bool?).Value;
-                exception.Data.Remove("Sentry:Handled");
+                mechanism.Handled = handled;
+                exception.Data.Remove(Mechanism.HandledKey);
             }
-            if (exception.Data?.Contains("Sentry:Mechanism") == true)
+            if (exception.Data[Mechanism.MechanismKey] is string mechanismName )
             {
-                mechanism.Type = exception.Data["Sentry:Mechanism"] as string;
-                exception.Data.Remove("Sentry:Mechanism");
+                mechanism.Type = mechanismName;
+                exception.Data.Remove(Mechanism.MechanismKey);
             }
 
             return mechanism;
