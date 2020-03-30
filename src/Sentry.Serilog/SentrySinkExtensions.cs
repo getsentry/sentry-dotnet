@@ -132,119 +132,168 @@ namespace Serilog
             LogEventLevel? minimumEventLevel = null,
             LogEventLevel? minimumBreadcrumbLevel = null,
             IFormatProvider formatProvider = null)
-            => loggerConfiguration.Sentry(o =>
+        {
+            return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
+                sendDefaultPii,
+                isEnvironmentUser,
+                serverName,
+                attachStackTrace,
+                maxBreadcrumbs,
+                sampleRate,
+                release,
+                environment,
+                dsn,
+                maxQueueItems,
+                shutdownTimeout,
+                decompressionMethods,
+                requestBodyCompressionLevel,
+                requestBodyCompressionBuffered,
+                debug,
+                diagnosticsLevel,
+                reportAssemblies,
+                deduplicateMode,
+                initializeSdk,
+                minimumEventLevel,
+                minimumBreadcrumbLevel,
+                formatProvider));
+        }
+
+        public static void ConfigureSentrySerilogOptions(
+            SentrySerilogOptions sentrySerilogOptions,
+            bool? sendDefaultPii = null,
+            bool? isEnvironmentUser = null,
+            string serverName = null,
+            bool? attachStackTrace = null,
+            int? maxBreadcrumbs = null,
+            float? sampleRate = null,
+            string release = null,
+            string environment = null,
+            string dsn = null,
+            int? maxQueueItems = null,
+            TimeSpan? shutdownTimeout = null,
+            DecompressionMethods? decompressionMethods = null,
+            CompressionLevel? requestBodyCompressionLevel = null,
+            bool? requestBodyCompressionBuffered = null,
+            bool? debug = null,
+            SentryLevel? diagnosticsLevel = null,
+            bool? reportAssemblies = null,
+            DeduplicateMode? deduplicateMode = null,
+            bool? initializeSdk = null,
+            LogEventLevel? minimumEventLevel = null,
+            LogEventLevel? minimumBreadcrumbLevel = null,
+            IFormatProvider formatProvider = null)
+        {
+            if (sendDefaultPii.HasValue)
             {
-                if (sendDefaultPii.HasValue)
-                {
-                    o.SendDefaultPii = sendDefaultPii.Value;
-                }
+                sentrySerilogOptions.SendDefaultPii = sendDefaultPii.Value;
+            }
 
-                if (isEnvironmentUser.HasValue)
-                {
-                    o.IsEnvironmentUser = isEnvironmentUser.Value;
-                }
+            if (isEnvironmentUser.HasValue)
+            {
+                sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser.Value;
+            }
 
-                if (!string.IsNullOrWhiteSpace(serverName))
-                {
-                    o.ServerName = serverName;
-                }
+            if (!string.IsNullOrWhiteSpace(serverName))
+            {
+                sentrySerilogOptions.ServerName = serverName;
+            }
 
-                if (attachStackTrace.HasValue)
-                {
-                    o.AttachStacktrace = attachStackTrace.Value;
-                }
+            if (attachStackTrace.HasValue)
+            {
+                sentrySerilogOptions.AttachStacktrace = attachStackTrace.Value;
+            }
 
-                if (maxBreadcrumbs.HasValue)
-                {
-                    o.MaxBreadcrumbs = maxBreadcrumbs.Value;
-                }
+            if (maxBreadcrumbs.HasValue)
+            {
+                sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs.Value;
+            }
 
-                if (sampleRate != null) // .HasValue instead?
-                {
-                    o.SampleRate = sampleRate;
-                }
+            if (sampleRate != null) // .HasValue instead?
+            {
+                sentrySerilogOptions.SampleRate = sampleRate;
+            }
 
-                if (!string.IsNullOrWhiteSpace(release))
-                {
-                    o.Release = release;
-                }
+            if (!string.IsNullOrWhiteSpace(release))
+            {
+                sentrySerilogOptions.Release = release;
+            }
 
-                if (!string.IsNullOrWhiteSpace(environment))
-                {
-                    o.Environment = environment;
-                }
+            if (!string.IsNullOrWhiteSpace(environment))
+            {
+                sentrySerilogOptions.Environment = environment;
+            }
 
-                if (!string.IsNullOrWhiteSpace(dsn))
-                {
-                    o.Dsn = new Dsn(dsn);
-                }
+            if (!string.IsNullOrWhiteSpace(dsn))
+            {
+                sentrySerilogOptions.Dsn = new Dsn(dsn);
+            }
 
-                if (maxQueueItems.HasValue)
-                {
-                    o.MaxQueueItems = maxQueueItems.Value;
-                }
+            if (maxQueueItems.HasValue)
+            {
+                sentrySerilogOptions.MaxQueueItems = maxQueueItems.Value;
+            }
 
-                if (shutdownTimeout.HasValue)
-                {
-                    o.ShutdownTimeout = shutdownTimeout.Value;
-                }
+            if (shutdownTimeout.HasValue)
+            {
+                sentrySerilogOptions.ShutdownTimeout = shutdownTimeout.Value;
+            }
 
-                if (decompressionMethods.HasValue)
-                {
-                    o.DecompressionMethods = decompressionMethods.Value;
-                }
+            if (decompressionMethods.HasValue)
+            {
+                sentrySerilogOptions.DecompressionMethods = decompressionMethods.Value;
+            }
 
-                if (requestBodyCompressionLevel.HasValue)
-                {
-                    o.RequestBodyCompressionLevel = requestBodyCompressionLevel.Value;
-                }
+            if (requestBodyCompressionLevel.HasValue)
+            {
+                sentrySerilogOptions.RequestBodyCompressionLevel = requestBodyCompressionLevel.Value;
+            }
 
-                if (requestBodyCompressionBuffered.HasValue)
-                {
-                    o.RequestBodyCompressionBuffered = requestBodyCompressionBuffered.Value;
-                }
+            if (requestBodyCompressionBuffered.HasValue)
+            {
+                sentrySerilogOptions.RequestBodyCompressionBuffered = requestBodyCompressionBuffered.Value;
+            }
 
-                if (debug.HasValue)
-                {
-                    o.Debug = debug.Value;
-                }
+            if (debug.HasValue)
+            {
+                sentrySerilogOptions.Debug = debug.Value;
+            }
 
-                if (diagnosticsLevel.HasValue)
-                {
-                    o.DiagnosticsLevel = diagnosticsLevel.Value;
-                }
+            if (diagnosticsLevel.HasValue)
+            {
+                sentrySerilogOptions.DiagnosticsLevel = diagnosticsLevel.Value;
+            }
 
-                if(reportAssemblies.HasValue)
-                {
-                    o.ReportAssemblies = reportAssemblies.Value;
-                }
+            if (reportAssemblies.HasValue)
+            {
+                sentrySerilogOptions.ReportAssemblies = reportAssemblies.Value;
+            }
 
-                if (deduplicateMode.HasValue)
-                {
-                    o.DeduplicateMode = deduplicateMode.Value;
-                }
+            if (deduplicateMode.HasValue)
+            {
+                sentrySerilogOptions.DeduplicateMode = deduplicateMode.Value;
+            }
 
-                // Serilog-specific items
-                if (initializeSdk.HasValue)
-                {
-                    o.InitializeSdk = initializeSdk.Value;
-                }
+            // Serilog-specific items
+            if (initializeSdk.HasValue)
+            {
+                sentrySerilogOptions.InitializeSdk = initializeSdk.Value;
+            }
 
-                if (minimumEventLevel.HasValue)
-                {
-                    o.MinimumEventLevel = minimumEventLevel.Value;
-                }
+            if (minimumEventLevel.HasValue)
+            {
+                sentrySerilogOptions.MinimumEventLevel = minimumEventLevel.Value;
+            }
 
-                if (minimumBreadcrumbLevel.HasValue)
-                {
-                    o.MinimumBreadcrumbLevel = minimumBreadcrumbLevel.Value;
-                }
+            if (minimumBreadcrumbLevel.HasValue)
+            {
+                sentrySerilogOptions.MinimumBreadcrumbLevel = minimumBreadcrumbLevel.Value;
+            }
 
-                if (formatProvider != null)
-                {
-                    o.FormatProvider = formatProvider;
-                }
-            });
+            if (formatProvider != null)
+            {
+                sentrySerilogOptions.FormatProvider = formatProvider;
+            }
+        }
 
         /// <summary>
         /// Add Sentry sink to Serilog.
