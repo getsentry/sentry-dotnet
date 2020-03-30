@@ -20,6 +20,10 @@ namespace Sentry.Protocol
         /// Keys found inside of the Exception Dictionary to inform if the exception was handled and which mechanism tracked it
         /// </summary>
         public static readonly string HandledKey = "Sentry:Handled";
+
+        /// <summary>
+        /// Key found inside of the Exception.Data to inform if the exception which mechanism tracked it
+        /// </summary>
         public static readonly string MechanismKey = "Sentry:Mechanism";
 
         [DataMember(Name = "data", EmitDefaultValue = false)]

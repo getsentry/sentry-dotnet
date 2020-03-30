@@ -121,7 +121,7 @@ namespace Sentry.Internal
                 mechanism.Handled = handled;
                 exception.Data.Remove(Mechanism.HandledKey);
             }
-            if (exception.Data[Mechanism.MechanismKey] is string mechanismName )
+            if (exception.Data[Mechanism.MechanismKey] is string mechanismName)
             {
                 mechanism.Type = mechanismName;
                 exception.Data.Remove(Mechanism.MechanismKey);
