@@ -33,6 +33,8 @@ namespace Sentry.Integrations
         {
             if (e.ExceptionObject is Exception ex)
             {
+                ex.Data["Sentry:Handled"] =  false;
+                ex.Data["Sentry:Mechanism"] = "AppDomain.UnhandledException";
                 _hub?.CaptureException(ex);
             }
 
