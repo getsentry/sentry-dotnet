@@ -67,7 +67,6 @@ namespace Sentry.Tests
 
             var exception = new Exception();
             sut.Handle(this, new UnhandledExceptionEventArgs(exception, true));
-            Assert.True(exception.Data?.Contains("Sentry:Handled"));
             Assert.Equal(exception.Data["Sentry:Handled"] as bool?, (bool?)false);
             Assert.True(exception.Data?.Contains("Sentry:Mechanism"));
 
