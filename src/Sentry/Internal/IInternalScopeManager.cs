@@ -4,6 +4,6 @@ namespace Sentry.Internal
 {
     internal interface IInternalScopeManager : ISentryScopeManager
     {
-        Tuple<Scope, ISentryClient> GetCurrent();
+        ValueTuple<Scope, ISentryClient> GetCurrent();
     }
 }
