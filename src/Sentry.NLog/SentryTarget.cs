@@ -316,14 +316,14 @@ namespace Sentry.NLog
             }
 
             var exception = logEvent.Exception;
-            var formatted = RenderLogEvent(Layout, logEvent);
-            var template = logEvent.Message;
-
             var shouldOnlyLogExceptions = exception == null && IgnoreEventsWithNoException;
             var shouldIncludeProperties = ContextProperties?.Count > 0 || ShouldIncludeProperties(logEvent);
 
             if (logEvent.Level >= Options.MinimumEventLevel && !shouldOnlyLogExceptions)
             {
+                var formatted = RenderLogEvent(Layout, logEvent);
+                var template = logEvent.Message;
+
                 var evt = new SentryEvent(exception)
                 {
                     Sdk =
@@ -346,7 +346,7 @@ namespace Sentry.NLog
 
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
 
-                if (Tags.Count > 0 || IncludeEventPropertiesAsTags)
+                if (Tags.Count > 0 || (IncludeEventPropertiesAsTags && logEvent.HasProperties))
                 {
                     evt.SetTags(GetTagsFromLogEvent(logEvent));
                 }
