@@ -25,6 +25,7 @@ namespace Sentry.Samples.AspNetCore3.Mvc.Controllers
         public IActionResult Privacy()
         {
             // Raises an event only when looking for the view (after returning).
+            // ReSharper disable once Mvc.ViewNotResolved
             return View("DoesNotExist");
         }
 

@@ -9,7 +9,9 @@ using Sentry.Internal;
 
 namespace Sentry
 {
-    ///
+    /// <summary>
+    /// SentryOptions extensions.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryOptionsExtensions
     {

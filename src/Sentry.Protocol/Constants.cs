@@ -1,6 +1,8 @@
 namespace Sentry.Protocol
 {
-    ///
+    /// <summary>
+    /// Constant values.
+    /// </summary>
     public static class Constants
     {
         /// <summary>

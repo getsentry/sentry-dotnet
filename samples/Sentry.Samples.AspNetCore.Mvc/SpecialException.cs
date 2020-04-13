@@ -9,5 +9,13 @@ namespace Samples.AspNetCore.Mvc
         public SpecialException(string message)
             : base(message)
         { }
+
+        public SpecialException() : base()
+        {
+        }
+
+        public SpecialException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

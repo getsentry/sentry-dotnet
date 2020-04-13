@@ -4,7 +4,7 @@ using Serilog;
 using Serilog.Context;
 using Serilog.Events;
 
-internal class Program
+internal static class Program
 {
     private static void Main()
     {
