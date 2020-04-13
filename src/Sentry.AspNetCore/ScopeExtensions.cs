@@ -10,7 +10,9 @@ using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {
-    ///
+    /// <summary>
+    /// Scope Extensions
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ScopeExtensions
     {

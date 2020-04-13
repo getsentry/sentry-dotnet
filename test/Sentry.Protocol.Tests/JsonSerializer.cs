@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Sentry.Protocol.Tests
 {
-    internal class JsonSerializer
+    internal static class JsonSerializer
     {
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings

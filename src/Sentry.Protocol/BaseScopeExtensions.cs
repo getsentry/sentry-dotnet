@@ -8,7 +8,9 @@ using Sentry.Protocol;
 // ReSharper disable once CheckNamespace
 namespace Sentry
 {
-    ///
+    /// <summary>
+    /// Base Scope Extensions.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class BaseScopeExtensions
     {

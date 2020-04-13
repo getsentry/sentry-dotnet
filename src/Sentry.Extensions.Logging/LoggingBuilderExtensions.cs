@@ -10,7 +10,9 @@ using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 // Ensures 'AddSentry' can be found without: 'using Sentry;'
 namespace Microsoft.Extensions.Logging
 {
-    ///
+    /// <summary>
+    /// LoggingBuilder extensions.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class LoggingBuilderExtensions
     {

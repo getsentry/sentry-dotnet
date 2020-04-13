@@ -4,7 +4,7 @@ using System.Reflection.Emit;
 
 namespace Sentry.Tests.Helpers.Reflection
 {
-    internal class AssemblyCreationHelper
+    internal static class AssemblyCreationHelper
     {
         public static Assembly CreateAssemblyWithDsnAttribute(string dsn)
         {
