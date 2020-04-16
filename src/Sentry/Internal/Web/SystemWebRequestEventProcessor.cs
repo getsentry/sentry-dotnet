@@ -30,7 +30,18 @@ namespace Sentry.Internal.Web
 
             @event.Request.Method = context.Request.HttpMethod;
             @event.Request.Url = context.Request.Path;
-            @event.Request.QueryString = context.Request.QueryString.ToString();
+
+            try
+            {
+                // ReSharper disable once ConstantConditionalAccessQualifier
+                @event.Request.QueryString = context.Request.QueryString?.ToString();
+            }
+            catch (NullReferenceException)
+            {
+                // Ignored since it can throw on WCF on the first event.
+                // See #390
+                _options.DiagnosticLogger?.LogDebug("Ignored NRE thrown on System.Web.HttpContext.Request.QueryString");
+            }
 
             foreach (var key in context.Request.Headers.AllKeys)
             {
@@ -85,7 +96,7 @@ namespace Sentry.Internal.Web
             {
                 @event.Contexts["server-os"] = os;
             }
-            
+
             var body = PayloadExtractor.ExtractPayload(new SystemWebHttpRequest(context.Request));
             if (body != null)
             {
