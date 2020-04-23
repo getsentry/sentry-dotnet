@@ -63,6 +63,12 @@ namespace Sentry.NLog
         public Layout BreadcrumbLayout { get; set; }
 
         /// <summary>
+        /// Custom layout for breadcrumbs category
+        /// </summary>
+        [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
+        public Layout BreadcrumbCategoryLayout { get; set; }
+
+        /// <summary>
         /// Configured layout for rendering SentryEvent message
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.

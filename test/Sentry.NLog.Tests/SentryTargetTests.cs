@@ -432,6 +432,24 @@ namespace Sentry.NLog.Tests
         }
 
         [Fact]
+        public void Log_WithCustomBreadcrumbCategory_RendersCorrectly()
+        {
+            _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Trace;
+
+            var factory = _fixture.GetLoggerFactory();
+            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
+            sentryTarget.BreadcrumbCategory = "${level}";
+            var logger = factory.GetLogger("sentry");
+
+            const string message = "This is a breadcrumb";
+            var evt = LogEventInfo.Create(LogLevel.Debug, logger.Name, message);
+            logger.Log(evt);
+
+            var b = _fixture.Scope.Breadcrumbs.First();
+            Assert.Equal("Debug", b.Category);
+        }
+
+        [Fact]
         public async Task LogManager_WhenFlushCalled_CallsSentryFlushAsync()
         {
             const int NLogTimeout = 2;
@@ -710,7 +728,6 @@ namespace Sentry.NLog.Tests
             _fixture.Hub.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["Logger"] == "sentry"));
         }
-
 
         [Fact]
         public void GetTagsFromLogEvent_PropertiesMapped()
