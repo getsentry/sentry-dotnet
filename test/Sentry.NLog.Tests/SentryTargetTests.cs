@@ -207,7 +207,7 @@ namespace Sentry.NLog.Tests
 
             Assert.Equal(b.Message, $"{expectedException.GetType()}: {expectedException.Message}");
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
-            Assert.Null(b.Category);
+            Assert.Equal(b.Category, logger.Name);
             Assert.Equal(b.Level, expectedLevel);
             Assert.Null(b.Type);
             Assert.NotNull(b.Data);
