@@ -207,7 +207,7 @@ namespace Sentry.NLog.Tests
 
             Assert.Equal(b.Message, $"{expectedException.GetType()}: {expectedException.Message}");
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
-            Assert.Null(b.Category);
+            Assert.Equal(b.Category, logger.Name);
             Assert.Equal(b.Level, expectedLevel);
             Assert.Null(b.Type);
             Assert.NotNull(b.Data);
@@ -429,6 +429,24 @@ namespace Sentry.NLog.Tests
             var b = _fixture.Scope.Breadcrumbs.First();
             Assert.Equal($"{logger.Name}: {message}", b.Message);
             Assert.Equal("b", b.Data["a"]);
+        }
+
+        [Fact]
+        public void Log_WithCustomBreadcrumbCategory_RendersCorrectly()
+        {
+            _fixture.Options.MinimumBreadcrumbLevel = LogLevel.Trace;
+
+            var factory = _fixture.GetLoggerFactory();
+            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
+            sentryTarget.BreadcrumbCategory = "${level}";
+            var logger = factory.GetLogger("sentry");
+
+            const string message = "This is a breadcrumb";
+            var evt = LogEventInfo.Create(LogLevel.Debug, logger.Name, message);
+            logger.Log(evt);
+
+            var b = _fixture.Scope.Breadcrumbs.First();
+            Assert.Equal("Debug", b.Category);
         }
 
         [Fact]
@@ -710,7 +728,6 @@ namespace Sentry.NLog.Tests
             _fixture.Hub.Received(1)
                 .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["Logger"] == "sentry"));
         }
-
 
         [Fact]
         public void GetTagsFromLogEvent_PropertiesMapped()

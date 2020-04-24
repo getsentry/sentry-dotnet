@@ -61,14 +61,15 @@ namespace Sentry.NLog
             Debug.Assert(hubAccessor != null);
             Debug.Assert(clock != null);
 
-            // Overrides default layout. Still will be explicitly overwritten if manually configured in the
-            // NLog.config file.
-            Layout = "${message}";
-            IncludeEventProperties = true;
-
             Options = options;
             _hubAccessor = hubAccessor;
             _clock = clock;
+
+            // Overrides default layout. Still will be explicitly overwritten if manually configured in the
+            // NLog.config file.
+            Layout = "${message}";
+            BreadcrumbCategory = Options.BreadcrumbCategoryLayout ?? "${logger}";
+            IncludeEventProperties = true;
 
             if (sdkInstance != null)
             {
@@ -122,6 +123,15 @@ namespace Sentry.NLog
         {
             get => Options.BreadcrumbLayout ?? Layout;
             set => Options.BreadcrumbLayout = value;
+        }
+
+        /// <summary>
+        /// Configured layout for application Environment to Sentry
+        /// </summary>
+        public Layout BreadcrumbCategory
+        {
+            get => Options.BreadcrumbCategoryLayout;
+            set => Options.BreadcrumbCategoryLayout = value;
         }
 
         /// <summary>
@@ -377,6 +387,11 @@ namespace Sentry.NLog
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
                 var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
+                var breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
+                if (string.IsNullOrEmpty(breadcrumbCategory))
+                {
+                    breadcrumbCategory = null;
+                }
 
                 var message = string.IsNullOrWhiteSpace(breadcrumbFormatted)
                     ? (exception?.Message ?? logEvent.FormattedMessage)
@@ -410,6 +425,7 @@ namespace Sentry.NLog
                 hub.AddBreadcrumb(
                     _clock,
                     message,
+                    category: breadcrumbCategory,
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
