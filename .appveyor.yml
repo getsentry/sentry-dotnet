@@ -12,8 +12,8 @@ branches:
     - /^release\/.*$/
 install:
   # Push job information to Zeus
-  # - npm install -g @zeus-ci/cli
-  # - bash scripts\zeus.sh report_pending
+  - npm install -g @zeus-ci/cli
+  - bash scripts\zeus.sh report_pending
 test: off
 build_script:
   - ps: ./build.ps1
@@ -31,6 +31,6 @@ on_success:
       bash codecov.sh -f "**\coverage.xml"
 
       # Upload *.nupkg files to Zeus
-      # bash scripts/zeus.sh upload_artifacts
-# on_failure:
-#   - bash scripts\zeus.sh report_failed
+      bash scripts/zeus.sh upload_artifacts
+on_failure:
+  - bash scripts\zeus.sh report_failed
