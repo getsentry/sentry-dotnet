@@ -23,21 +23,25 @@ namespace Sentry.Internal.Web
         public SentryEvent Process(SentryEvent @event)
         {
             var context = HttpContext.Current;
-            if (context == null || @event == null)
+            if (context is null || @event is null)
             {
                 return @event;
             }
 
             try
             {
-                @event.Request.Method = context.Request.HttpMethod;
-                @event.Request.Url = context.Request.Path;
+                // During Application initialization we might have an event to send but no HTTP Request.
+                // Request getter throws and doesn't seem there's a way to query for it.
+                _ = context.Request;
             }
             catch (HttpException)
             {
-                // During Application initialisation we might have an event to send but no HTTP Request.
+                _options.DiagnosticLogger?.LogDebug("HttpException not available to retrieve context.");
                 return @event;
             }
+
+            @event.Request.Method = context.Request.HttpMethod;
+            @event.Request.Url = context.Request.Path;
 
             try
             {
