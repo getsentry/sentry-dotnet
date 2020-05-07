@@ -28,8 +28,16 @@ namespace Sentry.Internal.Web
                 return @event;
             }
 
-            @event.Request.Method = context.Request.HttpMethod;
-            @event.Request.Url = context.Request.Path;
+            try
+            {
+                @event.Request.Method = context.Request.HttpMethod;
+                @event.Request.Url = context.Request.Path;
+            }
+            catch (HttpException)
+            {
+                // During Application initialisation we might have an event to send but no HTTP Request.
+                return @event;
+            }
 
             try
             {
