@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Sentry.Extensibility;
@@ -51,9 +52,33 @@ namespace Sentry.AspNetCore
             }
             SetEnv(scope, context, options);
 
-            // TODO: From MVC route template, ideally
-            // TODO: optionally get transaction from request through a dependency
-            //scope.Transation = context.Request.Path;
+            // Extract the route data
+            try
+            {
+                var routeData = context.GetRouteData();
+                if (routeData != null)
+                {
+                    var controller = routeData.Values["controller"]?.ToString();
+                    var action = routeData.Values["action"]?.ToString();
+                    var area = routeData.Values["area"]?.ToString();
+
+                    scope.SetTag("route.controller", controller);
+                    scope.SetTag("route.action", action);
+                    if (area != null)
+                    {
+                        scope.SetTag("route.area", area);
+                    }
+
+                    scope.Transaction = area == null ? $"{controller}.{action}" : $"{area}.{controller}.{action}";
+                }
+            }
+            catch
+            {
+                // Suppress the error here; we expect an ArgumentNullException if there is no router in the pipeline since the RouteData might not ever be set in that case
+                // TODO: Consider using custom methods to get the route data to avoid throwing and catching an exception here based on
+                //       https://github.com/dotnet/aspnetcore/blob/0d77594d17b631f577f8eddcf27bbc3704101080/src/Http/Routing.Abstractions/src/RoutingHttpContextExtensions.cs
+                //       Alternatively add a bool to the Sentry options to make this section optional
+            }
 
             // TODO: Get context stuff into scope
             //context.Session
