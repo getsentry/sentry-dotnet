@@ -74,10 +74,9 @@ namespace Sentry.AspNetCore
             }
             catch
             {
-                // Suppress the error here; we expect an ArgumentNullException if there is no router in the pipeline since the RouteData might not ever be set in that case
-                // TODO: Consider using custom methods to get the route data to avoid throwing and catching an exception here based on
-                //       https://github.com/dotnet/aspnetcore/blob/0d77594d17b631f577f8eddcf27bbc3704101080/src/Http/Routing.Abstractions/src/RoutingHttpContextExtensions.cs
-                //       Alternatively add a bool to the Sentry options to make this section optional
+                // Suppress the error here; we expect an ArgumentNullException if httpContext.Request.RouteValues is null from GetRouteData()
+                // TODO: Consider adding a bool to the Sentry options to make routedata extraction optional in case they don't use a routing middleware?
+                options?.DiagnosticLogger?.LogDebug("Failed to extract route data.", e);
             }
 
             // TODO: Get context stuff into scope
