@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Sentry.Extensibility;
@@ -51,9 +52,32 @@ namespace Sentry.AspNetCore
             }
             SetEnv(scope, context, options);
 
-            // TODO: From MVC route template, ideally
-            // TODO: optionally get transaction from request through a dependency
-            //scope.Transation = context.Request.Path;
+            // Extract the route data
+            try
+            {
+                var routeData = context.GetRouteData();
+                if (routeData != null)
+                {
+                    var controller = routeData.Values["controller"]?.ToString();
+                    var action = routeData.Values["action"]?.ToString();
+                    var area = routeData.Values["area"]?.ToString();
+
+                    scope.SetTag("route.controller", controller);
+                    scope.SetTag("route.action", action);
+                    if (area != null)
+                    {
+                        scope.SetTag("route.area", area);
+                    }
+
+                    scope.Transaction = area == null ? $"{controller}.{action}" : $"{area}.{controller}.{action}";
+                }
+            }
+            catch(Exception e)
+            {
+                // Suppress the error here; we expect an ArgumentNullException if httpContext.Request.RouteValues is null from GetRouteData()
+                // TODO: Consider adding a bool to the Sentry options to make routedata extraction optional in case they don't use a routing middleware?
+                options?.DiagnosticLogger?.LogDebug("Failed to extract route data.", e);
+            }
 
             // TODO: Get context stuff into scope
             //context.Session
