@@ -23,14 +23,37 @@ namespace Sentry.Internal.Web
         public SentryEvent Process(SentryEvent @event)
         {
             var context = HttpContext.Current;
-            if (context == null || @event == null)
+            if (context is null || @event is null)
             {
+                return @event;
+            }
+
+            try
+            {
+                // During Application initialization we might have an event to send but no HTTP Request.
+                // Request getter throws and doesn't seem there's a way to query for it.
+                _ = context.Request;
+            }
+            catch (HttpException)
+            {
+                _options.DiagnosticLogger?.LogDebug("HttpException not available to retrieve context.");
                 return @event;
             }
 
             @event.Request.Method = context.Request.HttpMethod;
             @event.Request.Url = context.Request.Path;
-            @event.Request.QueryString = context.Request.QueryString.ToString();
+
+            try
+            {
+                // ReSharper disable once ConstantConditionalAccessQualifier
+                @event.Request.QueryString = context.Request.QueryString?.ToString();
+            }
+            catch (NullReferenceException)
+            {
+                // Ignored since it can throw on WCF on the first event.
+                // See #390
+                _options.DiagnosticLogger?.LogDebug("Ignored NRE thrown on System.Web.HttpContext.Request.QueryString");
+            }
 
             foreach (var key in context.Request.Headers.AllKeys)
             {
@@ -85,7 +108,7 @@ namespace Sentry.Internal.Web
             {
                 @event.Contexts["server-os"] = os;
             }
-            
+
             var body = PayloadExtractor.ExtractPayload(new SystemWebHttpRequest(context.Request));
             if (body != null)
             {

@@ -1,16 +1,20 @@
 <Project>
   <PropertyGroup>
-    <Version>2.1.1</Version>
+    <Version>2.1.2-beta4</Version>
     <LangVersion>7.3</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <Deterministic>True</Deterministic>
+    <Features>strict</Features>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>SYSTEM_WEB;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
    <ItemGroup>
+    <PackageReference Include="Roslynator.Analyzers" Version="2.3.0" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="1.0.0-beta" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="1.0.0-rc" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="2.9.2" PrivateAssets="All" />
   </ItemGroup>

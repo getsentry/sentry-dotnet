@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 using NSubstitute;
 using Sentry.Extensibility;
@@ -264,6 +266,24 @@ namespace Sentry.AspNetCore.Tests
             first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
 
             Assert.Null(_sut.Request.Data);
+        }
+
+        [Fact]
+        public void Populate_RouteData_SetToScope()
+        {
+            const string controller = "Ctrl";
+            const string action = "Actn";
+            var routeFeature = new RoutingFeature()
+            {
+                RouteData = new RouteData() {Values = {{"controller", controller}, {"action", action},}}
+            };
+            var features = new FeatureCollection();
+            features.Set<IRoutingFeature>(routeFeature);
+            _httpContext.Features.Returns(features);
+
+            _sut.Populate(_httpContext, SentryAspNetCoreOptions);
+
+            Assert.Equal($"{controller}.{action}", _sut.Transaction);
         }
 
         public static IEnumerable<object[]> InvalidRequestBodies()

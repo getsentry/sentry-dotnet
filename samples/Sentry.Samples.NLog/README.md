@@ -28,8 +28,8 @@ The following options are available for the NLog Sentry Target:
     initializeSdk="True"
     flushTimeoutSeconds="15"
     >
-        <tag name="exception" value="${exception:format=shorttype}" includeEmptyValue="false" /><!-- Repeatable SentryEvent Tags -->
-        <contextproperty name="threadid" value="${threadid}" includeEmptyValue="true" />        <!-- Repeatable SentryEvent Data -->
+        <tag name="exception" layout="${exception:format=shorttype}" includeEmptyValue="false" /><!-- Repeatable SentryEvent Tags -->
+        <contextproperty name="threadid" layout="${threadid}" includeEmptyValue="true" />        <!-- Repeatable SentryEvent Data -->
         <!-- Advanced options can be configured here-->
         <options
             sendDefaultPii="False"

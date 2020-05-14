@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry.Serilog/Sentry.Serilog.csproj" />
+    <ProjectReference Include="../../test/Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
 
 </Project>

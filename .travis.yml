@@ -18,7 +18,7 @@ matrix:
       group: edge
 script:
   - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 2.1.507
-  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 3.1.100
+  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 3.1.200
   - export PATH=$PATH:~/.dotnet
   - dotnet --info
   - ./build.sh

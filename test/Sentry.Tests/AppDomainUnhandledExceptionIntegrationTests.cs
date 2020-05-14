@@ -3,6 +3,10 @@ using NSubstitute;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Xunit;
+using System.Linq;
+using System.Threading.Tasks;
+using Sentry.Extensibility;
+using Sentry.Protocol;
 
 namespace Sentry.Tests
 {
@@ -54,6 +58,25 @@ namespace Sentry.Tests
 
             var disposableHub = _fixture.Hub as IDisposable;
             disposableHub.Received(1).Dispose();
+        }
+
+        [Fact]
+        public void Handle_TerminatingTrue_IsHandledFalse()
+        {
+            var sut = _fixture.GetSut();
+            sut.Register(_fixture.Hub, SentryOptions);
+
+            var exception = new Exception();
+            sut.Handle(this, new UnhandledExceptionEventArgs(exception, true));
+            Assert.False((bool)exception.Data[Mechanism.HandledKey]);
+            Assert.True(exception.Data.Contains(Mechanism.MechanismKey));
+
+            var stackTraceFactory = Substitute.For<ISentryStackTraceFactory>();
+            var exceptionProcessor = new MainExceptionProcessor(SentryOptions, () => stackTraceFactory);
+            var @event = new SentryEvent(exception);
+
+            exceptionProcessor.Process(exception, @event);
+            Assert.NotNull(@event.SentryExceptions.ToList().Single(p => p.Mechanism.Handled == false));
         }
 
         [Fact]

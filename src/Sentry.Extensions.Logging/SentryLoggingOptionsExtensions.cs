@@ -5,7 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Sentry.Extensions.Logging
 {
-    ///
+    /// <summary>
+    /// SentryLoggingOptions extensions.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryLoggingOptionsExtensions
     {

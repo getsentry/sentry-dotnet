@@ -95,7 +95,15 @@ namespace Sentry.Protocol
         {
         }
 
-        ///
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Breadcrumb"/> class.
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <param name="message">The message.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="category">The category.</param>
+        /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal Breadcrumb(
             DateTimeOffset? timestamp = null,

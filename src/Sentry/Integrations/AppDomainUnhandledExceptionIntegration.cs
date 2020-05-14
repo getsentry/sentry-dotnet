@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Sentry.Internal;
 using System.Runtime.ExceptionServices;
 using System.Security;
+using Sentry.Protocol;
 
 namespace Sentry.Integrations
 {
@@ -33,6 +34,8 @@ namespace Sentry.Integrations
         {
             if (e.ExceptionObject is Exception ex)
             {
+                ex.Data[Mechanism.HandledKey] = false;
+                ex.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
                 _hub?.CaptureException(ex);
             }
 

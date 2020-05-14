@@ -84,7 +84,7 @@ internal class Program
     }
 }
 
-internal class Dependency
+internal static class Dependency
 {
     private static int _counter;
 
