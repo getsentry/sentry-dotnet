@@ -21,7 +21,7 @@ namespace Sentry.Extensions.Logging
         /// <param name="options">The <see cref="SentryLoggingOptions"/> to hold the filter.</param>
         /// <param name="filter">The filter.</param>
         public static void AddLogEntryFilter(this SentryLoggingOptions options, ILogEntryFilter filter)
-            => options.Filters = options.Filters.Add(filter);
+            => options.Filters = options.Filters.Concat(new[] { filter }).ToArray();
 
         /// <summary>
         /// Add an log event filter
