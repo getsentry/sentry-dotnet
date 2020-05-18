@@ -18,33 +18,11 @@ namespace Serilog
         /// <summary>
         /// Add Sentry Serilog Sink.
         /// </summary>
-        /// <param name="loggerConfiguration">The logger configuration.</param>
-        /// <param name="dsn">The Sentry DSN.</param>
-        /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb.</param>
-        /// <param name="minimumEventLevel">Minimum log level to send an event.</param>
-        /// <param name="formatProvider">The Serilog format provider.</param>
-        /// <returns></returns>
-        public static LoggerConfiguration Sentry(
-            this LoggerSinkConfiguration loggerConfiguration,
-            string dsn = null,
-            LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
-            LogEventLevel minimumEventLevel = LogEventLevel.Error,
-            IFormatProvider formatProvider = null)
-            => loggerConfiguration.Sentry(o =>
-            {
-                if (dsn != null)
-                {
-                    o.Dsn = new Dsn(dsn);
-                }
-                o.MinimumBreadcrumbLevel = minimumBreadcrumbLevel;
-                o.MinimumEventLevel = minimumEventLevel;
-                o.FormatProvider = formatProvider;
-            });
-
-        /// <summary>
-        /// Add Sentry Serilog Sink.
-        /// </summary>
         /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
+        /// <param name="dsn">The Sentry DSN. <seealso cref="SentryOptions.Dsn"/></param>
+        /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
+        /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
+        /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
         /// <param name="sendDefaultPii">Whether to include default Personal Identifiable information. <seealso cref="SentryOptions.SendDefaultPii"/></param>
         /// <param name="isEnvironmentUser">Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event. <seealso cref="SentryOptions.IsEnvironmentUser"/></param>
         /// <param name="serverName">Gets or sets the name of the server running the application. <seealso cref="SentryOptions.ServerName"/></param>
@@ -53,7 +31,6 @@ namespace Serilog
         /// <param name="sampleRate">The rate to sample events. <seealso cref="SentryOptions.SampleRate"/></param>
         /// <param name="release">The release version of the application. <seealso cref="SentryOptions.Release"/></param>
         /// <param name="environment">The environment the application is running. <seealso cref="SentryOptions.Environment"/></param>
-        /// <param name="dsn">The Sentry DSN. <seealso cref="SentryOptions.Dsn"/></param>
         /// <param name="maxQueueItems">The maximum number of events to keep while the worker attempts to send them. <seealso cref="SentryOptions.MaxQueueItems"/></param>
         /// <param name="shutdownTimeout">How long to wait for events to be sent before shutdown. <seealso cref="SentryOptions.ShutdownTimeout"/></param>
         /// <param name="decompressionMethods">Decompression methods accepted. <seealso cref="SentryOptions.DecompressionMethods"/></param>
@@ -64,9 +41,6 @@ namespace Serilog
         /// <param name="reportAssemblies">Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>. <seealso cref="SentryOptions.ReportAssemblies"/></param>
         /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
         /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
-        /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
-        /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
-        /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
         /// <returns><see cref="LoggerConfiguration"/></returns>
         /// <example>This sample shows how each item may be set from within a configuration file:
         /// <code>
@@ -110,6 +84,10 @@ namespace Serilog
         /// </example>
         public static LoggerConfiguration Sentry(
             this LoggerSinkConfiguration loggerConfiguration,
+            string dsn = null,
+            LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
+            LogEventLevel minimumEventLevel = LogEventLevel.Error,
+            IFormatProvider formatProvider = null,
             bool? sendDefaultPii = null,
             bool? isEnvironmentUser = null,
             string serverName = null,
@@ -118,7 +96,6 @@ namespace Serilog
             float? sampleRate = null,
             string release = null,
             string environment = null,
-            string dsn = null,
             int? maxQueueItems = null,
             TimeSpan? shutdownTimeout = null,
             DecompressionMethods? decompressionMethods = null,
@@ -128,12 +105,13 @@ namespace Serilog
             SentryLevel? diagnosticsLevel = null,
             bool? reportAssemblies = null,
             DeduplicateMode? deduplicateMode = null,
-            bool? initializeSdk = null,
-            LogEventLevel? minimumEventLevel = null,
-            LogEventLevel? minimumBreadcrumbLevel = null,
-            IFormatProvider formatProvider = null)
+            bool? initializeSdk = null)
         {
             return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
+                dsn,
+                minimumEventLevel,
+                minimumBreadcrumbLevel,
+                formatProvider,
                 sendDefaultPii,
                 isEnvironmentUser,
                 serverName,
@@ -142,7 +120,6 @@ namespace Serilog
                 sampleRate,
                 release,
                 environment,
-                dsn,
                 maxQueueItems,
                 shutdownTimeout,
                 decompressionMethods,
@@ -152,10 +129,7 @@ namespace Serilog
                 diagnosticsLevel,
                 reportAssemblies,
                 deduplicateMode,
-                initializeSdk,
-                minimumEventLevel,
-                minimumBreadcrumbLevel,
-                formatProvider));
+                initializeSdk));
         }
 
         /// <summary>
@@ -186,6 +160,10 @@ namespace Serilog
         /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
         public static void ConfigureSentrySerilogOptions(
             SentrySerilogOptions sentrySerilogOptions,
+            string dsn = null,
+            LogEventLevel? minimumEventLevel = null,
+            LogEventLevel? minimumBreadcrumbLevel = null,
+            IFormatProvider formatProvider = null,
             bool? sendDefaultPii = null,
             bool? isEnvironmentUser = null,
             string serverName = null,
@@ -194,7 +172,6 @@ namespace Serilog
             float? sampleRate = null,
             string release = null,
             string environment = null,
-            string dsn = null,
             int? maxQueueItems = null,
             TimeSpan? shutdownTimeout = null,
             DecompressionMethods? decompressionMethods = null,
@@ -204,10 +181,7 @@ namespace Serilog
             SentryLevel? diagnosticsLevel = null,
             bool? reportAssemblies = null,
             DeduplicateMode? deduplicateMode = null,
-            bool? initializeSdk = null,
-            LogEventLevel? minimumEventLevel = null,
-            LogEventLevel? minimumBreadcrumbLevel = null,
-            IFormatProvider formatProvider = null)
+            bool? initializeSdk = null)
         {
             if (sendDefaultPii.HasValue)
             {

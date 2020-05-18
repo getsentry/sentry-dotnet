@@ -65,7 +65,7 @@ namespace Sentry.Serilog.Tests
 
             // Make the call with only the required parameter
             const bool sendDefaultPii = true;
-            SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, sendDefaultPii);
+            SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, sendDefaultPii:sendDefaultPii);
 
             // Compare. I'm not sure how to deep compare--I don't see a nuget ref to that type
             // of functionality and I'm hesitant to introduce new technologies with such a
@@ -80,7 +80,7 @@ namespace Sentry.Serilog.Tests
         {
             var sut = _fixture.GetSut();
 
-            SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, _fixture.SendDefaultPii,
+            SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, sendDefaultPii:_fixture.SendDefaultPii,
                 decompressionMethods: _fixture.DecompressionMethods, reportAssemblies: _fixture.ReportAssemblies, sampleRate: _fixture.SampleRate);
 
             // Fail early
@@ -98,13 +98,13 @@ namespace Sentry.Serilog.Tests
         {
             var sut = _fixture.GetSut();
 
-            SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, _fixture.SendDefaultPii,
+            SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, _fixture.Dsn, _fixture.MinimumEventLevel,
+                _fixture.MinimumBreadcrumbLevel, null,_fixture.SendDefaultPii,
                 _fixture.IsEnvironmentUser, _fixture.ServerName, _fixture.AttachStackTrace, _fixture.MaxBreadcrumbs,
-                _fixture.SampleRate, _fixture.Release, _fixture.Environment, _fixture.Dsn, _fixture.MaxQueueItems,
+                _fixture.SampleRate, _fixture.Release, _fixture.Environment,  _fixture.MaxQueueItems,
                 _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
                 _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticsLevel,
-                _fixture.ReportAssemblies, _fixture.DeduplicateMode, _fixture.InitializeSdk,
-                _fixture.MinimumEventLevel, _fixture.MinimumBreadcrumbLevel);
+                _fixture.ReportAssemblies, _fixture.DeduplicateMode, _fixture.InitializeSdk);
 
             // Fail early
             AssertNotEqualDeep(_fixture.Options, sut);
