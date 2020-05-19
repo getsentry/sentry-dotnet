@@ -274,6 +274,10 @@ namespace Sentry.Internal
                 // If the queue is empty it will quit immediately
                 WorkerTask.Wait(_options.ShutdownTimeout);
             }
+            catch (OperationCanceledException)
+            {
+                 _options.DiagnosticLogger?.LogDebug("Stopping the background worker due to a cancellation");
+            }
             catch (Exception exception)
             {
                 _options.DiagnosticLogger?.LogError("Stopping the background worker threw an exception.", exception);
