@@ -276,7 +276,7 @@ namespace Sentry.Internal
             }
             catch (OperationCanceledException)
             {
-                // Ignored
+                 _options.DiagnosticLogger?.LogDebug("Stopping the background worker due to a cancellation");
             }
             catch (Exception exception)
             {
