@@ -12,13 +12,13 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="Newtonsoft.Json" Version="6.0.8" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Protocol\Sentry.Protocol.csproj" />

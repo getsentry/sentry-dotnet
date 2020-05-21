@@ -21,10 +21,10 @@ namespace Sentry.Tests.Internals
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
-        public void GetCurrent_Scope_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Item1);
+        public void GetCurrent_Scope_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Key);
 
         [Fact]
-        public void GetCurrent_Client_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Item2);
+        public void GetCurrent_Client_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Value);
 
         [Fact]
         public void GetCurrent_Equality_SameOnInstance()
@@ -64,19 +64,19 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             sut.BindClient(null);
-            var (_, client) = sut.GetCurrent();
+            var currentScope = sut.GetCurrent();
 
-            Assert.Same(DisabledHub.Instance, client);
+            Assert.Same(DisabledHub.Instance, currentScope.Value);
         }
 
         [Fact]
         public void BindClient_Scope_StaysTheSame()
         {
             var sut = _fixture.GetSut();
-            var (scope, _) = sut.GetCurrent();
+            var currentScope = sut.GetCurrent();
 
             sut.BindClient(Substitute.For<ISentryClient>());
-            Assert.Same(scope, sut.GetCurrent().Item1);
+            Assert.Same(currentScope.Key, sut.GetCurrent().Key);
         }
 
         [Fact]
@@ -118,22 +118,22 @@ namespace Sentry.Tests.Internals
         public void PushScope_Parameterless_UsesSameClient()
         {
             var sut = _fixture.GetSut();
-            var (_, first) = sut.GetCurrent();
+            var firstScope = sut.GetCurrent();
             sut.PushScope();
-            var (_, second) = sut.GetCurrent();
+            var secondScope = sut.GetCurrent();
 
-            Assert.Same(first, second);
+            Assert.Same(firstScope.Value, secondScope.Value);
         }
 
         [Fact]
         public void PushScope_StateInstance_UsesSameClient()
         {
             var sut = _fixture.GetSut();
-            var (_, first) = sut.GetCurrent();
+            var firstScope = sut.GetCurrent();
             sut.PushScope(new object());
-            var (_, second) = sut.GetCurrent();
+            var secondScope = sut.GetCurrent();
 
-            Assert.Same(first, second);
+            Assert.Same(firstScope.Value, secondScope.Value);
         }
 
         [Fact]
@@ -255,8 +255,8 @@ namespace Sentry.Tests.Internals
         {
             var sut = _fixture.GetSut();
             var root = sut.GetCurrent();
-            void AddRandomTag() => sut.GetCurrent().Item1.SetTag(Guid.NewGuid().ToString(), "1");
-            void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Item1.Tags.Count);
+            void AddRandomTag() => sut.GetCurrent().Key.SetTag(Guid.NewGuid().ToString(), "1");
+            void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Key.Tags.Count);
 
             AddRandomTag();
             AssertTagCount(1);

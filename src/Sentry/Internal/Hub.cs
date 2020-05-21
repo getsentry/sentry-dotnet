@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -11,7 +11,7 @@ namespace Sentry.Internal
     internal class Hub : IHub, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly ImmutableList<ISdkIntegration> _integrations;
+        private readonly ISdkIntegration[] _integrations;
         private readonly IDisposable _rootScope;
 
         private readonly SentryClient _ownedClient;
@@ -43,7 +43,7 @@ namespace Sentry.Internal
 
             _integrations = options.Integrations;
 
-            if (_integrations?.Count > 0)
+            if (_integrations?.Length > 0)
             {
                 foreach (var integration in _integrations)
                 {
@@ -102,9 +102,9 @@ namespace Sentry.Internal
         {
             try
             {
-                var (currentScope, client) = ScopeManager.GetCurrent();
-                var actualScope = scope ?? currentScope;
-                var id = client.CaptureEvent(evt, actualScope);
+                var currentScope = ScopeManager.GetCurrent();
+                var actualScope = scope ?? currentScope.Key;
+                var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
                 return id;
             }
@@ -119,8 +119,8 @@ namespace Sentry.Internal
         {
             try
             {
-                var (_, client) = ScopeManager.GetCurrent();
-                await client.FlushAsync(timeout).ConfigureAwait(false);
+                var currentScope = ScopeManager.GetCurrent();
+                await currentScope.Value.FlushAsync(timeout).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -132,7 +132,7 @@ namespace Sentry.Internal
         {
             _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
 
-            if (_integrations?.Count > 0)
+            if (_integrations?.Length > 0)
             {
                 foreach (var integration in _integrations)
                 {
@@ -152,8 +152,8 @@ namespace Sentry.Internal
         {
             get
             {
-                var (currentScope, _) = ScopeManager.GetCurrent();
-                return currentScope.LastEventId;
+                var currentScope = ScopeManager.GetCurrent();
+                return currentScope.Key.LastEventId;
             }
         }
     }

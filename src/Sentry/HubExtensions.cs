@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 
@@ -34,7 +34,7 @@ namespace Sentry
                 clock: null,
                 message: message,
                 type: type,
-                data: data?.ToImmutableDictionary(),
+                data: data != null ? new Dictionary<string,string>(data) : null,
                 category: category,
                 level: level);
 
@@ -65,7 +65,9 @@ namespace Sentry
                     timestamp: (clock ?? SystemClock.Clock).GetUtcNow(),
                     message: message,
                     category: category,
-                    type: type, data: data?.ToImmutableDictionary(), level: level));
+                    type: type,
+                    data: data != null ? new Dictionary<string, string>(data) : null,
+                    level: level));
 
         /// <summary>
         /// Pushes a new scope while locking it which stop new scope creation
@@ -92,7 +94,7 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void UnlockScope(this IHub hub) => hub.ConfigureScope(c => c.Locked = false);
 
-        private class LockedScope : IDisposable
+        private sealed class LockedScope : IDisposable
         {
             private readonly IDisposable _scope;
 
