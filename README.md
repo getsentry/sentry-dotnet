@@ -204,7 +204,7 @@ Of those, we've tested (we run our unit/integration tests) against:
 
 ### Sentry Protocol
 
-For more details, please: **refer to the [documentation](https://getsentry.github.io/sentry-dotnet-protocol/index.html)**
+For more details, please: **refer to the [documentation](https://getsentry.github.io/sentry-dotnet/index.html)**
 
 ### Legacy frameworks
 
