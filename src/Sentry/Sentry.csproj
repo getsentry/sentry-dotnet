@@ -10,12 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Newtonsoft.Json" Version="6.0.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <Reference Include="System.Web" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.0" />
