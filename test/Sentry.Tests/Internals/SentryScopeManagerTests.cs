@@ -80,6 +80,24 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
+        public void BindClient_ScopeState_StaysTheSame()
+        {
+            var sut = _fixture.GetSut();
+            var currentScope = sut.GetCurrent();
+
+            var scope1 = sut.PushScope(1);
+            var scope2 = sut.PushScope(2);
+            Assert.Equal(2, sut.GetCurrent().Key.Extra["state"]);
+
+            sut.BindClient(Substitute.For<ISentryClient>());
+
+            Assert.Equal(2, sut.GetCurrent().Key.Extra["state"]);
+
+            scope2.Dispose();
+            Assert.Equal(1, sut.GetCurrent().Key.Extra["state"]);
+        }
+
+        [Fact]
         public void ConfigureScope_NullArgument_NoOp()
         {
             var sut = _fixture.GetSut();
