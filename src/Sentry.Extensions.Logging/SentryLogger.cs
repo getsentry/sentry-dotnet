@@ -54,7 +54,7 @@ namespace Sentry.Extensions.Logging
 
             var message = formatter?.Invoke(state, exception);
 
-            if (SendEvent(logLevel, eventId, exception))
+            if (ShouldSendEvent(logLevel, eventId, exception))
             {
                 var @event = new SentryEvent(exception)
                 {
@@ -96,8 +96,7 @@ namespace Sentry.Extensions.Logging
             }
 
             // Even if it was sent as event, add breadcrumb so next event includes it
-            if (_options.MinimumBreadcrumbLevel != LogLevel.None
-                     && logLevel >= _options.MinimumBreadcrumbLevel)
+            if (ShouldAddBreadcrumb(logLevel, eventId, exception))
             {
                 var data = eventId.ToDictionaryOrNull();
                 if (exception != null && message != null)
@@ -118,7 +117,7 @@ namespace Sentry.Extensions.Logging
             }
         }
 
-        private bool SendEvent(
+        private bool ShouldSendEvent(
             LogLevel logLevel,
             EventId eventId,
             Exception exception)
@@ -130,12 +129,24 @@ namespace Sentry.Extensions.Logging
                    // often used by users experimenting with Sentry
                    && !CategoryName.StartsWith("Sentry.")
                    && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal)
-                   && (_options.Filters == null
-                        || _options.Filters.All(
-                           f => !f.Filter(
-                               CategoryName,
-                               logLevel,
-                               eventId,
-                               exception)));
+                   && _options.Filters?.All(
+                       f => !f.Filter(
+                           CategoryName,
+                           logLevel,
+                           eventId,
+                           exception)) != false;
+
+        private bool ShouldAddBreadcrumb(
+            LogLevel logLevel,
+            EventId eventId,
+            Exception exception)
+            => _options.MinimumBreadcrumbLevel != LogLevel.None
+               && logLevel >= _options.MinimumBreadcrumbLevel
+               && _options.Filters?.All(
+                   f => !f.Filter(
+                       CategoryName,
+                       logLevel,
+                       eventId,
+                       exception)) != false;
     }
 }
