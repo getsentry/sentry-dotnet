@@ -18,7 +18,7 @@ using Sentry.Protocol;
 
 internal static class Program
 {
-    public const string DefaultDsn = "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141";
+    public const string DefaultDsn = "https://9f271c100c3248a4b074a0bead837061@o19635.ingest.sentry.io/5264714";
     // A different DSN for a section of the app (i.e: admin)
     public const string AdminDsn = "https://f670c444cca14cf2bb4bfc403525b6a3@sentry.io/259314";
 

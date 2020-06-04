@@ -25,7 +25,7 @@ namespace Sentry.Samples.AspNetCore3.Mvc
                     {
                         o.Debug = true;
                         o.MaxRequestBodySize = RequestSize.Always;
-                        o.Dsn = "https://5fd7a6cda8444965bade9ccfd3df9882@sentry.io/1188141";
+                        o.Dsn = "https://9f271c100c3248a4b074a0bead837061@o19635.ingest.sentry.io/5264714";
                     });
                     webBuilder.UseStartup<Startup>();
                 });
