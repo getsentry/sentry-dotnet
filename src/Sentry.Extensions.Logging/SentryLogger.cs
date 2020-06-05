@@ -54,7 +54,7 @@ namespace Sentry.Extensions.Logging
 
             var message = formatter?.Invoke(state, exception);
 
-            if (ShouldSendEvent(logLevel, eventId, exception))
+            if (ShouldCaptureEvent(logLevel, eventId, exception))
             {
                 var @event = new SentryEvent(exception)
                 {
@@ -117,7 +117,7 @@ namespace Sentry.Extensions.Logging
             }
         }
 
-        private bool ShouldSendEvent(
+        private bool ShouldCaptureEvent(
             LogLevel logLevel,
             EventId eventId,
             Exception exception)
