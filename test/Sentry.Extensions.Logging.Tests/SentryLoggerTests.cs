@@ -125,6 +125,22 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
+        public void LogCritical_MatchingFilter_DoesNotAddBreadcrumb()
+        {
+            const string expected = "message";
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => true);
+
+            var sut = _fixture.GetSut();
+
+            sut.LogCritical(expected);
+
+            _fixture.Hub.DidNotReceive()
+                // Breadcrumbs live in the scope
+                .ConfigureScope(Arg.Any<Action<Scope>>());
+        }
+
+        [Fact]
         public void LogCritical_NotMatchingFilter_CapturesEvent()
         {
             const string expected = "message";
@@ -137,6 +153,26 @@ namespace Sentry.Extensions.Logging.Tests
 
             _fixture.Hub.Received(1)
                 .CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
+        public void LogCritical_NotMatchingFilter_AddsBreadcrumb()
+        {
+            var scope = new Scope();
+            _fixture.Hub.ConfigureScope(Arg.Invoke(scope));
+
+            const string expected = "message";
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+
+            var sut = _fixture.GetSut();
+
+            sut.LogCritical(expected);
+
+            _fixture.Hub.Received(1)
+                .ConfigureScope(Arg.Any<Action<Scope>>());
+
+            Assert.Single(scope.Breadcrumbs);
         }
 
         [Fact]
