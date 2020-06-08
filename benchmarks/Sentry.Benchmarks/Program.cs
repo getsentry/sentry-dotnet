@@ -1,6 +1,7 @@
 using System.Linq;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
@@ -16,14 +17,12 @@ namespace Sentry.Benchmarks
         {
             public Config()
             {
-                Add(Job.Core);
-
-                Add(MemoryDiagnoser.Default);
-
-                Add(MarkdownExporter.GitHub);
-
-                Add(DefaultConfig.Instance.GetLoggers().ToArray());
-                Add(DefaultConfig.Instance.GetColumnProviders().ToArray());
+                AddJob(Job.Default.WithRuntime(CoreRuntime.Core21));
+                AddJob(Job.Default.WithRuntime(CoreRuntime.Core31));
+                AddDiagnoser(MemoryDiagnoser.Default);
+                AddExporter(MarkdownExporter.GitHub);
+                AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
+                AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray());
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/bash
 set -e errexit
 
 framework=netcoreapp2.1
