@@ -142,7 +142,7 @@ namespace Sentry.Internal
 
         public void Dispose()
         {
-            _options?.DiagnosticLogger?.LogDebug("Disposing SentryClient.");
+            _options?.DiagnosticLogger?.LogDebug($"Disposing {nameof(SentryScopeManager)}.");
             _localScope = null;
         }
     }
