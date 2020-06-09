@@ -72,7 +72,30 @@ namespace Sentry
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
-        public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable());
+        public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable(), _globalHudDefaultMode);
+
+
+        /// <summary>
+        /// Initializes the SDK while attempting to locate the DSN
+        /// </summary>
+        /// <remarks>
+        /// If the DSN is not found, the SDK will not change state.
+        /// </remarks>
+        public static IDisposable Init(bool globalHudMode = _globalHudDefaultMode) => Init(DsnLocator.FindDsnStringOrDisable(), globalHudMode);
+
+
+        /// <summary>
+        /// Initializes the SDK with the specified DSN
+        /// </summary>
+        /// <remarks>
+        /// An empty string is interpreted as a disabled SDK
+        /// </remarks>
+        /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
+        /// <param name="dsn">The dsn</param>
+        public static IDisposable Init(string dsn)
+            => string.IsNullOrWhiteSpace(dsn)
+                ? DisabledHub.Instance
+                : Init(c => c.Dsn = new Dsn(dsn), _globalHudDefaultMode);
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
