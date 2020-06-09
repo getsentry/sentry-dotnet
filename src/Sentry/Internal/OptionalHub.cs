@@ -52,5 +52,11 @@ namespace Sentry.Internal
         public SentryId LastEventId => _hub.LastEventId;
 
         public void Dispose() => (_hub as IDisposable)?.Dispose();
+
+        //TODO: Should Implement?
+        public IHub Clone()
+        {
+            return _hub.Clone();
+        }
     }
 }

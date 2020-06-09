@@ -139,5 +139,11 @@ namespace Sentry.Extensibility
         [EditorBrowsable(EditorBrowsableState.Never)]
         public Task FlushAsync(TimeSpan timeout)
             => SentrySdk.FlushAsync(timeout);
+
+        //TODO: Should return?
+        public IHub Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -20,5 +20,7 @@ namespace Sentry
         /// Last event id recorded in the current scope
         /// </summary>
         SentryId LastEventId { get; }
+
+        IHub Clone();
     }
 }

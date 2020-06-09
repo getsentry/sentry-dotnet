@@ -44,7 +44,7 @@ namespace Sentry
         /// <summary>
         /// Last event id recorded in the current scope
         /// </summary>
-        public static SentryId LastEventId { [DebuggerStepThrough] get => _mainHud.LastEventId; }
+        public static SentryId LastEventId { [DebuggerStepThrough] get => GetCurrentHub().LastEventId; }
 
         /// <summary>
         /// Returns the current (threads) hub, if none, clones the mainHub and returns it.
@@ -59,11 +59,13 @@ namespace Sentry
             IHub hub = _currentHub.Value;
             if (hub == null)
             {
-                hub = Interlocked.Exchange(ref _mainHud, DisabledHub.Instance);
-                _currentHub.Value = hub;
+                lock (_mainHud)
+                {
+                    hub = _mainHud.Clone();
+                    _currentHub.Value = hub;
+                }
             }
             return hub;
-
         }
 
         /// <summary>
@@ -152,7 +154,6 @@ namespace Sentry
                 options.Dsn = dsn;
             }
             _globalHudMode = globalHudMode;
-
             return UseHub(new Hub(options));
         }
 
