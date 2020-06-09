@@ -23,7 +23,7 @@ namespace Sentry
     {
 
         /// <summary>
-        /// The Main Hub or NoOp if Sentry is disabled.
+        ///  Holds Hubs per thread or only mainHub if globalHubMode is disabled.
         /// </summary>
         private static readonly AsyncLocal<IHub> _currentHub = new AsyncLocal<IHub>();
         /// <summary>
@@ -34,7 +34,7 @@ namespace Sentry
         /// <summary>
         /// Default value for globalHubMode is false.
         /// </summary>
-        private  const bool _globalHudDefaultMode = false;
+        private const bool _globalHudDefaultMode = false;
 
         /// <summary>
         /// whether to use a single (global) Hub as opposed to one per thread.
@@ -50,7 +50,7 @@ namespace Sentry
         /// Returns the current (threads) hub, if none, clones the mainHub and returns it.
         /// </summary>
         /// <returns>A Hub</returns>
-        internal  static IHub GetCurrentHub()
+        internal static IHub GetCurrentHub()
         {
             if (_globalHudMode)
             {
@@ -76,7 +76,6 @@ namespace Sentry
         /// </remarks>
         public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable(), _globalHudDefaultMode);
 
-
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN
         /// </summary>
@@ -84,7 +83,6 @@ namespace Sentry
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
         public static IDisposable Init(bool globalHudMode = _globalHudDefaultMode) => Init(DsnLocator.FindDsnStringOrDisable(), globalHudMode);
-
 
         /// <summary>
         /// Initializes the SDK with the specified DSN
@@ -108,7 +106,7 @@ namespace Sentry
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
         /// <param name="globalHudMode">whether to use a single (global) Hub as opposed to one per thread.</param>
-        public static IDisposable Init(string dsn, bool globalHudMode = _globalHudDefaultMode )
+        public static IDisposable Init(string dsn, bool globalHudMode = _globalHudDefaultMode)
             => string.IsNullOrWhiteSpace(dsn)
                 ? DisabledHub.Instance
                 : Init(c => c.Dsn = new Dsn(dsn), globalHudMode);
@@ -159,10 +157,10 @@ namespace Sentry
 
         internal static IDisposable UseHub(IHub hub)
         {
-            if(!_globalHudMode)
+            if (!_globalHudMode)
             {
                 var asyncHub = _currentHub.Value;
-                _  = Interlocked.Exchange(ref asyncHub, hub);
+                _ = Interlocked.Exchange(ref asyncHub, hub);
                 _currentHub.Value = asyncHub;
             }
             var oldHub = Interlocked.Exchange(ref _mainHud, hub);
@@ -228,6 +226,7 @@ namespace Sentry
             }
             return null;
         }
+
         /// <summary>
         /// Creates a new scope that will terminate when disposed
         /// </summary>

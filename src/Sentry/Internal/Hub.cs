@@ -56,7 +56,6 @@ namespace Sentry.Internal
             _rootScope = PushScope();
         }
 
-
         public IHub Clone()
         {
             _options.DiagnosticLogger?.LogDebug("Attempt to clone a Hub");

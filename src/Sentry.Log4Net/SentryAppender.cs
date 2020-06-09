@@ -44,6 +44,7 @@ namespace Sentry.Log4Net
         /// </summary>
         public SentryAppender() : this(SentrySdk.Init, HubAdapter.Instance)
         { }
+
         internal SentryAppender(
             Func<string, IDisposable> initAction,
             IHub hubGetter)
@@ -51,10 +52,9 @@ namespace Sentry.Log4Net
             Debug.Assert(initAction != null);
             Debug.Assert(hubGetter != null);
 
-            _initAction = initAction.Invoke;
+            _initAction = initAction;
             Hub = hubGetter;
         }
-
 
         /// <summary>
         /// Append log.

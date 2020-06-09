@@ -53,7 +53,6 @@ namespace Sentry.Internal
 
         public void Dispose() => (_hub as IDisposable)?.Dispose();
 
-        //TODO: Should Implement?
         public IHub Clone()
         {
             return _hub.Clone();
