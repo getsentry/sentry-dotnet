@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Sentry.Samples.AspNetCore3.Mvc.Models;
 
-namespace Sentry.Samples.AspNetCore3.Mvc.Controllers
+namespace Samples.AspNetCore3.Mvc.Controllers
 {
     public class HomeController : Controller
     {
