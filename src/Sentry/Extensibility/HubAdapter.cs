@@ -140,10 +140,11 @@ namespace Sentry.Extensibility
         public Task FlushAsync(TimeSpan timeout)
             => SentrySdk.FlushAsync(timeout);
 
-        //TODO: Should return?
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public IHub Clone()
         {
-            throw new NotImplementedException();
+            return SentrySdk.GetCurrentHub().Clone();
         }
     }
 }

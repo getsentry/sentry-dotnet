@@ -50,7 +50,7 @@ namespace Sentry
         /// Returns the current (threads) hub, if none, clones the mainHub and returns it.
         /// </summary>
         /// <returns>A Hub</returns>
-        private static IHub GetCurrentHub()
+        internal  static IHub GetCurrentHub()
         {
             if (_globalHudMode)
             {
@@ -159,6 +159,12 @@ namespace Sentry
 
         internal static IDisposable UseHub(IHub hub)
         {
+            if(!_globalHudMode)
+            {
+                var asyncHub = _currentHub.Value;
+                _  = Interlocked.Exchange(ref asyncHub, hub);
+                _currentHub.Value = asyncHub;
+            }
             var oldHub = Interlocked.Exchange(ref _mainHud, hub);
             (oldHub as IDisposable)?.Dispose();
             return new DisposeHandle(hub);
