@@ -142,9 +142,6 @@ namespace Sentry.Extensibility
 
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public IHub Clone()
-        {
-            return SentrySdk.GetCurrentHub().Clone();
-        }
+        public IHub Clone() => SentrySdk.GetCurrentHub().Clone();
     }
 }

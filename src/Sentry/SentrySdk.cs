@@ -23,9 +23,10 @@ namespace Sentry
     {
 
         /// <summary>
-        ///  Holds Hubs per thread or only mainHub if globalHubMode is disabled.
+        /// The async-aware Hub if globalHubMode is disabled.
         /// </summary>
         private static readonly AsyncLocal<IHub> _currentHub = new AsyncLocal<IHub>();
+
         /// <summary>
         /// The Main Hub or NoOp if Sentry is disabled.
         /// </summary>
@@ -39,7 +40,7 @@ namespace Sentry
         /// <summary>
         /// whether to use a single (global) Hub as opposed to one per thread.
         /// </summary>
-        private static bool _globalHudMode = _globalHudDefaultMode;
+        private static volatile bool _globalHudMode = _globalHudDefaultMode;
 
         /// <summary>
         /// Last event id recorded in the current scope
@@ -47,9 +48,11 @@ namespace Sentry
         public static SentryId LastEventId { [DebuggerStepThrough] get => GetCurrentHub().LastEventId; }
 
         /// <summary>
-        /// Returns the current (threads) hub, if none, clones the mainHub and returns it.
+        /// Returns the current hub.
         /// </summary>
-        /// <returns>A Hub</returns>
+        /// <remarks>
+        /// This is an async-aware thread-local Hub, unless global Hub mode is enabled.
+        /// </remarks>
         internal static IHub GetCurrentHub()
         {
             if (_globalHudMode)
@@ -59,17 +62,14 @@ namespace Sentry
             IHub hub = _currentHub.Value;
             if (hub == null)
             {
-                lock (_mainHud)
-                {
-                    hub = _mainHud.Clone();
-                    _currentHub.Value = hub;
-                }
+                hub = _mainHud.Clone();
+                _currentHub.Value = hub;
             }
             return hub;
         }
 
         /// <summary>
-        /// Initializes the SDK while attempting to locate the DSN
+        /// Initializes the SDK while attempting to locate the DSN.
         /// </summary>
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
@@ -77,7 +77,7 @@ namespace Sentry
         public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable(), _globalHudDefaultMode);
 
         /// <summary>
-        /// Initializes the SDK while attempting to locate the DSN
+        /// Initializes the SDK while attempting to locate the DSN.
         /// </summary>
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
@@ -85,10 +85,10 @@ namespace Sentry
         public static IDisposable Init(bool globalHudMode = _globalHudDefaultMode) => Init(DsnLocator.FindDsnStringOrDisable(), globalHudMode);
 
         /// <summary>
-        /// Initializes the SDK with the specified DSN
+        /// Initializes the SDK with the specified DSN.
         /// </summary>
         /// <remarks>
-        /// An empty string is interpreted as a disabled SDK
+        /// An empty string is interpreted as a disabled SDK.
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn</param>
@@ -98,7 +98,7 @@ namespace Sentry
                 : Init(c => c.Dsn = new Dsn(dsn), _globalHudDefaultMode);
 
         /// <summary>
-        /// Initializes the SDK with the specified DSN
+        /// Initializes the SDK with the specified DSN.
         /// </summary>
         /// <remarks>
         /// An empty string is interpreted as a disabled SDK
@@ -112,7 +112,7 @@ namespace Sentry
                 : Init(c => c.Dsn = new Dsn(dsn), globalHudMode);
 
         /// <summary>
-        /// Initializes the SDK with the specified DSN
+        /// Initializes the SDK with the specified DSN.
         /// </summary>
         /// <param name="dsn">The dsn</param>
         public static IDisposable Init(Dsn dsn) => Init(c => c.Dsn = dsn, _globalHudDefaultMode);

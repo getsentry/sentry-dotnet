@@ -61,6 +61,7 @@ namespace Sentry.Internal
             _options.DiagnosticLogger?.LogDebug("Attempt to clone a Hub");
             return new Hub(_options);
         }
+
         public void ConfigureScope(Action<Scope> configureScope)
         {
             try

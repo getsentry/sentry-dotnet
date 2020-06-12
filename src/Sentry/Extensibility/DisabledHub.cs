@@ -71,10 +71,7 @@ namespace Sentry.Extensibility
         /// </summary>
         public void Dispose() { }
 
-        public IHub Clone()
-        {
-            return Instance;
-        }
+        public IHub Clone() => Instance;
 
         /// <summary>
         /// No-Op.

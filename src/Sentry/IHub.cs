@@ -22,7 +22,7 @@ namespace Sentry
         SentryId LastEventId { get; }
 
         /// <summary>
-        /// Clones the Hub
+        /// Clones the Hub.
         /// </summary>
         IHub Clone();
     }
