@@ -488,17 +488,26 @@ namespace Sentry.NLog.Tests
         public void InitializeTarget_InitializesSdk()
         {
             _fixture.Options.Dsn = null;
-            _fixture.Options.Debug = true;
             _fixture.SdkDisposeHandle = null;
             _fixture.Options.InitializeSdk = true;
-            var logger = Substitute.For<IDiagnosticLogger>();
 
-            logger.IsEnabled(SentryLevel.Warning).Returns(true);
-            _fixture.Options.DiagnosticLogger = logger;
+            var logwriter = new System.IO.StringWriter();
 
-            _ = _fixture.GetLoggerFactory();
-            logger.Received(1).Log(SentryLevel.Warning,
-                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.", null);
+            try
+            {
+                InternalLogger.LogWriter = logwriter;
+                InternalLogger.LogLevel = LogLevel.Debug;
+
+                _ = _fixture.GetLoggerFactory();
+
+                var logoutput = logwriter.ToString();
+                Assert.Contains("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.", logoutput);
+            }
+            finally
+            {
+                InternalLogger.LogWriter = null;
+                InternalLogger.LogLevel = LogLevel.Off;
+            }
         }
 
         [Fact]
@@ -769,15 +778,15 @@ namespace Sentry.NLog.Tests
             var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
             sentryTarget.User = new SentryNLogUser
             {
-                Username = "${logger:shortName=true}"
+                Username = "${logger:shortName=true}",
             };
+            sentryTarget.User.Other.Add(new TargetPropertyWithContext("mood", "joyous"));
 
             var logger = factory.GetLogger("sentry");
-
             logger.Fatal(DefaultMessage);
 
             _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Username == "sentry"));
+                .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Username == "sentry" && e.User.Other["mood"] == "joyous"));
         }
 
         internal class LogLevelData : IEnumerable<object[]>
