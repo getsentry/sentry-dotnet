@@ -257,6 +257,16 @@ namespace Sentry.NLog
         {
             base.InitializeTarget();
 
+            if (InternalLogger.IsDebugEnabled || InternalLogger.IsInfoEnabled || InternalLogger.IsWarnEnabled || InternalLogger.IsErrorEnabled || InternalLogger.IsFatalEnabled)
+            {
+                var existingLogger = Options.DiagnosticLogger;
+                if (!(existingLogger is NLogDiagnosticLogger))
+                {
+                    Options.DiagnosticLogger = new NLogDiagnosticLogger(existingLogger);
+                }
+                Options.Debug = true;
+            }
+
             var customDsn = Dsn?.Render(LogEventInfo.CreateNullEvent());
             if (!string.IsNullOrEmpty(customDsn))
             {
@@ -438,14 +448,28 @@ namespace Sentry.NLog
                 return null;
             }
 
-            return new User
+            var user = new User
             {
                 Email = User.Email?.Render(logEvent),
                 Id = User.Id?.Render(logEvent),
                 IpAddress = User.IpAddress?.Render(logEvent),
                 Username = User.Username?.Render(logEvent),
-                Other = User.Other.ToDictionary(a => a.Name, b => b.Layout.Render(logEvent)),
             };
+
+            if (User.Other?.Count > 0)
+            {
+                user.Other = new Dictionary<string, string>(User.Other.Count);
+                for (int i = 0; i < User.Other.Count; ++i)
+                {
+                    var value = User.Other[i].Layout?.Render(logEvent);
+                    if (!string.IsNullOrEmpty(value) || User.Other[i].IncludeEmptyValue)
+                    {
+                        user.Other[User.Other[i].Name] = value;
+                    }
+                }
+            }
+
+            return user;
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetTagsFromLogEvent(LogEventInfo logEvent)
