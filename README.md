@@ -8,10 +8,10 @@
 Sentry SDK for .NET 
 ===========
 
-[![Travis](https://travis-ci.org/getsentry/sentry-dotnet.svg?branch=master)](https://travis-ci.org/getsentry/sentry-dotnet)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/master?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master)
-[![Tests](https://img.shields.io/appveyor/tests/sentry/sentry-dotnet/master?compact_message)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/master/tests)
-[![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/master/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
+[![Travis](https://travis-ci.org/getsentry/sentry-dotnet.svg?branch=main)](https://travis-ci.org/getsentry/sentry-dotnet)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/main?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/main)
+[![Tests](https://img.shields.io/appveyor/tests/sentry/sentry-dotnet/main?compact_message)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/main/tests)
+[![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064.svg)](https://discord.gg/Ww9hbqr)  
 
 
@@ -35,7 +35,7 @@ Looking for samples using the NuGet packages? Check out [sentry-dotnet-samples](
 
 ## Usage
 
-**Consider taking a look at the _[samples](https://github.com/getsentry/sentry-dotnet/tree/master/samples)_ directory for different types of apps and example usages of the SDK.**
+**Consider taking a look at the _[samples](https://github.com/getsentry/sentry-dotnet/tree/main/samples)_ directory for different types of apps and example usages of the SDK.**
 
 This SDK provides integrations which can hook into your app and automatically capture errors and context.
 
@@ -44,7 +44,7 @@ This SDK provides integrations which can hook into your app and automatically ca
 You can still use the SDK directly to send events to Sentry.
 The integrations are just wrappers around the main SDK `Sentry`.
 
-There's a [basic sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Basic/Program.cs) and a one demonstrating [more customization](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Console.Customized/Program.cs).
+There's a [basic sample](https://github.com/getsentry/sentry-dotnet/blob/main/samples/Sentry.Samples.Console.Basic/Program.cs) and a one demonstrating [more customization](https://github.com/getsentry/sentry-dotnet/blob/main/main/Sentry.Samples.Console.Customized/Program.cs).
 
 Install the main SDK:
 ```shell
@@ -160,7 +160,7 @@ If you want only the logging integration:
 ```shell
 dotnet add package Sentry.Extensions.Logging
 ```
-See the [logging integration only sample](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.ME.Logging/Program.cs)
+See the [logging integration only sample](https://github.com/getsentry/sentry-dotnet/blob/main/samples/Sentry.Samples.ME.Logging/Program.cs)
 
 
 ### Internals/Testability
@@ -180,7 +180,7 @@ That's the job of the `Hub`. It holds the scope management as well as a client.
 If all you are doing is sending events, without modification/access to the current scope, then you depend on `ISentryClient`. If on the other hand you would like to have access to the current scope by configuring it or binding a different client to it, etc. You'd depend on `IHub`.
 
 
-An example using `IHub` for testability is [SentryLogger](https://github.com/getsentry/sentry-dotnet/blob/master/src/Sentry.Extensions.Logging/SentryLogger.cs) and its unit tests [SentryLoggerTests](https://github.com/getsentry/sentry-dotnet/blob/master/test/Sentry.Extensions.Logging.Tests/SentryLoggerTests.cs).  
+An example using `IHub` for testability is [SentryLogger](https://github.com/getsentry/sentry-dotnet/blob/main/src/Sentry.Extensions.Logging/SentryLogger.cs) and its unit tests [SentryLoggerTests](https://github.com/getsentry/sentry-dotnet/blob/main/test/Sentry.Extensions.Logging.Tests/SentryLoggerTests.cs).  
 `SentryLogger` depends on `IHub` because it does modify the scope (through `AddBreadcrumb`). In case it only sent events, it should instead depend on `ISentryClient`
 
 ## Compatibility

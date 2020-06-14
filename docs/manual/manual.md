@@ -1,6 +1,6 @@
 # Manual
 
-Besides the examples documented here, you can refer to [samples on GitHub](https://github.com/getsentry/sentry-dotnet/tree/master/samples). 
+Besides the examples documented here, you can refer to [samples on GitHub](https://github.com/getsentry/sentry-dotnet/tree/main/samples). 
 
 These are complete samples which you can run with a debugger to see how the SDK works.
 

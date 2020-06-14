@@ -28,7 +28,7 @@ This can be done, for example, via the `app.config` or `web.config` in case of A
     </appender>
 ```
 
-For how it's done in this sample, please refer to [sample app.config](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Log4Net/app.config).
+For how it's done in this sample, please refer to [sample app.config](https://github.com/getsentry/sentry-dotnet/blob/main/samples/Sentry.Samples.Log4Net/app.config).
 
 The example above defines the [DSN](https://docs.sentry.io/quickstart/#configure-the-dsn) so that the `SentryAppender` is able to initialize the SDK.
 
@@ -42,6 +42,6 @@ One of the advantages of this approach is that you can pass multiple configurati
 
 Bottom line is that the SDK needs to be initialized only **once** so you can choose where the initialization will happen. Other integrations (like ASP.NET) also is able to initialize the SDK. Make sure you pass the DSN to only one of these integrations, or if you are calling `Init` by yourself, there's no need to pass the DSN to the integration.
 
-Please refer to [the sample](https://github.com/getsentry/sentry-dotnet/tree/master/samples/Sentry.Samples.Log4Net) to see it in action.
+Please refer to [the sample](https://github.com/getsentry/sentry-dotnet/tree/main/samples/Sentry.Samples.Log4Net) to see it in action.
 
-![Sample event in Sentry](https://github.com/getsentry/sentry-dotnet/blob/master/samples/Sentry.Samples.Log4Net/.assets/log4net-sample.gif?raw=true)
+![Sample event in Sentry](https://github.com/getsentry/sentry-dotnet/blob/main/samples/Sentry.Samples.Log4Net/.assets/log4net-sample.gif?raw=true)

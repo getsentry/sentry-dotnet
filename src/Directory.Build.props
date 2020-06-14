@@ -19,7 +19,7 @@
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <RepositoryUrl>https://github.com/getsentry/sentry-dotnet</RepositoryUrl>
 
-    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet/master/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet/main/.assets/sentry-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>

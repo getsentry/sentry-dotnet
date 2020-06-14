@@ -10,7 +10,7 @@ fi
 mono ./docfx/docfx.exe docfx.json
 
 # on Travis-CI, publish the docs
-if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PULL_REQUEST" = "false" && "$TRAVIS_BRANCH" == "master" ]]; then
+if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PULL_REQUEST" = "false" && "$TRAVIS_BRANCH" == "main" ]]; then
   git clone https://github.com/davisp/ghp-import.git &&
   ./ghp-import/ghp_import.py -n -p -f -m "Documentation upload" -b gh-pages -r https://"$GH_TOKEN"@github.com/getsentry/sentry-dotnet.git _site &&
   echo "Uploaded documentation"
