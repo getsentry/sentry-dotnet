@@ -44,7 +44,7 @@ This SDK provides integrations which can hook into your app and automatically ca
 You can still use the SDK directly to send events to Sentry.
 The integrations are just wrappers around the main SDK `Sentry`.
 
-There's a [basic sample](https://github.com/getsentry/sentry-dotnet/blob/main/samples/Sentry.Samples.Console.Basic/Program.cs) and a one demonstrating [more customization](https://github.com/getsentry/sentry-dotnet/blob/main/main/Sentry.Samples.Console.Customized/Program.cs).
+There's a [basic sample](https://github.com/getsentry/sentry-dotnet/blob/main/samples/Sentry.Samples.Console.Basic/Program.cs) and a one demonstrating [more customization](https://github.com/getsentry/sentry-dotnet/blob/main/samples/Sentry.Samples.Console.Customized/Program.cs).
 
 Install the main SDK:
 ```shell
