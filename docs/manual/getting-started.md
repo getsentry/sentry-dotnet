@@ -24,6 +24,6 @@ By default, any call to `AddBreadcrumb` or `ConfigureScope` will access the **sa
 
 Perhaps that is what you need, for example on a WPF, WinForms or Xamarin app where a single user is using it. Or maybe you are building a ASP.NET application in which case you would prefer to create a **new scope per request**, ensuring that data in any single scope relates to a single request. 
 
-The scope feature is leveraged by the [ASP.NET Core integration](https://github.com/getsentry/sentry-dotnet/tree/master/src/Sentry.AspNetCore) for exactly this reason. It isolates data from each request so in case an event happens, only relevant data is sent to Sentry. This means you don't need to dig through logs with correlation ids in order to find the data relevant to you.
+The scope feature is leveraged by the [ASP.NET Core integration](https://github.com/getsentry/sentry-dotnet/tree/main/src/Sentry.AspNetCore) for exactly this reason. It isolates data from each request so in case an event happens, only relevant data is sent to Sentry. This means you don't need to dig through logs with correlation ids in order to find the data relevant to you.
 
 Please check the [manual](~/manual/manual.md) for more.

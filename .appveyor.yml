@@ -8,7 +8,7 @@ environment:
     secure: dcqtt6sxxBV0tDkXmPZOy0iOx17uW6ZfrPOivyLDzHaS9JeWUES653Lly9ZHQm7qZn1qbs4hL4BYaNSrhD5kraY9FXBkwtNmUC9eAxL/n8QtRFJu5uXrkSpewn+UAqbghVXAKCxOhD9WJYG72g+QcqmEBTZiO1RxRJhwsLBR5YY=
 branches:
   only:
-    - master
+    - main
     - /^release\/.*$/
 install:
   # Push job information to Zeus
