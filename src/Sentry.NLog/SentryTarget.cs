@@ -255,6 +255,12 @@ namespace Sentry.NLog
         /// <inheritdoc />
         protected override void InitializeTarget()
         {
+            // If a layout has been configured on the options, replace the default logger.
+            if (Options.Layout != null)
+            {
+                Layout = Options.Layout;
+            }
+
             base.InitializeTarget();
 
             if (InternalLogger.IsDebugEnabled || InternalLogger.IsInfoEnabled || InternalLogger.IsWarnEnabled || InternalLogger.IsErrorEnabled || InternalLogger.IsFatalEnabled)
@@ -285,16 +291,15 @@ namespace Sentry.NLog
                 Options.Environment = customEnvironment;
             }
 
-            // If a layout has been configured on the options, replace the default logger.
-            if (Options.Layout != null)
-            {
-                Layout = Options.Layout;
-            }
-
             // If the sdk is not there, set it on up.
             if (InitializeSdk && _sdkDisposable == null)
             {
                 _sdkDisposable = SentrySdk.Init(Options);
+            }
+
+            if (_hubAccessor()?.IsEnabled != true)
+            {
+                InternalLogger.Info("Sentry(Name={0}): Hub not enabled", Name);
             }
         }
 
