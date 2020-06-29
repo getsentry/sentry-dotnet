@@ -57,6 +57,23 @@ namespace Sentry
             => options.Integrations = options.Integrations.Where(p => p.GetType() != typeof(TIntegration)).ToArray();
 
         /// <summary>
+        /// Add an exception filter.
+        /// </summary>
+        /// <param name="options">The SentryOptions to hold the processor.</param>
+        /// <param name="exceptionFilter">The exception filter to add.</param>
+        public static void AddExceptionFilter(this SentryOptions options, IExceptionFilter exceptionFilter)
+            => options.ExceptionFilters = options.ExceptionFilters.Concat(new[] { exceptionFilter }).ToArray();
+
+        /// <summary>
+        /// Ignore exception of type <typeparamref name="TException"/> or derived.
+        /// </summary>
+        /// <typeparam name="TException">The type of the exception to ignore.</typeparam>
+        /// <param name="options">The SentryOptions to store the exceptions type ignore.</param>
+        /// <returns></returns>
+        public static void AddExceptionFilterForType<TException>(this SentryOptions options) where TException : Exception
+            => options.AddExceptionFilter(new ExceptionTypeFilter<TException>());
+
+        /// <summary>
         /// Add prefix to exclude from 'InApp' stack trace list
         /// </summary>
         /// <param name="options"></param>

@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml.Xsl;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Protocol;
@@ -77,6 +78,9 @@ internal static class Program
                 return crumb;
             };
 
+            // Ignore exception by its type:
+            o.AddExceptionFilterForType<XsltCompileException>();
+
             // Configure the background worker which sends events to sentry:
             // Wait up to 5 seconds before shutdown while there are events to send.
             o.ShutdownTimeout = TimeSpan.FromSeconds(5);
@@ -105,6 +109,9 @@ internal static class Program
             };
         }))
         {
+            // Ignored by its type due to the setting above
+            SentrySdk.CaptureException(new XsltCompileException());
+
             SentrySdk.AddBreadcrumb(
                 "A 'bad breadcrumb' that will be rejected because of 'BeforeBreadcrumb callback above.'");
 

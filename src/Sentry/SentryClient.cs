@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -108,6 +109,16 @@ namespace Sentry
                 if (Random.NextDouble() > sample)
                 {
                     _options.DiagnosticLogger?.LogDebug("Event sampled.");
+                    return SentryId.Empty;
+                }
+            }
+            if (@event.Exception is Exception ex
+                && _options.ExceptionFilters is IExceptionFilter[] filters && filters.Length > 0)
+            {
+                if (filters.Any(f => f.Filter(ex)))
+                {
+                    _options.DiagnosticLogger?.LogInfo(
+                        "Event with exception of type '{0}' was dropped by an exception filter.", ex.GetType());
                     return SentryId.Empty;
                 }
             }
