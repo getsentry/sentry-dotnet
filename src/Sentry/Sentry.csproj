@@ -18,7 +18,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.0" />
+    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Protocol\Sentry.Protocol.csproj" />
