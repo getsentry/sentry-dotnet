@@ -132,6 +132,7 @@ The SDK is configurable, many of the settings are demonstrated through the sampl
 
 * HTTP Proxy
 * Event sampling
+* Filter exception by type
 * Enable request body extraction
 * Send PII data (Personal Identifiable Information, requires opt-in)
 * Read [diagnostics activity data]("https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md)
