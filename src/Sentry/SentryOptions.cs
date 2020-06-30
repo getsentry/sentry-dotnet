@@ -52,7 +52,9 @@ namespace Sentry
         /// <summary>
         /// A list of integrations to be added when the SDK is initialized
         /// </summary>
-        internal ISdkIntegration[] Integrations { get; set; } 
+        internal ISdkIntegration[] Integrations { get; set; }
+
+        internal IExceptionFilter[] ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
         internal IBackgroundWorker BackgroundWorker { get; set; }
 

@@ -22,6 +22,27 @@ namespace Sentry.Tests
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
+        public void CaptureEvent_ExceptionFiltered_EmptySentryId()
+        {
+            _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
+            _fixture.BackgroundWorker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(true);
+
+            var sut = _fixture.GetSut();
+
+            // Filtered out for it's the exact filtered type
+            Assert.Equal(default, sut.CaptureException(new SystemException()));
+            _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+
+            // Filtered for it's a derived type
+            Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
+            _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+
+            // Not filtered since it's not in the inheritance chain
+            Assert.NotEqual(default, sut.CaptureException(new Exception()));
+            _fixture.BackgroundWorker.Received(1).EnqueueEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
         public void CaptureEvent_IdReturnedToString_NoDashes()
         {
             var sut = _fixture.GetSut();
