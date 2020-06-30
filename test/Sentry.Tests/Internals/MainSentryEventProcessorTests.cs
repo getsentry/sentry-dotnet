@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using NSubstitute;
@@ -329,6 +331,60 @@ namespace Sentry.Tests.Internals
             sut.Process(evt);
 
             _fixture.SentryStackTraceFactory.DidNotReceive().Create();
+        }
+
+        [Fact]
+        public void Process_DeviceTimezoneSet()
+        {
+            var sut = _fixture.GetSut();
+
+            var evt = new SentryEvent();
+            sut.Process(evt);
+
+            Assert.Equal(TimeZoneInfo.Local, evt.Contexts.Device.Timezone);
+        }
+
+        [Theory]
+        [MemberData(nameof(CultureInfoTestCase))]
+        public void Process_CultureInfo_ValuesOnContext(Action<CultureInfo> setter, Func<CultureInfo> getter, string key)
+        {
+            // Arrange
+            var originalValue = getter();
+            try
+            {
+                setter(CultureInfo.CreateSpecificCulture("pt-BR"));
+                var sut = _fixture.GetSut();
+
+                var evt = new SentryEvent();
+                // Act
+                sut.Process(evt);
+
+                // Assert
+                dynamic ret = evt.Contexts[key];
+                Assert.Equal(getter().Name, ret["Name"]);
+                Assert.Equal(getter().DisplayName, ret["DisplayName"]);
+                Assert.Equal(getter().Calendar.GetType().Name, ret["Calendar"]);
+            }
+            finally
+            {
+                setter(originalValue);
+            }
+        }
+
+        public static IEnumerable<object[]> CultureInfoTestCase()
+        {
+            yield return new object[]
+            {
+                new Action<CultureInfo>(c => CultureInfo.CurrentUICulture = c),
+                new Func<CultureInfo>(() => CultureInfo.CurrentUICulture),
+                nameof(CultureInfo.CurrentUICulture)
+            };
+            yield return new object[]
+            {
+                new Action<CultureInfo>(c => CultureInfo.CurrentCulture = c),
+                new Func<CultureInfo>(() => CultureInfo.CurrentCulture),
+                nameof(CultureInfo.CurrentCulture)
+            };
         }
     }
 }

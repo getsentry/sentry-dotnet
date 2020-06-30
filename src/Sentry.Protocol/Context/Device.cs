@@ -14,6 +14,9 @@ namespace Sentry.Protocol
         [DataMember(Name = "timezone", EmitDefaultValue = false)]
         private string TimezoneSerializable => Timezone?.Id;
 
+        [DataMember(Name = "timezone_display_name", EmitDefaultValue = false)]
+        private string TimezoneName => Timezone?.DisplayName;
+
         /// <summary>
         /// Tells Sentry which type of context this is.
         /// </summary>

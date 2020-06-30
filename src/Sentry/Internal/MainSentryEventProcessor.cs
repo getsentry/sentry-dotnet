@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -66,6 +67,25 @@ namespace Sentry.Internal
                 {
                     @event.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
                 }
+            }
+
+            if (TimeZoneInfo.Local is TimeZoneInfo timeZoneInfo)
+            {
+                @event.Contexts.Device.Timezone = timeZoneInfo;
+            }
+
+            const string currentUiCultureKey = "CurrentUICulture";
+            if (!@event.Contexts.ContainsKey(currentUiCultureKey)
+                && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is IDictionary<string, string> currentUiCultureMap)
+            {
+                @event.Contexts[currentUiCultureKey] = currentUiCultureMap;
+            }
+
+            const string cultureInfoKey = "CurrentCulture";
+            if (!@event.Contexts.ContainsKey(cultureInfoKey)
+                && CultureInfoToDictionary(CultureInfo.CurrentCulture) is IDictionary<string, string> currentCultureMap)
+            {
+                @event.Contexts[cultureInfoKey] = currentCultureMap;
             }
 
             @event.Platform = Protocol.Constants.Platform;
@@ -147,7 +167,33 @@ namespace Sentry.Internal
                     @event.Modules[asmName.Name] = asmName.Version.ToString();
                 }
             }
+
             return @event;
+        }
+
+        private static IDictionary<string, string> CultureInfoToDictionary(CultureInfo cultureInfo)
+        {
+            if (cultureInfo is null)
+            {
+                return null;
+            }
+
+            var dic = new Dictionary<string, string>();
+
+            if (!string.IsNullOrWhiteSpace(cultureInfo.Name))
+            {
+                dic.Add("Name", cultureInfo.Name);
+            }
+            if (!string.IsNullOrWhiteSpace(cultureInfo.DisplayName))
+            {
+                dic.Add("DisplayName", cultureInfo.DisplayName);
+            }
+            if (cultureInfo.Calendar is Calendar cal)
+            {
+                dic.Add("Calendar", cal.GetType().Name);
+            }
+
+            return dic.Count > 0 ? dic : null;
         }
     }
 }
