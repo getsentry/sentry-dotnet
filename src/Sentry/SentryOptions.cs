@@ -343,7 +343,7 @@ namespace Sentry
             {
                 if (value is null)
                 {
-                    _diagnosticLogger?.LogDebug("Sentry will not emit SDK debug messages because debug mode has been turned off off.");
+                    _diagnosticLogger?.LogDebug("Sentry will not emit SDK debug messages because debug mode has been turned off.");
                 }
                 else
                 {
