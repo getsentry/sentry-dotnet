@@ -341,7 +341,15 @@ namespace Sentry
             get => Debug ? _diagnosticLogger : null;
             set
             {
-                _diagnosticLogger?.LogInfo("Replacing current logger with: '{0}'.", value?.GetType().Name);
+                if (value is null)
+                {
+                    _diagnosticLogger?.LogDebug("Sentry will not emit SDK debug messages because debug mode has been turned off.");
+                }
+                else
+                {
+                    _diagnosticLogger?.LogInfo("Replacing current logger with: '{0}'.", value.GetType().Name);
+                }
+
                 _diagnosticLogger = value;
             }
         }
