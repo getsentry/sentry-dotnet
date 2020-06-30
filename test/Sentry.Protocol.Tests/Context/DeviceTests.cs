@@ -52,6 +52,7 @@ namespace Sentry.Protocol.Tests.Context
 
             Assert.Equal("{\"type\":\"device\","+
                          $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
+                         $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName}\"," +
                          "\"name\":\"testing.sentry.io\"," +
                          "\"manufacturer\":\"Manufacturer\"," +
                          "\"brand\":\"Brand\"," +
@@ -175,7 +176,7 @@ namespace Sentry.Protocol.Tests.Context
             yield return new object[] { (new Device { ScreenDensity = 1 }, "{\"type\":\"device\",\"screen_density\":1.0}") };
             yield return new object[] { (new Device { ScreenDpi = 1 }, "{\"type\":\"device\",\"screen_dpi\":1}") };
             yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, "{\"type\":\"device\",\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
-            yield return new object[] { (new Device { Timezone = TimeZoneInfo.Utc }, "{\"type\":\"device\",\"timezone\":\"UTC\"}") };
+            yield return new object[] { (new Device { Timezone = TimeZoneInfo.Utc }, "{\"type\":\"device\",\"timezone\":\"UTC\",\"timezone_display_name\":\"(UTC) Coordinated Universal Time\"}") };
         }
     }
 }
