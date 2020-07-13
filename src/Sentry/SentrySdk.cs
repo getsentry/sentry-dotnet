@@ -216,6 +216,8 @@ namespace Sentry
         /// <typeparam name="TState"></typeparam>
         /// <param name="state">A state object to be added to the scope</param>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
+        /// <remarks>When GlobalHudMode is enabled, PushScope will have no effect
+        /// And no scopes are going to be created</remarks>
         [DebuggerStepThrough]
         public static IDisposable PushScope<TState>(TState state)
         {
@@ -224,13 +226,15 @@ namespace Sentry
             {
                 return GetCurrentHub().PushScope(state);
             }
-            return null;
+            return DisabledHub.Instance;
         }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
+        /// <remarks>When GlobalHudMode is enabled, PushScope will have no effect
+        /// And no scopes are going to be created</remarks>
         [DebuggerStepThrough]
         public static IDisposable PushScope()
         {
@@ -239,7 +243,7 @@ namespace Sentry
             {
                 return GetCurrentHub().PushScope();
             }
-            return null;
+            return DisabledHub.Instance;
         }
         /// <summary>
         /// Binds the client to the current scope.

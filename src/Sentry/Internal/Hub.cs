@@ -58,8 +58,11 @@ namespace Sentry.Internal
 
         public IHub Clone()
         {
-            _options.DiagnosticLogger?.LogDebug("Attempt to clone a Hub");
-            return new Hub(_options);
+            _options.DiagnosticLogger?.LogDebug("Cloning Hub.");
+
+            var clone = new Hub(_options);
+            clone.ScopeManager.ScopeAndClientStack = ScopeManager.ScopeAndClientStack.Clone() as KeyValuePair<Scope, ISentryClient>[];
+            return clone;
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
