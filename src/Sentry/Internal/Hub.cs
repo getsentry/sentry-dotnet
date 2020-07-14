@@ -61,7 +61,10 @@ namespace Sentry.Internal
             _options.DiagnosticLogger?.LogDebug("Cloning Hub.");
 
             var clone = new Hub(_options);
-            clone.ScopeManager.ScopeAndClientStack = ScopeManager.ScopeAndClientStack.Clone() as KeyValuePair<Scope, ISentryClient>[];
+            foreach (var scopeClient in ScopeManager.ScopeAndClientStack)
+            {
+                _ = clone.PushScope(scopeClient.Key.Clone());
+            }
             return clone;
         }
 
