@@ -55,7 +55,7 @@ namespace Sentry.Internal
         {
             var currentScopeAndClientStack = ScopeAndClientStack;
             var scope = currentScopeAndClientStack[currentScopeAndClientStack.Length - 1];
-
+            var client = scope.Value;
             if (scope.Key.Locked)
             {
                 // TODO: keep state on current scope?
@@ -67,7 +67,15 @@ namespace Sentry.Internal
 
             if (state != null)
             {
-                clonedScope.Apply(state);
+                if(state is KeyValuePair<Scope, ISentryClient> newScope)
+                {
+                    clonedScope = newScope.Key;
+                    client = newScope.Value;
+                }
+                else
+                {
+                    clonedScope.Apply(state);
+                }
             }
 
             var scopeSnapshot = new ScopeSnapshot(_options, currentScopeAndClientStack, this);
@@ -75,7 +83,7 @@ namespace Sentry.Internal
             _options?.DiagnosticLogger?.LogDebug("New scope pushed.");
             var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length + 1];
             Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
-            newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new KeyValuePair<Scope, ISentryClient>(clonedScope, scope.Value);
+            newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new KeyValuePair<Scope, ISentryClient>(clonedScope, client);
 
             ScopeAndClientStack = newScopeAndClientStack;
             return scopeSnapshot;

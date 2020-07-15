@@ -63,7 +63,10 @@ namespace Sentry.Internal
             var clone = new Hub(_options);
             foreach (var scopeClient in ScopeManager.ScopeAndClientStack)
             {
-                _ = clone.PushScope(scopeClient.Key.Clone());
+                var clonedScope = scopeClient.Key.Clone();
+                var cloneItem = new KeyValuePair<Scope, ISentryClient>(clonedScope, scopeClient.Value);
+
+                _ = clone.PushScope(cloneItem);
             }
             return clone;
         }
