@@ -31,7 +31,7 @@ namespace Sentry.NLog
         private IDisposable _sdkDisposable;
 
         internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
-        
+
         internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
@@ -190,7 +190,7 @@ namespace Sentry.NLog
         /// </summary>
         /// <seealso cref="IncludeEventPropertiesAsTags" />
         [Obsolete("Use IncludeEventProperties instead")]
-        public bool SendEventPropertiesAsData 
+        public bool SendEventPropertiesAsData
         {
             get => IncludeEventProperties;
             set => IncludeEventProperties = value;
@@ -380,7 +380,7 @@ namespace Sentry.NLog
                 {
                     var contextProps = GetAllProperties(logEvent);
                     evt.SetExtras(contextProps);
-                    
+
                     if (contextProps.TryGetValue(AdditionalGroupingKeyProperty, out var additionalGroupingKey)
                         && additionalGroupingKey != null)
                     {
@@ -390,7 +390,7 @@ namespace Sentry.NLog
                             overridenFingerprint.Add("{{ default }}");
                         }
                         overridenFingerprint.Add(additionalGroupingKey.ToString());
-                        
+
                         evt.SetFingerprint(overridenFingerprint);
                     }
                 }
@@ -413,7 +413,7 @@ namespace Sentry.NLog
                     : breadcrumbFormatted;
 
                 IDictionary<string, string> data = null;
-// If this is true, an exception is being logged with no custom message
+                // If this is true, an exception is being logged with no custom message
                 if (exception != null && !message.StartsWith(exception.Message))
                 {
                     // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:

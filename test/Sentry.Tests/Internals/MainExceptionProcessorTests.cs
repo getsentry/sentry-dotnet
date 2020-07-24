@@ -134,7 +134,7 @@ namespace Sentry.Tests.Internals
             var exp = new Exception();
 
             sut.Process(exp, evt);
-            var x= evt.SentryExceptions.ToList();
+            var x = evt.SentryExceptions.ToList();
 
             Assert.Single(evt.SentryExceptions.Where(p => p.Mechanism.Handled == null));
         }

@@ -22,11 +22,11 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
         {
-            var sut =  new Breadcrumb(
+            var sut = new Breadcrumb(
                 timestamp: DateTimeOffset.MaxValue,
                 message: "message1",
                 type: "type1",
-                data: new Dictionary<string, string> { {"key", "val"} },
+                data: new Dictionary<string, string> { { "key", "val" } },
                 category: "category1",
                 level: BreadcrumbLevel.Warning);
 
@@ -57,12 +57,12 @@ namespace Sentry.Protocol.Tests
             var expectedTimestampString = "9999-12-31T23:59:59Z";
             var timestampString = $"\"timestamp\":\"{expectedTimestampString}\"";
 
-            yield return new object[] { (new Breadcrumb (expectedTimestamp), $"{{{timestampString}}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, message: "message"), $"{{{timestampString},\"message\":\"message\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, type: "type"), $"{{{timestampString},\"type\":\"type\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, data: new Dictionary<string, string> { { "key", "val" }}), $"{{{timestampString},\"data\":{{\"key\":\"val\"}}}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, category: "category"), $"{{{timestampString},\"category\":\"category\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, level: BreadcrumbLevel.Critical), $"{{{timestampString},\"level\":\"critical\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp), $"{{{timestampString}}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, message: "message"), $"{{{timestampString},\"message\":\"message\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, type: "type"), $"{{{timestampString},\"type\":\"type\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, data: new Dictionary<string, string> { { "key", "val" } }), $"{{{timestampString},\"data\":{{\"key\":\"val\"}}}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, category: "category"), $"{{{timestampString},\"category\":\"category\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, level: BreadcrumbLevel.Critical), $"{{{timestampString},\"level\":\"critical\"}}") };
         }
     }
 }

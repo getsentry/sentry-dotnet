@@ -11,11 +11,11 @@ namespace Sentry.Tests
         {
             var sut = new
             {
-               SentryLevel.Debug,
-               SentryLevel.Info,
-               SentryLevel.Warning,
-               SentryLevel.Error,
-               SentryLevel.Fatal,
+                SentryLevel.Debug,
+                SentryLevel.Info,
+                SentryLevel.Warning,
+                SentryLevel.Error,
+                SentryLevel.Fatal,
             };
 
             var actual = JsonSerializer.SerializeObject(sut);

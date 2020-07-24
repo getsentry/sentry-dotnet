@@ -12,7 +12,7 @@ namespace Sentry.AspNetCore.Tests
         protected class Fixture
         {
             public HttpRequest HttpRequestCore { get; set; } = Substitute.For<HttpRequest>();
-            public IHttpRequest HttpRequest { get; set; } 
+            public IHttpRequest HttpRequest { get; set; }
             public Stream Stream { get; set; } = Substitute.For<Stream>();
 
             public Fixture()

@@ -34,7 +34,7 @@ namespace Sentry
                 clock: null,
                 message: message,
                 type: type,
-                data: data != null ? new Dictionary<string,string>(data) : null,
+                data: data != null ? new Dictionary<string, string>(data) : null,
                 category: category,
                 level: level);
 

@@ -19,7 +19,7 @@ namespace Sentry.Protocol
         /// The name of the thread
         /// </summary>
         [DataMember(Name = "name", EmitDefaultValue = false)]
-        public string  Name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Whether the crash happened on this thread.

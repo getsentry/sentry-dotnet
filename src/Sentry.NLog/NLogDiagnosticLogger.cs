@@ -1,9 +1,8 @@
 using System;
-using Sentry.Extensibility;
-using Sentry.Protocol;
-
 using NLog.Common;
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Protocol;
 
 namespace Sentry.NLog
 {
@@ -28,11 +27,16 @@ namespace Sentry.NLog
 
             switch (level)
             {
-                case SentryLevel.Fatal: return InternalLogger.IsFatalEnabled;
-                case SentryLevel.Error: return InternalLogger.IsErrorEnabled;
-                case SentryLevel.Warning: return InternalLogger.IsWarnEnabled;
-                case SentryLevel.Info: return InternalLogger.IsInfoEnabled;
-                default: return InternalLogger.IsDebugEnabled;
+                case SentryLevel.Fatal:
+                    return InternalLogger.IsFatalEnabled;
+                case SentryLevel.Error:
+                    return InternalLogger.IsErrorEnabled;
+                case SentryLevel.Warning:
+                    return InternalLogger.IsWarnEnabled;
+                case SentryLevel.Info:
+                    return InternalLogger.IsInfoEnabled;
+                default:
+                    return InternalLogger.IsDebugEnabled;
             }
         }
 

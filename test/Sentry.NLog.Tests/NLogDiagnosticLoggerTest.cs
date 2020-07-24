@@ -1,7 +1,7 @@
 using System;
-using Sentry.Protocol;
 using NLog;
 using NLog.Common;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.NLog.Tests

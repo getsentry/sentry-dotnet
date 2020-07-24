@@ -72,7 +72,7 @@ namespace Sentry.AspNetCore
                     scope.Transaction = area == null ? $"{controller}.{action}" : $"{area}.{controller}.{action}";
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // Suppress the error here; we expect an ArgumentNullException if httpContext.Request.RouteValues is null from GetRouteData()
                 // TODO: Consider adding a bool to the Sentry options to make routedata extraction optional in case they don't use a routing middleware?
