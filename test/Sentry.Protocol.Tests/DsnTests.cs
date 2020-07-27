@@ -304,8 +304,10 @@ namespace Sentry.Protocol.Tests
 
         private static void AssertEqual(DsnTestCase @case, Dsn dsn)
         {
-            if (@case == null) throw new ArgumentNullException(nameof(@case));
-            if (dsn == null) throw new ArgumentNullException(nameof(dsn));
+            if (@case == null)
+                throw new ArgumentNullException(nameof(@case));
+            if (dsn == null)
+                throw new ArgumentNullException(nameof(dsn));
 
             Assert.Equal(@case.Scheme, dsn.SentryUri.Scheme);
             Assert.Equal(@case.PublicKey, dsn.PublicKey);

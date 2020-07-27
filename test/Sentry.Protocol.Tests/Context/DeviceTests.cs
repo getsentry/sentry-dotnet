@@ -50,7 +50,7 @@ namespace Sentry.Protocol.Tests.Context
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"type\":\"device\","+
+            Assert.Equal("{\"type\":\"device\"," +
                          $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
                          $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName}\"," +
                          "\"name\":\"testing.sentry.io\"," +

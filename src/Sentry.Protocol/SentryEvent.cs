@@ -144,7 +144,7 @@ namespace Sentry
             DateTimeOffset? timestamp = null,
             Guid id = default,
             IScopeOptions options = null)
-            : base (options)
+            : base(options)
         {
             EventId = id == default ? Guid.NewGuid() : id;
 

@@ -7,9 +7,9 @@ using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Testing;
 using Xunit;
+using static Sentry.DsnSamples;
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
-using static Sentry.DsnSamples;
 
 namespace Sentry.Tests
 {

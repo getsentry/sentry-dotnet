@@ -58,7 +58,7 @@ internal static class Program
                 {
                     var zero = 0;
                     _ = 10 / zero; // Throws DivideByZeroException
-                    }
+                }
                 catch (Exception e)
                 {
                     // Direct control of capturing errors with Sentry

@@ -313,7 +313,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             Thread.CurrentThread.Name = "second";
-            var evt = new SentryEvent { SentryThreads = new []{ new SentryThread { Name = "first" }}};
+            var evt = new SentryEvent { SentryThreads = new[] { new SentryThread { Name = "first" } } };
             sut.Process(evt);
 
             Assert.Equal(2, evt.SentryThreads.Count());

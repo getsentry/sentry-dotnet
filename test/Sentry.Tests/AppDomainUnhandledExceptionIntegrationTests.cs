@@ -1,12 +1,12 @@
 using System;
-using NSubstitute;
-using Sentry.Integrations;
-using Sentry.Internal;
-using Xunit;
 using System.Linq;
 using System.Threading.Tasks;
+using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Integrations;
+using Sentry.Internal;
 using Sentry.Protocol;
+using Xunit;
 
 namespace Sentry.Tests
 {
