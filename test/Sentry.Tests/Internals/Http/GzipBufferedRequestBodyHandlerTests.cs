@@ -43,10 +43,10 @@ namespace Sentry.Tests.Internals.Http
             await sut.SendAsync(_fixture.Message, None);
 
             var gzippedContent = await _fixture.Message.Content.ReadAsByteArrayAsync();
-            var contentLegnth = ((GzipBufferedRequestBodyHandler.BufferedStreamContent)_fixture.Message.Content)
+            var contentLength = ((GzipBufferedRequestBodyHandler.BufferedStreamContent)_fixture.Message.Content)
                 .ContentLength;
 
-            Assert.Equal(gzippedContent.Length, contentLegnth);
+            Assert.Equal(gzippedContent.Length, contentLength);
         }
 
         [Fact]

@@ -129,7 +129,7 @@ namespace Sentry.NLog.Tests
                         <target type='Sentry' name='sentry' dsn='{ValidDsnWithoutSecret}'>
                             <user username=""myUser"">
                                 <other name='mood' layout='joyous'/>
-                            </user>   
+                            </user>
                         </target>
                     </targets>
                 </nlog>";
@@ -354,22 +354,22 @@ namespace Sentry.NLog.Tests
                 "{{ default }}",
                 expectedGroupingKey
             };
-            
+
             var logger = _fixture.GetLogger();
 
             var evt = LogEventInfo.Create(LogLevel.Error, logger.Name, DefaultMessage);
-            
+
             evt.Properties[SentryTarget.AdditionalGroupingKeyProperty] = expectedGroupingKey;
-            
+
             var actualSentryEvent = default(SentryEvent);
             _fixture.Hub.When(h => h.CaptureEvent(Arg.Is<SentryEvent>(
                     e => e.Extra[SentryTarget.AdditionalGroupingKeyProperty].ToString() == expectedGroupingKey)))
                 .Do(c => actualSentryEvent = c.Arg<SentryEvent>());
-    
-            
+
+
             logger.Log(evt);
-           
-            
+
+
             Assert.NotNull(actualSentryEvent);
             Assert.Equal(expectedFingerprint, actualSentryEvent.Fingerprint);
         }
@@ -491,17 +491,17 @@ namespace Sentry.NLog.Tests
             _fixture.SdkDisposeHandle = null;
             _fixture.Options.InitializeSdk = true;
 
-            var logwriter = new System.IO.StringWriter();
+            var logWriter = new System.IO.StringWriter();
 
             try
             {
-                InternalLogger.LogWriter = logwriter;
+                InternalLogger.LogWriter = logWriter;
                 InternalLogger.LogLevel = LogLevel.Debug;
 
                 _ = _fixture.GetLoggerFactory();
 
-                var logoutput = logwriter.ToString();
-                Assert.Contains("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.", logoutput);
+                var logOutput = logWriter.ToString();
+                Assert.Contains("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.", logOutput);
             }
             finally
             {

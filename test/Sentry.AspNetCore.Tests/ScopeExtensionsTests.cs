@@ -46,7 +46,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void Populate_Request_QueryString_SetToScope()
         {
-            const string expected = "?query=bla&somethign=ble";
+            const string expected = "?query=bla&something=ble";
             _httpContext.Request.QueryString.Returns(new QueryString(expected));
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
@@ -108,7 +108,7 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_Request_Headers_SetToScope()
         {
             const string firstKey = "User-Agent";
-            const string secondKey = "Accept-Encodingt";
+            const string secondKey = "Accept-Encoding";
             var headers = new HeaderDictionary
             {
                 { firstKey, new StringValues("Mozilla/5.0") },

@@ -205,7 +205,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsync_ScopePushedAndPoped_OnHappyPath()
+        public async Task InvokeAsync_ScopePushedAndPopped_OnHappyPath()
         {
             var disposable = Substitute.For<IDisposable>();
             _fixture.Hub.PushScope().Returns(disposable);
@@ -219,7 +219,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsync_ScopePushedAndPoped_OnError()
+        public async Task InvokeAsync_ScopePushedAndPopped_OnError()
         {
             var expected = new Exception("test");
             _fixture.RequestDelegate = _ => throw expected;
@@ -514,7 +514,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsync_DisabledHub_DoesNotCallFlushAync()
+        public async Task InvokeAsync_DisabledHub_DoesNotCallFlushAsync()
         {
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;

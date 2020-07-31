@@ -9,7 +9,7 @@ using Sentry.Protocol;
 
 // One of the ways to set your DSN is via an attribute:
 // It could be set via AssemblyInfo.cs and patched via CI.
-// Other ways are via environment variable, configuration files and explictly via parameter to Init
+// Other ways are via environment variable, configuration files and explicitly via parameter to Init
 [assembly: Dsn(Program.DefaultDsn)]
 // Tracks the release which sent the event and enables more features: https://docs.sentry.io/learn/releases/
 // Much like the DSN above, this is only one of the ways to define the release.
@@ -42,7 +42,7 @@ internal static class Program
             o.AttachStacktrace = true;
 
             // Sentry won't consider code from namespace LibraryX.* as part of the app code and will hide it from the stacktrace by default
-            // To see the lines from non `AppCode`, select `Full`. That'll include non App code like System.*, Microsoft.* and LibraryX.*
+            // To see the lines from non `AppCode`, select `Full`. Will include non App code like System.*, Microsoft.* and LibraryX.*
             o.AddInAppExclude("LibraryX.");
 
             // Before excluding all prefixed 'LibraryX.', any stack trace from a type namespaced 'LibraryX.Core' will be considered InApp.

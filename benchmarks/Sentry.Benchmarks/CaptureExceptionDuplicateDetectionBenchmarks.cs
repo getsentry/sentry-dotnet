@@ -16,22 +16,22 @@ namespace Sentry.Benchmarks
             o.SentryHttpClientFactory = new FakeHttpClientFactory();
         });
 
-        [GlobalSetup(Target = nameof(CaptureException_WithDupliacteDetection))]
+        [GlobalSetup(Target = nameof(CaptureException_WithDuplicateDetection))]
         public void EnabledWithDuplicateDetectionSdk() => _sdk = SentrySdk.Init(o =>
         {
             o.DisableDuplicateEventDetection();
             SharedConfig(o);
         });
 
-        [GlobalSetup(Target = nameof(CaptureException_WithoutDupliacteDetection))]
+        [GlobalSetup(Target = nameof(CaptureException_WithoutDuplicateDetection))]
         public void EnabledWithoutDuplicateDetectionSdk() => _sdk = SentrySdk.Init(SharedConfig);
 
-        [GlobalCleanup(Target = nameof(CaptureException_WithoutDupliacteDetection) + "," +
-                                nameof(CaptureException_WithDupliacteDetection))]
+        [GlobalCleanup(Target = nameof(CaptureException_WithoutDuplicateDetection) + "," +
+                                nameof(CaptureException_WithDuplicateDetection))]
         public void DisableDsk() => _sdk.Dispose();
 
         [Benchmark(Description = "CaptureException with duplicate detection")]
-        public void CaptureException_WithoutDupliacteDetection()
+        public void CaptureException_WithoutDuplicateDetection()
         {
             for (var i = 0; i < EventCount; i++)
             {
@@ -40,7 +40,7 @@ namespace Sentry.Benchmarks
         }
 
         [Benchmark(Description = "CaptureException without duplicate detection")]
-        public void CaptureException_WithDupliacteDetection()
+        public void CaptureException_WithDuplicateDetection()
         {
             for (var i = 0; i < EventCount; i++)
             {
