@@ -8,6 +8,9 @@
   <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
     <TargetFrameworks>net461;$(TargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Verify.Xunit" Version="6.7.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />

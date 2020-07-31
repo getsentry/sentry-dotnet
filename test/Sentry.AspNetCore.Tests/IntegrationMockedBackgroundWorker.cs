@@ -16,12 +16,14 @@ using Sentry;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Tests;
 using Sentry.Extensions.Logging;
+using VerifyXunit;
 
 // ReSharper disable once CheckNamespace - To test Logger emitting events:
 // It filters events coming from 'Sentry.' namespace.
 namespace Else.AspNetCore.Tests
 {
     [Collection(nameof(SentrySdkCollection))]
+    [UsesVerify]
     public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     {
         protected IBackgroundWorker Worker { get; set; } = Substitute.For<IBackgroundWorker>();
@@ -176,7 +178,7 @@ namespace Else.AspNetCore.Tests
         }
 
         [Fact]
-        public void AllSettingsViaJson()
+        public Task AllSettingsViaJson()
         {
             ConfigureWehHost = b =>
             {
@@ -191,21 +193,7 @@ namespace Else.AspNetCore.Tests
             Build();
 
             var options = ServiceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
-
-            Assert.Equal("https://1@sentry.yo/1", ((SentryOptions)options).Dsn.ToString());
-#pragma warning disable 618
-            Assert.True(options.IncludeRequestPayload);
-#pragma warning restore 618
-            Assert.Equal(RequestSize.Always, options.MaxRequestBodySize);
-            Assert.True(options.SendDefaultPii);
-            Assert.True(options.IncludeActivityData);
-            Assert.Equal(LogLevel.Error, options.MinimumBreadcrumbLevel);
-            Assert.Equal(LogLevel.Critical, options.MinimumEventLevel);
-            Assert.False(options.InitializeSdk);
-            Assert.Equal(999, options.MaxBreadcrumbs);
-            Assert.Equal(1, options.SampleRate.Value);
-            Assert.Equal("7f5d9a1", options.Release);
-            Assert.Equal("Staging", options.Environment);
+            return Verifier.Verify(options);
         }
 
         [Fact]

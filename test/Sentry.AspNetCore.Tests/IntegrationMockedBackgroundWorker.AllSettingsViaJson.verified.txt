@@ -1,0 +1,19 @@
+{
+  IncludeActivityData: true,
+  MaxRequestBodySize: 'Always',
+  FlushTimeout: '00:00:02',
+  MinimumBreadcrumbLevel: 'Error',
+  MinimumEventLevel: 'Critical',
+  Dsn: 'https://1@sentry.yo/1',
+  SendDefaultPii: true,
+  MaxBreadcrumbs: 999,
+  SampleRate: 1.0,
+  Release: '7f5d9a1',
+  Environment: 'Staging',
+  MaxQueueItems: 30,
+  ShutdownTimeout: '00:00:02',
+  DecompressionMethods: 'All',
+  RequestBodyCompressionBuffered: true,
+  ReportAssemblies: true,
+  DeduplicateMode: 2147483643
+}
