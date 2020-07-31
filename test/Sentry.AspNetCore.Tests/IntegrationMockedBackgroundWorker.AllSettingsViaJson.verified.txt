@@ -12,7 +12,7 @@
   Environment: 'Staging',
   MaxQueueItems: 30,
   ShutdownTimeout: '00:00:02',
-  DecompressionMethods: 'All',
+  DecompressionMethods: 'GZip',
   RequestBodyCompressionBuffered: true,
   ReportAssemblies: true,
   DeduplicateMode: 2147483643

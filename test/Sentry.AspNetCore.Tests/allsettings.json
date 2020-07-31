@@ -6,6 +6,7 @@
     "IncludeActivityData": true,
     "MinimumBreadcrumbLevel": "Error",
     "MinimumEventLevel": "Critical",
+    "DecompressionMethods": "GZip",
     "InitializeSdk": "false",
     "MaxBreadcrumbs": "999",
     "SampleRate": "1",
