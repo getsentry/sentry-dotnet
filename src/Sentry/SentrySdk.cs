@@ -15,7 +15,7 @@ namespace Sentry
     /// Sentry SDK entrypoint
     /// </summary>
     /// <remarks>
-    /// This is a façade to the SDK instance.
+    /// This is a facade to the SDK instance.
     /// It allows safe static access to a client and scope management.
     /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
     /// </remarks>

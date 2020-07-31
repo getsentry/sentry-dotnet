@@ -10,8 +10,8 @@ namespace Sentry.Tests.Helpers.Reflection
         {
             var assemblyBuilder = (AssemblyBuilder)CreateAssembly();
 
-            var dsnAttrib = typeof(DsnAttribute);
-            var ctor = dsnAttrib.GetConstructor(new[] { typeof(string) });
+            var dsnAttribute = typeof(DsnAttribute);
+            var ctor = dsnAttribute.GetConstructor(new[] { typeof(string) });
             var attributeBuilder = new CustomAttributeBuilder(ctor, new object[] { dsn });
             assemblyBuilder.SetCustomAttribute(attributeBuilder);
 
@@ -33,8 +33,8 @@ namespace Sentry.Tests.Helpers.Reflection
                 asmName ?? new AssemblyName(Guid.NewGuid().ToString()),
                 AssemblyBuilderAccess.RunAndCollect);
 
-            var infoAttrib = typeof(AssemblyInformationalVersionAttribute);
-            var ctor = infoAttrib.GetConstructor(new[] { typeof(string) });
+            var infoAttribute = typeof(AssemblyInformationalVersionAttribute);
+            var ctor = infoAttribute.GetConstructor(new[] { typeof(string) });
             var attributeBuilder = new CustomAttributeBuilder(ctor, new object[] { version });
             assemblyBuilder.SetCustomAttribute(attributeBuilder);
 

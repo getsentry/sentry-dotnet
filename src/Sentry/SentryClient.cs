@@ -90,7 +90,7 @@ namespace Sentry
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("An error occured when capturing the event {0}.", e, @event.EventId);
+                _options.DiagnosticLogger?.LogError("An error occurred when capturing the event {0}.", e, @event.EventId);
                 return SentryId.Empty;
             }
         }

@@ -34,8 +34,8 @@ namespace Sentry.Tests
             var disposable = Substitute.For<IDisposable>();
             Sut.PushScope().Returns(disposable);
 
-            var acutal = Sut.PushAndLockScope();
-            acutal.Dispose();
+            var actual = Sut.PushAndLockScope();
+            actual.Dispose();
 
             disposable.Received(1).Dispose();
         }

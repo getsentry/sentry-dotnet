@@ -55,7 +55,7 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void ExtractPayload_CantSeakStream_DoesNotChangePosition()
+        public void ExtractPayload_CantSeekStream_DoesNotChangePosition()
         {
             TestFixture.Stream.CanSeek.Returns(false);
 

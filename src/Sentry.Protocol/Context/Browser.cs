@@ -5,7 +5,7 @@ namespace Sentry.Protocol
 {
     /// <summary>
     /// Carries information about the browser or user agent for web-related errors.
-    /// This can either be the browser this event ocurred in, or the user agent of a
+    /// This can either be the browser this event occurred in, or the user agent of a
     /// web request that triggered the event.
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/"/>

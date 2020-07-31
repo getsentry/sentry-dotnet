@@ -61,7 +61,7 @@ namespace Sentry.Tests.Internals
         [Theory]
         [InlineData(CompressionLevel.Fastest)]
         [InlineData(CompressionLevel.Optimal)]
-        public void Create_CompressionLeveEnabled_ByDefault_IncludesGzipRequestBodyHandler(CompressionLevel level)
+        public void Create_CompressionLevelEnabled_ByDefault_IncludesGzipRequestBodyHandler(CompressionLevel level)
         {
             _fixture.HttpOptions.RequestBodyCompressionLevel = level;
 
@@ -75,7 +75,7 @@ namespace Sentry.Tests.Internals
         [Theory]
         [InlineData(CompressionLevel.Fastest)]
         [InlineData(CompressionLevel.Optimal)]
-        public void Create_CompressionLeveEnabled_NonBuffered_IncludesGzipRequestBodyHandler(CompressionLevel level)
+        public void Create_CompressionLevelEnabled_NonBuffered_IncludesGzipRequestBodyHandler(CompressionLevel level)
         {
             _fixture.HttpOptions.RequestBodyCompressionLevel = level;
             _fixture.HttpOptions.RequestBodyCompressionBuffered = false;

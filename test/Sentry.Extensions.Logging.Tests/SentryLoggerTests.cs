@@ -368,7 +368,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             var sut = _fixture.GetSut();
 
-            sut.LogDebug("antyhing");
+            sut.LogDebug("anything");
 
             _fixture.Hub.DidNotReceive()
                 .AddBreadcrumb(
@@ -385,7 +385,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             var sut = _fixture.GetSut();
 
-            sut.LogTrace("antyhing");
+            sut.LogTrace("anything");
 
             _fixture.Hub.DidNotReceive()
                 .AddBreadcrumb(
