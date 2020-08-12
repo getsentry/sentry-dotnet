@@ -49,25 +49,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Handle_TerminatingTrue_IsHandledFalse()
-        {
-            var sut = _fixture.GetSut();
-            sut.Register(_fixture.Hub, SentryOptions);
-
-            var exception = new AggregateException();
-            sut.Handle(this, new UnobservedTaskExceptionEventArgs(exception));
-            Assert.False((bool)exception.Data[Mechanism.HandledKey]);
-            Assert.True(exception.Data.Contains(Mechanism.MechanismKey));
-
-            var stackTraceFactory = Substitute.For<ISentryStackTraceFactory>();
-            var exceptionProcessor = new MainExceptionProcessor(SentryOptions, () => stackTraceFactory);
-            var @event = new SentryEvent(exception);
-
-            exceptionProcessor.Process(exception, @event);
-            Assert.NotNull(@event.SentryExceptions.ToList().Single(p => p.Mechanism.Handled == false));
-        }
-
-        [Fact]
         public void Register_UnhandledException_Subscribes()
         {
             var sut = _fixture.GetSut();
