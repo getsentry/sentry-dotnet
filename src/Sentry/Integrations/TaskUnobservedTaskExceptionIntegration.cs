@@ -35,7 +35,6 @@ namespace Sentry.Integrations
         {
             if (e.Exception != null)
             {
-                e.Exception.Data[Mechanism.HandledKey] = false;
                 e.Exception.Data[Mechanism.MechanismKey] = "Task.UnobservedTaskExceptionEventArgs";
                 _ = _hub?.CaptureException(e.Exception);
                 (_hub as IDisposable)?.Dispose();
