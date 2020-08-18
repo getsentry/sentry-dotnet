@@ -28,7 +28,7 @@ namespace Samples.AspNetCore.Mvc
                     // Tracks the release which sent the event and enables more features: https://docs.sentry.io/learn/releases/
                     // If not explicitly set here, the SDK attempts to read it from: AssemblyInformationalVersionAttribute and AssemblyVersion
                     // TeamCity: %build.vcs.number%, VSTS: BUILD_SOURCEVERSION, Travis-CI: TRAVIS_COMMIT, AppVeyor: APPVEYOR_REPO_COMMIT, CircleCI: CIRCLE_SHA1
-                    options.Release = "e386dfd"; // Could be also the be like: 2.0 or however your version your app
+                    options.Release = "e386dfd"; // Could also be any format, such as: 2.0, or however version of your app is
 
                     options.MaxBreadcrumbs = 200;
 
