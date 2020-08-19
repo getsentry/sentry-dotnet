@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Protocol;
+using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Sentry.Tests
 {
@@ -36,6 +38,41 @@ namespace Sentry.Tests
 
             _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
         }
+
+#if RELEASE
+        [Fact] // Integration test.
+        public void Handle_UnobservedTaskException_CaptureEvent()
+        {
+            // UnobservedTaskException is only registered in release mode.
+            // Disabling the test in debug otherwise it'll say it has errors.
+            bool finished;
+            _fixture.AppDomain = AppDomainAdapter.Instance;
+            var evt = new ManualResetEvent(false);
+            _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
+                .Do(_ => evt.Set());
+
+            var sut = _fixture.GetSut();
+            sut.Register(_fixture.Hub, SentryOptions);
+            try
+            {
+                Task.Factory.StartNew(() => { throw new Exception(""); });
+                using (var autoresetEvent = new AutoResetEvent(false))
+                {
+                    //wait for task to run
+                    autoresetEvent.WaitOne(TimeSpan.FromSeconds(2));
+                }
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                finished = true;
+                Assert.True(evt.WaitOne(TimeSpan.FromMilliseconds(1000)));
+            }
+            finally
+            {
+                sut.Unregister(_fixture.Hub);
+            }
+            Assert.True(finished);
+        }
+#endif
 
         [Fact]
         public void Handle_NoException_NoCaptureEvent()
