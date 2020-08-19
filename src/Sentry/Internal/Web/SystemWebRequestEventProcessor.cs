@@ -114,6 +114,9 @@ namespace Sentry.Internal.Web
             {
                 @event.Request.Data = body;
             }
+
+            _options.ApplyDefaultTags(@event);
+
             return @event;
         }
     }
