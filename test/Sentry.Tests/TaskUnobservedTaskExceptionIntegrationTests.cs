@@ -45,20 +45,28 @@ namespace Sentry.Tests
         public void Handle_UnobservedTaskException_CaptureEvent()
         {
             _fixture.AppDomain = AppDomainAdapter.Instance;
-            var evt = new ManualResetEvent(false);
+            var captureCalledEvent = new ManualResetEvent(false);
             _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
-                .Do(_ => evt.Set());
+                .Do(_ => captureCalledEvent.Set());
 
             var sut = _fixture.GetSut();
             sut.Register(_fixture.Hub, SentryOptions);
             try
             {
-                Task.Factory.StartNew(() => { throw new Exception("Unhandled on Task"); });
-                Thread.Sleep(2000);
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                Assert.True(evt.WaitOne(TimeSpan.FromMilliseconds(1)));
+                var taskStartedEvent = new ManualResetEvent(false);
+                _ = Task.Run(() =>
+                {
+                    taskStartedEvent.Set();
+                    throw new Exception("Unhandled on Task");
+                });
+                Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(1)));
+                var counter = 0;
+                do
+                {
+                    Assert.True(counter++ < 5);
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));
             }
             finally
             {
