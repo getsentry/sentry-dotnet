@@ -41,7 +41,7 @@ namespace Sentry.Internal.Web
             }
 
             @event.Request.Method = context.Request.HttpMethod;
-            @event.Request.Url = context.Request.RawUrl;
+            @event.Request.Url = context.Request.Url.AbsoluteUri;
 
             try
             {
