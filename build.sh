@@ -8,6 +8,7 @@ dotnet test -c Release \
     /p:UseSourceLink=true
 
 # Docs
-pushd docs
-./build.sh
-popd
+# Docs building is broken on travis: ImportError: No module named dateutil
+#pushd docs
+#./build.sh
+#popd
