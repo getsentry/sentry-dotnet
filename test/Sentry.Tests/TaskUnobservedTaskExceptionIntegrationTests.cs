@@ -59,11 +59,11 @@ namespace Sentry.Tests
                     taskStartedEvent.Set();
                     throw new Exception("Unhandled on Task");
                 });
-                Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(1)));
+                Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(4)));
                 var counter = 0;
                 do
                 {
-                    Assert.True(counter++ < 5);
+                    Assert.True(counter++ < 10);
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
                 } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));
