@@ -370,7 +370,7 @@ namespace Sentry
         /// <summary>
         /// whether to use a single (global) Hub as opposed to one per thread.
         /// </summary>
-        public bool GlobalHudMode { get; set; } = SentrySdk.GlobalHudDefaultMode;
+        public bool GlobalHubMode { get; set; } = SentrySdk.GlobalHubDefaultMode;
 
 #if SYSTEM_WEB
         /// <summary>

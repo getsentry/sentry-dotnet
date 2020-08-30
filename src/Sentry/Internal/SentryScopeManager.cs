@@ -67,7 +67,7 @@ namespace Sentry.Internal
 
             if (state != null)
             {
-                if(state is KeyValuePair<Scope, ISentryClient> newScope)
+                if (state is KeyValuePair<Scope, ISentryClient> newScope)
                 {
                     clonedScope = newScope.Key;
                     client = newScope.Value;

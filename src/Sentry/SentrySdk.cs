@@ -35,12 +35,12 @@ namespace Sentry
         /// <summary>
         /// Default value for globalHubMode is false.
         /// </summary>
-        internal static readonly bool GlobalHudDefaultMode;
+        internal const bool GlobalHubDefaultMode = true;
 
         /// <summary>
         /// whether to use a single (global) Hub as opposed to one per thread.
         /// </summary>
-        private static volatile bool _globalHudMode = GlobalHudDefaultMode;
+        private static volatile bool _globalHubMode = GlobalHubDefaultMode;
 
         /// <summary>
         /// Last event id recorded in the current scope
@@ -55,11 +55,11 @@ namespace Sentry
         /// </remarks>
         internal static IHub GetCurrentHub()
         {
-            if (_globalHudMode)
+            if (_globalHubMode)
             {
                 return _mainHub;
             }
-            IHub hub = _currentHub.Value;
+            var hub = _currentHub.Value;
             if (hub == null)
             {
                 hub = _mainHub.Clone();
@@ -127,19 +127,22 @@ namespace Sentry
                 }
                 options.Dsn = dsn;
             }
-            _globalHudMode = options.GlobalHudMode;
+            _globalHubMode = options.GlobalHubMode;
             return UseHub(new Hub(options));
         }
 
         internal static IDisposable UseHub(IHub hub)
         {
-            if (!_globalHudMode)
+            IHub oldHub;
+            if (!_globalHubMode)
             {
-                var asyncHub = _currentHub.Value;
-                _ = Interlocked.Exchange(ref asyncHub, hub);
-                _currentHub.Value = asyncHub;
+                oldHub = _currentHub.Value;
+                _currentHub.Value = hub;
             }
-            var oldHub = Interlocked.Exchange(ref _mainHub, hub);
+            else
+            {
+                oldHub = Interlocked.Exchange(ref _mainHub, hub);
+            }
             (oldHub as IDisposable)?.Dispose();
             return new DisposeHandle(hub);
         }
@@ -192,13 +195,13 @@ namespace Sentry
         /// <typeparam name="TState"></typeparam>
         /// <param name="state">A state object to be added to the scope</param>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
-        /// <remarks>When GlobalHudMode is enabled, PushScope will have no effect
+        /// <remarks>When GlobalHubMode is enabled, PushScope will have no effect
         /// And no scopes are going to be created</remarks>
         [DebuggerStepThrough]
         public static IDisposable PushScope<TState>(TState state)
         {
             // pushScope is no-op in global hub mode
-            if (!_globalHudMode)
+            if (!_globalHubMode)
             {
                 return GetCurrentHub().PushScope(state);
             }
@@ -209,13 +212,13 @@ namespace Sentry
         /// Creates a new scope that will terminate when disposed
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
-        /// <remarks>When GlobalHudMode is enabled, PushScope will have no effect
+        /// <remarks>When GlobalHubMode is enabled, PushScope will have no effect
         /// And no scopes are going to be created</remarks>
         [DebuggerStepThrough]
         public static IDisposable PushScope()
         {
             // pushScope is no-op in global hub mode
-            if (!_globalHudMode)
+            if (!_globalHubMode)
             {
                 return GetCurrentHub().PushScope();
             }
