@@ -35,4 +35,18 @@ jobs:
           if: ${{ matrix.sdk == 'preview' }}
           with:
             dotnet-version: '5.0.100-preview.8.20417.9'
+        # https://github.com/actions/setup-dotnet/issues/25#issuecomment-583367317
+        - name: Work around action/dotnet limitation
+            shell: pwsh
+            run: |
+              $version = Split-Path (Split-Path $ENV:DOTNET_ROOT -Parent) -Leaf;
+              $root = Split-Path (Split-Path $ENV:DOTNET_ROOT -Parent) -Parent;
+              $directories = Get-ChildItem $root | Where-Object { $_.Name -ne $version };
+              foreach ($dir in $directories) {
+                  $from = $dir.FullName;
+                  $to = "$root/$version";
+                  Write-Host Copying from $from to $to;
+                  Copy-Item "$from\*" $to -Recurse -Force;
+              }
+
         - run: ${{ matrix.build_script }}
