@@ -10,7 +10,13 @@ branches:
   only:
     - main
     - /^release\/.*$/
+environment:
+  PREVIEW_DOTNET: "5.0.100-preview.8.20417.9"
+
 install:
+  - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
+  - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
+  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
   # Push job information to Zeus
   - npm install -g @zeus-ci/cli
   - bash scripts\zeus.sh report_pending
