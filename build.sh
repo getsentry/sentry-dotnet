@@ -4,7 +4,7 @@ set -e
 dotnet test -c Release \
     /p:CollectCoverage=true \
     /p:CoverletOutputFormat=opencover \
-    /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Testing]*,[Sentry.Test*]*\" \
+    /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\" \
     /p:UseSourceLink=true
 
 # Docs
