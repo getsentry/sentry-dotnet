@@ -6,12 +6,11 @@ on:
   pull_request:
 jobs:
   build:
-    name: ${{ matrix.os }} | ${{ matrix.sdk }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        sdk: ['stable', 'preview']
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: windows-latest
@@ -30,9 +29,8 @@ jobs:
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: '3.1.401'
-        - name: .NET Core CLI preview
+        - name: .NET Core CLI 5.0 preview
           uses: actions/setup-dotnet@v1
-          if: ${{ matrix.sdk == 'preview' }}
           with:
             dotnet-version: '5.0.100-preview.8.20417.9'
         # https://github.com/actions/setup-dotnet/issues/25#issuecomment-583367317
@@ -50,3 +48,5 @@ jobs:
             }
 
         - run: ${{ matrix.build_script }}
+
+        - uses: codecov/codecov-action@v1
