@@ -367,6 +367,11 @@ namespace Sentry
         /// </remarks>
         public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
 
+        /// <summary>
+        /// whether to use a single (global) Hub as opposed to one per thread.
+        /// </summary>
+        public bool GlobalHudMode { get; set; } = SentrySdk.GlobalHudDefaultMode;
+
 #if SYSTEM_WEB
         /// <summary>
         /// Max request body to be captured when a Web request exists on a ASP.NET Application.

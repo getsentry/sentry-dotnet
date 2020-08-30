@@ -21,15 +21,55 @@ namespace Sentry
     /// </remarks>
     public static class SentrySdk
     {
-        private static IHub _hub = DisabledHub.Instance;
+
+        /// <summary>
+        /// The async-aware Hub if globalHubMode is disabled.
+        /// </summary>
+        private static readonly AsyncLocal<IHub> _currentHub = new AsyncLocal<IHub>();
+
+        /// <summary>
+        /// The Main Hub or NoOp if Sentry is disabled.
+        /// </summary>
+        private static IHub _mainHub = DisabledHub.Instance;
+
+        /// <summary>
+        /// Default value for globalHubMode is false.
+        /// </summary>
+        internal static readonly bool GlobalHudDefaultMode;
+
+        /// <summary>
+        /// whether to use a single (global) Hub as opposed to one per thread.
+        /// </summary>
+        private static volatile bool _globalHudMode = GlobalHudDefaultMode;
 
         /// <summary>
         /// Last event id recorded in the current scope
         /// </summary>
-        public static SentryId LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
+        public static SentryId LastEventId { [DebuggerStepThrough] get => GetCurrentHub().LastEventId; }
 
         /// <summary>
-        /// Initializes the SDK while attempting to locate the DSN
+        /// Returns the current hub.
+        /// </summary>
+        /// <remarks>
+        /// This is an async-aware thread-local Hub, unless global Hub mode is enabled.
+        /// </remarks>
+        internal static IHub GetCurrentHub()
+        {
+            if (_globalHudMode)
+            {
+                return _mainHub;
+            }
+            IHub hub = _currentHub.Value;
+            if (hub == null)
+            {
+                hub = _mainHub.Clone();
+                _currentHub.Value = hub;
+            }
+            return hub;
+        }
+
+        /// <summary>
+        /// Initializes the SDK while attempting to locate the DSN.
         /// </summary>
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
@@ -37,7 +77,7 @@ namespace Sentry
         public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable());
 
         /// <summary>
-        /// Initializes the SDK with the specified DSN
+        /// Initializes the SDK with the specified DSN.
         /// </summary>
         /// <remarks>
         /// An empty string is interpreted as a disabled SDK
@@ -50,7 +90,7 @@ namespace Sentry
                 : Init(c => c.Dsn = new Dsn(dsn));
 
         /// <summary>
-        /// Initializes the SDK with the specified DSN
+        /// Initializes the SDK with the specified DSN.
         /// </summary>
         /// <param name="dsn">The dsn</param>
         public static IDisposable Init(Dsn dsn) => Init(c => c.Dsn = dsn);
@@ -87,13 +127,19 @@ namespace Sentry
                 }
                 options.Dsn = dsn;
             }
-
+            _globalHudMode = options.GlobalHudMode;
             return UseHub(new Hub(options));
         }
 
         internal static IDisposable UseHub(IHub hub)
         {
-            var oldHub = Interlocked.Exchange(ref _hub, hub);
+            if (!_globalHudMode)
+            {
+                var asyncHub = _currentHub.Value;
+                _ = Interlocked.Exchange(ref asyncHub, hub);
+                _currentHub.Value = asyncHub;
+            }
+            var oldHub = Interlocked.Exchange(ref _mainHub, hub);
             (oldHub as IDisposable)?.Dispose();
             return new DisposeHandle(hub);
         }
@@ -102,7 +148,7 @@ namespace Sentry
         /// Flushes events queued up.
         /// </summary>
         [DebuggerStepThrough]
-        public static Task FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
+        public static Task FlushAsync(TimeSpan timeout) => GetCurrentHub().FlushAsync(timeout);
 
         /// <summary>
         /// Close the SDK
@@ -115,7 +161,7 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Close()
         {
-            var oldHub = Interlocked.Exchange(ref _hub, DisabledHub.Instance);
+            var oldHub = Interlocked.Exchange(ref _mainHub, DisabledHub.Instance);
             (oldHub as IDisposable)?.Dispose();
         }
 
@@ -126,7 +172,7 @@ namespace Sentry
 
             public void Dispose()
             {
-                Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
+                _ = Interlocked.CompareExchange(ref _mainHub, DisabledHub.Instance, _localHub);
                 (_localHub as IDisposable)?.Dispose();
                 _localHub = null;
             }
@@ -135,7 +181,7 @@ namespace Sentry
         /// <summary>
         /// Whether the SDK is enabled or not
         /// </summary>
-        public static bool IsEnabled { [DebuggerStepThrough] get => _hub.IsEnabled; }
+        public static bool IsEnabled { [DebuggerStepThrough] get => GetCurrentHub().IsEnabled; }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
@@ -146,22 +192,41 @@ namespace Sentry
         /// <typeparam name="TState"></typeparam>
         /// <param name="state">A state object to be added to the scope</param>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
+        /// <remarks>When GlobalHudMode is enabled, PushScope will have no effect
+        /// And no scopes are going to be created</remarks>
         [DebuggerStepThrough]
-        public static IDisposable PushScope<TState>(TState state) => _hub.PushScope(state);
+        public static IDisposable PushScope<TState>(TState state)
+        {
+            // pushScope is no-op in global hub mode
+            if (!_globalHudMode)
+            {
+                return GetCurrentHub().PushScope(state);
+            }
+            return DisabledHub.Instance;
+        }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
+        /// <remarks>When GlobalHudMode is enabled, PushScope will have no effect
+        /// And no scopes are going to be created</remarks>
         [DebuggerStepThrough]
-        public static IDisposable PushScope() => _hub.PushScope();
-
+        public static IDisposable PushScope()
+        {
+            // pushScope is no-op in global hub mode
+            if (!_globalHudMode)
+            {
+                return GetCurrentHub().PushScope();
+            }
+            return DisabledHub.Instance;
+        }
         /// <summary>
         /// Binds the client to the current scope.
         /// </summary>
         /// <param name="client">The client.</param>
         [DebuggerStepThrough]
-        public static void BindClient(ISentryClient client) => _hub.BindClient(client);
+        public static void BindClient(ISentryClient client) => GetCurrentHub().BindClient(client);
 
         /// <summary>
         /// Adds a breadcrumb to the current Scope
@@ -194,7 +259,7 @@ namespace Sentry
             string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _hub.AddBreadcrumb(message, category, type, data, level);
+            => GetCurrentHub().AddBreadcrumb(message, category, type, data, level);
 
         /// <summary>
         /// Adds a breadcrumb to the current scope
@@ -218,7 +283,7 @@ namespace Sentry
             string type = null,
             IDictionary<string, string> data = null,
             BreadcrumbLevel level = default)
-            => _hub.AddBreadcrumb(clock, message, category, type, data, level);
+            => GetCurrentHub().AddBreadcrumb(clock, message, category, type, data, level);
 
         /// <summary>
         /// Runs the callback with a new scope which gets dropped at the end
@@ -230,7 +295,7 @@ namespace Sentry
         /// <param name="scopeCallback">The callback to run with the one time scope.</param>
         [DebuggerStepThrough]
         public static void WithScope(Action<Scope> scopeCallback)
-            => _hub.WithScope(scopeCallback);
+            => GetCurrentHub().WithScope(scopeCallback);
 
         /// <summary>
         /// Configures the scope through the callback.
@@ -238,7 +303,7 @@ namespace Sentry
         /// <param name="configureScope">The configure scope callback.</param>
         [DebuggerStepThrough]
         public static void ConfigureScope(Action<Scope> configureScope)
-            => _hub.ConfigureScope(configureScope);
+            => GetCurrentHub().ConfigureScope(configureScope);
 
         /// <summary>
         /// Configures the scope asynchronously
@@ -247,7 +312,7 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
-            => _hub.ConfigureScopeAsync(configureScope);
+            => GetCurrentHub().ConfigureScopeAsync(configureScope);
 
         /// <summary>
         /// Captures the event.
@@ -256,7 +321,7 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureEvent(SentryEvent evt)
-            => _hub.CaptureEvent(evt);
+            => GetCurrentHub().CaptureEvent(evt);
 
         /// <summary>
         /// Captures the event using the specified scope.
@@ -267,7 +332,7 @@ namespace Sentry
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static SentryId CaptureEvent(SentryEvent evt, Scope scope)
-            => _hub.CaptureEvent(evt, scope);
+            => GetCurrentHub().CaptureEvent(evt, scope);
 
         /// <summary>
         /// Captures the exception.
@@ -276,7 +341,7 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureException(Exception exception)
-            => _hub.CaptureException(exception);
+            => GetCurrentHub().CaptureException(exception);
 
         /// <summary>
         /// Captures the message.
@@ -286,6 +351,6 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
-            => _hub.CaptureMessage(message, level);
+            => GetCurrentHub().CaptureMessage(message, level);
     }
 }
