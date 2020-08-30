@@ -46,7 +46,20 @@ jobs:
                 Write-Host Copying from $from to $to;
                 Copy-Item "$from\*" $to -Recurse -Force;
             }
-
         - run: ${{ matrix.build_script }}
-
         - uses: codecov/codecov-action@v1
+
+  docs:
+    runs-on: ubuntu-latest
+    name: publish API docs
+    steps:
+    - uses: actions/checkout@v1
+    - uses: nikeee/docfx-action@v1.0.0
+      name: Build Documentation
+      with:
+        args: docs/docfx.json
+    - uses: maxheld83/ghpages@master
+      name: Publish to gh-pages
+      env:
+        BUILD_DIR: docs/_site
+        GH_PAT: ${{ secrets.GH_PAGES }}
