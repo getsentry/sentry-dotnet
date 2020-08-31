@@ -62,4 +62,4 @@ jobs:
       name: Publish to gh-pages
       env:
         BUILD_DIR: docs/_site
-        GH_PAT: ${{ secrets.GH_PAGES }}
+        GH_PAT: ${{ secrets.GH_TOKEN }}
