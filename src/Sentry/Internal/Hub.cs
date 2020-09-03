@@ -56,6 +56,21 @@ namespace Sentry.Internal
             _rootScope = PushScope();
         }
 
+        public IHub Clone()
+        {
+            _options.DiagnosticLogger?.LogDebug("Cloning Hub.");
+
+            var clone = new Hub(_options);
+            foreach (var scopeClient in ScopeManager.ScopeAndClientStack)
+            {
+                var clonedScope = scopeClient.Key.Clone();
+                var cloneItem = new KeyValuePair<Scope, ISentryClient>(clonedScope, scopeClient.Value);
+
+                _ = clone.PushScope(cloneItem);
+            }
+            return clone;
+        }
+
         public void ConfigureScope(Action<Scope> configureScope)
         {
             try

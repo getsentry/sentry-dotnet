@@ -12,7 +12,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// The singleton instance.
         /// </summary>
-        public static DisabledHub Instance = new DisabledHub();
+        public static readonly DisabledHub Instance = new DisabledHub();
 
         /// <summary>
         /// Always disabled.
@@ -70,6 +70,12 @@ namespace Sentry.Extensibility
         /// No-Op.
         /// </summary>
         public void Dispose() { }
+
+        /// <summary>
+        /// Returns the same disabled instance.
+        /// </summary>
+        /// <returns></returns>
+        public IHub Clone() => Instance;
 
         /// <summary>
         /// No-Op.

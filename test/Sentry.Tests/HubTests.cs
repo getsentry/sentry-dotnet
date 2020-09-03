@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using Sentry;
@@ -106,6 +107,33 @@ namespace NotSentry.Tests
 
             Assert.NotEqual(default, actualId);
             Assert.Equal(actualId, sut.LastEventId);
+        }
+
+        [Fact]
+        public void CloneHub_Preserve_Tags_Without_Reference()
+        {
+            var tags = new Dictionary<string, string> {
+                { "A","1" },
+                { "B","2" },
+                {"C","3" }
+            };
+            var sut = _fixture.GetSut();
+
+            sut.ConfigureScope(scope => scope.SetTags(tags));
+            var clone = sut.Clone();
+
+            clone.ConfigureScope(scope => {
+                foreach(var tag in tags)
+                {
+                    Assert.True(scope.Tags.ContainsKey(tag.Key));
+                    Assert.Equal(tag.Value, scope.Tags[tag.Key]);
+                }
+            });
+
+            sut.ConfigureScope(scope => scope.SetTag("A", "0"));
+            clone.ConfigureScope(scope => Assert.Equal("1", scope.Tags["A"]));
+
+            sut.Dispose();
         }
     }
 }
