@@ -306,9 +306,9 @@ namespace Sentry.NLog
         /// <inheritdoc />
         protected override void FlushAsync(AsyncContinuation asyncContinuation)
         {
-            _hubAccessor()
-                .FlushAsync(Options.FlushTimeout)
-                .ContinueWith(t => asyncContinuation(t.Exception));
+            _ = _hubAccessor()
+                    .FlushAsync(Options.FlushTimeout)
+                    .ContinueWith(t => asyncContinuation(t.Exception));
         }
 
         /// <summary>
@@ -395,7 +395,7 @@ namespace Sentry.NLog
                     }
                 }
 
-                hub.CaptureEvent(evt);
+                _ = hub.CaptureEvent(evt);
             }
 
             // Whether or not it was sent as event, add breadcrumb so the next event includes it

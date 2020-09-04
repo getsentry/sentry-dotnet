@@ -126,7 +126,7 @@ namespace Sentry
 
             public void Dispose()
             {
-                Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
+                _ = Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
                 (_localHub as IDisposable)?.Dispose();
                 _localHub = null;
             }

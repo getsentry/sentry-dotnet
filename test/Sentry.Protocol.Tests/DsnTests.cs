@@ -132,7 +132,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void Ctor_NullDsn_ThrowsArgumentNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new Dsn(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new Dsn(null));
         }
 
         [Fact]

@@ -34,8 +34,8 @@ namespace Sentry.AspNetCore.Tests
             public Fixture()
             {
                 HubAccessor = () => Hub;
-                Hub.IsEnabled.Returns(true);
-                HttpContext.Features.Returns(FeatureCollection);
+                _ = Hub.IsEnabled.Returns(true);
+                _ = HttpContext.Features.Returns(FeatureCollection);
             }
 
             public SentryMiddleware GetSut()
@@ -52,7 +52,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public async Task InvokeAsync_DisabledSdk_InvokesNextHandlers()
         {
-            _fixture.Hub.IsEnabled.Returns(false);
+            _ = _fixture.Hub.IsEnabled.Returns(false);
             _fixture.RequestDelegate = Substitute.For<RequestDelegate>();
 
             var sut = _fixture.GetSut();
@@ -64,12 +64,12 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public async Task InvokeAsync_DisabledSdk_NoScopePushed()
         {
-            _fixture.Hub.IsEnabled.Returns(false);
+            _ = _fixture.Hub.IsEnabled.Returns(false);
 
             var sut = _fixture.GetSut();
 
             await sut.InvokeAsync(_fixture.HttpContext);
-            _fixture.Hub.DidNotReceive().PushScope();
+            _ = _fixture.Hub.DidNotReceive().PushScope();
         }
 
         [Fact]
@@ -111,10 +111,10 @@ namespace Sentry.AspNetCore.Tests
 
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(
-                async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(
+                    async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
@@ -125,28 +125,28 @@ namespace Sentry.AspNetCore.Tests
             _fixture.Logger = null;
             var expected = new Exception("test");
             var feature = Substitute.For<IExceptionHandlerFeature>();
-            feature.Error.Returns(expected);
-            _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
+            _ = feature.Error.Returns(expected);
+            _ = _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
 
             var sut = _fixture.GetSut();
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
         }
 
         [Fact]
         public async Task InvokeAsync_FeatureFoundWithNoError_DoesNotCapturesEvent()
         {
             var feature = Substitute.For<IExceptionHandlerFeature>();
-            feature.Error.ReturnsNull();
-            _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
+            _ = feature.Error.ReturnsNull();
+            _ = _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
 
             var sut = _fixture.GetSut();
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace Sentry.AspNetCore.Tests
         public async Task InvokeAsync_OnEvaluating_HttpContextDataSet()
         {
             const string expectedTraceIdentifier = "trace id";
-            _fixture.HttpContext.TraceIdentifier.Returns(expectedTraceIdentifier);
+            _ = _fixture.HttpContext.TraceIdentifier.Returns(expectedTraceIdentifier);
             var scope = new Scope();
             _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(c => c.Arg<Action<Scope>>()(scope));
@@ -208,13 +208,13 @@ namespace Sentry.AspNetCore.Tests
         public async Task InvokeAsync_ScopePushedAndPopped_OnHappyPath()
         {
             var disposable = Substitute.For<IDisposable>();
-            _fixture.Hub.PushScope().Returns(disposable);
+            _ = _fixture.Hub.PushScope().Returns(disposable);
 
             var sut = _fixture.GetSut();
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
-            _fixture.Hub.Received(1).PushScope();
+            _ = _fixture.Hub.Received(1).PushScope();
             disposable.Received(1).Dispose();
         }
 
@@ -224,14 +224,14 @@ namespace Sentry.AspNetCore.Tests
             var expected = new Exception("test");
             _fixture.RequestDelegate = _ => throw expected;
             var disposable = Substitute.For<IDisposable>();
-            _fixture.Hub.PushScope().Returns(disposable);
+            _ = _fixture.Hub.PushScope().Returns(disposable);
 
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(
-                async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(
+                    async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Hub.Received(1).PushScope();
+            _ = _fixture.Hub.Received(1).PushScope();
             disposable.Received(1).Dispose();
         }
 
@@ -263,7 +263,7 @@ namespace Sentry.AspNetCore.Tests
         public void PopulateScope_WithHostingEnvironment_WebRootSet()
         {
             const string expectedWebRoot = "root";
-            _fixture.HostingEnvironment.WebRootPath.Returns(expectedWebRoot);
+            _ = _fixture.HostingEnvironment.WebRootPath.Returns(expectedWebRoot);
             var scope = new Scope();
 
             var sut = _fixture.GetSut();
@@ -278,8 +278,8 @@ namespace Sentry.AspNetCore.Tests
         {
             _fixture.Options = null;
             var activity = new Activity("test");
-            activity.Start();
-            activity.AddTag("k", "v");
+            _ = activity.Start();
+            _ = activity.AddTag("k", "v");
 
             var scope = new Scope();
 
@@ -294,8 +294,8 @@ namespace Sentry.AspNetCore.Tests
         {
             _fixture.Options.IncludeActivityData = false;
             var activity = new Activity("test");
-            activity.Start();
-            activity.AddTag("k", "v");
+            _ = activity.Start();
+            _ = activity.AddTag("k", "v");
 
             var scope = new Scope();
 
@@ -310,8 +310,8 @@ namespace Sentry.AspNetCore.Tests
         {
             _fixture.Options.IncludeActivityData = true;
             var activity = new Activity("test");
-            activity.Start();
-            activity.AddTag("k", "v");
+            _ = activity.Start();
+            _ = activity.AddTag("k", "v");
 
             var scope = new Scope();
 
@@ -326,8 +326,8 @@ namespace Sentry.AspNetCore.Tests
         {
             _fixture.Options.IncludeActivityData = true;
             var activity = new Activity("test");
-            activity.Start();
-            activity.AddTag("k", "v");
+            _ = activity.Start();
+            _ = activity.AddTag("k", "v");
             activity.Stop();
 
             var scope = new Scope();
@@ -363,11 +363,11 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();
-            request.Body.Returns(stream);
+            _ = request.Body.Returns(stream);
             var response = Substitute.For<HttpResponse>();
-            _fixture.HttpContext.Response.Returns(response);
-            _fixture.HttpContext.Request.Returns(request);
-            request.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = _fixture.HttpContext.Request.Returns(request);
+            _ = request.HttpContext.Returns(_fixture.HttpContext);
 
             var invoked = false;
             request.When(w => w.Body = Arg.Any<Stream>())
@@ -389,11 +389,11 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();
-            request.Body.Returns(stream);
+            _ = request.Body.Returns(stream);
             var response = Substitute.For<HttpResponse>();
-            _fixture.HttpContext.Response.Returns(response);
-            _fixture.HttpContext.Request.Returns(request);
-            request.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = _fixture.HttpContext.Request.Returns(request);
+            _ = request.HttpContext.Returns(_fixture.HttpContext);
 
             var invoked = false;
             request.When(w => w.Body = Arg.Any<Stream>())
@@ -415,11 +415,11 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();
-            request.Body.Returns(stream);
+            _ = request.Body.Returns(stream);
             var response = Substitute.For<HttpResponse>();
-            _fixture.HttpContext.Response.Returns(response);
-            _fixture.HttpContext.Request.Returns(request);
-            request.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = _fixture.HttpContext.Request.Returns(request);
+            _ = request.HttpContext.Returns(_fixture.HttpContext);
 
             var invoked = false;
             request.When(w => w.Body = Arg.Any<Stream>())
@@ -441,9 +441,9 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();
-            request.Body.Returns(stream);
-            _fixture.HttpContext.Request.Returns(request);
-            request.HttpContext.Returns(_fixture.HttpContext);
+            _ = request.Body.Returns(stream);
+            _ = _fixture.HttpContext.Request.Returns(request);
+            _ = request.HttpContext.Returns(_fixture.HttpContext);
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
@@ -457,9 +457,9 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();
-            request.Body.Returns(stream);
-            _fixture.HttpContext.Request.Returns(request);
-            request.HttpContext.Returns(_fixture.HttpContext);
+            _ = request.Body.Returns(stream);
+            _ = _fixture.HttpContext.Request.Returns(request);
+            _ = request.HttpContext.Returns(_fixture.HttpContext);
 
             await sut.InvokeAsync(_fixture.HttpContext);
 
@@ -489,8 +489,8 @@ namespace Sentry.AspNetCore.Tests
         {
             var sut = _fixture.GetSut();
             var response = Substitute.For<HttpResponse>();
-            _fixture.HttpContext.Response.Returns(response);
-            response.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
             response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
             await sut.InvokeAsync(_fixture.HttpContext);
@@ -504,8 +504,8 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = false;
             var response = Substitute.For<HttpResponse>();
-            _fixture.HttpContext.Response.Returns(response);
-            response.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
             response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
             await sut.InvokeAsync(_fixture.HttpContext);
@@ -518,10 +518,10 @@ namespace Sentry.AspNetCore.Tests
         {
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;
-            _fixture.Hub.IsEnabled.Returns(false);
+            _ = _fixture.Hub.IsEnabled.Returns(false);
             var response = Substitute.For<HttpResponse>();
-            _fixture.HttpContext.Response.Returns(response);
-            response.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
             response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
             await sut.InvokeAsync(_fixture.HttpContext);
@@ -537,8 +537,8 @@ namespace Sentry.AspNetCore.Tests
             _fixture.Options.FlushOnCompletedRequest = true;
             _fixture.Options.FlushTimeout = timeout;
             var response = Substitute.For<HttpResponse>();
-            _fixture.HttpContext.Response.Returns(response);
-            response.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
             response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
             await sut.InvokeAsync(_fixture.HttpContext);

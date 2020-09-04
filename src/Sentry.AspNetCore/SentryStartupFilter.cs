@@ -10,7 +10,7 @@ namespace Sentry.AspNetCore
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
             => e =>
             {
-                e.UseSentry();
+                _ = e.UseSentry();
 
                 next(e);
             };

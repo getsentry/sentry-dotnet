@@ -40,7 +40,7 @@ namespace Sentry.NLog.Tests
 
             public Fixture()
             {
-                Hub.IsEnabled.Returns(true);
+                _ = Hub.IsEnabled.Returns(true);
                 HubAccessor = () => Hub;
                 Scope = new Scope(new SentryOptions());
                 Hub.ConfigureScope(Arg.Invoke(Scope));
@@ -187,8 +187,8 @@ namespace Sentry.NLog.Tests
 
             logger.Error(expected, DefaultMessage);
 
-            _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
+            _ = _fixture.Hub.Received(1)
+                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
         }
 
         [Fact]
@@ -224,8 +224,8 @@ namespace Sentry.NLog.Tests
             var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
             logger.Info(DefaultMessage);
 
-            _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
+            _ = _fixture.Hub.Received(1)
+                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
                                                            && e.Sdk.Version == expected.Version));
         }
 
@@ -267,8 +267,8 @@ namespace Sentry.NLog.Tests
 
             logger.Log(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == sentryLevel));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == sentryLevel));
         }
 
         [Fact]
@@ -286,8 +286,8 @@ namespace Sentry.NLog.Tests
 
             manager.GetLogger("sentry").Log(evt);
 
-            _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.LogEntry.Formatted == expected));
+            _ = _fixture.Hub.Received(1)
+                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.LogEntry.Formatted == expected));
         }
 
         [Fact]
@@ -301,23 +301,23 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Log_DisabledHub_CaptureNotCalled()
         {
-            _fixture.Hub.IsEnabled.Returns(false);
+            _ = _fixture.Hub.IsEnabled.Returns(false);
             var sut = _fixture.GetLogger();
 
             sut.Error(DefaultMessage);
 
-            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
         public void Log_EnabledHub_CaptureCalled()
         {
-            _fixture.Hub.IsEnabled.Returns(true);
+            _ = _fixture.Hub.IsEnabled.Returns(true);
             var sut = _fixture.GetLogger();
 
             sut.Error(DefaultMessage);
 
-            _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
@@ -329,7 +329,7 @@ namespace Sentry.NLog.Tests
             // ReSharper disable once AssignNullToNotNullAttribute
             sut.Error(message);
 
-            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
@@ -341,8 +341,8 @@ namespace Sentry.NLog.Tests
 
             sut.Error("Something happened: {IPAddress}", expectedIp);
 
-            _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra["IPAddress"].ToString() == expectedIp));
+            _ = _fixture.Hub.Received(1)
+                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra["IPAddress"].ToString() == expectedIp));
         }
 
         [Fact]
@@ -384,9 +384,9 @@ namespace Sentry.NLog.Tests
 
             sut.Error(expectedMessage, param);
 
-            _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
-                p.LogEntry.Formatted == $"Test {param} log"
-                && p.LogEntry.Message == expectedMessage));
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+                    p.LogEntry.Formatted == $"Test {param} log"
+                    && p.LogEntry.Message == expectedMessage));
         }
 
         [Fact]
@@ -734,8 +734,8 @@ namespace Sentry.NLog.Tests
             var logger = factory.GetLogger("sentry");
             logger.Fatal(DefaultMessage);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["Logger"] == "sentry"));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["Logger"] == "sentry"));
         }
 
         [Fact]
@@ -748,8 +748,8 @@ namespace Sentry.NLog.Tests
             var logger = factory.GetLogger("sentry");
             logger.Fatal("{a}", "b");
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == "b"));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == "b"));
         }
 
         [Fact]
@@ -763,11 +763,11 @@ namespace Sentry.NLog.Tests
             var logger = factory.GetLogger("sentry");
             logger.Fatal("{a}", (string)null);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == null));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == null));
 
             var b = _fixture.Scope.Breadcrumbs.First();
-            Assert.Single(b.Data);
+            _ = Assert.Single(b.Data);
             Assert.Null(b.Data["a"]);
         }
 
@@ -785,8 +785,8 @@ namespace Sentry.NLog.Tests
             var logger = factory.GetLogger("sentry");
             logger.Fatal(DefaultMessage);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Username == "sentry" && e.User.Other["mood"] == "joyous"));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Username == "sentry" && e.User.Other["mood"] == "joyous"));
         }
 
         internal class LogLevelData : IEnumerable<object[]>

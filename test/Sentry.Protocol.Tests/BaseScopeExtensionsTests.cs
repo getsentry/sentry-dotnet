@@ -15,7 +15,7 @@ namespace Sentry.Protocol.Tests
 
             public Fixture()
             {
-                ScopeOptions.BeforeBreadcrumb.Returns(null as Func<Breadcrumb, Breadcrumb>);
+                _ = ScopeOptions.BeforeBreadcrumb.Returns(null as Func<Breadcrumb, Breadcrumb>);
             }
             public BaseScope GetSut() => new BaseScope(ScopeOptions);
         }
@@ -135,7 +135,7 @@ namespace Sentry.Protocol.Tests
         public void SetExtra_SecondExtra_AddedToDictionary()
         {
             var originalExtra = new ConcurrentDictionary<string, object>();
-            originalExtra.TryAdd("original", new object());
+            _ = originalExtra.TryAdd("original", new object());
             var sut = _fixture.GetSut();
             sut.InternalExtra = originalExtra;
 
@@ -168,7 +168,7 @@ namespace Sentry.Protocol.Tests
         public void SetExtras_SecondExtra_AddedToDictionary()
         {
             var originalExtra = new ConcurrentDictionary<string, object>();
-            originalExtra.TryAdd("original", new object());
+            _ = originalExtra.TryAdd("original", new object());
 
             var sut = _fixture.GetSut();
             sut.InternalExtra = originalExtra;
@@ -241,7 +241,7 @@ namespace Sentry.Protocol.Tests
         public void SetTag_SecondTag_AddedToDictionary()
         {
             var originalTag = new ConcurrentDictionary<string, string>();
-            originalTag.TryAdd("original", "value");
+            _ = originalTag.TryAdd("original", "value");
 
             var sut = _fixture.GetSut();
             sut.InternalTags = originalTag;
@@ -262,7 +262,7 @@ namespace Sentry.Protocol.Tests
         {
             var sut = _fixture.GetSut();
             var expectedTag = new ConcurrentDictionary<string, string>();
-            expectedTag.TryAdd("expected", "tag");
+            _ = expectedTag.TryAdd("expected", "tag");
 
             sut.InternalTags = expectedTag;
 
@@ -276,7 +276,7 @@ namespace Sentry.Protocol.Tests
         {
             var sut = _fixture.GetSut();
             var originalTag = new ConcurrentDictionary<string, string>();
-            originalTag.TryAdd("original", "value");
+            _ = originalTag.TryAdd("original", "value");
 
             sut.InternalTags = originalTag;
 
@@ -311,7 +311,7 @@ namespace Sentry.Protocol.Tests
         [Fact]
         public void AddBreadcrumb_BeforeBreadcrumbDropsCrumb_NoBreadcrumbInEvent()
         {
-            _fixture.ScopeOptions.BeforeBreadcrumb.Returns((Breadcrumb c) => null);
+            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns((Breadcrumb c) => null);
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb("no expected");
@@ -323,7 +323,7 @@ namespace Sentry.Protocol.Tests
         public void AddBreadcrumb_BeforeBreadcrumbNewCrumb_NewCrumbUsed()
         {
             var expected = new Breadcrumb();
-            _fixture.ScopeOptions.BeforeBreadcrumb.Returns(_ => expected);
+            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns(_ => expected);
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb("no expected");
@@ -335,7 +335,7 @@ namespace Sentry.Protocol.Tests
         public void AddBreadcrumb_BeforeBreadcrumbReturns_SameCrumb()
         {
             var expected = new Breadcrumb();
-            _fixture.ScopeOptions.BeforeBreadcrumb.Returns(c => c);
+            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns(c => c);
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb(expected);
@@ -363,7 +363,7 @@ namespace Sentry.Protocol.Tests
         [InlineData(10)]
         public void AddBreadcrumb_WithOptions_BoundOptionsLimit(int limit)
         {
-            _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
+            _ = _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
             var sut = _fixture.GetSut();
 
             for (var i = 0; i < limit + 1; i++)
@@ -379,7 +379,7 @@ namespace Sentry.Protocol.Tests
         {
             const int limit = 5;
 
-            _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
+            _ = _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
             var sut = _fixture.GetSut();
 
             for (var i = 0; i < limit + 1; i++)
@@ -585,7 +585,7 @@ namespace Sentry.Protocol.Tests
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Single(target.InternalBreadcrumbs);
+            _ = Assert.Single(target.InternalBreadcrumbs);
         }
 
         [Fact]
@@ -637,7 +637,7 @@ namespace Sentry.Protocol.Tests
 
             sut.Apply(target);
 
-            Assert.Single(target.InternalExtra);
+            _ = Assert.Single(target.InternalExtra);
             Assert.Equal(expectedValue, target.InternalExtra[conflictingKey]);
         }
 
@@ -650,7 +650,7 @@ namespace Sentry.Protocol.Tests
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Single(target.InternalExtra);
+            _ = Assert.Single(target.InternalExtra);
         }
 
         [Fact]
@@ -702,7 +702,7 @@ namespace Sentry.Protocol.Tests
 
             sut.Apply(target);
 
-            Assert.Single(target.InternalTags);
+            _ = Assert.Single(target.InternalTags);
             Assert.Equal(expectedValue, target.InternalTags[conflictingKey]);
         }
 
@@ -715,7 +715,7 @@ namespace Sentry.Protocol.Tests
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Single(target.InternalTags);
+            _ = Assert.Single(target.InternalTags);
         }
 
         [Fact]
@@ -832,7 +832,7 @@ namespace Sentry.Protocol.Tests
 
             sut.Apply(target);
 
-            Assert.Single(target.Contexts);
+            _ = Assert.Single(target.Contexts);
             Assert.Equal(expectedValue, target.Contexts[conflictingKey]);
         }
 
@@ -845,7 +845,7 @@ namespace Sentry.Protocol.Tests
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Single(target.Contexts);
+            _ = Assert.Single(target.Contexts);
         }
 
         [Fact]

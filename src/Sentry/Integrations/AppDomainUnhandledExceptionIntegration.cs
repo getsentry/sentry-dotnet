@@ -36,7 +36,7 @@ namespace Sentry.Integrations
             {
                 ex.Data[Mechanism.HandledKey] = false;
                 ex.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
-                _hub?.CaptureException(ex);
+                _ = (_hub?.CaptureException(ex));
             }
 
             if (e.IsTerminating)

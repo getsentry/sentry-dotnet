@@ -23,7 +23,7 @@ namespace Sentry.AspNetCore.Tests
 
             Handlers = new[] { handler };
             Build();
-            await HttpClient.GetAsync(handler.Path);
+            _ = await HttpClient.GetAsync(handler.Path);
 
             Assert.Same(expectedException, LastExceptionFilter.LastException);
         }
@@ -33,7 +33,7 @@ namespace Sentry.AspNetCore.Tests
         {
             var logger = Substitute.For<ILogger>();
             var factory = Substitute.For<ILoggerFactory>();
-            factory.CreateLogger(Arg.Any<string>()).Returns(logger);
+            _ = factory.CreateLogger(Arg.Any<string>()).Returns(logger);
 
             AfterConfigureBuilder = builder =>
             {
@@ -42,14 +42,14 @@ namespace Sentry.AspNetCore.Tests
                 // When logging integrations behave like this, the SDK should work normally
                 // simply without the MEL integration to event/breadcrumb
                 // Note that it runs After UseSentry
-                builder.ConfigureServices(collection =>
-                    collection.AddSingleton(factory));
+                _ = builder.ConfigureServices(collection =>
+                        collection.AddSingleton(factory));
             };
 
             Build();
 
             // Make sure custom factory was used instead of default one
-            factory.Received().CreateLogger(Arg.Any<string>());
+            _ = factory.Received().CreateLogger(Arg.Any<string>());
 
             Assert.True(SentrySdk.IsEnabled);
 

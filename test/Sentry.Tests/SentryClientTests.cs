@@ -25,21 +25,21 @@ namespace Sentry.Tests
         public void CaptureEvent_ExceptionFiltered_EmptySentryId()
         {
             _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
-            _fixture.BackgroundWorker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
             // Filtered out for it's the exact filtered type
             Assert.Equal(default, sut.CaptureException(new SystemException()));
-            _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
 
             // Filtered for it's a derived type
             Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
-            _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
 
             // Not filtered since it's not in the inheritance chain
             Assert.NotEqual(default, sut.CaptureException(new Exception()));
-            _fixture.BackgroundWorker.Received(1).EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.Received(1).EnqueueEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace Sentry.Tests
 
             var evt = new SentryEvent(new Exception());
 
-            sut.CaptureEvent(evt);
+            _ = sut.CaptureEvent(evt);
 
             exceptionProcessor.Received(1).Process(evt.Exception, evt);
         }
@@ -80,7 +80,7 @@ namespace Sentry.Tests
 
             var evt = new SentryEvent(new Exception());
 
-            sut.CaptureEvent(evt, scope);
+            _ = sut.CaptureEvent(evt, scope);
 
             exceptionProcessor.Received(1).Process(evt.Exception, evt);
         }
@@ -104,7 +104,7 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -117,7 +117,7 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -139,7 +139,7 @@ namespace Sentry.Tests
                 evaluated = true;
             };
 
-            sut.CaptureEvent(new SentryEvent(), scope);
+            _ = sut.CaptureEvent(new SentryEvent(), scope);
 
             Assert.True(evaluated);
             Assert.Same(scope, actualSender);
@@ -154,7 +154,7 @@ namespace Sentry.Tests
             var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
-            sut.CaptureEvent(@event, scope);
+            _ = sut.CaptureEvent(@event, scope);
 
             Assert.Equal(scope.InternalBreadcrumbs, @event.InternalBreadcrumbs);
         }
@@ -169,7 +169,7 @@ namespace Sentry.Tests
             var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
 
             Assert.Equal(default, actualId);
-            _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace Sentry.Tests
             var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
-            sut.CaptureEvent(@event);
+            _ = sut.CaptureEvent(@event);
 
             Assert.Same(@event, received);
         }
@@ -200,7 +200,7 @@ namespace Sentry.Tests
             };
 
             var sut = _fixture.GetSut();
-            sut.CaptureEvent(@event, scope);
+            _ = sut.CaptureEvent(@event, scope);
 
             Assert.Equal(expected, @event.Level);
         }
@@ -229,7 +229,7 @@ namespace Sentry.Tests
 
             var sut = _fixture.GetSut();
 
-            sut.CaptureEvent(@event);
+            _ = sut.CaptureEvent(@event);
 
             Assert.Same(@event, received);
         }
@@ -245,7 +245,7 @@ namespace Sentry.Tests
 
             var sut = _fixture.GetSut();
 
-            sut.CaptureEvent(@event);
+            _ = sut.CaptureEvent(@event);
 
             Assert.Same(@event, received);
         }
@@ -259,7 +259,7 @@ namespace Sentry.Tests
             var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
-            sut.CaptureEvent(@event);
+            _ = sut.CaptureEvent(@event);
 
             var crumb = @event.Breadcrumbs.First();
             Assert.Equal("BeforeSend callback failed.", crumb.Message);
@@ -276,7 +276,7 @@ namespace Sentry.Tests
             var @event = new SentryEvent();
 
             var sut = _fixture.GetSut();
-            sut.CaptureEvent(@event);
+            _ = sut.CaptureEvent(@event);
 
             Assert.Equal(expectedRelease, @event.Release);
         }
@@ -286,7 +286,7 @@ namespace Sentry.Tests
         {
             var sut = _fixture.GetSut();
             sut.Dispose();
-            Assert.Throws<ObjectDisposedException>(() => sut.CaptureEvent(null));
+            _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureEvent(null));
         }
 
         [Fact]
@@ -382,7 +382,7 @@ namespace Sentry.Tests
 
             using (var sut = new SentryClient(_fixture.SentryOptions))
             {
-                Assert.IsType<BackgroundWorker>(sut.Worker);
+                _ = Assert.IsType<BackgroundWorker>(sut.Worker);
             }
         }
     }

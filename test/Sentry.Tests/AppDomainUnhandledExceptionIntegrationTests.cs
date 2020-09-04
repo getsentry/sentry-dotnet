@@ -34,7 +34,7 @@ namespace Sentry.Tests
 
             sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
 
-            _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Sentry.Tests
 
             sut.Handle(this, new UnhandledExceptionEventArgs(new object(), true));
 
-            _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
         }
 
         [Fact]

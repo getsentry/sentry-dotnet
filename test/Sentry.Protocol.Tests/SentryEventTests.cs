@@ -37,10 +37,10 @@ namespace Sentry.Protocol.Tests
             sut.InternalBreadcrumbs = new ConcurrentQueue<Breadcrumb>();
             sut.InternalBreadcrumbs.Enqueue(new Breadcrumb(timestamp, "crumb"));
             sut.InternalExtra = new ConcurrentDictionary<string, object>();
-            sut.InternalExtra.TryAdd("extra_key", "extra_value");
+            _ = sut.InternalExtra.TryAdd("extra_key", "extra_value");
             sut.InternalFingerprint = new[] { "fingerprint" };
             sut.InternalTags = new ConcurrentDictionary<string, string>();
-            sut.InternalTags.TryAdd("tag_key", "tag_value");
+            _ = sut.InternalTags.TryAdd("tag_key", "tag_value");
 
             var actual = JsonSerializer.SerializeObject(sut);
 

@@ -109,7 +109,7 @@ namespace Sentry.Tests.Internals
             };
             var sut = _fixture.GetSut();
 
-            sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+            _ = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
 
             Assert.True(configureHandlerInvoked);
         }
@@ -125,7 +125,7 @@ namespace Sentry.Tests.Internals
             };
             var sut = _fixture.GetSut();
 
-            sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+            _ = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
 
             Assert.True(configureHandlerInvoked);
         }
@@ -141,7 +141,7 @@ namespace Sentry.Tests.Internals
             };
             var sut = _fixture.GetSut();
 
-            sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+            _ = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
 
             Assert.True(configureHandlerInvoked);
         }
@@ -158,7 +158,7 @@ namespace Sentry.Tests.Internals
             };
             var sut = _fixture.GetSut();
 
-            sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
+            _ = sut.Create(DsnSamples.Valid, _fixture.HttpOptions);
 
             Assert.True(configureHandlerInvoked);
         }

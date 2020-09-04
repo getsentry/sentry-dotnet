@@ -12,17 +12,17 @@ namespace Sentry.Testing
             =>
                 e =>
                 {
-                    e.Use(async (_, n) =>
-                    {
-                        try
+                    _ = e.Use(async (_, n) =>
                         {
-                            await n();
-                        }
-                        catch (Exception ex)
-                        {
-                            LastException = ex;
-                        }
-                    });
+                            try
+                            {
+                                await n();
+                            }
+                            catch (Exception ex)
+                            {
+                                LastException = ex;
+                            }
+                        });
 
                     next(e);
                 };

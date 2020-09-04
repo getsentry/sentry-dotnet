@@ -109,7 +109,7 @@ namespace Sentry.Serilog
                 evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
                 evt.SetExtras(GetLoggingEventProperties(logEvent));
 
-                hub.CaptureEvent(evt);
+                _ = hub.CaptureEvent(evt);
             }
 
             // Even if it was sent as event, add breadcrumb so next event includes it

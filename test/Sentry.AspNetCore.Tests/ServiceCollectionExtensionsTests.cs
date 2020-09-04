@@ -13,14 +13,14 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void AddSentry_NoPreviousRegistration_RegistersHub()
         {
-            _sut.AddSentry();
+            _ = _sut.AddSentry();
             _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(IHub)));
         }
 
         [Fact]
         public void AddSentry_NoPreviousRegistration_RegistersClient()
         {
-            _sut.AddSentry();
+            _ = _sut.AddSentry();
             _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(ISentryClient)));
         }
 
@@ -29,9 +29,9 @@ namespace Sentry.AspNetCore.Tests
         {
             var hub = Substitute.For<IHub>();
             _sut = new ServiceCollection();
-            _sut.AddSingleton(hub);
+            _ = _sut.AddSingleton(hub);
 
-            _sut.AddSentry();
+            _ = _sut.AddSentry();
 
             Assert.Same(hub, _sut.Single(s => s.ServiceType == typeof(IHub)).ImplementationInstance);
         }
@@ -41,9 +41,9 @@ namespace Sentry.AspNetCore.Tests
         {
             var hub = Substitute.For<ISentryClient>();
             _sut = new ServiceCollection();
-            _sut.AddSingleton(hub);
+            _ = _sut.AddSingleton(hub);
 
-            _sut.AddSentry();
+            _ = _sut.AddSentry();
 
             Assert.Same(hub, _sut.Single(s => s.ServiceType == typeof(ISentryClient)).ImplementationInstance);
         }
@@ -51,7 +51,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void AddSentry_PayloadExtractors_Registered()
         {
-            _sut.AddSentry();
+            _ = _sut.AddSentry();
             _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(IRequestPayloadExtractor)
                                                                && d.ImplementationType == typeof(FormRequestPayloadExtractor)));
 
@@ -64,9 +64,9 @@ namespace Sentry.AspNetCore.Tests
         {
             var hub = Substitute.For<ISentryClient>();
             _sut = new ServiceCollection();
-            _sut.AddSingleton(hub);
+            _ = _sut.AddSingleton(hub);
 
-            _sut.AddSentry();
+            _ = _sut.AddSentry();
 
             var last = _sut.Last(d => d.ServiceType == typeof(IRequestPayloadExtractor));
             Assert.Same(typeof(DefaultRequestPayloadExtractor), last.ImplementationType);
@@ -75,7 +75,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void AddSentry_DefaultUserFactory_Registered()
         {
-            _sut.AddSentry();
+            _ = _sut.AddSentry();
             _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(IUserFactory)
                                                                && d.ImplementationType == typeof(DefaultUserFactory)));
         }

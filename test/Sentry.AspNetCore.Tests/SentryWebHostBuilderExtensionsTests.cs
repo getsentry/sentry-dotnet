@@ -40,28 +40,28 @@ namespace Sentry.AspNetCore.Tests
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_ValidDsnString_ServicesRegistered(Action<IServiceCollection> assert)
         {
-            WebHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
+            _ = WebHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
             assert(Services);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_Parameterless_ServicesRegistered(Action<IServiceCollection> assert)
         {
-            WebHostBuilder.UseSentry();
+            _ = WebHostBuilder.UseSentry();
             assert(Services);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_DisableDsnString_ServicesRegistered(Action<IServiceCollection> assert)
         {
-            WebHostBuilder.UseSentry(Protocol.Constants.DisableSdkDsnValue);
+            _ = WebHostBuilder.UseSentry(Protocol.Constants.DisableSdkDsnValue);
             assert(Services);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
         public void UseSentry_Callback_ServicesRegistered(Action<IServiceCollection> assert)
         {
-            WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
+            _ = WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
             assert(Services);
         }
 

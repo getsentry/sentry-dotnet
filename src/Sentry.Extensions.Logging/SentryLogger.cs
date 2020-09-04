@@ -92,7 +92,7 @@ namespace Sentry.Extensions.Logging
                     @event.SetTag(tuple.Value.name, tuple.Value.value);
                 }
 
-                _hub.CaptureEvent(@event);
+                _ = _hub.CaptureEvent(@event);
             }
 
             // Even if it was sent as event, add breadcrumb so next event includes it

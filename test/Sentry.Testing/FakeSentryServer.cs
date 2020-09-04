@@ -14,12 +14,12 @@ namespace Sentry.Testing
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
-                    app.Use(async (context, next) =>
-                    {
-                        var handler = handlers.FirstOrDefault(p => p.Path == context.Request.Path);
+                    _ = app.Use(async (context, next) =>
+                        {
+                            var handler = handlers.FirstOrDefault(p => p.Path == context.Request.Path);
 
-                        await (handler?.Handler(context) ?? next());
-                    });
+                            await (handler?.Handler(context) ?? next());
+                        });
                 });
 
             return new TestServer(builder);
