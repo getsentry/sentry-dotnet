@@ -68,7 +68,7 @@ namespace Sentry.Internal.Http
 
                 foreach (var header in content.Headers)
                 {
-                    Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    _ = Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
 
                 Headers.ContentEncoding.Add(Gzip);

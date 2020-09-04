@@ -31,7 +31,7 @@ namespace Else.AspNetCore.Tests
         {
             ConfigureWehHost = builder =>
             {
-                builder.UseSentry(options =>
+                _ = builder.UseSentry(options =>
                 {
                     options.Dsn = DsnSamples.ValidDsnWithSecret;
                     options.BackgroundWorker = Worker;
@@ -47,9 +47,9 @@ namespace Else.AspNetCore.Tests
             Configure = o => o.InitializeSdk = false;
 
             Build();
-            await HttpClient.GetAsync("/throw");
+            _ = await HttpClient.GetAsync("/throw");
 
-            Worker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = Worker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
             Assert.False(ServiceProvider.GetRequiredService<IHub>().IsEnabled);
         }
 
@@ -62,7 +62,7 @@ namespace Else.AspNetCore.Tests
             var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
             logger.LogCritical("test");
 
-            Worker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = Worker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
             Assert.False(ServiceProvider.GetRequiredService<IHub>().IsEnabled);
         }
 
@@ -75,7 +75,7 @@ namespace Else.AspNetCore.Tests
             var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
             logger.LogError(expectedMessage);
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.LogEntry.Formatted == expectedMessage));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.LogEntry.Formatted == expectedMessage));
         }
 
         [Fact]
@@ -88,9 +88,9 @@ namespace Else.AspNetCore.Tests
             var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
             logger.LogError(expectedMessage, param);
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p =>
-                p.LogEntry.Formatted == $"Test {param} log"
-                && p.LogEntry.Message == expectedMessage));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p =>
+                    p.LogEntry.Formatted == $"Test {param} log"
+                    && p.LogEntry.Message == expectedMessage));
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace Else.AspNetCore.Tests
             Configure = o => o.Debug = true;
             Build();
             var options = ServiceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
-            Assert.IsType<MelDiagnosticLogger>(options.Value.DiagnosticLogger);
+            _ = Assert.IsType<MelDiagnosticLogger>(options.Value.DiagnosticLogger);
         }
 
         [Fact]
@@ -117,9 +117,9 @@ namespace Else.AspNetCore.Tests
 
             Build();
             var client = ServiceProvider.GetRequiredService<ISentryClient>();
-            client.CaptureMessage(expectedMessage);
+            _ = client.CaptureMessage(expectedMessage);
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
         }
 
         [Fact]
@@ -129,9 +129,9 @@ namespace Else.AspNetCore.Tests
 
             Build();
             var client = ServiceProvider.GetRequiredService<IHub>();
-            client.CaptureMessage(expectedMessage);
+            _ = client.CaptureMessage(expectedMessage);
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
         }
 
         [Fact]
@@ -140,9 +140,9 @@ namespace Else.AspNetCore.Tests
             Configure = o => o.SendDefaultPii = false;
 
             Build();
-            await HttpClient.GetAsync("/throw");
+            _ = await HttpClient.GetAsync("/throw");
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == null));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == null));
         }
 
         [Fact]
@@ -151,9 +151,9 @@ namespace Else.AspNetCore.Tests
             Configure = o => o.SendDefaultPii = true; // Sentry package will set to Environment.UserName
 
             Build();
-            await HttpClient.GetAsync("/throw");
+            _ = await HttpClient.GetAsync("/throw");
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == null));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == null));
         }
 
         [Fact]
@@ -163,16 +163,16 @@ namespace Else.AspNetCore.Tests
             Configure = o => o.SendDefaultPii = true; // Sentry package will set to Environment.UserName
             ConfigureApp = app =>
             {
-                app.Use(async (context, next) =>
+                _ = app.Use(async (context, next) =>
                 {
                     context.User = new GenericPrincipal(new GenericIdentity(expectedName), Array.Empty<string>());
                     await next();
                 });
             };
             Build();
-            await HttpClient.GetAsync("/throw");
+            _ = await HttpClient.GetAsync("/throw");
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == expectedName));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.User.Username == expectedName));
         }
 
         [Fact]
@@ -180,12 +180,12 @@ namespace Else.AspNetCore.Tests
         {
             ConfigureWehHost = b =>
             {
-                b.ConfigureAppConfiguration(c =>
+                _ = b.ConfigureAppConfiguration(c =>
                 {
-                    c.SetBasePath(Directory.GetCurrentDirectory()); // fails on net462 without this
-                    c.AddJsonFile("allsettings.json", optional: false);
+                    _ = c.SetBasePath(Directory.GetCurrentDirectory()); // fails on net462 without this
+                    _ = c.AddJsonFile("allsettings.json", optional: false);
                 });
-                b.UseSentry(o => o.BackgroundWorker = Worker);
+                _ = b.UseSentry(o => o.BackgroundWorker = Worker);
             };
 
             Build();
@@ -216,9 +216,9 @@ namespace Else.AspNetCore.Tests
             Configure = o => o.Environment = expected;
 
             Build();
-            await HttpClient.GetAsync("/throw");
+            _ = await HttpClient.GetAsync("/throw");
 
-            Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
         }
 
         [Fact]
@@ -231,9 +231,9 @@ namespace Else.AspNetCore.Tests
                 () =>
                 {
                     Build();
-                    HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
+                    _ = HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
 
-                    Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
+                    _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
                 });
         }
 
@@ -250,9 +250,9 @@ namespace Else.AspNetCore.Tests
                 () =>
                 {
                     Build();
-                    HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
+                    _ = HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
 
-                    Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
+                    _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
                 });
         }
     }

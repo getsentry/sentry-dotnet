@@ -12,7 +12,7 @@ namespace Sentry.AspNetCore.Tests
             =>
                 e =>
                 {
-                    e.Use(async (_, n) =>
+                    _ = e.Use(async (_, n) =>
                     {
                         try
                         {

@@ -19,14 +19,14 @@ namespace Sentry.Extensions.Logging.Tests
             public Fixture()
             {
                 Builder = new ConfigurationBuilder();
-                Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+                _ = Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
             }
 
             public IServiceProvider GetSut()
             {
                 var configuration = Builder.Build();
                 var services = new ServiceCollection();
-                services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry());
+                _ = services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry());
                 return services.BuildServiceProvider();
             }
         }
@@ -52,7 +52,7 @@ namespace Sentry.Extensions.Logging.Tests
                 {"Sentry:InitializeSdk", "true"},
             };
 
-            _fixture.Builder.AddInMemoryCollection(dict);
+            _ = _fixture.Builder.AddInMemoryCollection(dict);
 
             var provider = _fixture.GetSut();
             var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
@@ -72,7 +72,7 @@ namespace Sentry.Extensions.Logging.Tests
                 {"Sentry:DefaultTags:" + expectedKey, expectedValue},
             };
 
-            _fixture.Builder.AddInMemoryCollection(dict);
+            _ = _fixture.Builder.AddInMemoryCollection(dict);
 
             var provider = _fixture.GetSut();
             var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
@@ -84,7 +84,7 @@ namespace Sentry.Extensions.Logging.Tests
         public void SentryLoggerProvider_ResolvedFromILoggerProvider()
         {
             var provider = _fixture.GetSut();
-            Assert.Single(provider.GetServices<ILoggerProvider>().OfType<SentryLoggerProvider>());
+            _ = Assert.Single(provider.GetServices<ILoggerProvider>().OfType<SentryLoggerProvider>());
         }
     }
 }

@@ -118,7 +118,7 @@ namespace Sentry.Log4Net
                 evt.Environment = Environment;
             }
 
-            Hub.CaptureEvent(evt);
+            _ = Hub.CaptureEvent(evt);
         }
 
         private static IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LoggingEvent loggingEvent)

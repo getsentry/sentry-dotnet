@@ -20,15 +20,15 @@ namespace Sentry.Tests.Extensibility
         public HubAdapterTests()
         {
             Hub = Substitute.For<IHub>();
-            SentrySdk.UseHub(Hub);
+            _ = SentrySdk.UseHub(Hub);
         }
 
         [Fact]
         public void CaptureEvent_MockInvoked()
         {
             var expected = new SentryEvent();
-            HubAdapter.Instance.CaptureEvent(expected);
-            Hub.Received(1).CaptureEvent(expected);
+            _ = HubAdapter.Instance.CaptureEvent(expected);
+            _ = Hub.Received(1).CaptureEvent(expected);
         }
 
         [Fact]
@@ -36,16 +36,16 @@ namespace Sentry.Tests.Extensibility
         {
             var expectedEvent = new SentryEvent();
             var expectedScope = new Scope();
-            HubAdapter.Instance.CaptureEvent(expectedEvent, expectedScope);
-            Hub.Received(1).CaptureEvent(expectedEvent, expectedScope);
+            _ = HubAdapter.Instance.CaptureEvent(expectedEvent, expectedScope);
+            _ = Hub.Received(1).CaptureEvent(expectedEvent, expectedScope);
         }
 
         [Fact]
         public void CaptureException_MockInvoked()
         {
             var expected = new Exception();
-            HubAdapter.Instance.CaptureException(expected);
-            Hub.Received(1).CaptureException(expected);
+            _ = HubAdapter.Instance.CaptureException(expected);
+            _ = Hub.Received(1).CaptureException(expected);
         }
 
         [Fact]
@@ -68,8 +68,8 @@ namespace Sentry.Tests.Extensibility
         public void ConfigureScopeAsync_MockInvoked()
         {
             Task Expected(Scope _) => Task.CompletedTask;
-            HubAdapter.Instance.ConfigureScopeAsync(Expected);
-            Hub.Received(1).ConfigureScopeAsync(Expected);
+            _ = HubAdapter.Instance.ConfigureScopeAsync(Expected);
+            _ = Hub.Received(1).ConfigureScopeAsync(Expected);
         }
 
         [Fact]
@@ -93,16 +93,16 @@ namespace Sentry.Tests.Extensibility
         [Fact]
         public void PushScope_MockInvoked()
         {
-            HubAdapter.Instance.PushScope();
-            Hub.Received(1).PushScope();
+            _ = HubAdapter.Instance.PushScope();
+            _ = Hub.Received(1).PushScope();
         }
 
         [Fact]
         public void PushScope_State_MockInvoked()
         {
             var expected = new object();
-            HubAdapter.Instance.PushScope(expected);
-            Hub.Received(1).PushScope(expected);
+            _ = HubAdapter.Instance.PushScope(expected);
+            _ = Hub.Received(1).PushScope(expected);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace Sentry.Tests.Extensibility
         public void AddBreadcrumb_WithClock_BreadcrumbInstanceCreated()
         {
             var clock = Substitute.For<ISystemClock>();
-            clock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
+            _ = clock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
 
             TestAddBreadcrumbExtension((message, category, type, data, level)
                 => HubAdapter.Instance.AddBreadcrumb(
@@ -134,7 +134,7 @@ namespace Sentry.Tests.Extensibility
                     data,
                     level));
 
-            clock.Received(1).GetUtcNow();
+            _ = clock.Received(1).GetUtcNow();
         }
 
         private void TestAddBreadcrumbExtension(

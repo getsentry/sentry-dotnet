@@ -22,7 +22,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             var sut = _fixture.GetSut();
 
-            Assert.IsType<SentryLogger>(sut.CreateLogger("category"));
+            _ = Assert.IsType<SentryLogger>(sut.CreateLogger("category"));
         }
 
         [Fact]
@@ -40,25 +40,25 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void Ctor_DisabledHub_DoesNotCreatesScope()
         {
-            _fixture.Hub.IsEnabled.Returns(false);
-            _fixture.GetSut();
-            _fixture.Hub.DidNotReceive().PushScope();
+            _ = _fixture.Hub.IsEnabled.Returns(false);
+            _ = _fixture.GetSut();
+            _ = _fixture.Hub.DidNotReceive().PushScope();
         }
 
         [Fact]
         public void Ctor_EnabledHub_CreatesScope()
         {
-            _fixture.Hub.IsEnabled.Returns(true);
-            _fixture.GetSut();
-            _fixture.Hub.Received(1).PushScope();
+            _ = _fixture.Hub.IsEnabled.Returns(true);
+            _ = _fixture.GetSut();
+            _ = _fixture.Hub.Received(1).PushScope();
         }
 
         [Fact]
         public void Dispose_DisposesNewScope()
         {
-            _fixture.Hub.IsEnabled.Returns(true);
+            _ = _fixture.Hub.IsEnabled.Returns(true);
             var disposable = Substitute.For<IDisposable>();
-            _fixture.Hub.PushScope().Returns(disposable);
+            _ = _fixture.Hub.PushScope().Returns(disposable);
 
             var sut = _fixture.GetSut();
 
@@ -76,13 +76,13 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void Ctor_ScopeSdk_ContainNameAndVersion()
         {
-            _fixture.Hub.IsEnabled.Returns(true);
+            _ = _fixture.Hub.IsEnabled.Returns(true);
             var scope = new Scope(new SentryOptions());
 
             _fixture.Hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(info => info.Arg<Action<Scope>>()(scope));
 
-            _fixture.GetSut();
+            _ = _fixture.GetSut();
 
             Assert.Equal(Constants.SdkName, scope.Sdk.Name);
             Assert.Equal(SentryLoggerProvider.NameAndVersion.Version, scope.Sdk.Version);

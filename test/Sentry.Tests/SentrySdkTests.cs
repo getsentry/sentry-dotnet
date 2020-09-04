@@ -47,7 +47,7 @@ namespace Sentry.Tests
         [Fact]
         public void Init_BrokenDsn_Throws()
         {
-            Assert.Throws<UriFormatException>(() => SentrySdk.Init("invalid stuff"));
+            _ = Assert.Throws<UriFormatException>(() => SentrySdk.Init("invalid stuff"));
         }
 
         [Fact]
@@ -149,7 +149,7 @@ namespace Sentry.Tests
         public void Init_EmptyDsn_LogsWarning()
         {
             var logger = Substitute.For<IDiagnosticLogger>();
-            logger.IsEnabled(SentryLevel.Warning).Returns(true);
+            _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
 
             var options = new SentryOptions
             {
@@ -167,7 +167,7 @@ namespace Sentry.Tests
         public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogWarning()
         {
             var logger = Substitute.For<IDiagnosticLogger>();
-            logger.IsEnabled(SentryLevel.Warning).Returns(true);
+            _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
 
             var options = new SentryOptions
             {
@@ -190,7 +190,7 @@ namespace Sentry.Tests
             SentrySdk.ConfigureScope(p =>
             {
                 called = true;
-                Assert.Single(p.Breadcrumbs);
+                _ = Assert.Single(p.Breadcrumbs);
             });
             Assert.True(called);
             called = false;
@@ -227,7 +227,7 @@ namespace Sentry.Tests
             SentrySdk.ConfigureScope(p =>
             {
                 called = true;
-                Assert.Single(p.Breadcrumbs);
+                _ = Assert.Single(p.Breadcrumbs);
             });
             Assert.True(called);
             second.Dispose();
@@ -365,9 +365,9 @@ namespace Sentry.Tests
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);
-                SentrySdk.CaptureMessage("message");
+                _ = SentrySdk.CaptureMessage("message");
 
-                worker.EnqueueEvent(Arg.Is<SentryEvent>(e => e.Breadcrumbs.Single().Message == expected));
+                _ = worker.EnqueueEvent(Arg.Is<SentryEvent>(e => e.Breadcrumbs.Single().Message == expected));
             }
         }
 

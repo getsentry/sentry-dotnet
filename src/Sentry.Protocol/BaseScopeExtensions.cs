@@ -148,7 +148,7 @@ namespace Sentry
                                                 ?? Constants.DefaultMaxBreadcrumbs) + 1;
             if (overflow > 0)
             {
-                breadcrumbs.TryDequeue(out _);
+                _ = breadcrumbs.TryDequeue(out _);
             }
 
             breadcrumbs.Enqueue(breadcrumb);
@@ -181,7 +181,7 @@ namespace Sentry
             var extra = (ConcurrentDictionary<string, object>)scope.Extra;
             foreach (var keyValuePair in values)
             {
-                extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
+                _ = extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
             }
         }
 
@@ -204,7 +204,7 @@ namespace Sentry
             var internalTags = (ConcurrentDictionary<string, string>)scope.Tags;
             foreach (var keyValuePair in tags)
             {
-                internalTags.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
+                _ = internalTags.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
             }
         }
 
@@ -245,14 +245,14 @@ namespace Sentry
 
             if (from.InternalBreadcrumbs != null)
             {
-                ((ConcurrentQueue<Breadcrumb>)to.Breadcrumbs).EnqueueAll(from.InternalBreadcrumbs);
+                _ = ((ConcurrentQueue<Breadcrumb>)to.Breadcrumbs).EnqueueAll(from.InternalBreadcrumbs);
             }
 
             if (from.InternalExtra != null)
             {
                 foreach (var extra in from.Extra)
                 {
-                    ((ConcurrentDictionary<string, object>)to.Extra).TryAdd(extra.Key, extra.Value);
+                    _ = ((ConcurrentDictionary<string, object>)to.Extra).TryAdd(extra.Key, extra.Value);
                 }
             }
 
@@ -260,7 +260,7 @@ namespace Sentry
             {
                 foreach (var tag in from.Tags)
                 {
-                    ((ConcurrentDictionary<string, string>)to.Tags).TryAdd(tag.Key, tag.Value);
+                    _ = ((ConcurrentDictionary<string, string>)to.Tags).TryAdd(tag.Key, tag.Value);
                 }
             }
 

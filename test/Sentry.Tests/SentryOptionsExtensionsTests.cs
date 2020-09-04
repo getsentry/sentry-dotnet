@@ -114,7 +114,7 @@ namespace Sentry.Tests
             Sut.AddExceptionProcessors(new[] { Substitute.For<ISentryEventExceptionProcessor>() });
             Sut.AddExceptionProcessor(Substitute.For<ISentryEventExceptionProcessor>());
 
-            Assert.IsType<MainExceptionProcessor>(Sut.GetAllExceptionProcessors().First());
+            _ = Assert.IsType<MainExceptionProcessor>(Sut.GetAllExceptionProcessors().First());
         }
 
         [Fact]
@@ -179,20 +179,20 @@ namespace Sentry.Tests
             Sut.AddEventProcessors(new[] { Substitute.For<ISentryEventProcessor>() });
             Sut.AddEventProcessor(Substitute.For<ISentryEventProcessor>());
 
-            Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().Skip(1).First());
+            _ = Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().Skip(1).First());
         }
 
         [Fact]
         public void GetAllEventProcessors_NoAdding_SecondReturned_MainSentryEventProcessor()
         {
-            Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().Skip(1).First());
+            _ = Assert.IsType<MainSentryEventProcessor>(Sut.GetAllEventProcessors().Skip(1).First());
         }
 
         [Fact]
         public void UseStackTraceFactory_ReplacesStackTraceFactory()
         {
             var expected = Substitute.For<ISentryStackTraceFactory>();
-            Sut.UseStackTraceFactory(expected);
+            _ = Sut.UseStackTraceFactory(expected);
 
             Assert.Same(expected, Sut.SentryStackTraceFactory);
         }
@@ -204,7 +204,7 @@ namespace Sentry.Tests
             var exceptionProcessor = Sut.GetAllExceptionProcessors().OfType<MainExceptionProcessor>().Single();
 
             var expected = Substitute.For<ISentryStackTraceFactory>();
-            Sut.UseStackTraceFactory(expected);
+            _ = Sut.UseStackTraceFactory(expected);
 
             Assert.Same(expected, eventProcessor.SentryStackTraceFactoryAccessor());
             Assert.Same(expected, exceptionProcessor.SentryStackTraceFactoryAccessor());
@@ -213,7 +213,7 @@ namespace Sentry.Tests
         [Fact]
         public void UseStackTraceFactory_NotNull()
         {
-            Assert.Throws<ArgumentNullException>(() => Sut.UseStackTraceFactory(null));
+            _ = Assert.Throws<ArgumentNullException>(() => Sut.UseStackTraceFactory(null));
         }
 
         [Fact]
@@ -223,13 +223,13 @@ namespace Sentry.Tests
             Sut.AddEventProcessors(new[] { Substitute.For<ISentryEventProcessor>() });
             Sut.AddEventProcessor(Substitute.For<ISentryEventProcessor>());
 
-            Assert.IsType<DuplicateEventDetectionEventProcessor>(Sut.GetAllEventProcessors().First());
+            _ = Assert.IsType<DuplicateEventDetectionEventProcessor>(Sut.GetAllEventProcessors().First());
         }
 
         [Fact]
         public void GetAllEventProcessors_NoAdding_FirstReturned_DuplicateDetectionProcessor()
         {
-            Assert.IsType<DuplicateEventDetectionEventProcessor>(Sut.GetAllEventProcessors().First());
+            _ = Assert.IsType<DuplicateEventDetectionEventProcessor>(Sut.GetAllEventProcessors().First());
         }
 
         [Fact]

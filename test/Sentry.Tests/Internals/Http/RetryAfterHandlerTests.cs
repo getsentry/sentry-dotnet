@@ -101,7 +101,7 @@ namespace Sentry.Tests.Internals.Http
         {
             var expected = new HttpResponseMessage(TooManyRequests);
             const double floating = 292.052427053D; // Just under 5 minutes, taken from a Sentry response
-            expected.Headers.TryAddWithoutValidation("Retry-After", new[] { floating.ToString(CultureInfo.InvariantCulture) });
+            _ = expected.Headers.TryAddWithoutValidation("Retry-After", new[] { floating.ToString(CultureInfo.InvariantCulture) });
 
             _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
 
@@ -118,14 +118,14 @@ namespace Sentry.Tests.Internals.Http
         {
             var expected = new HttpResponseMessage(TooManyRequests);
             const double floating = 4138.97064495D; // Taken from a Sentry response
-            expected.Headers.TryAddWithoutValidation("Retry-After", new[] { floating.ToString(CultureInfo.InvariantCulture) });
+            _ = expected.Headers.TryAddWithoutValidation("Retry-After", new[] { floating.ToString(CultureInfo.InvariantCulture) });
 
             _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
 
             var invoker = _fixture.GetInvoker();
 
             // First call
-            await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
             Assert.True(_fixture.StubHandler.SendAsyncCalled);
 
             _fixture.StubHandler.SendAsyncCalled = false; // reset
@@ -148,7 +148,7 @@ namespace Sentry.Tests.Internals.Http
             var invoker = _fixture.GetInvoker();
 
             // First call
-            await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
             Assert.True(_fixture.StubHandler.SendAsyncCalled);
 
             _fixture.StubHandler.SendAsyncCalled = false; // reset
@@ -171,7 +171,7 @@ namespace Sentry.Tests.Internals.Http
             var invoker = _fixture.GetInvoker();
 
             // First call
-            await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
             Assert.True(_fixture.StubHandler.SendAsyncCalled);
 
             _fixture.StubHandler.SendAsyncCalled = false; // reset
@@ -194,7 +194,7 @@ namespace Sentry.Tests.Internals.Http
             var invoker = _fixture.GetInvoker();
 
             // First call: Too Many Requests, RetryAfterUtcTicks
-            await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
             Assert.True(_fixture.StubHandler.SendAsyncCalled);
             Assert.Equal(date.UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
 

@@ -58,7 +58,7 @@ namespace Sentry.Internal.Http
                     return _tooManyRequestsResponse;
                 }
 
-                Interlocked.Exchange(ref _retryAfterUtcTicks, 0);
+                _ = Interlocked.Exchange(ref _retryAfterUtcTicks, 0);
             }
 
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -70,11 +70,11 @@ namespace Sentry.Internal.Http
                     if (response.Headers.RetryAfter.Delta != null)
                     {
                         var retryAfterUtc = _clock.GetUtcNow() + response.Headers.RetryAfter.Delta.Value;
-                        Interlocked.Exchange(ref _retryAfterUtcTicks, retryAfterUtc.UtcTicks);
+                        _ = Interlocked.Exchange(ref _retryAfterUtcTicks, retryAfterUtc.UtcTicks);
                     }
                     else if (response.Headers.RetryAfter.Date != null)
                     {
-                        Interlocked.Exchange(ref _retryAfterUtcTicks, response.Headers.RetryAfter.Date.Value.UtcTicks);
+                        _ = Interlocked.Exchange(ref _retryAfterUtcTicks, response.Headers.RetryAfter.Date.Value.UtcTicks);
                     }
                 }
                 // Sentry was sending floating point numbers which are not handled by RetryConditionHeaderValue
@@ -83,7 +83,7 @@ namespace Sentry.Internal.Http
                          && double.TryParse(values?.FirstOrDefault(), out var retryAfterSeconds))
                 {
                     var retryAfterSpan = TimeSpan.FromSeconds(retryAfterSeconds);
-                    Interlocked.Exchange(ref _retryAfterUtcTicks, _clock.GetUtcNow().AddTicks(retryAfterSpan.Ticks).UtcTicks);
+                    _ = Interlocked.Exchange(ref _retryAfterUtcTicks, _clock.GetUtcNow().AddTicks(retryAfterSpan.Ticks).UtcTicks);
                 }
             }
 

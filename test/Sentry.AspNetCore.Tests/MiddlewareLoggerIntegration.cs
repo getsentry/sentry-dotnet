@@ -52,7 +52,7 @@ namespace Sentry.AspNetCore.Tests
                 var provider = new SentryLoggerProvider(hub, Clock, loggingOptions);
                 _disposable = provider;
                 SentryLogger = provider.CreateLogger(nameof(SentryLogger));
-                HttpContext.Features.Returns(FeatureCollection);
+                _ = HttpContext.Features.Returns(FeatureCollection);
             }
 
             public SentryMiddleware GetSut()
@@ -79,11 +79,11 @@ namespace Sentry.AspNetCore.Tests
             };
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Client.Received(1).CaptureEvent(
-                Arg.Any<SentryEvent>(),
-                Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
+            _ = _fixture.Client.Received(1).CaptureEvent(
+                    Arg.Any<SentryEvent>(),
+                    Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
         }
 
         [Fact]
@@ -100,11 +100,11 @@ namespace Sentry.AspNetCore.Tests
             };
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Client.Received(1).CaptureEvent(
-                Arg.Any<SentryEvent>(),
-                Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
+            _ = _fixture.Client.Received(1).CaptureEvent(
+                    Arg.Any<SentryEvent>(),
+                    Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
         }
 
         [Fact]
@@ -115,11 +115,11 @@ namespace Sentry.AspNetCore.Tests
             _fixture.RequestDelegate = context => throw new Exception();
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Client.Received(1).CaptureEvent(
-                Arg.Any<SentryEvent>(),
-                Arg.Is<Scope>(e => e.Level == expected));
+            _ = _fixture.Client.Received(1).CaptureEvent(
+                    Arg.Any<SentryEvent>(),
+                    Arg.Is<Scope>(e => e.Level == expected));
         }
 
         public void Dispose() => _fixture.Dispose();

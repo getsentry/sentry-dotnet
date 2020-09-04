@@ -56,7 +56,7 @@ namespace Sentry.Tests
                 var taskStartedEvent = new ManualResetEvent(false);
                 _ = Task.Run(() =>
                 {
-                    taskStartedEvent.Set();
+                    _ = taskStartedEvent.Set();
                     throw new Exception("Unhandled on Task");
                 });
                 Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(4)));
