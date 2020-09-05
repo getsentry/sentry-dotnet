@@ -59,6 +59,13 @@ namespace Sentry.Tests.Internals.Http
             var token = source.Token;
             var sut = _fixture.GetSut();
 
+#if NET5_0
+            await Assert.ThrowsAsync<TaskCanceledException>(() => sut.CaptureEventAsync(
+                new SentryEvent(
+                    id: SentryResponses.ResponseId),
+                token));
+#else
+
             await sut.CaptureEventAsync(
                 new SentryEvent(
                     id: SentryResponses.ResponseId),
@@ -66,7 +73,9 @@ namespace Sentry.Tests.Internals.Http
 
             _ = await _fixture.HttpMessageHandler
                     .Received(1)
-                    .VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
+                    .VerifyableSendAsync(Arg.Any<HttpRequestMessage>(),
+                        Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
+#endif
         }
 
         [Fact]
