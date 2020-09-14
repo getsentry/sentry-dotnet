@@ -18,7 +18,7 @@ internal static class Program
                 o.MinimumBreadcrumbLevel = LogEventLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
                 o.MinimumEventLevel = LogEventLevel.Error; // Error and higher is sent as event (default is Error)
                 // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If nothing is found, SDK is disabled.
-                o.Dsn = new Dsn("https://9f271c100c3248a4b074a0bead837061@o19635.ingest.sentry.io/5264714");
+                o.Dsn = new Dsn("https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537");
                 o.AttachStacktrace = true;
                 o.SendDefaultPii = true; // send PII like the username of the user logged in to the device
                 // Other configuration

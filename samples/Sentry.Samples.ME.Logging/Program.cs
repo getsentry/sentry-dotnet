@@ -18,7 +18,7 @@ internal class Program
                 // Configure the level of Sentry internal logging
                 o.DiagnosticsLevel = SentryLevel.Debug;
 
-                o.Dsn = "https://9f271c100c3248a4b074a0bead837061@o19635.ingest.sentry.io/5264714";
+                o.Dsn = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537";
                 o.MaxBreadcrumbs = 150; // Increasing from default 100
                 o.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
 
