@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{83263231-1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tests", "test\Sentry.Tests\Sentry.Tests.csproj", "{1E0F969B-67F9-4FCC-BCBF-596DB6460C7C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Solution Items", "1 - Solution Items", "{9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}"
 	ProjectSection(SolutionItems) = preProject
 		.appveyor.yml = .appveyor.yml
 		.editorconfig = .editorconfig
@@ -29,7 +29,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Solution Items", "1 - S
 		build.sh = build.sh
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
-		global.json = global.json
 		README.md = README.md
 	EndProjectSection
 EndProject
