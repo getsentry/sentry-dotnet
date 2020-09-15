@@ -18,7 +18,7 @@ namespace Sentry.Protocol
         /// The user's email address.
         /// </value>
         [DataMember(Name = "email", EmitDefaultValue = false)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         /// <summary>
         /// The unique ID of the user.
@@ -27,7 +27,7 @@ namespace Sentry.Protocol
         /// The unique identifier.
         /// </value>
         [DataMember(Name = "id", EmitDefaultValue = false)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         /// <summary>
         /// The IP of the user.
@@ -36,26 +36,26 @@ namespace Sentry.Protocol
         /// The user's IP address.
         /// </value>
         [DataMember(Name = "ip_address", EmitDefaultValue = false)]
-        public string IpAddress { get; set; }
+        public string? IpAddress { get; set; }
 
         /// <summary>
-        /// The username of the user
+        /// The username of the user.
         /// </summary>
         /// <value>
         /// The user's username.
         /// </value>
         [DataMember(Name = "username", EmitDefaultValue = false)]
-        public string Username { get; set; }
+        public string? Username { get; set; }
 
         [DataMember(Name = "other", EmitDefaultValue = false)]
-        internal IDictionary<string, string> InternalOther;
+        internal IDictionary<string, string>? InternalOther;
 
         /// <summary>
-        /// Additional information about the user
+        /// Additional information about the user.
         /// </summary>
         public IDictionary<string, string> Other
         {
-            get => InternalOther ?? (InternalOther = new Dictionary<string, string>());
+            get => InternalOther ??= new Dictionary<string, string>();
             set => InternalOther = value;
         }
 
@@ -72,38 +72,25 @@ namespace Sentry.Protocol
             return user;
         }
 
-        internal void CopyTo(User user)
+        internal void CopyTo(User? user)
         {
             if (user == null)
             {
                 return;
             }
 
-            if (user.Email == null)
-            {
-                user.Email = Email;
-            }
+            user.Email ??= Email;
 
-            if (user.Id == null)
-            {
-                user.Id = Id;
-            }
+            user.Id ??= Id;
 
-            if (user.Username == null)
-            {
-                user.Username = Username;
-            }
+            user.Username ??= Username;
 
-            if (user.IpAddress == null)
-            {
-                user.IpAddress = IpAddress;
-            }
+            user.IpAddress ??= IpAddress;
 
-            if (user.InternalOther == null)
-            {
-                user.InternalOther = InternalOther?.ToDictionary(entry => entry.Key,
-                                                  entry => entry.Value);
-            }
+            user.InternalOther ??= InternalOther?.ToDictionary(
+                entry => entry.Key,
+                entry => entry.Value
+            );
         }
     }
 }

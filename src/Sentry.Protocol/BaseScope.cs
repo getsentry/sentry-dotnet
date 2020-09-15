@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// The Scoped part of the protocol
+    /// The Scoped part of the protocol.
     /// </summary>
     /// <remarks>
     /// Members are included in the event but often modified as part
@@ -19,25 +19,25 @@ namespace Sentry.Protocol
     {
         // Default values are null so no serialization of empty objects or arrays
         [DataMember(Name = "user", EmitDefaultValue = false)]
-        internal User InternalUser { get; private set; }
+        internal User? InternalUser { get; private set; }
 
         [DataMember(Name = "contexts", EmitDefaultValue = false)]
-        internal Contexts InternalContexts { get; private set; }
+        internal Contexts? InternalContexts { get; private set; }
 
         [DataMember(Name = "request", EmitDefaultValue = false)]
-        internal Request InternalRequest { get; private set; }
+        internal Request? InternalRequest { get; private set; }
 
         [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        internal IEnumerable<string> InternalFingerprint { get; set; }
+        internal IEnumerable<string>? InternalFingerprint { get; set; }
 
         [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
-        internal ConcurrentQueue<Breadcrumb> InternalBreadcrumbs { get; set; }
+        internal ConcurrentQueue<Breadcrumb>? InternalBreadcrumbs { get; set; }
 
         [DataMember(Name = "extra", EmitDefaultValue = false)]
-        internal ConcurrentDictionary<string, object> InternalExtra { get; set; }
+        internal ConcurrentDictionary<string, object>? InternalExtra { get; set; }
 
         [DataMember(Name = "tags", EmitDefaultValue = false)]
-        internal ConcurrentDictionary<string, string> InternalTags { get; set; }
+        internal ConcurrentDictionary<string, string>? InternalTags { get; set; }
 
         /// <summary>
         /// An optional scope option
@@ -49,7 +49,7 @@ namespace Sentry.Protocol
         /// <returns>
         /// The options or null, if no options were defined.
         /// </returns>
-        public IScopeOptions ScopeOptions { get; }
+        public IScopeOptions? ScopeOptions { get; }
 
         /// <summary>
         /// Sentry level
@@ -67,7 +67,7 @@ namespace Sentry.Protocol
         /// (which have route template /user/{id}) are identified as the same transaction.
         /// </remarks>
         [DataMember(Name = "transaction", EmitDefaultValue = false)]
-        public string Transaction { get; set; }
+        public string? Transaction { get; set; }
 
         /// <summary>
         /// Gets or sets the HTTP.
@@ -77,7 +77,7 @@ namespace Sentry.Protocol
         /// </value>
         public Request Request
         {
-            get => InternalRequest ?? (InternalRequest = new Request());
+            get => InternalRequest ??= new Request();
             set => InternalRequest = value;
         }
 
@@ -89,7 +89,7 @@ namespace Sentry.Protocol
         /// </value>
         public Contexts Contexts
         {
-            get => InternalContexts ?? (InternalContexts = new Contexts());
+            get => InternalContexts ??= new Contexts();
             set => InternalContexts = value;
         }
 
@@ -101,7 +101,7 @@ namespace Sentry.Protocol
         /// </value>
         public User User
         {
-            get => InternalUser ?? (InternalUser = new User());
+            get => InternalUser ??= new User();
             set => InternalUser = value;
         }
 
@@ -110,14 +110,14 @@ namespace Sentry.Protocol
         /// </summary>
         /// <remarks>Requires Sentry 8.0 or higher</remarks>
         [DataMember(Name = "environment", EmitDefaultValue = false)]
-        public string Environment { get; set; }
+        public string? Environment { get; set; }
 
         /// <summary>
         /// SDK information
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>
         [DataMember(Name = "sdk", EmitDefaultValue = false)]
-        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
+        public SdkVersion? Sdk { get; internal set; } = new SdkVersion();
 
         /// <summary>
         /// A list of strings used to dictate the deduplication of this event.
@@ -135,7 +135,7 @@ namespace Sentry.Protocol
         /// A trail of events which happened prior to an issue.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/learn/breadcrumbs/"/>
-        public IEnumerable<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ?? (InternalBreadcrumbs = new ConcurrentQueue<Breadcrumb>());
+        public IEnumerable<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ??= new ConcurrentQueue<Breadcrumb>();
 
         /// <summary>
         /// An arbitrary mapping of additional metadata to store with the event.
@@ -146,7 +146,7 @@ namespace Sentry.Protocol
 #else
             IReadOnlyDictionary<string, object>
 #endif
-            Extra => InternalExtra ?? (InternalExtra = new ConcurrentDictionary<string, object>());
+            Extra => InternalExtra ??= new ConcurrentDictionary<string, object>();
 
         /// <summary>
         /// Arbitrary key-value for this event
@@ -157,11 +157,11 @@ namespace Sentry.Protocol
 #else
             IReadOnlyDictionary<string, string>
 #endif
-            Tags => InternalTags ?? (InternalTags = new ConcurrentDictionary<string, string>());
+            Tags => InternalTags ??= new ConcurrentDictionary<string, string>();
 
         /// <summary>
         /// Creates a scope with the specified options
         /// </summary>
-        public BaseScope(IScopeOptions options) => ScopeOptions = options;
+        public BaseScope(IScopeOptions? options) => ScopeOptions = options;
     }
 }

@@ -3,32 +3,36 @@ using System.Runtime.Serialization;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// The level of the event sent to Sentry
+    /// The level of the event sent to Sentry.
     /// </summary>
     public enum SentryLevel : short
     {
         /// <summary>
-        /// Debug
+        /// Debug.
         /// </summary>
         [EnumMember(Value = "debug")]
         Debug,
+
         /// <summary>
-        /// Informational
+        /// Informational.
         /// </summary>
         [EnumMember(Value = "info")]
         Info,
+
         /// <summary>
-        /// Warning
+        /// Warning.
         /// </summary>
         [EnumMember(Value = "warning")]
         Warning,
+
         /// <summary>
-        /// Error
+        /// Error.
         /// </summary>
         [EnumMember(Value = "error")]
         Error,
+
         /// <summary>
-        /// Fatal
+        /// Fatal.
         /// </summary>
         [EnumMember(Value = "fatal")]
         Fatal

@@ -9,12 +9,13 @@ namespace Sentry.Protocol
     public enum DeviceOrientation
     {
         /// <summary>
-        /// Portrait
+        /// Portrait.
         /// </summary>
         [EnumMember(Value = "portrait")]
         Portrait,
+
         /// <summary>
-        /// Landscape
+        /// Landscape.
         /// </summary>
         [EnumMember(Value = "landscape")]
         Landscape

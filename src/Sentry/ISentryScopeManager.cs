@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 namespace Sentry
 {
     /// <summary>
-    /// Scope management
+    /// Scope management.
     /// </summary>
     /// <remarks>
     /// An implementation shall create new scopes and allow consumers
-    /// modify the current scope
+    /// modify the current scope.
     /// </remarks>
     public interface ISentryScopeManager
     {
@@ -32,23 +32,22 @@ namespace Sentry
         void BindClient(ISentryClient client);
 
         /// <summary>
-        /// Pushes a new scope into the stack which is removed upon Dispose
+        /// Pushes a new scope into the stack which is removed upon Dispose.
         /// </summary>
         /// <returns>A disposable which removes the scope
-        /// from the environment when invoked</returns>
+        /// from the environment when invoked.</returns>
         IDisposable PushScope();
 
         /// <summary>
-        /// Pushes a new scope into the stack which is removed upon Dispose
+        /// Pushes a new scope into the stack which is removed upon Dispose.
         /// </summary>
-        /// <param name="state">A state to associate with the scope</param>
-        /// <typeparam name="TState"></typeparam>
+        /// <param name="state">A state to associate with the scope.</param>
         /// <returns>A disposable which removes the scope
-        /// from the environment when invoked</returns>
+        /// from the environment when invoked.</returns>
         IDisposable PushScope<TState>(TState state);
 
         /// <summary>
-        /// Runs the callback with a new scope which gets dropped at the end
+        /// Runs the callback with a new scope which gets dropped at the end.
         /// </summary>
         /// <remarks>
         /// Pushes a new scope, runs the callback, pops the scope.

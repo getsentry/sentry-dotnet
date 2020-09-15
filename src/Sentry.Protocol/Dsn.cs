@@ -19,20 +19,24 @@ namespace Sentry
         /// The project ID which the authenticated user is bound to.
         /// </summary>
         public string ProjectId { get; }
+
         /// <summary>
-        /// An optional path of which Sentry is hosted
+        /// An optional path of which Sentry is hosted.
         /// </summary>
-        public string Path { get; }
+        public string? Path { get; }
+
         /// <summary>
         /// The optional secret key to authenticate the SDK.
         /// </summary>
-        public string SecretKey { get; }
+        public string? SecretKey { get; }
+
         /// <summary>
         /// The required public key to authenticate the SDK.
         /// </summary>
         public string PublicKey { get; }
+
         /// <summary>
-        /// The URI used to communicate with Sentry
+        /// The URI used to communicate with Sentry.
         /// </summary>
         public Uri SentryUri { get; }
 
@@ -45,7 +49,7 @@ namespace Sentry
         /// </remarks>
         public Dsn(string dsn)
         {
-            var parsed = Parse(dsn, throwOnError: true);
+            var parsed = Parse(dsn, true);
             Debug.Assert(parsed != null, "Parse should throw instead of returning null!");
 
             _dsn = parsed.Item1;
@@ -56,7 +60,7 @@ namespace Sentry
             SentryUri = parsed.Item6;
         }
 
-        private Dsn(string dsn, string projectId, string path, string secretKey, string publicKey, Uri sentryUri)
+        private Dsn(string dsn, string projectId, string? path, string? secretKey, string publicKey, Uri sentryUri)
         {
             _dsn = dsn;
             ProjectId = projectId;
@@ -77,16 +81,16 @@ namespace Sentry
             Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Tries to parse the string into a <see cref="Dsn"/>
+        /// Tries to parse the string into a <see cref="Dsn"/>.
         /// </summary>
         /// <param name="dsn">The string to attempt parsing.</param>
         /// <param name="finalDsn">The <see cref="Dsn"/> when successfully parsed.</param>
         /// <returns><c>true</c> if the string is a valid <see cref="Dsn"/> as was successfully parsed. Otherwise, <c>false</c>.</returns>
-        public static bool TryParse(string dsn, out Dsn finalDsn)
+        public static bool TryParse(string dsn, out Dsn? finalDsn)
         {
             try
             {
-                var parsed = Parse(dsn, throwOnError: false);
+                var parsed = Parse(dsn, false);
                 if (parsed == null)
                 {
                     finalDsn = null;
@@ -104,7 +108,7 @@ namespace Sentry
             }
         }
 
-        private static Tuple<string, string, string, string, string, Uri> Parse(string dsn, bool throwOnError)
+        private static Tuple<string, string, string, string?, string, Uri>? Parse(string dsn, bool throwOnError)
         {
             Uri uri;
             if (throwOnError)
@@ -141,7 +145,7 @@ namespace Sentry
                 return null;
             }
 
-            string secretKey = null;
+            string? secretKey = null;
             if (keys.Length > 1)
             {
                 secretKey = keys[1];
@@ -171,7 +175,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// The original DSN string used to create this instance
+        /// The original DSN string used to create this instance.
         /// </summary>
         public override string ToString() => _dsn;
     }

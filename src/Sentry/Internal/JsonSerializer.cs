@@ -6,6 +6,7 @@ namespace Sentry.Internal
     internal static class JsonSerializer
     {
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
+
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,

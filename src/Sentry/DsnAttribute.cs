@@ -3,9 +3,8 @@ using System;
 namespace Sentry
 {
     /// <summary>
-    /// A way to configure the DSN via attribute defined at the entry-assembly
+    /// A way to configure the DSN via attribute defined at the entry-assembly.
     /// </summary>
-    /// <inheritdoc />
     [AttributeUsage(AttributeTargets.Assembly)]
     public class DsnAttribute : Attribute
     {
@@ -15,10 +14,8 @@ namespace Sentry
         public string Dsn { get; }
 
         /// <summary>
-        /// Creates a new instance of <see cref="T:Sentry.DsnAttribute" />
+        /// Creates a new instance of <see cref="T:Sentry.DsnAttribute" />.
         /// </summary>
-        /// <param name="dsn"></param>
-        /// <inheritdoc />
         public DsnAttribute(string dsn) => Dsn = dsn;
     }
 }

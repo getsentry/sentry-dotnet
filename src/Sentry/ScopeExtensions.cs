@@ -14,18 +14,14 @@ namespace Sentry
     public static class ScopeExtensions
     {
         /// <summary>
-        /// Invokes all event processor providers available
+        /// Invokes all event processor providers available.
         /// </summary>
         /// <param name="scope">The Scope which holds the processor providers.</param>
-        /// <returns></returns>
         public static IEnumerable<ISentryEventProcessor> GetAllEventProcessors(this Scope scope)
         {
-            if (scope.Options is SentryOptions options)
+            foreach (var processor in scope.Options.GetAllEventProcessors())
             {
-                foreach (var processor in options.GetAllEventProcessors())
-                {
-                    yield return processor;
-                }
+                yield return processor;
             }
 
             foreach (var processor in scope.EventProcessors)
@@ -35,18 +31,14 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Invokes all exception processor providers available
+        /// Invokes all exception processor providers available.
         /// </summary>
         /// <param name="scope">The Scope which holds the processor providers.</param>
-        /// <returns></returns>
         public static IEnumerable<ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Scope scope)
         {
-            if (scope.Options is SentryOptions options)
+            foreach (var processor in scope.Options.GetAllExceptionProcessors())
             {
-                foreach (var processor in options.GetAllExceptionProcessors())
-                {
-                    yield return processor;
-                }
+                yield return processor;
             }
 
             foreach (var processor in scope.ExceptionProcessors)
@@ -56,7 +48,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Add an exception processor
+        /// Add an exception processor.
         /// </summary>
         /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="processor">The exception processor.</param>
@@ -64,7 +56,7 @@ namespace Sentry
             => scope.ExceptionProcessors.Add(processor);
 
         /// <summary>
-        /// Add the exception processors
+        /// Add the exception processors.
         /// </summary>
         /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="processors">The exception processors.</param>

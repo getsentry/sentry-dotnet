@@ -5,9 +5,8 @@ using System.Runtime.Serialization;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Represents Sentry's structured Context
+    /// Represents Sentry's structured Context.
     /// </summary>
-    /// <inheritdoc />
     /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/" />
     [DataContract]
     public class Contexts : ConcurrentDictionary<string, object>
@@ -16,14 +15,17 @@ namespace Sentry.Protocol
         /// Describes the application.
         /// </summary>
         public App App => this.GetOrCreate<App>(App.Type);
+
         /// <summary>
         /// Describes the browser.
         /// </summary>
         public Browser Browser => this.GetOrCreate<Browser>(Browser.Type);
+
         /// <summary>
         /// Describes the device.
         /// </summary>
         public Device Device => this.GetOrCreate<Device>(Device.Type);
+
         /// <summary>
         /// Defines the operating system.
         /// </summary>
@@ -31,19 +33,20 @@ namespace Sentry.Protocol
         /// In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
         /// </remarks>
         public OperatingSystem OperatingSystem => this.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
+
         /// <summary>
         /// This describes a runtime in more detail.
         /// </summary>
         public Runtime Runtime => this.GetOrCreate<Runtime>(Runtime.Type);
+
         /// <summary>
-        /// This describes a GPU of the device..
+        /// This describes a GPU of the device.
         /// </summary>
         public Gpu Gpu => this.GetOrCreate<Gpu>(Gpu.Type);
 
         /// <summary>
-        /// Creates a deep clone of this context
+        /// Creates a deep clone of this context.
         /// </summary>
-        /// <returns></returns>
         internal Contexts Clone()
         {
             var context = new Contexts();
@@ -54,10 +57,9 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Copies the items of the context while cloning the known types
+        /// Copies the items of the context while cloning the known types.
         /// </summary>
-        /// <param name="to">To.</param>
-        internal void CopyTo(Contexts to)
+        internal void CopyTo(Contexts? to)
         {
             if (to == null)
             {
@@ -66,32 +68,16 @@ namespace Sentry.Protocol
 
             foreach (var kv in this)
             {
-                object value;
-                switch (kv.Key)
+                var value = kv.Key switch
                 {
-                    case App.Type:
-                        value = (kv.Value as App)?.Clone();
-                        break;
-                    case Browser.Type:
-                        value = (kv.Value as Browser)?.Clone();
-                        break;
-                    case Device.Type:
-                        value = (kv.Value as Device)?.Clone();
-                        break;
-                    case OperatingSystem.Type:
-                        value = (kv.Value as OperatingSystem)?.Clone();
-                        break;
-                    case Runtime.Type:
-                        value = (kv.Value as Runtime)?.Clone();
-                        break;
-                    case Gpu.Type:
-                        value = (kv.Value as Gpu)?.Clone();
-                        break;
-
-                    default:
-                        value = kv.Value;
-                        break;
-                }
+                    App.Type when kv.Value is App app => app.Clone(),
+                    Browser.Type when kv.Value is Browser browser => browser.Clone(),
+                    Device.Type when kv.Value is Device device => device.Clone(),
+                    OperatingSystem.Type when kv.Value is OperatingSystem os => os.Clone(),
+                    Runtime.Type when kv.Value is Runtime runtime => runtime.Clone(),
+                    Gpu.Type when kv.Value is Gpu gpu => gpu.Clone(),
+                    _ => kv.Value
+                };
 
                 to.TryAdd(kv.Key, value);
             }

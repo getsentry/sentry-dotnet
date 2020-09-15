@@ -29,23 +29,24 @@ namespace Sentry
 
 #if HAS_VALUE_TUPLE
         /// <summary>
-        /// Adds a breadcrumb to the scope
+        /// Adds a breadcrumb to the scope.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="message">The message.</param>
-        /// <param name="type">The type.</param>
         /// <param name="category">The category.</param>
+        /// <param name="type">The type.</param>
         /// <param name="dataPair">The data key-value pair.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-                    this BaseScope scope,
-                    string message,
-                    string category,
-                    string type,
-                    in (string, string)? dataPair = null,
-                    BreadcrumbLevel level = default)
+            this BaseScope scope,
+            string? message,
+            string? category,
+            string? type,
+            in (string, string)? dataPair = null,
+            BreadcrumbLevel level = default)
         {
-            Dictionary<string, string> data = null;
+            Dictionary<string, string>? data = null;
+
             if (dataPair != null)
             {
                 data = new Dictionary<string, string>
@@ -55,12 +56,12 @@ namespace Sentry
             }
 
             scope.AddBreadcrumb(
-                timestamp: null,
-                message: message,
-                category: category,
-                type: type,
-                data: data,
-                level: level);
+                null,
+                message,
+                category,
+                type,
+                data,
+                level);
         }
 #endif
 
@@ -75,23 +76,23 @@ namespace Sentry
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
             this BaseScope scope,
-            string message,
-            string category = null,
-            string type = null,
-            Dictionary<string, string> data = null,
+            string? message,
+            string? category = null,
+            string? type = null,
+            Dictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
         {
             scope.AddBreadcrumb(
-                timestamp: null,
-                message: message,
-                category: category,
-                type: type,
-                data: data,
-                level: level);
+                null,
+                message,
+                category,
+                type,
+                data,
+                level);
         }
 
         /// <summary>
-        /// Adds a breadcrumb to the scope
+        /// Adds a breadcrumb to the scope.
         /// </summary>
         /// <remarks>
         /// This overload is used for testing.
@@ -107,23 +108,23 @@ namespace Sentry
         public static void AddBreadcrumb(
             this BaseScope scope,
             DateTimeOffset? timestamp,
-            string message,
-            string category = null,
-            string type = null,
-            IReadOnlyDictionary<string, string> data = null,
+            string? message,
+            string? category = null,
+            string? type = null,
+            IReadOnlyDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => scope.AddBreadcrumb(new Breadcrumb(
-                timestamp: timestamp,
-                message: message,
-                type: type,
-                data: data,
-                category: category,
-                level: level));
+                timestamp,
+                message,
+                type,
+                data,
+                category,
+                level));
 
         /// <summary>
-        /// Adds a breadcrumb to the <see cref="BaseScope"/>
+        /// Adds a breadcrumb to the <see cref="BaseScope"/>.
         /// </summary>
-        /// <param name="scope">Scope</param>
+        /// <param name="scope">Scope.</param>
         /// <param name="breadcrumb">The breadcrumb.</param>
         internal static void AddBreadcrumb(this BaseScope scope, Breadcrumb breadcrumb)
         {
@@ -132,9 +133,9 @@ namespace Sentry
                 return;
             }
 
-            if (scope.ScopeOptions?.BeforeBreadcrumb is Func<Breadcrumb, Breadcrumb> callback)
+            if (scope.ScopeOptions?.BeforeBreadcrumb != null)
             {
-                breadcrumb = callback(breadcrumb);
+                breadcrumb = scope.ScopeOptions.BeforeBreadcrumb(breadcrumb);
 
                 if (breadcrumb == null)
                 {
@@ -142,7 +143,7 @@ namespace Sentry
                 }
             }
 
-            var breadcrumbs = (ConcurrentQueue<Breadcrumb>)scope.Breadcrumbs;
+            var breadcrumbs = (ConcurrentQueue<Breadcrumb>) scope.Breadcrumbs;
 
             var overflow = breadcrumbs.Count - (scope.ScopeOptions?.MaxBreadcrumbs
                                                 ?? Constants.DefaultMaxBreadcrumbs) + 1;
@@ -155,7 +156,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Sets the fingerprint to the <see cref="BaseScope"/>
+        /// Sets the fingerprint to the <see cref="BaseScope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
@@ -163,7 +164,7 @@ namespace Sentry
             => scope.InternalFingerprint = fingerprint;
 
         /// <summary>
-        /// Sets the extra key-value to the <see cref="BaseScope"/>
+        /// Sets the extra key-value to the <see cref="BaseScope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key">The key.</param>
@@ -172,7 +173,7 @@ namespace Sentry
             => ((ConcurrentDictionary<string, object>)scope.Extra).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
-        /// Sets the extra key-value pairs to the <see cref="BaseScope"/>
+        /// Sets the extra key-value pairs to the <see cref="BaseScope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="values">The values.</param>
@@ -181,12 +182,12 @@ namespace Sentry
             var extra = (ConcurrentDictionary<string, object>)scope.Extra;
             foreach (var keyValuePair in values)
             {
-                _ = extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
+                _ = extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (_, o) => keyValuePair.Value);
             }
         }
 
         /// <summary>
-        /// Sets the tag to the <see cref="BaseScope"/>
+        /// Sets the tag to the <see cref="BaseScope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key">The key.</param>
@@ -195,7 +196,7 @@ namespace Sentry
             => ((ConcurrentDictionary<string, string>)scope.Tags).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
-        /// Set all items as tags
+        /// Set all items as tags.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="tags"></param>
@@ -209,7 +210,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Removes a tag from the <see cref="BaseScope"/>
+        /// Removes a tag from the <see cref="BaseScope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
@@ -217,7 +218,7 @@ namespace Sentry
             => scope.InternalTags?.TryRemove(key, out _);
 
         /// <summary>
-        /// Applies the data from one scope to the other while
+        /// Applies the data from one scope to the other.
         /// </summary>
         /// <param name="from">The scope to data copy from.</param>
         /// <param name="to">The scope to copy data to.</param>
@@ -227,7 +228,7 @@ namespace Sentry
         /// Conflicting keys are not overriden
         /// This is a shallow copy.
         /// </remarks>
-        public static void Apply(this BaseScope from, BaseScope to)
+        public static void Apply(this BaseScope? from, BaseScope? to)
         {
             if (from == null || to == null)
             {
@@ -245,14 +246,14 @@ namespace Sentry
 
             if (from.InternalBreadcrumbs != null)
             {
-                _ = ((ConcurrentQueue<Breadcrumb>)to.Breadcrumbs).EnqueueAll(from.InternalBreadcrumbs);
+                _ = ((ConcurrentQueue<Breadcrumb>) to.Breadcrumbs).EnqueueAll(from.InternalBreadcrumbs);
             }
 
             if (from.InternalExtra != null)
             {
                 foreach (var extra in from.Extra)
                 {
-                    _ = ((ConcurrentDictionary<string, object>)to.Extra).TryAdd(extra.Key, extra.Value);
+                    _ = ((ConcurrentDictionary<string, object>) to.Extra).TryAdd(extra.Key, extra.Value);
                 }
             }
 
@@ -260,7 +261,7 @@ namespace Sentry
             {
                 foreach (var tag in from.Tags)
                 {
-                    _ = ((ConcurrentDictionary<string, string>)to.Tags).TryAdd(tag.Key, tag.Value);
+                    _ = ((ConcurrentDictionary<string, string>) to.Tags).TryAdd(tag.Key, tag.Value);
                 }
             }
 
@@ -268,22 +269,13 @@ namespace Sentry
             from.InternalRequest?.CopyTo(to.Request);
             from.InternalUser?.CopyTo(to.User);
 
-            if (to.Environment == null)
-            {
-                to.Environment = from.Environment;
-            }
+            to.Environment ??= from.Environment;
 
-            if (to.Transaction == null)
-            {
-                to.Transaction = from.Transaction;
-            }
+            to.Transaction ??= from.Transaction;
 
-            if (to.Level == null)
-            {
-                to.Level = from.Level;
-            }
+            to.Level ??= from.Level;
 
-            if (from.Sdk != null)
+            if (from.Sdk != null && to.Sdk != null)
             {
                 if (from.Sdk.Name != null && from.Sdk.Version != null)
                 {
@@ -302,7 +294,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Applies the state object into the scope
+        /// Applies the state object into the scope.
         /// </summary>
         /// <param name="scope">The scope to apply the data.</param>
         /// <param name="state">The state object to apply.</param>
@@ -323,7 +315,7 @@ namespace Sentry
                         scope.SetTags(keyValStringObject
                             .Select(k => new KeyValuePair<string, string>(
                                 k.Key,
-                                k.Value?.ToString()))
+                                k.Value?.ToString()!))
                             .Where(kv => !string.IsNullOrEmpty(kv.Value)));
 
                         break;

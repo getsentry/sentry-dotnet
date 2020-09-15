@@ -10,11 +10,11 @@ using Sentry.Protocol;
 namespace Sentry
 {
     /// <summary>
-    /// Sentry client used to send events to Sentry
+    /// Sentry client used to send events to Sentry.
     /// </summary>
     /// <remarks>
     /// This client captures events by queueing those to its
-    /// internal background worker which sends events to Sentry
+    /// internal background worker which sends events to Sentry.
     /// </remarks>
     /// <inheritdoc cref="ISentryClient" />
     /// <inheritdoc cref="IDisposable" />
@@ -26,17 +26,17 @@ namespace Sentry
         private readonly Lazy<Random> _random = new Lazy<Random>(() => new Random(), LazyThreadSafetyMode.PublicationOnly);
         internal Random Random => _random.Value;
 
-        // Internal for testing
+        // Internal for testing.
         internal IBackgroundWorker Worker { get; }
 
-        /// <inheritdoc />
         /// <summary>
-        /// Whether the client is enabled
+        /// Whether the client is enabled.
         /// </summary>
+        /// <inheritdoc />
         public bool IsEnabled => true;
 
         /// <summary>
-        /// Creates a new instance of <see cref="SentryClient"/>
+        /// Creates a new instance of <see cref="SentryClient"/>.
         /// </summary>
         /// <param name="options">The configuration for this client.</param>
         public SentryClient(SentryOptions options)
@@ -44,7 +44,7 @@ namespace Sentry
 
         internal SentryClient(
             SentryOptions options,
-            IBackgroundWorker worker)
+            IBackgroundWorker? worker)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
@@ -63,25 +63,19 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Queues the event to be sent to Sentry
+        /// Queues the event to be sent to Sentry.
         /// </summary>
         /// <remarks>
         /// An optional scope, if provided, will be applied to the event.
         /// </remarks>
         /// <param name="event">The event to send to Sentry.</param>
         /// <param name="scope">The optional scope to augment the event with.</param>
-        /// <returns></returns>
         /// <inheritdoc />
-        public SentryId CaptureEvent(SentryEvent @event, Scope scope = null)
+        public SentryId CaptureEvent(SentryEvent @event, Scope? scope = null)
         {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
-            if (@event == null)
-            {
-                return SentryId.Empty;
             }
 
             try
@@ -102,11 +96,11 @@ namespace Sentry
         /// <returns>A task to await for the flush operation.</returns>
         public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
-        private SentryId DoSendEvent(SentryEvent @event, Scope scope)
+        private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
         {
-            if (_options.SampleRate is float sample)
+            if (_options.SampleRate != null)
             {
-                if (Random.NextDouble() > sample)
+                if (Random.NextDouble() > _options.SampleRate.Value)
                 {
                     _options.DiagnosticLogger?.LogDebug("Event sampled.");
                     return SentryId.Empty;
