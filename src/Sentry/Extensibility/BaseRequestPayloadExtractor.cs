@@ -8,9 +8,9 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Extract the payload of the <see cref="IHttpRequest"/>.
         /// </summary>
-        public object? ExtractPayload(IHttpRequest request)
+        public object? ExtractPayload(IHttpRequest? request)
         {
-            if (request.Body == null
+            if (request?.Body == null
                 || !request.Body.CanSeek
                 || !request.Body.CanRead
                 || !IsSupported(request))
