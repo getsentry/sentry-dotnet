@@ -23,9 +23,12 @@ namespace Sentry.Internal
 
         public void Process(Exception? exception, SentryEvent sentryEvent)
         {
+            if (exception == null)
+                return;
+
             Debug.Assert(sentryEvent != null);
 
-            _options.DiagnosticLogger?.LogDebug("Running processor on exception: {0}", exception?.Message);
+            _options.DiagnosticLogger?.LogDebug("Running processor on exception: {0}", exception.Message);
 
             var sentryExceptions = CreateSentryException(exception)
                 // Otherwise realization happens on the worker thread before sending event.
@@ -59,10 +62,8 @@ namespace Sentry.Internal
             }
         }
 
-        internal IEnumerable<SentryException> CreateSentryException(Exception? exception)
+        internal IEnumerable<SentryException> CreateSentryException(Exception exception)
         {
-            Debug.Assert(exception != null);
-
             if (exception is AggregateException ae)
             {
                 foreach (var inner in ae.InnerExceptions.SelectMany(CreateSentryException))
