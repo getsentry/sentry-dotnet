@@ -35,18 +35,18 @@ namespace Sentry.Internal
             return current[current.Length - 1];
         }
 
-        public void ConfigureScope(Action<Scope> configureScope)
+        public void ConfigureScope(Action<Scope>? configureScope)
         {
             _options.DiagnosticLogger?.LogDebug("Configuring the scope.");
             var scope = GetCurrent();
-            configureScope.Invoke(scope.Key);
+            configureScope?.Invoke(scope.Key);
         }
 
-        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+        public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
         {
             _options.DiagnosticLogger?.LogDebug("Configuring the scope asynchronously.");
             var scope = GetCurrent();
-            return configureScope.Invoke(scope.Key) ?? Task.CompletedTask;
+            return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }
 
         public IDisposable PushScope() => PushScope<object>(null!); // NRTs don't work well with generics
