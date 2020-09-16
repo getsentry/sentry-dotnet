@@ -155,7 +155,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
-        public static void SetFingerprint(this BaseScope scope, IEnumerable<string> fingerprint)
+        public static void SetFingerprint(this BaseScope scope, IEnumerable<string>? fingerprint)
             => scope.InternalFingerprint = fingerprint;
 
         /// <summary>
@@ -223,8 +223,13 @@ namespace Sentry
         /// Conflicting keys are not overriden.
         /// This is a shallow copy.
         /// </remarks>
-        public static void Apply(this BaseScope from, BaseScope to)
+        public static void Apply(this BaseScope from, BaseScope? to)
         {
+            if (to == null)
+            {
+                return;
+            }
+
             // Fingerprint isn't combined. It's absolute.
             // One set explicitly on target (i.e: event)
             // takes precedence and is not overwritten
