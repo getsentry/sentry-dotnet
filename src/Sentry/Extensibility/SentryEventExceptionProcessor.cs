@@ -12,7 +12,7 @@ namespace Sentry.Extensibility
         where TException : Exception
     {
         /// <inheritdoc />
-        public void Process(Exception exception, SentryEvent sentryEvent)
+        public void Process(Exception? exception, SentryEvent sentryEvent)
         {
             if (exception is TException specificException)
             {
