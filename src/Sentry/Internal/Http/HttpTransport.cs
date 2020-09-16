@@ -33,7 +33,7 @@ namespace Sentry.Internal.Http
             _addAuth = addAuth;
         }
 
-        public async Task CaptureEventAsync(SentryEvent @event, CancellationToken cancellationToken = default)
+        public async Task CaptureEventAsync(SentryEvent? @event, CancellationToken cancellationToken = default)
         {
             if (@event == null)
             {
@@ -68,7 +68,7 @@ namespace Sentry.Internal.Http
         {
             var request = new HttpRequestMessage
             {
-                RequestUri = _options.Dsn.SentryUri,
+                RequestUri = _options.Dsn?.SentryUri,
                 Method = HttpMethod.Post,
                 Content = new StringContent(JsonSerializer.SerializeObject(@event))
             };

@@ -96,6 +96,7 @@ namespace Sentry
         /// <returns>A task to await for the flush operation.</returns>
         public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
+        // TODO: this method needs to be refactored, it's really hard to analyze nullability
         private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
         {
             if (_options.SampleRate != null)
@@ -106,17 +107,16 @@ namespace Sentry
                     return SentryId.Empty;
                 }
             }
-            if (@event.Exception is Exception ex
-                && _options.ExceptionFilters is IExceptionFilter[] filters && filters.Length > 0)
+            if (@event.Exception != null && _options.ExceptionFilters?.Length > 0)
             {
-                if (filters.Any(f => f.Filter(ex)))
+                if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
                     _options.DiagnosticLogger?.LogInfo(
-                        "Event with exception of type '{0}' was dropped by an exception filter.", ex.GetType());
+                        "Event with exception of type '{0}' was dropped by an exception filter.", @event.Exception.GetType());
                     return SentryId.Empty;
                 }
             }
-            scope = scope ?? new Scope(_options);
+            scope ??= new Scope(_options);
 
             _options.DiagnosticLogger?.LogInfo("Capturing event.");
 
@@ -141,35 +141,38 @@ namespace Sentry
                 }
             }
 
+            SentryEvent? processedEvent = @event;
+
             foreach (var processor in scope.GetAllEventProcessors())
             {
-                @event = processor.Process(@event);
-                if (@event == null)
+                processedEvent = processor.Process(processedEvent);
+                if (processedEvent == null)
                 {
                     _options.DiagnosticLogger?.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                     return SentryId.Empty;
                 }
             }
 
-            @event = BeforeSend(@event);
-            if (@event == null) // Rejected event
+            processedEvent = BeforeSend(processedEvent);
+            if (processedEvent == null) // Rejected event
             {
                 _options.DiagnosticLogger?.LogInfo("Event dropped by BeforeSend callback.");
                 return SentryId.Empty;
             }
 
-            if (Worker.EnqueueEvent(@event))
+            if (Worker.EnqueueEvent(processedEvent))
             {
                 _options.DiagnosticLogger?.LogDebug("Event queued up.");
-                return @event.EventId;
+                return processedEvent.EventId;
             }
 
             _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
                 Worker.QueuedItems);
+
             return SentryId.Empty;
         }
 
-        private SentryEvent BeforeSend(SentryEvent @event)
+        private SentryEvent? BeforeSend(SentryEvent? @event)
         {
             if (_options.BeforeSend == null)
             {
@@ -179,13 +182,13 @@ namespace Sentry
             _options.DiagnosticLogger?.LogDebug("Calling the BeforeSend callback");
             try
             {
-                @event = _options.BeforeSend?.Invoke(@event);
+                @event = @event != null ? _options.BeforeSend?.Invoke(@event) : null;
             }
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
 
-                @event.AddBreadcrumb(
+                @event?.AddBreadcrumb(
                     "BeforeSend callback failed.",
                     category: "SentryClient",
                     data: new Dictionary<string, string>

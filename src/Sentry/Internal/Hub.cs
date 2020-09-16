@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -11,7 +10,7 @@ namespace Sentry.Internal
     internal class Hub : IHub, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly ISdkIntegration[] _integrations;
+        private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
 
         private readonly SentryClient _ownedClient;
@@ -98,7 +97,7 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null)
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
             {
@@ -143,9 +142,9 @@ namespace Sentry.Internal
                 }
             }
 
-            _ownedClient?.Dispose();
+            _ownedClient.Dispose();
             _rootScope.Dispose();
-            ScopeManager?.Dispose();
+            ScopeManager.Dispose();
         }
 
         public SentryId LastEventId

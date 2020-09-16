@@ -14,7 +14,7 @@ namespace Sentry.Extensibility
         internal IEnumerable<IRequestPayloadExtractor> Extractors { get; }
 
         /// <summary>
-        /// Creates a new instance of <see cref="RequestBodyExtractionDispatcher"/>
+        /// Creates a new instance of <see cref="RequestBodyExtractionDispatcher"/>.
         /// </summary>
         /// <param name="extractors">Extractors to use.</param>
         /// <param name="options">Sentry Options.</param>
@@ -31,13 +31,8 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns>A serializable representation of the payload.</returns>
-        public object ExtractPayload(IHttpRequest request)
+        public object? ExtractPayload(IHttpRequest request)
         {
-            if (request == null)
-            {
-                return null;
-            }
-
             var size = _sizeSwitch();
 
             switch (size)

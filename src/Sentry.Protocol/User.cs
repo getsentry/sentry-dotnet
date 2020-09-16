@@ -80,11 +80,8 @@ namespace Sentry.Protocol
             }
 
             user.Email ??= Email;
-
             user.Id ??= Id;
-
             user.Username ??= Username;
-
             user.IpAddress ??= IpAddress;
 
             user.InternalOther ??= InternalOther?.ToDictionary(

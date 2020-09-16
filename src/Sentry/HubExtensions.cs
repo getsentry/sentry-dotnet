@@ -30,12 +30,12 @@ namespace Sentry
             IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
             => hub.AddBreadcrumb(
-                clock: null,
-                message: message,
-                category: category,
-                type: type,
-                data: data != null ? new Dictionary<string, string>(data) : null,
-                level: level);
+                null,
+                message,
+                category,
+                type,
+                data != null ? new Dictionary<string, string>(data) : null,
+                level);
 
         /// <summary>
         /// Adds a breadcrumb using a custom <see cref="ISystemClock"/> which allows better testability.
@@ -61,12 +61,12 @@ namespace Sentry
             BreadcrumbLevel level = default)
             => hub.ConfigureScope(
                 s => s.AddBreadcrumb(
-                    timestamp: (clock ?? SystemClock.Clock).GetUtcNow(),
-                    message: message,
-                    category: category,
-                    type: type,
-                    data: data != null ? new Dictionary<string, string>(data) : null,
-                    level: level));
+                    (clock ?? SystemClock.Clock).GetUtcNow(),
+                    message,
+                    category,
+                    type,
+                    data != null ? new Dictionary<string, string>(data) : null,
+                    level));
 
         /// <summary>
         /// Pushes a new scope while locking it which stop new scope creation.
@@ -95,8 +95,6 @@ namespace Sentry
 
             public LockedScope(IHub hub)
             {
-                Debug.Assert(hub != null);
-
                 _scope = hub.PushScope();
                 hub.LockScope();
             }

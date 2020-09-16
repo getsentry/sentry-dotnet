@@ -20,7 +20,7 @@ namespace Sentry.Internal.Web
             PayloadExtractor = payloadExtractor ?? throw new ArgumentNullException(nameof(payloadExtractor));
         }
 
-        public SentryEvent Process(SentryEvent @event)
+        public SentryEvent? Process(SentryEvent? @event)
         {
             var context = HttpContext.Current;
             if (context is null || @event is null)
@@ -77,7 +77,7 @@ namespace Sentry.Internal.Web
                 }
 
                 @event.User.IpAddress = context.Request.UserHostAddress;
-                if (context.User.Identity is IIdentity identity)
+                if (context.User.Identity is { } identity)
                 {
                     @event.User.Username = identity.Name;
                     var other = new Dictionary<string, string>
@@ -88,7 +88,7 @@ namespace Sentry.Internal.Web
                 }
                 if (context.User is ClaimsPrincipal claimsPrincipal)
                 {
-                    if (claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier) is Claim claim)
+                    if (claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier) is { } claim)
                     {
                         @event.User.Id = claim.Value;
                     }

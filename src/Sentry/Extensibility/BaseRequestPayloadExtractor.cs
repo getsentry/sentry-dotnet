@@ -6,13 +6,12 @@ namespace Sentry.Extensibility
     public abstract class BaseRequestPayloadExtractor : IRequestPayloadExtractor
     {
         /// <summary>
-        /// Extract the payload of the <see cref="IHttpRequest"/>
+        /// Extract the payload of the <see cref="IHttpRequest"/>.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public object ExtractPayload(IHttpRequest request)
+        public object? ExtractPayload(IHttpRequest request)
         {
-            if (!request.Body.CanSeek
+            if (request.Body == null
+                || !request.Body.CanSeek
                 || !request.Body.CanRead
                 || !IsSupported(request))
             {
@@ -33,17 +32,13 @@ namespace Sentry.Extensibility
         }
 
         /// <summary>
-        /// Whether this implementation supports the <see cref="IHttpRequest"/>
+        /// Whether this implementation supports the <see cref="IHttpRequest"/>.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         protected abstract bool IsSupported(IHttpRequest request);
 
         /// <summary>
         /// The extraction that gets called in case <see cref="IsSupported"/> is true.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        protected abstract object DoExtractPayLoad(IHttpRequest request);
+        protected abstract object? DoExtractPayLoad(IHttpRequest request);
     }
 }

@@ -25,11 +25,11 @@ namespace Sentry.Internal
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
         }
 
-        public event UnhandledExceptionEventHandler UnhandledException;
+        public event UnhandledExceptionEventHandler? UnhandledException;
 
-        public event EventHandler ProcessExit;
+        public event EventHandler? ProcessExit;
 
-        public event EventHandler<UnobservedTaskExceptionEventArgs> UnobservedTaskException;
+        public event EventHandler<UnobservedTaskExceptionEventArgs>? UnobservedTaskException;
 
         private void OnProcessExit(object sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
 

@@ -3,14 +3,14 @@
 namespace Sentry.Internal.Http
 {
     /// <summary>
-    /// The payload of a response to a successful call to Sentry
+    /// The payload of a response to a successful call to Sentry.
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/overview/#reading-the-response"/>
     // ReSharper disable All
     internal class SentrySuccessfulResponseBody
     {
         /// <summary>
-        /// The id generated for the event or the one created by the SDK if any
+        /// The id generated for the event or the one created by the SDK if any.
         /// </summary>
         /// <example>
         /// fc6d8c0c43fc4630ad850ee518f1b9d0
@@ -18,7 +18,7 @@ namespace Sentry.Internal.Http
 #pragma warning disable IDE1006 // Naming Styles
 #pragma warning disable S1144 // Unused private types or members should be removed
 #pragma warning disable S3459 // Unassigned members should be removed
-        public string id { get; set; }
+        public string? id { get; set; }
     }
 }
 #endif

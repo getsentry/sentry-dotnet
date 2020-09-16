@@ -128,11 +128,6 @@ namespace Sentry
         /// <param name="breadcrumb">The breadcrumb.</param>
         internal static void AddBreadcrumb(this BaseScope scope, Breadcrumb breadcrumb)
         {
-            if (scope == null)
-            {
-                return;
-            }
-
             if (scope.ScopeOptions?.BeforeBreadcrumb != null)
             {
                 breadcrumb = scope.ScopeOptions.BeforeBreadcrumb(breadcrumb);
@@ -170,7 +165,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetExtra(this BaseScope scope, string key, object value)
-            => ((ConcurrentDictionary<string, object>)scope.Extra).AddOrUpdate(key, value, (s, o) => value);
+            => ((ConcurrentDictionary<string, object>) scope.Extra).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="BaseScope"/>.
@@ -179,7 +174,7 @@ namespace Sentry
         /// <param name="values">The values.</param>
         public static void SetExtras(this BaseScope scope, IEnumerable<KeyValuePair<string, object>> values)
         {
-            var extra = (ConcurrentDictionary<string, object>)scope.Extra;
+            var extra = (ConcurrentDictionary<string, object>) scope.Extra;
             foreach (var keyValuePair in values)
             {
                 _ = extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (_, o) => keyValuePair.Value);
@@ -193,7 +188,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetTag(this BaseScope scope, string key, string value)
-            => ((ConcurrentDictionary<string, string>)scope.Tags).AddOrUpdate(key, value, (s, o) => value);
+            => ((ConcurrentDictionary<string, string>) scope.Tags).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
         /// Set all items as tags.
@@ -202,7 +197,7 @@ namespace Sentry
         /// <param name="tags"></param>
         public static void SetTags(this BaseScope scope, IEnumerable<KeyValuePair<string, string>> tags)
         {
-            var internalTags = (ConcurrentDictionary<string, string>)scope.Tags;
+            var internalTags = (ConcurrentDictionary<string, string>) scope.Tags;
             foreach (var keyValuePair in tags)
             {
                 _ = internalTags.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
@@ -225,16 +220,11 @@ namespace Sentry
         /// <remarks>
         /// Applies the data of 'from' into 'to'.
         /// If data in 'from' is null, 'to' is unmodified.
-        /// Conflicting keys are not overriden
+        /// Conflicting keys are not overriden.
         /// This is a shallow copy.
         /// </remarks>
-        public static void Apply(this BaseScope? from, BaseScope? to)
+        public static void Apply(this BaseScope from, BaseScope to)
         {
-            if (from == null || to == null)
-            {
-                return;
-            }
-
             // Fingerprint isn't combined. It's absolute.
             // One set explicitly on target (i.e: event)
             // takes precedence and is not overwritten
@@ -275,20 +265,20 @@ namespace Sentry
 
             to.Level ??= from.Level;
 
-            if (from.Sdk != null && to.Sdk != null)
-            {
-                if (from.Sdk.Name != null && from.Sdk.Version != null)
-                {
-                    to.Sdk.Name = from.Sdk.Name;
-                    to.Sdk.Version = from.Sdk.Version;
-                }
+            if (from.Sdk == null || to.Sdk == null)
+                return;
 
-                if (from.Sdk.InternalPackages != null)
+            if (from.Sdk.Name != null && from.Sdk.Version != null)
+            {
+                to.Sdk.Name = from.Sdk.Name;
+                to.Sdk.Version = from.Sdk.Version;
+            }
+
+            if (from.Sdk.InternalPackages != null)
+            {
+                foreach (var package in from.Sdk.InternalPackages)
                 {
-                    foreach (var package in from.Sdk.InternalPackages)
-                    {
-                        to.Sdk.AddPackage(package);
-                    }
+                    to.Sdk.AddPackage(package);
                 }
             }
         }
@@ -311,21 +301,22 @@ namespace Sentry
                         .Where(kv => !string.IsNullOrEmpty(kv.Value)));
                     break;
                 case IEnumerable<KeyValuePair<string, object>> keyValStringObject:
-                    {
-                        scope.SetTags(keyValStringObject
-                            .Select(k => new KeyValuePair<string, string>(
-                                k.Key,
-                                k.Value?.ToString()!))
-                            .Where(kv => !string.IsNullOrEmpty(kv.Value)));
+                {
+                    scope.SetTags(keyValStringObject
+                        .Select(k => new KeyValuePair<string, string>(
+                            k.Key,
+                            k.Value?.ToString()!))
+                        .Where(kv => !string.IsNullOrEmpty(kv.Value)));
 
-                        break;
-                    }
+                    break;
+                }
 #if HAS_VALUE_TUPLE
                 case ValueTuple<string, string> tupleStringString:
                     if (!string.IsNullOrEmpty(tupleStringString.Item2))
                     {
                         scope.SetTag(tupleStringString.Item1, tupleStringString.Item2);
                     }
+
                     break;
 #endif
                 default:

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Sentry.Extensibility;
@@ -9,7 +10,6 @@ using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Protocol;
 #if SYSTEM_WEB
-using System.Linq;
 using Sentry.Internal.Web;
 #endif
 using static Sentry.Internal.Constants;
@@ -23,7 +23,7 @@ namespace Sentry
     public class SentryOptions : IScopeOptions
     {
         private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
-        internal ISentryStackTraceFactory SentryStackTraceFactory { get; set; }
+        internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal string ClientVersion { get; } = SdkName;
 
@@ -32,29 +32,29 @@ namespace Sentry
         /// <summary>
         /// A list of exception processors
         /// </summary>
-        internal ISentryEventExceptionProcessor[] ExceptionProcessors { get; set; }
+        internal ISentryEventExceptionProcessor[]? ExceptionProcessors { get; set; }
 
         /// <summary>
         /// A list of event processors
         /// </summary>
-        internal ISentryEventProcessor[] EventProcessors { get; set; }
+        internal ISentryEventProcessor[]? EventProcessors { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventProcessor"/>
         /// </summary>
-        internal Func<IEnumerable<ISentryEventProcessor>>[] EventProcessorsProviders { get; set; }
+        internal Func<IEnumerable<ISentryEventProcessor>>[]? EventProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
         /// </summary>
-        internal Func<IEnumerable<ISentryEventExceptionProcessor>>[] ExceptionProcessorsProviders { get; set; }
+        internal Func<IEnumerable<ISentryEventExceptionProcessor>>[]? ExceptionProcessorsProviders { get; set; }
 
         /// <summary>
-        /// A list of integrations to be added when the SDK is initialized
+        /// A list of integrations to be added when the SDK is initialized.
         /// </summary>
-        internal ISdkIntegration[] Integrations { get; set; }
+        internal ISdkIntegration[]? Integrations { get; set; }
 
-        internal IExceptionFilter[] ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
+        internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
         internal IBackgroundWorker? BackgroundWorker { get; set; }
 
@@ -71,7 +71,7 @@ namespace Sentry
         /// <example>
         /// 'System.', 'Microsoft.'
         /// </example>
-        internal string[] InAppExclude { get; set; }
+        internal string[]? InAppExclude { get; set; }
 
         /// <summary>
         /// A list of namespaces (or prefixes) considered part of application code
@@ -85,7 +85,7 @@ namespace Sentry
         /// 'System.CustomNamespace', 'Microsoft.Azure.App'
         /// </example>
         /// <seealso href="https://docs.sentry.io/error-reporting/configuration/?platform=csharp#in-app-include"/>
-        internal string[] InAppInclude { get; set; }
+        internal string[]? InAppInclude { get; set; }
 
         /// <summary>
         /// Whether to include default Personal Identifiable information
@@ -390,11 +390,11 @@ namespace Sentry
         public SentryOptions()
         {
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
-                () => EventProcessors
+                () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
 
             ExceptionProcessorsProviders = new Func<IEnumerable<ISentryEventExceptionProcessor>>[] {
-                () => ExceptionProcessors
+                () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
             SentryStackTraceFactory = new SentryStackTraceFactory(this);

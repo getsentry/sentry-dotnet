@@ -13,7 +13,7 @@ namespace Sentry.Internal
             NullValueHandling = NullValueHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Formatting = Formatting.None,
-            Converters = new[] { StringEnumConverter },
+            Converters = new JsonConverter[] { StringEnumConverter },
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 

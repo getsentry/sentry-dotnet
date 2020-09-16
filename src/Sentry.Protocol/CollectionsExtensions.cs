@@ -21,13 +21,9 @@ namespace Sentry.Protocol
             return target;
         }
 
-        public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue>? from, IDictionary<TKey, TValue>? to)
+        public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
+            where TKey : notnull
         {
-            if (from == null || to == null)
-            {
-                return;
-            }
-
             foreach (var kv in from)
             {
                 if (!to.ContainsKey(kv.Key))

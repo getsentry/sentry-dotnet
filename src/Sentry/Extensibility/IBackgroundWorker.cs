@@ -11,15 +11,16 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Attempts to queue the event with the worker.
         /// </summary>
-        /// <param name="event"></param>
         /// <returns>True of queueing was successful. Otherwise, false.</returns>
         bool EnqueueEvent(SentryEvent @event);
+
         /// <summary>
         /// Flushes events asynchronously.
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>
         /// <returns>A task to await for the flush operation.</returns>
         Task FlushAsync(TimeSpan timeout);
+
         /// <summary>
         /// Current count of items queued up.
         /// </summary>

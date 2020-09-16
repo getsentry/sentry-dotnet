@@ -40,11 +40,11 @@ namespace Sentry.Protocol
         internal ConcurrentDictionary<string, string>? InternalTags { get; set; }
 
         /// <summary>
-        /// An optional scope option
+        /// An optional scope option.
         /// </summary>
         /// <remarks>
         /// Options are not mandatory. it allows defining callback for deciding
-        /// on adding breadcrumbs and the max breadcrumbs allowed
+        /// on adding breadcrumbs and the max breadcrumbs allowed.
         /// </remarks>
         /// <returns>
         /// The options or null, if no options were defined.
@@ -52,7 +52,7 @@ namespace Sentry.Protocol
         public IScopeOptions? ScopeOptions { get; }
 
         /// <summary>
-        /// Sentry level
+        /// Sentry level.
         /// </summary>
         [DataMember(Name = "level", EmitDefaultValue = false)]
         public SentryLevel? Level { get; set; }
@@ -61,7 +61,7 @@ namespace Sentry.Protocol
         /// The name of the transaction in which there was an event.
         /// </summary>
         /// <remarks>
-        /// A transaction should only be defined when it can be well defined
+        /// A transaction should only be defined when it can be well defined.
         /// On a Web framework, for example, a transaction is the route template
         /// rather than the actual request path. That is so GET /user/10 and /user/20
         /// (which have route template /user/{id}) are identified as the same transaction.
@@ -82,7 +82,7 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Gets the structured Sentry context
+        /// Gets the structured Sentry context.
         /// </summary>
         /// <value>
         /// The contexts.
@@ -94,7 +94,7 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Gets the user information
+        /// Gets the user information.
         /// </summary>
         /// <value>
         /// The user.
@@ -108,12 +108,12 @@ namespace Sentry.Protocol
         /// <summary>
         /// The environment name, such as 'production' or 'staging'.
         /// </summary>
-        /// <remarks>Requires Sentry 8.0 or higher</remarks>
+        /// <remarks>Requires Sentry 8.0 or higher.</remarks>
         [DataMember(Name = "environment", EmitDefaultValue = false)]
         public string? Environment { get; set; }
 
         /// <summary>
-        /// SDK information
+        /// SDK information.
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>
         [DataMember(Name = "sdk", EmitDefaultValue = false)]

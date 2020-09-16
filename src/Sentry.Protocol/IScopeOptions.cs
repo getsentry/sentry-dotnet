@@ -20,12 +20,12 @@ namespace Sentry.Protocol
         int MaxBreadcrumbs { get; }
 
         /// <summary>
-        /// Invoked before storing a new breadcrumb
+        /// Invoked before storing a new breadcrumb.
         /// </summary>
         /// <remarks>
         /// Allows the callback handler access to a breadcrumb and allows modification
         /// or totally dropping the breadcrumb by returning null.
         /// </remarks>
-        Func<Breadcrumb, Breadcrumb> BeforeBreadcrumb { get; }
+        Func<Breadcrumb, Breadcrumb>? BeforeBreadcrumb { get; }
     }
 }

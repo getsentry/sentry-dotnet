@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Sentry.Internal;
 using System.Runtime.ExceptionServices;
 using System.Security;
@@ -10,14 +9,13 @@ namespace Sentry.Integrations
     internal class AppDomainUnhandledExceptionIntegration : IInternalSdkIntegration
     {
         private readonly IAppDomain _appDomain;
-        private IHub _hub;
+        private IHub? _hub;
 
-        internal AppDomainUnhandledExceptionIntegration(IAppDomain appDomain = null)
+        internal AppDomainUnhandledExceptionIntegration(IAppDomain? appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
         public void Register(IHub hub, SentryOptions _)
         {
-            Debug.Assert(hub != null);
             _hub = hub;
             _appDomain.UnhandledException += Handle;
         }

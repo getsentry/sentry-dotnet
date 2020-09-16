@@ -59,13 +59,8 @@ namespace Sentry.Protocol
         /// <summary>
         /// Copies the items of the context while cloning the known types.
         /// </summary>
-        internal void CopyTo(Contexts? to)
+        internal void CopyTo(Contexts to)
         {
-            if (to == null)
-            {
-                return;
-            }
-
             foreach (var kv in this)
             {
                 var value = kv.Key switch

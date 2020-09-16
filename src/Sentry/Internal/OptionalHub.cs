@@ -33,7 +33,7 @@ namespace Sentry.Internal
             _hub = new Hub(options);
         }
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => _hub.CaptureEvent(evt, scope);
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => _hub.CaptureEvent(evt, scope);
 
         public Task FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
 
@@ -45,7 +45,8 @@ namespace Sentry.Internal
 
         public IDisposable PushScope() => _hub.PushScope();
 
-        public IDisposable PushScope<TState>(TState state) => _hub.PushScope(state);
+        public IDisposable PushScope<TState>(TState state)
+            => _hub.PushScope(state);
 
         public void WithScope(Action<Scope> scopeCallback) => _hub.WithScope(scopeCallback);
 
