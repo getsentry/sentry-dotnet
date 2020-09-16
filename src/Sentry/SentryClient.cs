@@ -71,11 +71,16 @@ namespace Sentry
         /// <param name="event">The event to send to Sentry.</param>
         /// <param name="scope">The optional scope to augment the event with.</param>
         /// <inheritdoc />
-        public SentryId CaptureEvent(SentryEvent @event, Scope? scope = null)
+        public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
         {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            if (@event == null)
+            {
+                return SentryId.Empty;
             }
 
             try

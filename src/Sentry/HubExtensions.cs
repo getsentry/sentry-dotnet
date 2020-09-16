@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
 
@@ -24,7 +23,7 @@ namespace Sentry
         /// <param name="level">Breadcrumb level.</param>
         public static void AddBreadcrumb(
             this IHub hub,
-            string message,
+            string? message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,
@@ -54,7 +53,7 @@ namespace Sentry
         public static void AddBreadcrumb(
             this IHub hub,
             ISystemClock? clock,
-            string message,
+            string? message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,

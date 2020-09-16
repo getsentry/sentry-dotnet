@@ -190,7 +190,7 @@ namespace Sentry
         /// <seealso href="https://docs.sentry.io/clientdev/interfaces/breadcrumbs/"/>
         [DebuggerStepThrough]
         public static void AddBreadcrumb(
-            string message,
+            string? message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,
@@ -213,8 +213,8 @@ namespace Sentry
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
-            ISystemClock clock,
-            string message,
+            ISystemClock? clock,
+            string? message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,
