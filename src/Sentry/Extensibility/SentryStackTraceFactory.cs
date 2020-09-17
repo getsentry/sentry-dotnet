@@ -82,7 +82,6 @@ namespace Sentry.Extensibility
             var frames = stackTrace.GetFrames();
             if (frames == null)
             {
-                // TODO: this probably can never happen
                 _options.DiagnosticLogger?.LogDebug("No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
                     _options.AttachStacktrace, isCurrentStackTrace);
 
