@@ -1,13 +1,16 @@
 name: build
+
 on:
   push:
     branches:
       - main
   pull_request:
+
 jobs:
   build:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -19,20 +22,25 @@ jobs:
             build_script: ./build.sh
           - os: macos-latest
             build_script: ./build.sh
+
     steps:
         - uses: actions/checkout@v2
+          -
         - name: .NET Core CLI 2.1
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: '2.1.809'
+
         - name: .NET Core CLI 3.1
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: '3.1.401'
+
         - name: .NET Core CLI 5.0 preview
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: '5.0.100-preview.8.20417.9'
+
         # https://github.com/actions/setup-dotnet/issues/25#issuecomment-583367317
         - name: Work around action/dotnet limitation
           shell: pwsh
@@ -46,5 +54,6 @@ jobs:
                 Write-Host Copying from $from to $to;
                 Copy-Item "$from\*" $to -Recurse -Force;
             }
+
         - run: ${{ matrix.build_script }}
         - uses: codecov/codecov-action@v1

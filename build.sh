@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-dotnet test -c Release \
+dotnet test -c Release -l GitHubActions \
     /p:CollectCoverage=true \
     /p:CoverletOutputFormat=opencover \
     /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\" \
