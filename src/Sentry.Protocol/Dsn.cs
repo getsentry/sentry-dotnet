@@ -86,7 +86,7 @@ namespace Sentry
         /// <param name="dsn">The string to attempt parsing.</param>
         /// <param name="finalDsn">The <see cref="Dsn"/> when successfully parsed.</param>
         /// <returns><c>true</c> if the string is a valid <see cref="Dsn"/> as was successfully parsed. Otherwise, <c>false</c>.</returns>
-        public static bool TryParse(string dsn, out Dsn? finalDsn)
+        public static bool TryParse(string dsn, [NotNullWhen(true)] out Dsn? finalDsn)
         {
             try
             {
