@@ -24,12 +24,15 @@ namespace Sentry.Internal
                 return worker;
             }
 
-            // TODO: what to do here if Dsn is null?
+            if (_options.Dsn is null)
+            {
+                throw new InvalidOperationException("The DSN is expected to be set at this point.");
+            }
 
             var addAuth = SentryHeaders.AddSentryAuth(
                 _options.SentryVersion,
                 _options.ClientVersion,
-                _options.Dsn!.PublicKey,
+                _options.Dsn.PublicKey,
                 _options.Dsn.SecretKey);
 
             if (_options.SentryHttpClientFactory is { } factory)
