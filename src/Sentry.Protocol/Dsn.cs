@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
