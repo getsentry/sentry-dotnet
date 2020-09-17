@@ -23,8 +23,10 @@ namespace Sentry.Internal
 
         public void Process(Exception? exception, SentryEvent sentryEvent)
         {
-            if (exception == null)
+            if (exception is null)
+            {
                 return;
+            }
 
             Debug.Assert(sentryEvent != null);
 
