@@ -128,9 +128,9 @@ namespace Sentry
         /// <param name="breadcrumb">The breadcrumb.</param>
         internal static void AddBreadcrumb(this BaseScope scope, Breadcrumb breadcrumb)
         {
-            if (scope.ScopeOptions?.BeforeBreadcrumb != null)
+            if (scope.ScopeOptions?.BeforeBreadcrumb is {} beforeBreadcrumb)
             {
-                breadcrumb = scope.ScopeOptions.BeforeBreadcrumb(breadcrumb);
+                breadcrumb = beforeBreadcrumb(breadcrumb);
 
                 if (breadcrumb == null)
                 {
@@ -177,7 +177,7 @@ namespace Sentry
             var extra = (ConcurrentDictionary<string, object>)scope.Extra;
             foreach (var keyValuePair in values)
             {
-                _ = extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (_, o) => keyValuePair.Value);
+                _ = extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
             }
         }
 
@@ -188,7 +188,7 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetTag(this BaseScope scope, string key, string value)
-            => ((ConcurrentDictionary<string, string>) scope.Tags).AddOrUpdate(key, value, (s, o) => value);
+            => ((ConcurrentDictionary<string, string>)scope.Tags).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
         /// Set all items as tags.
