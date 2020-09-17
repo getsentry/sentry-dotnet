@@ -80,7 +80,7 @@ namespace Sentry
         /// The name of the platform.
         /// </summary>
         [DataMember(Name = "platform", EmitDefaultValue = false)]
-        public string Platform { get; set; }
+        public string? Platform { get; set; }
 
         /// <summary>
         /// Identifies the host SDK from which the event was recorded.
