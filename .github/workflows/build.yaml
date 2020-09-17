@@ -25,7 +25,7 @@ jobs:
 
     steps:
         - uses: actions/checkout@v2
-          -
+
         - name: .NET Core CLI 2.1
           uses: actions/setup-dotnet@v1
           with:
