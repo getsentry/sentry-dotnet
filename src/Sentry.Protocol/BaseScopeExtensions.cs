@@ -241,7 +241,7 @@ namespace Sentry
 
             if (from.InternalBreadcrumbs != null)
             {
-                _ = ((ConcurrentQueue<Breadcrumb>) to.Breadcrumbs).EnqueueAll(from.InternalBreadcrumbs);
+                _ = ((ConcurrentQueue<Breadcrumb>)to.Breadcrumbs).EnqueueAll(from.InternalBreadcrumbs);
             }
 
             if (from.InternalExtra != null)
