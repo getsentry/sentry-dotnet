@@ -71,7 +71,7 @@ namespace Sentry.Extensibility
             }
 
             _options.DiagnosticLogger?.LogWarning("Ignoring request with Size {0} and configuration RequestSize {1}",
-                request.ContentLength, size);
+                request?.ContentLength, size);
 
             return null;
         }
