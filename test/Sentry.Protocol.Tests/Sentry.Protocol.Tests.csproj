@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net45</TargetFrameworks>
   </PropertyGroup>
 
@@ -15,17 +15,22 @@
     <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=netstandard2.0" />
   </ItemGroup>
 
+  <!-- To be deleted on 3.0-->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=netstandard1.3" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=netstandard2.1" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Condition="'$(TargetFramework)' != 'net45'" Version="3.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Condition="'$(TargetFramework)' != 'net45' AND '$(TargetFramework)' != 'netcoreapp1.1'" Version="3.7.0" />
   </ItemGroup>
 
-  <!--nca3.1 tests the ns2.0 version which has value tuples. nca2.1 tests ns1.3 which doesn't.-->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+  <!--nca3.1 tests the ns2.1, nca2.1 tests ns2.0, lower doesn't have value tuples -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' OR '$(TargetFramework)' == 'netcoreapp2.1'">
     <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
