@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Builder
         {
             // Container is built so resolve a logger and modify the SDK internal logger
             var options = app.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>();
-            if (options?.Value is SentryAspNetCoreOptions o)
+            if (options?.Value is { } o)
             {
                 if (o.Debug && (o.DiagnosticLogger == null || o.DiagnosticLogger.GetType() == typeof(ConsoleDiagnosticLogger)))
                 {

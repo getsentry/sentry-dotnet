@@ -1,14 +1,12 @@
 using System;
+#if RELEASE
+using System.Threading;
+#endif
 using NSubstitute;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Xunit;
-using System.Linq;
 using System.Threading.Tasks;
-using Sentry.Extensibility;
-using Sentry.Protocol;
-using System.Threading;
-using Microsoft.Extensions.Logging;
 
 namespace Sentry.Tests
 {

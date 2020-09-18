@@ -42,7 +42,7 @@ namespace Sentry
             string message,
             string? category,
             string? type,
-            in (string, string)? dataPair = null,
+            (string, string)? dataPair = null,
             BreadcrumbLevel level = default)
         {
             // Not to throw on code that ignores nullability warnings.
@@ -249,8 +249,9 @@ namespace Sentry
         public static void Apply(this BaseScope from, BaseScope to)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            // ReSharper disable ConditionIsAlwaysTrueOrFalse
             if (from is null || to is null)
+            // ReSharper enable ConditionIsAlwaysTrueOrFalse
             {
                 return;
             }

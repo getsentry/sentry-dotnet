@@ -10,7 +10,7 @@ namespace Samples.AspNetCore.Mvc
             : base(message)
         { }
 
-        public SpecialException() : base()
+        public SpecialException()
         {
         }
 

@@ -21,7 +21,6 @@ namespace Sentry.Extensions.Logging
                     return BreadcrumbLevel.Error;
                 case LogLevel.Critical:
                     return BreadcrumbLevel.Critical;
-                case LogLevel.None:
                 default:
                     return (BreadcrumbLevel)level;
             }
