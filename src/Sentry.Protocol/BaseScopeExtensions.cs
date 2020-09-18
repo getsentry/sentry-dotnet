@@ -45,6 +45,13 @@ namespace Sentry
             in (string, string)? dataPair = null,
             BreadcrumbLevel level = default)
         {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (scope is null)
+            {
+                return;
+            }
+
             Dictionary<string, string>? data = null;
 
             if (dataPair != null)
@@ -82,6 +89,13 @@ namespace Sentry
             Dictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
         {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (scope is null)
+            {
+                return;
+            }
+
             scope.AddBreadcrumb(
                 null,
                 message,
@@ -113,13 +127,22 @@ namespace Sentry
             string? type = null,
             IReadOnlyDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
-            => scope.AddBreadcrumb(new Breadcrumb(
+        {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (scope is null)
+            {
+                return;
+            }
+
+            scope.AddBreadcrumb(new Breadcrumb(
                 timestamp,
                 message,
                 type,
                 data,
                 category,
                 level));
+        }
 
         /// <summary>
         /// Adds a breadcrumb to the <see cref="BaseScope"/>.
@@ -128,7 +151,7 @@ namespace Sentry
         /// <param name="breadcrumb">The breadcrumb.</param>
         internal static void AddBreadcrumb(this BaseScope scope, Breadcrumb breadcrumb)
         {
-            if (scope.ScopeOptions?.BeforeBreadcrumb is {} beforeBreadcrumb)
+            if (scope.ScopeOptions?.BeforeBreadcrumb is { } beforeBreadcrumb)
             {
                 breadcrumb = beforeBreadcrumb(breadcrumb);
 
@@ -223,9 +246,11 @@ namespace Sentry
         /// Conflicting keys are not overriden.
         /// This is a shallow copy.
         /// </remarks>
-        public static void Apply(this BaseScope from, BaseScope? to)
+        public static void Apply(this BaseScope from, BaseScope to)
         {
-            if (to == null)
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (from is null || to is null)
             {
                 return;
             }
@@ -270,7 +295,7 @@ namespace Sentry
 
             to.Level ??= from.Level;
 
-            if (from.Sdk == null || to.Sdk == null)
+            if (from.Sdk is null || to.Sdk is null)
                 return;
 
             if (from.Sdk.Name != null && from.Sdk.Version != null)

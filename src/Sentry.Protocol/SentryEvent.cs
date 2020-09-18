@@ -127,7 +127,6 @@ namespace Sentry
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
         /// </summary>
-        // TODO: this method can be removed with a breaking change.
         public SentryEvent() : this(null)
         {
         }
@@ -136,7 +135,7 @@ namespace Sentry
         /// Creates a Sentry event with optional Exception details and default values like Id and Timestamp.
         /// </summary>
         /// <param name="exception">The exception.</param>
-        public SentryEvent(Exception? exception = null)
+        public SentryEvent(Exception? exception)
             : this(exception, null)
         {
         }
