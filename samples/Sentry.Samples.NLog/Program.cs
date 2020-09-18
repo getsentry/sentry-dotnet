@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -14,9 +13,9 @@ namespace Sentry.Samples.NLog
 
         // DSN used by the example: 'UsingCodeConfiguration'.
         // #### ADD YOUR DSN HERE:
-        private static string DsnSample = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537";
+        private static readonly string DsnSample = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537";
 
-        private static void Main(string[] args)
+        private static void Main()
         {
             try
             {

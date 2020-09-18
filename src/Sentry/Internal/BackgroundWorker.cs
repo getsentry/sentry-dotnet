@@ -212,7 +212,8 @@ namespace Sentry.Internal
                     }
                     catch // Timeout or Shutdown might have been called so this token was disposed.
                     {
-                    } // Flush will release when timeout is hit.
+                        // Flush will release when timeout is hit.
+                    }
                 }
             }
 

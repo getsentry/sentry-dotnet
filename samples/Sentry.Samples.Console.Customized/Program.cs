@@ -23,7 +23,7 @@ internal static class Program
     // A different DSN for a section of the app (i.e: admin)
     public const string AdminDsn = "https://f670c444cca14cf2bb4bfc403525b6a3@sentry.io/259314";
 
-    private static async Task Main(string[] args)
+    private static async Task Main()
     {
         // When the SDK is disabled, no callback is executed:
         await SentrySdk.ConfigureScopeAsync(async scope =>

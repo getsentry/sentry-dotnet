@@ -44,7 +44,7 @@ namespace Sentry.Internal.Http
                 _options.DiagnosticLogger?.LogDebug("Event {0} successfully received by Sentry.", @event.EventId);
 #if DEBUG
                 var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var responseId = JsonSerializer.DeserializeObject<SentrySuccessfulResponseBody>(body)?.id;
+                var responseId = JsonSerializer.DeserializeObject<SentrySuccessfulResponseBody>(body).id;
                 Debug.Assert(@event.EventId.ToString() == responseId);
 #endif
                 return;

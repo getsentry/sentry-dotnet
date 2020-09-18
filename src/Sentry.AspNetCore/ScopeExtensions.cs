@@ -62,8 +62,14 @@ namespace Sentry.AspNetCore
                     var action = routeData.Values["action"]?.ToString();
                     var area = routeData.Values["area"]?.ToString();
 
-                    scope.SetTag("route.controller", controller);
-                    scope.SetTag("route.action", action);
+                    if (controller != null)
+                    {
+                        scope.SetTag("route.controller", controller);
+                    }
+                    if (action != null)
+                    {
+                        scope.SetTag("route.action", action);
+                    }
                     if (area != null)
                     {
                         scope.SetTag("route.area", area);
@@ -116,7 +122,7 @@ namespace Sentry.AspNetCore
             // TODO: Hide these 'Env' behind some extension method as
             // these might be reported in a non CGI, old-school way
             if (options?.SendDefaultPii == true
-                && context.Connection.RemoteIpAddress?.ToString() is string ipAddress)
+                && context.Connection.RemoteIpAddress?.ToString() is { } ipAddress)
             {
                 scope.Request.Env["REMOTE_ADDR"] = ipAddress;
             }
