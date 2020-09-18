@@ -12,6 +12,6 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="exception">The exception to process.</param>
         /// <param name="sentryEvent">The event to add data to.</param>
-        void Process(Exception? exception, SentryEvent sentryEvent);
+        void Process(Exception exception, SentryEvent sentryEvent);
     }
 }

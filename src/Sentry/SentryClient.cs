@@ -187,7 +187,7 @@ namespace Sentry
             _options.DiagnosticLogger?.LogDebug("Calling the BeforeSend callback");
             try
             {
-                @event = _options.BeforeSend?.Invoke(@event);
+                @event = _options.BeforeSend?.Invoke(@event!);
             }
             catch (Exception e)
             {
