@@ -3,7 +3,7 @@ using System;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Options used by <see cref="BaseScope"/>
+    /// Options used by <see cref="BaseScope"/>.
     /// </summary>
     public interface IScopeOptions
     {
@@ -18,13 +18,14 @@ namespace Sentry.Protocol
         /// The maximum breadcrumbs per scope.
         /// </value>
         int MaxBreadcrumbs { get; }
+
         /// <summary>
-        /// Invoked before storing a new breadcrumb
+        /// Invoked before storing a new breadcrumb.
         /// </summary>
         /// <remarks>
         /// Allows the callback handler access to a breadcrumb and allows modification
         /// or totally dropping the breadcrumb by returning null.
         /// </remarks>
-        Func<Breadcrumb, Breadcrumb> BeforeBreadcrumb { get; }
+        Func<Breadcrumb, Breadcrumb>? BeforeBreadcrumb { get; }
     }
 }

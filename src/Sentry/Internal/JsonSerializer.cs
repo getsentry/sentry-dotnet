@@ -6,13 +6,14 @@ namespace Sentry.Internal
     internal static class JsonSerializer
     {
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
+
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             NullValueHandling = NullValueHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Formatting = Formatting.None,
-            Converters = new[] { StringEnumConverter },
+            Converters = new JsonConverter[] { StringEnumConverter },
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 

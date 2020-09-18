@@ -12,54 +12,57 @@ namespace Sentry.Extensibility
         /// <summary>
         /// The singleton instance.
         /// </summary>
-        public static DisabledHub Instance = new DisabledHub();
+        public static readonly DisabledHub Instance = new DisabledHub();
 
         /// <summary>
         /// Always disabled.
         /// </summary>
         public bool IsEnabled => false;
 
-        private DisabledHub() { }
+        private DisabledHub()
+        {
+        }
 
         /// <summary>
         /// No-Op.
         /// </summary>
-        /// <param name="configureScope"></param>
-        public void ConfigureScope(Action<Scope> configureScope) { }
+        public void ConfigureScope(Action<Scope> configureScope)
+        {
+        }
+
         /// <summary>
         /// No-Op.
         /// </summary>
-        /// <param name="configureScope"></param>
-        /// <returns></returns>
         public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => Task.CompletedTask;
 
         /// <summary>
         /// No-Op.
         /// </summary>
-        /// <returns></returns>
         public IDisposable PushScope() => this;
+
         /// <summary>
         /// No-Op.
         /// </summary>
-        /// <param name="state"></param>
-        /// <typeparam name="TState"></typeparam>
-        /// <returns></returns>
         public IDisposable PushScope<TState>(TState state) => this;
 
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void WithScope(Action<Scope> scopeCallback) { }
+        public void WithScope(Action<Scope> scopeCallback)
+        {
+        }
 
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void BindClient(ISentryClient client) { }
+        public void BindClient(ISentryClient client)
+        {
+        }
 
         /// <summary>
         /// No-Op.
         /// </summary>
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null) => SentryId.Empty;
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => SentryId.Empty;
 
         /// <summary>
         /// No-Op.
@@ -69,7 +72,9 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
         /// <summary>
         /// No-Op.

@@ -6,7 +6,7 @@ namespace Sentry.Internal
     internal interface IInternalSdkIntegration : ISdkIntegration
     {
         /// <summary>
-        /// Unregisters this integration with the hub
+        /// Unregisters this integration with the hub.
         /// </summary>
         /// <remarks>
         /// This method is invoked when the Hub is disposed.

@@ -12,8 +12,8 @@ namespace Sentry.Internal.Http
     /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
-        private readonly Action<HttpClientHandler, Dsn> _configureHandler;
-        private readonly Action<HttpClient, Dsn> _configureClient;
+        private readonly Action<HttpClientHandler, Dsn>? _configureHandler;
+        private readonly Action<HttpClient, Dsn>? _configureClient;
 
         /// <summary>
         /// Creates a new instance of <see cref="DefaultSentryHttpClientFactory"/>
@@ -21,8 +21,8 @@ namespace Sentry.Internal.Http
         /// <param name="configureHandler">An optional configuration callback</param>
         /// <param name="configureClient">An optional HttpClient configuration callback</param>
         public DefaultSentryHttpClientFactory(
-            Action<HttpClientHandler, Dsn> configureHandler = null,
-            Action<HttpClient, Dsn> configureClient = null)
+            Action<HttpClientHandler, Dsn>? configureHandler = null,
+            Action<HttpClient, Dsn>? configureClient = null)
         {
             _configureHandler = configureHandler;
             _configureClient = configureClient;
@@ -65,7 +65,7 @@ namespace Sentry.Internal.Http
                 options.DiagnosticLogger?.LogDebug("No response compression supported by HttpClientHandler.");
             }
 
-            if (_configureHandler is Action<HttpClientHandler, Dsn> configureHandler)
+            if (_configureHandler is { } configureHandler)
             {
                 options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClientHandler configuration action.");
                 configureHandler.Invoke(httpClientHandler, dsn);
@@ -98,10 +98,10 @@ namespace Sentry.Internal.Http
 
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-            if (_configureClient is Action<HttpClient, Dsn> configureClient)
+            if (_configureClient is { } configureClient)
             {
                 options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClient configuration action.");
-                configureClient?.Invoke(client, dsn);
+                configureClient.Invoke(client, dsn);
             }
 
             return client;

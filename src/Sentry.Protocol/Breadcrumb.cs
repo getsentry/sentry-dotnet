@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Series of application events
+    /// Series of application events.
     /// </summary>
     [DataContract]
     [DebuggerDisplay("Message: {" + nameof(Message) + "}, Type: {" + nameof(Type) + "}")]
@@ -30,7 +30,7 @@ namespace Sentry.Protocol
         /// Very long text might be abbreviated in the UI.
         /// </summary>
         [DataMember(Name = "message", EmitDefaultValue = false)]
-        public string Message { get; }
+        public string? Message { get; }
 
         /// <summary>
         /// The type of breadcrumb.
@@ -40,7 +40,7 @@ namespace Sentry.Protocol
         /// Other types are currently http for HTTP requests and navigation for navigation events.
         /// </remarks>
         [DataMember(Name = "type", EmitDefaultValue = false)]
-        public string Type { get; }
+        public string? Type { get; }
 
         /// <summary>
         /// Data associated with this breadcrumb.
@@ -50,7 +50,7 @@ namespace Sentry.Protocol
         /// Additional parameters that are unsupported by the type are rendered as a key/value table.
         /// </remarks>
         [DataMember(Name = "data", EmitDefaultValue = false)]
-        public IReadOnlyDictionary<string, string> Data { get; }
+        public IReadOnlyDictionary<string, string>? Data { get; }
 
         /// <summary>
         /// Dotted strings that indicate what the crumb is or where it comes from.
@@ -60,13 +60,13 @@ namespace Sentry.Protocol
         /// For instance aspnet.mvc.filter could be used to indicate that it came from an Action Filter.
         /// </remarks>
         [DataMember(Name = "category", EmitDefaultValue = false)]
-        public string Category { get; }
+        public string? Category { get; }
 
         /// <summary>
         /// The level of the event.
         /// </summary>
         /// <remarks>
-        /// Levels are used in the UI to emphasize and deemphasize the crumb.
+        /// Levels are used in the UI to emphasize and de-emphasize the crumb.
         /// </remarks>
         [DataMember(Name = "level", EmitDefaultValue = false)]
         public BreadcrumbLevel Level { get; }
@@ -82,8 +82,8 @@ namespace Sentry.Protocol
         public Breadcrumb(
             string message,
             string type,
-            IReadOnlyDictionary<string, string> data = null,
-            string category = null,
+            IReadOnlyDictionary<string, string>? data = null,
+            string? category = null,
             BreadcrumbLevel level = default)
         : this(
             null,
@@ -107,10 +107,10 @@ namespace Sentry.Protocol
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal Breadcrumb(
             DateTimeOffset? timestamp = null,
-            string message = null,
-            string type = null,
-            IReadOnlyDictionary<string, string> data = null,
-            string category = null,
+            string? message = null,
+            string? type = null,
+            IReadOnlyDictionary<string, string>? data = null,
+            string? category = null,
             BreadcrumbLevel level = default)
         {
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;

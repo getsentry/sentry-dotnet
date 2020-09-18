@@ -9,10 +9,12 @@ namespace Sentry.Internal
         /// Sentry DSN environment variable.
         /// </summary>
         public const string DsnEnvironmentVariable = "SENTRY_DSN";
+
         /// <summary>
         /// Sentry release environment variable.
         /// </summary>
         public const string ReleaseEnvironmentVariable = "SENTRY_RELEASE";
+
         /// <summary>
         /// Sentry environment, environment variable.
         /// </summary>

@@ -7,9 +7,9 @@ namespace Sentry.Integrations
     internal class AppDomainProcessExitIntegration : IInternalSdkIntegration
     {
         private readonly IAppDomain _appDomain;
-        private IHub _hub;
+        private IHub? _hub;
 
-        public AppDomainProcessExitIntegration(IAppDomain appDomain = null)
+        public AppDomainProcessExitIntegration(IAppDomain? appDomain = null)
         {
             _appDomain = appDomain ?? AppDomainAdapter.Instance;
         }

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Sentry.Extensibility;
 
 namespace Sentry.Internal
@@ -10,7 +9,6 @@ namespace Sentry.Internal
 
         public DelegateEventProcessor(Func<SentryEvent, SentryEvent> func)
         {
-            Debug.Assert(func != null);
             _func = func;
         }
 

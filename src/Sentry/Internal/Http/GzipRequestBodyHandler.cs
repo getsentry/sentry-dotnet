@@ -20,9 +20,9 @@ namespace Sentry.Internal.Http
         private readonly CompressionLevel _compressionLevel;
 
         /// <summary>
-        /// Creates a new instance of <see cref="T:Sentry.Internal.Http.GzipRequestBodyHandler" />
+        /// Creates a new instance of <see cref="T:Sentry.Internal.Http.GzipRequestBodyHandler" />.
         /// </summary>
-        /// <param name="innerHandler">The actual handler which handles the request</param>
+        /// <param name="innerHandler">The actual handler which handles the request.</param>
         /// <param name="compressionLevel">The compression level to use.</param>
         /// <exception cref="T:System.InvalidOperationException">Constructing this type with <see cref="T:System.IO.Compression.CompressionLevel" />
         /// of value <see cref="F:System.IO.Compression.CompressionLevel.NoCompression" /> is an invalid operation.</exception>
@@ -39,10 +39,10 @@ namespace Sentry.Internal.Http
         }
 
         /// <summary>
-        /// Sends the request while compressing it's payload
+        /// Sends the request while compressing its payload.
         /// </summary>
-        /// <param name="request">The HTTP request to compress</param>
-        /// <param name="cancellationToken">The cancellation token</param>
+        /// <param name="request">The HTTP request to compress.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         /// <inheritdoc />
         protected override Task<HttpResponseMessage> SendAsync(

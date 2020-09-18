@@ -9,7 +9,7 @@ namespace Sentry.Protocol
             this ConcurrentDictionary<string, object> dictionary,
             string key)
             where TValue : class, new()
-            => dictionary.GetOrAdd(key, _ => new TValue()) as TValue;
+            => (TValue) dictionary.GetOrAdd(key, _ => new TValue());
 
         public static ConcurrentQueue<T> EnqueueAll<T>(this ConcurrentQueue<T> target, IEnumerable<T> values)
         {
@@ -22,12 +22,8 @@ namespace Sentry.Protocol
         }
 
         public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
+            where TKey : notnull
         {
-            if (from == null || to == null)
-            {
-                return;
-            }
-
             foreach (var kv in from)
             {
                 if (!to.ContainsKey(kv.Key))

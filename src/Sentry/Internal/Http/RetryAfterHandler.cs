@@ -9,7 +9,7 @@ using Sentry.Infrastructure;
 namespace Sentry.Internal.Http
 {
     /// <summary>
-    /// Retry After Handler which short-circuit requests following an HTTP 429
+    /// Retry After Handler which short-circuit requests following an HTTP 429.
     /// </summary>
     /// <seealso href="https://tools.ietf.org/html/rfc6585#section-4" />
     /// <seealso href="https://docs.sentry.io/clientdev/overview/#writing-an-sdk"/>
@@ -38,7 +38,7 @@ namespace Sentry.Internal.Http
             => _clock = clock ?? throw new ArgumentNullException(nameof(clock));
 
         /// <summary>
-        /// Sends an HTTP request to the inner handler while verifying the Response status code for HTTP 429
+        /// Sends an HTTP request to the inner handler while verifying the Response status code for HTTP 429.
         /// </summary>
         /// <param name="request">The HTTP request message to send to the server.</param>
         /// <param name="cancellationToken">A cancellation token to cancel operation.</param>

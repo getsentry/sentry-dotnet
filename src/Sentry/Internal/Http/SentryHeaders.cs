@@ -10,22 +10,21 @@ namespace Sentry.Internal.Http
         public const string SentryAuthHeader = "X-Sentry-Auth";
 
         /// <summary>
-        /// Creates a function that when invoked returns a valid authentication header
+        /// Creates a function that when invoked returns a valid authentication header.
         /// </summary>
         /// <param name="sentryVersion">The sentry version.</param>
         /// <param name="clientVersion">The client version.</param>
         /// <param name="publicKey">The public key.</param>
         /// <param name="secretKey">The secret key.</param>
         /// <param name="clock">The clock.</param>
-        /// <returns></returns>
         public static Action<HttpRequestHeaders> AddSentryAuth(
             int sentryVersion,
             string clientVersion,
             string publicKey,
-            string secretKey,
-            ISystemClock clock = null)
+            string? secretKey,
+            ISystemClock? clock = null)
         {
-            clock = clock ?? SystemClock.Clock;
+            clock ??= SystemClock.Clock;
 
             var baseAuthHeader = $"Sentry sentry_version={sentryVersion}," +
                $"sentry_client={clientVersion}," +

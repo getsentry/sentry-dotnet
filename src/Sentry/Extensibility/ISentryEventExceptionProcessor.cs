@@ -3,7 +3,7 @@ using System;
 namespace Sentry.Extensibility
 {
     /// <summary>
-    /// Process exceptions and augments the event with its data
+    /// Process exceptions and augments the event with its data.
     /// </summary>
     public interface ISentryEventExceptionProcessor
     {

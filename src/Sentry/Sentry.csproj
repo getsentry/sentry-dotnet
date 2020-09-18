@@ -1,25 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <PackageId>Sentry</PackageId>
     <AssemblyName>Sentry</AssemblyName>
     <RootNamespace>Sentry</RootNamespace>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <!-- Disable nullability warnings on older frameworks because there is no nullability info for BCL -->
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
+    <Nullable>annotations</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="Newtonsoft.Json" Version="6.0.8" />
     <Reference Include="System.Web" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.1" />
-  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Protocol\Sentry.Protocol.csproj" />
   </ItemGroup>

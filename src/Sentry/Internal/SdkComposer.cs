@@ -1,6 +1,5 @@
 using System;
 using Sentry.Extensibility;
-using Sentry.Http;
 using Sentry.Internal.Http;
 
 namespace Sentry.Internal
@@ -17,12 +16,17 @@ namespace Sentry.Internal
 
         public IBackgroundWorker CreateBackgroundWorker()
         {
-            if (_options.BackgroundWorker is IBackgroundWorker worker)
+            if (_options.BackgroundWorker is { } worker)
             {
                 _options.DiagnosticLogger?.LogDebug("Using IBackgroundWorker set through options: {0}.",
                     worker.GetType().Name);
 
                 return worker;
+            }
+
+            if (_options.Dsn is null)
+            {
+                throw new InvalidOperationException("The DSN is expected to be set at this point.");
             }
 
             var addAuth = SentryHeaders.AddSentryAuth(
@@ -31,7 +35,7 @@ namespace Sentry.Internal
                 _options.Dsn.PublicKey,
                 _options.Dsn.SecretKey);
 
-            if (_options.SentryHttpClientFactory is ISentryHttpClientFactory factory)
+            if (_options.SentryHttpClientFactory is { } factory)
             {
                 _options.DiagnosticLogger?.LogDebug("Using ISentryHttpClientFactory set through options: {0}.",
                     factory.GetType().Name);

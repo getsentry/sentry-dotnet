@@ -17,7 +17,7 @@ namespace Sentry.Internal
         private readonly int _maxItems;
         private int _currentItems;
 
-        private event EventHandler OnFlushObjectReceived;
+        private event EventHandler? OnFlushObjectReceived;
 
         internal Task WorkerTask { get; }
 
@@ -26,15 +26,15 @@ namespace Sentry.Internal
         public BackgroundWorker(
             ITransport transport,
             SentryOptions options)
-            : this(transport, options, null, null)
+            : this(transport, options, null)
         {
         }
 
         internal BackgroundWorker(
             ITransport transport,
             SentryOptions options,
-            CancellationTokenSource shutdownSource = null,
-            ConcurrentQueue<SentryEvent> queue = null)
+            CancellationTokenSource? shutdownSource = null,
+            ConcurrentQueue<SentryEvent>? queue = null)
         {
             Debug.Assert(transport != null);
             Debug.Assert(options != null);
@@ -57,7 +57,7 @@ namespace Sentry.Internal
                     .ConfigureAwait(false));
         }
 
-        public bool EnqueueEvent(SentryEvent @event)
+        public bool EnqueueEvent(SentryEvent? @event)
         {
             if (_disposed)
             {

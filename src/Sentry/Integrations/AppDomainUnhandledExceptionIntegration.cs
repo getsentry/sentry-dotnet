@@ -10,9 +10,9 @@ namespace Sentry.Integrations
     internal class AppDomainUnhandledExceptionIntegration : IInternalSdkIntegration
     {
         private readonly IAppDomain _appDomain;
-        private IHub _hub;
+        private IHub? _hub;
 
-        internal AppDomainUnhandledExceptionIntegration(IAppDomain appDomain = null)
+        internal AppDomainUnhandledExceptionIntegration(IAppDomain? appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
         public void Register(IHub hub, SentryOptions _)

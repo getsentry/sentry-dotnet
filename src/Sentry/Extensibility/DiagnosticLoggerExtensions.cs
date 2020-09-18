@@ -63,7 +63,7 @@ namespace Sentry.Extensibility
         public static void LogError(
             this IDiagnosticLogger logger,
             string message,
-            Exception exception = null)
+            Exception? exception = null)
             => logger.LogIfEnabled(SentryLevel.Error, message, exception);
 
         public static void LogError<TArg>(
@@ -84,16 +84,16 @@ namespace Sentry.Extensibility
         public static void LogFatal(
             this IDiagnosticLogger logger,
             string message,
-            Exception exception = null)
+            Exception? exception = null)
             => logger.LogIfEnabled(SentryLevel.Fatal, message, exception);
 
         internal static void LogIfEnabled(
             this IDiagnosticLogger logger,
             SentryLevel level,
             string message,
-            Exception exception = null)
+            Exception? exception = null)
         {
-            if (logger?.IsEnabled(level) == true)
+            if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception);
             }
@@ -104,9 +104,9 @@ namespace Sentry.Extensibility
             SentryLevel level,
             string message,
             TArg arg,
-            Exception exception = null)
+            Exception? exception = null)
         {
-            if (logger?.IsEnabled(level) == true)
+            if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception, arg);
             }
@@ -118,9 +118,9 @@ namespace Sentry.Extensibility
             string message,
             TArg arg,
             TArg2 arg2,
-            Exception exception = null)
+            Exception? exception = null)
         {
-            if (logger?.IsEnabled(level) == true)
+            if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception, arg, arg2);
             }
@@ -133,9 +133,9 @@ namespace Sentry.Extensibility
             TArg arg,
             TArg2 arg2,
             TArg3 arg3,
-            Exception exception = null)
+            Exception? exception = null)
         {
-            if (logger?.IsEnabled(level) == true)
+            if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception, arg, arg2, arg3);
             }

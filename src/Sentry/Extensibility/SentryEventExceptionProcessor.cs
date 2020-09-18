@@ -3,16 +3,16 @@ using System;
 namespace Sentry.Extensibility
 {
     /// <summary>
-    /// Process an exception type and augments the event with its data
+    /// Process an exception type and augments the event with its data.
     /// </summary>
-    /// <typeparam name="TException">The type of the exception to process</typeparam>
+    /// <typeparam name="TException">The type of the exception to process.</typeparam>
     /// <inheritdoc />
     public abstract class SentryEventExceptionProcessor<TException>
         : ISentryEventExceptionProcessor
         where TException : Exception
     {
         /// <inheritdoc />
-        public void Process(Exception exception, SentryEvent sentryEvent)
+        public void Process(Exception? exception, SentryEvent sentryEvent)
         {
             if (exception is TException specificException)
             {
