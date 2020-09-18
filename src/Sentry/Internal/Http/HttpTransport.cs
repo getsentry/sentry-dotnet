@@ -33,13 +33,8 @@ namespace Sentry.Internal.Http
             _addAuth = addAuth;
         }
 
-        public async Task CaptureEventAsync(SentryEvent? @event, CancellationToken cancellationToken = default)
+        public async Task CaptureEventAsync(SentryEvent @event, CancellationToken cancellationToken = default)
         {
-            if (@event == null)
-            {
-                return;
-            }
-
             var request = CreateRequest(@event);
 
             var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);

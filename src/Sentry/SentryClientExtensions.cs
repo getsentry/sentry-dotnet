@@ -32,7 +32,7 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         public static SentryId CaptureMessage(
             this ISentryClient client,
-            string? message,
+            string message,
             SentryLevel level = SentryLevel.Info)
         {
             return !client.IsEnabled

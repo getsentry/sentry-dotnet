@@ -43,15 +43,6 @@ namespace Sentry.Tests.Internals.Http
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
-        public async Task CaptureEventAsync_NullEvent_NoOp()
-        {
-            var sut = _fixture.GetSut();
-            await sut.CaptureEventAsync(null);
-            _ = await _fixture.HttpMessageHandler.DidNotReceive()
-                    .VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
-        }
-
-        [Fact]
         public async Task CaptureEventAsync_CancellationToken_PassedToClient()
         {
             var source = new CancellationTokenSource();

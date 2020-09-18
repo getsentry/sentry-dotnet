@@ -21,13 +21,8 @@ namespace Sentry.Internal
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
         }
 
-        public void Process(Exception? exception, SentryEvent sentryEvent)
+        public void Process(Exception exception, SentryEvent sentryEvent)
         {
-            if (exception is null)
-            {
-                return;
-            }
-
             Debug.Assert(sentryEvent != null);
 
             _options.DiagnosticLogger?.LogDebug("Running processor on exception: {0}", exception.Message);

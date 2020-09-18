@@ -8,9 +8,16 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Extract the payload of the <see cref="IHttpRequest"/>.
         /// </summary>
-        public object? ExtractPayload(IHttpRequest? request)
+        public object? ExtractPayload(IHttpRequest request)
         {
-            if (request?.Body == null
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (request is null)
+            {
+                return null;
+            }
+
+            if (request.Body == null
                 || !request.Body.CanSeek
                 || !request.Body.CanRead
                 || !IsSupported(request))

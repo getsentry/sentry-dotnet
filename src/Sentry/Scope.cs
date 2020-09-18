@@ -81,17 +81,15 @@ namespace Sentry
         /// <summary>
         /// Creates a scope with the specified options.
         /// </summary>
-        public Scope(SentryOptions? options = null)
+        public Scope(SentryOptions? options)
             : base(options)
         {
             Options = options ?? new SentryOptions();
         }
 
-        /// <summary>
-        /// Creates a scope.
-        /// </summary>
-        // TODO: this method can be removed with a breaking change.
-        public Scope() : this(null)
+        // For testing. Should explicitly require SentryOptions.
+        internal Scope()
+            : this(new SentryOptions())
         {
         }
 

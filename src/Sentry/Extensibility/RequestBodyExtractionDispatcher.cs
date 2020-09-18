@@ -31,8 +31,15 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns>A serializable representation of the payload.</returns>
-        public object? ExtractPayload(IHttpRequest? request)
+        public object? ExtractPayload(IHttpRequest request)
         {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (request is null)
+            {
+                return null;
+            }
+
             var size = _sizeSwitch();
 
             switch (size)
@@ -41,7 +48,7 @@ namespace Sentry.Extensibility
                 case RequestSize.Medium when request?.ContentLength < 10_000:
                 case RequestSize.Always:
                     _options.DiagnosticLogger?.LogDebug("Attempting to read request body of size: {0}, configured max: {1}.",
-                        request?.ContentLength, size);
+                        request.ContentLength, size);
 
                     foreach (var extractor in Extractors)
                     {
@@ -64,7 +71,7 @@ namespace Sentry.Extensibility
             }
 
             _options.DiagnosticLogger?.LogWarning("Ignoring request with Size {0} and configuration RequestSize {1}",
-                request?.ContentLength, size);
+                request.ContentLength, size);
 
             return null;
         }

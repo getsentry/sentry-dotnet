@@ -23,18 +23,27 @@ namespace Sentry
         /// <param name="level">Breadcrumb level.</param>
         public static void AddBreadcrumb(
             this IHub hub,
-            string? message,
+            string message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
-            => hub.AddBreadcrumb(
+        {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (hub is null)
+            {
+                return;
+            }
+
+            hub.AddBreadcrumb(
                 null,
                 message,
                 category,
                 type,
                 data != null ? new Dictionary<string, string>(data) : null,
                 level);
+        }
 
         /// <summary>
         /// Adds a breadcrumb using a custom <see cref="ISystemClock"/> which allows better testability.
@@ -53,12 +62,20 @@ namespace Sentry
         public static void AddBreadcrumb(
             this IHub hub,
             ISystemClock? clock,
-            string? message,
+            string message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
-            => hub.ConfigureScope(
+        {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (hub is null)
+            {
+                return;
+            }
+
+            hub.ConfigureScope(
                 s => s.AddBreadcrumb(
                     (clock ?? SystemClock.Clock).GetUtcNow(),
                     message,
@@ -66,6 +83,7 @@ namespace Sentry
                     type,
                     data != null ? new Dictionary<string, string>(data) : null,
                     level));
+        }
 
         /// <summary>
         /// Pushes a new scope while locking it which stop new scope creation.

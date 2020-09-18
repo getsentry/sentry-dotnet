@@ -39,7 +39,7 @@ namespace Sentry
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
             this BaseScope scope,
-            string? message,
+            string message,
             string? category,
             string? type,
             in (string, string)? dataPair = null,
@@ -83,7 +83,7 @@ namespace Sentry
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
             this BaseScope scope,
-            string? message,
+            string message,
             string? category = null,
             string? type = null,
             Dictionary<string, string>? data = null,
@@ -122,7 +122,7 @@ namespace Sentry
         public static void AddBreadcrumb(
             this BaseScope scope,
             DateTimeOffset? timestamp,
-            string? message,
+            string message,
             string? category = null,
             string? type = null,
             IReadOnlyDictionary<string, string>? data = null,

@@ -129,7 +129,6 @@ namespace Sentry
                 _ = Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
                 (_localHub as IDisposable)?.Dispose();
 
-                // TODO: is this necessary?
                 _localHub = null!;
             }
         }
@@ -190,7 +189,7 @@ namespace Sentry
         /// <seealso href="https://docs.sentry.io/clientdev/interfaces/breadcrumbs/"/>
         [DebuggerStepThrough]
         public static void AddBreadcrumb(
-            string? message,
+            string message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,
@@ -214,7 +213,7 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
             ISystemClock? clock,
-            string? message,
+            string message,
             string? category = null,
             string? type = null,
             IDictionary<string, string>? data = null,
