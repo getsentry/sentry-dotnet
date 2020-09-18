@@ -111,7 +111,6 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Create a <see cref="SentryStackFrame"/> from a <see cref="StackFrame"/>.
         /// </summary>
-        // TODO: should this really ignore isCurrentStackTrace?
         protected virtual SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) => InternalCreateFrame(stackFrame, true);
 
         /// <summary>
