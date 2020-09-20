@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Sentry.Protocol;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -21,7 +22,7 @@ namespace Sentry.Samples.Mobile.Views
             menuItems = new List<HomeMenuItem>
             {
                 new HomeMenuItem {Id = MenuItemType.Browse, Title="Browse" },
-                new HomeMenuItem {Id = MenuItemType.About, Title="About" }
+                new HomeMenuItem {Id = MenuItemType.About, Title="Unhandled Exception" }
             };
 
             ListViewMenu.ItemsSource = menuItems;
@@ -30,9 +31,17 @@ namespace Sentry.Samples.Mobile.Views
             ListViewMenu.ItemSelected += async (sender, e) =>
             {
                 if (e.SelectedItem == null)
+                {
+                    SentrySdk.CaptureMessage("No item selected.", SentryLevel.Warning);
                     return;
+                }
 
                 var id = (int)((HomeMenuItem)e.SelectedItem).Id;
+                SentrySdk.AddBreadcrumb(
+                    $"Navigating to {((HomeMenuItem)e.SelectedItem).Title}",
+                    "app.lifecycle",
+                    "navigation");
+
                 await RootPage.NavigateFromMenu(id);
             };
         }

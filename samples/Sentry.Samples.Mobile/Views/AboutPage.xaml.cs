@@ -13,6 +13,7 @@ namespace Sentry.Samples.Mobile.Views
         public AboutPage()
         {
             InitializeComponent();
+            throw new Exception("About exception");
         }
     }
 }

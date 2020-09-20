@@ -32,11 +32,19 @@ namespace Sentry.Samples.Mobile.Views
             var layout = (BindableObject)sender;
             var item = (Item)layout.BindingContext;
             await Navigation.PushAsync(new ItemDetailPage(new ItemDetailViewModel(item)));
+            SentrySdk.AddBreadcrumb(
+                "Item selected",
+                "user.interaction",
+                "ui");
         }
 
         async void AddItem_Clicked(object sender, EventArgs e)
         {
             await Navigation.PushModalAsync(new NavigationPage(new NewItemPage()));
+            SentrySdk.AddBreadcrumb(
+                "Item added to cart",
+                "user.interaction",
+                "event");
         }
 
         protected override void OnAppearing()
@@ -44,7 +52,18 @@ namespace Sentry.Samples.Mobile.Views
             base.OnAppearing();
 
             if (viewModel.Items.Count == 0)
+            {
                 viewModel.IsBusy = true;
+            }
+
+            SentrySdk.AddBreadcrumb(
+                "OnAppearing",
+                "app.lifecycle",
+                "event",
+                new Dictionary<string, string>
+                {
+                {"IsBusy", viewModel.IsBusy.ToString()}
+            });
         }
     }
 }

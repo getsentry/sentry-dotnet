@@ -11,22 +11,22 @@ namespace Sentry.Samples.Mobile
 
         public App()
         {
+            SentrySdk.Init(o =>
+            {
+                o.Debug = false;
+                o.Dsn = new Dsn("https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537");
+            });
+
             InitializeComponent();
 
             DependencyService.Register<MockDataStore>();
             MainPage = new MainPage();
         }
 
-        protected override void OnStart()
-        {
-        }
+        protected override void OnStart() => SentrySdk.AddBreadcrumb("OnStart",  "app.lifecycle", "event");
 
-        protected override void OnSleep()
-        {
-        }
+        protected override void OnSleep() => SentrySdk.AddBreadcrumb("OnSleep",  "app.lifecycle", "event");
 
-        protected override void OnResume()
-        {
-        }
+        protected override void OnResume() => SentrySdk.AddBreadcrumb("OnResume",  "app.lifecycle", "event");
     }
 }

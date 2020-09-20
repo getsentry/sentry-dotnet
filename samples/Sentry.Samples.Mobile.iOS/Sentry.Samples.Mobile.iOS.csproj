@@ -139,6 +139,14 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Protocol\Sentry.Protocol.csproj">
+      <Project>{7b5631b4-3d97-4374-95b6-42dba5c8dd10}</Project>
+      <Name>Sentry.Protocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj">
+      <Project>{f2486cc8-fab7-4775-976f-c5a4cf97867f}</Project>
+      <Name>Sentry</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sentry.Samples.Mobile\Sentry.Samples.Mobile.csproj">
       <Project>{79F0D047-D4A7-4E71-B579-D76DE5537ED2}</Project>
       <Name>Sentry.Samples.Mobile</Name>
