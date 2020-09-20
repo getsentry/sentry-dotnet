@@ -5,13 +5,16 @@
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
     <Deterministic>True</Deterministic>
     <Features>strict</Features>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>SYSTEM_WEB;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net'))">
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

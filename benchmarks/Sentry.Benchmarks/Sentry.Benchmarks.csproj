@@ -3,6 +3,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <!-- Defining as true here because the hack at the top level Directory.Build.props -->
+    <!-- doesn't work with the generated csprojs of BenchmarkDotNet -->
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

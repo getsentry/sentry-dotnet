@@ -16,6 +16,7 @@
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <ProvisioningType>automatic</ProvisioningType>
     <!-- Xamarin.Forms, Essentials are not signed -->
+    <!-- Defining the property below in this format of msbuild does NOT work -->
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">

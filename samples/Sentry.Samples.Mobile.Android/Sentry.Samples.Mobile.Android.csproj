@@ -22,6 +22,7 @@
     <AndroidHttpClientHandlerType>Xamarin.Android.Net.AndroidClientHandler</AndroidHttpClientHandlerType>
     <NuGetPackageImportStamp />
     <!-- Xamarin.Forms, Essentials are not signed -->
+    <!-- Defining the property below in this format of msbuild does NOT work -->
     <SignAssembly>false</SignAssembly>
     <LangVersion>8</LangVersion>
   </PropertyGroup>
