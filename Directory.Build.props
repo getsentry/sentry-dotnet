@@ -5,8 +5,7 @@
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
-    <!-- Xamarin.Forms, Essentials are not signed -->
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
     <Deterministic>True</Deterministic>
     <Features>strict</Features>
   </PropertyGroup>
