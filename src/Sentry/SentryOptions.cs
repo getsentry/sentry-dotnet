@@ -397,7 +397,13 @@ namespace Sentry
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
+            // TODO: Make it configurable instead, flip default based on #ifdef
+            // This should be enabled for: Mono AOT so probably a better const here
+#if RELEASE && __MOBILE__
+            SentryStackTraceFactory = new MonoSentryStackTraceFactory(this);
+#else
             SentryStackTraceFactory = new SentryStackTraceFactory(this);
+#endif
             _sentryStackTraceFactoryAccessor = () => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
@@ -431,6 +437,8 @@ namespace Sentry
 
             InAppExclude = new[] {
                     "System.",
+                    "Mono",
+                    "Xamarin",
                     "Sentry.",
                     "Microsoft.",
                     "MS", // MS.Win32, MS.Internal, etc: Desktop apps

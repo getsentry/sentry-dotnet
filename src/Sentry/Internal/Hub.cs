@@ -13,7 +13,7 @@ namespace Sentry.Internal
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
 
-        private readonly SentryClient _ownedClient;
+        internal readonly SentryClient _ownedClient;
 
         internal SentryScopeManager ScopeManager { get; }
 
@@ -112,6 +112,24 @@ namespace Sentry.Internal
                 _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
                 return SentryId.Empty;
             }
+        }
+
+        internal SentryEvent? PrepareEvent(SentryEvent evt, Scope? scope = null)
+        {
+            try
+            {
+                var currentScope = ScopeManager.GetCurrent();
+                var actualScope = scope ?? currentScope.Key;
+                if (currentScope.Value is SentryClient c)
+                {
+                    return c.PrepareEvent(evt, actualScope);
+                }
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
+            }
+            return null;
         }
 
         public async Task FlushAsync(TimeSpan timeout)

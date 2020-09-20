@@ -112,13 +112,34 @@ namespace Sentry
                     return SentryId.Empty;
                 }
             }
+
+            var processedEvent = PrepareEvent(@event, scope);
+            if (processedEvent is null)
+            {
+                return SentryId.Empty;
+            }
+
+            if (Worker.EnqueueEvent(processedEvent))
+            {
+                _options.DiagnosticLogger?.LogDebug("Event queued up.");
+                return processedEvent.EventId;
+            }
+
+            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
+                Worker.QueuedItems);
+
+            return SentryId.Empty;
+        }
+
+        internal SentryEvent? PrepareEvent(SentryEvent @event, Scope? scope)
+        {
             if (@event.Exception != null && _options.ExceptionFilters?.Length > 0)
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
                     _options.DiagnosticLogger?.LogInfo(
                         "Event with exception of type '{0}' was dropped by an exception filter.", @event.Exception.GetType());
-                    return SentryId.Empty;
+                    return null;
                 }
             }
             scope ??= new Scope(_options);
@@ -154,7 +175,7 @@ namespace Sentry
                 if (processedEvent == null)
                 {
                     _options.DiagnosticLogger?.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                    return SentryId.Empty;
+                    return null;
                 }
             }
 
@@ -162,19 +183,10 @@ namespace Sentry
             if (processedEvent == null) // Rejected event
             {
                 _options.DiagnosticLogger?.LogInfo("Event dropped by BeforeSend callback.");
-                return SentryId.Empty;
+                return null;
             }
 
-            if (Worker.EnqueueEvent(processedEvent))
-            {
-                _options.DiagnosticLogger?.LogDebug("Event queued up.");
-                return processedEvent.EventId;
-            }
-
-            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
-                Worker.QueuedItems);
-
-            return SentryId.Empty;
+            return processedEvent;
         }
 
         private SentryEvent? BeforeSend(SentryEvent? @event)

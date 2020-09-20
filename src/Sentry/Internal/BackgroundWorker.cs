@@ -17,6 +17,7 @@ namespace Sentry.Internal
         private readonly int _maxItems;
         private int _currentItems;
 
+        internal ITransport _transport;
         private event EventHandler? OnFlushObjectReceived;
 
         internal Task WorkerTask { get; }
@@ -47,6 +48,7 @@ namespace Sentry.Internal
             _shutdownSource = shutdownSource ?? new CancellationTokenSource();
             _queue = queue ?? new ConcurrentQueue<SentryEvent>();
 
+            _transport = transport;
             WorkerTask = Task.Run(
                 async () => await WorkerAsync(
                     _queue,

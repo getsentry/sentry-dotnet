@@ -44,6 +44,34 @@ namespace Sentry.Protocol
         // Optional fields
 
         /// <summary>
+        /// Module Version Id.
+        /// </summary>
+        /// <remarks>Used by the Mono AOT compiler</remarks>
+        [DataMember(Name = "mvid", EmitDefaultValue = false)]
+        public string? ModuleVersionId { get; set; }
+
+        /// <summary>
+        /// AOT Id.
+        /// </summary>
+        /// <remarks>Used by the Mono AOT compiler</remarks>
+        [DataMember(Name = "aotid", EmitDefaultValue = false)]
+        public string? AotId { get; set; }
+
+        /// <summary>
+        /// Method Index.
+        /// </summary>
+        /// <remarks>Used by the Mono AOT compiler</remarks>
+        [DataMember(Name = "method_index", EmitDefaultValue = false)]
+        public string? MethodIndex { get; set; }
+
+        /// <summary>
+        /// Is IL offset.
+        /// </summary>
+        /// <remarks>Used by the Mono AOT compiler</remarks>
+        [DataMember(Name = "is_il_offset", EmitDefaultValue = false)]
+        public bool? IsILOffset { get; set; }
+
+        /// <summary>
         /// The line number of the call.
         /// </summary>
         [DataMember(Name = "lineno", EmitDefaultValue = false)]
