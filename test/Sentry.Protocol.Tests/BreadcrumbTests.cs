@@ -32,7 +32,7 @@ namespace Sentry.Protocol.Tests
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"123timestamp\":\"9999-12-31T23:59:59Z\","
+            Assert.Equal("{\"timestamp\":\"9999-12-31T23:59:59Z\","
                         + "\"message\":\"message1\","
                         + "\"type\":\"type1\","
                         + "\"data\":{\"key\":\"val\"},"
