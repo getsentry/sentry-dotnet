@@ -33,12 +33,12 @@ namespace Sentry.NLog
         /// <summary>
         /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
         /// </summary>
-        public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
+        public LogLevel? MinimumEventLevel { get; set; } = LogLevel.Error;
 
         /// <summary>
         /// Minimum log level to be included in the breadcrumb. Defaults to <see cref="M:LogLevel.Info" />.
         /// </summary>
-        public LogLevel MinimumBreadcrumbLevel { get; set; } = LogLevel.Info;
+        public LogLevel? MinimumBreadcrumbLevel { get; set; } = LogLevel.Info;
 
         /// <summary>
         /// Set this to <see langword="true" /> to ignore log messages that don't contain an exception.
@@ -60,37 +60,37 @@ namespace Sentry.NLog
         /// Custom layout for breadcrumbs.
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-        public Layout BreadcrumbLayout { get; set; }
+        public Layout? BreadcrumbLayout { get; set; }
 
         /// <summary>
         /// Custom layout for breadcrumbs category
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-        public Layout BreadcrumbCategoryLayout { get; set; }
+        public Layout? BreadcrumbCategoryLayout { get; set; }
 
         /// <summary>
         /// Configured layout for rendering SentryEvent message
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-        public Layout Layout { get; set; }
+        public Layout? Layout { get; set; }
 
         /// <summary>
         /// Configured layout for Dsn-Address to Sentry
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-        public Layout DsnLayout { get; set; }
+        public Layout? DsnLayout { get; set; }
 
         /// <summary>
         /// Configured layout for application Release version to Sentry
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-        public Layout ReleaseLayout { get; set; }
+        public Layout? ReleaseLayout { get; set; }
 
         /// <summary>
         /// Configured layout for application Environment to Sentry
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-        public Layout EnvironmentLayout { get; set; }
+        public Layout? EnvironmentLayout { get; set; }
 
         /// <summary>
         /// Any additional tags to apply to each logged message.

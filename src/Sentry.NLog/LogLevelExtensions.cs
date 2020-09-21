@@ -8,56 +8,30 @@ namespace Sentry.NLog
     {
         public static SentryLevel? ToSentryLevel(this LogLevel loggingLevel)
         {
-            switch (loggingLevel?.Name)
+            return loggingLevel.Name switch
             {
-                case nameof(LogLevel.Debug):
-                    return SentryLevel.Debug;
-
-                case nameof(LogLevel.Error):
-                    return SentryLevel.Error;
-
-                case nameof(LogLevel.Fatal):
-                    return SentryLevel.Fatal;
-
-                case nameof(LogLevel.Info):
-                    return SentryLevel.Info;
-
-                case nameof(LogLevel.Trace):
-                    return SentryLevel.Debug;
-
-                case nameof(LogLevel.Warn):
-                    return SentryLevel.Warning;
-
-                default:
-                    return null;
-            }
+                nameof(LogLevel.Debug) => SentryLevel.Debug,
+                nameof(LogLevel.Error) => SentryLevel.Error,
+                nameof(LogLevel.Fatal) => SentryLevel.Fatal,
+                nameof(LogLevel.Info) => SentryLevel.Info,
+                nameof(LogLevel.Trace) => SentryLevel.Debug,
+                nameof(LogLevel.Warn) => SentryLevel.Warning,
+                _ => null
+            };
         }
 
         public static BreadcrumbLevel ToBreadcrumbLevel(this LogLevel level)
         {
-            switch (level.Name)
+            return level.Name switch
             {
-                case nameof(LogLevel.Debug):
-                    return BreadcrumbLevel.Debug;
-
-                case nameof(LogLevel.Error):
-                    return BreadcrumbLevel.Error;
-
-                case nameof(LogLevel.Fatal):
-                    return BreadcrumbLevel.Critical;
-
-                case nameof(LogLevel.Info):
-                    return BreadcrumbLevel.Info;
-
-                case nameof(LogLevel.Trace):
-                    return BreadcrumbLevel.Debug;
-
-                case nameof(LogLevel.Warn):
-                    return BreadcrumbLevel.Warning;
-
-                default:
-                    return BreadcrumbLevel.Info;
-            }
+                nameof(LogLevel.Debug) => BreadcrumbLevel.Debug,
+                nameof(LogLevel.Error) => BreadcrumbLevel.Error,
+                nameof(LogLevel.Fatal) => BreadcrumbLevel.Critical,
+                nameof(LogLevel.Info) => BreadcrumbLevel.Info,
+                nameof(LogLevel.Trace) => BreadcrumbLevel.Debug,
+                nameof(LogLevel.Warn) => BreadcrumbLevel.Warning,
+                _ => BreadcrumbLevel.Info
+            };
         }
     }
 }

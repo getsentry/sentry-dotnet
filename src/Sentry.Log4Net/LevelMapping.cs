@@ -7,32 +7,16 @@ namespace Sentry.Log4Net
     {
         public static SentryLevel? ToSentryLevel(this LoggingEvent loggingLevel)
         {
-            switch (loggingLevel.Level)
+            return loggingLevel.Level switch
             {
-                case var l when l == Level.Fatal
-                                || l == Level.Emergency
-                                || l == Level.All:
-                    return SentryLevel.Fatal;
-                case var l when l == Level.Alert
-                                || l == Level.Critical
-                                || l == Level.Severe
-                                || l == Level.Error:
-                    return SentryLevel.Error;
-                case var l when l == Level.Warn:
-                    return SentryLevel.Warning;
-                case var l when l == Level.Notice
-                                || l == Level.Info:
-                    return SentryLevel.Info;
-                case var l when l == Level.Debug
-                                || l == Level.Verbose
-                                || l == Level.Trace
-                                || l == Level.Finer
-                                || l == Level.Finest
-                                || l == Level.Fine:
-                    return SentryLevel.Debug;
-            }
-
-            return null;
+                var l when l == Level.Fatal || l == Level.Emergency || l == Level.All => SentryLevel.Fatal,
+                var l when l == Level.Alert || l == Level.Critical || l == Level.Severe || l == Level.Error => SentryLevel.Error,
+                var l when l == Level.Warn => SentryLevel.Warning,
+                var l when l == Level.Notice || l == Level.Info => SentryLevel.Info,
+                var l when l == Level.Debug || l == Level.Verbose || l == Level.Trace || l == Level.Finer || l == Level.Finest ||
+                           l == Level.Fine => SentryLevel.Debug,
+                _ => null
+            };
         }
     }
 }

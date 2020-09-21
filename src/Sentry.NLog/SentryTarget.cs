@@ -28,10 +28,10 @@ namespace Sentry.NLog
         internal Func<IHub> HubAccessor => _hubAccessor;
 
         private readonly ISystemClock _clock;
-        private IDisposable _sdkDisposable;
+        private IDisposable? _sdkDisposable;
 
         internal static readonly SdkVersion NameAndVersion = typeof(SentryTarget).Assembly.GetNameAndVersion();
-        
+
         internal static readonly string AdditionalGroupingKeyProperty = "AdditionalGroupingKey";
 
         private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
@@ -55,7 +55,7 @@ namespace Sentry.NLog
         {
         }
 
-        internal SentryTarget(SentryNLogOptions options, Func<IHub> hubAccessor, IDisposable sdkInstance, ISystemClock clock)
+        internal SentryTarget(SentryNLogOptions options, Func<IHub> hubAccessor, IDisposable? sdkInstance, ISystemClock clock)
         {
             Debug.Assert(options != null);
             Debug.Assert(hubAccessor != null);
@@ -92,7 +92,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Configured layout for Data Source Name of a given project in Sentry
         /// </summary>
-        public Layout Dsn
+        public Layout? Dsn
         {
             get => Options.DsnLayout;
             set => Options.DsnLayout = value;
@@ -101,7 +101,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Configured layout for application Release version to Sentry
         /// </summary>
-        public Layout Release
+        public Layout? Release
         {
             get => Options.ReleaseLayout;
             set => Options.ReleaseLayout = value;
@@ -110,7 +110,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Configured layout for application Environment to Sentry
         /// </summary>
-        public Layout Environment
+        public Layout? Environment
         {
             get => Options.EnvironmentLayout;
             set => Options.EnvironmentLayout = value;
@@ -119,7 +119,7 @@ namespace Sentry.NLog
         /// <summary>
         /// An optional layout specific to breadcrumbs. If not set, uses the same layout as the standard <see cref="TargetWithContext.Layout"/>.
         /// </summary>
-        public Layout BreadcrumbLayout
+        public Layout? BreadcrumbLayout
         {
             get => Options.BreadcrumbLayout ?? Layout;
             set => Options.BreadcrumbLayout = value;
@@ -128,7 +128,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Configured layout for application Environment to Sentry
         /// </summary>
-        public Layout BreadcrumbCategory
+        public Layout? BreadcrumbCategory
         {
             get => Options.BreadcrumbCategoryLayout;
             set => Options.BreadcrumbCategoryLayout = value;
@@ -190,7 +190,7 @@ namespace Sentry.NLog
         /// </summary>
         /// <seealso cref="IncludeEventPropertiesAsTags" />
         [Obsolete("Use IncludeEventProperties instead")]
-        public bool SendEventPropertiesAsData 
+        public bool SendEventPropertiesAsData
         {
             get => IncludeEventProperties;
             set => IncludeEventProperties = value;
@@ -351,11 +351,6 @@ namespace Sentry.NLog
 
                 var evt = new SentryEvent(exception)
                 {
-                    Sdk =
-                    {
-                        Name = Constants.SdkName,
-                        Version = NameAndVersion.Version
-                    },
                     Message = null,
                     LogEntry = new LogEntry
                     {
@@ -369,7 +364,16 @@ namespace Sentry.NLog
                     User = GetUser(logEvent),
                 };
 
-                evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+                if (evt.Sdk is {} sdk)
+                {
+                    sdk.Name = Constants.SdkName;
+                    sdk.Version = NameAndVersion.Version;
+
+                    if (NameAndVersion.Version is {} version)
+                    {
+                        sdk.AddPackage(ProtocolPackageName, version);
+                    }
+                }
 
                 if (Tags.Count > 0 || (IncludeEventPropertiesAsTags && logEvent.HasProperties))
                 {
@@ -380,7 +384,7 @@ namespace Sentry.NLog
                 {
                     var contextProps = GetAllProperties(logEvent);
                     evt.SetExtras(contextProps);
-                    
+
                     if (contextProps.TryGetValue(AdditionalGroupingKeyProperty, out var additionalGroupingKey)
                         && additionalGroupingKey != null)
                     {
@@ -390,7 +394,7 @@ namespace Sentry.NLog
                             overridenFingerprint.Add("{{ default }}");
                         }
                         overridenFingerprint.Add(additionalGroupingKey.ToString());
-                        
+
                         evt.SetFingerprint(overridenFingerprint);
                     }
                 }
@@ -412,9 +416,9 @@ namespace Sentry.NLog
                     ? (exception?.Message ?? logEvent.FormattedMessage)
                     : breadcrumbFormatted;
 
-                IDictionary<string, string> data = null;
+                IDictionary<string, string>? data = null;
 // If this is true, an exception is being logged with no custom message
-                if (exception != null && !message.StartsWith(exception.Message))
+                if (exception?.Message != null && !message.StartsWith(exception.Message))
                 {
                     // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
                     data = new Dictionary<string, string>
@@ -429,10 +433,11 @@ namespace Sentry.NLog
                     if (shouldIncludeProperties)
                     {
                         var contextProps = GetAllProperties(logEvent);
-                        data = data ?? new Dictionary<string, string>(contextProps.Count);
+                        data ??= new Dictionary<string, string>(contextProps.Count);
                         foreach (var contextProp in contextProps)
                         {
-                            data.Add(contextProp.Key, contextProp.Value?.ToString());
+                            if (contextProp.Value?.ToString() is {} value)
+                                data.Add(contextProp.Key, value);
                         }
                     }
                 }
@@ -448,11 +453,6 @@ namespace Sentry.NLog
 
         private User GetUser(LogEventInfo logEvent)
         {
-            if (User == null)
-            {
-                return null;
-            }
-
             var user = new User
             {
                 Email = User.Email?.Render(logEvent),
@@ -466,10 +466,12 @@ namespace Sentry.NLog
                 user.Other = new Dictionary<string, string>(User.Other.Count);
                 for (int i = 0; i < User.Other.Count; ++i)
                 {
-                    var value = User.Other[i].Layout?.Render(logEvent);
-                    if (!string.IsNullOrEmpty(value) || User.Other[i].IncludeEmptyValue)
+                    if (User.Other[i].Layout?.Render(logEvent) is {} value)
                     {
-                        user.Other[User.Other[i].Name] = value;
+                        if (!string.IsNullOrEmpty(value) || User.Other[i].IncludeEmptyValue)
+                        {
+                            user.Other[User.Other[i].Name] = value;
+                        }
                     }
                 }
             }
@@ -485,7 +487,10 @@ namespace Sentry.NLog
                 {
                     foreach (var kv in logEvent.Properties)
                     {
-                        yield return new KeyValuePair<string, string>(kv.Key.ToString(), kv.Value?.ToString());
+                        if (kv.Value?.ToString() is {} value)
+                        {
+                            yield return new KeyValuePair<string, string>(kv.Key.ToString(), value);
+                        }
                     }
                 }
             }
