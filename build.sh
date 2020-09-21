@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 
-testLogger = $([ $GITHUB_ACTIONS == "true" ] && echo "GitHubActions" || echo "console")
+if [ "$GITHUB_ACTIONS" == "true" ]
+    then
+        testLogger="GitHubActions"
+    else
+        testLogger="console"
+fi
 
 dotnet test -c Release -l $testLogger \
     /p:CollectCoverage=true \
