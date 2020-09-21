@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-dotnet test -c Release -l GitHubActions \
+testLogger = $([ $GITHUB_ACTIONS == "true" ] && echo "GitHubActions" || echo "console")
+
+dotnet test -c Release -l $testLogger \
     /p:CollectCoverage=true \
     /p:CoverletOutputFormat=opencover \
     /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\" \

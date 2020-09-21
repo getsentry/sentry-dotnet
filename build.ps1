@@ -1,7 +1,8 @@
 $ErrorActionPreference = "Stop"
-$logger = If ($env:GITHUB_ACTIONS -eq "true") {"GitHubActions"} else {"console"}
 
-dotnet test -c Release -l $logger `
+$testLogger = if ($env:GITHUB_ACTIONS -eq "true") {"GitHubActions"} else {"console"}
+
+dotnet test -c Release -l $testLogger `
     /p:CollectCoverage=true `
     /p:CoverletOutputFormat=opencover `
     /p:Exclude='"""[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\"""'
