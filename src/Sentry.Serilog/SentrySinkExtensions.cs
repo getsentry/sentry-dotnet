@@ -56,7 +56,7 @@ namespace Serilog
         ///                     "dsn": "https://MY-DSN@sentry.io",
         ///                     "minimumBreadcrumbLevel": "Verbose",
         ///                     "minimumEventLevel": "Error",
-        ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"/// 
+        ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"///
         ///                     "sendDefaultPii": false,
         ///                     "isEnvironmentUser": false,
         ///                     "serverName": "MyServerName",
@@ -84,18 +84,18 @@ namespace Serilog
         /// </example>
         public static LoggerConfiguration Sentry(
             this LoggerSinkConfiguration loggerConfiguration,
-            string dsn = null,
+            string? dsn = null,
             LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
             LogEventLevel minimumEventLevel = LogEventLevel.Error,
-            IFormatProvider formatProvider = null,
+            IFormatProvider? formatProvider = null,
             bool? sendDefaultPii = null,
             bool? isEnvironmentUser = null,
-            string serverName = null,
+            string? serverName = null,
             bool? attachStackTrace = null,
             int? maxBreadcrumbs = null,
             float? sampleRate = null,
-            string release = null,
-            string environment = null,
+            string? release = null,
+            string? environment = null,
             int? maxQueueItems = null,
             TimeSpan? shutdownTimeout = null,
             DecompressionMethods? decompressionMethods = null,
@@ -139,7 +139,7 @@ namespace Serilog
         /// <param name="dsn">The Sentry DSN. <seealso cref="SentryOptions.Dsn"/></param>
         /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
         /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
-        /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param> 
+        /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
         /// <param name="sendDefaultPii">Whether to include default Personal Identifiable information. <seealso cref="SentryOptions.SendDefaultPii"/></param>
         /// <param name="isEnvironmentUser">Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event. <seealso cref="SentryOptions.IsEnvironmentUser"/></param>
         /// <param name="serverName">Gets or sets the name of the server running the application. <seealso cref="SentryOptions.ServerName"/></param>
@@ -160,18 +160,18 @@ namespace Serilog
         /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
         public static void ConfigureSentrySerilogOptions(
             SentrySerilogOptions sentrySerilogOptions,
-            string dsn = null,
+            string? dsn = null,
             LogEventLevel? minimumEventLevel = null,
             LogEventLevel? minimumBreadcrumbLevel = null,
-            IFormatProvider formatProvider = null,
+            IFormatProvider? formatProvider = null,
             bool? sendDefaultPii = null,
             bool? isEnvironmentUser = null,
-            string serverName = null,
+            string? serverName = null,
             bool? attachStackTrace = null,
             int? maxBreadcrumbs = null,
             float? sampleRate = null,
-            string release = null,
-            string environment = null,
+            string? release = null,
+            string? environment = null,
             int? maxQueueItems = null,
             TimeSpan? shutdownTimeout = null,
             DecompressionMethods? decompressionMethods = null,
@@ -308,7 +308,7 @@ namespace Serilog
             var options = new SentrySerilogOptions();
             configureOptions?.Invoke(options);
 
-            IDisposable sdkDisposable = null;
+            IDisposable? sdkDisposable = null;
             if (options.InitializeSdk)
             {
                 sdkDisposable = SentrySdk.Init(options);
