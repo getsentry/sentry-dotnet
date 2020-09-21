@@ -141,7 +141,7 @@ namespace Sentry.Protocol
         /// An arbitrary mapping of additional metadata to store with the event.
         /// </summary>
         public
-#if NET45
+#if NET451
             IDictionary<string, object>
 #else
             IReadOnlyDictionary<string, object>
@@ -152,7 +152,7 @@ namespace Sentry.Protocol
         /// Arbitrary key-value for this event
         /// </summary>
         public
-#if NET45
+#if NET451
             IDictionary<string, string>
 #else
             IReadOnlyDictionary<string, string>
