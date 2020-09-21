@@ -25,10 +25,10 @@ namespace Sentry.AspNetCore
         {
             base.Configure(options);
 
-            options.Environment
-                = options.Environment // Don't override user defined value
-                  ?? EnvironmentLocator.Locate() // Sentry specific environment takes precedence #92
-                  ?? _hostingEnvironment?.EnvironmentName;
+            // Don't override user defined value
+            options.Environment ??=
+                EnvironmentLocator.Locate() // Sentry specific environment takes precedence #92
+                ?? _hostingEnvironment.EnvironmentName;
 
             options.AddLogEntryFilter((category, level, eventId, exception)
                 // https://github.com/aspnet/KestrelHttpServer/blob/0aff4a0440c2f393c0b98e9046a8e66e30a56cb0/src/Kestrel.Core/Internal/Infrastructure/KestrelTrace.cs#L33

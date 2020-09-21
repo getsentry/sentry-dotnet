@@ -7,7 +7,7 @@ namespace Sentry.AspNetCore
 {
     internal class DefaultUserFactory : IUserFactory
     {
-        public User Create(HttpContext context)
+        public User? Create(HttpContext context)
         {
             Debug.Assert(context != null);
 
@@ -17,9 +17,9 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
-            string email = null;
-            string id = null;
-            string username = null;
+            string? email = null;
+            string? id = null;
+            string? username = null;
             foreach (var claim in principal.Claims)
             {
                 switch (claim.Type)

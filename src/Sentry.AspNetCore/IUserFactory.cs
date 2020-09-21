@@ -13,6 +13,6 @@ namespace Sentry.AspNetCore
         /// </summary>
         /// <param name="context">The HttpContext where the user resides</param>
         /// <returns>The protocol user</returns>
-        User Create(HttpContext context);
+        User? Create(HttpContext context);
     }
 }
