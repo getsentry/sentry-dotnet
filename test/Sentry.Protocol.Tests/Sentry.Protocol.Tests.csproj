@@ -8,7 +8,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <Reference Include="System.Threading.Tasks" />
-    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=net451" />
+    <ProjectReference Include="../../src/Sentry.Protocol/Sentry.Protocol.csproj" Properties="TargetFramework=net45" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
