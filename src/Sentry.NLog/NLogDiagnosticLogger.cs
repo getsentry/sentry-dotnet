@@ -9,9 +9,9 @@ namespace Sentry.NLog
 {
     internal class NLogDiagnosticLogger : IDiagnosticLogger
     {
-        private readonly IDiagnosticLogger _extraLogger;
+        private readonly IDiagnosticLogger? _extraLogger;
 
-        public NLogDiagnosticLogger(IDiagnosticLogger extraLogger = null)
+        public NLogDiagnosticLogger(IDiagnosticLogger? extraLogger = null)
         {
             if (!InternalLogger.LogToConsole || !(extraLogger is ConsoleDiagnosticLogger))
             {
@@ -26,17 +26,17 @@ namespace Sentry.NLog
                 return true;
             }
 
-            switch (level)
+            return level switch
             {
-                case SentryLevel.Fatal: return InternalLogger.IsFatalEnabled;
-                case SentryLevel.Error: return InternalLogger.IsErrorEnabled;
-                case SentryLevel.Warning: return InternalLogger.IsWarnEnabled;
-                case SentryLevel.Info: return InternalLogger.IsInfoEnabled;
-                default: return InternalLogger.IsDebugEnabled;
-            }
+                SentryLevel.Fatal => InternalLogger.IsFatalEnabled,
+                SentryLevel.Error => InternalLogger.IsErrorEnabled,
+                SentryLevel.Warning => InternalLogger.IsWarnEnabled,
+                SentryLevel.Info => InternalLogger.IsInfoEnabled,
+                _ => InternalLogger.IsDebugEnabled
+            };
         }
 
-        public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+        public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
         {
             switch (logLevel)
             {

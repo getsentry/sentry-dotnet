@@ -38,6 +38,6 @@ namespace Sentry.Serilog
         /// <summary>
         /// Optional <see cref="IFormatProvider"/>
         /// </summary>
-        public IFormatProvider FormatProvider { get; set; }
+        public IFormatProvider? FormatProvider { get; set; }
     }
 }
