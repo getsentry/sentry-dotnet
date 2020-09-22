@@ -203,16 +203,6 @@ namespace Sentry.Serilog.Tests
         }
 
         [Fact]
-        public void Emit_NullLogEvent_CaptureNotCalled()
-        {
-            var sut = _fixture.GetSut();
-
-            sut.Emit(null);
-
-            _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-        }
-
-        [Fact]
         public void Emit_Properties_AsExtra()
         {
             const string expectedIp = "127.0.0.1";
