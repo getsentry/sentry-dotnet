@@ -12,9 +12,9 @@ namespace Sentry.AspNetCore
 
         public HttpRequestAdapter(HttpRequest request) => _request = request;
 
-        public long? ContentLength => _request?.ContentLength;
-        public string ContentType => _request?.ContentType;
-        public Stream Body => _request?.Body;
+        public long? ContentLength => _request.ContentLength;
+        public string? ContentType => _request.ContentType;
+        public Stream? Body => _request.Body;
 
         public IEnumerable<KeyValuePair<string, IEnumerable<string>>> Form =>
             _request?.Form.Select(k => new KeyValuePair<string, IEnumerable<string>>(k.Key, k.Value))
