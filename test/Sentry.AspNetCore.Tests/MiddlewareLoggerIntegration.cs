@@ -31,7 +31,7 @@ namespace Sentry.AspNetCore.Tests
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
             public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
-            public ILogger<SentryMiddleware> MiddlewareLogger { get; set; }
+            public ILogger<SentryMiddleware> MiddlewareLogger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public ILogger SentryLogger { get; set; }
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();

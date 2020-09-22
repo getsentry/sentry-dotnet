@@ -73,20 +73,6 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task InvokeAsync_OnlyCtorRequiredArguments_InvokesNextHandlers()
-        {
-            _fixture.Options = null;
-            _fixture.HostingEnvironment = null;
-            _fixture.Logger = null;
-            _fixture.RequestDelegate = Substitute.For<RequestDelegate>();
-
-            var sut = _fixture.GetSut();
-
-            await sut.InvokeAsync(_fixture.HttpContext);
-            await _fixture.RequestDelegate.Received(1).Invoke(_fixture.HttpContext);
-        }
-
-        [Fact]
         public async Task InvokeAsync_ExceptionThrown_SameRethrown()
         {
             var expected = new Exception("test");
@@ -98,41 +84,6 @@ namespace Sentry.AspNetCore.Tests
                 async () => await sut.InvokeAsync(_fixture.HttpContext));
 
             Assert.Same(expected, actual);
-        }
-
-        [Fact]
-        public async Task InvokeAsync_OnlyCtorRequiredArguments_CapturesEventOnError()
-        {
-            _fixture.Options = null;
-            _fixture.HostingEnvironment = null;
-            _fixture.Logger = null;
-            var expected = new Exception("test");
-            _fixture.RequestDelegate = _ => throw expected;
-
-            var sut = _fixture.GetSut();
-
-            _ = await Assert.ThrowsAsync<Exception>(
-                    async () => await sut.InvokeAsync(_fixture.HttpContext));
-
-            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
-        }
-
-        [Fact]
-        public async Task InvokeAsync_OnlyCtorRequiredArguments_CapturesEventOnExceptionHandlerFeatureError()
-        {
-            _fixture.Options = null;
-            _fixture.HostingEnvironment = null;
-            _fixture.Logger = null;
-            var expected = new Exception("test");
-            var feature = Substitute.For<IExceptionHandlerFeature>();
-            _ = feature.Error.Returns(expected);
-            _ = _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
-
-            var sut = _fixture.GetSut();
-
-            await sut.InvokeAsync(_fixture.HttpContext);
-
-            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
         }
 
         [Fact]
@@ -236,30 +187,6 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void PopulateScope_NoHostingEnvironment_NoEnvironmentSet()
-        {
-            _fixture.HostingEnvironment = null;
-            var scope = new Scope();
-
-            var sut = _fixture.GetSut();
-            sut.PopulateScope(_fixture.HttpContext, scope);
-
-            Assert.Null(scope.Environment);
-        }
-
-        [Fact]
-        public void PopulateScope_NoHostingEnvironment_NoWebRootSet()
-        {
-            _fixture.HostingEnvironment = null;
-            var scope = new Scope();
-
-            var sut = _fixture.GetSut();
-            sut.PopulateScope(_fixture.HttpContext, scope);
-
-            Assert.False(scope.Request.Env.TryGetValue("DOCUMENT_ROOT", out _));
-        }
-
-        [Fact]
         public void PopulateScope_WithHostingEnvironment_WebRootSet()
         {
             const string expectedWebRoot = "root";
@@ -271,22 +198,6 @@ namespace Sentry.AspNetCore.Tests
 
             Assert.True(scope.Request.Env.TryGetValue("DOCUMENT_ROOT", out var actualWebRoot));
             Assert.Equal(expectedWebRoot, actualWebRoot);
-        }
-
-        [Fact]
-        public void PopulateScope_WithoutOptions_NoActivitySet()
-        {
-            _fixture.Options = null;
-            var activity = new Activity("test");
-            _ = activity.Start();
-            _ = activity.AddTag("k", "v");
-
-            var scope = new Scope();
-
-            var sut = _fixture.GetSut();
-            sut.PopulateScope(_fixture.HttpContext, scope);
-
-            Assert.DoesNotContain(scope.Tags, pair => pair.Key == "k");
         }
 
         [Fact]
