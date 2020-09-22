@@ -28,17 +28,17 @@ jobs:
           uses: actions/checkout@v2
 
         - name: Setup .NET SDK (v2.1)
-          uses: actions/setup-dotnet@v1
+          uses: actions/setup-dotnet@v1.7.0
           with:
             dotnet-version: '2.1.809'
 
         - name: Setup .NET SDK (v3.1)
-          uses: actions/setup-dotnet@v1
+          uses: actions/setup-dotnet@v1.7.0
           with:
             dotnet-version: '3.1.401'
 
         - name: Setup .NET SDK (v5.0)
-          uses: actions/setup-dotnet@v1
+          uses: actions/setup-dotnet@v1.7.0
           with:
             dotnet-version: '5.0.100-preview.8.20417.9'
 
