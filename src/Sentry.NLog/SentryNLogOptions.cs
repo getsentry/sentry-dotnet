@@ -111,6 +111,6 @@ namespace Sentry.NLog
         /// Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout
         /// </summary>
         [NLogConfigurationIgnoreProperty] // Configure this directly on the target in XML config.
-        public SentryNLogUser User { get; set; } = new SentryNLogUser();
+        public SentryNLogUser? User { get; set; } = new SentryNLogUser();
     }
 }

@@ -22,10 +22,8 @@ namespace Sentry.NLog
     [Target("Sentry")]
     public sealed class SentryTarget : TargetWithContext
     {
-        private readonly Func<IHub> _hubAccessor;
-
         // For testing:
-        internal Func<IHub> HubAccessor => _hubAccessor;
+        internal Func<IHub> HubAccessor { get; }
 
         private readonly ISystemClock _clock;
         private IDisposable? _sdkDisposable;
@@ -50,7 +48,7 @@ namespace Sentry.NLog
             : this(
                 options,
                 () => HubAdapter.Instance,
-                sdkInstance: null,
+                null,
                 SystemClock.Clock)
         {
         }
@@ -62,7 +60,7 @@ namespace Sentry.NLog
             Debug.Assert(clock != null);
 
             Options = options;
-            _hubAccessor = hubAccessor;
+            HubAccessor = hubAccessor;
             _clock = clock;
 
             // Overrides default layout. Still will be explicitly overwritten if manually configured in the
@@ -239,7 +237,7 @@ namespace Sentry.NLog
         /// <summary>
         /// Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout
         /// </summary>
-        public SentryNLogUser User
+        public SentryNLogUser? User
         {
             get => Options.User;
             set => Options.User = value;
@@ -297,7 +295,7 @@ namespace Sentry.NLog
                 _sdkDisposable = SentrySdk.Init(Options);
             }
 
-            if (_hubAccessor()?.IsEnabled != true)
+            if (HubAccessor()?.IsEnabled != true)
             {
                 InternalLogger.Info("Sentry(Name={0}): Hub not enabled", Name);
             }
@@ -306,7 +304,7 @@ namespace Sentry.NLog
         /// <inheritdoc />
         protected override void FlushAsync(AsyncContinuation asyncContinuation)
         {
-            _ = _hubAccessor()
+            _ = HubAccessor()
                     .FlushAsync(Options.FlushTimeout)
                     .ContinueWith(t => asyncContinuation(t.Exception));
         }
@@ -333,7 +331,7 @@ namespace Sentry.NLog
                 return;
             }
 
-            var hub = _hubAccessor();
+            var hub = HubAccessor();
 
             if (hub?.IsEnabled != true)
             {
@@ -361,7 +359,7 @@ namespace Sentry.NLog
                     Level = logEvent.Level.ToSentryLevel(),
                     Release = Options.Release,
                     Environment = Options.Environment,
-                    User = GetUser(logEvent),
+                    User = GetUser(logEvent) ?? new User(),
                 };
 
                 if (evt.Sdk is {} sdk)
@@ -417,7 +415,7 @@ namespace Sentry.NLog
                     : breadcrumbFormatted;
 
                 IDictionary<string, string>? data = null;
-// If this is true, an exception is being logged with no custom message
+                // If this is true, an exception is being logged with no custom message
                 if (exception?.Message != null && !message.StartsWith(exception.Message))
                 {
                     // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
@@ -445,14 +443,19 @@ namespace Sentry.NLog
                 hub.AddBreadcrumb(
                     _clock,
                     message,
-                    category: breadcrumbCategory,
+                    breadcrumbCategory,
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
         }
 
-        private User GetUser(LogEventInfo logEvent)
+        private User? GetUser(LogEventInfo logEvent)
         {
+            if (User is null)
+            {
+                return null;
+            }
+
             var user = new User
             {
                 Email = User.Email?.Render(logEvent),
@@ -464,7 +467,7 @@ namespace Sentry.NLog
             if (User.Other?.Count > 0)
             {
                 user.Other = new Dictionary<string, string>(User.Other.Count);
-                for (int i = 0; i < User.Other.Count; ++i)
+                for (var i = 0; i < User.Other.Count; ++i)
                 {
                     if (User.Other[i].Layout?.Render(logEvent) is {} value)
                     {

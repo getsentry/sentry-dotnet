@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
@@ -129,10 +128,10 @@ namespace Sentry.Serilog
 
                 hub.AddBreadcrumb(
                     _clock,
-                    message: string.IsNullOrWhiteSpace(formatted)
+                    string.IsNullOrWhiteSpace(formatted)
                         ? exception?.Message ?? ""
                         : formatted,
-                    category: context,
+                    context,
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
             }
