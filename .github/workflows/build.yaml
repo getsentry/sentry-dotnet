@@ -24,36 +24,26 @@ jobs:
             build_script: ./build.sh
 
     steps:
-        - uses: actions/checkout@v2
+        - name: Checkout
+          uses: actions/checkout@v2
 
-        - name: .NET Core CLI 2.1
-          uses: actions/setup-dotnet@v1
+        - name: Setup .NET SDK (v2.1)
+          uses: actions/setup-dotnet@v1.7.0
           with:
             dotnet-version: '2.1.809'
 
-        - name: .NET Core CLI 3.1
-          uses: actions/setup-dotnet@v1
+        - name: Setup .NET SDK (v3.1)
+          uses: actions/setup-dotnet@v1.7.0
           with:
             dotnet-version: '3.1.401'
 
-        - name: .NET Core CLI 5.0 preview
-          uses: actions/setup-dotnet@v1
+        - name: Setup .NET SDK (v5.0)
+          uses: actions/setup-dotnet@v1.7.0
           with:
             dotnet-version: '5.0.100-preview.8.20417.9'
 
-        # https://github.com/actions/setup-dotnet/issues/25#issuecomment-583367317
-        - name: Work around action/dotnet limitation
-          shell: pwsh
-          run: |
-            $version = Split-Path (Split-Path $ENV:DOTNET_ROOT -Parent) -Leaf;
-            $root = Split-Path (Split-Path $ENV:DOTNET_ROOT -Parent) -Parent;
-            $directories = Get-ChildItem $root | Where-Object { $_.Name -ne $version };
-            foreach ($dir in $directories) {
-                $from = $dir.FullName;
-                $to = "$root/$version";
-                Write-Host Copying from $from to $to;
-                Copy-Item "$from\*" $to -Recurse -Force;
-            }
+        - name: Run build script
+          run: ${{ matrix.build_script }}
 
-        - run: ${{ matrix.build_script }}
-        - uses: codecov/codecov-action@v1
+        - name: Publish coverage report
+          uses: codecov/codecov-action@v1
