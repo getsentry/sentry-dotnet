@@ -1,0 +1,11 @@
+﻿<ContentPage  xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            x:Class="Sentry.Samples.Mobile.MainPage"
+            Title="Sentry Samples Mobile">
+    <StackLayout VerticalOptions="Center"
+                 Margin="10,0,10,0">
+        <Button Text="Send Message" Clicked="SendMessageEvent"/>
+        <Button Text="Send Exception" Clicked="SendExceptioneEvent"/>
+        <Button Text="Crash me" Clicked="CrashEvent"/>
+    </StackLayout>
+</ContentPage>
