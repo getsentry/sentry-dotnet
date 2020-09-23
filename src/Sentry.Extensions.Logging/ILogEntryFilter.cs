@@ -24,6 +24,6 @@ namespace Sentry.Extensions.Logging
             string categoryName,
             LogLevel logLevel,
             EventId eventId,
-            Exception exception);
+            Exception? exception);
     }
 }
