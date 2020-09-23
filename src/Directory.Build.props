@@ -30,6 +30,11 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
+  <!-- Use nullability analysis only on frameworks that have annotated BCL -->
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net5')) or $(TargetFramework.StartsWith('netcoreapp3')) or $(TargetFramework.StartsWith('netstandard2.1'))">
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="../../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
   </ItemGroup>
