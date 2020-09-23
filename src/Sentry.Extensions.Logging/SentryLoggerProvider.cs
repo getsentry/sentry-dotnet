@@ -57,7 +57,7 @@ namespace Sentry.Extensions.Logging
                 _scope = hub.PushScope();
                 hub.ConfigureScope(s =>
                 {
-                    if (s.Sdk is {} sdk)
+                    if (s.Sdk is { } sdk)
                     {
                         sdk.Name = Constants.SdkName;
                         sdk.Version = NameAndVersion.Version;
