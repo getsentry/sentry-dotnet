@@ -25,7 +25,7 @@ namespace Sentry.Extensions.Logging
         /// <summary>
         /// Returns a dictionary (eventId,value) if the event is not empty, otherwise null.
         /// </summary>
-        public static IDictionary<string, string> ToDictionaryOrNull(this EventId eventId)
+        public static IDictionary<string, string>? ToDictionaryOrNull(this EventId eventId)
         {
             return eventId.Id != 0 || eventId.Name != null
                 ? new Dictionary<string, string>
