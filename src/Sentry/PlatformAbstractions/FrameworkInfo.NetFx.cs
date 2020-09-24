@@ -46,10 +46,7 @@ namespace Sentry.PlatformAbstractions
             FrameworkInstallation latest = null;
             foreach (var installation in GetInstallations())
             {
-                if (latest == null)
-                {
-                    latest = installation;
-                }
+                latest ??= installation;
 
                 if (clrVersion == 2)
                 {
@@ -153,20 +150,14 @@ namespace Sentry.PlatformAbstractions
                 version = parsed;
             }
 
-            FrameworkProfile? profile = null;
-            switch (subKeyName)
-            {
-                case "Full":
-                    profile = FrameworkProfile.Full;
-                    break;
-                case "Client":
-                    profile = FrameworkProfile.Client;
-                    break;
-            }
-
             return new FrameworkInstallation
             {
-                Profile = profile,
+                Profile = subKeyName switch
+                {
+                    "Full" => FrameworkProfile.Full,
+                    "Client" => FrameworkProfile.Client,
+                    _ => null
+                },
                 Version = version,
                 ServicePack = subKey.GetInt("SP"),
                 Release = hasRelease ? release : null as int?
@@ -176,11 +167,9 @@ namespace Sentry.PlatformAbstractions
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
         internal static int? Get45PlusLatestInstallationFromRegistry()
         {
-            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
-                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\"))
-            {
-                return ndpKey?.GetInt("Release");
-            }
+            using var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
+                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\");
+            return ndpKey?.GetInt("Release");
         }
 
         internal static Version GetNetFxVersionFromRelease(int release)

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 
 namespace Sentry.PlatformAbstractions
@@ -29,8 +30,8 @@ namespace Sentry.PlatformAbstractions
 
         private static bool IsRuntime(this Runtime? runtime, string runtimeName)
         {
-            return runtime?.Name?.StartsWith(runtimeName) == true
-                   || runtime?.Raw?.StartsWith(runtimeName) == true;
+            return runtime?.Name?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true
+                   || runtime?.Raw?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true;
         }
     }
 }
