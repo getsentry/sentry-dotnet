@@ -1,0 +1,7 @@
+---
+github:
+  owner: getsentry
+  repo: sentry-dotnet-platform-abstractions
+targets:
+  - name: nuget
+  - name: github

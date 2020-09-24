@@ -1,0 +1,37 @@
+version: '{build}'
+image: Visual Studio 2017
+environment:
+  global:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  ZEUS_HOOK_BASE:
+    secure: dcqtt6sxxBV0tDkXmPZOy5szEf2J7bnIlD7xZZLFC9Ald0sqhPfNEqT0n+kpdWkER5P1kC/+2N29Wq1KJtFGj8Oo+LOybERbQJk6ZoyUJmgH7mtxBtbMsiXBUWZjElLIr7Hi5yiCqTFJ49yLLKwSnn7TvxPWX7qPHfT51O9XE3U=
+branches:
+  only:
+    - master
+    - /^release\/.*$/
+install:
+  # Push job information to Zeus
+  - npm install -g @zeus-ci/cli
+  - zeus job update --status=pending -B "%APPVEYOR_PULL_REQUEST_TITLE%" -J "%APPVEYOR_JOB_NAME%"
+test: off
+build_script:
+- ps: ./build.ps1
+dotnet_csproj:
+  patch: true
+  file: 'src\**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+artifacts:
+- path: '**\*.nupkg'
+
+on_success:
+  - ps: >
+        $ErrorActionreferencePreference = "stop";
+        Resolve-Path -Relative .\src\*\bin\Release\*.nupkg |
+          Foreach-Object { zeus upload -t "application/zip+nupkg" $_};
+        if ($?) { zeus job update --status=passed }
+          else { $host.SetShouldExit(1) }
+
+on_failure:
+  - zeus job update --status=failed

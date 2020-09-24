@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard1.5;net471;net45;net40;net35</TargetFrameworks>
+    <DisableImplicitFrameworkReferences Condition="!$(TargetFramework.StartsWith('netstandard'))">true</DisableImplicitFrameworkReferences>
+    <!-- <GenerateDocumentationFile Condition="'$(Configuration)' == 'Release'">true</GenerateDocumentationFile> -->
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <Description>Abstractions to platform information</Description>
+    <Authors>Sentry Team and Contributors</Authors>
+    <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-platform-abstractions/master/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <RepositoryUrl>https://github.com/getsentry/sentry-dotnet-platform-abstractions</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>NETSTANDARD;NETCOREAPP;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
+    <DefineConstants>NETSTANDARD;NETCOREAPP;HAS_READONLY_COLLECTION;HAS_RUNTIME_INFORMATION;HAS_TYPE_INFO;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+    <Reference Include="System" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net471'">
+    <DefineConstants>NETFX;HAS_READONLY_COLLECTION;NET45PLUS;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <Reference Include="System" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+    <DefineConstants>NETFX;HAS_READONLY_COLLECTION;NET45PLUS;HAS_RUNTIME_INFORMATION;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net40'">
+    <DefineConstants>NETFX;NET40_OR_LESS;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+    <DefineConstants>NETFX;NET40_OR_LESS;HAS_ENVIRONMENT_VERSION;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+</Project>
