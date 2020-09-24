@@ -404,14 +404,14 @@ namespace Sentry.NLog
             if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
             {
                 var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
-                var breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
+                string? breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
                 if (string.IsNullOrEmpty(breadcrumbCategory))
                 {
                     breadcrumbCategory = null;
                 }
 
                 var message = string.IsNullOrWhiteSpace(breadcrumbFormatted)
-                    ? (exception?.Message ?? logEvent.FormattedMessage)
+                    ? exception?.Message ?? logEvent.FormattedMessage
                     : breadcrumbFormatted;
 
                 IDictionary<string, string>? data = null;

@@ -1,9 +1,7 @@
 using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
-#if HAS_RUNTIME_INFORMATION
 using System.Runtime.InteropServices;
-#endif
 
 namespace Sentry.PlatformAbstractions
 {
@@ -19,15 +17,10 @@ namespace Sentry.PlatformAbstractions
         /// <returns>A new instance for the current runtime</returns>
         internal static Runtime GetRuntime()
         {
-#if HAS_RUNTIME_INFORMATION
             var runtime = GetFromRuntimeInformation();
-#else
-            var runtime = GetFromMonoRuntime();
-#endif
+            runtime ??= GetFromMonoRuntime();
 
-#if HAS_ENVIRONMENT_VERSION
-            runtime = runtime ?? GetFromEnvironmentVariable();
-#endif
+            runtime ??= GetFromEnvironmentVariable();
 
 #if NETFX
             SetReleaseAndVersionNetFx(runtime);
@@ -37,7 +30,7 @@ namespace Sentry.PlatformAbstractions
             return runtime;
         }
 
-        internal static Runtime Parse(string rawRuntimeDescription, string name = null)
+        internal static Runtime? Parse(string rawRuntimeDescription, string? name = null)
         {
             if (rawRuntimeDescription == null)
             {
@@ -102,8 +95,7 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
-#if HAS_RUNTIME_INFORMATION
-        internal static Runtime GetFromRuntimeInformation()
+        internal static Runtime? GetFromRuntimeInformation()
         {
             // Prefered API: netstandard2.0
             // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
@@ -113,13 +105,9 @@ namespace Sentry.PlatformAbstractions
 
             return Parse(frameworkDescription);
         }
-#endif
 
-        internal static Runtime GetFromMonoRuntime()
+        internal static Runtime? GetFromMonoRuntime()
             => Type.GetType("Mono.Runtime", false)
-#if HAS_TYPE_INFO
-                ?.GetTypeInfo()
-#endif
                 ?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)
                 ?.Invoke(null, null) is string monoVersion
                 // The implementation of Mono to RuntimeInformation:
@@ -131,8 +119,6 @@ namespace Sentry.PlatformAbstractions
                 ? Parse(monoVersion, "Mono")
                 : null;
 
-
-#if HAS_ENVIRONMENT_VERSION
         // This should really only be used on .NET 1.0, 1.1, 2.0, 3.0, 3.5 and 4.0
         internal static Runtime GetFromEnvironmentVariable()
         {
@@ -157,7 +143,5 @@ namespace Sentry.PlatformAbstractions
             }
             return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
         }
-#endif
-
     }
 }

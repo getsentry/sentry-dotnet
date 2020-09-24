@@ -10,21 +10,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sentry.PlatformAbstractions" Version="1.1.1" />
+    <ProjectReference Include="..\Sentry.Protocol\Sentry.Protocol.csproj" />
   </ItemGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
+    <DefineConstants>NETSTANDARD;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <DefineConstants>NETFX;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="Newtonsoft.Json" Version="6.0.8" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <Reference Include="System.Web" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Sentry.Protocol\Sentry.Protocol.csproj" />
-  </ItemGroup>
-
+  
 </Project>

@@ -15,14 +15,14 @@ namespace Sentry.PlatformAbstractions
         /// <example>
         /// v2.0.50727, v3.5, v4.0
         /// </example>
-        public string ShortName { get; set; }
+        public string? ShortName { get; set; }
         /// <summary>
         /// Version
         /// </summary>
         /// <example>
         /// 2.0.50727.4927, 3.0.30729.4926, 3.5.30729.4926
         /// </example>
-        public Version Version { get; set; }
+        public Version? Version { get; set; }
         /// <summary>
         /// Service pack number, if any
         /// </summary>
@@ -50,9 +50,9 @@ namespace Sentry.PlatformAbstractions
         /// <inheritdoc />
         public override string ToString()
         {
-            return Version.Build > 0
+            return Version?.Build > 0
                 ? $"{Version.Major}.{Version.Minor}.{Version.Build}"
-                : $"{Version.Major}.{Version.Minor}";
+                : $"{Version?.Major ?? 0}.{Version?.Minor ?? 0}";
         }
     }
 

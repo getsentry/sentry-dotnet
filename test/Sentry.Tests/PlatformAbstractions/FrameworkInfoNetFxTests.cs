@@ -1,44 +1,39 @@
+using Sentry.PlatformAbstractions;
+using Xunit;
 #if NETFX
 using System;
-using NUnit.Framework;
 
-namespace Sentry.PlatformAbstractions.Tests
+namespace Sentry.Tests.PlatformAbstractions
 {
     public class FrameworkInfoNetFxTests
     {
-        [SetUp]
-        public void TestSetUp()
-        {
-            if (RuntimeInfo.GetRuntime().IsMono())
-            {
-                Assert.Ignore("Test only relevant under .NET Framework");
-            }
-        }
-
-        [Test]
+        [SkippableFact]
         public void GetLatest_NotNull()
         {
+            Skip.If(RuntimeInfo.GetRuntime().IsMono());
             var latest = FrameworkInfo.GetLatest(Environment.Version.Major);
             Assert.NotNull(latest);
         }
 
-        [Test]
+        [SkippableFact]
         public void GetInstallations_NotEmpty()
         {
+            Skip.If(RuntimeInfo.GetRuntime().IsMono());
             var allInstallations = FrameworkInfo.GetInstallations();
-            Assert.IsNotEmpty(allInstallations);
+            Assert.NotEmpty(allInstallations);
         }
 
-        [Test]
+        [SkippableFact]
         public void GetInstallations_AllReleasesAreMappedToVersion()
         {
+            Skip.If(RuntimeInfo.GetRuntime().IsMono());
             var allInstallations = FrameworkInfo.GetInstallations();
             foreach (var installation in allInstallations)
             {
                 if (installation.Release != null)
                 {
-                    Assert.NotNull(installation.Version,
-                        $"Release {installation.Release} has no version mapped");
+                    // Release has no version mapped
+                    Assert.NotNull(installation.Version);
                 }
             }
         }

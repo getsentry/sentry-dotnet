@@ -8,28 +8,28 @@ namespace Sentry.PlatformAbstractions
     /// <inheritdoc />
     public class Runtime : IEquatable<Runtime>
     {
-        private static Runtime _runtime;
+        private static Runtime? _runtime;
         /// <summary>
         /// Gets the current runtime
         /// </summary>
         /// <value>
         /// The current runtime.
         /// </value>
-        public static Runtime Current => _runtime ?? (_runtime = RuntimeInfo.GetRuntime());
+        public static Runtime Current => _runtime ??= RuntimeInfo.GetRuntime();
         /// <summary>
         /// The name of the runtime
         /// </summary>
         /// <example>
         /// .NET Framework, .NET Native, Mono
         /// </example>
-        public string Name { get; internal set; }
+        public string? Name { get; internal set; }
         /// <summary>
         /// The version of the runtime
         /// </summary>
         /// <example>
         /// 4.7.2633.0
         /// </example>
-        public string Version { get; internal set; }
+        public string? Version { get; internal set; }
 #if NETFX
         /// <summary>
         /// The .NET Framework installation which is running the process
@@ -46,22 +46,18 @@ namespace Sentry.PlatformAbstractions
         /// This property will contain a value when the underlying API
         /// returned Name and Version as a single string which required parsing.
         /// </remarks>
-        public string Raw { get; internal set; }
+        public string? Raw { get; internal set; }
 
         /// <summary>
         /// Creates a new Runtime instance
         /// </summary>
-        /// <param name="name">The name of the runtime</param>
-        /// <param name="version">The version of the runtime</param>
-        /// <param name="frameworkInstallation">The .NET Framework installation which is running the process</param>
-        /// <param name="raw">The raw value when parsing was required</param>
         public Runtime(
-            string name = null,
-            string version = null,
+            string? name = null,
+            string? version = null,
             #if NETFX
-            FrameworkInstallation frameworkInstallation = null,
+            FrameworkInstallation? frameworkInstallation = null,
             #endif
-            string raw = null)
+            string? raw = null)
         {
             Name = name;
             Version = version;
@@ -74,7 +70,7 @@ namespace Sentry.PlatformAbstractions
         /// <summary>
         /// The string representation of the Runtime
         /// </summary>
-        public override string ToString()
+        public override string? ToString()
         {
             if (Name == null && Version == null)
             {
@@ -91,6 +87,11 @@ namespace Sentry.PlatformAbstractions
             return $"{Name} {Version}";
         }
 
+        /// <summary>
+        /// Compare instances for equality.
+        /// </summary>
+        /// <param name="other">The instance to compare against.</param>
+        /// <returns>True if the instances are equal by reference or its state.</returns>
         public bool Equals(Runtime other)
         {
             if (other is null) return false;
@@ -103,6 +104,11 @@ namespace Sentry.PlatformAbstractions
                    && string.Equals(Raw, other.Raw);
         }
 
+        /// <summary>
+        /// Compare instances for equality.
+        /// </summary>
+        /// <param name="obj">The instance to compare against.</param>
+        /// <returns>True if the instances are equal by reference or its state.</returns>
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
@@ -111,11 +117,15 @@ namespace Sentry.PlatformAbstractions
             return Equals((Runtime) obj);
         }
 
+        /// <summary>
+        /// Get the hashcode of this instance.
+        /// </summary>
+        /// <returns>The hashcode of the instance.</returns>
         public override int GetHashCode()
         {
             unchecked
             {
-                var hashCode = (Name != null ? Name.GetHashCode() : 0);
+                var hashCode = Name != null ? Name.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (Version != null ? Version.GetHashCode() : 0);
 #if NETFX
                 hashCode = (hashCode * 397) ^ (FrameworkInstallation != null ? FrameworkInstallation.GetHashCode() : 0);
