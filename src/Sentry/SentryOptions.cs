@@ -9,9 +9,6 @@ using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Protocol;
-#if SYSTEM_WEB
-using Sentry.Internal.Web;
-#endif
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
 

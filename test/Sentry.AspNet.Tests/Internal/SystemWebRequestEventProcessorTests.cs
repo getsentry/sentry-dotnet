@@ -1,4 +1,3 @@
-#if SYSTEM_WEB
 using System;
 using System.IO;
 using System.Web;
@@ -82,4 +81,3 @@ namespace Sentry.Tests.Internals.Web
         }
     }
 }
-#endif
