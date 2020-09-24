@@ -28,6 +28,7 @@
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Nullable>annotations</Nullable>
   </PropertyGroup>
 
   <!-- Use nullability analysis only on frameworks that have annotated BCL -->

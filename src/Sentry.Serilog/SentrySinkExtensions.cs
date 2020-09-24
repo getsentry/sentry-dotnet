@@ -2,6 +2,7 @@ using System;
 using System.IO.Compression;
 using System.Net;
 using Sentry;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Serilog;
 using Serilog.Configuration;

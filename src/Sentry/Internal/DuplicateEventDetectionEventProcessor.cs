@@ -3,7 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Sentry.Extensibility;
 
-namespace Sentry
+namespace Sentry.Internal
 {
     /// <summary>
     /// Possible modes of dropping events that are detected to be duplicates.
@@ -36,10 +36,7 @@ namespace Sentry
         /// </summary>
         All = int.MaxValue
     }
-}
 
-namespace Sentry.Internal
-{
     internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
     {
         private readonly SentryOptions _options;

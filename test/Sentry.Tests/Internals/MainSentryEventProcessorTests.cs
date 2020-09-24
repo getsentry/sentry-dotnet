@@ -234,7 +234,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
             _ = sut.Process(evt);
 
-            Assert.Equal(Protocol.Constants.Platform, evt.Platform);
+            Assert.Equal(Sentry.Protocol.Constants.Platform, evt.Platform);
         }
 
         [Fact]
