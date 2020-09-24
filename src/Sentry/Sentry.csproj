@@ -9,6 +9,10 @@
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1'">
+    <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Protocol\Sentry.Protocol.csproj" />
   </ItemGroup>

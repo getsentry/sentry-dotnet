@@ -2,6 +2,7 @@ using System;
 using System.IO.Compression;
 using System.Net;
 using Newtonsoft.Json;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Serilog;
 using Serilog.Events;

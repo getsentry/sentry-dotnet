@@ -88,10 +88,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.NLog", "samp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore3.Mvc", "samples\Sentry.Samples.AspNetCore3.Mvc\Sentry.Samples.AspNetCore3.Mvc.csproj", "{3CCB5D82-1D19-4FDE-B92D-CA726C418171}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Protocol", "src\Sentry.Protocol\Sentry.Protocol.csproj", "{7B5631B4-3D97-4374-95B6-42DBA5C8DD10}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Protocol.Tests", "test\Sentry.Protocol.Tests\Sentry.Protocol.Tests.csproj", "{8B5C7826-E4D5-48D3-B2CE-713E62AB409C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -198,14 +194,6 @@ Global
 		{3CCB5D82-1D19-4FDE-B92D-CA726C418171}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CCB5D82-1D19-4FDE-B92D-CA726C418171}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CCB5D82-1D19-4FDE-B92D-CA726C418171}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7B5631B4-3D97-4374-95B6-42DBA5C8DD10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B5631B4-3D97-4374-95B6-42DBA5C8DD10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B5631B4-3D97-4374-95B6-42DBA5C8DD10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B5631B4-3D97-4374-95B6-42DBA5C8DD10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8B5C7826-E4D5-48D3-B2CE-713E62AB409C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B5C7826-E4D5-48D3-B2CE-713E62AB409C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8B5C7826-E4D5-48D3-B2CE-713E62AB409C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8B5C7826-E4D5-48D3-B2CE-713E62AB409C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -236,8 +224,6 @@ Global
 		{21A360C7-338F-4A9D-A9A3-83152D0C9303} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{3CCB5D82-1D19-4FDE-B92D-CA726C418171} = {77454495-55EE-4B40-A089-71B9E8F82E89}
-		{7B5631B4-3D97-4374-95B6-42DBA5C8DD10} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
-		{8B5C7826-E4D5-48D3-B2CE-713E62AB409C} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
