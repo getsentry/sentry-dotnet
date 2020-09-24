@@ -49,7 +49,7 @@ namespace Sentry.Tests.PlatformAbstractions
             Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
             var input = new Runtime(".NET Framework");
-            RuntimeInfo.SetReleaseAndVersionNetFx(input);
+            RuntimeInfo.SetNetFxReleaseAndVersion(input);
 
             Assert.NotNull(input.Version);
             Assert.NotNull(input.FrameworkInstallation);

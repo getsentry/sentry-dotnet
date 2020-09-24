@@ -6,7 +6,7 @@ namespace Sentry.PlatformAbstractions
     /// Details of the runtime
     /// </summary>
     /// <inheritdoc />
-    public class Runtime : IEquatable<Runtime>
+    public class Runtime
     {
         private static Runtime? _runtime;
         /// <summary>

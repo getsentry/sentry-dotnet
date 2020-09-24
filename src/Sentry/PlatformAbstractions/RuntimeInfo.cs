@@ -23,7 +23,7 @@ namespace Sentry.PlatformAbstractions
             runtime ??= GetFromEnvironmentVariable();
 
 #if NETFX
-            SetReleaseAndVersionNetFx(runtime);
+            SetNetFxReleaseAndVersion(runtime);
 #elif NETSTANDARD || NETCOREAPP // Possibly .NET Core
             SetNetCoreVersion(runtime);
 #endif
@@ -43,18 +43,17 @@ namespace Sentry.PlatformAbstractions
             if (match.Success)
             {
                 return new Runtime(
-                    name ?? (match.Groups["name"].Value == string.Empty
-                        ? null
-                        : match.Groups["name"].Value.Trim()),
-                    match.Groups["version"].Value,
-                    raw: rawRuntimeDescription);
+                    name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
+                    match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
+                    raw: rawRuntimeDescription
+                );
             }
 
             return new Runtime(name, raw: rawRuntimeDescription);
         }
 
 #if NETFX
-        internal static void SetReleaseAndVersionNetFx(Runtime runtime)
+        internal static void SetNetFxReleaseAndVersion(Runtime runtime)
         {
             if (runtime?.IsNetFx() == true)
             {
@@ -127,20 +126,11 @@ namespace Sentry.PlatformAbstractions
             // Not recommended on NET45+ (which has RuntimeInformation)
             var version = Environment.Version;
 
-            string friendlyVersion;
-            switch (version.Major)
+            var friendlyVersion = version.Major switch
             {
-                case 1:
-                    friendlyVersion = "";
-                    break;
-                //case "4.0.30319.42000":
-                //    Debug.Fail("This is .NET Framework 4.6 or later which support RuntimeInformation");
-                //    break;
-                default:
-                    friendlyVersion = version.ToString();
-                    break;
-
-            }
+                1 => "",
+                _ => version.ToString()
+            };
             return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
         }
     }
