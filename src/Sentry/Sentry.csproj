@@ -13,10 +13,6 @@
     <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Sentry.Protocol\Sentry.Protocol.csproj" />
-  </ItemGroup>
-
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
     <DefineConstants>NETSTANDARD;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
