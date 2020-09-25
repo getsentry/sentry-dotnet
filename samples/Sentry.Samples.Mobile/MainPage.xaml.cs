@@ -1,4 +1,8 @@
 using System;
+using System.Net;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace Sentry.Samples.Mobile
@@ -15,7 +19,7 @@ namespace Sentry.Samples.Mobile
             throw new Exception("Unhandled Exception");
         }
 
-        private void SendExceptioneEvent(object sender, EventArgs e)
+        private void SendExceptionEvent(object sender, EventArgs e)
         {
             try
             {
@@ -23,9 +27,36 @@ namespace Sentry.Samples.Mobile
             }
             catch (Exception ex)
             {
-                _ = SentrySdk.CaptureException(ex);
-                _ = DisplayAlert("Error", ex.Message, "Ok");
+                SentrySdk.WithScope(s =>
+                {
+                    s.Contexts["ex"] = new {ToString = ex.ToString()};
+                    _ = SentrySdk.CaptureException(ex);
+                    _ = DisplayAlert("Error", ex.Message, "Ok");
+                });
             }
+        }
+
+        private async void TryCatchAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                await SomethingAsync(CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.WithScope(s =>
+                {
+                    s.Contexts["ex"] = new {ToString = ex.ToString()};
+                    _ = SentrySdk.CaptureException(ex);
+                    _ = DisplayAlert("Error", ex.Message, "Ok");
+                });
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private async Task SomethingAsync(CancellationToken token)
+        {
+            await InnerCode.GiveMeCookieAsync(token);
         }
 
         private void SendMessageEvent(object sender, EventArgs e)
@@ -35,6 +66,14 @@ namespace Sentry.Samples.Mobile
             _ = DisplayAlert("Message captured", message, "Ok");
         }
 
-
+        private static class InnerCode
+        {
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            public static async Task GiveMeCookieAsync(CancellationToken token)
+            {
+                await Task.Yield();
+                throw new CookieException();
+            }
+        }
     }
 }

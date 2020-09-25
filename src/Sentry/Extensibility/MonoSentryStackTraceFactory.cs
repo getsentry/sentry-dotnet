@@ -63,14 +63,14 @@ namespace Sentry.Extensibility
                     Platform = "mono",
                     Function = f.MethodSignature,
                     LineNumber = GetLine(f.Line),
-                    ContextLine = $"MVID:{f.Mvid}-AOTID:{f.Aotid}-MethodIndex:{f.MethodIndex}-IsILOffset:{f.IsILOffset}",
+                    ContextLine = $"MVID:{f.Mvid}-AOTID:{f.Aotid}-MethodIndex:0x{f.MethodIndex:x4}-IsILOffset:{f.IsILOffset}-Offset:{f.Offset}-Line:{f.Line}",
                     // The following properties are not supported by the server and get dropped.
                     // For that reason, misusing the ContextLine to transport the data to Sentry
                     ModuleVersionId = f.Mvid,
                     AotId = f.Aotid,
                     MethodIndex = f.MethodIndex.ToString("x4"),
                     IsILOffset = f.IsILOffset,
-                }).ToArray()
+                }).Reverse().ToArray()
             };
 
             static int? GetLine(string line) =>

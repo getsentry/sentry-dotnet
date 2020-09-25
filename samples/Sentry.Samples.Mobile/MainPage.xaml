@@ -5,7 +5,8 @@
     <StackLayout VerticalOptions="Center"
                  Margin="10,0,10,0">
         <Button Text="Send Message" Clicked="SendMessageEvent"/>
-        <Button Text="Send Exception" Clicked="SendExceptioneEvent"/>
+        <Button Text="Send Exception" Clicked="SendExceptionEvent"/>
+        <Button Text="Try catch async" Clicked="TryCatchAsync"/>
         <Button Text="Crash me" Clicked="CrashEvent"/>
     </StackLayout>
 </ContentPage>
