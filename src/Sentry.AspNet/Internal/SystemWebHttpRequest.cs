@@ -1,4 +1,3 @@
-#if SYSTEM_WEB
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,4 +22,3 @@ namespace Sentry.Internal.Web
         public SystemWebHttpRequest(HttpRequest request) => _request = request;
     }
 }
-#endif
