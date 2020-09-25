@@ -9,13 +9,13 @@ namespace Sentry.Extensions.Logging
     /// <inheritdoc />
     public class DelegateLogEntryFilter : ILogEntryFilter
     {
-        private readonly Func<string, LogLevel, EventId, Exception, bool> _filter;
+        private readonly Func<string, LogLevel, EventId, Exception?, bool> _filter;
 
         /// <summary>
         /// Creates a new instance of <see cref="DelegateLogEntryFilter"/>
         /// </summary>
         /// <param name="filter"></param>
-        public DelegateLogEntryFilter(Func<string, LogLevel, EventId, Exception, bool> filter)
+        public DelegateLogEntryFilter(Func<string, LogLevel, EventId, Exception?, bool> filter)
             => _filter = filter ?? throw new ArgumentNullException(nameof(filter));
 
         /// <inheritdoc />
@@ -23,7 +23,7 @@ namespace Sentry.Extensions.Logging
             string categoryName,
             LogLevel logLevel,
             EventId eventId,
-            Exception exception)
+            Exception? exception)
             => _filter(
                 categoryName,
                 logLevel,

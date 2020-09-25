@@ -28,6 +28,12 @@
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Nullable>annotations</Nullable>
+  </PropertyGroup>
+
+  <!-- Use nullability analysis only on frameworks that have annotated BCL -->
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net5')) or $(TargetFramework.StartsWith('netcoreapp3')) or $(TargetFramework.StartsWith('netstandard2.1'))">
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

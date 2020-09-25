@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.Hosting
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
         public static IWebHostBuilder UseSentry(this IWebHostBuilder builder)
-            => UseSentry(builder, (Action<SentryAspNetCoreOptions>)null);
+            => UseSentry(builder, (Action<SentryAspNetCoreOptions>?)null);
 
         /// <summary>
         /// Uses Sentry integration.
@@ -40,7 +40,7 @@ namespace Microsoft.AspNetCore.Hosting
         /// <returns></returns>
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
-            Action<SentryAspNetCoreOptions> configureOptions)
+            Action<SentryAspNetCoreOptions>? configureOptions)
             => builder.UseSentry((context, options) => configureOptions?.Invoke(options));
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Microsoft.AspNetCore.Hosting
         /// <returns></returns>
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
-            Action<WebHostBuilderContext, SentryAspNetCoreOptions> configureOptions)
+            Action<WebHostBuilderContext, SentryAspNetCoreOptions>? configureOptions)
         {
             // The earliest we can hook the SDK initialization code with the framework
             // Initialization happens at a later time depending if the default MEL backend is enabled or not.
@@ -81,10 +81,7 @@ namespace Microsoft.AspNetCore.Hosting
                 _ = logging.Services.AddSentry();
             });
 
-            _ = builder.ConfigureServices(c =>
-            {
-                _ = c.AddTransient<IStartupFilter, SentryStartupFilter>();
-            });
+            _ = builder.ConfigureServices(c => _ = c.AddTransient<IStartupFilter, SentryStartupFilter>());
 
             return builder;
         }

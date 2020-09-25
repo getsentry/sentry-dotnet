@@ -15,7 +15,7 @@ namespace Sentry.Log4Net
     public class SentryAppender : AppenderSkeleton
     {
         private readonly Func<string, IDisposable> _initAction;
-        private volatile IDisposable _sdkHandle;
+        private volatile IDisposable? _sdkHandle;
 
         private readonly object _initSync = new object();
 
@@ -29,7 +29,7 @@ namespace Sentry.Log4Net
         /// <summary>
         /// Sentry DSN.
         /// </summary>
-        public string Dsn { get; set; }
+        public string? Dsn { get; set; }
         /// <summary>
         /// Whether to send the Identity or not.
         /// </summary>
@@ -37,7 +37,7 @@ namespace Sentry.Log4Net
         /// <summary>
         /// Environment to send in the event.
         /// </summary>
-        public string Environment { get; set; }
+        public string? Environment { get; set; }
 
         /// <summary>
         /// Creates a new instance of the <see cref="SentryAppender"/>.
@@ -62,7 +62,9 @@ namespace Sentry.Log4Net
         /// <param name="loggingEvent">The event.</param>
         protected override void Append(LoggingEvent loggingEvent)
         {
-            if (loggingEvent == null)
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (loggingEvent is null)
             {
                 return;
             }
@@ -87,16 +89,20 @@ namespace Sentry.Log4Net
             var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
             var evt = new SentryEvent(exception)
             {
-                Sdk =
-                {
-                    Name = Constants.SdkName,
-                    Version = NameAndVersion.Version
-                },
                 Logger = loggingEvent.LoggerName,
                 Level = loggingEvent.ToSentryLevel()
             };
 
-            evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+            if (evt.Sdk is {} sdk)
+            {
+                sdk.Name = Constants.SdkName;
+                sdk.Version = NameAndVersion.Version;
+
+                if (NameAndVersion.Version is {} version)
+                {
+                    sdk.AddPackage(ProtocolPackageName, version);
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
             {

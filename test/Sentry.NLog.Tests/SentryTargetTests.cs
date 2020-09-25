@@ -753,25 +753,6 @@ namespace Sentry.NLog.Tests
         }
 
         [Fact]
-        public void GetTagsFromLogEvent_NullPropertiesMapped()
-        {
-            var factory = _fixture.GetLoggerFactory();
-            var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
-            sentryTarget.IncludeEventPropertiesAsTags = true;
-            sentryTarget.IncludeEventDataOnBreadcrumbs = true;
-
-            var logger = factory.GetLogger("sentry");
-            logger.Fatal("{a}", (string)null);
-
-            _ = _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == null));
-
-            var b = _fixture.Scope.Breadcrumbs.First();
-            _ = Assert.Single(b.Data);
-            Assert.Null(b.Data["a"]);
-        }
-
-        [Fact]
         public void GetUserFromLayouts_PropertiesMapped()
         {
             var factory = _fixture.GetLoggerFactory();

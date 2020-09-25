@@ -12,7 +12,7 @@ namespace Sentry.AspNetCore
         private readonly SentryAspNetCoreOptions _options;
 
         public AspNetCoreEventProcessor(IOptions<SentryAspNetCoreOptions> options)
-            => _options = options?.Value;
+            => _options = options.Value;
 
         public SentryEvent Process(SentryEvent @event)
         {

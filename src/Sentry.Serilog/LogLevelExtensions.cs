@@ -7,42 +7,30 @@ namespace Sentry.Serilog
     {
         public static SentryLevel? ToSentryLevel(this LogEventLevel loggingLevel)
         {
-            switch (loggingLevel)
+            return loggingLevel switch
             {
-                case LogEventLevel.Fatal:
-                    return SentryLevel.Fatal;
-                case LogEventLevel.Error:
-                    return SentryLevel.Error;
-                case LogEventLevel.Warning:
-                    return SentryLevel.Warning;
-                case LogEventLevel.Information:
-                    return SentryLevel.Info;
-                case LogEventLevel.Debug:
-                case LogEventLevel.Verbose:
-                    return SentryLevel.Debug;
-            }
-
-            return null;
+                LogEventLevel.Fatal => SentryLevel.Fatal,
+                LogEventLevel.Error => SentryLevel.Error,
+                LogEventLevel.Warning => SentryLevel.Warning,
+                LogEventLevel.Information => SentryLevel.Info,
+                LogEventLevel.Debug => SentryLevel.Debug,
+                LogEventLevel.Verbose => SentryLevel.Debug,
+                _ => null
+            };
         }
 
         public static BreadcrumbLevel ToBreadcrumbLevel(this LogEventLevel level)
         {
-            switch (level)
+            return level switch
             {
-                case LogEventLevel.Verbose:
-                case LogEventLevel.Debug:
-                    return BreadcrumbLevel.Debug;
-                case LogEventLevel.Information:
-                    return BreadcrumbLevel.Info;
-                case LogEventLevel.Warning:
-                    return BreadcrumbLevel.Warning;
-                case LogEventLevel.Error:
-                    return BreadcrumbLevel.Error;
-                case LogEventLevel.Fatal:
-                    return BreadcrumbLevel.Critical;
-                default:
-                    return (BreadcrumbLevel)level;
-            }
+                LogEventLevel.Verbose => BreadcrumbLevel.Debug,
+                LogEventLevel.Debug => BreadcrumbLevel.Debug,
+                LogEventLevel.Information => BreadcrumbLevel.Info,
+                LogEventLevel.Warning => BreadcrumbLevel.Warning,
+                LogEventLevel.Error => BreadcrumbLevel.Error,
+                LogEventLevel.Fatal => BreadcrumbLevel.Critical,
+                _ => (BreadcrumbLevel)level
+            };
         }
     }
 }

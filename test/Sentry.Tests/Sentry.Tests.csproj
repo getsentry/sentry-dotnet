@@ -13,4 +13,17 @@
     <Reference Include="System.Web" />
   </ItemGroup>
 
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netcoreapp'))">
+    <DefineConstants>NETCOREAPP;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <DefineConstants>NETFX;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <PackageReference Include="Xunit.SkippableFact" Version="1.3.12" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
 </Project>

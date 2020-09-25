@@ -34,7 +34,7 @@ namespace Sentry.Extensions.Logging
         /// <param name="filter">The filter.</param>
         public static void AddLogEntryFilter(
             this SentryLoggingOptions options,
-            Func<string, LogLevel, EventId, Exception, bool> filter)
+            Func<string, LogLevel, EventId, Exception?, bool> filter)
             => options.AddLogEntryFilter(new DelegateLogEntryFilter(filter));
 
         /// <summary>

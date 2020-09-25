@@ -55,7 +55,7 @@ namespace Sentry.AspNetCore
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
-            _options = options?.Value;
+            _options = options.Value;
             if (_options != null)
             {
                 var hub = _hubAccessor();
@@ -84,20 +84,17 @@ namespace Sentry.AspNetCore
 
             using (hub.PushAndLockScope())
             {
-                if (_options != null)
+                if (_options.MaxRequestBodySize != RequestSize.None)
                 {
-                    if (_options.MaxRequestBodySize != RequestSize.None)
+                    context.Request.EnableBuffering();
+                }
+                if (_options.FlushOnCompletedRequest)
+                {
+                    context.Response.OnCompleted(async () =>
                     {
-                        context.Request.EnableBuffering();
-                    }
-                    if (_options.FlushOnCompletedRequest)
-                    {
-                        context.Response.OnCompleted(async () =>
-                        {
-                            // Serverless environments flush the queue at the end of each request
-                            await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
-                        });
-                    }
+                        // Serverless environments flush the queue at the end of each request
+                        await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
+                    });
                 }
 
                 hub.ConfigureScope(scope =>
@@ -133,29 +130,36 @@ namespace Sentry.AspNetCore
                 {
                     var evt = new SentryEvent(e);
 
-                    _logger?.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
+                    _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 
                     var id = hub.CaptureEvent(evt);
 
-                    _logger?.LogInformation("Event '{id}' queued.", id);
+                    _logger.LogInformation("Event '{id}' queued.", id);
                 }
             }
         }
 
         internal void PopulateScope(HttpContext context, Scope scope)
         {
-            scope.Sdk.Name = Constants.SdkName;
-            scope.Sdk.Version = NameAndVersion.Version;
-            scope.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-
-            if (_hostingEnvironment != null)
+            if (scope.Sdk is { })
             {
-                scope.SetWebRoot(_hostingEnvironment.WebRootPath);
+                scope.Sdk.Name = Constants.SdkName;
+                scope.Sdk.Version = NameAndVersion.Version;
+
+                if (NameAndVersion.Version is { } version)
+                {
+                    scope.Sdk.AddPackage(ProtocolPackageName, version);
+                }
+            }
+
+            if (_hostingEnvironment.WebRootPath is { } webRootPath)
+            {
+                scope.SetWebRoot(webRootPath);
             }
 
             scope.Populate(context, _options);
 
-            if (_options?.IncludeActivityData == true)
+            if (_options.IncludeActivityData)
             {
                 scope.Populate(Activity.Current);
             }
