@@ -42,7 +42,7 @@ namespace Sentry.Internal
         public StackFrameData Relocate(string typeName, string methodName)
             => new StackFrameData(Line, typeName, methodName, Offset, IsILOffset, MethodIndex, Mvid, Aotid);
 
-        public static bool TryParse(string line, out StackFrameData stackFrame)
+        public static bool TryParse(string line, [NotNullWhen(true)] out StackFrameData? stackFrame)
         {
             stackFrame = default;
 
