@@ -3,7 +3,7 @@ set -e
 
 if [ "$GITHUB_ACTIONS" == "true" ]
     then
-        testLogger="GitHubActions"
+        testLogger="GitHubActions;report-warnings=false"
     else
         testLogger="console"
 fi

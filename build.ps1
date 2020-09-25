@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$testLogger = if ($env:GITHUB_ACTIONS -eq "true") {"GitHubActions"} else {"console"}
+$testLogger = if ($env:GITHUB_ACTIONS -eq "true") {"GitHubActions;report-warnings=false"} else {"console"}
 
 dotnet test -c Release -l $testLogger `
     /p:CollectCoverage=true `
