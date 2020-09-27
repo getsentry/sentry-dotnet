@@ -11,3 +11,5 @@ dotnet run
 
 Browse the URL: `http://127.0.0.1:8080/`.
 An event will be sent to the DSN configured on `appsettings.json`.
+
+![Sample event in Sentry](.assets/gcp_sample.png)
