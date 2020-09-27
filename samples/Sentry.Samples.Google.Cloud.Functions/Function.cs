@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.Logging;
 public class Function : IHttpFunction
 {
     private readonly ILogger<Function> _logger;
-
     public Function(ILogger<Function> logger) => _logger = logger;
 
     public Task HandleAsync(HttpContext context)
