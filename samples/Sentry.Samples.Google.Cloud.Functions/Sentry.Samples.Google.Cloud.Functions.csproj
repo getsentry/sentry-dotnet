@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Must add the dependency directly here for AutoGenerateEntryPoint to work -->
+    <PackageReference Include="Google.Cloud.Functions.Hosting" Version="1.0.0-alpha12" />
     <ProjectReference Include="../../src/Sentry.Google.Cloud.Functions/Sentry.Google.Cloud.Functions.csproj" />
   </ItemGroup>
 

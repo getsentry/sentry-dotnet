@@ -9,6 +9,8 @@
     <Description>Official Google Cloud Functions integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <!-- https://github.com/GoogleCloudPlatform/functions-framework-dotnet/issues/15 -->
     <SignAssembly>false</SignAssembly>
+    <!-- https://github.com/GoogleCloudPlatform/functions-framework-dotnet/issues/145 -->
+    <AutoGenerateEntryPoint>false</AutoGenerateEntryPoint>
   </PropertyGroup>
 
   <ItemGroup>

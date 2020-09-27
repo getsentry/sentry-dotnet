@@ -4,9 +4,14 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Sentry.AspNetCore
 {
-    /// <inheritdoc />
-    internal class SentryStartupFilter : IStartupFilter
+    /// <summary>
+    /// Starts Sentry integration.
+    /// </summary>
+    public class SentryStartupFilter : IStartupFilter
     {
+        /// <summary>
+        /// Adds Sentry to the pipeline.
+        /// </summary>
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
             => e =>
             {
