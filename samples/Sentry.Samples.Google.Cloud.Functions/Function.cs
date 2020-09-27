@@ -16,12 +16,7 @@ public class Function : IHttpFunction
 
     public Task HandleAsync(HttpContext context)
     {
-        _logger.LogInformation("Useful info that is added to the breadcrumb list.",
-            new
-            {
-                IsVip = context.User.Claims.Any(p => p.ValueType == "vip")
-            });
-
+        _logger.LogInformation("Useful info that is added to the breadcrumb list.");
         throw new Exception("Bad function");
     }
 }
