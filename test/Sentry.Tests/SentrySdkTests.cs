@@ -67,7 +67,7 @@ namespace Sentry.Tests
         [Fact]
         public void Init_DsnInstance_EnablesSdk()
         {
-            var dsn = new Dsn(ValidDsnWithoutSecret);
+            var dsn = Dsn.Parse(ValidDsnWithoutSecret);
             using (SentrySdk.Init(dsn))
                 Assert.True(SentrySdk.IsEnabled);
         }

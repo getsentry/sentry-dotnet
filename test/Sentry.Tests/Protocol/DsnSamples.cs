@@ -19,6 +19,6 @@ namespace Sentry.Protocol.Tests
         /// <summary>
         /// Valid DSN instance
         /// </summary>
-        public static Dsn Valid = new Dsn(ValidDsnWithSecret);
+        public static Dsn Valid = Dsn.Parse(ValidDsnWithSecret);
     }
 }
