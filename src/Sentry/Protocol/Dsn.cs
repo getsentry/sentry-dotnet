@@ -24,7 +24,7 @@ namespace Sentry
 
         public Uri SentryUri { get; }
 
-        public Dsn(
+        private Dsn(
             string originalString,
             string projectId,
             string? path,
