@@ -98,7 +98,7 @@ namespace NLog
 
             if (dsn != null && options.Dsn == null)
             {
-                options.Dsn = new Dsn(dsn);
+                options.Dsn = dsn;
             }
 
             configuration.AddTarget(targetName, target);

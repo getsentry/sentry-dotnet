@@ -21,9 +21,9 @@ namespace Sentry.Internal
 
             if (options.Dsn == null)
             {
-                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
+                var dsn = DsnLocator.FindDsnStringOrDisable();
 
-                if (dsn is null)
+                if (string.IsNullOrWhiteSpace(dsn))
                 {
                     options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
                     _hub = DisabledHub.Instance;

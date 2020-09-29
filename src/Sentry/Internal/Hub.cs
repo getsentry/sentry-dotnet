@@ -26,9 +26,9 @@ namespace Sentry.Internal
 
             if (options.Dsn == null)
             {
-                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
+                var dsn = DsnLocator.FindDsnStringOrDisable();
 
-                if (dsn is null)
+                if (string.IsNullOrWhiteSpace(dsn))
                 {
                     const string msg = "Attempt to instantiate a Hub without a DSN.";
                     options.DiagnosticLogger?.LogFatal(msg);

@@ -17,15 +17,15 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void Ctor_SampleValidDsnWithoutSecret_CorrectlyConstructs()
         {
-            var dsn = Dsn.Parse(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithoutSecret);
-            Assert.Equal(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithoutSecret, dsn.ToString());
+            var dsn = Dsn.Parse(DsnSamples.ValidDsnWithoutSecret);
+            Assert.Equal(DsnSamples.ValidDsnWithoutSecret, dsn.ToString());
         }
 
         [Fact]
         public void Ctor_SampleValidDsnWithSecret_CorrectlyConstructs()
         {
-            var dsn = Dsn.Parse(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret);
-            Assert.Equal(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret, dsn.ToString());
+            var dsn = Dsn.Parse(DsnSamples.ValidDsnWithSecret);
+            Assert.Equal(DsnSamples.ValidDsnWithSecret, dsn.ToString());
         }
 
         [Fact]
@@ -139,19 +139,19 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void TryParse_SampleValidDsnWithoutSecret_Succeeds()
         {
-            Assert.NotNull(Dsn.TryParse(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithoutSecret));
+            Assert.NotNull(Dsn.TryParse(DsnSamples.ValidDsnWithoutSecret));
         }
 
         [Fact]
         public void TryParse_SampleValidDsnWithSecret_Succeeds()
         {
-            Assert.NotNull(Dsn.TryParse(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret));
+            Assert.NotNull(Dsn.TryParse(DsnSamples.ValidDsnWithSecret));
         }
 
         [Fact]
         public void TryParse_SampleInvalidDsn_Fails()
         {
-            Assert.Null(Dsn.TryParse(Sentry.Protocol.Tests.DsnSamples.InvalidDsn));
+            Assert.Null(Dsn.TryParse(DsnSamples.InvalidDsn));
         }
 
         [Fact]
@@ -258,10 +258,10 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void IsDisabled_ValidDsn_False() => Assert.False(Dsn.IsDisabled(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret));
+        public void IsDisabled_ValidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.ValidDsnWithSecret));
 
         [Fact]
-        public void IsDisabled_InvalidDsn_False() => Assert.False(Dsn.IsDisabled(Sentry.Protocol.Tests.DsnSamples.InvalidDsn));
+        public void IsDisabled_InvalidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.InvalidDsn));
 
         [Fact]
         public void IsDisabled_NullDsn_False() => Assert.False(Dsn.IsDisabled(null));
@@ -299,15 +299,17 @@ namespace Sentry.Tests.Protocol
             if (@case == null) throw new ArgumentNullException(nameof(@case));
             if (dsn == null) throw new ArgumentNullException(nameof(dsn));
 
-            Assert.Equal(@case.Scheme, dsn.SentryUri.Scheme);
+            var uri = dsn.GetStoreEndpointUri();
+
+            Assert.Equal(@case.Scheme, uri.Scheme);
             Assert.Equal(@case.PublicKey, dsn.PublicKey);
             Assert.Equal(@case.SecretKey, dsn.SecretKey);
             Assert.Equal(@case.ProjectId, dsn.ProjectId);
             Assert.Equal(@case.Path, dsn.Path);
-            Assert.Equal(@case.Host, dsn.SentryUri.Host);
-            Assert.Equal(@case.Port, dsn.SentryUri.Port);
+            Assert.Equal(@case.Host, uri.Host);
+            Assert.Equal(@case.Port, uri.Port);
 
-            Assert.Equal(@case, dsn.SentryUri);
+            Assert.Equal(@case, uri);
         }
     }
 }

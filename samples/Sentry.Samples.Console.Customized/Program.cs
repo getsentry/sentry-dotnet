@@ -96,14 +96,14 @@ internal static class Program
             o.HttpProxy = null; //new WebProxy("https://localhost:3128");
 
             // Example customizing the HttpClientHandlers created
-            o.CreateHttpClientHandler = dsn => new HttpClientHandler
+            o.CreateHttpClientHandler = () => new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
                     !certificate.Archived
             };
 
             // Access to the HttpClient created to serve the SentryClint
-            o.ConfigureClient = (client, dsn) =>
+            o.ConfigureClient = client =>
             {
                 client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
             };
@@ -187,8 +187,7 @@ internal static class Program
             SentrySdk.CaptureEvent(evt);
 
             // Using a different DSN:
-            var adminDsn = new Dsn(AdminDsn);
-            using (var adminClient = new SentryClient(new SentryOptions { Dsn = adminDsn }))
+            using (var adminClient = new SentryClient(new SentryOptions { Dsn = AdminDsn }))
             {
                 // Make believe web framework middleware
                 var middleware = new AdminPartMiddleware(adminClient, null);

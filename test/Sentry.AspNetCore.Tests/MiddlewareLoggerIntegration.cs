@@ -46,7 +46,7 @@ namespace Sentry.AspNetCore.Tests
                 };
                 loggingOptions.InitializeSdk = false;
 
-                var hub = new Hub(new SentryOptions { Dsn = DsnSamples.Valid });
+                var hub = new Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret });
                 hub.BindClient(Client);
                 Hub = hub;
                 var provider = new SentryLoggerProvider(hub, Clock, loggingOptions);

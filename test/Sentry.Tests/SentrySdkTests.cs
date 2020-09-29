@@ -65,14 +65,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Init_DsnInstance_EnablesSdk()
-        {
-            var dsn = Dsn.Parse(ValidDsnWithoutSecret);
-            using (SentrySdk.Init(dsn))
-                Assert.True(SentrySdk.IsEnabled);
-        }
-
-        [Fact]
         public void Init_CallbackWithoutDsn_ValidDsnEnvironmentVariable_LocatesDsnEnvironmentVariable()
         {
             EnvironmentVariableGuard.WithVariable(
@@ -360,7 +352,7 @@ namespace Sentry.Tests
             const string expected = "test";
             using (SentrySdk.Init(o =>
             {
-                o.Dsn = Valid;
+                o.Dsn = ValidDsnWithSecret;
                 o.BackgroundWorker = worker;
             }))
             {

@@ -24,16 +24,19 @@ namespace Sentry.Internal
                 return worker;
             }
 
-            if (_options.Dsn is null)
+            if (string.IsNullOrWhiteSpace(_options.Dsn))
             {
                 throw new InvalidOperationException("The DSN is expected to be set at this point.");
             }
 
+            var dsn = Dsn.Parse(_options.Dsn);
+
             var addAuth = SentryHeaders.AddSentryAuth(
                 _options.SentryVersion,
                 _options.ClientVersion,
-                _options.Dsn.PublicKey,
-                _options.Dsn.SecretKey);
+                dsn.PublicKey,
+                dsn.SecretKey
+            );
 
             if (_options.SentryHttpClientFactory is { } factory)
             {
@@ -47,7 +50,7 @@ namespace Sentry.Internal
 #pragma warning restore 618
             }
 
-            var httpClient = factory.Create(_options.Dsn, _options);
+            var httpClient = factory.Create(_options);
 
             return new BackgroundWorker(new HttpTransport(_options, httpClient, addAuth), _options);
         }

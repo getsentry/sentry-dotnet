@@ -274,7 +274,7 @@ namespace Sentry.NLog
             var customDsn = Dsn?.Render(LogEventInfo.CreateNullEvent());
             if (!string.IsNullOrEmpty(customDsn))
             {
-                Options.Dsn = new Dsn(customDsn);
+                Options.Dsn = customDsn;
             }
 
             var customRelease = Release?.Render(LogEventInfo.CreateNullEvent());

@@ -1,5 +1,4 @@
-// ReSharper disable once CheckNamespace
-namespace Sentry.Protocol.Tests
+namespace Sentry.Tests.Protocol
 {
     public static class DsnSamples
     {
@@ -15,10 +14,5 @@ namespace Sentry.Protocol.Tests
         /// Missing ProjectId
         /// </summary>
         public const string InvalidDsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/";
-
-        /// <summary>
-        /// Valid DSN instance
-        /// </summary>
-        public static Dsn Valid = Dsn.Parse(ValidDsnWithSecret);
     }
 }

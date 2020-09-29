@@ -1,7 +1,6 @@
 using System;
 using Sentry.Protocol;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry
 {
     /// <summary>
@@ -10,42 +9,64 @@ namespace Sentry
     /// <remarks>
     /// <see href="https://docs.sentry.io/quickstart/#configure-the-dsn"/>
     /// </remarks>
-    public sealed class Dsn
+    internal sealed class Dsn
     {
-        public string OriginalString { get; }
+        /// <summary>
+        /// Source DSN string.
+        /// </summary>
+        public string Source { get; }
 
+        /// <summary>
+        /// The project ID which the authenticated user is bound to.
+        /// </summary>
         public string ProjectId { get; }
 
+        /// <summary>
+        /// An optional path of which Sentry is hosted.
+        /// </summary>
         public string? Path { get; }
 
+        /// <summary>
+        /// The optional secret key to authenticate the SDK.
+        /// </summary>
         public string? SecretKey { get; }
 
+        /// <summary>
+        /// The required public key to authenticate the SDK.
+        /// </summary>
         public string PublicKey { get; }
 
-        public Uri SentryUri { get; }
+        /// <summary>
+        /// Sentry API's base URI.
+        /// </summary>
+        private Uri ApiBaseUri { get; }
 
         private Dsn(
-            string originalString,
+            string source,
             string projectId,
             string? path,
             string? secretKey,
             string publicKey,
-            Uri sentryUri)
+            Uri apiBaseUri)
         {
-            OriginalString = originalString;
+            Source = source;
             ProjectId = projectId;
             Path = path;
             SecretKey = secretKey;
             PublicKey = publicKey;
-            SentryUri = sentryUri;
+            ApiBaseUri = apiBaseUri;
         }
 
-        public override string ToString() => OriginalString;
+        public Uri GetStoreEndpointUri() => new Uri(ApiBaseUri, "store/");
 
-        internal static bool IsDisabled(string dsn) =>
+        public Uri GetEnvelopeEndpointUri() => new Uri(ApiBaseUri, "envelope/");
+
+        public override string ToString() => Source;
+
+        public static bool IsDisabled(string? dsn) =>
             Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
 
-        internal static Dsn Parse(string dsn)
+        public static Dsn Parse(string dsn)
         {
             var uri = new Uri(dsn);
 
@@ -56,32 +77,31 @@ namespace Sentry
             }
 
             var keys = uri.UserInfo.Split(':');
+
             var publicKey = keys[0];
             if (string.IsNullOrWhiteSpace(publicKey))
             {
                 throw new ArgumentException("Invalid DSN: No public key provided.");
             }
 
-            string? secretKey = null;
-            if (keys.Length > 1)
-            {
-                secretKey = keys[1];
-            }
+            var secretKey = keys.Length > 1
+                ? keys[1]
+                : null;
 
             var path = uri.AbsolutePath.Substring(0, uri.AbsolutePath.LastIndexOf('/'));
-            var projectId = uri.AbsoluteUri.Substring(uri.AbsoluteUri.LastIndexOf('/') + 1);
 
+            var projectId = uri.AbsoluteUri.Substring(uri.AbsoluteUri.LastIndexOf('/') + 1);
             if (string.IsNullOrWhiteSpace(projectId))
             {
                 throw new ArgumentException("Invalid DSN: A Project Id is required.");
             }
 
-            var sentryUri = new UriBuilder
+            var apiBaseUri = new UriBuilder
             {
                 Scheme = uri.Scheme,
                 Host = uri.DnsSafeHost,
                 Port = uri.Port,
-                Path = $"{path}/api/{projectId}/store/"
+                Path = $"{path}/api/{projectId}/"
             }.Uri;
 
             return new Dsn(
@@ -90,11 +110,11 @@ namespace Sentry
                 path,
                 secretKey,
                 publicKey,
-                sentryUri
+                apiBaseUri
             );
         }
 
-        internal static Dsn? TryParse(string? dsn)
+        public static Dsn? TryParse(string? dsn)
         {
             if (string.IsNullOrWhiteSpace(dsn))
             {

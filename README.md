@@ -71,7 +71,7 @@ void Main()
 {
     using (SentrySdk.Init(o =>
     {
-        o.Dsn = new Dsn("dsn");
+        o.Dsn = "dsn";
         o.Proxy = new WebProxy("https://localhost:3128");
     }))
     {
