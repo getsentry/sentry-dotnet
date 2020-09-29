@@ -71,17 +71,17 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
-            if (string.IsNullOrWhiteSpace(options.Dsn))
+            var dsn = !string.IsNullOrWhiteSpace(options.Dsn)
+                ? options.Dsn
+                : DsnLocator.FindDsnStringOrDisable();
+
+            options.Dsn = dsn;
+
+            var dsnParsed = Dsn.TryParse(dsn);
+            if (dsnParsed is null)
             {
-                var dsn = DsnLocator.FindDsnStringOrDisable();
-
-                if (string.IsNullOrWhiteSpace(dsn))
-                {
-                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    return DisabledHub.Instance;
-                }
-
-                options.Dsn = dsn;
+                options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+                return DisabledHub.Instance;
             }
 
             return UseHub(new Hub(options));
