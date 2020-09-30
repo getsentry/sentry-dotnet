@@ -69,7 +69,23 @@ namespace Sentry
         /// </remarks>
         /// <returns>A disposable to close the SDK.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static IDisposable Init(SentryOptions options) => UseHub(new Hub(options));
+        public static IDisposable Init(SentryOptions options)
+        {
+            if (options.Dsn == null)
+            {
+                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
+
+                if (dsn is null)
+                {
+                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+                    return DisabledHub.Instance;
+                }
+
+                options.Dsn = dsn.Source;
+            }
+
+            return UseHub(new Hub(options));
+        }
 
         internal static IDisposable UseHub(IHub hub)
         {
