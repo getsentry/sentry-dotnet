@@ -1,4 +1,4 @@
-name: Require changelog entry
+name: Require Changelog
 
 on: [pull_request]
 
@@ -15,10 +15,10 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1 -q
 
-          $merge_base = git merge-base ${{ github.head_ref }} ${{ github.base_ref }}
+          $merge_base = git merge-base ${{ github.head }} ${{ github.base_ref }}
 
-          $changes = git --no-pager diff --name-only FETCH_HEAD $merge_base
-          $contains_changelog = $changes -contains 'CHANGELOG.md'
+          $changes = git --no-pager diff --name-only ${{ github.head }} $merge_base
+          $contains_changelog = $changes -split '\n' -contains 'CHANGELOG.md'
 
           if (-not $contains_changelog) {
             echo '::error::Changelog has not been modified!'
