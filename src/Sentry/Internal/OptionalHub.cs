@@ -19,7 +19,7 @@ namespace Sentry.Internal
         {
             options.SetupLogging();
 
-            if (string.IsNullOrWhiteSpace(options.Dsn))
+            if (options.Dsn is null)
             {
                 var dsn = DsnLocator.FindDsnStringOrDisable();
 
