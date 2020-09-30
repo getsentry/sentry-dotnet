@@ -24,7 +24,7 @@ namespace Sentry.Internal
                 return worker;
             }
 
-            if (string.IsNullOrWhiteSpace(_options.Dsn))
+            if (_options.Dsn is null)
             {
                 throw new InvalidOperationException("The DSN is expected to be set at this point.");
             }

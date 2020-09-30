@@ -18,22 +18,7 @@ namespace Sentry.Internal
         public OptionalHub(SentryOptions options)
         {
             options.SetupLogging();
-
-            if (options.Dsn is null)
-            {
-                var dsn = DsnLocator.FindDsnStringOrDisable();
-
-                if (Dsn.TryParse(dsn) is null)
-                {
-                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    _hub = DisabledHub.Instance;
-                    return;
-                }
-
-                options.Dsn = dsn;
-            }
-
-            _hub = new Hub(options);
+            _hub = GetHub(options);
         }
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => _hub.CaptureEvent(evt, scope);
@@ -56,5 +41,18 @@ namespace Sentry.Internal
         public SentryId LastEventId => _hub.LastEventId;
 
         public void Dispose() => (_hub as IDisposable)?.Dispose();
+
+        private static IHub GetHub(SentryOptions options)
+        {
+            var dsn = options.Dsn ?? DsnLocator.FindDsnStringOrDisable();
+
+            if (Dsn.IsDisabled(dsn))
+            {
+                options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+                return DisabledHub.Instance;
+            }
+
+            return new Hub(options);
+        }
     }
 }
