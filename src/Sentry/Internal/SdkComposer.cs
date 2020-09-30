@@ -1,5 +1,4 @@
 using System;
-using System.Net.Http;
 using Sentry.Extensibility;
 using Sentry.Internal.Http;
 
@@ -39,17 +38,14 @@ namespace Sentry.Internal
                 dsn.SecretKey
             );
 
-            if (_options.SentryHttpClientFactory is { } factory)
+            if (_options.SentryHttpClientFactory is {})
             {
                 _options.DiagnosticLogger?.LogDebug("Using ISentryHttpClientFactory set through options: {0}.",
-                    factory.GetType().Name);
-            }
-            else
-            {
-                factory = new DefaultSentryHttpClientFactory(_options.ConfigureClient);
+                    _options.SentryHttpClientFactory.GetType().Name);
             }
 
-            var httpClient = factory.Create(_options);
+            var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
+            var httpClient = httpClientFactory.Create(_options);
 
             return new BackgroundWorker(new HttpTransport(_options, httpClient, addAuth), _options);
         }

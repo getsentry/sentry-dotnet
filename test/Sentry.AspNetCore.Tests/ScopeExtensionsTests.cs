@@ -20,9 +20,6 @@ namespace Sentry.AspNetCore.Tests
         public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; }
             = new SentryAspNetCoreOptions
             {
-#pragma warning disable 618
-                IncludeRequestPayload = true,
-#pragma warning restore 618
                 MaxRequestBodySize = RequestSize.Always
             };
 

@@ -193,9 +193,6 @@ namespace Else.AspNetCore.Tests
             var options = ServiceProvider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
 
             Assert.Equal("https://1@sentry.yo/1", ((SentryOptions)options).Dsn.ToString());
-#pragma warning disable 618
-            Assert.True(options.IncludeRequestPayload);
-#pragma warning restore 618
             Assert.Equal(RequestSize.Always, options.MaxRequestBodySize);
             Assert.True(options.SendDefaultPii);
             Assert.True(options.IncludeActivityData);
