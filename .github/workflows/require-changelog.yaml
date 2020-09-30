@@ -13,6 +13,7 @@ jobs:
       - name: Ensure Changelog.md was modified
         shell: pwsh
         run: |
+          git fetch --all
           $merge_base = git merge-base FETCH_HEAD origin/${{ github.base_ref }}
           $changes = git diff --no-pager --name-only FETCH_HEAD $merge_base
           $contains_changelog = $changes -contains 'CHANGELOG.md'
