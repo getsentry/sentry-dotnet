@@ -24,7 +24,7 @@ namespace Sentry.Internal
             Debug.Assert(options != null);
             _options = options;
 
-            if (string.IsNullOrWhiteSpace(options.Dsn))
+            if (options.Dsn is null)
             {
                 var dsn = DsnLocator.FindDsnStringOrDisable();
 
