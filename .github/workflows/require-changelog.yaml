@@ -1,0 +1,14 @@
+name: Require changelog entry
+
+on: [pull_request]
+
+jobs:
+  check:
+    runson: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Ensure Changelog.md was modified
+        run: git diff-tree --no-commit-id --name-only -r ${{ github.sha }}
