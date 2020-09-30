@@ -1,4 +1,4 @@
-name: Require Changelog
+name: changelog
 
 on: [pull_request]
 
@@ -17,7 +17,7 @@ jobs:
 
           $merge_base = git merge-base ${{ github.head_ref }} ${{ github.base_ref }}
 
-          $changes = git --no-pager diff --name-only ${{ github.head }} $merge_base
+          $changes = git --no-pager diff --name-only ${{ github.sha }} $merge_base
           echo $changes
 
           $contains_changelog = $changes -split '\n' -contains 'CHANGELOG.md'
