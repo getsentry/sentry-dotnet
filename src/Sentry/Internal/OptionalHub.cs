@@ -10,6 +10,8 @@ namespace Sentry.Internal
     {
         public static IHub FromOptions(SentryOptions options)
         {
+            options.SetupLogging();
+
             var dsn = options.Dsn ?? DsnLocator.FindDsnStringOrDisable();
 
             if (Dsn.IsDisabled(dsn))
