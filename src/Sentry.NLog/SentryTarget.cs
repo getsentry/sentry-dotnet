@@ -183,29 +183,6 @@ namespace Sentry.NLog
         }
 
         /// <summary>
-        /// Determines whether event-level properties will be sent to sentry as additional data.
-        /// Defaults to <see langword="true" />.
-        /// </summary>
-        /// <seealso cref="IncludeEventPropertiesAsTags" />
-        [Obsolete("Use IncludeEventProperties instead")]
-        public bool SendEventPropertiesAsData
-        {
-            get => IncludeEventProperties;
-            set => IncludeEventProperties = value;
-        }
-
-        /// <summary>
-        /// Determines whether event properties will be sent to sentry as Tags or not.
-        /// Defaults to <see langword="false" />.
-        /// </summary>
-        [Obsolete("Use IncludeEventPropertiesAsTags instead")]
-        public bool SendEventPropertiesAsTags
-        {
-            get => IncludeEventPropertiesAsTags;
-            set => IncludeEventPropertiesAsTags = value;
-        }
-
-        /// <summary>
         /// Determines whether or not to include event-level data as data in breadcrumbs for future errors.
         /// Defaults to <see langword="false" />.
         /// </summary>

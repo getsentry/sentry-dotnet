@@ -342,22 +342,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Ctor_HttpOptionsCallback_InvokedConfigureHandler()
-        {
-            var invoked = false;
-            _fixture.BackgroundWorker = null;
-            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
-#pragma warning disable 618 // Tests will be removed once obsolete code gets removed
-            _fixture.SentryOptions.ConfigureHandler = (handler) => invoked = true;
-#pragma warning restore 618
-
-            using (_fixture.GetSut())
-            {
-                Assert.True(invoked);
-            }
-        }
-
-        [Fact]
         public void Ctor_CreateHttpClientHandler_InvokedConfigureHandler()
         {
             var invoked = false;

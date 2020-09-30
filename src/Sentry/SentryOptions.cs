@@ -288,16 +288,6 @@ namespace Sentry
         public IWebProxy? HttpProxy { get; set; }
 
         /// <summary>
-        /// A callback invoked when a <see cref="SentryClient"/> is created.
-        /// </summary>
-        /// <remarks>
-        /// This callback is invoked once configuration has been applied to the inner most <see cref="HttpClientHandler"/>.
-        /// </remarks>
-        [Obsolete("Please use '" + nameof(CreateHttpClientHandler) + "' instead. " +
-                  "You can create an instance of '" + nameof(HttpClientHandler) + "' and modify it at once.")]
-        public Action<HttpClientHandler>? ConfigureHandler { get; set; }
-
-        /// <summary>
         /// Creates the inner most <see cref="HttpClientHandler"/>.
         /// </summary>
         public Func<HttpClientHandler>? CreateHttpClientHandler { get; set; }

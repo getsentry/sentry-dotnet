@@ -1,7 +1,7 @@
 ﻿{
   "Sentry": {
     "Dsn": "https://1@sentry.yo/1",
-    "IncludeRequestPayload": true,
+    "MaxRequestBodySize": "Always",
     "SendDefaultPii": true,
     "IncludeActivityData": true,
     "MinimumBreadcrumbLevel": "Error",

@@ -268,9 +268,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public async Task InvokeAsync_OptionsReadPayload_CanSeekStream()
         {
-#pragma warning disable 618
-            _fixture.Options.IncludeRequestPayload = true;
-#pragma warning restore 618
+            _fixture.Options.MaxRequestBodySize = RequestSize.Always;
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();

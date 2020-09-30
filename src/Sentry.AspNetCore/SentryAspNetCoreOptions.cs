@@ -11,20 +11,6 @@ namespace Sentry.AspNetCore
     public class SentryAspNetCoreOptions : SentryLoggingOptions
     {
         /// <summary>
-        /// Gets or sets a value indicating whether to [include the request payload].
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if [the request payload shall be included in events]; otherwise, <c>false</c>.
-        /// </value>
-        [Obsolete("Use MaxRequestBodySize instead.")]
-        public bool IncludeRequestPayload
-        {
-            get => MaxRequestBodySize != RequestSize.None;
-            // As originally there was no truncation, setting to Large.
-            set => MaxRequestBodySize = value ? RequestSize.Always : RequestSize.None;
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether [include System.Diagnostic.Activity data] to events.
         /// </summary>
         /// <value>
