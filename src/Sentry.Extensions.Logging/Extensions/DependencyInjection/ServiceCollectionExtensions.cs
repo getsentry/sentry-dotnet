@@ -25,8 +25,6 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
             services.TryAddSingleton<SentryOptions>(
                 c => c.GetRequiredService<IOptions<TOptions>>().Value);
 
-            services.TryAddSingleton<OptionalHub>();
-
             services.TryAddTransient<ISentryClient>(c => c.GetRequiredService<IHub>());
             services.TryAddTransient(c => c.GetRequiredService<Func<IHub>>()());
 
@@ -36,7 +34,7 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
 
                 if (options.InitializeSdk)
                 {
-                    var hub = c.GetRequiredService<OptionalHub>();
+                    var hub = OptionalHub.FromOptions(options);
                     _ = SentrySdk.UseHub(hub);
                 }
 

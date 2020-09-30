@@ -64,17 +64,6 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
-        public void AddSentry_DefaultOptions_InstantiateOptionalHub()
-        {
-            var sut = Substitute.For<ILoggerFactory>();
-
-            _ = sut.AddSentry();
-
-            sut.Received(1)
-                .AddProvider(Arg.Is<SentryLoggerProvider>(p => p.Hub is OptionalHub));
-        }
-
-        [Fact]
         public void AddSentry_NoDiagnosticSet_MelSet()
         {
             SentryLoggingOptions options = null;

@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.Logging
                 else
                 {
                     options.DiagnosticLogger?.LogDebug("Initializing from {0} and swapping current Hub.", nameof(SentryLoggerFactoryExtensions));
-                    hub = new OptionalHub(options);
+                    hub = OptionalHub.FromOptions(options);
                     _ = SentrySdk.UseHub(hub);
                 }
             }
