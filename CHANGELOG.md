@@ -18,6 +18,7 @@ We'd love to get feedback.
 Add nullable reference types support (Sentry, Sentry.Protocol) (#509) 
 fix: Use ASP.NET Core endpoint FQDN (#485) 
 feat: Add integration to TaskScheduler.UnobservedTaskException (#481) 
+
 # 2.1.6
 
 fix: aspnet fqdn (#485) @bruno-garcia 
@@ -81,42 +82,50 @@ Fix sentry serilog extension method collapsing (#406)
 Fix Sentry.Samples.NLog so NLog.config is valid (#404) 
 
 Thanks @snakefoot and @JimHume for the fixes
+
 # 2.1.2-beta4
 
 Add MVC route data extraction to ScopeExtensions.Populate() (#401)
+
 # 2.1.2-beta3
 
 Fixed ASP.NET System.Web catch HttpException to prevent the request processor from being unable to submit #397 (#398)
 
-
 # 2.1.2-beta2
 
 * Ignore WCF error and capture (#391) 
+
 # 2.1.2-beta
 
 * Serilog Sentry sink does not load all options from IConfiguration (#380)
 * UnhandledException sets Handled=false (#382)
+
 # 2.1.1
 
-Bug fix:  Don't overwrite server name set via configuration with machine name on ASP.NET Core #372 
+Bug fix:  Don't overwrite server name set via configuration with machine name on ASP.NET Core #372
+ 
 # 2.1.0
 
 * Set score url to fully constructed url #367 Thanks @christopher-taormina-zocdoc 
 * Don't dedupe from inner exception #363 - Note this might change groupings. It's opt-in.
 * Expose FlushAsync to intellisense #362
 * Protocol monorepo #325 - new protocol version whenever there's a new SDK release
+
 # 2.0.3
 
 Expose httpHandler creation (#359)
 NLog: possibility to override fingerprint using AdditionalGroupingKey (#358) @Shtannikov
 Take ServerName from options (#356) 
+
 # 2.0.2
 
 Add logger and category from Serilog SourceContext. (#316) @krisztiankocsis
 Set DateFormatHandling.IsoDateFormat for serializer. Fixes #351 (#353)  @olsh
+
 # 2.0.1
 
 Removed `-beta` from dependencies.
+
 # 2.0.0
 
 * SentryTarget - GetTagsFromLogEvent with null check (#326) 
@@ -162,6 +171,7 @@ Major version bumped due to these breaking changes:
 * handled process corrupted (#328)
 * sourcelink GA (#330)
 * Adds ability to specify user values via NLog configuration (#336) 
+
 # 2.0.0-beta7
 
 Fixes:
@@ -177,17 +187,20 @@ Features:
 # 2.0.0-beta6
 
 * Fixed error when reading request body affects collecting other request data (#299) 
+
 # 2.0.0-beta5
 
 * Add option to ASP.NET Core to flush events after response complete (#288)
 * Fixed race on `BackgroundWorker`  (#293)
 * Exclude `Sentry.` frames from InApp (#272)
 * NLog SentryTarget with less overhead for breadcrumb (#273)
+
 # 2.0.0-beta4
 
 * Logging on body not extracted (#246)
 * Add support to DefaultTags for ASP.NET Core and M.E.Logging (#268)
 * Don't use ValueTuple (#263)
+
 # 2.0.0-beta3
 
 * All public members were documented: #252 
@@ -200,11 +213,13 @@ Thanks @josh-degraw for:
 * Adds PublicApiAnalyzers to public projects: #234
 * NLog: Utilizes Flush functionality in NLog target: #228
 * NLog: Set the logger via the log event info in SentryTarget.Write, #227 
+
 # 2.0.0-beta2
 
 * Removed dev dependency from external dependencies 4d92ab0
 * Use new `Sentry.Protocol` 836fb07e
 * Use new `Sentry.PlatformAbsrtractions` #226
+
 # 2.0.0-beta
 
 Major version bumped due to these breaking changes:
@@ -225,11 +240,10 @@ Fixes:
 * `Microsoft.Extensions.Logging` `ConfigureScope` invocation. #208, #210, #224 Thanks @dbraillon 
 * `Sentry.Serilog` Verbose level. #213, #217. Thanks @kanadaj 
 
-
-
 # 1.2.1-beta
 
 Fixes and improvements to the NLog integration: #207 by @josh-degraw 
+
 # 1.2.0
 
 # Features
@@ -246,20 +260,24 @@ Fixes and improvements to the NLog integration: #207 by @josh-degraw
 
 * Don't override user #199
 * Read the hub to take latest Client: 8f4b5ba
+
 # 1.1.3-beta4
 
 Bug fix: Don't override user  #199
+
 # 1.1.3-beta3
 
 * First NLog integration release #188 (Thanks @josh-degraw)
 * Extensible stack trace #184 (Thanks @pengweiqhca) 
+
 # 1.1.3-beta2
 
 Feature: 
 * MaxRequestSize for ASP.NET and ASP.NET Core #174
 * InAppInclude #171
 
-Fix: Diagnostic log order: #173 by @scolestock 
+Fix: Diagnostic log order: #173 by @scolestock
+
 # 1.1.3-beta
 
 Fixed: 
@@ -269,6 +287,7 @@ Fixed:
 Feature
 * Overload to `AddSentry` #163 by @F1nZeR 
 * ASP.NET Core `AddSentry` has now `ConfigureScope`: #160 
+
 # 1.1.2
 
 Using [new version of the protocol with fixes and features](https://github.com/getsentry/sentry-dotnet-protocol/releases/tag/1.0.3).
@@ -276,10 +295,12 @@ Using [new version of the protocol with fixes and features](https://github.com/g
 Fixed:
 
 ASP.NET Core integration issue when containers are built on the ServiceCollection after SDK is initialized (#157, #103 )
+
 # 1.1.2-beta
 
 Fixed:
 * ASP.NET Core integration issue when containers are built on the ServiceCollection after SDK is initialized (#157, #103 )
+
 # 1.1.1
 
 Fixed:
@@ -287,6 +308,7 @@ Fixed:
 
 Feature:
 * log4net environment via xml configuration #150 (Thanks Sébastien Pierre)
+
 # 1.1.0
 
 Includes all features and bug fixes of previous beta releases:
@@ -308,9 +330,11 @@ Bug fixes:
 * Log4net only init if current hub is disabled #119
 
 Thanks to our growing list of [contributors](https://github.com/getsentry/sentry-dotnet/graphs/contributors).
+
 # 1.0.1-beta5
 
 * Added `net461` target to Serilog package #148 
+
 # 1.0.1-beta4
 
 * Serilog Integration #118, #145
@@ -319,12 +343,15 @@ Thanks to our growing list of [contributors](https://github.com/getsentry/sentry
 * Revert reducing Json.NET requirements https://github.com/getsentry/sentry-dotnet/commit/1aed4a5c76ead2f4d39f1c2979eda02d068bfacd
 
 Thanks to our growing [list of contributors](https://github.com/getsentry/sentry-dotnet/graphs/contributors).
+
 # 1.0.1-beta3
 
 Lowering Newtonsoft.Json requirements; #138
+
 # 1.0.1-beta2
 
 `Sentry` package Includes `net461` target #135
+
 # 1.0.1-beta
 
 Features: 
@@ -336,6 +363,7 @@ Features:
 Bug fixes: 
 * Disabled SDK throws on shutdown: #124 
 * Log4net only init if current hub is disabled #119
+
 # 1.0.0
 
 # First major release of the new .NET SDK.
@@ -343,6 +371,7 @@ Bug fixes:
 ## Main features
 
 ### Sentry package
+
 * Automatic Captures global unhandled exceptions (AppDomain)
 * Scope management
 * Duplicate events automatically dropped
@@ -400,6 +429,7 @@ All packages are:
 * Tested on .NET Core, .NET Framework and Mono
 
 ## Learn more:
+
 * [Code samples](https://github.com/getsentry/sentry-dotnet/tree/master/samples)
 * [Sentry docs](https://docs.sentry.io/quickstart/?platform=csharp)
 
@@ -483,7 +513,6 @@ Bug fixes:
 * On-prem without chuncked support for gzip #71 
 * Exception.Data key is not string #77 
 
-
 ## [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration.
 
 Download it directly below from GitHub or using NuGet:
@@ -505,7 +534,6 @@ Features:
 * log4net integration
 * SDK honors Sentry's 429 HTTP Status with Retry After header #61
 
-
 Bug fixes:
 
 * `Init` pushes the first scope #55, #54 
@@ -513,12 +541,10 @@ Bug fixes:
 * Demangling code ensures Function name available #64 
 * ASP.NET Core integration throws when Serilog added #65, #68, #67
 
-
 Improvements to [the docs](https://getsentry.github.io/sentry-dotnet) like:
 * Release discovery
 * `ConfigureScope` clarifications
 * Documenting samples
-
 
 ## [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration.
 
