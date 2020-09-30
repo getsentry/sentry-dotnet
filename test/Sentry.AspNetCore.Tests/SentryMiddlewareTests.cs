@@ -268,6 +268,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public async Task InvokeAsync_OptionsReadPayload_CanSeekStream()
         {
+            _fixture.Options.MaxRequestBodySize = RequestSize.Always;
             var sut = _fixture.GetSut();
             var request = Substitute.For<HttpRequest>();
             var stream = Substitute.For<Stream>();
