@@ -9,12 +9,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Ensure Changelog.md was modified
         shell: pwsh
         run: |
-          git fetch origin ${{ github.base_ref }} -q
-
           $merge_base = git merge-base HEAD ${{ github.base_ref }}
 
           $changes = git --no-pager diff --name-only HEAD $merge_base
