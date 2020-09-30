@@ -44,8 +44,12 @@ namespace Sentry.Internal
                 _options.DiagnosticLogger?.LogDebug("Using ISentryHttpClientFactory set through options: {0}.",
                     factory.GetType().Name);
             }
+            else
+            {
+                factory = new DefaultSentryHttpClientFactory(_options.ConfigureClient);
+            }
 
-            var httpClient = _options.SentryHttpClientFactory?.Create(_options) ?? new HttpClient();
+            var httpClient = factory.Create(_options);
 
             return new BackgroundWorker(new HttpTransport(_options, httpClient, addAuth), _options);
         }

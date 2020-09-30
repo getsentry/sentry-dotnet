@@ -12,19 +12,14 @@ namespace Sentry.Internal.Http
     /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
-        private readonly Action<HttpClientHandler>? _configureHandler;
         private readonly Action<HttpClient>? _configureClient;
 
         /// <summary>
         /// Creates a new instance of <see cref="DefaultSentryHttpClientFactory"/>
         /// </summary>
-        /// <param name="configureHandler">An optional configuration callback</param>
         /// <param name="configureClient">An optional HttpClient configuration callback</param>
-        public DefaultSentryHttpClientFactory(
-            Action<HttpClientHandler>? configureHandler = null,
-            Action<HttpClient>? configureClient = null)
+        public DefaultSentryHttpClientFactory(Action<HttpClient>? configureClient = null)
         {
-            _configureHandler = configureHandler;
             _configureClient = configureClient;
         }
 
@@ -56,12 +51,6 @@ namespace Sentry.Internal.Http
             else
             {
                 options.DiagnosticLogger?.LogDebug("No response compression supported by HttpClientHandler.");
-            }
-
-            if (_configureHandler is { } configureHandler)
-            {
-                options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClientHandler configuration action.");
-                configureHandler.Invoke(httpClientHandler);
             }
 
             HttpMessageHandler handler = httpClientHandler;
