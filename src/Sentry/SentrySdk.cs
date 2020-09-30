@@ -71,7 +71,7 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options)
         {
-            if (string.IsNullOrWhiteSpace(options.Dsn))
+            if (options.Dsn is null)
             {
                 var dsn = DsnLocator.FindDsnStringOrDisable();
 
