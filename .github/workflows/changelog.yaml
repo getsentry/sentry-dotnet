@@ -15,9 +15,11 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1 -q
 
-          $merge_base = git merge-base ${{ github.head }} ${{ github.base_ref }}
+          $merge_base = git merge-base ${{ github.head_ref }} ${{ github.base_ref }}
 
           $changes = git --no-pager diff --name-only ${{ github.head }} $merge_base
+          echo $changes
+
           $contains_changelog = $changes -split '\n' -contains 'CHANGELOG.md'
 
           if (-not $contains_changelog) {
