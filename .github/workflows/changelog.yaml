@@ -15,7 +15,7 @@ jobs:
       - name: Ensure Changelog.md was modified
         shell: pwsh
         run: |
-          $merge_base = git merge-base HEAD ${{ github.base_ref }}
+          $merge_base = git merge-base HEAD origin/${{ github.base_ref }}
 
           $changes = git --no-pager diff --name-only HEAD $merge_base
           echo $changes
