@@ -4,11 +4,22 @@ on: [pull_request]
 
 jobs:
   check:
-    runson: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Ensure Changelog.md was modified
-        run: git diff-tree --no-commit-id --name-only -r ${{ github.sha }}
+        shell: pwsh
+        run: |
+          $merge_base = git merge-base FETCH_HEAD ${{ github.base_ref }}
+          $changes = git diff --no-pager --name-only FETCH_HEAD $merge_base
+          $contains_changelog = $changes -contains 'CHANGELOG.md'
+
+          if (-not $contains_changelog) {
+            echo '::error::Changelog has not been modified!'
+            exit 1
+          }
+
+          exit 0
