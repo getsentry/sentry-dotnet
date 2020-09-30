@@ -9,16 +9,16 @@ namespace Sentry.Tests.Internals
     {
         // Issue: https://github.com/getsentry/sentry-dotnet/issues/123
         [Fact]
-        public void Ctor_NoDsn_DisposeDoesNotThrow()
+        public void FromOptions_NoDsn_DisposeDoesNotThrow()
         {
-            var sut = new OptionalHub(new SentryOptions());
-            sut.Dispose();
+            var sut = OptionalHub.FromOptions(new SentryOptions()) as IDisposable;
+            sut?.Dispose();
         }
 
         [Fact]
-        public Task Ctor_NoDsn_FlushAsyncDoesNotThrow()
+        public Task FromOptions_NoDsn_FlushAsyncDoesNotThrow()
         {
-            var sut = new OptionalHub(new SentryOptions());
+            var sut = OptionalHub.FromOptions(new SentryOptions());
             return sut.FlushAsync(TimeSpan.FromDays(1));
         }
     }
