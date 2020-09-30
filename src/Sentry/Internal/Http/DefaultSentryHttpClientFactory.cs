@@ -12,8 +12,8 @@ namespace Sentry.Internal.Http
     /// <inheritdoc />
     internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
     {
-        private readonly Action<HttpClientHandler, Dsn>? _configureHandler;
-        private readonly Action<HttpClient, Dsn>? _configureClient;
+        private readonly Action<HttpClientHandler>? _configureHandler;
+        private readonly Action<HttpClient>? _configureClient;
 
         /// <summary>
         /// Creates a new instance of <see cref="DefaultSentryHttpClientFactory"/>
@@ -21,8 +21,8 @@ namespace Sentry.Internal.Http
         /// <param name="configureHandler">An optional configuration callback</param>
         /// <param name="configureClient">An optional HttpClient configuration callback</param>
         public DefaultSentryHttpClientFactory(
-            Action<HttpClientHandler, Dsn>? configureHandler = null,
-            Action<HttpClient, Dsn>? configureClient = null)
+            Action<HttpClientHandler>? configureHandler = null,
+            Action<HttpClient>? configureClient = null)
         {
             _configureHandler = configureHandler;
             _configureClient = configureClient;
@@ -31,23 +31,16 @@ namespace Sentry.Internal.Http
         /// <summary>
         /// Creates an <see cref="T:System.Net.Http.HttpClient" /> configure to call Sentry for the specified <see cref="T:Sentry.Dsn" />
         /// </summary>
-        /// <param name="dsn">The DSN.</param>
         /// <param name="options">The HTTP options.</param>
         /// <returns></returns>
-        /// <inheritdoc />
-        public HttpClient Create(Dsn dsn, SentryOptions options)
+        public HttpClient Create(SentryOptions options)
         {
-            if (dsn == null)
-            {
-                throw new ArgumentNullException(nameof(dsn));
-            }
-
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
 
-            var httpClientHandler = options.CreateHttpClientHandler?.Invoke(dsn) ?? new HttpClientHandler();
+            var httpClientHandler = options.CreateHttpClientHandler?.Invoke() ?? new HttpClientHandler();
             if (options.HttpProxy != null)
             {
                 httpClientHandler.Proxy = options.HttpProxy;
@@ -68,7 +61,7 @@ namespace Sentry.Internal.Http
             if (_configureHandler is { } configureHandler)
             {
                 options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClientHandler configuration action.");
-                configureHandler.Invoke(httpClientHandler, dsn);
+                configureHandler.Invoke(httpClientHandler);
             }
 
             HttpMessageHandler handler = httpClientHandler;
@@ -101,7 +94,7 @@ namespace Sentry.Internal.Http
             if (_configureClient is { } configureClient)
             {
                 options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClient configuration action.");
-                configureClient.Invoke(client, dsn);
+                configureClient.Invoke(client);
             }
 
             return client;

@@ -96,9 +96,9 @@ namespace NLog
                 Layout = "${message}",
             };
 
-            if (dsn != null && options.Dsn == null)
+            if (dsn != null && string.IsNullOrWhiteSpace(options.Dsn))
             {
-                options.Dsn = new Dsn(dsn);
+                options.Dsn = dsn;
             }
 
             configuration.AddTarget(targetName, target);

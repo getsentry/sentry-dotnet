@@ -26,7 +26,7 @@ namespace Sentry.NLog.Tests
 
         private class Fixture
         {
-            public SentryNLogOptions Options { get; set; } = new SentryNLogOptions { Dsn = Valid };
+            public SentryNLogOptions Options { get; set; } = new SentryNLogOptions { Dsn = ValidDsnWithSecret };
 
             public IHub Hub { get; set; } = Substitute.For<IHub>();
 
@@ -521,7 +521,7 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Dsn_ReturnsDsnFromOptions_Instance()
         {
-            var expectedDsn = new Dsn("https://a@sentry.io/1");
+            var expectedDsn = "https://a@sentry.io/1";
             _fixture.Options.Dsn = expectedDsn;
             var target = (SentryTarget)_fixture.GetTarget();
             Assert.Equal(expectedDsn.ToString(), target.Options.Dsn.ToString());
@@ -530,7 +530,7 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Dsn_SupportsNLogLayout_Lookup()
         {
-            var expectedDsn = new Dsn("https://a@sentry.io/1");
+            var expectedDsn = "https://a@sentry.io/1";
             var target = (SentryTarget)_fixture.GetTarget();
             target.Dsn = "${var:mydsn}";
             var logFactory = new LogFactory();

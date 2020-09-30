@@ -23,7 +23,9 @@ namespace Sentry.Tests.Internals.Http
 
             public Fixture()
             {
-                Message = new HttpRequestMessage(HttpMethod.Post, DsnSamples.Valid.SentryUri)
+                var uri = Dsn.Parse(DsnSamples.ValidDsnWithSecret).GetStoreEndpointUri();
+
+                Message = new HttpRequestMessage(HttpMethod.Post, uri)
                 {
                     Content = new StringContent(new string('a', MessageCharCount))
                 };

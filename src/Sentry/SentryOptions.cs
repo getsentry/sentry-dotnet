@@ -201,7 +201,7 @@ namespace Sentry
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
         /// </summary>
-        public Dsn? Dsn { get; set; }
+        public string? Dsn { get; set; }
 
         /// <summary>
         /// A callback to invoke before sending an event to Sentry
@@ -295,17 +295,17 @@ namespace Sentry
         /// </remarks>
         [Obsolete("Please use '" + nameof(CreateHttpClientHandler) + "' instead. " +
                   "You can create an instance of '" + nameof(HttpClientHandler) + "' and modify it at once.")]
-        public Action<HttpClientHandler, Dsn>? ConfigureHandler { get; set; }
+        public Action<HttpClientHandler>? ConfigureHandler { get; set; }
 
         /// <summary>
         /// Creates the inner most <see cref="HttpClientHandler"/>.
         /// </summary>
-        public Func<Dsn, HttpClientHandler>? CreateHttpClientHandler { get; set; }
+        public Func<HttpClientHandler>? CreateHttpClientHandler { get; set; }
 
         /// <summary>
         /// A callback invoked when a <see cref="SentryClient"/> is created.
         /// </summary>
-        public Action<HttpClient, Dsn>? ConfigureClient { get; set; }
+        public Action<HttpClient>? ConfigureClient { get; set; }
 
         private volatile bool _debug;
 

@@ -332,8 +332,8 @@ namespace Sentry.Tests
         {
             var invoked = false;
             _fixture.BackgroundWorker = null;
-            _fixture.SentryOptions.Dsn = DsnSamples.Valid;
-            _fixture.SentryOptions.ConfigureClient = (client, dsn) => invoked = true;
+            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+            _fixture.SentryOptions.ConfigureClient = (client) => invoked = true;
 
             using (_fixture.GetSut())
             {
@@ -346,9 +346,9 @@ namespace Sentry.Tests
         {
             var invoked = false;
             _fixture.BackgroundWorker = null;
-            _fixture.SentryOptions.Dsn = DsnSamples.Valid;
+            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
 #pragma warning disable 618 // Tests will be removed once obsolete code gets removed
-            _fixture.SentryOptions.ConfigureHandler = (handler, dsn) => invoked = true;
+            _fixture.SentryOptions.ConfigureHandler = (handler) => invoked = true;
 #pragma warning restore 618
 
             using (_fixture.GetSut())
@@ -362,8 +362,8 @@ namespace Sentry.Tests
         {
             var invoked = false;
             _fixture.BackgroundWorker = null;
-            _fixture.SentryOptions.Dsn = DsnSamples.Valid;
-            _fixture.SentryOptions.CreateHttpClientHandler = (dsn) =>
+            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+            _fixture.SentryOptions.CreateHttpClientHandler = () =>
             {
                 invoked = true;
                 return Substitute.For<HttpClientHandler>();
@@ -378,7 +378,7 @@ namespace Sentry.Tests
         [Fact]
         public void Ctor_NullBackgroundWorker_ConcreteBackgroundWorker()
         {
-            _fixture.SentryOptions.Dsn = DsnSamples.Valid;
+            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
 
             using (var sut = new SentryClient(_fixture.SentryOptions))
             {

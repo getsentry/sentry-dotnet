@@ -10,35 +10,35 @@ namespace Sentry.Tests.Protocol
         public void ToString_SameAsInput()
         {
             var @case = new DsnTestCase();
-            var dsn = new Dsn(@case);
+            var dsn = Dsn.Parse(@case);
             Assert.Equal(@case.ToString(), dsn.ToString());
         }
 
         [Fact]
         public void Ctor_SampleValidDsnWithoutSecret_CorrectlyConstructs()
         {
-            var dsn = new Dsn(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithoutSecret);
-            Assert.Equal(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithoutSecret, dsn.ToString());
+            var dsn = Dsn.Parse(DsnSamples.ValidDsnWithoutSecret);
+            Assert.Equal(DsnSamples.ValidDsnWithoutSecret, dsn.ToString());
         }
 
         [Fact]
         public void Ctor_SampleValidDsnWithSecret_CorrectlyConstructs()
         {
-            var dsn = new Dsn(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret);
-            Assert.Equal(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret, dsn.ToString());
+            var dsn = Dsn.Parse(DsnSamples.ValidDsnWithSecret);
+            Assert.Equal(DsnSamples.ValidDsnWithSecret, dsn.ToString());
         }
 
         [Fact]
         public void Ctor_NotUri_ThrowsUriFormatException()
         {
-            var ex = Assert.Throws<UriFormatException>(() => new Dsn("Not a URI"));
+            var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse("Not a URI"));
             Assert.Equal("Invalid URI: The format of the URI could not be determined.", ex.Message);
         }
 
         [Fact]
         public void Ctor_DisableSdk_ThrowsUriFormatException()
         {
-            var ex = Assert.Throws<UriFormatException>(() => new Dsn(Constants.DisableSdkDsnValue));
+            var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(Constants.DisableSdkDsnValue));
             Assert.Equal("Invalid URI: The URI is empty.", ex.Message);
         }
 
@@ -46,7 +46,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_ValidDsn_CorrectlyConstructs()
         {
             var @case = new DsnTestCase();
-            var dsn = new Dsn(@case);
+            var dsn = Dsn.Parse(@case);
 
             AssertEqual(@case, dsn);
         }
@@ -55,7 +55,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_MissingScheme_ThrowsUriFormatException()
         {
             var @case = new DsnTestCase { Scheme = null };
-            var ex = Assert.Throws<UriFormatException>(() => new Dsn(@case));
+            var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(@case));
             Assert.Equal("Invalid URI: The format of the URI could not be determined.", ex.Message);
         }
 
@@ -63,7 +63,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_FutureScheme_ValidDsn()
         {
             var @case = new DsnTestCase { Scheme = "hypothetical" };
-            var dsn = new Dsn(@case);
+            var dsn = Dsn.Parse(@case);
             AssertEqual(@case, dsn);
         }
 
@@ -71,7 +71,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_EmptyPath_ValidDsn()
         {
             var @case = new DsnTestCase { Path = string.Empty };
-            var dsn = new Dsn(@case);
+            var dsn = Dsn.Parse(@case);
             AssertEqual(@case, dsn);
         }
 
@@ -79,7 +79,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_MissingSecretKey_GetterReturnsNull()
         {
             var @case = new DsnTestCase { SecretKey = null };
-            var sut = new Dsn(@case);
+            var sut = Dsn.Parse(@case);
             Assert.Null(sut.SecretKey);
         }
 
@@ -87,7 +87,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_MissingPublicKey_ThrowsArgumentException()
         {
             var @case = new DsnTestCase { PublicKey = null };
-            var ex = Assert.Throws<ArgumentException>(() => new Dsn(@case));
+            var ex = Assert.Throws<ArgumentException>(() => Dsn.Parse(@case));
             Assert.Equal("Invalid DSN: No public key provided.", ex.Message);
         }
 
@@ -95,7 +95,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_MissingPublicAndSecretKey_ThrowsArgumentException()
         {
             var @case = new DsnTestCase { PublicKey = null, SecretKey = null, UserInfoSeparator = null, CredentialSeparator = null };
-            var ex = Assert.Throws<ArgumentException>(() => new Dsn(@case));
+            var ex = Assert.Throws<ArgumentException>(() => Dsn.Parse(@case));
             Assert.Equal("Invalid DSN: No public key provided.", ex.Message);
         }
 
@@ -103,7 +103,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_MissingProjectId_ThrowsArgumentException()
         {
             var @case = new DsnTestCase { ProjectId = null };
-            var ex = Assert.Throws<ArgumentException>(() => new Dsn(@case));
+            var ex = Assert.Throws<ArgumentException>(() => Dsn.Parse(@case));
             Assert.Equal("Invalid DSN: A Project Id is required.", ex.Message);
         }
 
@@ -111,7 +111,7 @@ namespace Sentry.Tests.Protocol
         public void Ctor_InvalidPort_ThrowsUriFormatException()
         {
             var @case = new DsnTestCase { Port = -1 };
-            var ex = Assert.Throws<UriFormatException>(() => new Dsn(@case));
+            var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(@case));
             Assert.Equal("Invalid URI: Invalid port specified.", ex.Message);
         }
 
@@ -119,63 +119,59 @@ namespace Sentry.Tests.Protocol
         public void Ctor_InvalidHost_ThrowsUriFormatException()
         {
             var @case = new DsnTestCase { Host = null };
-            var ex = Assert.Throws<UriFormatException>(() => new Dsn(@case));
+            var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(@case));
             Assert.Equal("Invalid URI: The hostname could not be parsed.", ex.Message);
         }
 
         [Fact]
         public void Ctor_EmptyStringDsn_ThrowsUriFormatException()
         {
-            var ex = Assert.Throws<UriFormatException>(() => new Dsn(string.Empty));
+            var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(string.Empty));
             Assert.Equal("Invalid URI: The URI is empty.", ex.Message);
         }
 
         [Fact]
         public void Ctor_NullDsn_ThrowsArgumentNull()
         {
-            _ = Assert.Throws<ArgumentNullException>(() => new Dsn(null));
+            _ = Assert.Throws<ArgumentNullException>(() => Dsn.Parse(null));
         }
 
         [Fact]
         public void TryParse_SampleValidDsnWithoutSecret_Succeeds()
         {
-            Assert.True(Dsn.TryParse(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithoutSecret, out var dsn));
-            Assert.NotNull(dsn);
+            Assert.NotNull(Dsn.TryParse(DsnSamples.ValidDsnWithoutSecret));
         }
 
         [Fact]
         public void TryParse_SampleValidDsnWithSecret_Succeeds()
         {
-            Assert.True(Dsn.TryParse(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret, out var dsn));
-            Assert.NotNull(dsn);
+            Assert.NotNull(Dsn.TryParse(DsnSamples.ValidDsnWithSecret));
         }
 
         [Fact]
         public void TryParse_SampleInvalidDsn_Fails()
         {
-            Assert.False(Dsn.TryParse(Sentry.Protocol.Tests.DsnSamples.InvalidDsn, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(DsnSamples.InvalidDsn));
         }
 
         [Fact]
         public void TryParse_NotUri_Fails()
         {
-            Assert.False(Dsn.TryParse("Not a URI", out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse("Not a URI"));
         }
 
         [Fact]
         public void TryParse_DisabledSdk_Fails()
         {
-            Assert.False(Dsn.TryParse(Constants.DisableSdkDsnValue, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(Constants.DisableSdkDsnValue));
         }
 
         [Fact]
         public void TryParse_ValidDsn_Succeeds()
         {
             var @case = new DsnTestCase();
-            Assert.True(Dsn.TryParse(@case, out var dsn));
+            var dsn = Dsn.TryParse(@case);
+            Assert.NotNull(dsn);
 
             AssertEqual(@case, dsn);
         }
@@ -184,15 +180,15 @@ namespace Sentry.Tests.Protocol
         public void TryParse_MissingScheme_Fails()
         {
             var @case = new DsnTestCase { Scheme = null };
-            Assert.False(Dsn.TryParse(@case, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(@case));
         }
 
         [Fact]
         public void TryParse_FutureScheme_Succeeds()
         {
             var @case = new DsnTestCase { Scheme = "hypothetical" };
-            Assert.True(Dsn.TryParse(@case, out var dsn));
+            var dsn = Dsn.TryParse(@case);
+            Assert.NotNull(dsn);
             AssertEqual(@case, dsn);
         }
 
@@ -200,7 +196,8 @@ namespace Sentry.Tests.Protocol
         public void TryParse_EmptyPath_Succeeds()
         {
             var @case = new DsnTestCase { Path = string.Empty };
-            Assert.True(Dsn.TryParse(@case, out var dsn));
+            var dsn = Dsn.TryParse(@case);
+            Assert.NotNull(dsn);
             AssertEqual(@case, dsn);
         }
 
@@ -208,7 +205,8 @@ namespace Sentry.Tests.Protocol
         public void TryParse_MissingSecretKey_Succeeds()
         {
             var @case = new DsnTestCase { SecretKey = null };
-            Assert.True(Dsn.TryParse(@case, out var dsn));
+            var dsn = Dsn.TryParse(@case);
+            Assert.NotNull(dsn);
             AssertEqual(@case, dsn);
         }
 
@@ -216,61 +214,54 @@ namespace Sentry.Tests.Protocol
         public void TryParse_MissingPublicKey_Fails()
         {
             var @case = new DsnTestCase { PublicKey = null };
-            Assert.False(Dsn.TryParse(@case, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(@case));
         }
 
         [Fact]
         public void TryParse_MissingPublicAndSecretKey_Fails()
         {
             var @case = new DsnTestCase { PublicKey = null, SecretKey = null, UserInfoSeparator = null, CredentialSeparator = null };
-            Assert.False(Dsn.TryParse(@case, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(@case));
         }
 
         [Fact]
         public void TryParse_MissingProjectId_Fails()
         {
             var @case = new DsnTestCase { ProjectId = null };
-            Assert.False(Dsn.TryParse(@case, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(@case));
         }
 
         [Fact]
         public void TryParse_InvalidPort_Fails()
         {
             var @case = new DsnTestCase { Port = -1 };
-            Assert.False(Dsn.TryParse(@case, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(@case));
         }
 
         [Fact]
         public void TryParse_InvalidHost_Fails()
         {
             var @case = new DsnTestCase { Host = null };
-            Assert.False(Dsn.TryParse(@case, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(@case));
         }
 
         [Fact]
         public void TryParse_EmptyStringDsn_ThrowsUriFormatException()
         {
-            Assert.False(Dsn.TryParse(string.Empty, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(string.Empty));
         }
 
         [Fact]
         public void TryParse_NullDsn_ThrowsArgumentNull()
         {
-            Assert.False(Dsn.TryParse(null, out var dsn));
-            Assert.Null(dsn);
+            Assert.Null(Dsn.TryParse(null));
         }
 
         [Fact]
-        public void IsDisabled_ValidDsn_False() => Assert.False(Dsn.IsDisabled(Sentry.Protocol.Tests.DsnSamples.ValidDsnWithSecret));
+        public void IsDisabled_ValidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.ValidDsnWithSecret));
 
         [Fact]
-        public void IsDisabled_InvalidDsn_False() => Assert.False(Dsn.IsDisabled(Sentry.Protocol.Tests.DsnSamples.InvalidDsn));
+        public void IsDisabled_InvalidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.InvalidDsn));
 
         [Fact]
         public void IsDisabled_NullDsn_False() => Assert.False(Dsn.IsDisabled(null));
@@ -308,15 +299,17 @@ namespace Sentry.Tests.Protocol
             if (@case == null) throw new ArgumentNullException(nameof(@case));
             if (dsn == null) throw new ArgumentNullException(nameof(dsn));
 
-            Assert.Equal(@case.Scheme, dsn.SentryUri.Scheme);
+            var uri = dsn.GetStoreEndpointUri();
+
+            Assert.Equal(@case.Scheme, uri.Scheme);
             Assert.Equal(@case.PublicKey, dsn.PublicKey);
             Assert.Equal(@case.SecretKey, dsn.SecretKey);
             Assert.Equal(@case.ProjectId, dsn.ProjectId);
             Assert.Equal(@case.Path, dsn.Path);
-            Assert.Equal(@case.Host, dsn.SentryUri.Host);
-            Assert.Equal(@case.Port, dsn.SentryUri.Port);
+            Assert.Equal(@case.Host, uri.Host);
+            Assert.Equal(@case.Port, uri.Port);
 
-            Assert.Equal(@case, dsn.SentryUri);
+            Assert.Equal(@case, uri);
         }
     }
 }

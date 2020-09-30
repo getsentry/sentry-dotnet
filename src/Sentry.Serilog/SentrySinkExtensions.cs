@@ -186,7 +186,7 @@ namespace Serilog
         {
             if (!string.IsNullOrWhiteSpace(dsn))
             {
-                sentrySerilogOptions.Dsn = new Dsn(dsn);
+                sentrySerilogOptions.Dsn = dsn;
             }
 
             if (minimumEventLevel.HasValue)

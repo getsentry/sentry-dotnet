@@ -19,7 +19,7 @@ namespace NotSentry.Tests
 
             public Fixture()
             {
-                SentryOptions.Dsn = DsnSamples.Valid;
+                SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
                 SentryOptions.BackgroundWorker = Worker;
             }
 

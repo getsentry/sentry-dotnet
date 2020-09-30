@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry.Internal.Http
 {
@@ -61,9 +60,16 @@ namespace Sentry.Internal.Http
 
         internal HttpRequestMessage CreateRequest(SentryEvent @event)
         {
+            if (string.IsNullOrWhiteSpace(_options.Dsn))
+            {
+                throw new InvalidOperationException("The DSN is expected to be set at this point.");
+            }
+
+            var dsn = Dsn.Parse(_options.Dsn);
+
             var request = new HttpRequestMessage
             {
-                RequestUri = _options.Dsn?.SentryUri,
+                RequestUri = dsn.GetStoreEndpointUri(),
                 Method = HttpMethod.Post,
                 Content = new StringContent(JsonSerializer.SerializeObject(@event))
             };

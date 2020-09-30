@@ -44,16 +44,9 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn.</param>
-        public static IDisposable Init(string? dsn)
-            => !string.IsNullOrWhiteSpace(dsn)
-                ? Init(new Dsn(dsn))
-                : DisabledHub.Instance;
-
-        /// <summary>
-        /// Initializes the SDK with the specified DSN.
-        /// </summary>
-        /// <param name="dsn">The dsn.</param>
-        public static IDisposable Init(Dsn dsn) => Init(c => c.Dsn = dsn);
+        public static IDisposable Init(string? dsn) => !string.IsNullOrWhiteSpace(dsn)
+            ? Init(c => c.Dsn = dsn)
+            : DisabledHub.Instance;
 
         /// <summary>
         /// Initializes the SDK with an optional configuration options callback.
@@ -80,12 +73,15 @@ namespace Sentry
         {
             if (options.Dsn == null)
             {
-                if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
+                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
+
+                if (dsn is null)
                 {
                     options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
                     return DisabledHub.Instance;
                 }
-                options.Dsn = dsn;
+
+                options.Dsn = dsn.Source;
             }
 
             return UseHub(new Hub(options));

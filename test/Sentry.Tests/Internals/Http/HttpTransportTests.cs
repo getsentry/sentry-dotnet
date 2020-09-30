@@ -20,7 +20,7 @@ namespace Sentry.Tests.Internals.Http
         {
             public SentryOptions SentryOptions { get; set; } = new SentryOptions
             {
-                Dsn = DsnSamples.Valid,
+                Dsn = DsnSamples.ValidDsnWithSecret,
                 DiagnosticLogger = Substitute.For<IDiagnosticLogger>()
             };
 
@@ -142,7 +142,9 @@ namespace Sentry.Tests.Internals.Http
             var evt = new SentryEvent();
             var actual = sut.CreateRequest(evt);
 
-            Assert.Equal(_fixture.SentryOptions.Dsn.SentryUri, actual.RequestUri);
+            var uri = Dsn.Parse(_fixture.SentryOptions.Dsn!).GetStoreEndpointUri();
+
+            Assert.Equal(uri, actual.RequestUri);
         }
 
         [Fact]
