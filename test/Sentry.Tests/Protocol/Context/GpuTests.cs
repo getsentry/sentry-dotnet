@@ -28,7 +28,7 @@ namespace Sentry.Protocol.Tests.Context
             Assert.Equal("{\"type\":\"gpu\","
                         + "\"name\":\"Sentry.Test.Gpu\","
                         + "\"id\":123,"
-                        + "\"vendor_id\":321,"
+                        + "\"vendor_id\":\"321\","
                         + "\"vendor_name\":\"Vendor name\","
                         + "\"memory_size\":1000,"
                         + "\"api_type\":\"API Type\","
