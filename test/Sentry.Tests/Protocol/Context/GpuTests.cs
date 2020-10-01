@@ -14,7 +14,7 @@ namespace Sentry.Protocol.Tests.Context
             {
                 Name = "Sentry.Test.Gpu",
                 Id = 123,
-                VendorId = 321,
+                VendorId = "321",
                 VendorName = "Vendor name",
                 MemorySize = 1_000,
                 ApiType = "API Type",
@@ -45,7 +45,7 @@ namespace Sentry.Protocol.Tests.Context
             {
                 Name = "Sentry.Test.Gpu",
                 Id = 123,
-                VendorId = 321,
+                VendorId = "321",
                 VendorName = "Vendor name",
                 MemorySize = 1_000,
                 ApiType = "API Type",
@@ -80,7 +80,7 @@ namespace Sentry.Protocol.Tests.Context
             yield return new object[] { (new Gpu(), "{\"type\":\"gpu\"}") };
             yield return new object[] { (new Gpu { Name = "some name" }, "{\"type\":\"gpu\",\"name\":\"some name\"}") };
             yield return new object[] { (new Gpu { Id = 1 }, "{\"type\":\"gpu\",\"id\":1}") };
-            yield return new object[] { (new Gpu { VendorId = 1 }, "{\"type\":\"gpu\",\"vendor_id\":1}") };
+            yield return new object[] { (new Gpu { VendorId = "1" }, "{\"type\":\"gpu\",\"vendor_id\":\"1\"}") };
             yield return new object[] { (new Gpu { VendorName = "some name" }, "{\"type\":\"gpu\",\"vendor_name\":\"some name\"}") };
             yield return new object[] { (new Gpu { MemorySize = 123 }, "{\"type\":\"gpu\",\"memory_size\":123}") };
             yield return new object[] { (new Gpu { ApiType = "some ApiType" }, "{\"type\":\"gpu\",\"api_type\":\"some ApiType\"}") };
