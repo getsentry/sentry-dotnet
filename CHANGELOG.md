@@ -1,3 +1,7 @@
+# vNext
+
+* Rename `LogEntry` to `SentryMessage`. Change type of `SentryEvent.Message` from `string` to `SentryMessage`.
+
 # 3.0.0-alpha.0
 
 ## What’s Changed
