@@ -22,10 +22,10 @@ namespace Sentry.Tests.Protocol
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
-                Message = "message",
-                LogEntry = new LogEntry
+                Message = new SentryMessage
                 {
-                    Message = "structured_message"
+                    Message = "message",
+                    Formatted = "structured_message"
                 },
                 Modules = { { "module_key", "module_value" } },
                 Release = "release",
@@ -48,8 +48,7 @@ namespace Sentry.Tests.Protocol
             Assert.Equal("{\"modules\":{\"module_key\":\"module_value\"}," +
                          "\"event_id\":\"4b780f4cec0342a78ef8a41c9d5621f8\"," +
                          "\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-                         "\"message\":\"message\"," +
-                         "\"logentry\":{\"message\":\"structured_message\"}," +
+                         "\"logentry\":{\"message\":\"message\",\"formatted\":\"structured_message\"}," +
                          "\"logger\":\"logger\"," +
                          "\"platform\":\"csharp\"," +
                          "\"server_name\":\"server_name\"," +

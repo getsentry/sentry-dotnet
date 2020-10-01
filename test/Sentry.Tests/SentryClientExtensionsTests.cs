@@ -60,7 +60,7 @@ namespace Sentry.Tests
             const string expectedMessage = "message";
             _ = _sut.IsEnabled.Returns(true);
             _ = _sut.CaptureMessage(expectedMessage);
-            _ = _sut.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Message == expectedMessage));
+            _ = _sut.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == expectedMessage));
         }
 
         [Fact]

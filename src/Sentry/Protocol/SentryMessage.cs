@@ -17,7 +17,7 @@ namespace Sentry.Protocol
     /// </example>
     /// <seealso href="https://docs.sentry.io/clientdev/interfaces/message/"/>
     [DataContract]
-    public class LogEntry
+    public class SentryMessage
     {
         /// <summary>
         /// The raw message string (un-interpolated).
@@ -39,5 +39,10 @@ namespace Sentry.Protocol
         /// </summary>
         [DataMember(Name = "formatted", EmitDefaultValue = false)]
         public string? Formatted { get; set; }
+
+        /// <summary>
+        /// Coerces <see cref="System.String"/> into <see cref="SentryMessage"/>.
+        /// </summary>
+        public static implicit operator SentryMessage(string? message) => new SentryMessage {Message = message};
     }
 }

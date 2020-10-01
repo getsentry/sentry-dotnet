@@ -35,14 +35,15 @@ namespace Sentry
             string message,
             SentryLevel level = SentryLevel.Info)
         {
-            return !client.IsEnabled
-                   || string.IsNullOrWhiteSpace(message)
+            return !client.IsEnabled || string.IsNullOrWhiteSpace(message)
                 ? new SentryId()
-                : client.CaptureEvent(new SentryEvent
-                {
-                    Message = message,
-                    Level = level
-                });
+                : client.CaptureEvent(
+                    new SentryEvent
+                    {
+                        Message = message,
+                        Level = level
+                    }
+                );
         }
     }
 }

@@ -51,12 +51,6 @@ namespace Sentry
         public DateTimeOffset Timestamp { get; }
 
         /// <summary>
-        /// Gets the message that describes this event.
-        /// </summary>
-        [DataMember(Name = "message", EmitDefaultValue = false)]
-        public string? Message { get; set; }
-
-        /// <summary>
         /// Gets the structured message that describes this event.
         /// </summary>
         /// <remarks>
@@ -64,11 +58,11 @@ namespace Sentry
         /// on the template message instead of the result string message.
         /// </remarks>
         /// <example>
-        /// LogEntry will have a template like: 'user {0} logged in'
+        /// SentryMessage will have a template like: 'user {0} logged in'
         /// Or structured logging template: '{user} has logged in'
         /// </example>
         [DataMember(Name = "logentry", EmitDefaultValue = false)]
-        public LogEntry? LogEntry { get; set; }
+        public SentryMessage? Message { get; set; }
 
         /// <summary>
         /// Name of the logger (or source) of the event.

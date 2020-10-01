@@ -4,12 +4,12 @@ using Xunit;
 
 namespace Sentry.Tests.Protocol
 {
-    public class LogEntryTests
+    public class SentryMessageTests
     {
         [Fact]
         public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
         {
-            var sut = new LogEntry
+            var sut = new SentryMessage
             {
                 Message = "Message {eventId} {name}",
                 Params = new object[] { 100, "test-name" },
@@ -26,7 +26,7 @@ namespace Sentry.Tests.Protocol
 
         [Theory]
         [MemberData(nameof(TestCases))]
-        public void SerializeObject_TestCase_SerializesAsExpected((LogEntry msg, string serialized) @case)
+        public void SerializeObject_TestCase_SerializesAsExpected((SentryMessage msg, string serialized) @case)
         {
             var actual = JsonSerializer.SerializeObject(@case.msg);
 
@@ -35,10 +35,10 @@ namespace Sentry.Tests.Protocol
 
         public static IEnumerable<object[]> TestCases()
         {
-            yield return new object[] { (new LogEntry(), "{}") };
-            yield return new object[] { (new LogEntry { Message = "some message" }, "{\"message\":\"some message\"}") };
-            yield return new object[] { (new LogEntry { Params = new[] { "param" } }, "{\"params\":[\"param\"]}") };
-            yield return new object[] { (new LogEntry { Formatted = "some formatted" }, "{\"formatted\":\"some formatted\"}") };
+            yield return new object[] { (new SentryMessage(), "{}") };
+            yield return new object[] { (new SentryMessage { Message = "some message" }, "{\"message\":\"some message\"}") };
+            yield return new object[] { (new SentryMessage { Params = new[] { "param" } }, "{\"params\":[\"param\"]}") };
+            yield return new object[] { (new SentryMessage { Formatted = "some formatted" }, "{\"formatted\":\"some formatted\"}") };
         }
     }
 }
