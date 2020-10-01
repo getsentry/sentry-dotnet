@@ -23,9 +23,9 @@ namespace Sentry.Tests.Protocol
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
                 Message = "message",
-                LogEntry = new LogEntry
+                Message = new SentryMessage
                 {
-                    Message = "structured_message"
+                    Raw = "structured_message"
                 },
                 Modules = { { "module_key", "module_value" } },
                 Release = "release",

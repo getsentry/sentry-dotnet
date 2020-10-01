@@ -326,11 +326,10 @@ namespace Sentry.NLog
 
                 var evt = new SentryEvent(exception)
                 {
-                    Message = null,
-                    LogEntry = new LogEntry
+                    Message = new SentryMessage
                     {
                         Formatted = formatted,
-                        Message = template
+                        Raw = template
                     },
                     Logger = logEvent.LoggerName,
                     Level = logEvent.Level.ToSentryLevel(),

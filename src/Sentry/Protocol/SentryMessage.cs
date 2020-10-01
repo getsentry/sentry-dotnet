@@ -17,7 +17,7 @@ namespace Sentry.Protocol
     /// </example>
     /// <seealso href="https://docs.sentry.io/clientdev/interfaces/message/"/>
     [DataContract]
-    public class LogEntry
+    public class SentryMessage
     {
         /// <summary>
         /// The raw message string (un-interpolated).
@@ -26,7 +26,7 @@ namespace Sentry.Protocol
         /// Must be no more than 1000 characters in length.
         /// </remarks>
         [DataMember(Name = "message", EmitDefaultValue = false)]
-        public string? Message { get; set; }
+        public string? Raw { get; set; }
 
         /// <summary>
         /// The optional list of formatting parameters.

@@ -75,7 +75,7 @@ namespace Else.AspNetCore.Tests
             var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
             logger.LogError(expectedMessage);
 
-            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.LogEntry.Formatted == expectedMessage));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message.Formatted == expectedMessage));
         }
 
         [Fact]
@@ -89,8 +89,8 @@ namespace Else.AspNetCore.Tests
             logger.LogError(expectedMessage, param);
 
             _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p =>
-                    p.LogEntry.Formatted == $"Test {param} log"
-                    && p.LogEntry.Message == expectedMessage));
+                    p.Message.Formatted == $"Test {param} log"
+                    && p.Message.Raw == expectedMessage));
         }
 
         [Fact]

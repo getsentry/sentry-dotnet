@@ -59,7 +59,7 @@ namespace Sentry.Extensions.Logging
                 var @event = new SentryEvent(exception)
                 {
                     Logger = CategoryName,
-                    Message = message,
+                    Message = new SentryMessage{ Raw = message },
                     Level = logLevel.ToSentryLevel()
                 };
 
@@ -71,10 +71,10 @@ namespace Sentry.Extensions.Logging
                         {
                             // Original format found, use Sentry logEntry interface
                             @event.Message = null;
-                            @event.LogEntry = new LogEntry
+                            @event.Message = new SentryMessage
                             {
                                 Formatted = message,
-                                Message = template
+                                Raw = template
                             };
                             continue;
                         }

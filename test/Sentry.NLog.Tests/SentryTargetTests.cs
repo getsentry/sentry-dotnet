@@ -287,7 +287,7 @@ namespace Sentry.NLog.Tests
             manager.GetLogger("sentry").Log(evt);
 
             _ = _fixture.Hub.Received(1)
-                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.LogEntry.Formatted == expected));
+                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Formatted == expected));
         }
 
         [Fact]
@@ -385,8 +385,8 @@ namespace Sentry.NLog.Tests
             sut.Error(expectedMessage, param);
 
             _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
-                    p.LogEntry.Formatted == $"Test {param} log"
-                    && p.LogEntry.Message == expectedMessage));
+                    p.Message.Formatted == $"Test {param} log"
+                    && p.Message.Raw == expectedMessage));
         }
 
         [Fact]
