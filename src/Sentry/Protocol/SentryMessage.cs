@@ -26,7 +26,7 @@ namespace Sentry.Protocol
         /// Must be no more than 1000 characters in length.
         /// </remarks>
         [DataMember(Name = "message", EmitDefaultValue = false)]
-        public string? Raw { get; set; }
+        public string? Message { get; set; }
 
         /// <summary>
         /// The optional list of formatting parameters.
@@ -39,5 +39,10 @@ namespace Sentry.Protocol
         /// </summary>
         [DataMember(Name = "formatted", EmitDefaultValue = false)]
         public string? Formatted { get; set; }
+
+        /// <summary>
+        /// Coerces <see cref="System.String"/> into <see cref="SentryMessage"/>.
+        /// </summary>
+        public static implicit operator SentryMessage(string? message) => new SentryMessage {Message = message};
     }
 }

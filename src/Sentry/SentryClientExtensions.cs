@@ -40,10 +40,7 @@ namespace Sentry
                 : client.CaptureEvent(
                     new SentryEvent
                     {
-                        Message = new SentryMessage
-                        {
-                            Raw = message
-                        },
+                        Message = message,
                         Level = level
                     }
                 );

@@ -11,7 +11,7 @@ namespace Sentry.Tests.Protocol
         {
             var sut = new SentryMessage
             {
-                Raw = "Message {eventId} {name}",
+                Message = "Message {eventId} {name}",
                 Params = new object[] { 100, "test-name" },
                 Formatted = "Message 100 test-name"
             };
@@ -36,7 +36,7 @@ namespace Sentry.Tests.Protocol
         public static IEnumerable<object[]> TestCases()
         {
             yield return new object[] { (new SentryMessage(), "{}") };
-            yield return new object[] { (new SentryMessage { Raw = "some message" }, "{\"message\":\"some message\"}") };
+            yield return new object[] { (new SentryMessage { Message = "some message" }, "{\"message\":\"some message\"}") };
             yield return new object[] { (new SentryMessage { Params = new[] { "param" } }, "{\"params\":[\"param\"]}") };
             yield return new object[] { (new SentryMessage { Formatted = "some formatted" }, "{\"formatted\":\"some formatted\"}") };
         }

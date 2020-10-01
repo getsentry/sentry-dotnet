@@ -90,7 +90,7 @@ namespace Sentry.Serilog
                     Message = new SentryMessage
                     {
                         Formatted = formatted,
-                        Raw = template
+                        Message = template
                     },
                     Level = logEvent.Level.ToSentryLevel()
                 };

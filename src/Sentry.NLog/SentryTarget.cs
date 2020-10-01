@@ -329,7 +329,7 @@ namespace Sentry.NLog
                     Message = new SentryMessage
                     {
                         Formatted = formatted,
-                        Raw = template
+                        Message = template
                     },
                     Logger = logEvent.LoggerName,
                     Level = logEvent.Level.ToSentryLevel(),

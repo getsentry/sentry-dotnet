@@ -90,7 +90,7 @@ namespace Else.AspNetCore.Tests
 
             _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p =>
                     p.Message.Formatted == $"Test {param} log"
-                    && p.Message.Raw == expectedMessage));
+                    && p.Message.Message == expectedMessage));
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace Else.AspNetCore.Tests
             var client = ServiceProvider.GetRequiredService<ISentryClient>();
             _ = client.CaptureMessage(expectedMessage);
 
-            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message.Message == expectedMessage));
         }
 
         [Fact]
@@ -131,7 +131,7 @@ namespace Else.AspNetCore.Tests
             var client = ServiceProvider.GetRequiredService<IHub>();
             _ = client.CaptureMessage(expectedMessage);
 
-            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message == expectedMessage));
+            _ = Worker.Received(1).EnqueueEvent(Arg.Is<SentryEvent>(p => p.Message.Message == expectedMessage));
         }
 
         [Fact]

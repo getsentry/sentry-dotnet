@@ -106,7 +106,7 @@ namespace Sentry.Log4Net
 
             if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
             {
-                evt.Message = new SentryMessage {Raw = loggingEvent.RenderedMessage};
+                evt.Message = loggingEvent.RenderedMessage;
             }
 
             evt.SetExtras(GetLoggingEventProperties(loggingEvent));

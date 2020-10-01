@@ -386,7 +386,7 @@ namespace Sentry.NLog.Tests
 
             _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
                     p.Message.Formatted == $"Test {param} log"
-                    && p.Message.Raw == expectedMessage));
+                    && p.Message.Message == expectedMessage));
         }
 
         [Fact]

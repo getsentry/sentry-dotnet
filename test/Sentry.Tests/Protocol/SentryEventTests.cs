@@ -22,10 +22,10 @@ namespace Sentry.Tests.Protocol
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
-                Message = "message",
                 Message = new SentryMessage
                 {
-                    Raw = "structured_message"
+                    Message = "message",
+                    Formatted = "structured_message"
                 },
                 Modules = { { "module_key", "module_value" } },
                 Release = "release",
