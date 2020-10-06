@@ -50,7 +50,7 @@ namespace Sentry.Tests.Internals.Http
             var token = source.Token;
             var sut = _fixture.GetSut();
 
-            await sut.CaptureEventAsync(
+            await sut.SendEnvelopeAsync(
                 new SentryEvent(
                     id: SentryResponses.ResponseId),
                 token);
@@ -74,7 +74,7 @@ namespace Sentry.Tests.Internals.Http
 
             var sut = _fixture.GetSut();
 
-            await sut.CaptureEventAsync(expectedEvent);
+            await sut.SendEnvelopeAsync(expectedEvent);
 
             _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
                 "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,
@@ -96,7 +96,7 @@ namespace Sentry.Tests.Internals.Http
 
             var sut = _fixture.GetSut();
 
-            await sut.CaptureEventAsync(expectedEvent);
+            await sut.SendEnvelopeAsync(expectedEvent);
 
             _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
                 "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,

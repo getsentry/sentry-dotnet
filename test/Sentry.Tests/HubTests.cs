@@ -4,6 +4,7 @@ using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Xunit;
 
 // ReSharper disable once CheckNamespace
@@ -65,7 +66,7 @@ namespace NotSentry.Tests
             _ = sut.CaptureMessage("test");
 
             _ = _fixture.Worker.Received(1)
-                    .EnqueueEvent(Arg.Do<SentryEvent>(
+                    .EnqueueEnvelope(Arg.Do<Envelope>(
                         e => Assert.DoesNotContain(e.SentryExceptions.Single().Stacktrace.Frames,
                             p => p.Function == nameof(CaptureMessage_AttachStacktraceTrue_IncludesStackTrace))));
         }
@@ -80,14 +81,14 @@ namespace NotSentry.Tests
             _ = sut.CaptureMessage("test");
 
             _ = _fixture.Worker.Received(1)
-                    .EnqueueEvent(Arg.Is<SentryEvent>(e => e.SentryExceptionValues == null));
+                    .EnqueueEnvelope(Arg.Is<Envelope>(e => e.SentryExceptionValues == null));
         }
 
         [Fact]
         public void CaptureMessage_FailedQueue_LastEventIdSetToEmpty()
         {
             var expectedId = Guid.Empty;
-            _ = _fixture.Worker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(false);
+            _ = _fixture.Worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(false);
             var sut = _fixture.GetSut();
 
             var actualId = sut.CaptureMessage("test");
@@ -99,7 +100,7 @@ namespace NotSentry.Tests
         [Fact]
         public void CaptureMessage_SuccessQueued_LastEventIdSetToReturnedId()
         {
-            _ = _fixture.Worker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(true);
+            _ = _fixture.Worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
             var sut = _fixture.GetSut();
 
             var actualId = sut.CaptureMessage("test");

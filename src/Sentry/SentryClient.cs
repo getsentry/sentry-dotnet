@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
+using Sentry.Protocol.Builders;
 
 namespace Sentry
 {
@@ -165,9 +166,13 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            if (Worker.EnqueueEvent(processedEvent))
+            var envelope = new EnvelopeBuilder()
+                .AddEventItem(processedEvent)
+                .Build();
+
+            if (Worker.EnqueueEnvelope(envelope))
             {
-                _options.DiagnosticLogger?.LogDebug("Event queued up.");
+                _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
                 return processedEvent.EventId;
             }
 

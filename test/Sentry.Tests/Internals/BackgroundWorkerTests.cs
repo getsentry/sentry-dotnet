@@ -62,7 +62,7 @@ namespace Sentry.Tests.Internals
             var signal = new ManualResetEventSlim();
             var evt = new SentryEvent();
             _fixture.Transport
-                .When(t => t.CaptureEventAsync(evt, Arg.Any<CancellationToken>()))
+                .When(t => t.SendEnvelopeAsync(evt, Arg.Any<CancellationToken>()))
                 .Do(_ => signal.Set());
 
             var sut = _fixture.GetSut();
@@ -80,7 +80,7 @@ namespace Sentry.Tests.Internals
         {
             var evt = new SentryEvent();
             _ = _fixture.Transport
-                    .CaptureEventAsync(evt, Arg.Any<CancellationToken>())
+                    .SendEnvelopeAsync(evt, Arg.Any<CancellationToken>())
                     .Throws(new OperationCanceledException());
 
             var sut = _fixture.GetSut();
@@ -112,7 +112,7 @@ namespace Sentry.Tests.Internals
             using (var sut = _fixture.GetSut())
             {
                 _fixture.Transport
-                    .When(t => t.CaptureEventAsync(evt, Arg.Any<CancellationToken>()))
+                    .When(t => t.SendEnvelopeAsync(evt, Arg.Any<CancellationToken>()))
                     .Do(p =>
                     {
                         var token = p.ArgAt<CancellationToken>(1);
@@ -142,7 +142,7 @@ namespace Sentry.Tests.Internals
             {
                 var counter = 0;
                 _fixture.Transport
-                    .When(t => t.CaptureEventAsync(evt, Arg.Any<CancellationToken>()))
+                    .When(t => t.SendEnvelopeAsync(evt, Arg.Any<CancellationToken>()))
                     .Do(p =>
                     {
                         if (++counter == 2)
@@ -198,7 +198,7 @@ namespace Sentry.Tests.Internals
             var eventsQueuedEvent = new ManualResetEvent(false);
             _fixture.SentryOptions.MaxQueueItems = 1;
             _fixture.Transport
-                .When(t => t.CaptureEventAsync(expected, Arg.Any<CancellationToken>()))
+                .When(t => t.SendEnvelopeAsync(expected, Arg.Any<CancellationToken>()))
                 .Do(p =>
                 {
                     _ = transportEvent.Set(); // Processing first event
@@ -254,7 +254,7 @@ namespace Sentry.Tests.Internals
 
             // Assert
             Assert.True(queued);
-            _ = _fixture.Transport.Received(1).CaptureEventAsync(expected, Arg.Any<CancellationToken>());
+            _ = _fixture.Transport.Received(1).SendEnvelopeAsync(expected, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -264,7 +264,7 @@ namespace Sentry.Tests.Internals
             var expected = new SentryEvent();
 
             _fixture.Transport
-                .When(e => e.CaptureEventAsync(expected))
+                .When(e => e.SendEnvelopeAsync(expected))
                 .Do(_ => throw new Exception("Sending to sentry failed."));
 
             using (var sut = _fixture.GetSut())
@@ -323,7 +323,7 @@ namespace Sentry.Tests.Internals
             var transportEvent = new ManualResetEvent(false);
             var eventsQueuedEvent = new ManualResetEvent(false);
             _fixture.Transport
-                .When(t => t.CaptureEventAsync(expected, Arg.Any<CancellationToken>()))
+                .When(t => t.SendEnvelopeAsync(expected, Arg.Any<CancellationToken>()))
                 .Do(p =>
                 {
                     _ = transportEvent.Set(); // Processing first event
@@ -355,7 +355,7 @@ namespace Sentry.Tests.Internals
             var transportEvent = new ManualResetEvent(false);
             var eventsQueuedEvent = new ManualResetEvent(false);
             _fixture.Transport
-                .When(t => t.CaptureEventAsync(expected, Arg.Any<CancellationToken>()))
+                .When(t => t.SendEnvelopeAsync(expected, Arg.Any<CancellationToken>()))
                 .Do(p =>
                 {
                     _ = transportEvent.Set(); // Processing first event
@@ -381,7 +381,7 @@ namespace Sentry.Tests.Internals
             var eventsQueuedEvent = new ManualResetEvent(false);
             _fixture.SentryOptions.MaxQueueItems = 1;
             _fixture.Transport
-                .When(t => t.CaptureEventAsync(expected, Arg.Any<CancellationToken>()))
+                .When(t => t.SendEnvelopeAsync(expected, Arg.Any<CancellationToken>()))
                 .Do(p =>
                 {
                     _ = transportEvent.Set(); // Processing first event

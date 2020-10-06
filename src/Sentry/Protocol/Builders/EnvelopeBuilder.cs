@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sentry.Internal;
 
 namespace Sentry.Protocol.Builders
 {
@@ -28,6 +29,15 @@ namespace Sentry.Protocol.Builders
             configure(builder);
 
             return AddItem(builder.Build());
+        }
+
+        public EnvelopeBuilder AddEventItem(SentryEvent @event)
+        {
+            AddHeader("event_id", @event.EventId.ToString());
+            AddItem(i => i
+                .SetData(JsonSerializer.SerializeObject(@event)));
+
+            return this;
         }
 
         public Envelope Build() => new Envelope(

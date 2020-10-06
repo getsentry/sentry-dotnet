@@ -26,11 +26,11 @@ namespace Sentry.Benchmarks
             _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 });
             _event = new SentryEvent();
             // Make sure worker spins once.
-            _backgroundWorker.EnqueueEvent(_event);
+            _backgroundWorker.EnqueueEnvelope(_event);
             _backgroundWorker.FlushAsync(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
             for (var i = 0; i < Items; i++)
             {
-                _backgroundWorker.EnqueueEvent(_event);
+                _backgroundWorker.EnqueueEnvelope(_event);
             }
         }
 
