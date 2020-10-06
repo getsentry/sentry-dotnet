@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Sentry.Protocol
 {
     public class EnvelopeItem : ISerializable
@@ -12,12 +14,16 @@ namespace Sentry.Protocol
             Payload = payload;
         }
 
-        public string Serialize() => string.Concat(
-            Headers.Serialize(),
-            "\n",
-            Payload.Serialize(),
-            "\n"
-        );
+        public string Serialize()
+        {
+            var buffer = new StringBuilder();
+
+            buffer.Append(Headers.Serialize());
+            buffer.Append('\n');
+            buffer.Append(Payload.Serialize());
+
+            return buffer.ToString();
+        }
 
         public override string ToString() => Serialize();
     }

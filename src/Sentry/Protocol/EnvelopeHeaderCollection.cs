@@ -7,6 +7,8 @@ namespace Sentry.Protocol
     {
         public IReadOnlyDictionary<string, object> KeyValues { get; }
 
+        public int Count => KeyValues.Count;
+
         public EnvelopeHeaderCollection(IReadOnlyDictionary<string, object> keyValues)
         {
             KeyValues = keyValues;

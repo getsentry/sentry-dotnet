@@ -11,7 +11,7 @@ namespace Sentry.Protocol
             Data = data;
         }
 
-        public string Serialize() => Encoding.ASCII.GetString(Data);
+        public string Serialize() => Encoding.UTF8.GetString(Data);
 
         public override string ToString() => Serialize();
     }

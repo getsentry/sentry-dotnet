@@ -10,24 +10,24 @@ namespace Sentry.Protocol.Builders
 
         private readonly List<EnvelopeItem> _items = new List<EnvelopeItem>();
 
-        public EnvelopeBuilder WithHeader(string key, object value)
+        public EnvelopeBuilder AddHeader(string key, object value)
         {
             _headers[key] = value;
             return this;
         }
 
-        public EnvelopeBuilder WithItem(EnvelopeItem item)
+        public EnvelopeBuilder AddItem(EnvelopeItem item)
         {
             _items.Add(item);
             return this;
         }
 
-        public EnvelopeBuilder WithItem(Action<EnvelopeItemBuilder> configure)
+        public EnvelopeBuilder AddItem(Action<EnvelopeItemBuilder> configure)
         {
             var builder = new EnvelopeItemBuilder();
             configure(builder);
 
-            return WithItem(builder.Build());
+            return AddItem(builder.Build());
         }
 
         public Envelope Build() => new Envelope(

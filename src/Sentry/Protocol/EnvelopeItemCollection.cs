@@ -7,6 +7,8 @@ namespace Sentry.Protocol
     {
         public IReadOnlyList<EnvelopeItem> Items { get; }
 
+        public int Count => Items.Count;
+
         public EnvelopeItemCollection(IReadOnlyList<EnvelopeItem> items)
         {
             Items = items;

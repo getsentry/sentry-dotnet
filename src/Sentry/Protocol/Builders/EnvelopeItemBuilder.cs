@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Sentry.Protocol.Builders
 {
@@ -10,7 +11,7 @@ namespace Sentry.Protocol.Builders
 
         private byte[] _data = Array.Empty<byte>();
 
-        public EnvelopeItemBuilder WithHeader(string key, object value)
+        public EnvelopeItemBuilder AddHeader(string key, object value)
         {
             _headers[key] = value;
             return this;
@@ -21,6 +22,10 @@ namespace Sentry.Protocol.Builders
             _data = data;
             return this;
         }
+
+        public EnvelopeItemBuilder SetData(string data) => SetData(
+            Encoding.UTF8.GetBytes(data)
+        );
 
         public EnvelopeItem Build() => new EnvelopeItem(
             new EnvelopeHeaderCollection(_headers),
