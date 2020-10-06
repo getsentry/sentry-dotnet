@@ -31,10 +31,16 @@ namespace Sentry.Protocol.Builders
             return AddItem(builder.Build());
         }
 
+        // https://develop.sentry.dev/sdk/envelopes/#event
         public EnvelopeBuilder AddEventItem(SentryEvent @event)
         {
             AddHeader("event_id", @event.EventId.ToString());
+
+            var eventJson = JsonSerializer.SerializeObject(@event);
+
             AddItem(i => i
+                .AddHeader("type", "event")
+                .AddHeader("length", eventJson.Length)
                 .SetData(JsonSerializer.SerializeObject(@event)));
 
             return this;
