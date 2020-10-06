@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace Sentry.Protocol
+namespace Sentry.Internal.Extensions
 {
     internal static class CollectionsExtensions
     {
