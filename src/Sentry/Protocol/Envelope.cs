@@ -32,8 +32,9 @@ namespace Sentry.Protocol
         /// </summary>
         public SentryId? TryGetEventId() =>
             Headers.KeyValues.TryGetValue("event_id", out var value) &&
-            value is string valueString
-                ? new SentryId(Guid.Parse(valueString))
+            value is string valueString &&
+            Guid.TryParse(valueString, out var guid)
+                ? new SentryId(guid)
                 : (SentryId?)null;
 
         /// <inheritdoc />
