@@ -3,12 +3,24 @@ using System.Text;
 
 namespace Sentry.Protocol
 {
+    /// <summary>
+    /// Envelope.
+    /// </summary>
     public class Envelope : ISerializable
     {
+        /// <summary>
+        /// Headers associated with this envelope.
+        /// </summary>
         public EnvelopeHeaderCollection Headers { get; }
 
+        /// <summary>
+        /// Items inside this envelope.
+        /// </summary>
         public EnvelopeItemCollection Items { get; }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="Envelope"/>.
+        /// </summary>
         public Envelope(EnvelopeHeaderCollection headers, EnvelopeItemCollection items)
         {
             Headers = headers;
@@ -24,6 +36,7 @@ namespace Sentry.Protocol
                 ? new SentryId(Guid.Parse(valueString))
                 : (SentryId?)null;
 
+        /// <inheritdoc />
         public string Serialize()
         {
             var buffer = new StringBuilder();
@@ -40,6 +53,7 @@ namespace Sentry.Protocol
             return buffer.ToString();
         }
 
+        /// <inheritdoc />
         public override string ToString() => Serialize();
     }
 }
