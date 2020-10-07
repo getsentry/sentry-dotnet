@@ -82,7 +82,7 @@ namespace Sentry.Tests.Internals.Http
             await sut.SendEnvelopeAsync(envelope);
 
             _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
-                "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,
+                "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}", null,
                 Arg.Is<object[]>(p => p[0].ToString() == envelope.TryGetEventId().ToString()
                                       && p[1].ToString() == expectedCode.ToString()
                                       && p[2].ToString() == expectedMessage));
@@ -107,7 +107,7 @@ namespace Sentry.Tests.Internals.Http
             await sut.SendEnvelopeAsync(envelope);
 
             _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
-                "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,
+                "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}", null,
                 Arg.Is<object[]>(p => p[0].ToString() == envelope.TryGetEventId().ToString()
                                       && p[1].ToString() == expectedCode.ToString()
                                       && p[2].ToString() == HttpTransport.NoMessageFallback));
@@ -159,7 +159,7 @@ namespace Sentry.Tests.Internals.Http
 
             var actual = sut.CreateRequest(envelope);
 
-            var uri = Dsn.Parse(_fixture.SentryOptions.Dsn!).GetStoreEndpointUri();
+            var uri = Dsn.Parse(_fixture.SentryOptions.Dsn!).GetEnvelopeEndpointUri();
 
             Assert.Equal(uri, actual.RequestUri);
         }

@@ -105,8 +105,7 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            var expectedEnvelope = new EnvelopeBuilder().AddEventItem(expectedEvent).Build();
-            _ = _fixture.BackgroundWorker.EnqueueEnvelope(expectedEnvelope).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -119,8 +118,7 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            var expectedEnvelope = new EnvelopeBuilder().AddEventItem(expectedEvent).Build();
-            _ = _fixture.BackgroundWorker.EnqueueEnvelope(expectedEnvelope).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
