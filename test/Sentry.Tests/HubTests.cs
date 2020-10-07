@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using FluentAssertions;
+using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
@@ -65,10 +67,16 @@ namespace NotSentry.Tests
 
             _ = sut.CaptureMessage("test");
 
-            _ = _fixture.Worker.Received(1)
-                    .EnqueueEnvelope(Arg.Do<Envelope>(
-                        e => Assert.DoesNotContain(e.SentryExceptions.Single().Stacktrace.Frames,
-                            p => p.Function == nameof(CaptureMessage_AttachStacktraceTrue_IncludesStackTrace))));
+            _ = _fixture.Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
+            {
+                var functions = JToken.Parse(e.Items.Items.Single().Payload.Serialize())
+                    .SelectTokens("..exception.stacktrace.frames[*].function")
+                    .Select(j => j.Value<string>())
+                    .ToArray();
+
+                functions.Should().NotBeEmpty();
+                functions.Should().NotContain(nameof(CaptureMessage_AttachStacktraceTrue_IncludesStackTrace));
+            }));
         }
 
         [Fact]
@@ -80,8 +88,15 @@ namespace NotSentry.Tests
 
             _ = sut.CaptureMessage("test");
 
-            _ = _fixture.Worker.Received(1)
-                    .EnqueueEnvelope(Arg.Is<Envelope>(e => e.SentryExceptionValues == null));
+            _ = _fixture.Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
+            {
+                var exceptions = JToken.Parse(e.Items.Items.Single().Payload.Serialize())
+                    .SelectTokens("..exception")
+                    .Select(j => j.Value<string>())
+                    .ToArray();
+
+                exceptions.Should().BeEmpty();
+            }));
         }
 
         [Fact]

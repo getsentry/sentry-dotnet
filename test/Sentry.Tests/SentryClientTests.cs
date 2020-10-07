@@ -5,6 +5,7 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
+using Sentry.Protocol.Builders;
 using Xunit;
 
 namespace Sentry.Tests
@@ -104,7 +105,8 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEnvelope(expectedEvent).Returns(true);
+            var expectedEnvelope = new EnvelopeBuilder().AddEventItem(expectedEvent).Build();
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(expectedEnvelope).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -117,7 +119,8 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEnvelope(expectedEvent).Returns(true);
+            var expectedEnvelope = new EnvelopeBuilder().AddEventItem(expectedEvent).Build();
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(expectedEnvelope).Returns(true);
 
             var sut = _fixture.GetSut();
 
