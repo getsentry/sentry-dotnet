@@ -12,10 +12,10 @@ namespace System.IO
     internal static class Extensions
     {
         public static async Task CopyToAsync(this Stream stream, Stream destination, CancellationToken cancellationToken) =>
-            await stream.CopyToAsync(destination, 81920, cancellationToken).ConfigureAwait(false);
+            stream.CopyToAsync(destination, 81920, cancellationToken);
 
         public static async Task WriteAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
-            await stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+            stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
     }
 }
 #endif
