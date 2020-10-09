@@ -1,4 +1,6 @@
-using System.Text;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sentry.Protocol
 {
@@ -27,18 +29,11 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public string Serialize()
+        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
         {
-            var buffer = new StringBuilder();
-
-            buffer.Append(Headers.Serialize());
-            buffer.Append('\n');
-            buffer.Append(Payload.Serialize());
-
-            return buffer.ToString();
+            await Headers.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+            await writer.WriteAsync('\n').ConfigureAwait(false);
+            await Payload.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
         }
-
-        /// <inheritdoc />
-        public override string ToString() => Serialize();
     }
 }

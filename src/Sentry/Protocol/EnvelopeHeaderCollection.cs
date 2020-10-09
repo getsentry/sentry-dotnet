@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Sentry.Internal;
 
 namespace Sentry.Protocol
@@ -27,9 +30,9 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public string Serialize() => JsonSerializer.SerializeObject(KeyValues);
-
-        /// <inheritdoc />
-        public override string ToString() => Serialize();
+        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
+        {
+            await writer.WriteAsync(JsonSerializer.SerializeObject(KeyValues)).ConfigureAwait(false);
+        }
     }
 }

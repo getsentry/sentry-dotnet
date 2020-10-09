@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using FluentAssertions;
+using Sentry.Protocol;
 using Sentry.Protocol.Builders;
 using Xunit;
 
@@ -10,7 +12,7 @@ namespace Sentry.Tests.Protocol
         // https://develop.sentry.dev/sdk/envelopes/#full-examples
 
         [Fact]
-        public void Envelope_without_items_is_serialized_correctly()
+        public async Task Envelope_without_items_is_serialized_correctly()
         {
             // Arrange
             var envelope = new EnvelopeBuilder()
@@ -18,7 +20,7 @@ namespace Sentry.Tests.Protocol
                 .Build();
 
             // Act
-            var output = envelope.Serialize();
+            var output = await envelope.SerializeToStringAsync();
 
             // Assert
             output.Should().Be(
@@ -27,7 +29,7 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Envelope_with_two_items_is_serialized_correctly()
+        public async Task Envelope_with_two_items_is_serialized_correctly()
         {
             // Arrange
             var envelope = new EnvelopeBuilder()
@@ -38,17 +40,17 @@ namespace Sentry.Tests.Protocol
                     .AddHeader("length", 10)
                     .AddHeader("content_type", "text/plain")
                     .AddHeader("filename", "hello.txt")
-                    .SetData("\xef\xbb\xbfHello\r\n"))
+                    .SetStream("\xef\xbb\xbfHello\r\n"))
                 .AddItem(i => i
                     .AddHeader("type", "event")
                     .AddHeader("length", 41)
                     .AddHeader("content_type", "application/json")
                     .AddHeader("filename", "application.log")
-                    .SetData("{\"message\":\"hello world\",\"level\":\"error\"}"))
+                    .SetStream("{\"message\":\"hello world\",\"level\":\"error\"}"))
                 .Build();
 
             // Act
-            var output = envelope.Serialize();
+            var output = await envelope.SerializeToStringAsync();
 
             // Assert
             output.Should().Be(
@@ -61,7 +63,7 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Envelope_with_two_empty_items_is_serialized_correctly()
+        public async Task Envelope_with_two_empty_items_is_serialized_correctly()
         {
             // Arrange
             var envelope = new EnvelopeBuilder()
@@ -75,7 +77,7 @@ namespace Sentry.Tests.Protocol
                 .Build();
 
             // Act
-            var output = envelope.Serialize();
+            var output = await envelope.SerializeToStringAsync();
 
             // Assert
             output.Should().Be(
@@ -88,18 +90,18 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Envelope_with_an_item_with_implicit_length_is_serialized_correctly()
+        public async Task Envelope_with_an_item_with_implicit_length_is_serialized_correctly()
         {
             // Arrange
             var envelope = new EnvelopeBuilder()
                 .AddHeader("event_id", "9ec79c33ec9942ab8353589fcb2e04dc")
                 .AddItem(i => i
                     .AddHeader("type", "attachment")
-                    .SetData("helloworld"))
+                    .SetStream("helloworld"))
                 .Build();
 
             // Act
-            var output = envelope.Serialize();
+            var output = await envelope.SerializeToStringAsync();
 
             // Assert
             output.Should().Be(
@@ -110,17 +112,17 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Envelope_without_headers_is_serialized_correctly()
+        public async Task Envelope_without_headers_is_serialized_correctly()
         {
             // Arrange
             var envelope = new EnvelopeBuilder()
                 .AddItem(i => i
                     .AddHeader("type", "session")
-                    .SetData("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"))
+                    .SetStream("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"))
                 .Build();
 
             // Act
-            var output = envelope.Serialize();
+            var output = await envelope.SerializeToStringAsync();
 
             // Assert
             output.Should().Be(

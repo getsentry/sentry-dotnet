@@ -1,29 +1,35 @@
-using System.Text;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Envelope payload.
     /// </summary>
-    public class EnvelopePayload : ISerializable
+    public class EnvelopePayload : ISerializable, IDisposable
     {
         /// <summary>
         /// Payload data.
         /// </summary>
-        public byte[] Data { get; }
+        public Stream Stream { get; }
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopePayload"/>.
         /// </summary>
-        public EnvelopePayload(byte[] data)
+        public EnvelopePayload(Stream stream)
         {
-            Data = data;
+            Stream = stream;
         }
 
         /// <inheritdoc />
-        public string Serialize() => Encoding.UTF8.GetString(Data);
+        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
+        {
+            await Stream.CopyToAsync(writer.BaseStream, cancellationToken).ConfigureAwait(false);
+        }
 
         /// <inheritdoc />
-        public override string ToString() => Serialize();
+        public void Dispose() => Stream.Dispose();
     }
 }

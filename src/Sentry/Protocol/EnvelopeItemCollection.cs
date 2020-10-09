@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sentry.Protocol
 {
@@ -27,9 +30,23 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public string Serialize() => string.Join("\n", Items.Select(i => i.Serialize()));
+        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
+        {
+            var isFirst = true;
 
-        /// <inheritdoc />
-        public override string ToString() => Serialize();
+            foreach (var item in Items)
+            {
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    await writer.WriteAsync('\n').ConfigureAwait(false);
+                }
+
+                await item.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 }

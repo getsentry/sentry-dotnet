@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Sentry.Protocol.Builders
@@ -12,7 +13,7 @@ namespace Sentry.Protocol.Builders
         private readonly Dictionary<string, object> _headers =
             new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
-        private byte[] _data = Array.Empty<byte>();
+        private Stream _stream = Stream.Null;
 
         /// <summary>
         /// Adds the specified header to the item.
@@ -24,18 +25,25 @@ namespace Sentry.Protocol.Builders
         }
 
         /// <summary>
-        /// Sets the payload data to the specified byte array.
+        /// Sets the payload data to the specified stream.
         /// </summary>
-        public EnvelopeItemBuilder SetData(byte[] data)
+        public EnvelopeItemBuilder SetStream(Stream stream)
         {
-            _data = data;
+            _stream = stream;
             return this;
         }
 
         /// <summary>
+        /// Sets the payload data to the specified byte array.
+        /// </summary>
+        public EnvelopeItemBuilder SetStream(byte[] data) => SetStream(
+            new MemoryStream(data)
+        );
+
+        /// <summary>
         /// Sets the payload data to the specified string.
         /// </summary>
-        public EnvelopeItemBuilder SetData(string data) => SetData(
+        public EnvelopeItemBuilder SetStream(string data) => SetStream(
             Encoding.UTF8.GetBytes(data)
         );
 
@@ -44,7 +52,7 @@ namespace Sentry.Protocol.Builders
         /// </summary>
         public EnvelopeItem Build() => new EnvelopeItem(
             new EnvelopeHeaderCollection(_headers),
-            new EnvelopePayload(_data)
+            new EnvelopePayload(_stream)
         );
     }
 }

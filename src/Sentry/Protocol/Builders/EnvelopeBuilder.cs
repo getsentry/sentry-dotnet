@@ -56,7 +56,7 @@ namespace Sentry.Protocol.Builders
             AddItem(i => i
                 .AddHeader("type", "event")
                 .AddHeader("length", eventJson.Length)
-                .SetData(JsonSerializer.SerializeObject(@event)));
+                .SetStream(JsonSerializer.SerializeObject(@event)));
 
             return this;
         }

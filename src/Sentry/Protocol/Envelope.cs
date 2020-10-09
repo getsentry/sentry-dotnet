@@ -1,5 +1,7 @@
 using System;
-using System.Text;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sentry.Protocol
 {
@@ -38,23 +40,16 @@ namespace Sentry.Protocol
                 : (SentryId?)null;
 
         /// <inheritdoc />
-        public string Serialize()
+        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
         {
-            var buffer = new StringBuilder();
-
-            buffer.Append(Headers.Serialize());
-            buffer.Append('\n');
+            await Headers.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+            await writer.WriteAsync('\n').ConfigureAwait(false);
 
             if (Items.Count > 0)
             {
-                buffer.Append(Items.Serialize());
-                buffer.Append('\n');
+                await Items.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+                await writer.WriteAsync('\n').ConfigureAwait(false);
             }
-
-            return buffer.ToString();
         }
-
-        /// <inheritdoc />
-        public override string ToString() => Serialize();
     }
 }
