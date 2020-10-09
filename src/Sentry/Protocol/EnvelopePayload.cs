@@ -24,9 +24,9 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            await Stream.CopyToAsync(writer.BaseStream, cancellationToken).ConfigureAwait(false);
+            await Stream.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />

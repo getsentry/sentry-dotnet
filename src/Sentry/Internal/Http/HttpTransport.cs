@@ -1,11 +1,12 @@
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry.Internal.Http
@@ -42,8 +43,8 @@ namespace Sentry.Internal.Http
             }
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
-                response.Headers.TryGetValues(SentryHeaders.SentryErrorHeader, out var values);
-                var errorMessage = values?.FirstOrDefault() ?? NoMessageFallback;
+                var responseJson = await response.Content.ReadAsJsonAsync().ConfigureAwait(false);
+                var errorMessage = responseJson.SelectToken("detail")?.Value<string>() ?? NoMessageFallback;
 
                 _options.DiagnosticLogger?.Log(
                     SentryLevel.Error,

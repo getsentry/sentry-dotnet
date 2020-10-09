@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,7 +29,7 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             var isFirst = true;
 
@@ -42,10 +41,10 @@ namespace Sentry.Protocol
                 }
                 else
                 {
-                    await writer.WriteAsync('\n').ConfigureAwait(false);
+                    stream.WriteByte((byte)'\n');
                 }
 
-                await item.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+                await item.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
             }
         }
     }

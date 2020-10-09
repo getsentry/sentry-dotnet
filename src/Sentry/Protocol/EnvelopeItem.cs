@@ -29,11 +29,11 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            await Headers.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
-            await writer.WriteAsync('\n').ConfigureAwait(false);
-            await Payload.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
+            await Headers.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            stream.WriteByte((byte)'\n');
+            await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
         }
     }
 }

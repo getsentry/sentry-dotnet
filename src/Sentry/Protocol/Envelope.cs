@@ -40,15 +40,15 @@ namespace Sentry.Protocol
                 : (SentryId?)null;
 
         /// <inheritdoc />
-        public async Task SerializeAsync(StreamWriter writer, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            await Headers.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
-            await writer.WriteAsync('\n').ConfigureAwait(false);
+            await Headers.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            stream.WriteByte((byte)'\n');
 
             if (Items.Count > 0)
             {
-                await Items.SerializeAsync(writer, cancellationToken).ConfigureAwait(false);
-                await writer.WriteAsync('\n').ConfigureAwait(false);
+                await Items.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                stream.WriteByte((byte)'\n');
             }
         }
     }
