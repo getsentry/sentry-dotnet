@@ -1,6 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
 
   <PropertyGroup>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);uap10.0.16299;</TargetFrameworks>
     <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <PackageId>Sentry</PackageId>
     <AssemblyName>Sentry</AssemblyName>
@@ -9,7 +10,7 @@
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1'">
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
     <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
@@ -17,8 +18,12 @@
     <DefineConstants>NETSTANDARD;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>NETFX;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
+    <DefineConstants>WINRT;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
@@ -30,5 +35,9 @@
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>
+
+  <!--<ItemGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.9" PrivateAssets="all" />
+  </ItemGroup>-->
 
 </Project>

@@ -387,6 +387,7 @@ namespace Sentry
             };
 
             Integrations = new ISdkIntegration[] {
+                new PlatformIntegration(),
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
             };
