@@ -85,7 +85,7 @@ namespace Sentry.Internal.Http
                 var gzipStream = new GZipStream(stream, _compressionLevel, leaveOpen: true);
                 try
                 {
-                    await _content.CopyToAsync(gzipStream).ConfigureAwait(false);
+                    await _content.CopyToAsync(gzipStream);
                 }
                 finally
                 {

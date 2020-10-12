@@ -61,7 +61,7 @@ namespace Sentry.Internal.Http
                 _ = Interlocked.Exchange(ref _retryAfterUtcTicks, 0);
             }
 
-            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var response = await base.SendAsync(request, cancellationToken);
 
             if (response.StatusCode == TooManyRequests && response.Headers != null)
             {

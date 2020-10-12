@@ -53,8 +53,7 @@ namespace Sentry.Internal
                     _options,
                     transport,
                     _queuedEventSemaphore,
-                    _shutdownSource.Token)
-                    .ConfigureAwait(false));
+                    _shutdownSource.Token));
         }
 
         public bool EnqueueEvent(SentryEvent? @event)
@@ -102,7 +101,7 @@ namespace Sentry.Internal
                     {
                         try
                         {
-                            await queuedEventSemaphore.WaitAsync(cancellation).ConfigureAwait(false);
+                            await queuedEventSemaphore.WaitAsync(cancellation);
                         }
                         // Cancellation requested, scheduled shutdown but continue in case there are more items
                         catch (OperationCanceledException)
@@ -131,7 +130,7 @@ namespace Sentry.Internal
                         {
                             var task = transport.CaptureEventAsync(@event, shutdownTimeout.Token);
                             options.DiagnosticLogger?.LogDebug("Event {0} in-flight to Sentry. #{1} in queue.", @event.EventId, queue.Count);
-                            await task.ConfigureAwait(false);
+                            await task;
                         }
                         catch (OperationCanceledException)
                         {
@@ -235,7 +234,7 @@ namespace Sentry.Internal
                 }
 
                 // Await until event is flushed or one of the tokens triggers
-                await Task.Delay(timeout, timeoutWithShutdown.Token).ConfigureAwait(false);
+                await Task.Delay(timeout, timeoutWithShutdown.Token);
                 _options.DiagnosticLogger?.LogDebug("Timeout when trying to flush queue.");
             }
             catch (OperationCanceledException)

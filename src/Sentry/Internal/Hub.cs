@@ -74,7 +74,7 @@ namespace Sentry.Internal
         {
             try
             {
-                await ScopeManager.ConfigureScopeAsync(configureScope).ConfigureAwait(false);
+                await ScopeManager.ConfigureScopeAsync(configureScope);
             }
             catch (Exception e)
             {
@@ -122,7 +122,7 @@ namespace Sentry.Internal
             try
             {
                 var currentScope = ScopeManager.GetCurrent();
-                await currentScope.Value.FlushAsync(timeout).ConfigureAwait(false);
+                await currentScope.Value.FlushAsync(timeout);
             }
             catch (Exception e)
             {

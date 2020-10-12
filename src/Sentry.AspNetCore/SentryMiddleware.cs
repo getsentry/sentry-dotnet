@@ -78,7 +78,7 @@ namespace Sentry.AspNetCore
             var hub = _hubAccessor();
             if (!hub.IsEnabled)
             {
-                await _next(context).ConfigureAwait(false);
+                await _next(context);
                 return;
             }
 
@@ -93,7 +93,7 @@ namespace Sentry.AspNetCore
                     context.Response.OnCompleted(async () =>
                     {
                         // Serverless environments flush the queue at the end of each request
-                        await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
+                        await hub.FlushAsync(timeout: _options.FlushTimeout);
                     });
                 }
 
@@ -110,7 +110,7 @@ namespace Sentry.AspNetCore
                 });
                 try
                 {
-                    await _next(context).ConfigureAwait(false);
+                    await _next(context);
 
                     // When an exception was handled by other component (i.e: UseExceptionHandler feature).
                     var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();

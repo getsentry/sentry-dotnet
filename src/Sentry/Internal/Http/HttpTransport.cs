@@ -36,13 +36,13 @@ namespace Sentry.Internal.Http
         {
             var request = CreateRequest(@event);
 
-            var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 _options.DiagnosticLogger?.LogDebug("Event {0} successfully received by Sentry.", @event.EventId);
 #if DEBUG
-                var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var body = await response.Content.ReadAsStringAsync();
                 var responseId = JsonSerializer.DeserializeObject<SentrySuccessfulResponseBody>(body).id;
                 Debug.Assert(@event.EventId.ToString() == responseId);
 #endif

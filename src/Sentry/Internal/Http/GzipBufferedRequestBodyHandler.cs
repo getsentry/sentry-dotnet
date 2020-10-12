@@ -54,13 +54,13 @@ namespace Sentry.Internal.Http
             var memoryStream = new MemoryStream();
             using (var gzipStream = new GZipStream(memoryStream, _compressionLevel, leaveOpen: true))
             {
-                await request.Content.CopyToAsync(gzipStream).ConfigureAwait(false);
+                await request.Content.CopyToAsync(gzipStream);
             }
             memoryStream.Position = 0;
 
             request.Content = new BufferedStreamContent(memoryStream, memoryStream.Length, request.Content.Headers);
 
-            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            return await base.SendAsync(request, cancellationToken);
         }
 
         // Internal for testability
