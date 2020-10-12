@@ -6,11 +6,11 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal.Http
 {
-    internal class EnvelopeHttpContent : HttpContent
+    internal class SerializableHttpContent : HttpContent
     {
-        private readonly Envelope _envelope;
+        private readonly ISerializable _envelope;
 
-        public EnvelopeHttpContent(Envelope envelope)
+        public SerializableHttpContent(ISerializable envelope)
         {
             _envelope = envelope;
         }

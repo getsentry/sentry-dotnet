@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,6 +51,21 @@ namespace Sentry.Protocol
                 await Items.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
                 stream.WriteByte((byte)'\n');
             }
+        }
+
+        public static Envelope FromEvent(SentryEvent @event)
+        {
+            var headers = new EnvelopeHeaderCollection(new Dictionary<string, object>
+            {
+                ["event_id"] = @event.EventId.ToString()
+            });
+
+            var items = new EnvelopeItemCollection(new[]
+            {
+                EnvelopeItem.FromEvent(@event)
+            });
+
+            return new Envelope(headers, items);
         }
     }
 }

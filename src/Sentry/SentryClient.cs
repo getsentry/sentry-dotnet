@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
-using Sentry.Protocol.Builders;
 
 namespace Sentry
 {
@@ -167,9 +165,7 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(processedEvent)
-                .Build();
+            var envelope = Envelope.FromEvent(processedEvent);
 
             if (Worker.EnqueueEnvelope(envelope))
             {

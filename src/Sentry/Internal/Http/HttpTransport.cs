@@ -70,7 +70,7 @@ namespace Sentry.Internal.Http
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
-                Content = new EnvelopeHttpContent(envelope)
+                Content = new SerializableHttpContent(envelope)
             };
 
             _addAuth(request.Headers);

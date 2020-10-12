@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,12 +18,12 @@ namespace Sentry.Protocol
         /// <summary>
         /// Payload associated with this item.
         /// </summary>
-        public EnvelopePayload Payload { get; }
+        public ISerializable Payload { get; }
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopeItem"/>.
         /// </summary>
-        public EnvelopeItem(EnvelopeHeaderCollection headers, EnvelopePayload payload)
+        public EnvelopeItem(EnvelopeHeaderCollection headers, ISerializable payload)
         {
             Headers = headers;
             Payload = payload;
@@ -34,6 +35,31 @@ namespace Sentry.Protocol
             await Headers.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
             stream.WriteByte((byte)'\n');
             await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+        }
+
+        public static EnvelopeItem FromFile(string filePath)
+        {
+            var fileStream = File.OpenRead(filePath);
+            var payload = new StreamSerializable(fileStream);
+
+            var headers = new EnvelopeHeaderCollection(new Dictionary<string, object>
+            {
+                ["type"] = "file",
+                ["length"] = fileStream.Length
+            });
+
+            return new EnvelopeItem(headers, payload);
+        }
+
+        public static EnvelopeItem FromEvent(SentryEvent @event)
+        {
+            // TODO: calculate length ahead of time?
+            var headers = new EnvelopeHeaderCollection(new Dictionary<string, object>
+            {
+                ["type"] = "event"
+            });
+
+            return new EnvelopeItem(headers, @event);
         }
     }
 }
