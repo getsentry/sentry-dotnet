@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Internal;
 
 namespace Sentry.Protocol
 {
@@ -12,21 +13,21 @@ namespace Sentry.Protocol
     public class Envelope : ISerializable
     {
         /// <summary>
-        /// Headers associated with this envelope.
+        /// Header associated with this envelope.
         /// </summary>
-        public EnvelopeHeaderCollection Headers { get; }
+        public IReadOnlyDictionary<string, object> Header { get; }
 
         /// <summary>
         /// Items inside this envelope.
         /// </summary>
-        public EnvelopeItemCollection Items { get; }
+        public IReadOnlyList<EnvelopeItem> Items { get; }
 
         /// <summary>
         /// Initializes an instance of <see cref="Envelope"/>.
         /// </summary>
-        public Envelope(EnvelopeHeaderCollection headers, EnvelopeItemCollection items)
+        public Envelope(IReadOnlyDictionary<string, object> header, IReadOnlyList<EnvelopeItem> items)
         {
-            Headers = headers;
+            Header = header;
             Items = items;
         }
 
@@ -34,7 +35,7 @@ namespace Sentry.Protocol
         /// Attempts to extract the value of "sentry_id" header if it's present.
         /// </summary>
         public SentryId? TryGetEventId() =>
-            Headers.KeyValues.TryGetValue("event_id", out var value) &&
+            Header.TryGetValue("event_id", out var value) &&
             value is string valueString &&
             Guid.TryParse(valueString, out var guid)
                 ? new SentryId(guid)
@@ -43,27 +44,29 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            await Headers.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            // Header
+            await JsonSerializer.SerializeObjectAsync(Header, stream, cancellationToken).ConfigureAwait(false);
             stream.WriteByte((byte)'\n');
 
-            if (Items.Count > 0)
+            // Items
+            foreach (var item in Items)
             {
-                await Items.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await item.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
                 stream.WriteByte((byte)'\n');
             }
         }
 
         public static Envelope FromEvent(SentryEvent @event)
         {
-            var headers = new EnvelopeHeaderCollection(new Dictionary<string, object>
+            var headers = new Dictionary<string, object>
             {
                 ["event_id"] = @event.EventId.ToString()
-            });
+            };
 
-            var items = new EnvelopeItemCollection(new[]
+            var items = new[]
             {
                 EnvelopeItem.FromEvent(@event)
-            });
+            };
 
             return new Envelope(headers, items);
         }
