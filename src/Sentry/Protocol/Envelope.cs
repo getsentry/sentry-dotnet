@@ -45,7 +45,7 @@ namespace Sentry.Protocol
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Header
-            await JsonSerializer.SerializeObjectAsync(Header, stream, cancellationToken).ConfigureAwait(false);
+            await JsonSerializer.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
             stream.WriteByte((byte)'\n');
 
             // Items

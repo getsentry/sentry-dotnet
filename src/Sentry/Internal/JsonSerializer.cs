@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -8,6 +9,7 @@ namespace Sentry.Internal
 {
     internal static class JsonSerializer
     {
+        private static readonly Encoding Encoding = new UTF8Encoding(false, true);
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
 
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
@@ -20,14 +22,33 @@ namespace Sentry.Internal
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 
-        public static string SerializeObject(object obj) => JsonConvert.SerializeObject(obj, Settings);
+        private static JsonTextWriter CreateWriter(Stream stream) => new JsonTextWriter(
+            new StreamWriter(stream, Encoding, 1024, true)
+        );
 
-        public static async Task SerializeObjectAsync(object obj, Stream stream, CancellationToken cancellationToken = default)
+        public static string Serialize(object obj) => JsonConvert.SerializeObject(obj, Settings);
+
+        public static void SerializeToStream(object obj, Stream stream)
         {
-            using var textWriter = new StreamWriter(stream, EncodingEx.Utf8WithoutBom, 1024, true);
-            using var jsonWriter = new JsonTextWriter(textWriter);
+            using var writer = CreateWriter(stream);
+            writer.WriteValue(obj);
+        }
 
-            await jsonWriter.WriteValueAsync(obj, cancellationToken).ConfigureAwait(false);
+        public static byte[] SerializeToByteArray(object obj)
+        {
+            using var buffer = new MemoryStream();
+            SerializeToStream(obj, buffer);
+
+            return buffer.ToArray();
+        }
+
+        public static async Task SerializeToStreamAsync(
+            object obj,
+            Stream stream,
+            CancellationToken cancellationToken = default)
+        {
+            using var writer = CreateWriter(stream);
+            await writer.WriteValueAsync(obj, cancellationToken).ConfigureAwait(false);
         }
     }
 }
