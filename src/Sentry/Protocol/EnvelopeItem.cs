@@ -44,7 +44,8 @@ namespace Sentry.Protocol
 
             var headers = new EnvelopeHeaderCollection(new Dictionary<string, object>
             {
-                ["type"] = "file",
+                ["type"] = "attachment",
+                ["file_name"] = Path.GetFileName(filePath),
                 ["length"] = fileStream.Length
             });
 
