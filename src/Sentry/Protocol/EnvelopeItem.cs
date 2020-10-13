@@ -101,14 +101,31 @@ namespace Sentry.Protocol
 
         public static EnvelopeItem FromFile(string filePath)
         {
-            var fileStream = File.OpenRead(filePath);
-            var payload = new StreamSerializable(fileStream);
+            var file = File.OpenRead(filePath);
+            var payload = new StreamSerializable(file);
 
             var header = new Dictionary<string, object>
             {
                 [TypeKey] = "attachment",
                 [FileNameKey] = Path.GetFileName(filePath),
-                [LengthKey] = fileStream.Length
+                [LengthKey] = file.Length
+            };
+
+            return new EnvelopeItem(header, payload);
+        }
+
+        public static EnvelopeItem FromString(string text)
+        {
+            using var buffer = new MemoryStream(
+                Encoding.UTF8.GetBytes(text)
+            );
+
+            var payload = new StreamSerializable(buffer);
+
+            var header = new Dictionary<string, object>
+            {
+                [TypeKey] = "attachment",
+                [LengthKey] = buffer.Length
             };
 
             return new EnvelopeItem(header, payload);

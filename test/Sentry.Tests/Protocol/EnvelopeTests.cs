@@ -1,7 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Sentry.Protocol;
-using Sentry.Protocol.Builders;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests.Protocol
@@ -12,12 +15,13 @@ namespace Sentry.Tests.Protocol
         // https://develop.sentry.dev/sdk/envelopes/#full-examples
 
         [Fact]
-        public async Task Envelope_without_items_is_serialized_correctly()
+        public async Task Serialization_EnvelopeWithoutItems_Success()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddHeader("event_id", "12c2d058d58442709aa2eca08bf20986")
-                .Build();
+            var envelope = new Envelope(
+                new Dictionary<string, object> {["event_id"] = "12c2d058d58442709aa2eca08bf20986"},
+                Array.Empty<EnvelopeItem>()
+            );
 
             // Act
             var output = await envelope.SerializeToStringAsync();
@@ -29,25 +33,67 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public async Task Envelope_with_two_items_is_serialized_correctly()
+        public async Task Serialization_EnvelopeWithoutHeader_Success()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddHeader("event_id", "9ec79c33ec9942ab8353589fcb2e04dc")
-                .AddHeader("dsn", "https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42")
-                .AddItem(i => i
-                    .AddHeader("type", "attachment")
-                    .AddHeader("length", 10)
-                    .AddHeader("content_type", "text/plain")
-                    .AddHeader("filename", "hello.txt")
-                    .SetStream("\xef\xbb\xbfHello\r\n"))
-                .AddItem(i => i
-                    .AddHeader("type", "event")
-                    .AddHeader("length", 41)
-                    .AddHeader("content_type", "application/json")
-                    .AddHeader("filename", "application.log")
-                    .SetStream("{\"message\":\"hello world\",\"level\":\"error\"}"))
-                .Build();
+            var envelope = new Envelope(
+                new Dictionary<string, object> {["type"] = "session"},
+                new[]
+                {
+                    new EnvelopeItem(
+                        new Dictionary<string, object>(),
+                        new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
+                            .ToMemoryStream())
+                    )
+                }
+            );
+
+            // Act
+            var output = await envelope.SerializeToStringAsync();
+
+            // Assert
+            output.Should().Be(
+                "{}\n" +
+                "{\"type\":\"session\"}\n" +
+                "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
+            );
+        }
+
+        [Fact]
+        public async Task Serialization_EnvelopeWithTwoItems_Success()
+        {
+            // Arrange
+            var envelope = new Envelope(
+                new Dictionary<string, object>
+                {
+                    ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc",
+                    ["dsn"] = "https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42"
+                },
+                new[]
+                {
+                    new EnvelopeItem(
+                        new Dictionary<string, object>
+                        {
+                            ["type"] = "attachment",
+                            ["length"] = 10,
+                            ["content_type"] = "text/plain",
+                            ["filename"] = "hello.txt"
+                        },
+                        new StreamSerializable("\xef\xbb\xbfHello\r\n".ToMemoryStream())
+                    ),
+
+                    new EnvelopeItem(
+                        new Dictionary<string, object>
+                        {
+                            ["type"] = "event",
+                            ["length"] = 41,
+                            ["content_type"] = "application/json",
+                            ["filename"] = "application.log"
+                        },
+                        new StreamSerializable("{\"message\":\"hello world\",\"level\":\"error\"}".ToMemoryStream())
+                    )
+                }
+            );
 
             // Act
             var output = await envelope.SerializeToStringAsync();
@@ -63,18 +109,30 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public async Task Envelope_with_two_empty_items_is_serialized_correctly()
+        public async Task Serialization_EnvelopeWithTwoEmptyItems_Success()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddHeader("event_id", "9ec79c33ec9942ab8353589fcb2e04dc")
-                .AddItem(i => i
-                    .AddHeader("type", "attachment")
-                    .AddHeader("length",  0))
-                .AddItem(i => i
-                    .AddHeader("type", "attachment")
-                    .AddHeader("length",  0))
-                .Build();
+            var envelope = new Envelope(
+                new Dictionary<string, object> {["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc"},
+                new[]
+                {
+                    new EnvelopeItem(
+                        new Dictionary<string, object> {
+                            ["type"] = "attachment",
+                            ["length"] = 0},
+                        new StreamSerializable(new MemoryStream())
+                    ),
+
+                    new EnvelopeItem(
+                        new Dictionary<string, object>
+                        {
+                            ["type"] = "attachment",
+                            ["length"] = 0
+                        },
+                        new StreamSerializable(new MemoryStream())
+                    )
+                }
+            );
 
             // Act
             var output = await envelope.SerializeToStringAsync();
@@ -90,15 +148,19 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public async Task Envelope_with_an_item_with_implicit_length_is_serialized_correctly()
+        public async Task Serialization_EnvelopeWithItemWithoutLength_Success()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddHeader("event_id", "9ec79c33ec9942ab8353589fcb2e04dc")
-                .AddItem(i => i
-                    .AddHeader("type", "attachment")
-                    .SetStream("helloworld"))
-                .Build();
+            var envelope = new Envelope(
+                new Dictionary<string, object> {["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc"},
+                new[]
+                {
+                    new EnvelopeItem(
+                        new Dictionary<string, object> {["type"] = "attachment"},
+                        new StreamSerializable("helloworld".ToMemoryStream())
+                    )
+                }
+            );
 
             // Act
             var output = await envelope.SerializeToStringAsync();
@@ -108,27 +170,6 @@ namespace Sentry.Tests.Protocol
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
                 "{\"type\":\"attachment\"}\n" +
                 "helloworld\n"
-            );
-        }
-
-        [Fact]
-        public async Task Envelope_without_headers_is_serialized_correctly()
-        {
-            // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddItem(i => i
-                    .AddHeader("type", "session")
-                    .SetStream("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"))
-                .Build();
-
-            // Act
-            var output = await envelope.SerializeToStringAsync();
-
-            // Assert
-            output.Should().Be(
-                "{}\n" +
-                "{\"type\":\"session\"}\n" +
-                "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
             );
         }
     }
