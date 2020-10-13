@@ -1,5 +1,4 @@
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -9,7 +8,6 @@ namespace Sentry.Internal
 {
     internal static class JsonSerializer
     {
-        private static readonly Encoding Utf8WithoutBom = new UTF8Encoding(false, true);
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
 
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
@@ -26,7 +24,7 @@ namespace Sentry.Internal
 
         public static async Task SerializeObjectAsync(object obj, Stream stream, CancellationToken cancellationToken = default)
         {
-            using var textWriter = new StreamWriter(stream, Utf8WithoutBom, 1024, true);
+            using var textWriter = new StreamWriter(stream, EncodingEx.Utf8WithoutBom, 1024, true);
             using var jsonWriter = new JsonTextWriter(textWriter);
 
             await jsonWriter.WriteValueAsync(obj, cancellationToken).ConfigureAwait(false);

@@ -86,7 +86,7 @@ namespace Sentry.Protocol
                 var headerWithLength = Header.ToDictionary();
                 headerWithLength[LengthKey] = payloadBuffer.Length;
 
-                var headerJson = new UTF8Encoding(false, true).GetBytes(
+                var headerJson = EncodingEx.Utf8WithoutBom.GetBytes(
                     JsonSerializer.SerializeObject(headerWithLength)
                 );
 
