@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry.Benchmarks
 {
@@ -11,26 +12,27 @@ namespace Sentry.Benchmarks
     {
         private class FakeTransport : ITransport
         {
-            public Task CaptureEventAsync(
-                SentryEvent @event,
-                CancellationToken cancellationToken = default)
+            public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
                 => Task.CompletedTask;
         }
 
         private IBackgroundWorker _backgroundWorker;
         private SentryEvent _event;
+        private Envelope _envelope;
 
         [IterationSetup]
         public void IterationSetup()
         {
             _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 });
             _event = new SentryEvent();
+            _envelope = Envelope.FromEvent(_event);
+
             // Make sure worker spins once.
-            _backgroundWorker.EnqueueEnvelope(_event);
+            _backgroundWorker.EnqueueEnvelope(_envelope);
             _backgroundWorker.FlushAsync(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
             for (var i = 0; i < Items; i++)
             {
-                _backgroundWorker.EnqueueEnvelope(_event);
+                _backgroundWorker.EnqueueEnvelope(_envelope);
             }
         }
 
