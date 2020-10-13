@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
@@ -30,41 +32,99 @@ namespace Sentry.Protocol
             Payload = payload;
         }
 
+        /// <summary>
+        /// Attempts to extract the value of "length" header if it's present.
+        /// </summary>
+        public long? TryGetLength()
+        {
+            if (!Header.TryGetValue(LengthKey, out var value))
+            {
+                return null;
+            }
+
+            if (value is long valueLong)
+            {
+                return valueLong;
+            }
+
+            if (value is int valueInt)
+            {
+                return valueInt;
+            }
+
+            return null;
+        }
+
+        private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
+        {
+            var buffer = new MemoryStream();
+            await Payload.SerializeAsync(buffer, cancellationToken).ConfigureAwait(false);
+            buffer.Seek(0, SeekOrigin.Begin);
+
+            return buffer;
+        }
+
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            // Header
-            await JsonSerializer.SerializeObjectAsync(Header, stream, cancellationToken).ConfigureAwait(false);
-            stream.WriteByte((byte)'\n');
+            // Length is known
+            if (TryGetLength() != null)
+            {
+                // Header
+                await JsonSerializer.SerializeObjectAsync(Header, stream, cancellationToken).ConfigureAwait(false);
+                stream.WriteByte((byte)'\n');
 
-            // Payload
-            await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                // Payload
+                await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            }
+            // Length is NOT known (need to calculate)
+            else
+            {
+                using var payloadBuffer = await BufferPayloadAsync(cancellationToken).ConfigureAwait(false);
+
+                // Header
+                var headerWithLength = Header.ToDictionary();
+                headerWithLength[LengthKey] = payloadBuffer.Length;
+
+                var headerJson = new UTF8Encoding(false, true).GetBytes(
+                    JsonSerializer.SerializeObject(headerWithLength)
+                );
+
+                await stream.WriteAsync(headerJson, cancellationToken).ConfigureAwait(false);
+                stream.WriteByte((byte)'\n');
+
+                // Payload
+                await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+            }
         }
+
+        private const string TypeKey = "type";
+        private const string LengthKey = "length";
+        private const string FileNameKey = "file_name";
 
         public static EnvelopeItem FromFile(string filePath)
         {
             var fileStream = File.OpenRead(filePath);
             var payload = new StreamSerializable(fileStream);
 
-            var headers = new Dictionary<string, object>
+            var header = new Dictionary<string, object>
             {
-                ["type"] = "attachment",
-                ["file_name"] = Path.GetFileName(filePath),
-                ["length"] = fileStream.Length
+                [TypeKey] = "attachment",
+                [FileNameKey] = Path.GetFileName(filePath),
+                [LengthKey] = fileStream.Length
             };
 
-            return new EnvelopeItem(headers, payload);
+            return new EnvelopeItem(header, payload);
         }
 
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
-            // TODO: calculate length ahead of time?
-            var headers = new Dictionary<string, object>
+            var header = new Dictionary<string, object>
             {
-                ["type"] = "event"
+                [TypeKey] = "event"
             };
 
-            return new EnvelopeItem(headers, @event);
+            return new EnvelopeItem(header, @event);
         }
     }
 }

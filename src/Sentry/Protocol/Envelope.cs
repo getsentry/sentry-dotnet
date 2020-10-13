@@ -35,7 +35,7 @@ namespace Sentry.Protocol
         /// Attempts to extract the value of "sentry_id" header if it's present.
         /// </summary>
         public SentryId? TryGetEventId() =>
-            Header.TryGetValue("event_id", out var value) &&
+            Header.TryGetValue(EventIdKey, out var value) &&
             value is string valueString &&
             Guid.TryParse(valueString, out var guid)
                 ? new SentryId(guid)
@@ -56,11 +56,13 @@ namespace Sentry.Protocol
             }
         }
 
+        private const string EventIdKey = "event_id";
+
         public static Envelope FromEvent(SentryEvent @event)
         {
-            var headers = new Dictionary<string, object>
+            var header = new Dictionary<string, object>
             {
-                ["event_id"] = @event.EventId.ToString()
+                [EventIdKey] = @event.EventId.ToString()
             };
 
             var items = new[]
@@ -68,7 +70,7 @@ namespace Sentry.Protocol
                 EnvelopeItem.FromEvent(@event)
             };
 
-            return new Envelope(headers, items);
+            return new Envelope(header, items);
         }
     }
 }

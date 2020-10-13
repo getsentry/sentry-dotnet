@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sentry.Internal.Extensions
 {
@@ -32,5 +33,8 @@ namespace Sentry.Internal.Extensions
                 }
             }
         }
+
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source) =>
+            source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }

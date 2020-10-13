@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Sentry.Protocol
 {
-    public class StreamSerializable : ISerializable, IDisposable
+    internal class StreamSerializable : ISerializable, IDisposable
     {
         private readonly Stream _source;
 
