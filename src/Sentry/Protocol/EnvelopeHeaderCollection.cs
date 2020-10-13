@@ -31,10 +31,7 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
-        {
-            var data = Encoding.UTF8.GetBytes(JsonSerializer.SerializeObject(KeyValues));
-            await stream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
-        }
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+            await JsonSerializer.SerializeObjectAsync(KeyValues, stream, cancellationToken).ConfigureAwait(false);
     }
 }

@@ -1,3 +1,7 @@
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -5,6 +9,7 @@ namespace Sentry.Internal
 {
     internal static class JsonSerializer
     {
+        private static readonly Encoding Utf8WithoutBom = new UTF8Encoding(false, true);
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
 
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
@@ -17,10 +22,14 @@ namespace Sentry.Internal
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 
-        public static string SerializeObject<T>(T @object) => JsonConvert.SerializeObject(@object, Settings);
-        public static dynamic DeserializeObject(string json) => JsonConvert.DeserializeObject(json);
-#if DEBUG
-        public static T DeserializeObject<T>(string json) => JsonConvert.DeserializeObject<T>(json);
-#endif
+        public static string SerializeObject(object obj) => JsonConvert.SerializeObject(obj, Settings);
+
+        public static async Task SerializeObjectAsync(object obj, Stream stream, CancellationToken cancellationToken = default)
+        {
+            using var textWriter = new StreamWriter(stream, Utf8WithoutBom, 1024, true);
+            using var jsonWriter = new JsonTextWriter(textWriter);
+
+            await jsonWriter.WriteValueAsync(obj, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

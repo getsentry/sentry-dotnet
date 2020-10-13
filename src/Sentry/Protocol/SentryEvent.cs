@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
@@ -156,12 +155,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
-        {
-            var json = JsonSerializer.SerializeObject(this);
-            var data = Encoding.UTF8.GetBytes(json);
-
-            await stream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
-        }
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+            await JsonSerializer.SerializeObjectAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }
