@@ -60,7 +60,7 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public async Task CaptureMessage_AttachStacktraceTrue_IncludesStackTrace()
+        public void CaptureMessage_AttachStacktraceTrue_IncludesStackTrace()
         {
             _fixture.SentryOptions.AttachStacktrace = true;
 
@@ -68,20 +68,16 @@ namespace NotSentry.Tests
 
             _ = sut.CaptureMessage("test");
 
-            Envelope? lastEnvelope = null;
-            _ = _fixture.Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e => lastEnvelope = e));
-
-            lastEnvelope.Should().NotBeNull();
-
-            var eventPayload = await lastEnvelope.Items.Items.Single().Payload.SerializeToStringAsync();
-
-            var functions = JToken.Parse(eventPayload)
-                .SelectTokens("..exception.stacktrace.frames[*].function")
-                .Select(j => j.Value<string>())
-                .ToArray();
-
-            functions.Should().NotBeEmpty();
-            functions.Should().NotContain(nameof(CaptureMessage_AttachStacktraceTrue_IncludesStackTrace));
+            _ = _fixture.Worker.Received(1).EnqueueEnvelope(
+                Arg.Is<Envelope>(e => e
+                    .Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Exception
+                    .StackTrace
+                    .Length > 0)
+            );
         }
 
         [Fact]
