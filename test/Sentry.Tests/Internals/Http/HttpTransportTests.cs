@@ -8,7 +8,6 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal.Http;
 using Sentry.Protocol;
-using Sentry.Protocol.Builders;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;
@@ -51,9 +50,9 @@ namespace Sentry.Tests.Internals.Http
             var token = source.Token;
             var sut = _fixture.GetSut();
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent(id: SentryResponses.ResponseId))
-                .Build();
+            var envelope = Envelope.FromEvent(
+                new SentryEvent(id: SentryResponses.ResponseId)
+            );
 
             await sut.SendEnvelopeAsync(envelope, token);
 
@@ -68,9 +67,7 @@ namespace Sentry.Tests.Internals.Http
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             const string expectedMessage = "Bad Gateway!";
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             _fixture.SentryOptions.Debug = true;
             _ = _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
@@ -93,9 +90,7 @@ namespace Sentry.Tests.Internals.Http
         {
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             _fixture.SentryOptions.Debug = true;
             _ = _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
@@ -125,9 +120,7 @@ namespace Sentry.Tests.Internals.Http
 
             var sut = _fixture.GetSut();
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             _ = sut.CreateRequest(envelope);
 
@@ -139,9 +132,7 @@ namespace Sentry.Tests.Internals.Http
         {
             var sut = _fixture.GetSut();
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var actual = sut.CreateRequest(envelope);
 
@@ -153,9 +144,7 @@ namespace Sentry.Tests.Internals.Http
         {
             var sut = _fixture.GetSut();
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var actual = sut.CreateRequest(envelope);
 
@@ -169,9 +158,7 @@ namespace Sentry.Tests.Internals.Http
         {
             var sut = _fixture.GetSut();
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var actual = sut.CreateRequest(envelope);
 

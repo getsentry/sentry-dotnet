@@ -7,7 +7,6 @@ using NSubstitute.ExceptionExtensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
-using Sentry.Protocol.Builders;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -59,9 +58,7 @@ namespace Sentry.Tests.Internals
         public void Dispose_WhenRequestInFlight_StopsTask()
         {
             var signal = new ManualResetEventSlim();
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             _fixture.Transport
                 .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
@@ -80,9 +77,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Dispose_TokenCancelledWhenRequestInFlight_StopsTask()
         {
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             _ = _fixture.Transport
                     .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
@@ -113,9 +108,7 @@ namespace Sentry.Tests.Internals
         {
             _fixture.SentryOptions.ShutdownTimeout = default; // Don't wait
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             using var sut = _fixture.GetSut();
 
@@ -145,9 +138,7 @@ namespace Sentry.Tests.Internals
         {
             var sync = new AutoResetEvent(false);
 
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             using var sut = _fixture.GetSut();
 
@@ -203,9 +194,7 @@ namespace Sentry.Tests.Internals
         public void CaptureEvent_LimitReached_EventDropped()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var transportEvent = new ManualResetEvent(false);
             var eventsQueuedEvent = new ManualResetEvent(false);
@@ -236,9 +225,7 @@ namespace Sentry.Tests.Internals
         public void CaptureEvent_DisposedWorker_ThrowsObjectDisposedException()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             using var sut = _fixture.GetSut();
             sut.Dispose();
@@ -250,9 +237,7 @@ namespace Sentry.Tests.Internals
         public void CaptureEvent_InnerTransportInvoked()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var sut = _fixture.GetSut();
 
@@ -269,9 +254,7 @@ namespace Sentry.Tests.Internals
         public void CaptureEvent_InnerTransportThrows_WorkerSuppresses()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             _fixture.Transport
                 .When(e => e.SendEnvelopeAsync(envelope))
@@ -323,9 +306,7 @@ namespace Sentry.Tests.Internals
         public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var transportEvent = new ManualResetEvent(false);
             var eventsQueuedEvent = new ManualResetEvent(false);
@@ -358,9 +339,7 @@ namespace Sentry.Tests.Internals
         public async Task FlushAsync_ZeroTimeout_Accepted()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var transportEvent = new ManualResetEvent(false);
             var eventsQueuedEvent = new ManualResetEvent(false);
@@ -386,9 +365,7 @@ namespace Sentry.Tests.Internals
         public async Task FlushAsync_FullQueue_RespectsTimeout()
         {
             // Arrange
-            var envelope = new EnvelopeBuilder()
-                .AddEventItem(new SentryEvent())
-                .Build();
+            var envelope = Envelope.FromEvent(new SentryEvent());
 
             var transportEvent = new ManualResetEvent(false);
             var eventsQueuedEvent = new ManualResetEvent(false);
