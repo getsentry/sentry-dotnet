@@ -37,11 +37,11 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var envelope = new Envelope(
-                new Dictionary<string, object> {["type"] = "session"},
+                new Dictionary<string, object>(),
                 new[]
                 {
                     new EnvelopeItem(
-                        new Dictionary<string, object>(),
+                        new Dictionary<string, object>{["type"] = "session"},
                         new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
                             .ToMemoryStream())
                     )
@@ -54,7 +54,7 @@ namespace Sentry.Tests.Protocol
             // Assert
             output.Should().Be(
                 "{}\n" +
-                "{\"type\":\"session\"}\n" +
+                "{\"type\":\"session\",\"length\":75}\n" +
                 "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
             );
         }
@@ -168,7 +168,7 @@ namespace Sentry.Tests.Protocol
             // Assert
             output.Should().Be(
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
-                "{\"type\":\"attachment\"}\n" +
+                "{\"type\":\"attachment\",\"length\":10}\n" +
                 "helloworld\n"
             );
         }
