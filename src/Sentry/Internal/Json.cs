@@ -7,18 +7,18 @@ using Newtonsoft.Json.Converters;
 
 namespace Sentry.Internal
 {
-    internal static class JsonSerializer
+    internal static class Json
     {
         private static readonly Encoding Encoding = new UTF8Encoding(false, true);
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
 
-        private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
+        private static readonly JsonSerializer Serializer = new JsonSerializer
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             NullValueHandling = NullValueHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Formatting = Formatting.None,
-            Converters = new JsonConverter[] { StringEnumConverter },
+            Converters = {StringEnumConverter},
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 
@@ -26,12 +26,10 @@ namespace Sentry.Internal
             new StreamWriter(stream, Encoding, 1024, true)
         );
 
-        public static string Serialize(object obj) => JsonConvert.SerializeObject(obj, Settings);
-
         public static void SerializeToStream(object obj, Stream stream)
         {
             using var writer = CreateWriter(stream);
-            writer.WriteValue(obj);
+            Serializer.Serialize(writer, obj);
         }
 
         public static byte[] SerializeToByteArray(object obj)
@@ -42,13 +40,18 @@ namespace Sentry.Internal
             return buffer.ToArray();
         }
 
+        public static string Serialize(object obj) => Encoding.GetString(
+            SerializeToByteArray(obj)
+        );
+
         public static async Task SerializeToStreamAsync(
             object obj,
             Stream stream,
             CancellationToken cancellationToken = default)
         {
             using var writer = CreateWriter(stream);
-            await writer.WriteValueAsync(obj, cancellationToken).ConfigureAwait(false);
+            Serializer.Serialize(writer, obj);
+            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

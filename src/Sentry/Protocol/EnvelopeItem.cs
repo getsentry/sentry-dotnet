@@ -63,7 +63,7 @@ namespace Sentry.Protocol
             if (TryGetLength() != null)
             {
                 // Header
-                await JsonSerializer.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
+                await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
                 stream.WriteByte((byte)'\n');
 
                 // Payload
@@ -77,7 +77,7 @@ namespace Sentry.Protocol
                 // Header
                 var headerWithLength = Header.ToDictionary();
                 headerWithLength[LengthKey] = payloadBuffer.Length;
-                var headerData = JsonSerializer.SerializeToByteArray(headerWithLength);
+                var headerData = Json.SerializeToByteArray(headerWithLength);
 
                 await stream.WriteAsync(headerData, cancellationToken).ConfigureAwait(false);
                 stream.WriteByte((byte)'\n');

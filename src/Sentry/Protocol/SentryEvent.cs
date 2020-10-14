@@ -156,6 +156,6 @@ namespace Sentry
 
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            await JsonSerializer.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
+            await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

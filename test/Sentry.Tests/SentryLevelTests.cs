@@ -18,7 +18,7 @@ namespace Sentry.Tests
                SentryLevel.Fatal,
             };
 
-            var actual = JsonSerializer.Serialize(sut);
+            var actual = Json.Serialize(sut);
 
             Assert.Equal("{\"Debug\":\"debug\","
                         + "\"Info\":\"info\","
