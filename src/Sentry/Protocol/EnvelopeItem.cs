@@ -87,6 +87,9 @@ namespace Sentry.Protocol
             }
         }
 
+        /// <summary>
+        /// Creates an envelope item from file.
+        /// </summary>
         public static EnvelopeItem FromFile(string filePath)
         {
             var file = File.OpenRead(filePath);
@@ -102,6 +105,9 @@ namespace Sentry.Protocol
             return new EnvelopeItem(header, payload);
         }
 
+        /// <summary>
+        /// Creates an envelope item from text content.
+        /// </summary>
         public static EnvelopeItem FromString(string text)
         {
             using var buffer = new MemoryStream(
@@ -119,6 +125,9 @@ namespace Sentry.Protocol
             return new EnvelopeItem(header, payload);
         }
 
+        /// <summary>
+        /// Creates an envelope item from an event.
+        /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
             var header = new Dictionary<string, object>

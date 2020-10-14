@@ -58,6 +58,9 @@ namespace Sentry.Protocol
             }
         }
 
+        /// <summary>
+        /// Creates an envelope that contains a single event.
+        /// </summary>
         public static Envelope FromEvent(SentryEvent @event)
         {
             var header = new Dictionary<string, object>
