@@ -211,7 +211,7 @@ namespace Sentry
         /// a chance to inspect and/or modify the event before it's sent. If the event
         /// should not be sent at all, return null from the callback.
         /// </remarks>
-        public Func<SentryEvent, SentryEvent>? BeforeSend { get; set; }
+        public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
 
         /// <summary>
         /// A callback invoked when a breadcrumb is about to be stored.
@@ -219,7 +219,7 @@ namespace Sentry
         /// <remarks>
         /// Gives a chance to inspect and modify/reject a breadcrumb.
         /// </remarks>
-        public Func<Breadcrumb, Breadcrumb>? BeforeBreadcrumb { get; set; }
+        public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
 
         private int _maxQueueItems = 30;
 
