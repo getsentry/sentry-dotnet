@@ -13,6 +13,10 @@ namespace Sentry.Protocol
     /// </summary>
     public class EnvelopeItem : ISerializable
     {
+        private const string TypeKey = "type";
+        private const string LengthKey = "length";
+        private const string FileNameKey = "file_name";
+
         /// <summary>
         /// Header associated with this item.
         /// </summary>
@@ -35,25 +39,13 @@ namespace Sentry.Protocol
         /// <summary>
         /// Attempts to extract the value of "length" header if it's present.
         /// </summary>
-        public long? TryGetLength()
-        {
-            if (!Header.TryGetValue(LengthKey, out var value))
+        public long? TryGetLength() =>
+            Header.GetValueOrDefault(LengthKey) switch
             {
-                return null;
-            }
-
-            if (value is long valueLong)
-            {
-                return valueLong;
-            }
-
-            if (value is int valueInt)
-            {
-                return valueInt;
-            }
-
-            return null;
-        }
+                long x => x,
+                int x => x,
+                _ => null
+            };
 
         private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
         {
@@ -94,10 +86,6 @@ namespace Sentry.Protocol
                 await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
             }
         }
-
-        private const string TypeKey = "type";
-        private const string LengthKey = "length";
-        private const string FileNameKey = "file_name";
 
         public static EnvelopeItem FromFile(string filePath)
         {

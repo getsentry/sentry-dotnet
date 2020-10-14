@@ -12,6 +12,8 @@ namespace Sentry.Protocol
     /// </summary>
     public class Envelope : ISerializable
     {
+        private const string EventIdKey = "event_id";
+
         /// <summary>
         /// Header associated with this envelope.
         /// </summary>
@@ -55,8 +57,6 @@ namespace Sentry.Protocol
                 stream.WriteByte((byte)'\n');
             }
         }
-
-        private const string EventIdKey = "event_id";
 
         public static Envelope FromEvent(SentryEvent @event)
         {
