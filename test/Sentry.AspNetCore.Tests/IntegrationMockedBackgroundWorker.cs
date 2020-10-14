@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using NSubstitute;
 using Sentry.Extensibility;
@@ -14,7 +13,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Tests;
@@ -79,14 +77,14 @@ namespace Else.AspNetCore.Tests
             var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
             logger.LogError(expectedMessage);
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..message.formatted")
-                    .Value<string>()
-                    .Should()
-                    .Be(expectedMessage);
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Message
+                    .Formatted == expectedMessage
+            ));
         }
 
         [Fact]
@@ -99,23 +97,21 @@ namespace Else.AspNetCore.Tests
             var logger = ServiceProvider.GetRequiredService<ILogger<IntegrationMockedBackgroundWorker>>();
             logger.LogError(expectedMessage, param);
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                var messageJson = JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..message");
-
-                messageJson
-                    .SelectToken("formatted")
-                    .Value<string>()
-                    .Should()
-                    .Be($"Test {param} log");
-
-                messageJson
-                    .SelectToken("message")
-                    .Value<string>()
-                    .Should()
-                    .Be(expectedMessage);
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Message
+                    .Formatted == $"Test {param} log"
+                &&
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Message
+                    .Message == expectedMessage
+            ));
         }
 
         [Fact]
@@ -144,14 +140,14 @@ namespace Else.AspNetCore.Tests
             var client = ServiceProvider.GetRequiredService<ISentryClient>();
             _ = client.CaptureMessage(expectedMessage);
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..message.message")
-                    .Value<string>()
-                    .Should()
-                    .Be(expectedMessage);
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Message
+                    .Message == expectedMessage
+            ));
         }
 
         [Fact]
@@ -163,14 +159,14 @@ namespace Else.AspNetCore.Tests
             var client = ServiceProvider.GetRequiredService<IHub>();
             _ = client.CaptureMessage(expectedMessage);
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..message.message")
-                    .Value<string>()
-                    .Should()
-                    .Be(expectedMessage);
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Message
+                    .Message == expectedMessage
+            ));
         }
 
         [Fact]
@@ -181,14 +177,15 @@ namespace Else.AspNetCore.Tests
             Build();
             _ = await HttpClient.GetAsync("/throw");
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..user.username")?
-                    .Value<string>()?
-                    .Should()
-                    .BeNull();
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .User
+                    .Username == null
+            ));
         }
 
         [Fact]
@@ -199,14 +196,14 @@ namespace Else.AspNetCore.Tests
             Build();
             _ = await HttpClient.GetAsync("/throw");
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..user.username")?
-                    .Value<string>()?
-                    .Should()
-                    .BeNull();
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .User
+                    .Username == null
+            ));
         }
 
         [Fact]
@@ -225,14 +222,14 @@ namespace Else.AspNetCore.Tests
             Build();
             _ = await HttpClient.GetAsync("/throw");
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..user.username")?
-                    .Value<string>()?
-                    .Should()
-                    .Be(expectedName);
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .User
+                    .Username == expectedName
+            ));
         }
 
         [Fact]
@@ -275,14 +272,13 @@ namespace Else.AspNetCore.Tests
             Build();
             _ = await HttpClient.GetAsync("/throw");
 
-            _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-            {
-                JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                    .SelectToken("..environment")?
-                    .Value<string>()?
-                    .Should()
-                    .Be(expected);
-            }));
+            _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Environment == expected
+            ));
         }
 
         [Fact]
@@ -297,14 +293,13 @@ namespace Else.AspNetCore.Tests
                     Build();
                     _ = HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
 
-                    _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-                    {
-                        JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                            .SelectToken("..environment")?
-                            .Value<string>()?
-                            .Should()
-                            .Be(expected);
-                    }));
+                    _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                        e.Items
+                            .Select(i => i.Payload)
+                            .OfType<SentryEvent>()
+                            .Single()
+                            .Environment == expected
+                    ));
                 });
         }
 
@@ -323,14 +318,13 @@ namespace Else.AspNetCore.Tests
                     Build();
                     _ = HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
 
-                    _ = Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e =>
-                    {
-                        JToken.Parse(e.Items.Items.Single().Payload.Serialize())
-                            .SelectToken("..environment")?
-                            .Value<string>()?
-                            .Should()
-                            .Be(expected);
-                    }));
+                    _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+                        e.Items
+                            .Select(i => i.Payload)
+                            .OfType<SentryEvent>()
+                            .Single()
+                            .Environment == expected
+                    ));
                 });
         }
     }
