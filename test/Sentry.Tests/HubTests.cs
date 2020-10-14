@@ -1,8 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
@@ -75,13 +72,12 @@ namespace NotSentry.Tests
                     .OfType<SentryEvent>()
                     .Single()
                     .Exception
-                    .StackTrace
-                    .Length > 0)
+                    .StackTrace != null)
             );
         }
 
         [Fact]
-        public async Task CaptureMessage_AttachStacktraceFalse_IncludesStackTrace()
+        public void CaptureMessage_AttachStacktraceFalse_DoesNotIncludeStackTrace()
         {
             _fixture.SentryOptions.AttachStacktrace = false;
 
@@ -89,17 +85,15 @@ namespace NotSentry.Tests
 
             _ = sut.CaptureMessage("test");
 
-            Envelope? lastEnvelope = null;
-            _ = _fixture.Worker.Received(1).EnqueueEnvelope(Arg.Do<Envelope>(e => lastEnvelope = e));
-
-            var eventPayload = await lastEnvelope.Items.Items.Single().Payload.SerializeToStringAsync();
-
-            var exceptions = JToken.Parse(eventPayload)
-                .SelectTokens("..exception")
-                .Select(j => j.Value<string>())
-                .ToArray();
-
-            exceptions.Should().BeEmpty();
+            _ = _fixture.Worker.Received(1).EnqueueEnvelope(
+                Arg.Is<Envelope>(e => e
+                    .Items
+                    .Select(i => i.Payload)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Exception
+                    .StackTrace == null)
+            );
         }
 
         [Fact]
