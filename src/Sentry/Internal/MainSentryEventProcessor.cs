@@ -136,9 +136,19 @@ namespace Sentry.Internal
                 @event.Release = _options.Release ?? Release;
             }
 
-            if (@event.Environment == null)
+            if (string.IsNullOrWhiteSpace(@event.Environment))
             {
-                @event.Environment = _options.Environment ?? EnvironmentLocator.Locate();
+                if (string.IsNullOrWhiteSpace(_options.Environment))
+                {
+                    var foundEnvironment = EnvironmentLocator.Locate();
+                    @event.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
+                        ? Constants.DefaultEnvironmentSetting
+                        : foundEnvironment;
+                }
+                else
+                {
+                    @event.Environment = _options.Environment;
+                }
             }
 
             if (@event.Exception == null)

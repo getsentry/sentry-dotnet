@@ -289,47 +289,6 @@ namespace Sentry.Tests
             _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureEvent(null));
         }
 
-        [Theory]
-        [InlineData(null, "production")] // Missing: will get default value.
-        [InlineData("", "production")] // Missing: will get default value.
-        [InlineData(" ", "production")] // Missing: will get default value.
-        [InlineData("a", "a")] // Provided: nothing will change.
-        [InlineData("production", "production")] // Provided: nothing will change. (value happens to be the default)
-        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
-        public void CaptureEvent_Environment_HasCorrectEnvironmentValue(string environment, string expectedEnvironment)
-        {
-            //_fixture.SentryOptions.Environment = environment;
-
-            var @event = new SentryEvent
-            {
-                Environment = environment
-            };
-
-            var sut = _fixture.GetSut();
-            _ = sut.CaptureEvent(@event);
-
-            Assert.Equal(expectedEnvironment, @event.Environment);
-        }
-
-        [Theory]
-        [InlineData(null, "production")] // Missing: will get default value.
-        [InlineData("", "production")] // Missing: will get default value.
-        [InlineData(" ", "production")] // Missing: will get default value.
-        [InlineData("a", "a")] // Provided: nothing will change.
-        [InlineData("production", "production")] // Provided: nothing will change. (value happens to be the default)
-        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
-        public void CaptureEvent_OptionsEnvironment_HasCorrectEnvironmentValue(string environment, string expectedEnvironment)
-        {
-            _fixture.SentryOptions.Environment = environment;
-
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-            _ = sut.CaptureEvent(@event);
-
-            Assert.Equal(expectedEnvironment, @event.Environment);
-        }
-
         [Fact]
         public void Dispose_Worker_DisposeCalled()
         {
