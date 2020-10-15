@@ -146,6 +146,15 @@ namespace Sentry
                 }
             }
 
+            // Each event should have an 'Environment' set. If none was set, then should default
+            // to 'production'.
+            if (string.IsNullOrWhiteSpace(@event.Environment))
+            {
+                @event.Environment = string.IsNullOrWhiteSpace(_options.Environment)
+                    ? "production"
+                    : _options.Environment;
+            }
+
             SentryEvent? processedEvent = @event;
 
             foreach (var processor in scope.GetAllEventProcessors())

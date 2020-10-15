@@ -234,6 +234,7 @@ namespace Else.AspNetCore.Tests
                 });
         }
 
+        // NOTE: Options take priority over EnvVar's.
         [Fact]
         public void Environment_BothOnOptionsAndEnvVar_ValueFromOption()
         {
