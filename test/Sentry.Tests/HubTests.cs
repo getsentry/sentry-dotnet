@@ -72,35 +72,6 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void CaptureMessage_AttachStacktraceTrue_IncludesStackTrace()
-        {
-            // Arrange
-            var worker = new FakeBackgroundWorker();
-
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                BackgroundWorker = worker,
-                AttachStacktrace = true
-            });
-
-            // Act
-            hub.CaptureMessage("test");
-
-            // Assert
-            var envelope = worker.Queue.Single();
-
-            var stackTrace = envelope.Items
-                .Select(i => i.Payload)
-                .OfType<SentryEvent>()
-                .Single()
-                .Exception?
-                .StackTrace;
-
-            stackTrace.Should().NotBeNull();
-        }
-
-        [Fact]
         public void CaptureMessage_AttachStacktraceFalse_DoesNotIncludeStackTrace()
         {
             // Arrange
@@ -123,8 +94,7 @@ namespace NotSentry.Tests
                 .Select(i => i.Payload)
                 .OfType<SentryEvent>()
                 .Single()
-                .Exception?
-                .StackTrace;
+                .SentryExceptionValues;
 
             stackTrace.Should().BeNull();
         }
