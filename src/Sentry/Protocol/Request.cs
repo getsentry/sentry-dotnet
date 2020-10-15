@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
