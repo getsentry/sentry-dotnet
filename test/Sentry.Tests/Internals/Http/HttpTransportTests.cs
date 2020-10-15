@@ -1,11 +1,10 @@
-using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
-using Sentry.Extensibility;
 using Sentry.Internal.Http;
 using Sentry.Protocol;
 using Sentry.Testing;
@@ -16,153 +15,198 @@ namespace Sentry.Tests.Internals.Http
 {
     public class HttpTransportTests
     {
-        private class Fixture
-        {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                DiagnosticLogger = Substitute.For<IDiagnosticLogger>()
-            };
-
-            public HttpClient HttpClient { get; set; }
-            public MockableHttpMessageHandler HttpMessageHandler { get; set; } = Substitute.For<MockableHttpMessageHandler>();
-            public HttpContent HttpContent { get; set; } = Substitute.For<HttpContent>();
-            public Action<HttpRequestHeaders> AddAuth { get; set; } = _ => { };
-
-            public Fixture()
-            {
-                _ = HttpMessageHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                        .Returns(_ => SentryResponses.GetOkResponse());
-
-                HttpClient = new HttpClient(HttpMessageHandler);
-            }
-
-            public HttpTransport GetSut() => new HttpTransport(SentryOptions, HttpClient, AddAuth);
-        }
-
-        private readonly Fixture _fixture = new Fixture();
-
         [Fact]
-        public async Task CaptureEventAsync_CancellationToken_PassedToClient()
+        public async Task SendEnvelopeAsync_CancellationToken_PassedToClient()
         {
-            var source = new CancellationTokenSource();
+            // Arrange
+            using var source = new CancellationTokenSource();
             source.Cancel();
             var token = source.Token;
-            var sut = _fixture.GetSut();
+
+            var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+            httpHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(_ => SentryResponses.GetOkResponse());
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
+                new HttpClient(httpHandler),
+                _ => { }
+            );
 
             var envelope = Envelope.FromEvent(
                 new SentryEvent(id: SentryResponses.ResponseId)
             );
 
-            await sut.SendEnvelopeAsync(envelope, token);
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope, token);
 
-            _ = await _fixture.HttpMessageHandler
-                    .Received(1)
-                    .VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
+            // Assert
+            await httpHandler
+                .Received(1)
+                .VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
         }
 
         [Fact]
-        public async Task CaptureEventAsync_ResponseNotOkWithMessage_LogsError()
+        public async Task SendEnvelopeAsync_ResponseNotOkWithMessage_LogsError()
         {
+            // Arrange
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             const string expectedMessage = "Bad Gateway!";
 
+            var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+            httpHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage));
+
+            var logger = new AccumulativeDiagnosticLogger();
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    Debug = true,
+                    DiagnosticLogger = logger
+                },
+                new HttpClient(httpHandler),
+                _ => { }
+            );
+
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            _fixture.SentryOptions.Debug = true;
-            _ = _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
-            _ = _fixture.HttpMessageHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                    .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage));
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
 
-            var sut = _fixture.GetSut();
-
-            await sut.SendEnvelopeAsync(envelope);
-
-            _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
-                "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}", null,
-                Arg.Is<object[]>(p => p[0].ToString() == envelope.TryGetEventId().ToString()
-                                      && p[1].ToString() == expectedCode.ToString()
-                                      && p[2].ToString() == expectedMessage));
+            // Assert
+            logger.Entries.Any(e =>
+                e.Level == SentryLevel.Error &&
+                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}" &&
+                e.Exception == null &&
+                e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
+                e.Args[1].ToString() == expectedCode.ToString() &&
+                e.Args[2].ToString() == expectedMessage
+            ).Should().BeTrue();
         }
 
         [Fact]
-        public async Task CaptureEventAsync_ResponseNotOkNoMessage_LogsError()
+        public async Task SendEnvelopeAsync_ResponseNotOkNoMessage_LogsError()
         {
+            // Arrange
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
+
+            var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+            httpHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, null));
+
+            var logger = new AccumulativeDiagnosticLogger();
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    Debug = true,
+                    DiagnosticLogger = logger
+                },
+                new HttpClient(httpHandler),
+                _ => { }
+            );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            _fixture.SentryOptions.Debug = true;
-            _ = _fixture.SentryOptions.DiagnosticLogger.IsEnabled(SentryLevel.Error).Returns(true);
-            _ = _fixture.HttpMessageHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                    .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, null));
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
 
-            var sut = _fixture.GetSut();
-
-            await sut.SendEnvelopeAsync(envelope);
-
-            _fixture.SentryOptions.DiagnosticLogger.Received(1).Log(SentryLevel.Error,
-                "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}", null,
-                Arg.Is<object[]>(p => p[0].ToString() == envelope.TryGetEventId().ToString()
-                                      && p[1].ToString() == expectedCode.ToString()
-                                      && p[2].ToString() == HttpTransport.NoMessageFallback));
+            // Assert
+            logger.Entries.Any(e =>
+                e.Level == SentryLevel.Error &&
+                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}" &&
+                e.Exception == null &&
+                e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
+                e.Args[1].ToString() == expectedCode.ToString() &&
+                e.Args[2].ToString() == HttpTransport.NoMessageFallback
+            ).Should().BeTrue();
         }
 
         [Fact]
         public void CreateRequest_AuthHeader_Invoked()
         {
+            // Arrange
             var callbackInvoked = false;
-            _fixture.AddAuth = headers =>
-            {
-                Assert.NotNull(headers);
-                callbackInvoked = true;
-            };
 
-            var sut = _fixture.GetSut();
+            var httpTransport = new HttpTransport(
+                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
+                new HttpClient(),
+                _ => callbackInvoked = true
+            );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            _ = sut.CreateRequest(envelope);
+            // Act
+            httpTransport.CreateRequest(envelope);
 
-            Assert.True(callbackInvoked);
+            // Assert
+            callbackInvoked.Should().BeTrue();
         }
 
         [Fact]
         public void CreateRequest_RequestMethod_Post()
         {
-            var sut = _fixture.GetSut();
+            // Arrange
+            var httpTransport = new HttpTransport(
+                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
+                new HttpClient(),
+                _ => { }
+            );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var actual = sut.CreateRequest(envelope);
+            // Act
+            var request = httpTransport.CreateRequest(envelope);
 
-            Assert.Equal(HttpMethod.Post, actual.Method);
+            // Assert
+            request.Method.Should().Be(HttpMethod.Post);
         }
 
         [Fact]
         public void CreateRequest_SentryUrl_FromOptions()
         {
-            var sut = _fixture.GetSut();
+            // Arrange
+            var httpTransport = new HttpTransport(
+                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
+                new HttpClient(),
+                _ => { }
+            );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var actual = sut.CreateRequest(envelope);
+            var uri = Dsn.Parse(DsnSamples.ValidDsnWithSecret).GetEnvelopeEndpointUri();
 
-            var uri = Dsn.Parse(_fixture.SentryOptions.Dsn!).GetEnvelopeEndpointUri();
+            // Act
+            var request = httpTransport.CreateRequest(envelope);
 
-            Assert.Equal(uri, actual.RequestUri);
+            // Assert
+            request.RequestUri.Should().Be(uri);
         }
 
         [Fact]
         public async Task CreateRequest_Content_IncludesEvent()
         {
-            var sut = _fixture.GetSut();
+            // Arrange
+            var httpTransport = new HttpTransport(
+                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
+                new HttpClient(),
+                _ => { }
+            );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var actual = sut.CreateRequest(envelope);
+            // Act
+            var request = httpTransport.CreateRequest(envelope);
+            var requestContent = await request.Content.ReadAsStringAsync();
 
-            Assert.Contains(envelope.TryGetEventId().ToString(), await actual.Content.ReadAsStringAsync());
+            // Assert
+            requestContent.Should().Contain(envelope.TryGetEventId().ToString());
         }
     }
 }

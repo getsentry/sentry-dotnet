@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using Sentry.Internal;
 using Sentry.Internal.Http;
 
 namespace Sentry.Testing
@@ -13,7 +14,6 @@ namespace Sentry.Testing
         public static Guid ResponseId => new Guid(ResponseIdString);
 
         public static HttpContent GetOkContent() => new StringContent(SentryOkResponseBody);
-        public static HttpContent GetBadGatewayContent() => new StringContent("{}");
 
         public static HttpResponseMessage GetOkResponse()
             => new HttpResponseMessage(HttpStatusCode.OK)
@@ -23,17 +23,8 @@ namespace Sentry.Testing
 
         public static HttpResponseMessage GetErrorResponse(HttpStatusCode code, string errorMessage)
         {
-            var response = new HttpResponseMessage(code)
-            {
-                Content = GetBadGatewayContent()
-            };
-
-            if (errorMessage != null)
-            {
-                response.Headers.Add(SentryHeaders.SentryErrorHeader, errorMessage);
-            }
-
-            return response;
+            var responseContent = Json.Serialize(new {detail = errorMessage});
+            return new HttpResponseMessage(code) {Content = new StringContent(responseContent)};
         }
     }
 }
