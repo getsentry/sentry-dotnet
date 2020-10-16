@@ -1,4 +1,6 @@
-# vNext
+# unreleased
+
+# 3.0.0-alpha.1
 
 * Rename `LogEntry` to `SentryMessage`. Change type of `SentryEvent.Message` from `string` to `SentryMessage`.
 * Change the type of `Gpu.VendorId` from `int` to `string`.
