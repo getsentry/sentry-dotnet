@@ -99,6 +99,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{3454
 		scripts\zeus.sh = scripts\zeus.sh
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F267BFB9-C5D5-4018-9D3F-B55443702AEC}"
+	ProjectSection(SolutionItems) = preProject
+		.github\CODEOWNERS = .github\CODEOWNERS
+		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+		.github\release-drafter.yml = .github\release-drafter.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E1800E08-72E6-45AE-91EC-69B4FDBA7555}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yaml = .github\workflows\build.yaml
+		.github\workflows\changelog.yaml = .github\workflows\changelog.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -246,6 +259,8 @@ Global
 		{22AA261A-F8B4-41E2-95DD-82632EED0AA5} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{0885DDFE-2FC7-4241-AEB1-8D6BDA627C0A} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{3454831A-397C-4039-AAFC-9152A4E0B682} = {9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}
+		{F267BFB9-C5D5-4018-9D3F-B55443702AEC} = {9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}
+		{E1800E08-72E6-45AE-91EC-69B4FDBA7555} = {F267BFB9-C5D5-4018-9D3F-B55443702AEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
