@@ -1,11 +1,12 @@
 # unreleased
 
+* Set the Environment setting to 'production' if none was provided. (#550) @PureKrome
+
 # 3.0.0-alpha.1
 
 * Rename `LogEntry` to `SentryMessage`. Change type of `SentryEvent.Message` from `string` to `SentryMessage`.
 * Change the type of `Gpu.VendorId` from `int` to `string`.
 * Add support for envelopes.
-* Set the Environment setting to 'production' if none was provided. (#550) @PureKrome
 
 # 3.0.0-alpha.0
 
