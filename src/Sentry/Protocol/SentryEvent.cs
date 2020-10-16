@@ -2,9 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
+using Sentry.Internal;
 using Sentry.Protocol;
+using Constants = Sentry.Protocol.Constants;
+using ISerializable = Sentry.Protocol.ISerializable;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -13,10 +19,9 @@ namespace Sentry
     /// An event to be sent to Sentry.
     /// </summary>
     /// <seealso href="https://docs.sentry.io/clientdev/attributes/" />
-    /// <inheritdoc />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public class SentryEvent : BaseScope
+    public class SentryEvent : BaseScope, ISerializable
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string>? InternalModules { get; set; }
@@ -148,5 +153,9 @@ namespace Sentry
 
             Platform = Constants.Platform;
         }
+
+        /// <inheritdoc />
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+            await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

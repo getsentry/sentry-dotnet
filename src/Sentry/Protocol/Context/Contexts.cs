@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Runtime.Serialization;
+using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol

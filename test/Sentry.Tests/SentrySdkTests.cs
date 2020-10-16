@@ -357,9 +357,17 @@ namespace Sentry.Tests
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);
-                _ = SentrySdk.CaptureMessage("message");
+                SentrySdk.CaptureMessage("message");
 
-                _ = worker.EnqueueEvent(Arg.Is<SentryEvent>(e => e.Breadcrumbs.Single().Message == expected));
+                worker.EnqueueEnvelope(
+                    Arg.Is<Envelope>(e => e.Items
+                            .Select(i => i.Payload)
+                            .OfType<SentryEvent>()
+                            .Single()
+                            .Breadcrumbs
+                            .Single()
+                            .Message == expected)
+                );
             }
         }
 

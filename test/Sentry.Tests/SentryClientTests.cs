@@ -25,21 +25,21 @@ namespace Sentry.Tests
         public void CaptureEvent_ExceptionFiltered_EmptySentryId()
         {
             _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
-            _ = _fixture.BackgroundWorker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
             // Filtered out for it's the exact filtered type
             Assert.Equal(default, sut.CaptureException(new SystemException()));
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
 
             // Filtered for it's a derived type
             Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
 
             // Not filtered since it's not in the inheritance chain
             Assert.NotEqual(default, sut.CaptureException(new Exception()));
-            _ = _fixture.BackgroundWorker.Received(1).EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -117,7 +117,7 @@ namespace Sentry.Tests
         {
             var expectedId = Guid.NewGuid();
             var expectedEvent = new SentryEvent(id: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -169,7 +169,7 @@ namespace Sentry.Tests
             var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
 
             Assert.Equal(default, actualId);
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]

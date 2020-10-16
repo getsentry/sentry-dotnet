@@ -1,7 +1,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace Sentry.Protocol
+namespace Sentry.Internal.Extensions
 {
     internal static class CollectionsExtensions
     {
@@ -32,5 +33,8 @@ namespace Sentry.Protocol
                 }
             }
         }
+
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source) =>
+            source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }

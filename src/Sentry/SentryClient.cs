@@ -165,9 +165,11 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            if (Worker.EnqueueEvent(processedEvent))
+            var envelope = Envelope.FromEvent(processedEvent);
+
+            if (Worker.EnqueueEnvelope(envelope))
             {
-                _options.DiagnosticLogger?.LogDebug("Event queued up.");
+                _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
                 return processedEvent.EventId;
             }
 
