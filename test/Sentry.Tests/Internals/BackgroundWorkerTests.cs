@@ -57,12 +57,16 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Dispose_WhenRequestInFlight_StopsTask()
         {
-            var signal = new ManualResetEventSlim();
+            using var signal = new ManualResetEventSlim();
             var envelope = Envelope.FromEvent(new SentryEvent());
 
             _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(_ => signal.Set());
+                .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
+                .Returns(Task.Run(() =>
+                {
+                    // Run on separate thread to avoid deadlock
+                    signal.Set();
+                }));
 
             var sut = _fixture.GetSut();
             _ = sut.EnqueueEnvelope(envelope);
@@ -136,7 +140,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void Dispose_EventQueuedDefaultShutdownTimeout_EmptiesQueueBeforeShutdown()
         {
-            var sync = new AutoResetEvent(false);
+            using var sync = new AutoResetEvent(false);
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -196,29 +200,30 @@ namespace Sentry.Tests.Internals
             // Arrange
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
+            using var transportEvent = new ManualResetEventSlim(false);
+            using var eventsQueuedEvent = new ManualResetEventSlim(false);
 
             _fixture.SentryOptions.MaxQueueItems = 1;
             _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
+                .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
+                .Returns(Task.Run(() =>
                 {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
+                    // Run on separate thread to avoid deadlock
+                    transportEvent.Set();
+                    eventsQueuedEvent.Wait();
+                }));
 
             using var sut = _fixture.GetSut();
 
             // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+            sut.EnqueueEnvelope(envelope);
+            transportEvent.Wait(); // Wait first event to be in-flight
 
             // in-flight events are kept in queue until completed.
             var queued = sut.EnqueueEnvelope(envelope);
             Assert.False(queued); // Fails to queue second
 
-            _ = eventsQueuedEvent.Set();
+            eventsQueuedEvent.Set();
         }
 
         [Fact]
@@ -261,6 +266,7 @@ namespace Sentry.Tests.Internals
                 .Do(_ => throw new Exception("Sending to sentry failed."));
 
             using var sut = _fixture.GetSut();
+
             // Act
             var queued = sut.EnqueueEnvelope(envelope);
 
@@ -308,27 +314,28 @@ namespace Sentry.Tests.Internals
             // Arrange
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
+            using var transportEvent = new ManualResetEventSlim(false);
+            using var eventsQueuedEvent = new ManualResetEventSlim(false);
 
             _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
+                .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
+                .Returns(Task.Run(() =>
                 {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
+                    // Run on separate thread to avoid deadlock
+                    transportEvent.Set();
+                    eventsQueuedEvent.Wait();
+                }));
 
             using var sut = _fixture.GetSut();
 
             // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+            sut.EnqueueEnvelope(envelope);
+            transportEvent.Wait(); // Wait first event to be in-flight
 
             var flushTask = sut.FlushAsync(TimeSpan.FromDays(1));
-            _ = Assert.Single(_fixture.Queue); // Event being processed
+            Assert.Single(_fixture.Queue); // Event being processed
 
-            _ = eventsQueuedEvent.Set();
+            eventsQueuedEvent.Set();
             await flushTask;
 
             _fixture.Logger.Received().Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
@@ -341,22 +348,23 @@ namespace Sentry.Tests.Internals
             // Arrange
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
+            using var transportEvent = new ManualResetEventSlim(false);
+            using var eventsQueuedEvent = new ManualResetEventSlim(false);
 
             _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
+                .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
+                .Returns(Task.Run(() =>
                 {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
+                    // Run on separate thread to avoid deadlock
+                    transportEvent.Set();
+                    eventsQueuedEvent.Wait();
+                }));
 
             using var sut = _fixture.GetSut();
 
             // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+            sut.EnqueueEnvelope(envelope);
+            transportEvent.Wait(); // Wait first event to be in-flight
 
             await sut.FlushAsync(TimeSpan.Zero);
         }
@@ -367,28 +375,29 @@ namespace Sentry.Tests.Internals
             // Arrange
             var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
+            using var transportEvent = new ManualResetEventSlim(false);
+            using var eventsQueuedEvent = new ManualResetEventSlim(false);
 
             _fixture.SentryOptions.MaxQueueItems = 1;
             _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
+                .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
+                .Returns(Task.Run(() =>
                 {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
+                    // Run on separate thread to avoid deadlock
+                    transportEvent.Set();
+                    eventsQueuedEvent.Wait();
+                }));
 
             using var sut = _fixture.GetSut();
 
             // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+            sut.EnqueueEnvelope(envelope);
+            transportEvent.Wait(); // Wait first event to be in-flight
 
             await sut.FlushAsync(TimeSpan.FromSeconds(1));
 
             _fixture.Logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
-            _ = Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
+            Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
         }
     }
 }
