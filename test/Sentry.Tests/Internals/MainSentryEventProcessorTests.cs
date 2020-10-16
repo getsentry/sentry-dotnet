@@ -187,7 +187,7 @@ namespace Sentry.Tests.Internals
         [InlineData("", Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
         [InlineData(" ", Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
         [InlineData("a", "a")] // Provided: nothing will change.
-        [InlineData("production", "production")] // Provided: nothing will change. (value has a lower case 'p', different to default value)
+        [InlineData("Production", "Production")] // Provided: nothing will change. (value has a upper case 'p', different to default value)
         [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
         public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
         {
