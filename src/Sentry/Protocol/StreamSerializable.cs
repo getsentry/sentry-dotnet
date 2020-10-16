@@ -13,7 +13,7 @@ namespace Sentry.Protocol
 
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            await _source.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+            await _source.CopyToAsync(stream, cancellationToken);
 
         /// <inheritdoc />
         public void Dispose() => _source.Dispose();

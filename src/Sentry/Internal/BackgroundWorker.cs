@@ -46,7 +46,7 @@ namespace Sentry.Internal
             _shutdownSource = shutdownSource ?? new CancellationTokenSource();
             _queuedEnvelopeSemaphore = new SemaphoreSlim(0, _maxItems);
 
-            WorkerTask = Task.Run(async () => await WorkerAsync().ConfigureAwait(false));
+            WorkerTask = Task.Run(async () => await WorkerAsync());
         }
 
         public bool EnqueueEnvelope(Envelope envelope)
@@ -87,7 +87,7 @@ namespace Sentry.Internal
                     {
                         try
                         {
-                            await _queuedEnvelopeSemaphore.WaitAsync(cancellation).ConfigureAwait(false);
+                            await _queuedEnvelopeSemaphore.WaitAsync(cancellation);
                         }
                         // Cancellation requested, scheduled shutdown but continue in case there are more items
                         catch (OperationCanceledException)
@@ -128,7 +128,7 @@ namespace Sentry.Internal
                                 _queue.Count
                             );
 
-                            await task.ConfigureAwait(false);
+                            await task;
                         }
                         catch (OperationCanceledException)
                         {
@@ -239,7 +239,7 @@ namespace Sentry.Internal
                 }
 
                 // Await until event is flushed or one of the tokens triggers
-                await Task.Delay(timeout, timeoutWithShutdown.Token).ConfigureAwait(false);
+                await Task.Delay(timeout, timeoutWithShutdown.Token);
                 _options.DiagnosticLogger?.LogDebug("Timeout when trying to flush queue.");
             }
             catch (OperationCanceledException)

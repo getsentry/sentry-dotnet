@@ -8,7 +8,7 @@ namespace Sentry.Internal.Extensions
     {
         public static async Task<JToken> ReadAsJsonAsync(this HttpContent content)
         {
-            var raw = await content.ReadAsStringAsync().ConfigureAwait(false);
+            var raw = await content.ReadAsStringAsync();
             return JToken.Parse(raw);
         }
     }

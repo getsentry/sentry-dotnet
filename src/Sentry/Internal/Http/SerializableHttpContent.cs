@@ -17,7 +17,7 @@ namespace Sentry.Internal.Http
 
         protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
-            await _envelope.SerializeAsync(stream).ConfigureAwait(false);
+            await _envelope.SerializeAsync(stream);
         }
 
         protected override bool TryComputeLength(out long length)

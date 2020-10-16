@@ -13,7 +13,7 @@ namespace Sentry.Testing
             CancellationToken cancellationToken = default)
         {
             using var stream = new MemoryStream();
-            await serializable.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            await serializable.SerializeAsync(stream, cancellationToken);
             return Encoding.UTF8.GetString(stream.ToArray());
         }
     }

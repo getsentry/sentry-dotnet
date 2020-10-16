@@ -47,13 +47,13 @@ namespace Sentry.Protocol
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Header
-            await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
+            await Json.SerializeToStreamAsync(Header, stream, cancellationToken);
             stream.WriteByte((byte)'\n');
 
             // Items
             foreach (var item in Items)
             {
-                await item.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await item.SerializeAsync(stream, cancellationToken);
                 stream.WriteByte((byte)'\n');
             }
         }

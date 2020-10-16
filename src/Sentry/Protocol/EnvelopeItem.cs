@@ -50,7 +50,7 @@ namespace Sentry.Protocol
         private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
         {
             var buffer = new MemoryStream();
-            await Payload.SerializeAsync(buffer, cancellationToken).ConfigureAwait(false);
+            await Payload.SerializeAsync(buffer, cancellationToken);
             buffer.Seek(0, SeekOrigin.Begin);
 
             return buffer;
@@ -63,27 +63,27 @@ namespace Sentry.Protocol
             if (TryGetLength() != null)
             {
                 // Header
-                await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
+                await Json.SerializeToStreamAsync(Header, stream, cancellationToken);
                 stream.WriteByte((byte)'\n');
 
                 // Payload
-                await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await Payload.SerializeAsync(stream, cancellationToken);
             }
             // Length is NOT known (need to calculate)
             else
             {
-                using var payloadBuffer = await BufferPayloadAsync(cancellationToken).ConfigureAwait(false);
+                using var payloadBuffer = await BufferPayloadAsync(cancellationToken);
 
                 // Header
                 var headerWithLength = Header.ToDictionary();
                 headerWithLength[LengthKey] = payloadBuffer.Length;
                 var headerData = Json.SerializeToByteArray(headerWithLength);
 
-                await stream.WriteAsync(headerData, cancellationToken).ConfigureAwait(false);
+                await stream.WriteAsync(headerData, cancellationToken);
                 stream.WriteByte((byte)'\n');
 
                 // Payload
-                await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+                await payloadBuffer.CopyToAsync(stream, cancellationToken);
             }
         }
 

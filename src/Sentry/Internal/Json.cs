@@ -51,7 +51,7 @@ namespace Sentry.Internal
         {
             using var writer = CreateWriter(stream);
             Serializer.Serialize(writer, obj);
-            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            await writer.FlushAsync(cancellationToken);
         }
     }
 }

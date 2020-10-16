@@ -32,7 +32,7 @@ namespace Sentry.Internal.Http
         public async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
             var request = CreateRequest(envelope);
-            var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -43,7 +43,7 @@ namespace Sentry.Internal.Http
             }
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
-                var responseJson = await response.Content.ReadAsJsonAsync().ConfigureAwait(false);
+                var responseJson = await response.Content.ReadAsJsonAsync();
                 var errorMessage = responseJson.SelectToken("detail")?.Value<string>() ?? NoMessageFallback;
 
                 _options.DiagnosticLogger?.Log(
