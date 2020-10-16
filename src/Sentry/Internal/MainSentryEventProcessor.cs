@@ -136,9 +136,16 @@ namespace Sentry.Internal
                 @event.Release = _options.Release ?? Release;
             }
 
-            if (@event.Environment == null)
+            // Recommendation: The 'Environment' setting should always be set
+            //                 with a default fallback.
+            if (string.IsNullOrWhiteSpace(@event.Environment))
             {
-                @event.Environment = _options.Environment ?? EnvironmentLocator.Locate();
+                var foundEnvironment = EnvironmentLocator.Locate();
+                @event.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
+                    ? string.IsNullOrWhiteSpace(_options.Environment)
+                        ? Constants.DefaultEnvironmentSetting
+                        : _options.Environment
+                    : foundEnvironment;
             }
 
             if (@event.Exception == null)
