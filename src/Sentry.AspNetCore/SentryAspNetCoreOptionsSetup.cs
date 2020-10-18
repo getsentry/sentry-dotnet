@@ -25,10 +25,56 @@ namespace Sentry.AspNetCore
         {
             base.Configure(options);
 
-            // Don't override user defined value
-            options.Environment ??=
-                EnvironmentLocator.Locate() // Sentry specific environment takes precedence #92
-                ?? _hostingEnvironment.EnvironmentName;
+            // Don't override user defined value.
+            if (string.IsNullOrWhiteSpace(options.Environment))
+            {
+                var locatedEnvironment = EnvironmentLocator.Locate();
+                if (!string.IsNullOrWhiteSpace(locatedEnvironment))
+                {
+                    // Sentry specific environment takes precedence #92.
+                    options.Environment = locatedEnvironment;
+                }
+                else
+                {
+                    // NOTE: Sentry prefers to have it's environment setting to be all lower case.
+                    //       .NET Core sets the ENV variable to 'Production' (upper case P) or
+                    //       'Development' (upper case D) which conflicts with the Sentry recommendation.
+                    //       As such, we'll be kind and override those values, here ... if applicable.
+                    // Assumption: The Hosting Environment is always set.
+                    //             If not set by a developer, then the framework will auto set it.
+                    //             Alternatively, developers might set this to a CUSTOM value, which we
+                    //             need to respect (especially the case-sensitivity).
+                    //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
+#if NETSTANDARD2_0
+                    if (_hostingEnvironment.Equals("Production"))
+                    {
+                        options.Environment = Internal.Constants.DefaultEnvironmentSetting;
+                    }
+                    else if (_hostingEnvironment.EnvironmentName.Equals("Development"))
+                    {
+                        options.Environment = "development";
+                    }
+#else
+                    if (_hostingEnvironment.EnvironmentName.Equals(Microsoft.Extensions.Hosting.Environments.Production))
+                    {
+                        options.Environment = Internal.Constants.DefaultEnvironmentSetting;
+                    }
+                    else if (_hostingEnvironment.EnvironmentName.Equals(Microsoft.Extensions.Hosting.Environments.Development))
+                    {
+                        options.Environment = Microsoft.Extensions.Hosting.Environments.Development.ToLower();
+                    }
+#endif
+                    else
+                    {
+                        // Use the value set by the developer.
+                        options.Environment = _hostingEnvironment.EnvironmentName;
+                    }
+                }
+            }
+            //// Don't override user defined value
+            //options.Environment ??=
+            //    EnvironmentLocator.Locate() // Sentry specific environment takes precedence #92
+            //    ?? _hostingEnvironment.EnvironmentName;
 
             options.AddLogEntryFilter((category, level, eventId, exception)
                 // https://github.com/aspnet/KestrelHttpServer/blob/0aff4a0440c2f393c0b98e9046a8e66e30a56cb0/src/Kestrel.Core/Internal/Infrastructure/KestrelTrace.cs#L33
