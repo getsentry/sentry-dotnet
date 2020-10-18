@@ -46,7 +46,7 @@ namespace Sentry.AspNetCore
                     //             need to respect (especially the case-sensitivity).
                     //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
 #if NETSTANDARD2_0
-                    if (_hostingEnvironment.Equals("Production"))
+                    if (_hostingEnvironment.EnvironmentName.Equals("Production"))
                     {
                         options.Environment = Internal.Constants.DefaultEnvironmentSetting;
                     }
