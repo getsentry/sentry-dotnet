@@ -8,5 +8,5 @@ dotnet test -c Release -l $testLogger `
     /p:Exclude='"""[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\"""'
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-dotnet pack -c Release --no-build -p:SymbolPackageFormat=snupkg
+dotnet pack -c Release --no-build
 if ($LASTEXITCODE -ne 0) { exit 1 }
