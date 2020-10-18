@@ -7,7 +7,7 @@
 * Rename `LogEntry` to `SentryMessage`. Change type of `SentryEvent.Message` from `string` to `SentryMessage`.
 * Change the type of `Gpu.VendorId` from `int` to `string`.
 * Add support for envelopes.
-* Souce-link integration.
+* Publishing symbols package (snupkg) to nuget.org with sourcelink
 
 # 3.0.0-alpha.0
 
