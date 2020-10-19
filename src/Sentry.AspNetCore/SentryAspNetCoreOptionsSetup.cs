@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Internal;
+using Microsoft.Extensions.Hosting;
 #if NETSTANDARD2_0
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
@@ -45,25 +46,15 @@ namespace Sentry.AspNetCore
                     //             Alternatively, developers might set this to a CUSTOM value, which we
                     //             need to respect (especially the case-sensitivity).
                     //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
-#if NETSTANDARD2_0
-                    if (_hostingEnvironment.EnvironmentName.Equals("Production"))
+
+                    if (_hostingEnvironment.EnvironmentName.Equals(Constants.ASPNETCoreProductionEnvironmentName))
                     {
-                        options.Environment = Internal.Constants.DefaultEnvironmentSetting;
+                        options.Environment = Internal.Constants.ProductionEnvironmentSetting;
                     }
-                    else if (_hostingEnvironment.EnvironmentName.Equals("Development"))
+                    else if (_hostingEnvironment.EnvironmentName.Equals(Constants.ASPNETCoreDevelopmentEnvironmentName))
                     {
-                        options.Environment = "development";
+                        options.Environment = Internal.Constants.DevelopmentEnvironmentSetting;
                     }
-#else
-                    if (_hostingEnvironment.EnvironmentName.Equals(Microsoft.Extensions.Hosting.Environments.Production))
-                    {
-                        options.Environment = Internal.Constants.DefaultEnvironmentSetting;
-                    }
-                    else if (_hostingEnvironment.EnvironmentName.Equals(Microsoft.Extensions.Hosting.Environments.Development))
-                    {
-                        options.Environment = Microsoft.Extensions.Hosting.Environments.Development.ToLowerInvariant();
-                    }
-#endif
                     else
                     {
                         // Use the value set by the developer.
