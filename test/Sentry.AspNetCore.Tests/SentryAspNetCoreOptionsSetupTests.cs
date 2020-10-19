@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using NSubstitute;
 using Xunit;
+using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests
 {
