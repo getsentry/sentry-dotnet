@@ -416,6 +416,7 @@ namespace Sentry
                     "SkiaSharp",
                     "IdentityModel",
                     "SqlitePclRaw",
+                    "Xamarin",
                     "Google.",
                     "MongoDB.",
                     "Remotion.Linq",
