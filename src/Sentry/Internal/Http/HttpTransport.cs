@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -17,6 +19,10 @@ namespace Sentry.Internal.Http
         private readonly HttpClient _httpClient;
         private readonly Action<HttpRequestHeaders> _addAuth;
 
+        // Envelope item type -> rate limit reset mapping
+        private readonly Dictionary<string, DateTimeOffset> _quotaLimitResets =
+            new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase);
+
         internal const string NoMessageFallback = "No message";
 
         public HttpTransport(
@@ -31,14 +37,62 @@ namespace Sentry.Internal.Http
 
         public async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
-            var request = CreateRequest(envelope);
+            var instant = DateTimeOffset.Now;
+
+            // Discard envelope items if they don't fit in the quota limit
+            var envelopeItems = new List<EnvelopeItem>();
+            foreach (var envelopeItem in envelope.Items)
+            {
+                var category = envelopeItem.TryGetType();
+
+                if (!string.IsNullOrWhiteSpace(category) &&
+                    _quotaLimitResets.TryGetValue(category, out var resetInstant))
+                {
+                    if (instant > resetInstant)
+                    {
+                        envelopeItems.Add(envelopeItem);
+                    }
+                }
+                else
+                {
+                    envelopeItems.Add(envelopeItem);
+                }
+            }
+
+            if (!envelopeItems.Any())
+            {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Envelope {0} was discarded because all contained items are rate-limited.",
+                    envelope.TryGetEventId()
+                );
+                return;
+            }
+
+            // TODO: optimize/refactor
+            var actualEnvelope = new Envelope(envelope.Header, envelopeItems);
+
+            var request = CreateRequest(actualEnvelope);
             var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+            // Read & set quota limits for future
+            if (response.Headers.TryGetValues("X-Sentry-Rate-Limits", out var quotaLimitValues))
+            {
+                var quotaLimits = quotaLimitValues.Select(SentryEnvelopeQuotaLimit.Parse).ToArray();
+
+                foreach (var quotaLimit in quotaLimits)
+                {
+                    foreach (var quotaLimitCategory in quotaLimit.Categories)
+                    {
+                        _quotaLimitResets[quotaLimitCategory] = instant + quotaLimit.RetryAfter;
+                    }
+                }
+            }
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Envelope {0} successfully received by Sentry.",
-                    envelope.TryGetEventId()
+                    actualEnvelope.TryGetEventId()
                 );
             }
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
@@ -50,7 +104,7 @@ namespace Sentry.Internal.Http
                     SentryLevel.Error,
                     "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}",
                     null,
-                    envelope.TryGetEventId(),
+                    actualEnvelope.TryGetEventId(),
                     response.StatusCode,
                     errorMessage
                 );
