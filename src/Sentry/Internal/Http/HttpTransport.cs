@@ -52,6 +52,13 @@ namespace Sentry.Internal.Http
                     {
                         envelopeItems.Add(envelopeItem);
                     }
+                    else
+                    {
+                        _options.DiagnosticLogger?.LogDebug(
+                            "Envelope item of type {0} was discarded because it's rate-limited.",
+                            envelopeItem.TryGetType()
+                        );
+                    }
                 }
                 else
                 {
