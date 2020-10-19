@@ -61,7 +61,7 @@ namespace Sentry.Internal.Http
 
             if (!envelopeItems.Any())
             {
-                _options.DiagnosticLogger?.LogInformation(
+                _options.DiagnosticLogger?.LogInfo(
                     "Envelope {0} was discarded because all contained items are rate-limited.",
                     envelope.TryGetEventId()
                 );
