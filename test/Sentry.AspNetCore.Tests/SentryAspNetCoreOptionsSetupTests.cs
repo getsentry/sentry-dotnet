@@ -49,7 +49,7 @@ namespace Sentry.AspNetCore.Tests
         [InlineData("", "Development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is default DEV.
         [InlineData(null, "production", "production")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'p').
         [InlineData(null, "development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'd').
-        public void Filters_Environment_SentryEnvironment_Set(string environment, string hostingEnvironmentSetting, string expectedEnvironment)
+        public void Filters_Environment_CustomOrASPNETEnvironment_Set(string environment, string hostingEnvironmentSetting, string expectedEnvironment)
         {
             // Arrange.
             var hostingEnvironment = Substitute.For<IHostingEnvironment>();
@@ -67,6 +67,21 @@ namespace Sentry.AspNetCore.Tests
 
             // Assert.
             Assert.Equal(expectedEnvironment, _target.Environment);
+        }
+
+        [Theory]
+        [InlineData("foo")] // Random setting.
+        [InlineData("Production")] // Custom setting which is the same as ASPNET_ENVIRONMENT. But because this is manually set, don't change it.
+        public void Filters_Environment_SentryEnvironment_Set(string environment)
+        {
+            // Arrange.
+            Environment.SetEnvironmentVariable(Internal.Constants.EnvironmentEnvironmentVariable, environment);
+
+            // Act.
+            _sut.Configure(_target);
+
+            // Assert.
+            Assert.Equal(environment, _target.Environment);
         }
     }
 }
