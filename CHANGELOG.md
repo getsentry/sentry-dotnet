@@ -1,6 +1,7 @@
 # unreleased
 
 * Set the Environment setting to 'production' if none was provided. (#550) @PureKrome
+* Add most popular libraries to InAppExclude #555 (@bruno-garcia)
 
 # 3.0.0-alpha.1
 
