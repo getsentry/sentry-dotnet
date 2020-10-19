@@ -75,13 +75,14 @@ namespace Sentry.AspNetCore.Tests
         public void Filters_Environment_SentryEnvironment_Set(string environment)
         {
             // Arrange.
-            Environment.SetEnvironmentVariable(Internal.Constants.EnvironmentEnvironmentVariable, environment);
+            EnvironmentVariableGuard.WithVariable(Internal.Constants.EnvironmentEnvironmentVariable, environment, () =>
+            {
+                // Act.
+                _sut.Configure(_target);
 
-            // Act.
-            _sut.Configure(_target);
-
-            // Assert.
-            Assert.Equal(environment, _target.Environment);
+                // Assert.
+                Assert.Equal(environment, _target.Environment);
+            });
         }
     }
 }
