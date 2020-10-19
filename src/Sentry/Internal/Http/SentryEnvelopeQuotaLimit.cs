@@ -7,16 +7,16 @@ namespace Sentry.Internal.Http
 {
     internal class SentryEnvelopeQuotaLimit
     {
-        public TimeSpan RetryAfter { get; }
-
         public IReadOnlyList<string> Categories { get; }
+
+        public TimeSpan RetryAfter { get; }
 
         public bool IsAllCategories => !Categories.Any();
 
-        public SentryEnvelopeQuotaLimit(TimeSpan retryAfter, IReadOnlyList<string> categories)
+        public SentryEnvelopeQuotaLimit(IReadOnlyList<string> categories, TimeSpan retryAfter)
         {
-            RetryAfter = retryAfter;
             Categories = categories;
+            RetryAfter = retryAfter;
         }
 
         public static SentryEnvelopeQuotaLimit Parse(string quotaLimit)
@@ -28,8 +28,8 @@ namespace Sentry.Internal.Http
             var categories = components[1].Split(';');
 
             return new SentryEnvelopeQuotaLimit(
-                retryAfter,
-                categories
+                categories,
+                retryAfter
             );
         }
     }
