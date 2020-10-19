@@ -61,7 +61,7 @@ namespace Sentry.AspNetCore
                     }
                     else if (_hostingEnvironment.EnvironmentName.Equals(Microsoft.Extensions.Hosting.Environments.Development))
                     {
-                        options.Environment = Microsoft.Extensions.Hosting.Environments.Development.ToLower();
+                        options.Environment = Microsoft.Extensions.Hosting.Environments.Development.ToLowerInvariant();
                     }
 #endif
                     else
