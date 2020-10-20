@@ -20,8 +20,8 @@ namespace Sentry.Internal.Http
         private readonly Action<HttpRequestHeaders> _addAuth;
 
         // Category -> rate limit reset mapping
-        private readonly Dictionary<SentryEnvelopeQuotaLimitCategory, DateTimeOffset> _categoryLimitResets =
-            new Dictionary<SentryEnvelopeQuotaLimitCategory, DateTimeOffset>();
+        private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets =
+            new Dictionary<RateLimitCategory, DateTimeOffset>();
 
         internal const string NoMessageFallback = "No message";
 
@@ -79,7 +79,7 @@ namespace Sentry.Internal.Http
             // Read & set quota limits for future
             if (response.Headers.TryGetValues("X-Sentry-Rate-Limits", out var quotaLimitValues))
             {
-                var quotaLimits = quotaLimitValues.Select(SentryEnvelopeQuotaLimit.Parse).ToArray();
+                var quotaLimits = quotaLimitValues.Select(RateLimit.Parse).ToArray();
 
                 foreach (var quotaLimit in quotaLimits)
                 {

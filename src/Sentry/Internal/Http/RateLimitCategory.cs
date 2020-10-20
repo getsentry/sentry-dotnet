@@ -3,13 +3,13 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal.Http
 {
-    public class SentryEnvelopeQuotaLimitCategory
+    public class RateLimitCategory
     {
         public string Name { get; }
 
         public bool IsMatchAll => string.IsNullOrWhiteSpace(Name);
 
-        public SentryEnvelopeQuotaLimitCategory(string name) => Name = name;
+        public RateLimitCategory(string name) => Name = name;
 
         public bool MatchesItem(EnvelopeItem item)
         {

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Sentry.Tests.Internals.Http
 {
-    public class SentryEnvelopeQuotaLimitTests
+    public class RateLimitTests
     {
         [Fact]
         public void Parse_MinimalFormat_Works()
@@ -14,11 +14,11 @@ namespace Sentry.Tests.Internals.Http
             const string value = "60:transaction";
 
             // Act
-            var quotaLimit = SentryEnvelopeQuotaLimit.Parse(value);
+            var quotaLimit = RateLimit.Parse(value);
 
             // Assert
-            quotaLimit.Should().BeEquivalentTo(new SentryEnvelopeQuotaLimit(
-                new[] {new SentryEnvelopeQuotaLimitCategory("transaction")},
+            quotaLimit.Should().BeEquivalentTo(new RateLimit(
+                new[] {new RateLimitCategory("transaction")},
                 TimeSpan.FromSeconds(60)
             ));
         }
@@ -30,11 +30,11 @@ namespace Sentry.Tests.Internals.Http
             const string value = "60:transaction:key";
 
             // Act
-            var quotaLimit = SentryEnvelopeQuotaLimit.Parse(value);
+            var quotaLimit = RateLimit.Parse(value);
 
             // Assert
-            quotaLimit.Should().BeEquivalentTo(new SentryEnvelopeQuotaLimit(
-                new[] {new SentryEnvelopeQuotaLimitCategory("transaction")},
+            quotaLimit.Should().BeEquivalentTo(new RateLimit(
+                new[] {new RateLimitCategory("transaction")},
                 TimeSpan.FromSeconds(60)
             ));
         }
@@ -46,15 +46,15 @@ namespace Sentry.Tests.Internals.Http
             const string value = "2700:default;error;security:organization";
 
             // Act
-            var quotaLimit = SentryEnvelopeQuotaLimit.Parse(value);
+            var quotaLimit = RateLimit.Parse(value);
 
             // Assert
-            quotaLimit.Should().BeEquivalentTo(new SentryEnvelopeQuotaLimit(
+            quotaLimit.Should().BeEquivalentTo(new RateLimit(
                 new[]
                 {
-                    new SentryEnvelopeQuotaLimitCategory("default"),
-                    new SentryEnvelopeQuotaLimitCategory("error"),
-                    new SentryEnvelopeQuotaLimitCategory("security")
+                    new RateLimitCategory("default"),
+                    new RateLimitCategory("error"),
+                    new RateLimitCategory("security")
                 },
                 TimeSpan.FromSeconds(2700)
             ));

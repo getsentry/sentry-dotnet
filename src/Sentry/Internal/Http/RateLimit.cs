@@ -5,29 +5,29 @@ using System.Linq;
 
 namespace Sentry.Internal.Http
 {
-    internal class SentryEnvelopeQuotaLimit
+    internal class RateLimit
     {
-        public IReadOnlyList<SentryEnvelopeQuotaLimitCategory> Categories { get; }
+        public IReadOnlyList<RateLimitCategory> Categories { get; }
 
         public TimeSpan RetryAfter { get; }
 
-        public SentryEnvelopeQuotaLimit(
-            IReadOnlyList<SentryEnvelopeQuotaLimitCategory> categories,
+        public RateLimit(
+            IReadOnlyList<RateLimitCategory> categories,
             TimeSpan retryAfter)
         {
             Categories = categories;
             RetryAfter = retryAfter;
         }
 
-        public static SentryEnvelopeQuotaLimit Parse(string quotaLimit)
+        public static RateLimit Parse(string quotaLimit)
         {
             // Don't remove empty entries because some components may be empty (e.g. categories)
             var components = quotaLimit.Split(':');
 
             var retryAfter = TimeSpan.FromSeconds(int.Parse(components[0], CultureInfo.InvariantCulture));
-            var categories = components[1].Split(';').Select(c => new SentryEnvelopeQuotaLimitCategory(c)).ToArray();
+            var categories = components[1].Split(';').Select(c => new RateLimitCategory(c)).ToArray();
 
-            return new SentryEnvelopeQuotaLimit(
+            return new RateLimit(
                 categories,
                 retryAfter
             );
