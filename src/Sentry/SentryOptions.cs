@@ -408,7 +408,7 @@ namespace Sentry
                     "AWSSDK",
                     "Polly",
                     "Swashbuckle",
-                    "Fluentassertions",
+                    "FluentValidation",
                     "Autofac",
                     "Stackexchange.Redis",
                     "Dapper",
