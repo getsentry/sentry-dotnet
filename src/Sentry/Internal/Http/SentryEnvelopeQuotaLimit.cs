@@ -7,13 +7,13 @@ namespace Sentry.Internal.Http
 {
     internal class SentryEnvelopeQuotaLimit
     {
-        public IReadOnlyList<string> Categories { get; }
+        public IReadOnlyList<SentryEnvelopeQuotaLimitCategory> Categories { get; }
 
         public TimeSpan RetryAfter { get; }
 
-        public bool IsAllCategories => !Categories.Any();
-
-        public SentryEnvelopeQuotaLimit(IReadOnlyList<string> categories, TimeSpan retryAfter)
+        public SentryEnvelopeQuotaLimit(
+            IReadOnlyList<SentryEnvelopeQuotaLimitCategory> categories,
+            TimeSpan retryAfter)
         {
             Categories = categories;
             RetryAfter = retryAfter;
@@ -25,7 +25,7 @@ namespace Sentry.Internal.Http
             var components = quotaLimit.Split(':');
 
             var retryAfter = TimeSpan.FromSeconds(int.Parse(components[0], CultureInfo.InvariantCulture));
-            var categories = components[1].Split(';');
+            var categories = components[1].Split(';').Select(c => new SentryEnvelopeQuotaLimitCategory(c)).ToArray();
 
             return new SentryEnvelopeQuotaLimit(
                 categories,

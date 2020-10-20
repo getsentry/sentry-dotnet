@@ -18,7 +18,7 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             quotaLimit.Should().BeEquivalentTo(new SentryEnvelopeQuotaLimit(
-                new[] {"transaction"},
+                new[] {new SentryEnvelopeQuotaLimitCategory("transaction")},
                 TimeSpan.FromSeconds(60)
             ));
         }
@@ -34,7 +34,7 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             quotaLimit.Should().BeEquivalentTo(new SentryEnvelopeQuotaLimit(
-                new[] {"transaction"},
+                new[] {new SentryEnvelopeQuotaLimitCategory("transaction")},
                 TimeSpan.FromSeconds(60)
             ));
         }
@@ -50,7 +50,12 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             quotaLimit.Should().BeEquivalentTo(new SentryEnvelopeQuotaLimit(
-                new[] {"default", "error", "security"},
+                new[]
+                {
+                    new SentryEnvelopeQuotaLimitCategory("default"),
+                    new SentryEnvelopeQuotaLimitCategory("error"),
+                    new SentryEnvelopeQuotaLimitCategory("security")
+                },
                 TimeSpan.FromSeconds(2700)
             ));
         }

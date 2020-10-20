@@ -19,9 +19,9 @@ namespace Sentry.Internal.Http
         private readonly HttpClient _httpClient;
         private readonly Action<HttpRequestHeaders> _addAuth;
 
-        // Envelope item type -> rate limit reset mapping
-        private readonly Dictionary<string, DateTimeOffset> _quotaLimitResets =
-            new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase);
+        // Category -> rate limit reset mapping
+        private readonly Dictionary<SentryEnvelopeQuotaLimitCategory, DateTimeOffset> _categoryLimitResets =
+            new Dictionary<SentryEnvelopeQuotaLimitCategory, DateTimeOffset>();
 
         internal const string NoMessageFallback = "No message";
 
@@ -43,26 +43,21 @@ namespace Sentry.Internal.Http
             var envelopeItems = new List<EnvelopeItem>();
             foreach (var envelopeItem in envelope.Items)
             {
-                var category = envelopeItem.TryGetType();
+                // Check if there is at least one matching category that is rate-limited
+                var isRateLimited = _categoryLimitResets
+                    .Where(kvp => kvp.Value <= instant)
+                    .Any(kvp => kvp.Key.MatchesItem(envelopeItem));
 
-                if (!string.IsNullOrWhiteSpace(category) &&
-                    _quotaLimitResets.TryGetValue(category, out var resetInstant))
+                if (!isRateLimited)
                 {
-                    if (instant > resetInstant)
-                    {
-                        envelopeItems.Add(envelopeItem);
-                    }
-                    else
-                    {
-                        _options.DiagnosticLogger?.LogDebug(
-                            "Envelope item of type {0} was discarded because it's rate-limited.",
-                            envelopeItem.TryGetType()
-                        );
-                    }
+                    envelopeItems.Add(envelopeItem);
                 }
                 else
                 {
-                    envelopeItems.Add(envelopeItem);
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Envelope item of type {0} was discarded because it's rate-limited.",
+                        envelopeItem.TryGetType()
+                    );
                 }
             }
 
@@ -90,7 +85,7 @@ namespace Sentry.Internal.Http
                 {
                     foreach (var quotaLimitCategory in quotaLimit.Categories)
                     {
-                        _quotaLimitResets[quotaLimitCategory] = instant + quotaLimit.RetryAfter;
+                        _categoryLimitResets[quotaLimitCategory] = instant + quotaLimit.RetryAfter;
                     }
                 }
             }
