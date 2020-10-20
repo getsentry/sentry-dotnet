@@ -143,7 +143,7 @@ namespace Sentry.Internal
                 var foundEnvironment = EnvironmentLocator.Locate();
                 @event.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
                     ? string.IsNullOrWhiteSpace(_options.Environment)
-                        ? Constants.DefaultEnvironmentSetting
+                        ? Constants.ProductionEnvironmentSetting
                         : _options.Environment
                     : foundEnvironment;
             }
