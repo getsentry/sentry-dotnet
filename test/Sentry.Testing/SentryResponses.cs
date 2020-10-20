@@ -2,7 +2,6 @@ using System;
 using System.Net;
 using System.Net.Http;
 using Sentry.Internal;
-using Sentry.Internal.Http;
 
 namespace Sentry.Testing
 {
@@ -25,6 +24,14 @@ namespace Sentry.Testing
         {
             var responseContent = Json.Serialize(new {detail = errorMessage});
             return new HttpResponseMessage(code) {Content = new StringContent(responseContent)};
+        }
+
+        public static HttpResponseMessage GetRateLimitResponse(string rateLimitHeaderValue)
+        {
+            return new HttpResponseMessage((HttpStatusCode)429)
+            {
+                Headers = {{"X-Sentry-Rate-Limit", rateLimitHeaderValue}}
+            };
         }
     }
 }
