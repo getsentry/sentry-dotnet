@@ -43,9 +43,9 @@ namespace Sentry.Internal.Http
             var envelopeItems = new List<EnvelopeItem>();
             foreach (var envelopeItem in envelope.Items)
             {
-                // Check if there is at least one matching category that is rate-limited
+                // Check if there is at least one matching category for this item that is rate-limited
                 var isRateLimited = _categoryLimitResets
-                    .Where(kvp => kvp.Value <= instant)
+                    .Where(kvp => kvp.Value > instant)
                     .Any(kvp => kvp.Key.MatchesItem(envelopeItem));
 
                 if (!isRateLimited)
@@ -77,15 +77,17 @@ namespace Sentry.Internal.Http
             var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             // Read & set quota limits for future
-            if (response.Headers.TryGetValues("X-Sentry-Rate-Limits", out var quotaLimitValues))
+            if (response.Headers.TryGetValues("X-Sentry-Rate-Limits", out var rateLimitHeaderValues))
             {
-                var quotaLimits = quotaLimitValues.Select(RateLimit.Parse).ToArray();
+                // Handle both multi-header and single-header cases
+                var rateLimitsEncoded = string.Join(",", rateLimitHeaderValues);
+                var rateLimits = RateLimit.ParseMany(rateLimitsEncoded);
 
-                foreach (var quotaLimit in quotaLimits)
+                foreach (var rateLimit in rateLimits)
                 {
-                    foreach (var quotaLimitCategory in quotaLimit.Categories)
+                    foreach (var rateLimitCategory in rateLimit.Categories)
                     {
-                        _categoryLimitResets[quotaLimitCategory] = instant + quotaLimit.RetryAfter;
+                        _categoryLimitResets[rateLimitCategory] = instant + rateLimit.RetryAfter;
                     }
                 }
             }

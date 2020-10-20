@@ -30,7 +30,7 @@ namespace Sentry.Testing
         {
             return new HttpResponseMessage((HttpStatusCode)429)
             {
-                Headers = {{"X-Sentry-Rate-Limit", rateLimitHeaderValue}}
+                Headers = {{"X-Sentry-Rate-Limits", rateLimitHeaderValue}}
             };
         }
     }

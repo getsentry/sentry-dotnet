@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -25,7 +26,7 @@ namespace Sentry.Tests.Internals.Http
 
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
-            httpHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetOkResponse());
 
             var httpTransport = new HttpTransport(
@@ -44,7 +45,7 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             await httpHandler
                 .Received(1)
-                .VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
+                .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
         }
 
         [Fact]
@@ -56,7 +57,7 @@ namespace Sentry.Tests.Internals.Http
 
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
-            httpHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage));
 
             var logger = new AccumulativeDiagnosticLogger();
@@ -96,7 +97,7 @@ namespace Sentry.Tests.Internals.Http
 
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
-            httpHandler.VerifyableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+            httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, null));
 
             var logger = new AccumulativeDiagnosticLogger();
@@ -126,6 +127,70 @@ namespace Sentry.Tests.Internals.Http
                 e.Args[1].ToString() == expectedCode.ToString() &&
                 e.Args[2].ToString() == HttpTransport.NoMessageFallback
             ).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task SendEnvelopeAsync_ItemRateLimit_DropsItem()
+        {
+            // Arrange
+            var httpHandler = new FakeHttpMessageHandler(
+                _ => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            );
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret
+                },
+                new HttpClient(httpHandler),
+                _ => { }
+            );
+
+            // First request always goes through
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+            var envelope = new Envelope(
+                new Dictionary<string, object>(),
+                new[]
+                {
+                    // Should be dropped
+                    new EnvelopeItem(
+                        new Dictionary<string, object> {["type"] = "event"},
+                        new EmptySerializable()),
+                    new EnvelopeItem(
+                        new Dictionary<string, object> {["type"] = "event"},
+                        new EmptySerializable()),
+                    new EnvelopeItem(
+                        new Dictionary<string, object> {["type"] = "transaction"},
+                        new EmptySerializable()),
+
+                    // Should stay
+                    new EnvelopeItem(
+                        new Dictionary<string, object> {["type"] = "other"},
+                        new EmptySerializable())
+                }
+            );
+
+            var expectedEnvelope = new Envelope(
+                new Dictionary<string, object>(),
+                new[]
+                {
+                    new EnvelopeItem(
+                        new Dictionary<string, object> {["type"] = "other"},
+                        new EmptySerializable())
+                }
+            );
+
+            var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync();
+
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            var lastRequest = httpHandler.GetRequests().Last();
+            var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+            // Assert
+            actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
         }
 
         [Fact]

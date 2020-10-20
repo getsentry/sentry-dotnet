@@ -14,10 +14,10 @@ namespace Sentry.Tests.Internals.Http
             const string value = "60:transaction";
 
             // Act
-            var quotaLimit = RateLimit.Parse(value);
+            var rateLimit = RateLimit.Parse(value);
 
             // Assert
-            quotaLimit.Should().BeEquivalentTo(new RateLimit(
+            rateLimit.Should().BeEquivalentTo(new RateLimit(
                 new[] {new RateLimitCategory("transaction")},
                 TimeSpan.FromSeconds(60)
             ));
@@ -30,10 +30,10 @@ namespace Sentry.Tests.Internals.Http
             const string value = "60:transaction:key";
 
             // Act
-            var quotaLimit = RateLimit.Parse(value);
+            var rateLimit = RateLimit.Parse(value);
 
             // Assert
-            quotaLimit.Should().BeEquivalentTo(new RateLimit(
+            rateLimit.Should().BeEquivalentTo(new RateLimit(
                 new[] {new RateLimitCategory("transaction")},
                 TimeSpan.FromSeconds(60)
             ));
@@ -46,10 +46,10 @@ namespace Sentry.Tests.Internals.Http
             const string value = "2700:default;error;security:organization";
 
             // Act
-            var quotaLimit = RateLimit.Parse(value);
+            var rateLimit = RateLimit.Parse(value);
 
             // Assert
-            quotaLimit.Should().BeEquivalentTo(new RateLimit(
+            rateLimit.Should().BeEquivalentTo(new RateLimit(
                 new[]
                 {
                     new RateLimitCategory("default"),

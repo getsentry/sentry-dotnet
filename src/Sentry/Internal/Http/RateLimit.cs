@@ -19,10 +19,10 @@ namespace Sentry.Internal.Http
             RetryAfter = retryAfter;
         }
 
-        public static RateLimit Parse(string quotaLimit)
+        public static RateLimit Parse(string rateLimitEncoded)
         {
             // Don't remove empty entries because some components may be empty (e.g. categories)
-            var components = quotaLimit.Split(':');
+            var components = rateLimitEncoded.Split(':');
 
             var retryAfter = TimeSpan.FromSeconds(int.Parse(components[0], CultureInfo.InvariantCulture));
             var categories = components[1].Split(';').Select(c => new RateLimitCategory(c)).ToArray();
@@ -32,5 +32,8 @@ namespace Sentry.Internal.Http
                 retryAfter
             );
         }
+
+        public static IReadOnlyList<RateLimit> ParseMany(string rateLimitsEncoded) =>
+            rateLimitsEncoded.Split(',').Select(Parse).ToArray();
     }
 }
