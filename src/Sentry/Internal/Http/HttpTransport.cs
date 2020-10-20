@@ -46,7 +46,7 @@ namespace Sentry.Internal.Http
                 // Check if there is at least one matching category for this item that is rate-limited
                 var isRateLimited = _categoryLimitResets
                     .Where(kvp => kvp.Value > instant)
-                    .Any(kvp => kvp.Key.MatchesItem(envelopeItem));
+                    .Any(kvp => kvp.Key.Matches(envelopeItem));
 
                 if (!isRateLimited)
                 {

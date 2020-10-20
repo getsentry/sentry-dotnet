@@ -11,8 +11,9 @@ namespace Sentry.Internal.Http
 
         public RateLimitCategory(string name) => Name = name;
 
-        public bool MatchesItem(EnvelopeItem item)
+        public bool Matches(EnvelopeItem item)
         {
+            // Empty category name matches everything
             if (IsMatchAll)
             {
                 return true;
@@ -24,7 +25,6 @@ namespace Sentry.Internal.Http
                 return false;
             }
 
-            // TODO: figure out how exactly categories map onto item types
             return string.Equals(Name, type, StringComparison.OrdinalIgnoreCase);
         }
     }
