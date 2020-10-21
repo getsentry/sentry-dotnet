@@ -4,6 +4,7 @@
 * ASPNET.Core hosting environment is set to 'production' / 'development' (notice lower casing) if no custom options.Enviroment is set. (#554) @PureKrome
 * Add most popular libraries to InAppExclude #555 (@bruno-garcia)
 * Add support for individual rate limits.
+* Extend `SentryOptions.BeforeBreadcrumb` signature to accept returning nullable values.
 
 # 3.0.0-alpha.1
 
