@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.0.0-alpha.1</Version>
+    <Version>3.0.0-alpha.2</Version>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
