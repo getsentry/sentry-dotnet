@@ -3,7 +3,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal.Http
 {
-    public class RateLimitCategory
+    public class RateLimitCategory : IEquatable<RateLimitCategory>
     {
         public string Name { get; }
 
@@ -13,7 +13,6 @@ namespace Sentry.Internal.Http
 
         public bool Matches(EnvelopeItem item)
         {
-            // Empty category name matches everything
             if (IsMatchAll)
             {
                 return true;
@@ -27,5 +26,42 @@ namespace Sentry.Internal.Http
 
             return string.Equals(Name, type, StringComparison.OrdinalIgnoreCase);
         }
+
+        public bool Equals(RateLimitCategory? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((RateLimitCategory) obj);
+        }
+
+        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
     }
 }

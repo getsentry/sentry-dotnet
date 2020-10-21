@@ -33,7 +33,7 @@ namespace Sentry.Internal.Http
             );
         }
 
-        public static IReadOnlyList<RateLimit> ParseMany(string rateLimitsEncoded) =>
-            rateLimitsEncoded.Split(',').Select(Parse).ToArray();
+        public static IEnumerable<RateLimit> ParseMany(string rateLimitsEncoded) =>
+            rateLimitsEncoded.Split(',').Select(Parse);
     }
 }

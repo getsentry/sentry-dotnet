@@ -125,7 +125,7 @@ namespace Sentry.Tests.Internals.Http
                 e.Exception == null &&
                 e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
                 e.Args[1].ToString() == expectedCode.ToString() &&
-                e.Args[2].ToString() == HttpTransport.NoMessageFallback
+                e.Args[2].ToString() == HttpTransport.DefaultErrorMessage
             ).Should().BeTrue();
         }
 
