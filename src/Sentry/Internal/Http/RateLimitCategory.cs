@@ -3,7 +3,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal.Http
 {
-    public class RateLimitCategory : IEquatable<RateLimitCategory>
+    internal class RateLimitCategory : IEquatable<RateLimitCategory>
     {
         public string Name { get; }
 
