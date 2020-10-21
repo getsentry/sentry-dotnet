@@ -1,6 +1,10 @@
+minVersion: '0.9.3'
 github:
   owner: getsentry
   repo: sentry-dotnet
+changelogPolicy: simple
+statusProvider:
+  name: github
 targets:
   - name: nuget
   - name: github
