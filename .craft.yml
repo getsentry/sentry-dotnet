@@ -23,6 +23,10 @@ targets:
   - name: registry
     type: sdk
     config:
+      canonical: "nuget:Sentry.AspNet"
+  - name: registry
+    type: sdk
+    config:
       canonical: "nuget:Sentry.Log4Net"
   - name: registry
     type: sdk
