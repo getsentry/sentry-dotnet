@@ -154,10 +154,13 @@ namespace Sentry
         {
             if (scope.ScopeOptions?.BeforeBreadcrumb is { } beforeBreadcrumb)
             {
-                breadcrumb = beforeBreadcrumb(breadcrumb);
-
-                if (breadcrumb == null)
+                if (beforeBreadcrumb(breadcrumb) is { } processedBreadcrumb)
                 {
+                    breadcrumb = processedBreadcrumb;
+                }
+                else
+                {
+                    // Callback returned null, which means the breadcrumb should be dropped
                     return;
                 }
             }
