@@ -165,9 +165,9 @@ namespace Sentry.Tests.Internals
         }
 
         [Theory]
-        [InlineData(null, Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
-        [InlineData("", Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
-        [InlineData(" ", Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
         [InlineData("a", "a")] // Provided: nothing will change.
         [InlineData("production", "production")] // Provided: nothing will change. (value has a lower case 'p', different to default value)
         [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
@@ -183,9 +183,9 @@ namespace Sentry.Tests.Internals
         }
 
         [Theory]
-        [InlineData(null, Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
-        [InlineData("", Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
-        [InlineData(" ", Constants.DefaultEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
         [InlineData("a", "a")] // Provided: nothing will change.
         [InlineData("Production", "Production")] // Provided: nothing will change. (value has a upper case 'p', different to default value)
         [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
