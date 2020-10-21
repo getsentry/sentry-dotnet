@@ -1,5 +1,3 @@
-# unreleased
-
 # 3.0.0-alpha.2
 
 * Set the Environment setting to 'production' if none was provided. (#550) @PureKrome
