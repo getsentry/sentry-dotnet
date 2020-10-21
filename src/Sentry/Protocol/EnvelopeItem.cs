@@ -37,6 +37,11 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
+        /// Attempts to extract the value of "type" header if it's present.
+        /// </summary>
+        public string? TryGetType() => Header.GetValueOrDefault(TypeKey) as string;
+
+        /// <summary>
         /// Attempts to extract the value of "length" header if it's present.
         /// </summary>
         public long? TryGetLength() =>

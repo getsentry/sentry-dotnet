@@ -3,6 +3,7 @@
 * Set the Environment setting to 'production' if none was provided. (#550) @PureKrome
 * ASPNET.Core hosting environment is set to 'production' / 'development' (notice lower casing) if no custom options.Enviroment is set. (#554) @PureKrome
 * Add most popular libraries to InAppExclude #555 (@bruno-garcia)
+* Add support for individual rate limits.
 
 # 3.0.0-alpha.1
 
