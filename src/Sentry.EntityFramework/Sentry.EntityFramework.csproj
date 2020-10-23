@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>2.1.6</Version>
     <TargetFrameworks>net461</TargetFrameworks>
     <PackageTags>Sentry;GetSentry;Error-Reporting;Crash-Reporting;Exception-Handling;EntityFramework6</PackageTags>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
