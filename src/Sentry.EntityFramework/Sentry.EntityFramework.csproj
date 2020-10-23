@@ -16,9 +16,9 @@
     <LangVersion>7.2</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageIconUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-ef/master/.assets/sentry-nuget.png</PackageIconUrl>
+    <PackageIcon>sentry-nuget.png</PackageIcon>
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/getsentry/sentry-dotnet-ef/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet-ef/releases</PackageReleaseNotes>
     <PackageId>Sentry.EntityFramework</PackageId>
     <AssemblyName>Sentry.EntityFramework</AssemblyName>
@@ -30,6 +30,10 @@
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.0.0" />
     <PackageReference Include="Sentry" Version="2.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
   </ItemGroup>
 
 </Project>
