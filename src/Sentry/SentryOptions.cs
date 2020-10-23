@@ -425,7 +425,8 @@ namespace Sentry
                     "Owin",
                     "MediatR",
                     "ICSharpCode",
-                    "Grpc"
+                    "Grpc",
+                    "ServiceStack"
             };
 
             InAppInclude = Array.Empty<string>();
