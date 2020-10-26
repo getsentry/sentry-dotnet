@@ -160,6 +160,7 @@ namespace Sentry.Protocol
             while (stream.ReadByte() == (byte)'\n') {}
 
             // Payload
+            // TODO: recognize events/etc and parse them as proper structures
             var payloadStream = new PartialStream(stream, stream.Position, length);
             var payload = new StreamSerializable(payloadStream);
 
