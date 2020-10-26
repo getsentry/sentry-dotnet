@@ -41,6 +41,9 @@ namespace Sentry
         [DataMember(Name = "comments", EmitDefaultValue = false)]
         public string Comments { get; }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="SentryUserFeedback"/>.
+        /// </summary>
         public SentryUserFeedback(SentryId eventId, string email, string comments, string? name = null)
         {
             EventId = eventId;
@@ -49,7 +52,8 @@ namespace Sentry
             Comments = comments;
         }
 
+        /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
+        await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

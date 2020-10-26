@@ -14,7 +14,7 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var eventId = new SentryId(Guid.Parse("acbe351c61494e7b807fd7e82a435ffc"));
-            var userFeedback = new SentryUserFeedback(eventId, "myName", "myEmail@service.com", "my comment");
+            var userFeedback = new SentryUserFeedback(eventId, "myEmail@service.com", "my comment", "myName");
             using var stream = new MemoryStream();
 
             // Act
