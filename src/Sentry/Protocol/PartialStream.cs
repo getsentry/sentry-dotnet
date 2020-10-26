@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,12 +76,15 @@ namespace Sentry.Protocol
             _ => throw new ArgumentOutOfRangeException(nameof(origin))
         };
 
+        [ExcludeFromCodeCoverage]
         public override void SetLength(long value) =>
             throw new NotSupportedException();
 
+        [ExcludeFromCodeCoverage]
         public override void Write(byte[] buffer, int offset, int count) =>
             throw new NotSupportedException();
 
+        [ExcludeFromCodeCoverage]
         public override void Flush() => _innerStream.Flush();
     }
 }

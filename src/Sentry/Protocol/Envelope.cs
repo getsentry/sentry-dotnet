@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
@@ -84,13 +85,17 @@ namespace Sentry.Protocol
             Stream stream,
             CancellationToken cancellationToken = default)
         {
+            // TODO: discuss: is it safe to do this?
+            // Maybe stream reader can read ahead to cache stuff and ruin the stream for other readers
+            using var reader = new StreamReader(stream, Encoding.UTF8, false, 0, true);
+
             // Header
-            var header = await Json.DeserializeFromStreamAsync<Dictionary<string, object>>(stream, cancellationToken)
-                .ConfigureAwait(false);
+            var headerJson = await reader.ReadLineAsync().ConfigureAwait(false);
+            var header = Json.Deserialize<Dictionary<string, object>>(headerJson);
 
             // Items
             var items = new List<EnvelopeItem>();
-            while (stream.ReadByte() == (byte)'\n')
+            while (stream.Position < stream.Length)
             {
                 var item = await EnvelopeItem.DeserializeAsync(stream, cancellationToken).ConfigureAwait(false);
                 items.Add(item);

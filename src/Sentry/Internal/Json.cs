@@ -37,6 +37,12 @@ namespace Sentry.Internal
             Serializer.Serialize(writer, obj);
         }
 
+        public static T DeserializeFromStream<T>(Stream stream)
+        {
+            using var reader = CreateReader(stream);
+            return Serializer.Deserialize<T>(reader);
+        }
+
         public static byte[] SerializeToByteArray(object obj)
         {
             using var buffer = new MemoryStream();
@@ -45,9 +51,17 @@ namespace Sentry.Internal
             return buffer.ToArray();
         }
 
-        public static string Serialize(object obj) => Encoding.GetString(
-            SerializeToByteArray(obj)
-        );
+        public static T DeserializeFromByteArray<T>(byte[] data)
+        {
+            using var buffer = new MemoryStream(data);
+            return DeserializeFromStream<T>(buffer);
+        }
+
+        public static string Serialize(object obj) =>
+            Encoding.GetString(SerializeToByteArray(obj));
+
+        public static T Deserialize<T>(string json) =>
+            DeserializeFromByteArray<T>(Encoding.GetBytes(json));
 
         public static async Task SerializeToStreamAsync(
             object obj,
@@ -70,7 +84,7 @@ namespace Sentry.Internal
                 return Serializer.Deserialize<T>(reader);
             }
 
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Invalid JSON.");
         }
     }
 }

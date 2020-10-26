@@ -151,18 +151,20 @@ namespace Sentry.Protocol
             Stream stream,
             CancellationToken cancellationToken = default)
         {
+            using var reader = new StreamReader(stream, Encoding.UTF8, false, 10, true);
+
             // Header
-            var header = await Json.DeserializeFromStreamAsync<Dictionary<string, object>>(stream, cancellationToken)
-                .ConfigureAwait(false);
+            var headerJson = await reader.ReadLineAsync().ConfigureAwait(false);
+            var header = Json.Deserialize<Dictionary<string, object>>(headerJson);
 
             var length = (long)header.GetValueOrDefault(LengthKey, long.MaxValue);
-
-            while (stream.ReadByte() == (byte)'\n') {}
 
             // Payload
             // TODO: recognize events/etc and parse them as proper structures
             var payloadStream = new PartialStream(stream, stream.Position, length);
             var payload = new StreamSerializable(payloadStream);
+
+            stream.Seek(stream.Position + length + 1, SeekOrigin.Begin);
 
             return new EnvelopeItem(header, payload);
         }
