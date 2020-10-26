@@ -151,11 +151,17 @@ namespace Sentry.Protocol
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            using var reader = new StreamReader(stream, Encoding.UTF8, false, 10, true);
+            using var reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
+
+            var startPos = stream.Position;
+            reader.DiscardBufferedData();
 
             // Header
             var headerJson = await reader.ReadLineAsync().ConfigureAwait(false);
             var header = Json.Deserialize<Dictionary<string, object>>(headerJson);
+
+            // Rest position (massive hack)
+            stream.Position = startPos + Encoding.UTF8.GetBytes(headerJson).Length + 1;
 
             var length = (long)header.GetValueOrDefault(LengthKey, long.MaxValue);
 

@@ -87,11 +87,14 @@ namespace Sentry.Protocol
         {
             // TODO: discuss: is it safe to do this?
             // Maybe stream reader can read ahead to cache stuff and ruin the stream for other readers
-            using var reader = new StreamReader(stream, Encoding.UTF8, false, 0, true);
+            using var reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
 
             // Header
             var headerJson = await reader.ReadLineAsync().ConfigureAwait(false);
             var header = Json.Deserialize<Dictionary<string, object>>(headerJson);
+
+            // Rest position (massive hack)
+            stream.Position = Encoding.UTF8.GetBytes(headerJson).Length + 1;
 
             // Items
             var items = new List<EnvelopeItem>();
