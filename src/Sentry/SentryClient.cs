@@ -95,6 +95,44 @@ namespace Sentry
         }
 
         /// <summary>
+        /// Captures a manually created user feedback and sends it to Sentry.
+        /// </summary>
+        /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+        public void CaptureUserFeedback(SentryUserFeedback userFeedback)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            if (userFeedback.EventId.Equals(SentryId.Empty))
+            {
+                //Ignore the userfeedback if EventId is empty
+                _options.DiagnosticLogger?.LogInfo(
+                        "User feedback discarted due to because no event is associated.", userFeedback.GetType());
+                return;
+            }
+            else if ( string.IsNullOrWhiteSpace(userFeedback.Email) ||
+                 string.IsNullOrWhiteSpace(userFeedback.Comments))
+            {
+                //Ignore the userfeedback if a required field is null or empty.
+                _options.DiagnosticLogger?.LogInfo(
+                        "User feedback discarted due to one or more properties being empty.", userFeedback.GetType());
+                return;
+            }
+            var envelope = Envelope.FromUserFeedback(userFeedback);
+
+            if (Worker.EnqueueEnvelope(envelope))
+            {
+                _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
+                return;
+            }
+
+            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
+                Worker.QueuedItems);
+        }
+
+        /// <summary>
         /// Flushes events asynchronously.
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>

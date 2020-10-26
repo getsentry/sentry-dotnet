@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -287,6 +288,62 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut.Dispose();
             _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureEvent(null));
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_Ignored_If_EventIdEmpty()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+            var captureCalledEvent = new ManualResetEvent(false);
+            sut.Worker.When(x => x.EnqueueEnvelope(Arg.Any<Envelope>()))
+                .Do(_ => captureCalledEvent.Set());
+
+            //Act
+            sut.CaptureUserFeedback(new SentryUserFeedback(SentryId.Empty, "email", "comment"));
+
+            //Assert
+            Assert.False(captureCalledEvent.WaitOne(1));
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_Ignored_If_Email_Is_NullOrEmpty()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+            var captureCalledEvent = new ManualResetEvent(false);
+            sut.Worker.When(x => x.EnqueueEnvelope(Arg.Any<Envelope>()))
+                .Do(_ => captureCalledEvent.Set());
+
+            //Act
+            sut.CaptureUserFeedback(new SentryUserFeedback(SentryId.Empty, null, "comment"));
+
+            //Assert
+            Assert.False(captureCalledEvent.WaitOne(1));
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_Ignored_If_Comment_Is_NullOrEmpty()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+            var captureCalledEvent = new ManualResetEvent(false);
+            sut.Worker.When(x => x.EnqueueEnvelope(Arg.Any<Envelope>()))
+                .Do(_ => captureCalledEvent.Set());
+
+            //Act
+            sut.CaptureUserFeedback(new SentryUserFeedback(SentryId.Empty, "email", null));
+
+            //Assert
+            Assert.False(captureCalledEvent.WaitOne(1));
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_DisposedClient_ThrowsObjectDisposedException()
+        {
+            var sut = _fixture.GetSut();
+            sut.Dispose();
+            _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureUserFeedback(null));
         }
 
         [Fact]

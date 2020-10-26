@@ -117,6 +117,18 @@ namespace Sentry.Internal
             }
         }
 
+        public void CaptureUserFeedback(SentryUserFeedback userFeedback)
+        {
+            try
+            {
+                _ownedClient.CaptureUserFeedback(userFeedback);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+            }
+        }
+
         public async Task FlushAsync(TimeSpan timeout)
         {
             try

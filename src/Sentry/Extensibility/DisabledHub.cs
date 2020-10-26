@@ -79,6 +79,13 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
+        public void CaptureUserFeedback(SentryUserFeedback userFeedback)
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
         public SentryId LastEventId => SentryId.Empty;
     }
 }

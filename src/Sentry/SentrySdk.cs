@@ -283,5 +283,13 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
             => _hub.CaptureMessage(message, level);
+
+        /// <summary>
+        /// Captures a manually created user feedback and sends it to Sentry.
+        /// </summary>
+        /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+        [DebuggerStepThrough]
+        public static void CaptureUserFeedback(SentryUserFeedback userFeedback)
+            => _hub.CaptureUserFeedback(userFeedback);
     }
 }
