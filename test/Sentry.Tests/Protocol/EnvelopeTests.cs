@@ -33,6 +33,22 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public async Task Deserialization_EnvelopeWithoutItems_Success()
+        {
+            // Arrange
+            var input = "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n".ToMemoryStream();
+
+            // Act
+            var envelope = await Envelope.DeserializeAsync(input);
+
+            // Assert
+            envelope.Should().BeEquivalentTo(new Envelope(
+                new Dictionary<string, object> {["event_id"] = "12c2d058d58442709aa2eca08bf20986"},
+                Array.Empty<EnvelopeItem>()
+            ));
+        }
+
+        [Fact]
         public async Task Serialization_EnvelopeWithoutHeader_Success()
         {
             // Arrange

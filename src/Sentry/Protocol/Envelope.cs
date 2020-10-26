@@ -4,13 +4,14 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Envelope.
     /// </summary>
-    public class Envelope : ISerializable
+    public class Envelope : IDisposable, ISerializable
     {
         private const string EventIdKey = "event_id";
 
@@ -58,6 +59,9 @@ namespace Sentry.Protocol
             }
         }
 
+        /// <inheritdoc />
+        public void Dispose() => Items.DisposeAll();
+
         /// <summary>
         /// Creates an envelope that contains a single event.
         /// </summary>
@@ -72,6 +76,25 @@ namespace Sentry.Protocol
             {
                 EnvelopeItem.FromEvent(@event)
             };
+
+            return new Envelope(header, items);
+        }
+
+        public static async Task<Envelope> DeserializeAsync(
+            Stream stream,
+            CancellationToken cancellationToken = default)
+        {
+            // Header
+            var header = await Json.DeserializeFromStreamAsync<Dictionary<string, object>>(stream, cancellationToken)
+                .ConfigureAwait(false);
+
+            // Items
+            var items = new List<EnvelopeItem>();
+            while (stream.ReadByte() == (byte)'\n')
+            {
+                var item = await EnvelopeItem.DeserializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                items.Add(item);
+            }
 
             return new Envelope(header, items);
         }

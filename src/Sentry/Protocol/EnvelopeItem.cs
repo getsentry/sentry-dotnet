@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Envelope item.
     /// </summary>
-    public class EnvelopeItem : ISerializable
+    public class EnvelopeItem : IDisposable, ISerializable
     {
         private const string TypeKey = "type";
         private const string LengthKey = "length";
@@ -92,6 +93,9 @@ namespace Sentry.Protocol
             }
         }
 
+        /// <inheritdoc />
+        public void Dispose() => (Payload as IDisposable)?.Dispose();
+
         /// <summary>
         /// Creates an envelope item from file.
         /// </summary>
@@ -141,6 +145,25 @@ namespace Sentry.Protocol
             };
 
             return new EnvelopeItem(header, @event);
+        }
+
+        public static async Task<EnvelopeItem> DeserializeAsync(
+            Stream stream,
+            CancellationToken cancellationToken = default)
+        {
+            // Header
+            var header = await Json.DeserializeFromStreamAsync<Dictionary<string, object>>(stream, cancellationToken)
+                .ConfigureAwait(false);
+
+            var length = (long)header.GetValueOrDefault(LengthKey, long.MaxValue);
+
+            while (stream.ReadByte() == (byte)'\n') {}
+
+            // Payload
+            var payloadStream = new PartialStream(stream, stream.Position, length);
+            var payload = new StreamSerializable(payloadStream);
+
+            return new EnvelopeItem(header, payload);
         }
     }
 }

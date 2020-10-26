@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -26,6 +27,10 @@ namespace Sentry.Internal
             new StreamWriter(stream, Encoding, 1024, true)
         );
 
+        private static JsonTextReader CreateReader(Stream stream) => new JsonTextReader(
+            new StreamReader(stream, Encoding, false, 1024, true)
+        );
+
         public static void SerializeToStream(object obj, Stream stream)
         {
             using var writer = CreateWriter(stream);
@@ -52,6 +57,20 @@ namespace Sentry.Internal
             using var writer = CreateWriter(stream);
             Serializer.Serialize(writer, obj);
             await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public static async Task<T> DeserializeFromStreamAsync<T>(
+            Stream stream,
+            CancellationToken cancellationToken = default)
+        {
+            using var reader = CreateReader(stream);
+
+            if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                return Serializer.Deserialize<T>(reader);
+            }
+
+            throw new InvalidOperationException();
         }
     }
 }
