@@ -9,7 +9,7 @@ namespace Sentry.Protocol
     /// <remarks>
     /// Typically this context is used multiple times if multiple runtimes are involved (for instance if you have a JavaScript application running on top of JVM)
     /// </remarks>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
     [DataContract]
     public class Runtime
     {

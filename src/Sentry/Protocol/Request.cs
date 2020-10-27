@@ -24,7 +24,7 @@ namespace Sentry.Protocol
     ///     }
     /// }
     /// </example>
-    /// <see href="https://docs.sentry.io/clientdev/interfaces/http/"/>
+    /// <see href="https://develop.sentry.dev/sdk/event-payloads/request/"/>
     [DataContract]
     public class Request
     {

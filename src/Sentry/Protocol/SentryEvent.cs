@@ -18,7 +18,7 @@ namespace Sentry
     /// <summary>
     /// An event to be sent to Sentry.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/attributes/" />
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
     public class SentryEvent : BaseScope, ISerializable
@@ -111,7 +111,7 @@ namespace Sentry
         /// <summary>
         /// The Sentry Thread interface.
         /// </summary>
-        /// <see href="https://docs.sentry.io/clientdev/interfaces/threads/"/>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/threads/"/>
         public IEnumerable<SentryThread>? SentryThreads
         {
             get => SentryThreadValues?.Values ?? Enumerable.Empty<SentryThread>();
