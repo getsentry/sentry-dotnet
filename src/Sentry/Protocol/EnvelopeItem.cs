@@ -166,6 +166,9 @@ namespace Sentry.Protocol
             return Json.DeserializeFromByteArray<Dictionary<string, object>>(buffer.ToArray());
         }
 
+        /// <summary>
+        /// Deserializes envelope item from stream.
+        /// </summary>
         public static async Task<EnvelopeItem> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
