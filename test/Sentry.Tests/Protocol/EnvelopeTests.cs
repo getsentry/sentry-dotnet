@@ -36,7 +36,7 @@ namespace Sentry.Tests.Protocol
         public async Task Deserialization_EnvelopeWithoutItems_Success()
         {
             // Arrange
-            var input = "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n".ToMemoryStream();
+            using var input = "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n".ToMemoryStream();
 
             using var expectedEnvelope = new Envelope(
                 new Dictionary<string, object> {["event_id"] = "12c2d058d58442709aa2eca08bf20986"},
@@ -81,7 +81,7 @@ namespace Sentry.Tests.Protocol
         public async Task Deserialization_EnvelopeWithoutHeader_Success()
         {
             // Arrange
-            var input = (
+            using var input = (
                 "{}\n" +
                 "{\"type\":\"session\",\"length\":75}\n" +
                 "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
@@ -159,7 +159,7 @@ namespace Sentry.Tests.Protocol
         public async Task Deserialization_EnvelopeWithTwoItems_Success()
         {
             // Arrange
-            var input = (
+            using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
                 "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
                 "\xef\xbb\xbfHello\r\n\n" +
@@ -251,7 +251,7 @@ namespace Sentry.Tests.Protocol
         public async Task Deserialization_EnvelopeWithTwoEmptyItems_Success()
         {
             // Arrange
-            var input = (
+            using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
                 "{\"type\":\"attachment\",\"length\":0}\n" +
                 "\n" +
@@ -320,7 +320,7 @@ namespace Sentry.Tests.Protocol
         public async Task Deserialization_EnvelopeWithItemWithoutLength_Success()
         {
             // Arrange
-            var input = (
+            using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
                 "{\"type\":\"attachment\"}\n" +
                 "helloworld\n"
@@ -342,6 +342,45 @@ namespace Sentry.Tests.Protocol
 
             // Assert
             envelope.Should().BeEquivalentTo(expectedEnvelope);
+        }
+
+        [Fact]
+        public async Task Deserialization_EmptyStream_Throws()
+        {
+            // Arrange
+            using var input = new MemoryStream();
+
+            // Act & assert
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                async () => await Envelope.DeserializeAsync(input)
+            );
+        }
+
+        [Fact]
+        public async Task Deserialization_InvalidData_Throws()
+        {
+            // Arrange
+            using var input = new MemoryStream(new byte[1_000_000]); // all 0's
+
+            // Act & assert
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                async () => await Envelope.DeserializeAsync(input)
+            );
+        }
+
+        [Fact]
+        public async Task Deserialization_MalformedData_Throws()
+        {
+            // Arrange
+            using var input = (
+                // no header
+                "helloworld\n"
+            ).ToMemoryStream();
+
+            // Act & assert
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                async () => await Envelope.DeserializeAsync(input)
+            );
         }
     }
 }

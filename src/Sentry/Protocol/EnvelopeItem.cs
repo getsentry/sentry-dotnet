@@ -155,6 +155,12 @@ namespace Sentry.Protocol
 
             var lastLastByte = default(int);
             var lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
+
+            if (lastByte != (byte)'{')
+            {
+                throw new InvalidOperationException("Envelope item header is malformed.");
+            }
+
             while (lastByte != -1 && !(lastByte == (byte)'\n' && lastLastByte != (byte)'\\'))
             {
                 buffer.Add((byte)lastByte);
@@ -163,7 +169,9 @@ namespace Sentry.Protocol
                 lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            return Json.DeserializeFromByteArray<Dictionary<string, object>>(buffer.ToArray());
+            return
+                Json.DeserializeFromByteArray<Dictionary<string, object>?>(buffer.ToArray()) ??
+                throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
         /// <summary>
