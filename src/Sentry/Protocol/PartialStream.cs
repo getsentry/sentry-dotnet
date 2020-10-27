@@ -10,7 +10,7 @@ namespace Sentry.Protocol
     {
         private readonly Stream _innerStream;
         private readonly long _startIndex;
-        private readonly long _length;
+        private readonly long? _length;
 
         public override bool CanRead => _innerStream.CanRead;
 
@@ -18,11 +18,11 @@ namespace Sentry.Protocol
 
         public override bool CanWrite => false;
 
-        public override long Length => _length;
+        public override long Length => _length ?? throw new NotSupportedException();
 
         public override long Position { get; set; }
 
-        public PartialStream(Stream innerStream, long startIndex, long length)
+        public PartialStream(Stream innerStream, long startIndex, long? length)
         {
             _innerStream = innerStream;
             _startIndex = startIndex;
@@ -36,7 +36,7 @@ namespace Sentry.Protocol
             var innerPosition = Position - _startIndex;
 
             // Ensure that the new position is in range
-            if (innerPosition < _startIndex || innerPosition > _startIndex + _length)
+            if (innerPosition < _startIndex || (_length != null && innerPosition > _startIndex + _length.Value))
             {
                 throw new InvalidOperationException("Cannot access stream outside of the allowed range.");
             }
@@ -71,8 +71,13 @@ namespace Sentry.Protocol
         public override long Seek(long offset, SeekOrigin origin) => origin switch
         {
             SeekOrigin.Begin => Position = _startIndex + offset,
+
             SeekOrigin.Current => Position += offset,
-            SeekOrigin.End => Position = _startIndex + _length - offset,
+
+            SeekOrigin.End => _length != null
+                ? Position = _startIndex + _length.Value - offset
+                : throw new NotSupportedException(),
+
             _ => throw new ArgumentOutOfRangeException(nameof(origin))
         };
 

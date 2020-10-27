@@ -56,7 +56,7 @@ namespace Sentry.Protocol
             foreach (var item in Items)
             {
                 await item.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
-                stream.WriteByte((byte)'\n');
+                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -81,20 +81,31 @@ namespace Sentry.Protocol
             return new Envelope(header, items);
         }
 
+        private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
+            Stream stream,
+            CancellationToken cancellationToken = default)
+        {
+            var buffer = new List<byte>();
+
+            var lastLastByte = default(int);
+            var lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
+            while (lastByte != -1 && !(lastByte == (byte)'\n' && lastLastByte != (byte)'\\'))
+            {
+                buffer.Add((byte)lastByte);
+
+                lastLastByte = lastByte;
+                lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            return Json.DeserializeFromByteArray<Dictionary<string, object>>(buffer.ToArray());
+        }
+
         public static async Task<Envelope> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            // TODO: discuss: is it safe to do this?
-            // Maybe stream reader can read ahead to cache stuff and ruin the stream for other readers
-            using var reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
-
             // Header
-            var headerJson = await reader.ReadLineAsync().ConfigureAwait(false);
-            var header = Json.Deserialize<Dictionary<string, object>>(headerJson);
-
-            // Rest position (massive hack)
-            stream.Position = Encoding.UTF8.GetBytes(headerJson).Length + 1;
+            var header = await DeserializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
 
             // Items
             var items = new List<EnvelopeItem>();

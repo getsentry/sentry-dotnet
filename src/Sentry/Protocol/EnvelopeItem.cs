@@ -70,7 +70,7 @@ namespace Sentry.Protocol
             {
                 // Header
                 await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
-                stream.WriteByte((byte)'\n');
+                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
                 // Payload
                 await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
@@ -86,7 +86,7 @@ namespace Sentry.Protocol
                 var headerData = Json.SerializeToByteArray(headerWithLength);
 
                 await stream.WriteAsync(headerData, cancellationToken).ConfigureAwait(false);
-                stream.WriteByte((byte)'\n');
+                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
                 // Payload
                 await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
@@ -147,30 +147,49 @@ namespace Sentry.Protocol
             return new EnvelopeItem(header, @event);
         }
 
+        private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
+            Stream stream,
+            CancellationToken cancellationToken = default)
+        {
+            var buffer = new List<byte>();
+
+            var lastLastByte = default(int);
+            var lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
+            while (lastByte != -1 && !(lastByte == (byte)'\n' && lastLastByte != (byte)'\\'))
+            {
+                buffer.Add((byte)lastByte);
+
+                lastLastByte = lastByte;
+                lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            return Json.DeserializeFromByteArray<Dictionary<string, object>>(buffer.ToArray());
+        }
+
         public static async Task<EnvelopeItem> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            using var reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
-
-            var startPos = stream.Position;
-            reader.DiscardBufferedData();
-
             // Header
-            var headerJson = await reader.ReadLineAsync().ConfigureAwait(false);
-            var header = Json.Deserialize<Dictionary<string, object>>(headerJson);
+            var header = await DeserializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
 
-            // Rest position (massive hack)
-            stream.Position = startPos + Encoding.UTF8.GetBytes(headerJson).Length + 1;
-
-            var length = (long)header.GetValueOrDefault(LengthKey, long.MaxValue);
+            var length = header.GetValueOrDefault(LengthKey) is long value
+                ? value
+                : (long?)null;
 
             // Payload
             // TODO: recognize events/etc and parse them as proper structures
             var payloadStream = new PartialStream(stream, stream.Position, length);
             var payload = new StreamSerializable(payloadStream);
 
-            stream.Seek(stream.Position + length + 1, SeekOrigin.Begin);
+            if (length != null)
+            {
+                stream.Seek(length.Value + 1, SeekOrigin.Current);
+            }
+            else
+            {
+                stream.Seek(0, SeekOrigin.End);
+            }
 
             return new EnvelopeItem(header, payload);
         }

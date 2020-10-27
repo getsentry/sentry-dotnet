@@ -14,6 +14,9 @@ namespace System.IO
         public static Task CopyToAsync(this Stream stream, Stream destination, CancellationToken cancellationToken) =>
             stream.CopyToAsync(destination, 81920, cancellationToken);
 
+        public static Task<int> ReadAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
+            stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+
         public static Task WriteAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
             stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
     }
