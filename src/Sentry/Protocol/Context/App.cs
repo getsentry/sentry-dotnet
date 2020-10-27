@@ -11,7 +11,7 @@ namespace Sentry.Protocol
     /// As opposed to the runtime, this is the actual application that
     /// was running and carries meta data about the current session.
     /// </remarks>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
     [DataContract]
     public class App
     {

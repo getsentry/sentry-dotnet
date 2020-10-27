@@ -7,7 +7,7 @@ namespace Sentry
     /// The Data Source Name of a given project in Sentry.
     /// </summary>
     /// <remarks>
-    /// <see href="https://docs.sentry.io/quickstart/#configure-the-dsn"/>
+    /// <see href="https://develop.sentry.dev/sdk/overview/#parsing-the-dsn"/>
     /// </remarks>
     internal sealed class Dsn
     {

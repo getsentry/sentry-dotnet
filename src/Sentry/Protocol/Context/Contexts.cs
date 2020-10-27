@@ -8,7 +8,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Represents Sentry's structured Context.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/" />
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
     [DataContract]
     public class Contexts : ConcurrentDictionary<string, object>
     {

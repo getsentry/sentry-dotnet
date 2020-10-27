@@ -15,7 +15,7 @@ namespace Sentry.Protocol
     ///   "params": [10]
     /// }
     /// </example>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/message/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/message/"/>
     [DataContract]
     public class SentryMessage
     {

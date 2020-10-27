@@ -9,7 +9,7 @@ namespace Sentry.Protocol
     /// <remarks>
     /// Defines the operating system that caused the event. In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
     /// </remarks>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/#context-types"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#os-context"/>
     [DataContract]
     public class OperatingSystem
     {

@@ -8,7 +8,7 @@ namespace Sentry.Protocol
     /// This can either be the browser this event occurred in, or the user agent of a
     /// web request that triggered the event.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
     [DataContract]
     public class Browser
     {
