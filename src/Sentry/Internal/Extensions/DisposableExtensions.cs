@@ -17,7 +17,7 @@ namespace Sentry.Internal.Extensions
                 }
                 catch (Exception ex)
                 {
-                	exception =?? new List<Exception>();
+                    exceptions ??= new List<Exception>();
                     exceptions.Add(ex);
                 }
             }
