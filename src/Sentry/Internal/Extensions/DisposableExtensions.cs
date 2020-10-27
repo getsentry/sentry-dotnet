@@ -7,7 +7,7 @@ namespace Sentry.Internal.Extensions
     {
         public static void DisposeAll(this IEnumerable<IDisposable> disposables)
         {
-            var exceptions = new List<Exception>();
+            List<Exception>? exceptions = null;
 
             foreach (var i in disposables)
             {
@@ -17,11 +17,12 @@ namespace Sentry.Internal.Extensions
                 }
                 catch (Exception ex)
                 {
+                	exception =?? new List<Exception>();
                     exceptions.Add(ex);
                 }
             }
 
-            if (exceptions.Count > 0)
+            if (exceptions?.Count > 0)
             {
                 throw new AggregateException(exceptions);
             }
