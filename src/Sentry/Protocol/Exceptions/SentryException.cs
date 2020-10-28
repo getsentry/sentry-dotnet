@@ -7,7 +7,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry Exception interface.
     /// </summary>
-    /// <see href="https://docs.sentry.io/clientdev/interfaces/exception/"/>
+    /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception"/>
     [DataContract]
     public class SentryException
     {
@@ -36,7 +36,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// An optional value which refers to a thread in the threads interface.
         /// </summary>
-        /// <seealso href="https://docs.sentry.io/clientdev/interfaces/threads/"/>
+        /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/threads/"/>
         /// <seealso cref="SentryThread"/>
         [DataMember(Name = "thread_id", EmitDefaultValue = false)]
         public int ThreadId { get; set; }
@@ -44,14 +44,14 @@ namespace Sentry.Protocol
         /// <summary>
         /// Stack trace.
         /// </summary>
-        /// <see href="https://docs.sentry.io/clientdev/interfaces/stacktrace/"/>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
         [DataMember(Name = "stacktrace", EmitDefaultValue = false)]
         public SentryStackTrace? Stacktrace { get; set; }
 
         /// <summary>
         /// An optional mechanism that created this exception.
         /// </summary>
-        /// <see href="https://docs.sentry.io/clientdev/interfaces/mechanism/"/>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception/#exception-mechanism"/>
         [DataMember(Name = "mechanism", EmitDefaultValue = false)]
         public Mechanism? Mechanism { get; set; }
 

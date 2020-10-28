@@ -2,7 +2,8 @@
 
 ## unreleased
 
-* Add support for user feedback (#559) @lucas-zimerman
+* Add support for user feedback. (#559) @lucas-zimerman
+* Fix internal url references for the new Sentry documentation. @lucas-zimerman
 
 ## 3.0.0-alpha.2
 
