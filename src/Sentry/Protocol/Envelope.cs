@@ -86,20 +86,17 @@ namespace Sentry.Protocol
         {
             var buffer = new List<byte>();
 
-            var lastLastByte = default(int);
-            var lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
-
-            if (lastByte != (byte)'{')
+            var prevByte = default(int);
+            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken))
             {
-                throw new InvalidOperationException("Envelope header is malformed.");
-            }
+                // Break if found an unescaped newline
+                if (curByte == '\n' && prevByte != '\\')
+                {
+                    break;
+                }
 
-            while (lastByte != -1 && !(lastByte == (byte)'\n' && lastLastByte != (byte)'\\'))
-            {
-                buffer.Add((byte)lastByte);
-
-                lastLastByte = lastByte;
-                lastByte = await stream.ReadByteAsync(cancellationToken).ConfigureAwait(false);
+                buffer.Add(curByte);
+                prevByte = curByte;
             }
 
             return

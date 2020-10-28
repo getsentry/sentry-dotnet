@@ -378,7 +378,8 @@ namespace Sentry.Tests.Protocol
             ).ToMemoryStream();
 
             // Act & assert
-            await Assert.ThrowsAsync<InvalidOperationException>(
+            // Currently throws a Newtonsoft.Json exception, which is an implementation detail
+            await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );
         }
