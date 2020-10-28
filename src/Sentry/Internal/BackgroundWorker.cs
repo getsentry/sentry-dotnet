@@ -152,6 +152,7 @@ namespace Sentry.Internal
                         {
                             _ = _queue.TryDequeue(out _);
                             _ = Interlocked.Decrement(ref _currentItems);
+                            envelope.Dispose();
                             OnFlushObjectReceived?.Invoke(envelope, EventArgs.Empty);
                         }
                     }

@@ -90,7 +90,7 @@ namespace Sentry.Internal.Http
             var instant = DateTimeOffset.Now;
 
             // Apply rate limiting and re-package envelope items
-            var processedEnvelope = ApplyRateLimitsOnEnvelope(envelope, instant);
+            using var processedEnvelope = ApplyRateLimitsOnEnvelope(envelope, instant);
             if (!processedEnvelope.Items.Any())
             {
                 _options.DiagnosticLogger?.LogInfo(
