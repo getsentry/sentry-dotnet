@@ -48,9 +48,8 @@ namespace Sentry.Protocol
         public long? TryGetLength() =>
             Header.GetValueOrDefault(LengthKey) switch
             {
-                long x => x,
-                int x => x,
-                _ => null
+                null => null,
+                var value => Convert.ToInt64(value) // can be int, long, or another numeric type
             };
 
         private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
@@ -181,9 +180,11 @@ namespace Sentry.Protocol
             // Header
             var header = await DeserializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
 
-            var length = header.GetValueOrDefault(LengthKey) is long value
-                ? value
-                : (long?)null;
+            var length = header.GetValueOrDefault(LengthKey) switch
+            {
+                null => (long?)null,
+                var value => Convert.ToInt64(value)
+            };
 
             // Payload
             // TODO: recognize events/etc and parse them as proper structures
