@@ -15,6 +15,7 @@ namespace Sentry.Protocol
     public class EnvelopeItem : IDisposable, ISerializable
     {
         private const string TypeKey = "type";
+        private const string TypeValueEvent = "event";
         private const string LengthKey = "length";
         private const string FileNameKey = "file_name";
 
@@ -140,7 +141,7 @@ namespace Sentry.Protocol
         {
             var header = new Dictionary<string, object>
             {
-                [TypeKey] = "event"
+                [TypeKey] = TypeValueEvent
             };
 
             return new EnvelopeItem(header, @event);
@@ -170,6 +171,50 @@ namespace Sentry.Protocol
                 ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
+        private static async Task<ISerializable> DeserializePayloadAsync(
+            Stream stream,
+            IReadOnlyDictionary<string, object> header,
+            CancellationToken cancellationToken = default)
+        {
+            var payloadLength = header.GetValueOrDefault(LengthKey) switch
+            {
+                null => (long?)null,
+                var value => Convert.ToInt64(value)
+            };
+
+            var payloadType = header.GetValueOrDefault(TypeKey) as string;
+
+            if (string.Equals(payloadType, TypeValueEvent, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = new PooledBuffer<byte>(bufferLength);
+
+                var bytesRead = await stream.ReadAsync(buffer.Array, 0, bufferLength, cancellationToken)
+                    .ConfigureAwait(false);
+
+                // The original buffer may be bigger than necessary, but Json.NET doesn't accept Spans
+                var bufferTrimmed = new byte[bytesRead];
+                Array.Copy(buffer.Array, bufferTrimmed, bytesRead);
+
+                return Json.DeserializeFromByteArray<SentryEvent>(bufferTrimmed);
+            }
+            else
+            {
+                var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
+
+                if (payloadLength != null)
+                {
+                    stream.Seek(payloadLength.Value, SeekOrigin.Current);
+                }
+                else
+                {
+                    stream.Seek(0, SeekOrigin.End);
+                }
+
+                return new StreamSerializable(payloadStream);
+            }
+        }
+
         /// <summary>
         /// Deserializes envelope item from stream.
         /// </summary>
@@ -177,27 +222,17 @@ namespace Sentry.Protocol
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            // Header
             var header = await DeserializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
+            var payload = await DeserializePayloadAsync(stream, header, cancellationToken).ConfigureAwait(false);
 
-            var payloadLength = header.GetValueOrDefault(LengthKey) switch
+            // Swallow trailing newlines (some envelopes may have them after payloads)
+            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken))
             {
-                null => (long?)null,
-                var value => Convert.ToInt64(value)
-            };
-
-            // Payload
-            // TODO: recognize events/etc and parse them as proper structures
-            var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
-            var payload = new StreamSerializable(payloadStream);
-
-            if (payloadLength != null)
-            {
-                stream.Seek(payloadLength.Value + 1, SeekOrigin.Current);
-            }
-            else
-            {
-                stream.Seek(0, SeekOrigin.End);
+                if (curByte != '\n')
+                {
+                    stream.Position--;
+                    break;
+                }
             }
 
             return new EnvelopeItem(header, payload);

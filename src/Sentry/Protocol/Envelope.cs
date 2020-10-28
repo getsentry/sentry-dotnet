@@ -111,10 +111,8 @@ namespace Sentry.Protocol
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            // Header
             var header = await DeserializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
 
-            // Items
             var items = new List<EnvelopeItem>();
             while (stream.Position < stream.Length)
             {

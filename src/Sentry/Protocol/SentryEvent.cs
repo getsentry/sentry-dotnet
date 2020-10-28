@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Constants = Sentry.Protocol.Constants;
@@ -26,9 +27,6 @@ namespace Sentry
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string>? InternalModules { get; set; }
 
-        [DataMember(Name = "event_id", EmitDefaultValue = false)]
-        private string SerializableEventId => EventId.ToString();
-
         /// <summary>
         /// The <see cref="System.Exception"/> used to create this event.
         /// </summary>
@@ -46,6 +44,7 @@ namespace Sentry
         /// Hexadecimal string representing a uuid4 value.
         /// The length is exactly 32 characters (no dashes!).
         /// </remarks>
+        [DataMember(Name = "event_id", EmitDefaultValue = false)]
         public SentryId EventId { get; }
 
         /// <summary>
@@ -139,14 +138,15 @@ namespace Sentry
         {
         }
 
+        [JsonConstructor]
         internal SentryEvent(
             Exception? exception = null,
             DateTimeOffset? timestamp = null,
-            Guid id = default,
+            SentryId eventId = default,
             IScopeOptions? options = null)
             : base(options)
         {
-            EventId = id != default ? id : Guid.NewGuid();
+            EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
 
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             Exception = exception;

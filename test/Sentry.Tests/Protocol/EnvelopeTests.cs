@@ -345,6 +345,35 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public async Task Roundtrip_Success()
+        {
+            // Arrange
+            var @event = new SentryEvent
+            {
+                Message = "Foo bar",
+                Environment = "release"
+            };
+
+            using var envelope = Envelope.FromEvent(@event);
+
+            using var stream = new MemoryStream();
+
+            // Act
+            await envelope.SerializeAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
+
+            // Assert
+
+            // Can't compare the entire object graph because output envelope contains evaluated length,
+            // which original envelope doesn't have.
+            envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
+            envelopeRoundtrip.Items.Should().ContainSingle();
+            envelopeRoundtrip.Items[0].Payload.Should().BeEquivalentTo(@event);
+        }
+
+        [Fact]
         public async Task Deserialization_EmptyStream_Throws()
         {
             // Arrange
