@@ -100,8 +100,8 @@ namespace Sentry.Protocol
             }
 
             return
-                Json.DeserializeFromByteArray<Dictionary<string, object>?>(buffer.ToArray()) ??
-                throw new InvalidOperationException("Envelope header is malformed.");
+                Json.DeserializeFromByteArray<Dictionary<string, object>?>(buffer.ToArray())
+                ?? throw new InvalidOperationException("Envelope header is malformed.");
         }
 
         /// <summary>
