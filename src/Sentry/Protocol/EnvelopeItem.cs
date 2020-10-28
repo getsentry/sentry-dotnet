@@ -180,7 +180,7 @@ namespace Sentry.Protocol
             // Header
             var header = await DeserializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
 
-            var length = header.GetValueOrDefault(LengthKey) switch
+            var payloadLength = header.GetValueOrDefault(LengthKey) switch
             {
                 null => (long?)null,
                 var value => Convert.ToInt64(value)
@@ -188,12 +188,12 @@ namespace Sentry.Protocol
 
             // Payload
             // TODO: recognize events/etc and parse them as proper structures
-            var payloadStream = new PartialStream(stream, stream.Position, length);
+            var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
             var payload = new StreamSerializable(payloadStream);
 
-            if (length != null)
+            if (payloadLength != null)
             {
-                stream.Seek(length.Value + 1, SeekOrigin.Current);
+                stream.Seek(payloadLength.Value + 1, SeekOrigin.Current);
             }
             else
             {
