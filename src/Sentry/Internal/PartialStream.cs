@@ -24,7 +24,7 @@ namespace Sentry.Internal
 
         public override bool CanWrite => false;
 
-        public override long Length => _length ?? throw new NotSupportedException();
+        public override long Length => _length ?? _innerStream.Length - _offset;
 
         public override long Position
         {
