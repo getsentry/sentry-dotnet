@@ -12,7 +12,7 @@ namespace Sentry
     /// Sentry User Feedback.
     /// </summary>
     [DataContract]
-    public class SentryUserFeedback : ISerializable
+    public class UserFeedback : ISerializable
     {
 
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
@@ -42,9 +42,9 @@ namespace Sentry
         public string Comments { get; }
 
         /// <summary>
-        /// Initializes an instance of <see cref="SentryUserFeedback"/>.
+        /// Initializes an instance of <see cref="UserFeedback"/>.
         /// </summary>
-        public SentryUserFeedback(SentryId eventId, string email, string comments, string? name = null)
+        public UserFeedback(SentryId eventId, string email, string comments, string? name = null)
         {
             EventId = eventId;
             Name = name;
@@ -53,7 +53,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-        await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+            => await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

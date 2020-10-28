@@ -146,7 +146,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Creates an envelope item from an user feedback.
         /// </summary>
-        public static EnvelopeItem FromUserFeedback(SentryUserFeedback sentryUserFeedback)
+        public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
             var header = new Dictionary<string, object>
             {

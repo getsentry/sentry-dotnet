@@ -112,8 +112,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\changelog.yaml = .github\workflows\changelog.yaml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.ManualUserFeedback", "samples\Sentry.Samples.Console.ManualUserFeedback\Sentry.Samples.Console.ManualUserFeedback.csproj", "{3C579563-B590-4067-8E4D-9DF2E640B481}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -228,10 +226,6 @@ Global
 		{0885DDFE-2FC7-4241-AEB1-8D6BDA627C0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0885DDFE-2FC7-4241-AEB1-8D6BDA627C0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0885DDFE-2FC7-4241-AEB1-8D6BDA627C0A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C579563-B590-4067-8E4D-9DF2E640B481}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C579563-B590-4067-8E4D-9DF2E640B481}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C579563-B590-4067-8E4D-9DF2E640B481}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C579563-B590-4067-8E4D-9DF2E640B481}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -267,7 +261,6 @@ Global
 		{3454831A-397C-4039-AAFC-9152A4E0B682} = {9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}
 		{F267BFB9-C5D5-4018-9D3F-B55443702AEC} = {9D7E2F87-D6F4-4BBB-8980-87D0A8344C74}
 		{E1800E08-72E6-45AE-91EC-69B4FDBA7555} = {F267BFB9-C5D5-4018-9D3F-B55443702AEC}
-		{3C579563-B590-4067-8E4D-9DF2E640B481} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

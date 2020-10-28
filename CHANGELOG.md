@@ -1,5 +1,9 @@
 # Changelog
 
+## unreleased
+
+* Add support for user feedback (#559) @lucas-zimerman
+
 ## 3.0.0-alpha.2
 
 * Set the Environment setting to 'production' if none was provided. (#550) @PureKrome

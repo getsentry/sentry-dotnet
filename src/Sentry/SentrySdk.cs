@@ -285,11 +285,22 @@ namespace Sentry
             => _hub.CaptureMessage(message, level);
 
         /// <summary>
-        /// Captures a manually created user feedback and sends it to Sentry.
+        /// Captures a user feedback.
         /// </summary>
         /// <param name="userFeedback">The user feedback to send to Sentry.</param>
         [DebuggerStepThrough]
-        public static void CaptureUserFeedback(SentryUserFeedback userFeedback)
+        public static void CaptureUserFeedback(UserFeedback userFeedback)
             => _hub.CaptureUserFeedback(userFeedback);
+
+        /// <summary>
+        /// Captures a user feedback.
+        /// </summary>
+        /// <param name="eventId">The event Id.</param>
+        /// <param name="email">The user email.</param>
+        /// <param name="comments">The user comments.</param>
+        /// <param name="name">The optional username.</param>
+        [DebuggerStepThrough]
+        public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
+            => _hub.CaptureUserFeedback(new UserFeedback(eventId, email, comments, name));
     }
 }

@@ -95,10 +95,10 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Captures a manually created user feedback and sends it to Sentry.
+        /// Captures a user feedback.
         /// </summary>
         /// <param name="userFeedback">The user feedback to send to Sentry.</param>
-        public void CaptureUserFeedback(SentryUserFeedback userFeedback)
+        public void CaptureUserFeedback(UserFeedback userFeedback)
         {
             if (_disposed)
             {
@@ -108,28 +108,20 @@ namespace Sentry
             if (userFeedback.EventId.Equals(SentryId.Empty))
             {
                 //Ignore the userfeedback if EventId is empty
-                _options.DiagnosticLogger?.LogInfo(
-                        "User feedback discarted due to because no event is associated.", userFeedback.GetType());
+                _options.DiagnosticLogger?.LogWarning(
+                        "User feedback dropped due to empty id.", "UserFeedback");
                 return;
             }
-            else if ( string.IsNullOrWhiteSpace(userFeedback.Email) ||
+            else if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
                  string.IsNullOrWhiteSpace(userFeedback.Comments))
             {
                 //Ignore the userfeedback if a required field is null or empty.
-                _options.DiagnosticLogger?.LogInfo(
-                        "User feedback discarted due to one or more properties being empty.", userFeedback.GetType());
-                return;
-            }
-            var envelope = Envelope.FromUserFeedback(userFeedback);
-
-            if (Worker.EnqueueEnvelope(envelope))
-            {
-                _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
+                _options.DiagnosticLogger?.LogWarning(
+                        "User feedback discarded due to one or more required fields missing.", "UserFeedback");
                 return;
             }
 
-            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
-                Worker.QueuedItems);
+            _ = CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
         }
 
         /// <summary>
@@ -203,18 +195,26 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            var envelope = Envelope.FromEvent(processedEvent);
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent)) ?
+                processedEvent.EventId : SentryId.Empty;
+        }
 
+        /// <summary>
+        /// Capture an envelope and queue it.
+        /// </summary>
+        /// <param name="envelope">The envelope.</param>
+        /// <returns>true if the enveloped was queued, false otherwise.</returns>
+        private bool CaptureEnvelope(Envelope envelope)
+        {
             if (Worker.EnqueueEnvelope(envelope))
             {
                 _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
-                return processedEvent.EventId;
+                return true;
             }
 
             _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
                 Worker.QueuedItems);
-
-            return SentryId.Empty;
+            return false;
         }
 
         private SentryEvent? BeforeSend(SentryEvent? @event)

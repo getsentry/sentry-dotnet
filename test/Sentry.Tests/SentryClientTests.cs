@@ -300,42 +300,65 @@ namespace Sentry.Tests
                 .Do(_ => captureCalledEvent.Set());
 
             //Act
-            sut.CaptureUserFeedback(new SentryUserFeedback(SentryId.Empty, "email", "comment"));
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", "comment"));
 
             //Assert
             Assert.False(captureCalledEvent.WaitOne(1));
         }
 
         [Fact]
-        public void CaptureUserFeedback_Ignored_If_Email_Is_NullOrEmpty()
+        public void CaptureUserFeedback_ValidUserFeedback_FeedbackRegistered()
         {
             //Arrange
             var sut = _fixture.GetSut();
-            var captureCalledEvent = new ManualResetEvent(false);
-            sut.Worker.When(x => x.EnqueueEnvelope(Arg.Any<Envelope>()))
-                .Do(_ => captureCalledEvent.Set());
 
             //Act
-            sut.CaptureUserFeedback(new SentryUserFeedback(SentryId.Empty, null, "comment"));
+            sut.CaptureUserFeedback(new UserFeedback(Guid.Parse("4eb98e5f861a41019f270a7a27e84f02"), "email", "comment"));
 
             //Assert
-            Assert.False(captureCalledEvent.WaitOne(1));
+            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
-        public void CaptureUserFeedback_Ignored_If_Comment_Is_NullOrEmpty()
+        public void CaptureUserFeedback_CommentsNullOrEmpty_FeedbackIgnored()
         {
             //Arrange
             var sut = _fixture.GetSut();
-            var captureCalledEvent = new ManualResetEvent(false);
-            sut.Worker.When(x => x.EnqueueEnvelope(Arg.Any<Envelope>()))
-                .Do(_ => captureCalledEvent.Set());
 
             //Act
-            sut.CaptureUserFeedback(new SentryUserFeedback(SentryId.Empty, "email", null));
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", null));
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", ""));
 
             //Assert
-            Assert.False(captureCalledEvent.WaitOne(1));
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_EmailNullOrEmpty_FeedbackIgnored()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+
+            //Act
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, null, "comment"));
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "", "comment"));
+
+            //Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
+        {
+
+            //Arrange
+            var sut = _fixture.GetSut();
+
+            //Act
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", "comment"));
+
+            //Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]

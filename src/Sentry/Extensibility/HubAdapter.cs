@@ -145,7 +145,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void CaptureUserFeedback(SentryUserFeedback sentryUserFeedback)
+        public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
             => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
     }
 }

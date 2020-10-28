@@ -117,7 +117,7 @@ namespace Sentry.Internal
             }
         }
 
-        public void CaptureUserFeedback(SentryUserFeedback userFeedback)
+        public void CaptureUserFeedback(UserFeedback userFeedback)
         {
             try
             {
