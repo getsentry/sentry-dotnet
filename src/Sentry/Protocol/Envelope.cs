@@ -49,7 +49,7 @@ namespace Sentry.Protocol
         {
             // Header
             await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
-            stream.WriteByte((byte)'\n');
+            await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
             // Items
             foreach (var item in Items)
