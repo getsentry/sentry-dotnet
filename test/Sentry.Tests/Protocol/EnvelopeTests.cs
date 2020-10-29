@@ -345,7 +345,7 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public async Task Roundtrip_Success()
+        public async Task Roundtrip_WithEvent_Success()
         {
             // Arrange
             var @event = new SentryEvent
@@ -371,6 +371,36 @@ namespace Sentry.Tests.Protocol
             envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
             envelopeRoundtrip.Items.Should().ContainSingle();
             envelopeRoundtrip.Items[0].Payload.Should().BeEquivalentTo(@event);
+        }
+
+        [Fact]
+        public async Task Roundtrip_WithUserFeedback_Success()
+        {
+            // Arrange
+            var feedback = new UserFeedback(
+                new SentryId(Guid.NewGuid()),
+                "foo@bar.com",
+                "Everything sucks",
+                "Donald J. Trump"
+            );
+
+            using var envelope = Envelope.FromUserFeedback(feedback);
+
+            using var stream = new MemoryStream();
+
+            // Act
+            await envelope.SerializeAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
+
+            // Assert
+
+            // Can't compare the entire object graph because output envelope contains evaluated length,
+            // which original envelope doesn't have.
+            envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
+            envelopeRoundtrip.Items.Should().ContainSingle();
+            envelopeRoundtrip.Items[0].Payload.Should().BeEquivalentTo(feedback);
         }
 
         [Fact]
