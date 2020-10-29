@@ -14,7 +14,6 @@ namespace Sentry
     [DataContract]
     public class UserFeedback : ISerializable
     {
-
         [DataMember(Name = "event_id", EmitDefaultValue = false)]
         private string _serializableEventId => EventId.ToString();
 

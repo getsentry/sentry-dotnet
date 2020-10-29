@@ -108,16 +108,14 @@ namespace Sentry
             if (userFeedback.EventId.Equals(SentryId.Empty))
             {
                 //Ignore the userfeedback if EventId is empty
-                _options.DiagnosticLogger?.LogWarning(
-                        "User feedback dropped due to empty id.", "UserFeedback");
+                _options.DiagnosticLogger?.LogWarning("User feedback dropped due to empty id.");
                 return;
             }
             else if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
                  string.IsNullOrWhiteSpace(userFeedback.Comments))
             {
                 //Ignore the userfeedback if a required field is null or empty.
-                _options.DiagnosticLogger?.LogWarning(
-                        "User feedback discarded due to one or more required fields missing.", "UserFeedback");
+                _options.DiagnosticLogger?.LogWarning("User feedback discarded due to one or more required fields missing.");
                 return;
             }
 

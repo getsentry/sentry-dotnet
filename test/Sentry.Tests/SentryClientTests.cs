@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -291,19 +290,16 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void CaptureUserFeedback_Ignored_If_EventIdEmpty()
+        public void CaptureUserFeedback_EventIdEmpty_IgnoreUserFeedback()
         {
             //Arrange
             var sut = _fixture.GetSut();
-            var captureCalledEvent = new ManualResetEvent(false);
-            sut.Worker.When(x => x.EnqueueEnvelope(Arg.Any<Envelope>()))
-                .Do(_ => captureCalledEvent.Set());
 
             //Act
             sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", "comment"));
 
             //Assert
-            Assert.False(captureCalledEvent.WaitOne(1));
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
