@@ -120,6 +120,9 @@ namespace Sentry.Internal
                     {
                         try
                         {
+                            // Dispose inside try/catch
+                            using var _ = envelope;
+
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.DiagnosticLogger?.LogDebug(
@@ -152,7 +155,6 @@ namespace Sentry.Internal
                         {
                             _ = _queue.TryDequeue(out _);
                             _ = Interlocked.Decrement(ref _currentItems);
-                            envelope.Dispose();
                             OnFlushObjectReceived?.Invoke(envelope, EventArgs.Empty);
                         }
                     }
