@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
 
-namespace Sentry.Protocol
+namespace Sentry
 {
     /// <summary>
     /// Sentry User Feedback.
