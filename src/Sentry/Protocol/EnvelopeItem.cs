@@ -206,6 +206,7 @@ namespace Sentry.Protocol
 
                 return Json.DeserializeFromByteArray<SentryEvent>(buffer);
             }
+
             // User report
             if (string.Equals(payloadType, TypeValueUserReport, StringComparison.OrdinalIgnoreCase))
             {
