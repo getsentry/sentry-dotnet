@@ -16,6 +16,7 @@ namespace Sentry.Protocol
     {
         private const string TypeKey = "type";
         private const string TypeValueEvent = "event";
+        private const string TypeValueUserReport = "user_report";
         private const string LengthKey = "length";
         private const string FileNameKey = "file_name";
 
@@ -147,6 +148,19 @@ namespace Sentry.Protocol
             return new EnvelopeItem(header, @event);
         }
 
+        /// <summary>
+        /// Creates an envelope item from an user feedback.
+        /// </summary>
+        public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
+        {
+            var header = new Dictionary<string, object>
+            {
+                [TypeKey] = TypeValueUserReport
+            };
+
+            return new EnvelopeItem(header, sentryUserFeedback);
+        }
+
         private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
@@ -184,35 +198,36 @@ namespace Sentry.Protocol
 
             var payloadType = header.GetValueOrDefault(TypeKey) as string;
 
+            // Event
             if (string.Equals(payloadType, TypeValueEvent, StringComparison.OrdinalIgnoreCase))
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
-                var buffer = new PooledBuffer<byte>(bufferLength);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                var bytesRead = await stream.ReadAsync(buffer.Array, 0, bufferLength, cancellationToken)
-                    .ConfigureAwait(false);
+                return Json.DeserializeFromByteArray<SentryEvent>(buffer);
+            }
+            // User report
+            if (string.Equals(payloadType, TypeValueUserReport, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                // The original buffer may be bigger than necessary, but Json.NET doesn't accept Spans
-                var bufferTrimmed = new byte[bytesRead];
-                Array.Copy(buffer.Array, bufferTrimmed, bytesRead);
+                return Json.DeserializeFromByteArray<UserFeedback>(buffer);
+            }
 
-                return Json.DeserializeFromByteArray<SentryEvent>(bufferTrimmed);
+            // Arbitrary payload
+            if (payloadLength != null)
+            {
+                stream.Seek(payloadLength.Value, SeekOrigin.Current);
             }
             else
             {
-                var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
-
-                if (payloadLength != null)
-                {
-                    stream.Seek(payloadLength.Value, SeekOrigin.Current);
-                }
-                else
-                {
-                    stream.Seek(0, SeekOrigin.End);
-                }
-
-                return new StreamSerializable(payloadStream);
+                stream.Seek(0, SeekOrigin.End);
             }
+
+            var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
+
+            return new StreamSerializable(payloadStream);
         }
 
         /// <summary>

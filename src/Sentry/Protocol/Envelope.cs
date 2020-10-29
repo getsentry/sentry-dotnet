@@ -80,6 +80,24 @@ namespace Sentry.Protocol
             return new Envelope(header, items);
         }
 
+        /// <summary>
+        /// Creates an envelope that contains a single user feedback.
+        /// </summary>
+        internal static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
+        {
+            var header = new Dictionary<string, object>
+            {
+                [EventIdKey] = sentryUserFeedback.EventId.ToString()
+            };
+
+            var items = new[]
+            {
+                EnvelopeItem.FromUserFeedback(sentryUserFeedback)
+            };
+
+            return new Envelope(header, items);
+        }
+
         private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
