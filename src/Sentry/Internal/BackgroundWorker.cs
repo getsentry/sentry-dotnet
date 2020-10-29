@@ -120,6 +120,9 @@ namespace Sentry.Internal
                     {
                         try
                         {
+                            // Dispose inside try/catch
+                            using var _ = envelope;
+
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.DiagnosticLogger?.LogDebug(

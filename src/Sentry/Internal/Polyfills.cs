@@ -14,6 +14,9 @@ namespace System.IO
         public static Task CopyToAsync(this Stream stream, Stream destination, CancellationToken cancellationToken) =>
             stream.CopyToAsync(destination, 81920, cancellationToken);
 
+        public static Task<int> ReadAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
+            stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+
         public static Task WriteAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
             stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
     }
@@ -23,14 +26,20 @@ namespace System.Collections.Generic
 {
     internal static class Extensions
     {
-        public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> pair, out TKey key, out TValue value)
+        public static void Deconstruct<TKey, TValue>(
+            this KeyValuePair<TKey, TValue> pair,
+            out TKey key,
+            out TValue value)
         {
             key = pair.Key;
             value = pair.Value;
         }
 
-        public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dic, TKey key) =>
-            dic.TryGetValue(key, out var result) ? result! : default!;
+        public static TValue GetValueOrDefault<TKey, TValue>(
+            this IReadOnlyDictionary<TKey, TValue> dic,
+            TKey key,
+            TValue defaultValue = default) =>
+            dic.TryGetValue(key!, out var result) ? result! : defaultValue!;
     }
 }
 #endif

@@ -3,8 +3,6 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
-using Sentry.Protocol;
-using ISerializable = Sentry.Protocol.ISerializable;
 
 namespace Sentry
 {
@@ -14,12 +12,10 @@ namespace Sentry
     [DataContract]
     public class UserFeedback : ISerializable
     {
-        [DataMember(Name = "event_id", EmitDefaultValue = false)]
-        private string _serializableEventId => EventId.ToString();
-
         /// <summary>
         /// The eventId of the event to which the user feedback is associated.
         /// </summary>
+        [DataMember(Name = "event_id", EmitDefaultValue = false)]
         public SentryId EventId { get; }
 
         /// <summary>

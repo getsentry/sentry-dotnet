@@ -36,7 +36,7 @@ namespace Sentry.Tests.Internals.Http
             );
 
             var envelope = Envelope.FromEvent(
-                new SentryEvent(id: SentryResponses.ResponseId)
+                new SentryEvent(eventId: SentryResponses.ResponseId)
             );
 
             // Act

@@ -12,6 +12,7 @@
 * Add most popular libraries to InAppExclude #555 (@bruno-garcia)
 * Add support for individual rate limits.
 * Extend `SentryOptions.BeforeBreadcrumb` signature to accept returning nullable values.
+* Add support for envelope deserialization.
 
 ## 3.0.0-alpha.1
 

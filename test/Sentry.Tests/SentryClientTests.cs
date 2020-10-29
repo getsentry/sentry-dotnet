@@ -103,7 +103,7 @@ namespace Sentry.Tests
         public void CaptureEvent_NullScope_QueuesEvent()
         {
             var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(id: expectedId);
+            var expectedEvent = new SentryEvent(eventId: expectedId);
             _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
@@ -116,7 +116,7 @@ namespace Sentry.Tests
         public void CaptureEvent_EventAndScope_QueuesEvent()
         {
             var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(id: expectedId);
+            var expectedEvent = new SentryEvent(eventId: expectedId);
             _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
