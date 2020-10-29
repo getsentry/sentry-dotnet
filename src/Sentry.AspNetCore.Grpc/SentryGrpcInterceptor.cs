@@ -117,6 +117,8 @@ namespace Sentry.AspNetCore.Grpc
             if (!hub.IsEnabled)
             {
                 await continuation(request, responseStream, context).ConfigureAwait(false);
+
+                return;
             }
 
             using (hub.PushAndLockScope())
@@ -154,7 +156,7 @@ namespace Sentry.AspNetCore.Grpc
             var hub = _hubAccessor();
             if (!hub.IsEnabled)
             {
-                await continuation(requestStream, context).ConfigureAwait(false);
+                return await continuation(requestStream, context).ConfigureAwait(false);
             }
 
             using (hub.PushAndLockScope())
@@ -197,6 +199,8 @@ namespace Sentry.AspNetCore.Grpc
             if (!hub.IsEnabled)
             {
                 await continuation(requestStream, responseStream, context).ConfigureAwait(false);
+
+                return;
             }
 
             using (hub.PushAndLockScope())
