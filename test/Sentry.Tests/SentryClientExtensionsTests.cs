@@ -82,5 +82,22 @@ namespace Sentry.Tests
             _ = _sut.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
             Assert.Equal(default, id);
         }
+
+        [Fact]
+        public void CaptureUserFeedback_EnabledClient_CapturesUserFeedback()
+        {
+            _ = _sut.IsEnabled.Returns(true);
+            _sut.CaptureUserFeedback(Guid.Parse("1ec19311a7c048818de80b18dcc43eaa"), "email@email.com", "comments");
+            _sut.Received(1).CaptureUserFeedback(Arg.Any<UserFeedback>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_DisabledClient_DoesNotCaptureUserFeedback()
+        {
+            _ = _sut.IsEnabled.Returns(false);
+            _sut.CaptureUserFeedback(Guid.Parse("1ec19311a7c048818de80b18dcc43eea"), "email@email.com", "comments");
+
+            _sut.DidNotReceive().CaptureUserFeedback(Arg.Any<UserFeedback>());
+        }
     }
 }

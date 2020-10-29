@@ -142,7 +142,14 @@ internal static class Program
                 SentrySdk.CaptureMessage("Fatal message!");
             });
 
-            SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
+            var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
+
+            // Send an user feedback linked to the warning.
+            var timestamp = DateTime.Now.Ticks;
+            var user = $"user{timestamp}";
+            var email = $"user{timestamp}@user{timestamp}.com";
+
+            SentrySdk.CaptureUserFeedback(new UserFeedback(eventId, email, "this is a sample user feedback", user));
 
             var error = new Exception("Attempting to send this multiple times");
 

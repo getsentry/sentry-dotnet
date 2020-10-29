@@ -23,6 +23,12 @@ namespace Sentry
         SentryId CaptureEvent(SentryEvent evt, Scope? scope = null);
 
         /// <summary>
+        /// Captures a user feedback.
+        /// </summary>
+        /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+        void CaptureUserFeedback(UserFeedback userFeedback);
+
+        /// <summary>
         /// Flushes events queued up.
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>

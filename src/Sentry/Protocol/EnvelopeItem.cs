@@ -56,7 +56,7 @@ namespace Sentry.Protocol
         {
             var buffer = new MemoryStream();
             await Payload.SerializeAsync(buffer, cancellationToken).ConfigureAwait(false);
-            buffer.Seek(0, SeekOrigin.Begin);
+            _ = buffer.Seek(0, SeekOrigin.Begin);
 
             return buffer;
         }
@@ -141,6 +141,19 @@ namespace Sentry.Protocol
             };
 
             return new EnvelopeItem(header, @event);
+        }
+
+        /// <summary>
+        /// Creates an envelope item from an user feedback.
+        /// </summary>
+        public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
+        {
+            var header = new Dictionary<string, object>
+            {
+                [TypeKey] = "user_report"
+            };
+
+            return new EnvelopeItem(header, sentryUserFeedback);
         }
     }
 }
