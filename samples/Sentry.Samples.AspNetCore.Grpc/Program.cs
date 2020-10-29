@@ -5,10 +5,8 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Sentry.Samples.AspNetCore.Grpc
 {
-#pragma warning disable RCS1102
-    public class Program
+    public static class Program
     {
-#pragma warning restore RCS1102
         public static void Main(string[] args)
         {
             BuildWebHost(args).Run();
