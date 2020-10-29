@@ -1,9 +1,11 @@
 # Changelog
 
-## unreleased
+## 3.0.0-alpha.3
 
 * Add support for user feedback. (#559) @lucas-zimerman
-* Fix internal url references for the new Sentry documentation. @lucas-zimerman
+* Add support for envelope deserialization (#558) @Tyrrrz
+* Add package description and tags to Sentry.AspNet @Tyrrrz
+* Fix internal url references for the new Sentry documentation. (#562) @lucas-zimerman
 
 ## 3.0.0-alpha.2
 
