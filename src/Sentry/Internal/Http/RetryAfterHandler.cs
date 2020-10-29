@@ -12,7 +12,7 @@ namespace Sentry.Internal.Http
     /// Retry After Handler which short-circuit requests following an HTTP 429.
     /// </summary>
     /// <seealso href="https://tools.ietf.org/html/rfc6585#section-4" />
-    /// <seealso href="https://docs.sentry.io/clientdev/overview/#writing-an-sdk"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/overview/#writing-an-sdk"/>
     /// <inheritdoc />
     internal class RetryAfterHandler : DelegatingHandler
     {

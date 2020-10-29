@@ -5,7 +5,7 @@ namespace Sentry.Internal.Http
     /// <summary>
     /// The payload of a response to a successful call to Sentry.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/overview/#reading-the-response"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/overview/#reading-the-response"/>
     // ReSharper disable All
     internal class SentrySuccessfulResponseBody
     {

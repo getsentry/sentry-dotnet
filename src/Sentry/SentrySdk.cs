@@ -42,7 +42,7 @@ namespace Sentry
         /// <remarks>
         /// An empty string is interpreted as a disabled SDK.
         /// </remarks>
-        /// <seealso href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
+        /// <seealso href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn.</param>
         public static IDisposable Init(string? dsn) => !string.IsNullOrWhiteSpace(dsn)
             ? Init(c => c.Dsn = dsn)
@@ -174,7 +174,7 @@ namespace Sentry
         /// The type of breadcrumb.
         /// The default type is default which indicates no specific handling.
         /// Other types are currently http for HTTP requests and navigation for navigation events.
-        /// <seealso href="https://docs.sentry.io/clientdev/interfaces/breadcrumbs/#breadcrumb-types"/>
+        /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types"/>
         /// </param>
         /// <param name="data">
         /// Data associated with this breadcrumb.
@@ -182,7 +182,7 @@ namespace Sentry
         /// Additional parameters that are unsupported by the type are rendered as a key/value table.
         /// </param>
         /// <param name="level">Breadcrumb level.</param>
-        /// <seealso href="https://docs.sentry.io/clientdev/interfaces/breadcrumbs/"/>
+        /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/"/>
         [DebuggerStepThrough]
         public static void AddBreadcrumb(
             string message,
@@ -222,7 +222,7 @@ namespace Sentry
         /// <remarks>
         /// Pushes a new scope, runs the callback, pops the scope.
         /// </remarks>
-        /// <see href="https://docs.sentry.io/learn/scopes/?platform=csharp#local-scopes"/>
+        /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
         /// <param name="scopeCallback">The callback to run with the one time scope.</param>
         [DebuggerStepThrough]
         public static void WithScope(Action<Scope> scopeCallback)

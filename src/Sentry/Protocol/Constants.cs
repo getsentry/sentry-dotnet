@@ -8,7 +8,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Empty string disables the SDK.
         /// </summary>
-        /// <see href="https://docs.sentry.io/clientdev/overview/#usage-for-end-users"/>
+        /// <see href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
         public const string DisableSdkDsnValue = "";
 
         /// <summary>

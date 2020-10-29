@@ -6,7 +6,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Graphics device unit.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/development/sdk-dev/interfaces/gpu/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#gpu-context"/>
     [DataContract]
     public class Gpu
     {
