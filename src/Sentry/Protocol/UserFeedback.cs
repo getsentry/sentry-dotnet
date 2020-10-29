@@ -3,6 +3,8 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
+using Sentry.Protocol;
+using ISerializable = Sentry.Protocol.ISerializable;
 
 namespace Sentry
 {
