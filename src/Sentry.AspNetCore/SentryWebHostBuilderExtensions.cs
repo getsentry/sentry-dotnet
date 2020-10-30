@@ -52,15 +52,8 @@ namespace Microsoft.AspNetCore.Hosting
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
             Action<WebHostBuilderContext, SentryAspNetCoreOptions>? configureOptions)
-        {
-            _ = builder.ConfigureLogging((context, appBuilder) =>
-            {
-                builder.UseSentry(sentryBuilder =>
-                    sentryBuilder.AddSentryOptions(options => configureOptions?.Invoke(context, options)));
-            });
-
-            return builder;
-        }
+            => builder.UseSentry((context, sentryBuilder) =>
+                sentryBuilder.AddSentryOptions(options => configureOptions?.Invoke(context, options)));
 
         /// <summary>
         /// Uses Sentry integration.
@@ -70,7 +63,18 @@ namespace Microsoft.AspNetCore.Hosting
         /// <returns></returns>
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
-            Action<ISentryBuilder>? configureSentry)
+            Action<ISentryBuilder>? configureSentry) =>
+            builder.UseSentry((context, sentryBuilder) => configureSentry?.Invoke(sentryBuilder));
+
+        /// <summary>
+        /// Uses Sentry integration.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="configureSentry">The Sentry builder.</param>
+        /// <returns></returns>
+        public static IWebHostBuilder UseSentry(
+            this IWebHostBuilder builder,
+            Action<WebHostBuilderContext, ISentryBuilder>? configureSentry)
         {
             // The earliest we can hook the SDK initialization code with the framework
             // Initialization happens at a later time depending if the default MEL backend is enabled or not.
@@ -91,7 +95,7 @@ namespace Microsoft.AspNetCore.Hosting
                     LogLevel.None);
 
                 var sentryBuilder = logging.Services.AddSentry();
-                configureSentry?.Invoke(sentryBuilder);
+                configureSentry?.Invoke(context, sentryBuilder);
             });
 
             _ = builder.ConfigureServices(c => _ = c.AddTransient<IStartupFilter, SentryStartupFilter>());
