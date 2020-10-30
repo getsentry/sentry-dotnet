@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.0;net5.0</TargetFrameworks>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <PackageTags>$(PackageTags);AspNetCore;gRPC</PackageTags>
     <PackageId>Sentry.AspNetCore.Grpc</PackageId>
     <AssemblyName>Sentry.AspNetCore.Grpc</AssemblyName>
