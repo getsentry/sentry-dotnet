@@ -1,6 +1,6 @@
 using Google.Protobuf;
 
-namespace Sentry.Extensions.Protobuf
+namespace Sentry.AspNetCore.Grpc
 {
     /// <summary>
     /// Default request payload extractor that will read the request as an <see cref="IMessage"/>

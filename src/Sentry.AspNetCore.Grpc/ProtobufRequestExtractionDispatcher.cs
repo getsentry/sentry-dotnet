@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Google.Protobuf;
 using Sentry.Extensibility;
 
-namespace Sentry.Extensions.Protobuf
+namespace Sentry.AspNetCore.Grpc
 {
     /// <summary>
     /// Dispatches request message extractions if enabled and within limits.

@@ -1,4 +1,4 @@
-namespace Sentry.Extensions.Protobuf
+namespace Sentry.AspNetCore.Grpc
 {
     /// <summary>
     /// An abstraction to a gRPC Request.

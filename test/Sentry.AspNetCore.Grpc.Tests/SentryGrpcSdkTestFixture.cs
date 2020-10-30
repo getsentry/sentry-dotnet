@@ -32,12 +32,16 @@ namespace Sentry.AspNetCore.Grpc.Tests
         {
             var sentry = FakeSentryGrpcServer.CreateServer<GrpcTestService, TestRequest, TestResponse>(GrpcHandlers);
             var sentryHttpClient = sentry.CreateClient();
-            _ = builder.UseSentry(options =>
+            _ = builder.UseSentry(sentryBuilder =>
             {
-                options.Dsn = DsnSamples.ValidDsnWithSecret;
-                options.SentryHttpClientFactory = new DelegateHttpClientFactory(o => sentryHttpClient);
+                sentryBuilder.AddGrpc();
+                sentryBuilder.AddSentryOptions(options =>
+                {
+                    options.Dsn = DsnSamples.ValidDsnWithSecret;
+                    options.SentryHttpClientFactory = new DelegateHttpClientFactory(o => sentryHttpClient);
 
-                Configure?.Invoke(options);
+                    Configure?.Invoke(options);
+                });
             });
 
             Channel = GrpcChannel.ForAddress("http://test-server",

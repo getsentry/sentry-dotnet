@@ -10,13 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sentry.AspNetCore\Sentry.AspNetCore.csproj"/>
-    <ProjectReference Include="..\Sentry.Extensions.Protobuf\Sentry.Extensions.Protobuf.csproj"/>
+    <ProjectReference Include="..\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\Sentry.Extensions.Protobuf\Sentry.Extensions.Protobuf.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.13.0"/>
-    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.32"/>
+    <PackageReference Include="Google.Protobuf" Version="3.13.0" />
+    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.32" />
   </ItemGroup>
 
 </Project>

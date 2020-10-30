@@ -22,8 +22,6 @@ namespace Sentry.AspNetCore.Grpc.Tests
                         options.Interceptors.Add<SentryGrpcTestInterceptor>();
                     });
 
-                    services.AddSentryGrpc();
-
                     foreach (var handler in handlers)
                     {
                         services.AddSingleton(handler);

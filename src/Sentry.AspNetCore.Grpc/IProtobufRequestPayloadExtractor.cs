@@ -1,6 +1,6 @@
 using Google.Protobuf;
 
-namespace Sentry.Extensions.Protobuf
+namespace Sentry.AspNetCore.Grpc
 {
     /// <summary>
     /// A request extractor.

@@ -1,5 +1,4 @@
 using Google.Protobuf;
-using Sentry.Extensions.Protobuf;
 
 namespace Sentry.AspNetCore.Grpc
 {

@@ -1,12 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Net.Http.Headers;
-using Sentry.Extensions.Protobuf;
 using Sentry.Protocol;
 
 namespace Sentry.AspNetCore.Grpc
@@ -21,7 +17,7 @@ namespace Sentry.AspNetCore.Grpc
         /// Populates the scope with the gRPC data
         /// </summary>
         public static void Populate<TRequest>(this Scope scope, ServerCallContext context, TRequest? request,
-            SentryAspNetCoreGrpcOptions options) where TRequest : class
+            SentryAspNetCoreOptions options) where TRequest : class
         {
             // Not to throw on code that ignores nullability warnings.
             // ReSharper disable ConditionIsAlwaysTrueOrFalse
@@ -31,67 +27,11 @@ namespace Sentry.AspNetCore.Grpc
             }
             // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
-            if (options.SendDefaultPii && !scope.HasUser())
-            {
-                var httpContext = context.GetHttpContext();
-                var userFactory = httpContext.RequestServices?.GetService<IUserFactory>();
-                var user = userFactory?.Create(httpContext);
-
-                if (user != null)
-                {
-                    scope.User = user;
-                }
-            }
-
             scope.SetTag("grpc.method", context.Method);
 
             if (request is IMessage requestMessage)
             {
                 SetBody(scope, context, requestMessage, options);
-            }
-
-            SetEnv(scope, context, options);
-        }
-
-        private static void SetEnv(Scope scope, ServerCallContext context, SentryAspNetCoreOptions options)
-        {
-            var httpContext = context.GetHttpContext();
-
-            scope.Request.Method = httpContext.Request.Method;
-
-            var host = context.Host;
-
-            scope.Request.Url = $"{httpContext.Request.Scheme}://{host}{httpContext.Request.Path}";
-            scope.UnsetTag("RequestPath");
-
-            foreach (var requestHeader in context.RequestHeaders)
-            {
-                if (!options.SendDefaultPii
-                    // Don't add headers which might contain PII
-                    // Header field names are lowercase as per http/2 spec https://httpwg.org/specs/rfc7540.html#rfc.section.8.1.2
-                    && (requestHeader.Key == HeaderNames.Cookie.ToLower()
-                        || requestHeader.Key == HeaderNames.Authorization.ToLower()))
-                {
-                    continue;
-                }
-
-                scope.Request.Headers[requestHeader.Key] = requestHeader.Value;
-            }
-
-            // TODO: Hide these 'Env' behind some extension method as
-            // these might be reported in a non CGI, old-school way
-            if (options.SendDefaultPii
-                && httpContext.Connection.RemoteIpAddress?.ToString() is { } ipAddress)
-            {
-                scope.Request.Env["REMOTE_ADDR"] = ipAddress;
-            }
-
-            scope.Request.Env["SERVER_NAME"] = Environment.MachineName;
-            scope.Request.Env["SERVER_PORT"] = httpContext.Connection.LocalPort.ToString();
-
-            if (httpContext.Response.Headers.TryGetValue("Server", out var server))
-            {
-                scope.Request.Env["SERVER_SOFTWARE"] = server;
             }
         }
 
@@ -123,32 +63,6 @@ namespace Sentry.AspNetCore.Grpc
 
                 scope.Request.Data = jsonData;
             }
-        }
-
-        /// <summary>
-        /// Populates the scope with the System.Diagnostics.Activity
-        /// </summary>
-        /// <param name="scope">The scope.</param>
-        /// <param name="activity">The activity.</param>
-        public static void Populate(this Scope scope, Activity activity)
-        {
-            // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            if (scope is null || activity is null)
-            {
-                return;
-            }
-            // ReSharper restore ConditionIsAlwaysTrueOrFalse
-
-            //scope.ActivityId = activity.Id;
-
-            // TODO: enumerating Activity.Tags clears the collection and sets field to null?
-            scope.SetTags(activity.Tags!);
-        }
-
-        internal static void SetWebRoot(this Scope scope, string webRoot)
-        {
-            scope.Request.Env["DOCUMENT_ROOT"] = webRoot;
         }
     }
 }

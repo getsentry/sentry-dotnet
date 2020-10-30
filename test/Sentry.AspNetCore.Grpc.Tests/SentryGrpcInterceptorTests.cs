@@ -15,7 +15,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
         {
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public Func<IHub> HubAccessor { get; set; }
-            public SentryAspNetCoreGrpcOptions Options { get; set; } = new SentryAspNetCoreGrpcOptions();
+            public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
             public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
 
             public ILogger<SentryGrpcInterceptor> Logger { get; set; } =

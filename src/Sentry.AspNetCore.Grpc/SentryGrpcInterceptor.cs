@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -18,7 +17,7 @@ namespace Sentry.AspNetCore.Grpc
     public class SentryGrpcInterceptor : Interceptor
     {
         private readonly Func<IHub> _hubAccessor;
-        private readonly SentryAspNetCoreGrpcOptions _options;
+        private readonly SentryAspNetCoreOptions _options;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly ILogger<SentryGrpcInterceptor> _logger;
 
@@ -41,7 +40,7 @@ namespace Sentry.AspNetCore.Grpc
         /// </exception>
         public SentryGrpcInterceptor(
             Func<IHub> hubAccessor,
-            IOptions<SentryAspNetCoreGrpcOptions> options,
+            IOptions<SentryAspNetCoreOptions> options,
             IWebHostEnvironment hostingEnvironment,
             ILogger<SentryGrpcInterceptor> logger)
         {
@@ -81,7 +80,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    PopulateScope(context, request, scope);
+                    scope.OnEvaluating += (_, __) => scope.Populate(context, request, _options);
                 });
 
                 try
@@ -125,7 +124,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    PopulateScope(context, request, scope);
+                    scope.OnEvaluating += (_, __) => scope.Populate(context, request, _options);
                 });
 
                 try
@@ -163,7 +162,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    PopulateScope<TRequest>(context, null, scope);
+                    scope.OnEvaluating += (_, __) => scope.Populate<TRequest>(context, null, _options);
                 });
 
                 try
@@ -207,7 +206,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    PopulateScope<TRequest>(context, null, scope);
+                    scope.OnEvaluating += (_, __) => scope.Populate<TRequest>(context, null, _options);
                 });
 
                 try
@@ -232,33 +231,6 @@ namespace Sentry.AspNetCore.Grpc
             var id = hub.CaptureEvent(evt);
 
             _logger.LogInformation("Event '{id}' queued.", id);
-        }
-
-        internal void PopulateScope<TRequest>(ServerCallContext context, TRequest? request, Scope scope)
-            where TRequest : class
-        {
-            if (scope.Sdk is { })
-            {
-                scope.Sdk.Name = Constants.SdkName;
-                scope.Sdk.Version = NameAndVersion.Version;
-
-                if (NameAndVersion.Version is { } version)
-                {
-                    scope.Sdk.AddPackage(ProtocolPackageName, version);
-                }
-            }
-
-            if (_hostingEnvironment.WebRootPath is { } webRootPath)
-            {
-                scope.SetWebRoot(webRootPath);
-            }
-
-            scope.Populate(context, request, _options);
-
-            if (_options.IncludeActivityData)
-            {
-                scope.Populate(Activity.Current!);
-            }
         }
     }
 }
