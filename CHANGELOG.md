@@ -1,5 +1,9 @@
 # Changelog
 
+## unreleased
+
+* Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman
+
 ## 3.0.0-alpha.3
 
 * Add support for user feedback. (#559) @lucas-zimerman
