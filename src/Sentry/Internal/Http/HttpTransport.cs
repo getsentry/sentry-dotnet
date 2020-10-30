@@ -85,7 +85,7 @@ namespace Sentry.Internal.Http
             }
         }
 
-        public async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+        public async ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
             var instant = DateTimeOffset.Now;
 
