@@ -39,8 +39,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
                 => new SentryGrpcInterceptor(
                     HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
-                    HostingEnvironment,
-                    Logger);
+                    HostingEnvironment);
         }
 
         private readonly Fixture _fixture = new Fixture();

@@ -6,6 +6,7 @@ using Grpc.Core.Interceptors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
 
@@ -19,7 +20,6 @@ namespace Sentry.AspNetCore.Grpc
         private readonly Func<IHub> _hubAccessor;
         private readonly SentryAspNetCoreOptions _options;
         private readonly IWebHostEnvironment _hostingEnvironment;
-        private readonly ILogger<SentryGrpcInterceptor> _logger;
 
         internal static readonly SdkVersion NameAndVersion
             = typeof(SentryGrpcInterceptor).Assembly.GetNameAndVersion();
@@ -32,7 +32,6 @@ namespace Sentry.AspNetCore.Grpc
         /// <param name="hubAccessor">The sentry Hub accessor.</param>
         /// <param name="options">The options for this integration</param>
         /// <param name="hostingEnvironment">The hosting environment.</param>
-        /// <param name="logger">Sentry logger.</param>
         /// <exception cref="ArgumentNullException">
         /// continuation
         /// or
@@ -41,8 +40,7 @@ namespace Sentry.AspNetCore.Grpc
         public SentryGrpcInterceptor(
             Func<IHub> hubAccessor,
             IOptions<SentryAspNetCoreOptions> options,
-            IWebHostEnvironment hostingEnvironment,
-            ILogger<SentryGrpcInterceptor> logger)
+            IWebHostEnvironment hostingEnvironment)
         {
             _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
             _options = options.Value;
@@ -53,7 +51,6 @@ namespace Sentry.AspNetCore.Grpc
             }
 
             _hostingEnvironment = hostingEnvironment;
-            _logger = logger;
         }
 
         /// <summary>
@@ -226,11 +223,11 @@ namespace Sentry.AspNetCore.Grpc
         {
             var evt = new SentryEvent(e);
 
-            _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
+            _options.DiagnosticLogger?.LogDebug("Sending event '{SentryEvent}' to Sentry.", evt);
 
             var id = hub.CaptureEvent(evt);
 
-            _logger.LogInformation("Event '{id}' queued.", id);
+            _options.DiagnosticLogger?.LogInfo("Event '{id}' queued.", id);
         }
     }
 }
