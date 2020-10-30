@@ -12,8 +12,8 @@ namespace Sentry.Benchmarks
     {
         private class FakeTransport : ITransport
         {
-            public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
-                => Task.CompletedTask;
+            public ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+                => default;
         }
 
         private IBackgroundWorker _backgroundWorker;
@@ -40,6 +40,6 @@ namespace Sentry.Benchmarks
         public int Items;
 
         [Benchmark(Description = "Enqueue event and FlushAsync")]
-        public Task FlushAsync_QueueDepthAsync() => _backgroundWorker.FlushAsync(TimeSpan.FromSeconds(10));
+        public ValueTask FlushAsync_QueueDepthAsync() => _backgroundWorker.FlushAsync(TimeSpan.FromSeconds(10));
     }
 }

@@ -28,7 +28,7 @@ namespace NotSentry.Tests
                 return true;
             }
 
-            public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
+            public ValueTask FlushAsync(TimeSpan timeout) => default;
         }
 
         [Fact]
