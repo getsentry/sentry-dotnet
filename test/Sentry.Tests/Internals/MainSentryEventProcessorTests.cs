@@ -64,6 +64,43 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
+        public void Process_SendDefaultPiiTrueIdEnvironmentTrueUserIpNull_UserIpSetDefaultIp()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+            _fixture.SentryOptions.IsEnvironmentUser = true;
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Equal(sut.UserIpDefault, evt.User.IpAddress);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiTrueIdEnvironmentTrueUserIpSet_UserIpIgnoreDefaultIp()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+            var @ip = "192.0.0.1";
+            evt.User.IpAddress = ip;
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+            _fixture.SentryOptions.IsEnvironmentUser = true;
+
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Equal(ip, evt.User.IpAddress);
+        }
+
+        [Fact]
         public void Process_SendDefaultPiiTrueIdEnvironmentFalse_UserNameNotSet()
         {
             var evt = new SentryEvent();
