@@ -21,7 +21,7 @@ namespace Sentry.Internal.Extensions
             }
         }
 
-        public static async Task<byte[]> ReadByteChunkAsync(
+        public static async ValueTask<byte[]> ReadByteChunkAsync(
             this Stream stream,
             int expectedLength,
             CancellationToken cancellationToken = default)
@@ -38,7 +38,7 @@ namespace Sentry.Internal.Extensions
             return result;
         }
 
-        public static async Task WriteByteAsync(
+        public static async ValueTask WriteByteAsync(
             this Stream stream,
             byte value,
             CancellationToken cancellationToken = default)

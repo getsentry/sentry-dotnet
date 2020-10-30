@@ -12,6 +12,6 @@ namespace Sentry.Protocol
         /// <summary>
         /// Serializes the object to a stream.
         /// </summary>
-        Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default);
+        ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default);
     }
 }

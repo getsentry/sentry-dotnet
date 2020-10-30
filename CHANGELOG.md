@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+* Replace Task with ValueTask where possible.
+
 ## 3.0.0-alpha.3
 
 * Add support for user feedback. (#559) @lucas-zimerman

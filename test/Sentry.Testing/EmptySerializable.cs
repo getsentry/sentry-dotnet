@@ -7,7 +7,6 @@ namespace Sentry.Testing
 {
     public class EmptySerializable : ISerializable
     {
-        public Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+        public ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default) => default;
     }
 }

@@ -127,7 +127,7 @@ namespace Sentry
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>
         /// <returns>A task to await for the flush operation.</returns>
-        public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
+        public ValueTask FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
         // TODO: this method needs to be refactored, it's really hard to analyze nullability
         private SentryId DoSendEvent(SentryEvent @event, Scope? scope)

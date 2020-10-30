@@ -68,7 +68,7 @@ namespace Sentry.Internal
             return true;
         }
 
-        private async Task WorkerAsync()
+        private async ValueTask WorkerAsync()
         {
             var cancellation = _shutdownSource.Token;
 
@@ -123,7 +123,7 @@ namespace Sentry.Internal
                             // Dispose inside try/catch
                             using var _ = envelope;
 
-                            var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
+                            var ValueTask = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.DiagnosticLogger?.LogDebug(
                                 "Envelope {0} in-flight to Sentry. #{1} in queue.",
@@ -131,7 +131,7 @@ namespace Sentry.Internal
                                 _queue.Count
                             );
 
-                            await task.ConfigureAwait(false);
+                            await ValueTask.ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {
@@ -179,7 +179,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async Task FlushAsync(TimeSpan timeout)
+        public async ValueTask FlushAsync(TimeSpan timeout)
         {
             if (_disposed)
             {

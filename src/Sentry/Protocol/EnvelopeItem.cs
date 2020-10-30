@@ -54,7 +54,7 @@ namespace Sentry.Protocol
                 var value => Convert.ToInt64(value) // can be int, long, or another numeric type
             };
 
-        private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
         {
             var buffer = new MemoryStream();
             await Payload.SerializeAsync(buffer, cancellationToken).ConfigureAwait(false);
@@ -64,7 +64,7 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Length is known
             if (TryGetLength() != null)
@@ -161,7 +161,7 @@ namespace Sentry.Protocol
             return new EnvelopeItem(header, sentryUserFeedback);
         }
 
-        private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
+        private static async ValueTask<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
@@ -185,7 +185,7 @@ namespace Sentry.Protocol
                 ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
-        private static async Task<ISerializable> DeserializePayloadAsync(
+        private static async ValueTask<ISerializable> DeserializePayloadAsync(
             Stream stream,
             IReadOnlyDictionary<string, object> header,
             CancellationToken cancellationToken = default)
@@ -234,7 +234,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Deserializes envelope item from stream.
         /// </summary>
-        public static async Task<EnvelopeItem> DeserializeAsync(
+        public static async ValueTask<EnvelopeItem> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
