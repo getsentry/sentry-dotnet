@@ -2,7 +2,8 @@
 
 ## vNext
 
-* Replace Task with ValueTask where possible.
+* Replace Task with ValueTask where possible. (#564) @Tyrrrz
+* Add support for ASP.NET Core gRPC (#563) @Mitch528
 
 ## 3.0.0-alpha.3
 
