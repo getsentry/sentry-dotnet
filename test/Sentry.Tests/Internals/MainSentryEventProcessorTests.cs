@@ -64,24 +64,23 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void Process_SendDefaultPiiTrueIdEnvironmentTrueUserIpNull_UserIpSetDefaultIp()
+        public void Process_SendDefaultPiiTrueAndUserIpNull_UserIpSetServerInferredIp()
         {
             //Arrange
             var evt = new SentryEvent();
 
             _fixture.SentryOptions.SendDefaultPii = true;
-            _fixture.SentryOptions.IsEnvironmentUser = true;
             var sut = _fixture.GetSut();
 
             //Act
             _ = sut.Process(evt);
 
             //Assert
-            Assert.Equal(sut.UserIpDefault, evt.User.IpAddress);
+            Assert.Equal(sut.UserIpServerInferred, evt.User.IpAddress);
         }
 
         [Fact]
-        public void Process_SendDefaultPiiTrueIdEnvironmentTrueUserIpSet_UserIpIgnoreDefaultIp()
+        public void Process_SendDefaultPiiTrueAndUserIpSet_UserIpIgnoreServerInferredIp()
         {
             //Arrange
             var evt = new SentryEvent();
@@ -89,7 +88,6 @@ namespace Sentry.Tests.Internals
             evt.User.IpAddress = ip;
 
             _fixture.SentryOptions.SendDefaultPii = true;
-            _fixture.SentryOptions.IsEnvironmentUser = true;
 
             var sut = _fixture.GetSut();
 
@@ -98,6 +96,21 @@ namespace Sentry.Tests.Internals
 
             //Assert
             Assert.Equal(ip, evt.User.IpAddress);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiFalse_UserIpNotSet()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+            _fixture.SentryOptions.SendDefaultPii = false;
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Null(evt.User.IpAddress);
         }
 
         [Fact]

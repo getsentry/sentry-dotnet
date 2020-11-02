@@ -45,7 +45,7 @@ namespace Sentry.Internal
         /// <summary>
         /// A flag that tells the endpoint to figure out the user ip.
         /// </summary>
-        internal string UserIpDefault = "{{auto}}";
+        internal string UserIpServerInferred = "{{auto}}";
 
         public MainSentryEventProcessor(
             SentryOptions options,
@@ -113,11 +113,13 @@ namespace Sentry.Internal
             }
 
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-            if (_options.SendDefaultPii && _options.IsEnvironmentUser)
+            if (_options.SendDefaultPii)
             {
-                if(!@event.HasUser())
+                if (_options.IsEnvironmentUser && !@event.HasUser())
+                {
                     @event.User.Username = Environment.UserName;
-                @event.User.IpAddress ??= UserIpDefault;
+                }
+                @event.User.IpAddress ??= UserIpServerInferred;
             }
 
             if (@event.ServerName == null)
