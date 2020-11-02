@@ -3,6 +3,7 @@ name: build
 on:
   create:
     tags:
+      - '*'
   push:
     branches:
       - main
