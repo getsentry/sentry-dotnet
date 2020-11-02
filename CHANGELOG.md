@@ -1,6 +1,6 @@
 # Changelog
 
-## vNext
+## 3.0.0-alpha.4
 
 * Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman
 * Replace Task with ValueTask where possible. (#564) @Tyrrrz
