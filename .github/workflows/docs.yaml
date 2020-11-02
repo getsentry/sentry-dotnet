@@ -20,7 +20,7 @@ jobs:
         name: Publish Documentation on GitHub Pages
         env:
           BUILD_DIR: docs/_site
-          GH_PAT: ${{ secrets.GH_PAGES }}
+          GH_PAT: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive Docs
         uses: actions/upload-artifact@v2
         with:
