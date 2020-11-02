@@ -1,0 +1,22 @@
+name: API Docs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+  docs:
+    name: DocFX
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nikeee/docfx-action@v1.0.0
+        name: Build Documentation
+        with:
+          args: docs/docfx.json
+      - uses: maxheld83/ghpages@master
+        name: Publish Documentation on GitHub Pages
+        env:
+          BUILD_DIR: _site
+          GH_PAT: ${{ secrets.GH_PAGES }}
