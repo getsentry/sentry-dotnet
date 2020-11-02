@@ -108,17 +108,22 @@ namespace Sentry.Tests.Internals
         public void ConfigureScopeAsync_NullArgument_ReturnsCompletedTask()
         {
             var sut = _fixture.GetSut();
-            Assert.Same(Task.CompletedTask, sut.ConfigureScopeAsync(null));
+            Assert.Equal(default, sut.ConfigureScopeAsync(null));
         }
 
         [Fact]
-        public void ConfigureScopeAsync_Callback_InvokesCallback()
+        public async Task ConfigureScopeAsync_Callback_InvokesCallback()
         {
             var sut = _fixture.GetSut();
-            var expectedTask = Task.FromResult(1);
+            var isInvoked = false;
 
-            var actualTask = sut.ConfigureScopeAsync(scope => expectedTask);
-            Assert.Same(expectedTask, actualTask);
+            await sut.ConfigureScopeAsync(scope =>
+            {
+                isInvoked = true;
+                return default;
+            });
+
+            Assert.True(isInvoked);
         }
 
         [Fact]

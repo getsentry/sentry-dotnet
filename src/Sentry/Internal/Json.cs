@@ -62,7 +62,7 @@ namespace Sentry.Internal
         public static T Deserialize<T>(string json) =>
             DeserializeFromByteArray<T>(Encoding.GetBytes(json));
 
-        public static async Task SerializeToStreamAsync(
+        public static async ValueTask SerializeToStreamAsync(
             object obj,
             Stream stream,
             CancellationToken cancellationToken = default)

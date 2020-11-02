@@ -70,7 +70,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+        public async ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async Task FlushAsync(TimeSpan timeout)
+        public async ValueTask FlushAsync(TimeSpan timeout)
         {
             try
             {

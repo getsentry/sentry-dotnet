@@ -50,7 +50,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
             => await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

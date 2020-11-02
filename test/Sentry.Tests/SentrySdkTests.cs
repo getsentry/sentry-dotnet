@@ -226,7 +226,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+        public async Task FlushAsync_NotInit_NoOp() => await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
 
         [Fact]
         public void PushScope_InstanceOf_DisabledClient()
@@ -328,7 +328,7 @@ namespace Sentry.Tests
             await SentrySdk.ConfigureScopeAsync(_ =>
             {
                 invoked = true;
-                return Task.CompletedTask;
+                return default;
             });
             Assert.False(invoked);
         }

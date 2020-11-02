@@ -12,7 +12,7 @@ namespace Sentry.Protocol
         public StreamSerializable(Stream source) => _source = source;
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
             await _source.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
 
         /// <inheritdoc />
