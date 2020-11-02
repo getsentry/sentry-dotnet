@@ -6,6 +6,7 @@ on:
       - main
   pull_request:
 
+jobs:
   docs:
     name: DocFX
     runs-on: ubuntu-latest
