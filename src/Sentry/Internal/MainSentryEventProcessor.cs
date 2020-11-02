@@ -42,6 +42,11 @@ namespace Sentry.Internal
         internal string? Release => _release.Value;
         internal Runtime? Runtime => _runtime.Value;
 
+        /// <summary>
+        /// A flag that tells the endpoint to figure out the user ip.
+        /// </summary>
+        internal string UserIpServerInferred = "{{auto}}";
+
         public MainSentryEventProcessor(
             SentryOptions options,
             Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
@@ -108,9 +113,13 @@ namespace Sentry.Internal
             }
 
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-            if (_options.SendDefaultPii && _options.IsEnvironmentUser && !@event.HasUser())
+            if (_options.SendDefaultPii)
             {
-                @event.User.Username = Environment.UserName;
+                if (_options.IsEnvironmentUser && !@event.HasUser())
+                {
+                    @event.User.Username = Environment.UserName;
+                }
+                @event.User.IpAddress ??= UserIpServerInferred;
             }
 
             if (@event.ServerName == null)

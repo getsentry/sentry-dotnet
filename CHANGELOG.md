@@ -2,6 +2,7 @@
 
 ## vNext
 
+* Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman
 * Replace Task with ValueTask where possible. (#564) @Tyrrrz
 * Add support for ASP.NET Core gRPC (#563) @Mitch528
 
