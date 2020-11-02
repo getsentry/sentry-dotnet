@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 
 namespace Sentry.Internal.Http
 {
@@ -144,7 +145,7 @@ namespace Sentry.Internal.Http
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
-                Content = new SerializableHttpContent(envelope)
+                Content = new EnvelopeHttpContent(envelope)
             };
 
             _addAuth(request.Headers);

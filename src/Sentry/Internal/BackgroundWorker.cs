@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 
 namespace Sentry.Internal
 {

@@ -2,12 +2,12 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Sentry.Protocol
+namespace Sentry.Protocol.Batching
 {
     /// <summary>
     /// Represents a serializable entity.
     /// </summary>
-    public interface ISerializable
+    internal interface ISerializable
     {
         /// <summary>
         /// Serializes the object to a stream.

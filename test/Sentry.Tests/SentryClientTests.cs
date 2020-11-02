@@ -5,6 +5,7 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 using Xunit;
 
 namespace Sentry.Tests

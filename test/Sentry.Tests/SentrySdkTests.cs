@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 using Sentry.Testing;
 using Xunit;
 using static Sentry.Internal.Constants;

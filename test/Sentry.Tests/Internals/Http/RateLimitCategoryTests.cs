@@ -2,6 +2,7 @@
 using FluentAssertions;
 using Sentry.Internal.Http;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 using Sentry.Testing;
 using Xunit;
 

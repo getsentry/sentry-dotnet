@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 using Sentry.Testing;
 using Xunit;
 

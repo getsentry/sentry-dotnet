@@ -7,12 +7,9 @@ using System.Threading.Tasks;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.Protocol
+namespace Sentry.Protocol.Batching
 {
-    /// <summary>
-    /// Envelope item.
-    /// </summary>
-    public class EnvelopeItem : IDisposable, ISerializable
+    internal class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
         private const string TypeValueEvent = "event";
@@ -20,33 +17,18 @@ namespace Sentry.Protocol
         private const string LengthKey = "length";
         private const string FileNameKey = "file_name";
 
-        /// <summary>
-        /// Header associated with this item.
-        /// </summary>
         public IReadOnlyDictionary<string, object> Header { get; }
 
-        /// <summary>
-        /// Payload associated with this item.
-        /// </summary>
         public ISerializable Payload { get; }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="EnvelopeItem"/>.
-        /// </summary>
         public EnvelopeItem(IReadOnlyDictionary<string, object> header, ISerializable payload)
         {
             Header = header;
             Payload = payload;
         }
 
-        /// <summary>
-        /// Attempts to extract the value of "type" header if it's present.
-        /// </summary>
         public string? TryGetType() => Header.GetValueOrDefault(TypeKey) as string;
 
-        /// <summary>
-        /// Attempts to extract the value of "length" header if it's present.
-        /// </summary>
         public long? TryGetLength() =>
             Header.GetValueOrDefault(LengthKey) switch
             {
@@ -63,7 +45,6 @@ namespace Sentry.Protocol
             return buffer;
         }
 
-        /// <inheritdoc />
         public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Length is known
@@ -94,12 +75,8 @@ namespace Sentry.Protocol
             }
         }
 
-        /// <inheritdoc />
         public void Dispose() => (Payload as IDisposable)?.Dispose();
 
-        /// <summary>
-        /// Creates an envelope item from file.
-        /// </summary>
         public static EnvelopeItem FromFile(string filePath)
         {
             var file = File.OpenRead(filePath);
@@ -115,9 +92,6 @@ namespace Sentry.Protocol
             return new EnvelopeItem(header, payload);
         }
 
-        /// <summary>
-        /// Creates an envelope item from text content.
-        /// </summary>
         public static EnvelopeItem FromString(string text)
         {
             using var buffer = new MemoryStream(
@@ -135,9 +109,6 @@ namespace Sentry.Protocol
             return new EnvelopeItem(header, payload);
         }
 
-        /// <summary>
-        /// Creates an envelope item from an event.
-        /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
             var header = new Dictionary<string, object>
@@ -145,12 +116,9 @@ namespace Sentry.Protocol
                 [TypeKey] = TypeValueEvent
             };
 
-            return new EnvelopeItem(header, @event);
+            return new EnvelopeItem(header, new JsonSerializable(@event));
         }
 
-        /// <summary>
-        /// Creates an envelope item from an user feedback.
-        /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
             var header = new Dictionary<string, object>
@@ -158,7 +126,7 @@ namespace Sentry.Protocol
                 [TypeKey] = TypeValueUserReport
             };
 
-            return new EnvelopeItem(header, sentryUserFeedback);
+            return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
         }
 
         private static async ValueTask<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
@@ -204,7 +172,7 @@ namespace Sentry.Protocol
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                return Json.DeserializeFromByteArray<SentryEvent>(buffer);
+                return new JsonSerializable(Json.DeserializeFromByteArray<SentryEvent>(buffer));
             }
 
             // User report
@@ -213,7 +181,7 @@ namespace Sentry.Protocol
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                return Json.DeserializeFromByteArray<UserFeedback>(buffer);
+                return new JsonSerializable(Json.DeserializeFromByteArray<UserFeedback>(buffer));
             }
 
             // Arbitrary payload
@@ -231,9 +199,6 @@ namespace Sentry.Protocol
             return new StreamSerializable(payloadStream);
         }
 
-        /// <summary>
-        /// Deserializes envelope item from stream.
-        /// </summary>
         public static async ValueTask<EnvelopeItem> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)

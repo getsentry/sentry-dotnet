@@ -2,16 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Sentry.Internal;
 using Sentry.Protocol;
 using Constants = Sentry.Protocol.Constants;
-using ISerializable = Sentry.Protocol.ISerializable;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -22,7 +17,7 @@ namespace Sentry
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public class SentryEvent : BaseScope, ISerializable
+    public class SentryEvent : BaseScope
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string>? InternalModules { get; set; }
@@ -153,9 +148,5 @@ namespace Sentry
 
             Platform = Constants.Platform;
         }
-
-        /// <inheritdoc />
-        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

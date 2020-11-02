@@ -18,6 +18,7 @@ using Sentry.AspNetCore;
 using Sentry.AspNetCore.Tests;
 using Sentry.Extensions.Logging;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 
 // ReSharper disable once CheckNamespace - To test Logger emitting events:
 // It filters events coming from 'Sentry.' namespace.

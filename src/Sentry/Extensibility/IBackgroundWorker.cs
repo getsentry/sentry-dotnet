@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 
 namespace Sentry.Extensibility
 {

@@ -8,6 +8,7 @@ using FluentAssertions;
 using NSubstitute;
 using Sentry.Internal.Http;
 using Sentry.Protocol;
+using Sentry.Protocol.Batching;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;
