@@ -5,7 +5,7 @@ using Sentry.Internal;
 
 namespace Sentry.Protocol.Envelopes
 {
-    public class JsonSerializable : ISerializable
+    internal class JsonSerializable : ISerializable
     {
         public object Source { get; }
 
