@@ -7,7 +7,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Describes the device that caused the event. This is most appropriate for mobile applications.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/interfaces/contexts/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
     [DataContract]
     public class Device
     {

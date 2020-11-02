@@ -7,6 +7,7 @@ export PATH=./node_modules/.bin:$PATH
 
 upload_artifacts() {
   zeus upload -t "application/zip+nupkg" ./src/*/bin/Release/*.nupkg
+  zeus upload -t "application/zip+snupkg" ./src/*/bin/Release/*.snupkg
   zeus job update --status=passed
 }
 

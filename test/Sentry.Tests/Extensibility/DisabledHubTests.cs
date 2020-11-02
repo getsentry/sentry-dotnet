@@ -15,7 +15,7 @@ namespace Sentry.Tests.Extensibility
 
         [Fact]
         public void ConfigureScopeAsync_ReturnsCompletedTask()
-            => Assert.Same(Task.CompletedTask, DisabledHub.Instance.ConfigureScopeAsync(null));
+            => Assert.Equal(default, DisabledHub.Instance.ConfigureScopeAsync(null));
 
         [Fact]
         public void PushScope_ReturnsSelf()
@@ -42,6 +42,6 @@ namespace Sentry.Tests.Extensibility
         public void Dispose_NoOp() => DisabledHub.Instance.Dispose();
 
         [Fact]
-        public Task FlushAsync_NoOp() => DisabledHub.Instance.FlushAsync(TimeSpan.FromDays(1));
+        public async Task FlushAsync_NoOp() => await DisabledHub.Instance.FlushAsync(TimeSpan.FromDays(1));
     }
 }

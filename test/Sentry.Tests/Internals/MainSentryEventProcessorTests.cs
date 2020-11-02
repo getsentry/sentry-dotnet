@@ -164,35 +164,45 @@ namespace Sentry.Tests.Internals
             Assert.Equal(sut.Release, evt.Release);
         }
 
-        [Fact]
-        public void Process_EnvironmentOnOptions_SetToEvent()
+        [Theory]
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("a", "a")] // Provided: nothing will change.
+        [InlineData("production", "production")] // Provided: nothing will change. (value has a lower case 'p', different to default value)
+        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
+        public void Process_EnvironmentOnOptions_SetToEvent(string environment, string expectedEnvironment)
         {
-            const string expected = "Production";
-            _fixture.SentryOptions.Environment = expected;
+            _fixture.SentryOptions.Environment = environment;
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
             _ = sut.Process(evt);
 
-            Assert.Equal(expected, evt.Environment);
+            Assert.Equal(expectedEnvironment, evt.Environment);
         }
 
-        [Fact]
-        public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable()
+        [Theory]
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("a", "a")] // Provided: nothing will change.
+        [InlineData("Production", "Production")] // Provided: nothing will change. (value has a upper case 'p', different to default value)
+        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
+        public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
         {
-            const string expected = "Staging";
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
             EnvironmentVariableGuard.WithVariable(
                 Constants.EnvironmentEnvironmentVariable,
-                expected,
+                environment,
                 () =>
                 {
                     _ = sut.Process(evt);
                 });
 
-            Assert.Equal(expected, evt.Environment);
+            Assert.Equal(expectedEnvironment, evt.Environment);
         }
 
         [Fact]

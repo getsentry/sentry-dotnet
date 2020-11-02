@@ -11,7 +11,7 @@ namespace Sentry.Internal
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            if (options.Dsn == null) throw new ArgumentException("No DSN defined in the SentryOptions");
+            if (options.Dsn is null) throw new ArgumentException("No DSN defined in the SentryOptions");
         }
 
         public IBackgroundWorker CreateBackgroundWorker()
@@ -29,25 +29,23 @@ namespace Sentry.Internal
                 throw new InvalidOperationException("The DSN is expected to be set at this point.");
             }
 
+            var dsn = Dsn.Parse(_options.Dsn);
+
             var addAuth = SentryHeaders.AddSentryAuth(
                 _options.SentryVersion,
                 _options.ClientVersion,
-                _options.Dsn.PublicKey,
-                _options.Dsn.SecretKey);
+                dsn.PublicKey,
+                dsn.SecretKey
+            );
 
-            if (_options.SentryHttpClientFactory is { } factory)
+            if (_options.SentryHttpClientFactory is {})
             {
                 _options.DiagnosticLogger?.LogDebug("Using ISentryHttpClientFactory set through options: {0}.",
-                    factory.GetType().Name);
-            }
-            else
-            {
-#pragma warning disable 618 // Tests will be removed once obsolete code gets removed
-                factory = new DefaultSentryHttpClientFactory(_options.ConfigureHandler, _options.ConfigureClient);
-#pragma warning restore 618
+                    _options.SentryHttpClientFactory.GetType().Name);
             }
 
-            var httpClient = factory.Create(_options.Dsn, _options);
+            var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
+            var httpClient = httpClientFactory.Create(_options);
 
             return new BackgroundWorker(new HttpTransport(_options, httpClient, addAuth), _options);
         }

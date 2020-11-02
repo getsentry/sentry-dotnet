@@ -95,11 +95,39 @@ namespace Sentry
         }
 
         /// <summary>
+        /// Captures a user feedback.
+        /// </summary>
+        /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+        public void CaptureUserFeedback(UserFeedback userFeedback)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            if (userFeedback.EventId.Equals(SentryId.Empty))
+            {
+                //Ignore the userfeedback if EventId is empty
+                _options.DiagnosticLogger?.LogWarning("User feedback dropped due to empty id.");
+                return;
+            }
+            else if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
+                 string.IsNullOrWhiteSpace(userFeedback.Comments))
+            {
+                //Ignore the userfeedback if a required field is null or empty.
+                _options.DiagnosticLogger?.LogWarning("User feedback discarded due to one or more required fields missing.");
+                return;
+            }
+
+            _ = CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+        }
+
+        /// <summary>
         /// Flushes events asynchronously.
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>
         /// <returns>A task to await for the flush operation.</returns>
-        public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
+        public ValueTask FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
         // TODO: this method needs to be refactored, it's really hard to analyze nullability
         private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
@@ -119,16 +147,8 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            if (Worker.EnqueueEvent(processedEvent))
-            {
-                _options.DiagnosticLogger?.LogDebug("Event queued up.");
-                return processedEvent.EventId;
-            }
-
-            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
-                Worker.QueuedItems);
-
-            return SentryId.Empty;
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent)) ?
+                processedEvent.EventId : SentryId.Empty;
         }
 
         internal SentryEvent? PrepareEvent(SentryEvent @event, Scope? scope)
@@ -187,6 +207,24 @@ namespace Sentry
             }
 
             return processedEvent;
+        }
+
+        /// <summary>
+        /// Capture an envelope and queue it.
+        /// </summary>
+        /// <param name="envelope">The envelope.</param>
+        /// <returns>true if the enveloped was queued, false otherwise.</returns>
+        private bool CaptureEnvelope(Envelope envelope)
+        {
+            if (Worker.EnqueueEnvelope(envelope))
+            {
+                _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
+                return true;
+            }
+
+            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
+                Worker.QueuedItems);
+            return false;
         }
 
         private SentryEvent? BeforeSend(SentryEvent? @event)

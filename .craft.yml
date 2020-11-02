@@ -1,6 +1,10 @@
+minVersion: '0.9.3'
 github:
   owner: getsentry
   repo: sentry-dotnet
+changelogPolicy: simple
+statusProvider:
+  name: github
 targets:
   - name: nuget
   - name: github
@@ -16,6 +20,10 @@ targets:
     type: sdk
     config:
       canonical: "nuget:Sentry.AspNetCore"
+  - name: registry
+    type: sdk
+    config:
+      canonical: "nuget:Sentry.AspNet"
   - name: registry
     type: sdk
     config:

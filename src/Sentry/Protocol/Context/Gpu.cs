@@ -6,7 +6,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Graphics device unit.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/development/sdk-dev/interfaces/gpu/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#gpu-context"/>
     [DataContract]
     public class Gpu
     {
@@ -44,7 +44,7 @@ namespace Sentry.Protocol
         /// <seealso href="https://docs.microsoft.com/en-us/windows-hardware/drivers/install/identifiers-for-pci-devices"/>
         /// <seealso href="http://pci-ids.ucw.cz/read/PC/"/>
         [DataMember(Name = "vendor_id", EmitDefaultValue = false)]
-        public int? VendorId { get; set; }
+        public string? VendorId { get; set; }
 
         /// <summary>
         /// The vendor name reported by the graphic device.

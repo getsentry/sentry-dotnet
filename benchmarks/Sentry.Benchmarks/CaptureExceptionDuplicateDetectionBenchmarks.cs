@@ -12,7 +12,7 @@ namespace Sentry.Benchmarks
 
         private static Action<SentryOptions> SharedConfig => (o =>
         {
-            o.Dsn = new Dsn(Constants.ValidDsn);
+            o.Dsn = Constants.ValidDsn;
             o.SentryHttpClientFactory = new FakeHttpClientFactory();
         });
 

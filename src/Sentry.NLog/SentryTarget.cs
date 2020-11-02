@@ -183,29 +183,6 @@ namespace Sentry.NLog
         }
 
         /// <summary>
-        /// Determines whether event-level properties will be sent to sentry as additional data.
-        /// Defaults to <see langword="true" />.
-        /// </summary>
-        /// <seealso cref="IncludeEventPropertiesAsTags" />
-        [Obsolete("Use IncludeEventProperties instead")]
-        public bool SendEventPropertiesAsData
-        {
-            get => IncludeEventProperties;
-            set => IncludeEventProperties = value;
-        }
-
-        /// <summary>
-        /// Determines whether event properties will be sent to sentry as Tags or not.
-        /// Defaults to <see langword="false" />.
-        /// </summary>
-        [Obsolete("Use IncludeEventPropertiesAsTags instead")]
-        public bool SendEventPropertiesAsTags
-        {
-            get => IncludeEventPropertiesAsTags;
-            set => IncludeEventPropertiesAsTags = value;
-        }
-
-        /// <summary>
         /// Determines whether or not to include event-level data as data in breadcrumbs for future errors.
         /// Defaults to <see langword="false" />.
         /// </summary>
@@ -274,7 +251,7 @@ namespace Sentry.NLog
             var customDsn = Dsn?.Render(LogEventInfo.CreateNullEvent());
             if (!string.IsNullOrEmpty(customDsn))
             {
-                Options.Dsn = new Dsn(customDsn);
+                Options.Dsn = customDsn;
             }
 
             var customRelease = Release?.Render(LogEventInfo.CreateNullEvent());
@@ -306,6 +283,7 @@ namespace Sentry.NLog
         {
             _ = HubAccessor()
                     .FlushAsync(Options.FlushTimeout)
+                    .AsTask()
                     .ContinueWith(t => asyncContinuation(t.Exception));
         }
 
@@ -349,8 +327,7 @@ namespace Sentry.NLog
 
                 var evt = new SentryEvent(exception)
                 {
-                    Message = null,
-                    LogEntry = new LogEntry
+                    Message = new SentryMessage
                     {
                         Formatted = formatted,
                         Message = template

@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>2.2.0-alpha</Version>
+    <Version>3.0.0-alpha.3</Version>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
@@ -9,10 +9,7 @@
     <Features>strict</Features>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <DefineConstants>SYSTEM_WEB;$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
-
+  <!-- Xamarin deps are not signed -->
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net'))">
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
@@ -21,7 +18,7 @@
     <PackageReference Include="Roslynator.Analyzers" Version="3.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.0" PrivateAssets="All" />
-    <PackageReference Include="Nullable" Version="1.2.1" PrivateAssets="All" />
+    <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

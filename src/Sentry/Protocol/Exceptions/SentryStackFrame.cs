@@ -7,7 +7,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// A frame of a stacktrace.
     /// </summary>
-    /// <see href="https://docs.sentry.io/clientdev/interfaces/stacktrace/"/>
+    /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
     [DataContract]
     public class SentryStackFrame
     {

@@ -2,9 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Sentry.Internal;
 using Sentry.Protocol;
+using Constants = Sentry.Protocol.Constants;
+using ISerializable = Sentry.Protocol.ISerializable;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -12,17 +19,13 @@ namespace Sentry
     /// <summary>
     /// An event to be sent to Sentry.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/attributes/" />
-    /// <inheritdoc />
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public class SentryEvent : BaseScope
+    public class SentryEvent : BaseScope, ISerializable
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string>? InternalModules { get; set; }
-
-        [DataMember(Name = "event_id", EmitDefaultValue = false)]
-        private string SerializableEventId => EventId.ToString();
 
         /// <summary>
         /// The <see cref="System.Exception"/> used to create this event.
@@ -41,6 +44,7 @@ namespace Sentry
         /// Hexadecimal string representing a uuid4 value.
         /// The length is exactly 32 characters (no dashes!).
         /// </remarks>
+        [DataMember(Name = "event_id", EmitDefaultValue = false)]
         public SentryId EventId { get; }
 
         /// <summary>
@@ -51,12 +55,6 @@ namespace Sentry
         public DateTimeOffset Timestamp { get; }
 
         /// <summary>
-        /// Gets the message that describes this event.
-        /// </summary>
-        [DataMember(Name = "message", EmitDefaultValue = false)]
-        public string? Message { get; set; }
-
-        /// <summary>
         /// Gets the structured message that describes this event.
         /// </summary>
         /// <remarks>
@@ -64,11 +62,11 @@ namespace Sentry
         /// on the template message instead of the result string message.
         /// </remarks>
         /// <example>
-        /// LogEntry will have a template like: 'user {0} logged in'
+        /// SentryMessage will have a template like: 'user {0} logged in'
         /// Or structured logging template: '{user} has logged in'
         /// </example>
         [DataMember(Name = "logentry", EmitDefaultValue = false)]
-        public LogEntry? LogEntry { get; set; }
+        public SentryMessage? Message { get; set; }
 
         /// <summary>
         /// Name of the logger (or source) of the event.
@@ -112,7 +110,7 @@ namespace Sentry
         /// <summary>
         /// The Sentry Thread interface.
         /// </summary>
-        /// <see href="https://docs.sentry.io/clientdev/interfaces/threads/"/>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/threads/"/>
         public IEnumerable<SentryThread>? SentryThreads
         {
             get => SentryThreadValues?.Values ?? Enumerable.Empty<SentryThread>();
@@ -140,19 +138,24 @@ namespace Sentry
         {
         }
 
+        [JsonConstructor]
         internal SentryEvent(
             Exception? exception = null,
             DateTimeOffset? timestamp = null,
-            Guid id = default,
+            SentryId eventId = default,
             IScopeOptions? options = null)
             : base(options)
         {
-            EventId = id != default ? id : Guid.NewGuid();
+            EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
 
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             Exception = exception;
 
             Platform = Constants.Platform;
         }
+
+        /// <inheritdoc />
+        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+            await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

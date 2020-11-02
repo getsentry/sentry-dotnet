@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
@@ -153,10 +154,13 @@ namespace Sentry
         {
             if (scope.ScopeOptions?.BeforeBreadcrumb is { } beforeBreadcrumb)
             {
-                breadcrumb = beforeBreadcrumb(breadcrumb);
-
-                if (breadcrumb == null)
+                if (beforeBreadcrumb(breadcrumb) is { } processedBreadcrumb)
                 {
+                    breadcrumb = processedBreadcrumb;
+                }
+                else
+                {
+                    // Callback returned null, which means the breadcrumb should be dropped
                     return;
                 }
             }

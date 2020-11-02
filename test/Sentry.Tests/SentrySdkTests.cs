@@ -65,14 +65,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Init_DsnInstance_EnablesSdk()
-        {
-            var dsn = new Dsn(ValidDsnWithoutSecret);
-            using (SentrySdk.Init(dsn))
-                Assert.True(SentrySdk.IsEnabled);
-        }
-
-        [Fact]
         public void Init_CallbackWithoutDsn_ValidDsnEnvironmentVariable_LocatesDsnEnvironmentVariable()
         {
             EnvironmentVariableGuard.WithVariable(
@@ -234,7 +226,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+        public async Task FlushAsync_NotInit_NoOp() => await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
 
         [Fact]
         public void PushScope_InstanceOf_DisabledClient()
@@ -336,7 +328,7 @@ namespace Sentry.Tests
             await SentrySdk.ConfigureScopeAsync(_ =>
             {
                 invoked = true;
-                return Task.CompletedTask;
+                return default;
             });
             Assert.False(invoked);
         }
@@ -360,14 +352,22 @@ namespace Sentry.Tests
             const string expected = "test";
             using (SentrySdk.Init(o =>
             {
-                o.Dsn = Valid;
+                o.Dsn = ValidDsnWithSecret;
                 o.BackgroundWorker = worker;
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);
-                _ = SentrySdk.CaptureMessage("message");
+                SentrySdk.CaptureMessage("message");
 
-                _ = worker.EnqueueEvent(Arg.Is<SentryEvent>(e => e.Breadcrumbs.Single().Message == expected));
+                worker.EnqueueEnvelope(
+                    Arg.Is<Envelope>(e => e.Items
+                            .Select(i => i.Payload)
+                            .OfType<SentryEvent>()
+                            .Single()
+                            .Breadcrumbs
+                            .Single()
+                            .Message == expected)
+                );
             }
         }
 

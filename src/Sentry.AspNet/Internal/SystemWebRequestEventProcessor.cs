@@ -1,4 +1,3 @@
-#if SYSTEM_WEB
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -117,4 +116,3 @@ namespace Sentry.Internal.Web
         }
     }
 }
-#endif

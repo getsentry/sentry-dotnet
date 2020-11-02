@@ -1,7 +1,7 @@
-using Sentry.Tests.Protocol;
+using Sentry.Protocol;
 using Xunit;
 
-namespace Sentry.Protocol.Tests.Exceptions
+namespace Sentry.Tests.Protocol.Exceptions
 {
     public class SentryStackFrameTests
     {
