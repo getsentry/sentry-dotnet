@@ -1,12 +1,10 @@
 name: build
 
 on:
-  create:
-    tags:
-      - '*'
   push:
     branches:
       - main
+      - release/*
   pull_request:
 
 jobs:

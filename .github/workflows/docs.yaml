@@ -1,9 +1,9 @@
 name: API Docs
 
 on:
-  push:
-    branches:
-      - main
+  create:
+    tags:
+      - '*'
 
 jobs:
   docs:
