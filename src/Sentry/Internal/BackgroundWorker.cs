@@ -4,8 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal
 {

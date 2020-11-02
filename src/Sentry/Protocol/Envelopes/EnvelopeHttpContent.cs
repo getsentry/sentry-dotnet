@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Sentry.Protocol.Batching
+namespace Sentry.Protocol.Envelopes
 {
     internal class EnvelopeHttpContent : HttpContent
     {

@@ -2,12 +2,11 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 
-namespace Sentry.Testing
+namespace Sentry.Tests.Helpers
 {
-    public static class SerializableExtensions
+    internal static class SerializableExtensions
     {
         public static async Task<string> SerializeToStringAsync(
             this ISerializable serializable,

@@ -1,14 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Extensibility
 {
     /// <summary>
     /// An abstraction to the transport of the event.
     /// </summary>
-    public interface ITransport
+    internal interface ITransport
     {
         /// <summary>
         /// Sends the <see cref="Envelope" /> to Sentry asynchronously.

@@ -7,8 +7,7 @@ using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 using Xunit;
 
 // ReSharper disable once CheckNamespace

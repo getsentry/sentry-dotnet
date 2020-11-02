@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Testing
 {

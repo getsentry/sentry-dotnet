@@ -3,15 +3,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
 
-namespace Sentry.Protocol.Batching
+namespace Sentry.Protocol.Envelopes
 {
     public class JsonSerializable : ISerializable
     {
-        private readonly object _source;
+        public object Source { get; }
 
-        public JsonSerializable(object source) => _source = source;
+        public JsonSerializable(object source) => Source = source;
 
         public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            await Json.SerializeToStreamAsync(_source, stream, cancellationToken).ConfigureAwait(false);
+            await Json.SerializeToStreamAsync(Source, stream, cancellationToken).ConfigureAwait(false);
     }
 }

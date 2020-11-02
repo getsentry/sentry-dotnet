@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {

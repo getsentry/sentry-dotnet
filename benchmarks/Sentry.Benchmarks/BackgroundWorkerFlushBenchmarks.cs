@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Benchmarks
 {

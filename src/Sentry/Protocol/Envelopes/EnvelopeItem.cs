@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.Protocol.Batching
+namespace Sentry.Protocol.Envelopes
 {
     internal class EnvelopeItem : ISerializable, IDisposable
     {

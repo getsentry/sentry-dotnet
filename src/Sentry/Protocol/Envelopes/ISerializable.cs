@@ -2,7 +2,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Sentry.Protocol.Batching
+namespace Sentry.Protocol.Envelopes
 {
     /// <summary>
     /// Represents a serializable entity.

@@ -1,6 +1,5 @@
 ﻿using System;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {

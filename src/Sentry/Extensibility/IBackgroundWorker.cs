@@ -1,14 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Extensibility
 {
     /// <summary>
     /// A worker that queues envelopes synchronously and flushes async.
     /// </summary>
-    public interface IBackgroundWorker
+    internal interface IBackgroundWorker
     {
         /// <summary>
         /// Attempts to queue the envelope with the worker.

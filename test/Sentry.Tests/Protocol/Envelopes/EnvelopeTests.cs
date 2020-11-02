@@ -4,11 +4,12 @@ using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
+using Sentry.Tests.Helpers;
 using Xunit;
 
-namespace Sentry.Tests.Protocol
+namespace Sentry.Tests.Protocol.Envelopes
 {
     public class EnvelopeTests
     {

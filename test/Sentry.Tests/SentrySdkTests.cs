@@ -4,8 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
-using Sentry.Protocol;
-using Sentry.Protocol.Batching;
+using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
 using static Sentry.Internal.Constants;
@@ -363,6 +362,8 @@ namespace Sentry.Tests
                 worker.EnqueueEnvelope(
                     Arg.Is<Envelope>(e => e.Items
                             .Select(i => i.Payload)
+                            .OfType<JsonSerializable>()
+                            .Select(i => i.Source)
                             .OfType<SentryEvent>()
                             .Single()
                             .Breadcrumbs
