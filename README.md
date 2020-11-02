@@ -204,6 +204,7 @@ Of those, we've tested (we run our unit/integration tests) against:
 * Mono 6.6 on macOS and Linux
 * .NET Core 2.1 on Windows, macOS and Linux
 * .NET Core 3.1 on Windows, macOS and Linux
+* .NET 5 on Windows, macOS and Linux
 
 ### Sentry Protocol
 
@@ -211,7 +212,7 @@ For more details, please: **refer to the [documentation](https://getsentry.githu
 
 ### Legacy frameworks
 
-Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 1.000.000 downloads on NuGet has support to .NET Framework 3.5+.
+Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 2.500.000 downloads on NuGet has support to .NET Framework 3.5+.
 
 ## Resources
 
