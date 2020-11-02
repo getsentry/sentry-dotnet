@@ -92,6 +92,8 @@ namespace NotSentry.Tests
 
             var stackTrace = envelope.Items
                 .Select(i => i.Payload)
+                .OfType<JsonSerializable>()
+                .Select(i => i.Source)
                 .OfType<SentryEvent>()
                 .Single()
                 .SentryExceptionValues;

@@ -80,6 +80,8 @@ namespace Else.AspNetCore.Tests
             _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .Message
@@ -100,6 +102,8 @@ namespace Else.AspNetCore.Tests
             _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .Message
@@ -107,6 +111,8 @@ namespace Else.AspNetCore.Tests
                 &&
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .Message
@@ -143,6 +149,8 @@ namespace Else.AspNetCore.Tests
             _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .Message
@@ -162,6 +170,8 @@ namespace Else.AspNetCore.Tests
             _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .Message
@@ -181,6 +191,8 @@ namespace Else.AspNetCore.Tests
 
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .User
@@ -199,6 +211,8 @@ namespace Else.AspNetCore.Tests
             _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .User
@@ -225,6 +239,8 @@ namespace Else.AspNetCore.Tests
             _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .User
@@ -275,6 +291,8 @@ namespace Else.AspNetCore.Tests
             _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                 e.Items
                     .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
                     .OfType<SentryEvent>()
                     .Single()
                     .Environment == expected
@@ -296,6 +314,8 @@ namespace Else.AspNetCore.Tests
                     _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                         e.Items
                             .Select(i => i.Payload)
+                            .OfType<JsonSerializable>()
+                            .Select(i => i.Source)
                             .OfType<SentryEvent>()
                             .Single()
                             .Environment == expected
@@ -321,6 +341,8 @@ namespace Else.AspNetCore.Tests
                     _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                         e.Items
                             .Select(i => i.Payload)
+                            .OfType<JsonSerializable>()
+                            .Select(i => i.Source)
                             .OfType<SentryEvent>()
                             .Single()
                             .Environment == expected
