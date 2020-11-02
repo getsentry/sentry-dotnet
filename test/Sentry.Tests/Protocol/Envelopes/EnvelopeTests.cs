@@ -372,7 +372,9 @@ namespace Sentry.Tests.Protocol.Envelopes
             // which original envelope doesn't have.
             envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
             envelopeRoundtrip.Items.Should().ContainSingle();
-            envelopeRoundtrip.Items[0].Payload.Should().BeEquivalentTo(@event);
+
+            var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
+            payloadContent.Should().BeEquivalentTo(@event);
         }
 
         [Fact]
@@ -402,7 +404,9 @@ namespace Sentry.Tests.Protocol.Envelopes
             // which original envelope doesn't have.
             envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
             envelopeRoundtrip.Items.Should().ContainSingle();
-            envelopeRoundtrip.Items[0].Payload.Should().BeEquivalentTo(feedback);
+
+            var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
+            payloadContent.Should().BeEquivalentTo(feedback);
         }
 
         [Fact]
