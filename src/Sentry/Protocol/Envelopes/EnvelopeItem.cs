@@ -9,6 +9,9 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol.Envelopes
 {
+    /// <summary>
+    /// Envelope item.
+    /// </summary>
     internal class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
@@ -17,18 +20,33 @@ namespace Sentry.Protocol.Envelopes
         private const string LengthKey = "length";
         private const string FileNameKey = "file_name";
 
+        /// <summary>
+        /// Header associated with this envelope item.
+        /// </summary>
         public IReadOnlyDictionary<string, object> Header { get; }
 
+        /// <summary>
+        /// Item payload.
+        /// </summary>
         public ISerializable Payload { get; }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="EnvelopeItem"/>.
+        /// </summary>
         public EnvelopeItem(IReadOnlyDictionary<string, object> header, ISerializable payload)
         {
             Header = header;
             Payload = payload;
         }
 
+        /// <summary>
+        /// Tries to get item type.
+        /// </summary>
         public string? TryGetType() => Header.GetValueOrDefault(TypeKey) as string;
 
+        /// <summary>
+        /// Tries to get payload length.
+        /// </summary>
         public long? TryGetLength() =>
             Header.GetValueOrDefault(LengthKey) switch
             {
@@ -45,6 +63,7 @@ namespace Sentry.Protocol.Envelopes
             return buffer;
         }
 
+        /// <inheritdoc />
         public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Length is known
@@ -75,8 +94,12 @@ namespace Sentry.Protocol.Envelopes
             }
         }
 
+        /// <inheritdoc />
         public void Dispose() => (Payload as IDisposable)?.Dispose();
 
+        /// <summary>
+        /// Creates an envelope item from file.
+        /// </summary>
         public static EnvelopeItem FromFile(string filePath)
         {
             var file = File.OpenRead(filePath);
@@ -92,6 +115,9 @@ namespace Sentry.Protocol.Envelopes
             return new EnvelopeItem(header, payload);
         }
 
+        /// <summary>
+        /// Creates an envelope item from text.
+        /// </summary>
         public static EnvelopeItem FromString(string text)
         {
             using var buffer = new MemoryStream(
@@ -109,6 +135,9 @@ namespace Sentry.Protocol.Envelopes
             return new EnvelopeItem(header, payload);
         }
 
+        /// <summary>
+        /// Creates an envelope item from an event.
+        /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
             var header = new Dictionary<string, object>
@@ -119,6 +148,9 @@ namespace Sentry.Protocol.Envelopes
             return new EnvelopeItem(header, new JsonSerializable(@event));
         }
 
+        /// <summary>
+        /// Creates an envelope item from user feedback.
+        /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
             var header = new Dictionary<string, object>
@@ -199,6 +231,9 @@ namespace Sentry.Protocol.Envelopes
             return new StreamSerializable(payloadStream);
         }
 
+        /// <summary>
+        /// Deserializes envelope item from stream.
+        /// </summary>
         public static async ValueTask<EnvelopeItem> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)

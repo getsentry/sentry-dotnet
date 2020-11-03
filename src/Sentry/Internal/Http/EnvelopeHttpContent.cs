@@ -2,8 +2,9 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Sentry.Protocol.Envelopes;
 
-namespace Sentry.Protocol.Envelopes
+namespace Sentry.Internal.Http
 {
     internal class EnvelopeHttpContent : HttpContent
     {

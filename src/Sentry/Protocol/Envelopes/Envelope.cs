@@ -8,20 +8,35 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol.Envelopes
 {
+    /// <summary>
+    /// Envelope.
+    /// </summary>
     internal class Envelope : ISerializable, IDisposable
     {
         private const string EventIdKey = "event_id";
 
+        /// <summary>
+        /// Header associated with the envelope.
+        /// </summary>
         public IReadOnlyDictionary<string, object> Header { get; }
 
+        /// <summary>
+        /// Envelope items.
+        /// </summary>
         public IReadOnlyList<EnvelopeItem> Items { get; }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="Envelope"/>.
+        /// </summary>
         public Envelope(IReadOnlyDictionary<string, object> header, IReadOnlyList<EnvelopeItem> items)
         {
             Header = header;
             Items = items;
         }
 
+        /// <summary>
+        /// Attempts to extract the value of "sentry_id" header if it's present.
+        /// </summary>
         public SentryId? TryGetEventId() =>
             Header.TryGetValue(EventIdKey, out var value) &&
             value is string valueString &&
@@ -29,6 +44,7 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : (SentryId?)null;
 
+        /// <inheritdoc />
         public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Header
@@ -43,8 +59,12 @@ namespace Sentry.Protocol.Envelopes
             }
         }
 
+        /// <inheritdoc />
         public void Dispose() => Items.DisposeAll();
 
+        /// <summary>
+        /// Creates an envelope that contains a single event.
+        /// </summary>
         public static Envelope FromEvent(SentryEvent @event)
         {
             var header = new Dictionary<string, object>
@@ -60,6 +80,9 @@ namespace Sentry.Protocol.Envelopes
             return new Envelope(header, items);
         }
 
+        /// <summary>
+        /// Creates an envelope that contains a single user feedback.
+        /// </summary>
         public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
             var header = new Dictionary<string, object>
@@ -99,6 +122,9 @@ namespace Sentry.Protocol.Envelopes
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
         }
 
+        /// <summary>
+        /// Deserializes envelope from stream.
+        /// </summary>
         public static async ValueTask<Envelope> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
