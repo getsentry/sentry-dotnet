@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Internal.Http;
-using Sentry.Protocol;
+using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 using Xunit;

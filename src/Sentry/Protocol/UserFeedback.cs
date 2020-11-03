@@ -1,10 +1,5 @@
-using System.IO;
 using System.Runtime.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using Sentry.Internal;
 using Sentry.Protocol;
-using ISerializable = Sentry.Protocol.ISerializable;
 
 namespace Sentry
 {
@@ -12,7 +7,7 @@ namespace Sentry
     /// Sentry User Feedback.
     /// </summary>
     [DataContract]
-    public class UserFeedback : ISerializable
+    public class UserFeedback
     {
         /// <summary>
         /// The eventId of the event to which the user feedback is associated.
@@ -48,9 +43,5 @@ namespace Sentry
             Email = email;
             Comments = comments;
         }
-
-        /// <inheritdoc />
-        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
-            => await Json.SerializeToStreamAsync(this, stream, cancellationToken).ConfigureAwait(false);
     }
 }

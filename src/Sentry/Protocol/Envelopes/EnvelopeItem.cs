@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.Protocol
+namespace Sentry.Protocol.Envelopes
 {
     /// <summary>
     /// Envelope item.
     /// </summary>
-    public class EnvelopeItem : IDisposable, ISerializable
+    internal class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
         private const string TypeValueEvent = "event";
@@ -21,12 +21,12 @@ namespace Sentry.Protocol
         private const string FileNameKey = "file_name";
 
         /// <summary>
-        /// Header associated with this item.
+        /// Header associated with this envelope item.
         /// </summary>
         public IReadOnlyDictionary<string, object> Header { get; }
 
         /// <summary>
-        /// Payload associated with this item.
+        /// Item payload.
         /// </summary>
         public ISerializable Payload { get; }
 
@@ -40,12 +40,12 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Attempts to extract the value of "type" header if it's present.
+        /// Tries to get item type.
         /// </summary>
         public string? TryGetType() => Header.GetValueOrDefault(TypeKey) as string;
 
         /// <summary>
-        /// Attempts to extract the value of "length" header if it's present.
+        /// Tries to get payload length.
         /// </summary>
         public long? TryGetLength() =>
             Header.GetValueOrDefault(LengthKey) switch
@@ -116,7 +116,7 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Creates an envelope item from text content.
+        /// Creates an envelope item from text.
         /// </summary>
         public static EnvelopeItem FromString(string text)
         {
@@ -145,11 +145,11 @@ namespace Sentry.Protocol
                 [TypeKey] = TypeValueEvent
             };
 
-            return new EnvelopeItem(header, @event);
+            return new EnvelopeItem(header, new JsonSerializable(@event));
         }
 
         /// <summary>
-        /// Creates an envelope item from an user feedback.
+        /// Creates an envelope item from user feedback.
         /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
@@ -158,7 +158,7 @@ namespace Sentry.Protocol
                 [TypeKey] = TypeValueUserReport
             };
 
-            return new EnvelopeItem(header, sentryUserFeedback);
+            return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
         }
 
         private static async ValueTask<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
@@ -204,7 +204,7 @@ namespace Sentry.Protocol
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                return Json.DeserializeFromByteArray<SentryEvent>(buffer);
+                return new JsonSerializable(Json.DeserializeFromByteArray<SentryEvent>(buffer));
             }
 
             // User report
@@ -213,7 +213,7 @@ namespace Sentry.Protocol
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                return Json.DeserializeFromByteArray<UserFeedback>(buffer);
+                return new JsonSerializable(Json.DeserializeFromByteArray<UserFeedback>(buffer));
             }
 
             // Arbitrary payload

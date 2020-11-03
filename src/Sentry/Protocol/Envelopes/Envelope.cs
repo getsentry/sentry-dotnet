@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.Protocol
+namespace Sentry.Protocol.Envelopes
 {
     /// <summary>
     /// Envelope.
     /// </summary>
-    public class Envelope : IDisposable, ISerializable
+    internal class Envelope : ISerializable, IDisposable
     {
         private const string EventIdKey = "event_id";
 
         /// <summary>
-        /// Header associated with this envelope.
+        /// Header associated with the envelope.
         /// </summary>
         public IReadOnlyDictionary<string, object> Header { get; }
 
         /// <summary>
-        /// Items inside this envelope.
+        /// Envelope items.
         /// </summary>
         public IReadOnlyList<EnvelopeItem> Items { get; }
 
@@ -83,7 +83,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Creates an envelope that contains a single user feedback.
         /// </summary>
-        internal static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
+        public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
             var header = new Dictionary<string, object>
             {
