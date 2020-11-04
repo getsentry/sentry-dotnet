@@ -24,9 +24,11 @@ namespace Sentry.Tests
         [Fact]
         public void DisableNetFxInstallationsEventProcessor_RemovesDisableNetFxInstallationsEventProcessorEventProcessor()
         {
-            Sut.DisableNetFxInstallationsEventProcessor();
+            Sut.DisableNetFxInstallationsIntegration();
             Assert.DoesNotContain(Sut.EventProcessors,
                 p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
+            Assert.DoesNotContain(Sut.Integrations,
+                p => p.GetType() == typeof(NetFxInstallationsIntegration));
         }
 #endif
 

@@ -380,9 +380,6 @@ namespace Sentry
                     // de-dupe to be the first to run
                     new DuplicateEventDetectionEventProcessor(this),
                     new MainSentryEventProcessor(this, _sentryStackTraceFactoryAccessor),
-#if NETFX
-                    new NetFxInstallationsEventProcessor(),
-#endif
             };
 
             ExceptionProcessors = new ISentryEventExceptionProcessor[] {
@@ -392,6 +389,9 @@ namespace Sentry
             Integrations = new ISdkIntegration[] {
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
+#if NETFX
+                new NetFxInstallationsIntegration(),
+#endif
             };
 
             InAppExclude = new[] {

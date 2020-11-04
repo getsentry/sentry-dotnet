@@ -8,7 +8,7 @@ namespace Sentry.Tests.Internals
 {
     public class NetFxInstallationsEventProcessorTests
     {
-            private class Fixture
+        private class Fixture
         {
             public NetFxInstallationsEventProcessor GetSut() => new NetFxInstallationsEventProcessor();
         }

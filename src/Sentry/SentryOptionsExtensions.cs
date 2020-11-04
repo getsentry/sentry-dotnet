@@ -37,12 +37,15 @@ namespace Sentry
 
 #if NETFX
         /// <summary>
-        /// Disables the attachment of Installed Dot Net Frameworks list from events./>.
+        /// Disables the list addition of .Net Frameworks into events.
         /// </summary>
-        /// <param name="options">The SentryOptions to remove the processor from.</param>
-        public static void DisableNetFxInstallationsEventProcessor(this SentryOptions options)
-            => options.EventProcessors =
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableNetFxInstallationsIntegration(this SentryOptions options)
+        {
+            options.EventProcessors =
                 options.EventProcessors?.Where(p => p.GetType() != typeof(NetFxInstallationsEventProcessor)).ToArray();
+            options.RemoveIntegration<NetFxInstallationsIntegration>();
+        }
 #endif
 
         /// <summary>
