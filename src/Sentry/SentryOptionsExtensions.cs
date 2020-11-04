@@ -35,6 +35,16 @@ namespace Sentry
         public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) =>
             options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
 
+#if NETFX
+        /// <summary>
+        /// Disables the attachment of Installed Dot Net Frameworks list from events./>.
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the processor from.</param>
+        public static void DisableNetFxInstallationsEventProcessor(this SentryOptions options)
+            => options.EventProcessors =
+                options.EventProcessors?.Where(p => p.GetType() != typeof(NetFxInstallationsEventProcessor)).ToArray();
+#endif
+
         /// <summary>
         /// Disables the capture of errors through <see cref="AppDomain.ProcessExit"/>
         /// </summary>

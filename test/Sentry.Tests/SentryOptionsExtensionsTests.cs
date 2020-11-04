@@ -20,6 +20,16 @@ namespace Sentry.Tests
                 p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
         }
 
+#if NETFX
+        [Fact]
+        public void DisableNetFxInstallationsEventProcessor_RemovesDisableNetFxInstallationsEventProcessorEventProcessor()
+        {
+            Sut.DisableNetFxInstallationsEventProcessor();
+            Assert.DoesNotContain(Sut.EventProcessors,
+                p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
+        }
+#endif
+
         [Fact]
         public void DisableAppDomainUnhandledExceptionCapture_RemovesAppDomainUnhandledExceptionIntegration()
         {

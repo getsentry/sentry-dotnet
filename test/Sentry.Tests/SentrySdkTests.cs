@@ -357,18 +357,18 @@ namespace Sentry.Tests
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);
-                SentrySdk.CaptureMessage("message");
+                _ = SentrySdk.CaptureMessage("message");
 
-                worker.EnqueueEnvelope(
-                    Arg.Is<Envelope>(e => e.Items
-                            .Select(i => i.Payload)
-                            .OfType<JsonSerializable>()
-                            .Select(i => i.Source)
-                            .OfType<SentryEvent>()
-                            .Single()
-                            .Breadcrumbs
-                            .Single()
-                            .Message == expected)
+                _ = worker.EnqueueEnvelope(
+                       Arg.Is<Envelope>(e => e.Items
+                               .Select(i => i.Payload)
+                               .OfType<JsonSerializable>()
+                               .Select(i => i.Source)
+                               .OfType<SentryEvent>()
+                               .Single()
+                               .Breadcrumbs
+                               .Single()
+                               .Message == expected)
                 );
             }
         }
