@@ -11,7 +11,7 @@ namespace Sentry.Protocol
     /// A stacktrace contains a list of frames, each with various bits (most optional) describing the context of that frame.
     /// Frames should be sorted from oldest to newest.
     /// </remarks>
-    /// <see href="https://docs.sentry.io/clientdev/interfaces/stacktrace/"/>
+    /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
     [DataContract]
     public class SentryStackTrace
     {

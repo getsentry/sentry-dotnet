@@ -45,5 +45,21 @@ namespace Sentry
                     }
                 );
         }
+
+        /// <summary>
+        /// Captures a user feedback.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="eventId">The event Id.</param>
+        /// <param name="email">The user email.</param>
+        /// <param name="comments">The user comments.</param>
+        /// <param name="name">The optional username.</param>
+        public static void CaptureUserFeedback(this ISentryClient client, SentryId eventId, string email, string comments, string? name = null)
+        {
+            if (client.IsEnabled)
+            {
+                client.CaptureUserFeedback(new UserFeedback(eventId, email, comments, name));
+            }
+        }
     }
 }

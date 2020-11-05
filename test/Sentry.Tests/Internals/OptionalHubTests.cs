@@ -16,10 +16,10 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public Task FromOptions_NoDsn_FlushAsyncDoesNotThrow()
+        public async Task FromOptions_NoDsn_FlushAsyncDoesNotThrow()
         {
             var sut = OptionalHub.FromOptions(new SentryOptions());
-            return sut.FlushAsync(TimeSpan.FromDays(1));
+            await sut.FlushAsync(TimeSpan.FromDays(1));
         }
     }
 }

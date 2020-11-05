@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
-using Sentry.Protocol;
+using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
 using static Sentry.Internal.Constants;
@@ -226,7 +226,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+        public async Task FlushAsync_NotInit_NoOp() => await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
 
         [Fact]
         public void PushScope_InstanceOf_DisabledClient()
@@ -328,7 +328,7 @@ namespace Sentry.Tests
             await SentrySdk.ConfigureScopeAsync(_ =>
             {
                 invoked = true;
-                return Task.CompletedTask;
+                return default;
             });
             Assert.False(invoked);
         }
@@ -357,9 +357,19 @@ namespace Sentry.Tests
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);
-                _ = SentrySdk.CaptureMessage("message");
+                SentrySdk.CaptureMessage("message");
 
-                _ = worker.EnqueueEvent(Arg.Is<SentryEvent>(e => e.Breadcrumbs.Single().Message == expected));
+                worker.EnqueueEnvelope(
+                    Arg.Is<Envelope>(e => e.Items
+                            .Select(i => i.Payload)
+                            .OfType<JsonSerializable>()
+                            .Select(i => i.Source)
+                            .OfType<SentryEvent>()
+                            .Single()
+                            .Breadcrumbs
+                            .Single()
+                            .Message == expected)
+                );
             }
         }
 

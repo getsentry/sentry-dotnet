@@ -26,6 +26,6 @@ namespace Sentry.Protocol
         /// Allows the callback handler access to a breadcrumb and allows modification
         /// or totally dropping the breadcrumb by returning null.
         /// </remarks>
-        Func<Breadcrumb, Breadcrumb>? BeforeBreadcrumb { get; }
+        Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; }
     }
 }

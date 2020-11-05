@@ -122,7 +122,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// A list of strings used to dictate the deduplication of this event.
         /// </summary>
-        /// <seealso href="https://docs.sentry.io/learn/rollups/#custom-grouping"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/data-management/event-grouping/grouping-enhancements/"/>
         /// <remarks>
         /// A value of {{ default }} will be replaced with the built-in behavior, thus allowing you to extend it, or completely replace it.
         /// New in version Protocol: version '7'
@@ -134,7 +134,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>
-        /// <seealso href="https://docs.sentry.io/learn/breadcrumbs/"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/enriching-events/breadcrumbs/"/>
         public IEnumerable<Breadcrumb> Breadcrumbs => InternalBreadcrumbs ??= new ConcurrentQueue<Breadcrumb>();
 
         /// <summary>

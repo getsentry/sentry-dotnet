@@ -33,7 +33,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => Task.CompletedTask;
+        public ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope) => default;
 
         /// <summary>
         /// No-Op.
@@ -67,12 +67,19 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
+        public ValueTask FlushAsync(TimeSpan timeout) => default;
 
         /// <summary>
         /// No-Op.
         /// </summary>
         public void Dispose()
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void CaptureUserFeedback(UserFeedback userFeedback)
         {
         }
 

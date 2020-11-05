@@ -64,6 +64,56 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
+        public void Process_SendDefaultPiiTrueAndUserIpNull_UserIpSetServerInferredIp()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Equal(sut.UserIpServerInferred, evt.User.IpAddress);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiTrueAndUserIpSet_UserIpIgnoreServerInferredIp()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+            var @ip = "192.0.0.1";
+            evt.User.IpAddress = ip;
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Equal(ip, evt.User.IpAddress);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiFalse_UserIpNotSet()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+            _fixture.SentryOptions.SendDefaultPii = false;
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Null(evt.User.IpAddress);
+        }
+
+        [Fact]
         public void Process_SendDefaultPiiTrueIdEnvironmentFalse_UserNameNotSet()
         {
             var evt = new SentryEvent();
@@ -164,35 +214,45 @@ namespace Sentry.Tests.Internals
             Assert.Equal(sut.Release, evt.Release);
         }
 
-        [Fact]
-        public void Process_EnvironmentOnOptions_SetToEvent()
+        [Theory]
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("a", "a")] // Provided: nothing will change.
+        [InlineData("production", "production")] // Provided: nothing will change. (value has a lower case 'p', different to default value)
+        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
+        public void Process_EnvironmentOnOptions_SetToEvent(string environment, string expectedEnvironment)
         {
-            const string expected = "Production";
-            _fixture.SentryOptions.Environment = expected;
+            _fixture.SentryOptions.Environment = environment;
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
             _ = sut.Process(evt);
 
-            Assert.Equal(expected, evt.Environment);
+            Assert.Equal(expectedEnvironment, evt.Environment);
         }
 
-        [Fact]
-        public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable()
+        [Theory]
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("a", "a")] // Provided: nothing will change.
+        [InlineData("Production", "Production")] // Provided: nothing will change. (value has a upper case 'p', different to default value)
+        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
+        public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
         {
-            const string expected = "Staging";
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
             EnvironmentVariableGuard.WithVariable(
                 Constants.EnvironmentEnvironmentVariable,
-                expected,
+                environment,
                 () =>
                 {
                     _ = sut.Process(evt);
                 });
 
-            Assert.Equal(expected, evt.Environment);
+            Assert.Equal(expectedEnvironment, evt.Environment);
         }
 
         [Fact]

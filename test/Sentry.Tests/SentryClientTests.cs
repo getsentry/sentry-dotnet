@@ -5,6 +5,7 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
+using Sentry.Protocol.Envelopes;
 using Xunit;
 
 namespace Sentry.Tests
@@ -25,21 +26,21 @@ namespace Sentry.Tests
         public void CaptureEvent_ExceptionFiltered_EmptySentryId()
         {
             _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
-            _ = _fixture.BackgroundWorker.EnqueueEvent(Arg.Any<SentryEvent>()).Returns(true);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
             // Filtered out for it's the exact filtered type
             Assert.Equal(default, sut.CaptureException(new SystemException()));
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
 
             // Filtered for it's a derived type
             Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
 
             // Not filtered since it's not in the inheritance chain
             Assert.NotEqual(default, sut.CaptureException(new Exception()));
-            _ = _fixture.BackgroundWorker.Received(1).EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
@@ -103,8 +104,8 @@ namespace Sentry.Tests
         public void CaptureEvent_NullScope_QueuesEvent()
         {
             var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(id: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
+            var expectedEvent = new SentryEvent(eventId: expectedId);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -116,8 +117,8 @@ namespace Sentry.Tests
         public void CaptureEvent_EventAndScope_QueuesEvent()
         {
             var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(id: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEvent(expectedEvent).Returns(true);
+            var expectedEvent = new SentryEvent(eventId: expectedId);
+            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
             var sut = _fixture.GetSut();
 
@@ -169,7 +170,7 @@ namespace Sentry.Tests
             var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
 
             Assert.Equal(default, actualId);
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEvent(Arg.Any<SentryEvent>());
+            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
@@ -287,6 +288,82 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut.Dispose();
             _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureEvent(null));
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_EventIdEmpty_IgnoreUserFeedback()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+
+            //Act
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", "comment"));
+
+            //Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_ValidUserFeedback_FeedbackRegistered()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+
+            //Act
+            sut.CaptureUserFeedback(new UserFeedback(Guid.Parse("4eb98e5f861a41019f270a7a27e84f02"), "email", "comment"));
+
+            //Assert
+            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_CommentsNullOrEmpty_FeedbackIgnored()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+
+            //Act
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", null));
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", ""));
+
+            //Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_EmailNullOrEmpty_FeedbackIgnored()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+
+            //Act
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, null, "comment"));
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "", "comment"));
+
+            //Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
+        {
+
+            //Arrange
+            var sut = _fixture.GetSut();
+
+            //Act
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", "comment"));
+
+            //Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureUserFeedback_DisposedClient_ThrowsObjectDisposedException()
+        {
+            var sut = _fixture.GetSut();
+            sut.Dispose();
+            _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureUserFeedback(null));
         }
 
         [Fact]

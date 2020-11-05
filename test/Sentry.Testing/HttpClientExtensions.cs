@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -23,6 +25,39 @@ namespace Sentry
                 yield return handler;
                 handler = (handler as DelegatingHandler)?.InnerHandler;
             } while (handler != null);
+        }
+
+        public static async Task<HttpRequestMessage> CloneAsync(this HttpRequestMessage source)
+        {
+            var clone = new HttpRequestMessage(source.Method, source.RequestUri) {Version = source.Version};
+
+            // Properties
+            foreach (var prop in source.Properties)
+            {
+                clone.Properties.Add(prop);
+            }
+
+            // Headers
+            foreach (var (key, value) in source.Headers)
+            {
+                clone.Headers.TryAddWithoutValidation(key, value);
+            }
+
+            // Content
+            var cloneContentStream = new MemoryStream();
+
+            await source.Content.CopyToAsync(cloneContentStream).ConfigureAwait(false);
+            cloneContentStream.Position = 0;
+
+            clone.Content = new StreamContent(cloneContentStream);
+
+            // Content headers
+            foreach (var (key, value) in source.Content.Headers)
+            {
+                clone.Content.Headers.Add(key, value);
+            }
+
+            return clone;
         }
     }
 }

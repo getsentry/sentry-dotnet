@@ -7,7 +7,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// An interface which describes the authenticated User for a request.
     /// </summary>
-    /// <see href="https://docs.sentry.io/clientdev/interfaces/user/"/>
+    /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
     [DataContract]
     public class User
     {

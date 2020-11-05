@@ -70,7 +70,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+        public async ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope)
         {
             try
             {
@@ -117,7 +117,19 @@ namespace Sentry.Internal
             }
         }
 
-        public async Task FlushAsync(TimeSpan timeout)
+        public void CaptureUserFeedback(UserFeedback userFeedback)
+        {
+            try
+            {
+                _ownedClient.CaptureUserFeedback(userFeedback);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+            }
+        }
+
+        public async ValueTask FlushAsync(TimeSpan timeout)
         {
             try
             {

@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using Sentry.Protocol;
+using Constants = Sentry.Protocol.Constants;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -12,17 +14,13 @@ namespace Sentry
     /// <summary>
     /// An event to be sent to Sentry.
     /// </summary>
-    /// <seealso href="https://docs.sentry.io/clientdev/attributes/" />
-    /// <inheritdoc />
+    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
     public class SentryEvent : BaseScope
     {
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string>? InternalModules { get; set; }
-
-        [DataMember(Name = "event_id", EmitDefaultValue = false)]
-        private string SerializableEventId => EventId.ToString();
 
         /// <summary>
         /// The <see cref="System.Exception"/> used to create this event.
@@ -41,6 +39,7 @@ namespace Sentry
         /// Hexadecimal string representing a uuid4 value.
         /// The length is exactly 32 characters (no dashes!).
         /// </remarks>
+        [DataMember(Name = "event_id", EmitDefaultValue = false)]
         public SentryId EventId { get; }
 
         /// <summary>
@@ -106,7 +105,7 @@ namespace Sentry
         /// <summary>
         /// The Sentry Thread interface.
         /// </summary>
-        /// <see href="https://docs.sentry.io/clientdev/interfaces/threads/"/>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/threads/"/>
         public IEnumerable<SentryThread>? SentryThreads
         {
             get => SentryThreadValues?.Values ?? Enumerable.Empty<SentryThread>();
@@ -134,14 +133,15 @@ namespace Sentry
         {
         }
 
+        [JsonConstructor]
         internal SentryEvent(
             Exception? exception = null,
             DateTimeOffset? timestamp = null,
-            Guid id = default,
+            SentryId eventId = default,
             IScopeOptions? options = null)
             : base(options)
         {
-            EventId = id != default ? id : Guid.NewGuid();
+            EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
 
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             Exception = exception;

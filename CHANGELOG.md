@@ -1,11 +1,37 @@
-# vNext
+# Changelog
+
+## 3.0.0-alpha.4
+
+* Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman
+* Replace Task with ValueTask where possible. (#564) @Tyrrrz
+* Add support for ASP.NET Core gRPC (#563) @Mitch528
+* Push API docs to GitHub Pages GH Actions (#570) @bruno-garcia
+* Refactor envelopes
+
+## 3.0.0-alpha.3
+
+* Add support for user feedback. (#559) @lucas-zimerman
+* Add support for envelope deserialization (#558) @Tyrrrz
+* Add package description and tags to Sentry.AspNet @Tyrrrz
+* Fix internal url references for the new Sentry documentation. (#562) @lucas-zimerman
+
+## 3.0.0-alpha.2
+
+* Set the Environment setting to 'production' if none was provided. (#550) @PureKrome
+* ASPNET.Core hosting environment is set to 'production' / 'development' (notice lower casing) if no custom options.Enviroment is set. (#554) @PureKrome
+* Add most popular libraries to InAppExclude #555 (@bruno-garcia)
+* Add support for individual rate limits.
+* Extend `SentryOptions.BeforeBreadcrumb` signature to accept returning nullable values.
+* Add support for envelope deserialization.
+
+## 3.0.0-alpha.1
 
 * Rename `LogEntry` to `SentryMessage`. Change type of `SentryEvent.Message` from `string` to `SentryMessage`.
 * Change the type of `Gpu.VendorId` from `int` to `string`.
+* Add support for envelopes.
+* Publishing symbols package (snupkg) to nuget.org with sourcelink
 
-# 3.0.0-alpha.0
-
-## What’s Changed
+## 3.0.0-alpha.0
 
 * Move aspnet-classic integration to Sentry.AspNet (#528) @Tyrrrz
 * Merge Sentry.Protocol into Sentry (#527) @Tyrrrz
@@ -18,13 +44,13 @@
 
 We'd love to get feedback.
 
-# 2.2.0-alpha
+## 2.2.0-alpha
 
 Add nullable reference types support (Sentry, Sentry.Protocol) (#509) 
 fix: Use ASP.NET Core endpoint FQDN (#485) 
 feat: Add integration to TaskScheduler.UnobservedTaskException (#481) 
 
-# 2.1.6
+## 2.1.6
 
 fix: aspnet fqdn (#485) @bruno-garcia 
 ref: wait on test the time needed (#484) @bruno-garcia
@@ -36,16 +62,7 @@ build(deps): bump Microsoft.Extensions.Logging.Debug @dependabot-preview
 fix some spelling (#475) @SimonCropp
 build(deps): bump Microsoft.Extensions.Configuration.Json (#467) @dependabot-preview
 
-# 2.1.5
-
-* fix: MEL don't init if enabled (#460) @bruno-garcia
-* feat: Device Calendar, Timezone, CultureInfo (#457) @bruno-garcia
-* ref: Log out debug disabled (#459) @bruno-garcia
-* dep: Bump PlatformAbstractions (#458) @bruno-garcia
-* feat: Exception filter (#456) @bruno-garcia
-# 2.1.5-beta
-
-## What’s Changed
+## 2.1.5
 
 * fix: MEL don't init if enabled (#460) @bruno-garcia
 * feat: Device Calendar, Timezone, CultureInfo (#457) @bruno-garcia
@@ -53,11 +70,15 @@ build(deps): bump Microsoft.Extensions.Configuration.Json (#467) @dependabot-pre
 * dep: Bump PlatformAbstractions (#458) @bruno-garcia
 * feat: Exception filter (#456) @bruno-garcia
 
-We'd love to get feedback.
+## 2.1.5-beta
 
-# 2.1.4
+* fix: MEL don't init if enabled (#460) @bruno-garcia
+* feat: Device Calendar, Timezone, CultureInfo (#457) @bruno-garcia
+* ref: Log out debug disabled (#459) @bruno-garcia
+* dep: Bump PlatformAbstractions (#458) @bruno-garcia
+* feat: Exception filter (#456) @bruno-garcia
 
-## What’s Changed
+## 2.1.4
 
 * NLog SentryTarget - NLogDiagnosticLogger for writing to NLog InternalLogger (#450) @snakefoot
 * fix: SentryScopeManager dispose message (#449) @bruno-garcia
@@ -67,20 +88,14 @@ We'd love to get feedback.
 * build(deps): bump Microsoft.AspNetCore.Diagnostics from 2.1.1 to 2.2.0 (#431) @dependabot-preview
 * build(deps): bump Microsoft.CodeAnalysis.CSharp.Workspaces from 3.1.0 to 3.6.0 (#437) @dependabot-preview
 
-We'd love to get feedback.
-
-# 2.1.3
-
-## What’s Changed
+## 2.1.3
 
 * SentryScopeManager - Fixed clone of Stack so it does not reverse order (#420) @snakefoot
 * build(deps): bump Serilog.AspNetCore from 2.1.1 to 3.2.0 (#411) @dependabot-preview
 * Removed dependency on System.Collections.Immutable (#405) @snakefoot
 * Fix Sentry.Microsoft.Logging Filter now drops also breadcrumbs (#440) 
 
-We'd love to get feedback.
-
-# 2.1.2-beta5
+## 2.1.2-beta5
 
 Fix Background worker dispose logs error message (#408) 
 Fix sentry serilog extension method collapsing (#406) 
@@ -88,50 +103,48 @@ Fix Sentry.Samples.NLog so NLog.config is valid (#404)
 
 Thanks @snakefoot and @JimHume for the fixes
 
-# 2.1.2-beta4
-
 Add MVC route data extraction to ScopeExtensions.Populate() (#401)
 
-# 2.1.2-beta3
+## 2.1.2-beta3
 
 Fixed ASP.NET System.Web catch HttpException to prevent the request processor from being unable to submit #397 (#398)
 
-# 2.1.2-beta2
+## 2.1.2-beta2
 
 * Ignore WCF error and capture (#391) 
 
-# 2.1.2-beta
+### 2.1.2-beta
 
 * Serilog Sentry sink does not load all options from IConfiguration (#380)
 * UnhandledException sets Handled=false (#382)
 
-# 2.1.1
+## 2.1.1
 
 Bug fix:  Don't overwrite server name set via configuration with machine name on ASP.NET Core #372
  
-# 2.1.0
+## 2.1.0
 
 * Set score url to fully constructed url #367 Thanks @christopher-taormina-zocdoc 
 * Don't dedupe from inner exception #363 - Note this might change groupings. It's opt-in.
 * Expose FlushAsync to intellisense #362
 * Protocol monorepo #325 - new protocol version whenever there's a new SDK release
 
-# 2.0.3
+## 2.0.3
 
 Expose httpHandler creation (#359)
 NLog: possibility to override fingerprint using AdditionalGroupingKey (#358) @Shtannikov
 Take ServerName from options (#356) 
 
-# 2.0.2
+## 2.0.2
 
 Add logger and category from Serilog SourceContext. (#316) @krisztiankocsis
 Set DateFormatHandling.IsoDateFormat for serializer. Fixes #351 (#353)  @olsh
 
-# 2.0.1
+## 2.0.1
 
 Removed `-beta` from dependencies.
 
-# 2.0.0
+## 2.0.0
 
 * SentryTarget - GetTagsFromLogEvent with null check (#326) 
 * handled process corrupted (#328)
@@ -170,14 +183,14 @@ Major version bumped due to these breaking changes:
 3. Use `StackTrace` from `Threads` #222 
 4. `FlushAsync` added to `ISentryClient` #214 
 
-# 2.0.0-beta8
+## 2.0.0-beta8
 
 * SentryTarget - GetTagsFromLogEvent with null check (#326) 
 * handled process corrupted (#328)
 * sourcelink GA (#330)
 * Adds ability to specify user values via NLog configuration (#336) 
 
-# 2.0.0-beta7
+## 2.0.0-beta7
 
 Fixes:
 
@@ -189,24 +202,24 @@ Features:
 
 * Multi-target .NET Core 3.0 (#308)
 
-# 2.0.0-beta6
+## 2.0.0-beta6
 
 * Fixed error when reading request body affects collecting other request data (#299) 
 
-# 2.0.0-beta5
+## 2.0.0-beta5
 
 * Add option to ASP.NET Core to flush events after response complete (#288)
 * Fixed race on `BackgroundWorker`  (#293)
 * Exclude `Sentry.` frames from InApp (#272)
 * NLog SentryTarget with less overhead for breadcrumb (#273)
 
-# 2.0.0-beta4
+## 2.0.0-beta4
 
 * Logging on body not extracted (#246)
 * Add support to DefaultTags for ASP.NET Core and M.E.Logging (#268)
 * Don't use ValueTuple (#263)
 
-# 2.0.0-beta3
+## 2.0.0-beta3
 
 * All public members were documented: #252 
 * Use EnableBuffering to keep request payload around: #250
@@ -219,13 +232,13 @@ Thanks @josh-degraw for:
 * NLog: Utilizes Flush functionality in NLog target: #228
 * NLog: Set the logger via the log event info in SentryTarget.Write, #227 
 
-# 2.0.0-beta2
+## 2.0.0-beta2
 
 * Removed dev dependency from external dependencies 4d92ab0
 * Use new `Sentry.Protocol` 836fb07e
 * Use new `Sentry.PlatformAbsrtractions` #226
 
-# 2.0.0-beta
+## 2.0.0-beta
 
 Major version bumped due to these breaking changes:
 
@@ -245,13 +258,13 @@ Fixes:
 * `Microsoft.Extensions.Logging` `ConfigureScope` invocation. #208, #210, #224 Thanks @dbraillon 
 * `Sentry.Serilog` Verbose level. #213, #217. Thanks @kanadaj 
 
-# 1.2.1-beta
+## 1.2.1-beta
 
 Fixes and improvements to the NLog integration: #207 by @josh-degraw 
 
-# 1.2.0
+## 1.2.0
 
-# Features
+### Features
 
 * Optionally skip module registrations #202 - (Thanks @josh-degraw)
 * First NLog integration release #188 (Thanks @josh-degraw)
@@ -261,21 +274,21 @@ Fixes and improvements to the NLog integration: #207 by @josh-degraw
 * Overload to AddSentry #163 by (Thanks @f1nzer)
 * ASP.NET Core AddSentry has now ConfigureScope: #160
 
-# Bug fixes
+### Bug fixes
 
 * Don't override user #199
 * Read the hub to take latest Client: 8f4b5ba
 
-# 1.1.3-beta4
+## 1.1.3-beta4
 
 Bug fix: Don't override user  #199
 
-# 1.1.3-beta3
+## 1.1.3-beta3
 
 * First NLog integration release #188 (Thanks @josh-degraw)
 * Extensible stack trace #184 (Thanks @pengweiqhca) 
 
-# 1.1.3-beta2
+## 1.1.3-beta2
 
 Feature: 
 * MaxRequestSize for ASP.NET and ASP.NET Core #174
@@ -283,7 +296,7 @@ Feature:
 
 Fix: Diagnostic log order: #173 by @scolestock
 
-# 1.1.3-beta
+## 1.1.3-beta
 
 Fixed: 
 * Read the hub to take latest Client: 8f4b5ba1a3
@@ -293,7 +306,7 @@ Feature
 * Overload to `AddSentry` #163 by @F1nZeR 
 * ASP.NET Core `AddSentry` has now `ConfigureScope`: #160 
 
-# 1.1.2
+## 1.1.2
 
 Using [new version of the protocol with fixes and features](https://github.com/getsentry/sentry-dotnet-protocol/releases/tag/1.0.3).
 
@@ -301,12 +314,12 @@ Fixed:
 
 ASP.NET Core integration issue when containers are built on the ServiceCollection after SDK is initialized (#157, #103 )
 
-# 1.1.2-beta
+## 1.1.2-beta
 
 Fixed:
 * ASP.NET Core integration issue when containers are built on the ServiceCollection after SDK is initialized (#157, #103 )
 
-# 1.1.1
+## 1.1.1
 
 Fixed:
 * Serilog bug that self log would recurse #156 
@@ -314,7 +327,7 @@ Fixed:
 Feature:
 * log4net environment via xml configuration #150 (Thanks Sébastien Pierre)
 
-# 1.1.0
+## 1.1.0
 
 Includes all features and bug fixes of previous beta releases:
 
@@ -336,11 +349,11 @@ Bug fixes:
 
 Thanks to our growing list of [contributors](https://github.com/getsentry/sentry-dotnet/graphs/contributors).
 
-# 1.0.1-beta5
+## 1.0.1-beta5
 
 * Added `net461` target to Serilog package #148 
 
-# 1.0.1-beta4
+## 1.0.1-beta4
 
 * Serilog Integration #118, #145
 * `Capture` methods return `SentryId` #139, #140 
@@ -349,15 +362,15 @@ Thanks to our growing list of [contributors](https://github.com/getsentry/sentry
 
 Thanks to our growing [list of contributors](https://github.com/getsentry/sentry-dotnet/graphs/contributors).
 
-# 1.0.1-beta3
+## 1.0.1-beta3
 
 Lowering Newtonsoft.Json requirements; #138
 
-# 1.0.1-beta2
+## 1.0.1-beta2
 
 `Sentry` package Includes `net461` target #135
 
-# 1.0.1-beta
+## 1.0.1-beta
 
 Features: 
 * Use log entry to improve grouping #125 
@@ -369,13 +382,13 @@ Bug fixes:
 * Disabled SDK throws on shutdown: #124 
 * Log4net only init if current hub is disabled #119
 
-# 1.0.0
+## 1.0.0
 
-# First major release of the new .NET SDK.
+### First major release of the new .NET SDK.
 
-## Main features
+#### Main features
 
-### Sentry package
+##### Sentry package
 
 * Automatic Captures global unhandled exceptions (AppDomain)
 * Scope management
@@ -399,7 +412,7 @@ Bug fixes:
 * Enable SDK debug mode (opt-in)
 * Attach stack trace for captured messages (opt-in)
 
-### Sentry.Extensions.Logging
+##### Sentry.Extensions.Logging
 
 * Includes all features from the `Sentry` package.
 * BeginScope data added to Sentry scope, sent with events
@@ -407,7 +420,7 @@ Bug fixes:
 * LogError or higher automatically captures an event
 * Minimal levels are configurable.
 
-### Sentry.AspNetCore
+##### Sentry.AspNetCore
 
 * Includes all features from the `Sentry` package.
 * Includes all features from the `Sentry.Extensions.Logging` package.
@@ -433,7 +446,7 @@ All packages are:
 * Tested on Windows, Linux and macOS
 * Tested on .NET Core, .NET Framework and Mono
 
-## Learn more:
+##### Learn more:
 
 * [Code samples](https://github.com/getsentry/sentry-dotnet/tree/master/samples)
 * [Sentry docs](https://docs.sentry.io/quickstart/?platform=csharp)
@@ -518,7 +531,7 @@ Bug fixes:
 * On-prem without chuncked support for gzip #71 
 * Exception.Data key is not string #77 
 
-## [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration.
+##### [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration.
 
 Download it directly below from GitHub or using NuGet:
 
@@ -529,7 +542,7 @@ Download it directly below from GitHub or using NuGet:
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 | **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 
-# 0.0.1-preview4
+## 0.0.1-preview4
 
 Features:
 
@@ -551,7 +564,7 @@ Improvements to [the docs](https://getsentry.github.io/sentry-dotnet) like:
 * `ConfigureScope` clarifications
 * Documenting samples
 
-## [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration.
+### [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration.
 
 Download it directly from GitHub or using NuGet:
 
@@ -562,7 +575,7 @@ Download it directly from GitHub or using NuGet:
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 | **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 
-# 0.0.1-preview3
+## 0.0.1-preview3
 
 This third preview includes bug fixes and more features. Test coverage increased to 96%
 
@@ -592,7 +605,7 @@ Download it directly from GitHub or using NuGet:
 |         **Sentry**            |    [![NuGet](https://img.shields.io/nuget/vpre/Sentry.svg)](https://www.nuget.org/packages/Sentry)   |
 |     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
-# 0.0.1-preview2
+## 0.0.1-preview2
 
 This second release includes bug fixes and more features. Test coverage increased to 93%
 
@@ -617,7 +630,7 @@ Download it directly from GitHub or using NuGet:
 |     **Sentry.AspNetCore**     |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 
-# 0.0.1-preview1
+## 0.0.1-preview1
 
 Our first preview of the SDK:
 

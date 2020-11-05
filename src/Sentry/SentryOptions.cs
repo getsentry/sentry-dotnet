@@ -81,7 +81,7 @@ namespace Sentry
         /// <example>
         /// 'System.CustomNamespace', 'Microsoft.Azure.App'
         /// </example>
-        /// <seealso href="https://docs.sentry.io/error-reporting/configuration/?platform=csharp#in-app-include"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/options/#in-app-include"/>
         internal string[]? InAppInclude { get; set; }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Sentry
         /// <example>
         /// 0.1 = 10% of events are sent
         /// </example>
-        /// <see href="https://docs.sentry.io/clientdev/features/#event-sampling"/>
+        /// <see href="https://develop.sentry.dev/sdk/features/#event-sampling"/>
         private float? _sampleRate;
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Sentry
         /// default values for new projects, they are not considered valid by the discovery process.
         /// </para>
         /// </remarks>
-        /// <seealso href="https://docs.sentry.io/learn/releases/"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
         public string? Release { get; set; }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace Sentry
         /// <example>
         /// Production, Staging
         /// </example>
-        /// <seealso href="https://docs.sentry.io/learn/environments/"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/environments/"/>
         public string? Environment { get; set; }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace Sentry
         /// a chance to inspect and/or modify the event before it's sent. If the event
         /// should not be sent at all, return null from the callback.
         /// </remarks>
-        public Func<SentryEvent, SentryEvent>? BeforeSend { get; set; }
+        public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
 
         /// <summary>
         /// A callback invoked when a breadcrumb is about to be stored.
@@ -219,7 +219,7 @@ namespace Sentry
         /// <remarks>
         /// Gives a chance to inspect and modify/reject a breadcrumb.
         /// </remarks>
-        public Func<Breadcrumb, Breadcrumb>? BeforeBreadcrumb { get; set; }
+        public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
 
         private int _maxQueueItems = 30;
 
@@ -402,6 +402,32 @@ namespace Sentry
                     "Serilog",
                     "Giraffe.",
                     "NLog",
+                    "Npgsql",
+                    "RabbitMQ",
+                    "Hangfire",
+                    "IdentityServer4",
+                    "AWSSDK",
+                    "Polly",
+                    "Swashbuckle",
+                    "FluentValidation",
+                    "Autofac",
+                    "Stackexchange.Redis",
+                    "Dapper",
+                    "RestSharp",
+                    "SkiaSharp",
+                    "IdentityModel",
+                    "SqlitePclRaw",
+                    "Xamarin",
+                    "Google.",
+                    "MongoDB.",
+                    "Remotion.Linq",
+                    "AutoMapper",
+                    "Nest",
+                    "Owin",
+                    "MediatR",
+                    "ICSharpCode",
+                    "Grpc",
+                    "ServiceStack"
             };
 
             InAppInclude = Array.Empty<string>();
