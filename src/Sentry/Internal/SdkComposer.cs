@@ -40,12 +40,12 @@ namespace Sentry.Internal
 
             var transport = CreateTransport();
 
-            if (_options.CacheDirectory is { } cacheDirectory)
+            if (_options.CacheDirectory is { })
             {
-                return new CachingBackgroundWorker(transport, _options, cacheDirectory);
+                return new CachingBackgroundWorker(transport, _options);
             }
 
-            return new BackgroundWorker(transport, _options);
+            return new StatelessBackgroundWorker(transport, _options);
         }
     }
 }

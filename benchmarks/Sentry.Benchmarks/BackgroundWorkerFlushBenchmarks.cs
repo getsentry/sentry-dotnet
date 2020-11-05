@@ -23,7 +23,7 @@ namespace Sentry.Benchmarks
         [IterationSetup]
         public void IterationSetup()
         {
-            _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 });
+            _backgroundWorker = new StatelessBackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 });
             _event = new SentryEvent();
             _envelope = Envelope.FromEvent(_event);
 

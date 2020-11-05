@@ -443,7 +443,7 @@ namespace Sentry.Tests
 
             using (var sut = new SentryClient(_fixture.SentryOptions))
             {
-                _ = Assert.IsType<BackgroundWorker>(sut.Worker);
+                _ = Assert.IsType<BackgroundWorkerBase>(sut.Worker);
             }
         }
     }

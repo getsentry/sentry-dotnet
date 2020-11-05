@@ -25,9 +25,7 @@ namespace Sentry.Internal.Http
 
         internal const string DefaultErrorMessage = "No message";
 
-        public HttpTransport(
-            SentryOptions options,
-            HttpClient httpClient)
+        public HttpTransport(SentryOptions options, HttpClient httpClient)
         {
             _options = options;
             _httpClient = httpClient;
@@ -144,15 +142,13 @@ namespace Sentry.Internal.Http
                 (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
                 $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
 
-            var request = new HttpRequestMessage
+            return new HttpRequestMessage
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
                 Headers = {{"X-Sentry-Auth", authHeader}},
                 Content = new EnvelopeHttpContent(envelope)
             };
-
-            return request;
         }
     }
 }

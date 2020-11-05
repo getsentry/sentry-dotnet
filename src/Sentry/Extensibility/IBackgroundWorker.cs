@@ -25,6 +25,6 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Current count of items queued up.
         /// </summary>
-        int QueuedItems { get; }
+        int QueueLength { get; }
     }
 }
