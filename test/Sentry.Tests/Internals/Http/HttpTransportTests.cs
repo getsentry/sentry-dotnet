@@ -31,8 +31,7 @@ namespace Sentry.Tests.Internals.Http
 
             var httpTransport = new HttpTransport(
                 new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient(httpHandler),
-                _ => { }
+                new HttpClient(httpHandler)
             );
 
             var envelope = Envelope.FromEvent(
@@ -69,8 +68,7 @@ namespace Sentry.Tests.Internals.Http
                     Debug = true,
                     DiagnosticLogger = logger
                 },
-                new HttpClient(httpHandler),
-                _ => { }
+                new HttpClient(httpHandler)
             );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
@@ -109,8 +107,7 @@ namespace Sentry.Tests.Internals.Http
                     Debug = true,
                     DiagnosticLogger = logger
                 },
-                new HttpClient(httpHandler),
-                _ => { }
+                new HttpClient(httpHandler)
             );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
@@ -142,8 +139,7 @@ namespace Sentry.Tests.Internals.Http
                 {
                     Dsn = DsnSamples.ValidDsnWithSecret
                 },
-                new HttpClient(httpHandler),
-                _ => { }
+                new HttpClient(httpHandler)
             );
 
             // First request always goes through
@@ -194,24 +190,22 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
-        public void CreateRequest_AuthHeader_Invoked()
+        public void CreateRequest_AuthHeader_IsSet()
         {
             // Arrange
-            var callbackInvoked = false;
-
             var httpTransport = new HttpTransport(
                 new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient(),
-                _ => callbackInvoked = true
+                new HttpClient()
             );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
             // Act
-            httpTransport.CreateRequest(envelope);
+            using var request = httpTransport.CreateRequest(envelope);
+            var authHeader = request.Headers.GetValues("X-Sentry-Auth").FirstOrDefault();
 
             // Assert
-            callbackInvoked.Should().BeTrue();
+            authHeader.Should().NotBeNullOrWhiteSpace();
         }
 
         [Fact]
@@ -220,8 +214,7 @@ namespace Sentry.Tests.Internals.Http
             // Arrange
             var httpTransport = new HttpTransport(
                 new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient(),
-                _ => { }
+                new HttpClient()
             );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
@@ -239,8 +232,7 @@ namespace Sentry.Tests.Internals.Http
             // Arrange
             var httpTransport = new HttpTransport(
                 new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient(),
-                _ => { }
+                new HttpClient()
             );
 
             var envelope = Envelope.FromEvent(new SentryEvent());
@@ -260,8 +252,7 @@ namespace Sentry.Tests.Internals.Http
             // Arrange
             var httpTransport = new HttpTransport(
                 new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient(),
-                _ => { }
+                new HttpClient()
             );
 
             var envelope = Envelope.FromEvent(new SentryEvent());

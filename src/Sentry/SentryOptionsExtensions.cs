@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
@@ -179,6 +180,15 @@ namespace Sentry
         {
             options.SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
 
+            return options;
+        }
+
+        /// <summary>
+        /// Sets the cache directory.
+        /// </summary>
+        public static SentryOptions SetCacheDirectory(this SentryOptions options, string directoryPath)
+        {
+            options.CacheDirectory = new DirectoryInfo(directoryPath);
             return options;
         }
 

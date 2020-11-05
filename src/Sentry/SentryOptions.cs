@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
@@ -359,6 +360,12 @@ namespace Sentry
         /// By default will not drop an event solely for including an inner exception that was already captured.
         /// </remarks>
         public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
+
+        /// <summary>
+        /// Path to the directory where events are stored locally for resilience purposes.
+        /// If set to <code>null</code>, caching will not be used.
+        /// </summary>
+        public DirectoryInfo? CacheDirectory { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
