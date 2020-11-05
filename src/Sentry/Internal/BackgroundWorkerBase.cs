@@ -282,7 +282,7 @@ namespace Sentry.Internal
 
                 // If there's anything in the queue, it'll keep running until 'shutdownTimeout' is reached
                 // If the queue is empty it will quit immediately
-                _ = WorkerTask.Wait(Options.ShutdownTimeout);
+                WorkerTask.Wait(Options.ShutdownTimeout);
             }
             catch (OperationCanceledException)
             {

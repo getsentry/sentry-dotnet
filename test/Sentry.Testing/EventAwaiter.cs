@@ -21,7 +21,8 @@ namespace Sentry.Testing
 
             _handlerDelegate = Delegate.CreateDelegate(
                 eventInfo.EventHandlerType,
-                typeof(EventAwaiter).GetMethod(nameof(EventHandler))!
+                this,
+                typeof(EventAwaiter).GetMethod(nameof(EventHandler), BindingFlags.NonPublic | BindingFlags.Instance)!
             );
 
             _eventInfo.AddEventHandler(_owner, _handlerDelegate);

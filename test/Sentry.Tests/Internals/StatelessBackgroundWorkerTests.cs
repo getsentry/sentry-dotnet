@@ -36,18 +36,19 @@ namespace Sentry.Tests.Internals
             worker.WorkerTask.Status.Should().Be(TaskStatus.RanToCompletion);
         }
 
-        [Fact(Timeout = 3000)]
-        public async Task Dispose_WhenRequestInFlight_StopsTask()
+        [Fact(Timeout = 5000)]
+        public void Dispose_WhenRequestInFlight_StopsTask()
         {
             // Arrange
-            using var transport = new FakeTransport();
+            var transport = Substitute.For<ITransport>();
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions());
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
+            transport.SendEnvelopeAsync(Arg.Any<Envelope>()).Returns(new ValueTask(Task.Delay(3000)));
+
             // Act
             worker.EnqueueEnvelope(envelope);
-            await Event.WaitUntilTriggeredAsync(transport, nameof(transport.EnvelopeSent));
             worker.Dispose();
 
             // Assert
@@ -77,12 +78,17 @@ namespace Sentry.Tests.Internals
         public void Dispose_SwallowsException()
         {
             // Arrange
-            using var transport = new FakeTransport();
+            var transport = Substitute.For<ITransport>();
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions());
 
-            transport.EnvelopeSent += (_, __) => throw new InvalidOperationException();
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+
+            transport
+                .When(e => e.SendEnvelopeAsync(envelope))
+                .Do(_ => throw new Exception("Sending to sentry failed."));
 
             // Act
+            worker.EnqueueEnvelope(envelope);
             worker.Dispose();
 
             // Assert
@@ -93,7 +99,7 @@ namespace Sentry.Tests.Internals
         public async Task Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
         {
             // Arrange
-            using var transport = new FakeTransport();
+            var transport = Substitute.For<ITransport>();
 
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions
             {
@@ -102,10 +108,23 @@ namespace Sentry.Tests.Internals
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
+            var count = 0;
+            transport.SendEnvelopeAsync(Arg.Any<Envelope>()).Returns(_ =>
+            {
+                worker.EnqueueEnvelope(envelope);
+
+                if (count++ > 0)
+                {
+                    worker.Shutdown();
+                    worker.EnqueueEnvelope(envelope);
+                    worker.EnqueueEnvelope(envelope);
+                }
+
+                return default;
+            });
+
             // Act
             worker.EnqueueEnvelope(envelope);
-
-            await Event.WaitUntilTriggeredAsync(transport, nameof(transport.EnvelopeSent));
             worker.Dispose();
 
             await worker.WorkerTask;
@@ -127,7 +146,6 @@ namespace Sentry.Tests.Internals
 
             // Act
             worker.EnqueueEnvelope(envelope);
-            await Event.WaitUntilTriggeredAsync(transport, nameof(transport.EnvelopeSent));
             worker.Shutdown();
 
             worker.EnqueueEnvelope(envelope);
@@ -168,7 +186,7 @@ namespace Sentry.Tests.Internals
         public void CaptureEvent_LimitReached_EventDropped()
         {
             // Arrange
-            using var transport = new FakeTransport();
+            var transport = Substitute.For<ITransport>();
 
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions
             {
@@ -177,7 +195,7 @@ namespace Sentry.Tests.Internals
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
-            transport.EnvelopeSent += (_, __) => Thread.Sleep(3000);
+            transport.SendEnvelopeAsync(Arg.Any<Envelope>()).Returns(new ValueTask(Task.Delay(3000)));
 
             // Act
             worker.EnqueueEnvelope(envelope);
@@ -223,7 +241,7 @@ namespace Sentry.Tests.Internals
         public void CaptureEvent_InnerTransportThrows_WorkerSuppresses()
         {
             // Arrange
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = Substitute.For<IDiagnosticLogger>();
             var transport = Substitute.For<ITransport>();
 
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions
@@ -243,7 +261,8 @@ namespace Sentry.Tests.Internals
 
             // Assert
             isQueued.Should().BeTrue();
-            logger.Entries.Should().Contain(e => e.Message.Contains("Sending to sentry failed."));
+            logger.Received().Log(SentryLevel.Error, "Error while processing event {1}: {0}. #{2} in queue.",
+                Arg.Any<Exception>(), Arg.Any<object[]>());
         }
 
         [Fact]
