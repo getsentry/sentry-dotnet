@@ -1,0 +1,32 @@
+﻿@page "/thrower"
+
+<h1>Throw Exception</h1>
+
+<button class="btn btn-primary" @onclick="Throw">Throw</button>
+
+@if (lastEventId != SentryId.Empty)
+{
+<p>Event Id: @lastEventId</p>
+}
+
+@code {
+    private SentryId lastEventId;
+
+    private void Throw()
+    {
+        try
+        {
+            Stuff.DoSomething();
+        }
+        catch (Exception e)
+        {
+            lastEventId = SentrySdk.CaptureException(e);
+        }
+    }
+
+    private static class Stuff
+    {
+        public static void DoSomething() => Thrower();
+        private static void Thrower() => throw null;
+    }
+}
