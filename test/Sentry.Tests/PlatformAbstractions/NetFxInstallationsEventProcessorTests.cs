@@ -2,49 +2,25 @@
 using Xunit;
 using System.Collections.Generic;
 using Sentry.PlatformAbstractions;
-using Xunit.Abstractions;
-using Sentry.Extensibility;
-using System;
 
 namespace Sentry.Tests.PlatformAbstractions
 {
-
     public class NetFxInstallationsEventProcessorTests
     {
-
-        private class TestLogger : IDiagnosticLogger
-        {
-            public bool IsEnabled(SentryLevel level) => true;
-
-            public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
-            {
-                _testOutputHelper.WriteLine($"sentry IDiagnosticLogger {logLevel} {message}, ex {exception?.Message} {exception?.StackTrace}");
-            }
-        }
-
         private class Fixture
         {
-
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions()
-            {
-                Debug = true,
-                DiagnosticLogger = new TestLogger()
-            };
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
 
             public NetFxInstallationsEventProcessor GetSut() => new NetFxInstallationsEventProcessor(SentryOptions);
-        }
-        private  static ITestOutputHelper _testOutputHelper;
-
-        public NetFxInstallationsEventProcessorTests(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
         }
 
         private readonly Fixture _fixture = new Fixture();
 
-        [Fact]
+        [SkippableFact]
         public void Process_SentryEventWithNetFxList()
         {
+            Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+
             //Arrange
             var @event = new SentryEvent();
             var sut = _fixture.GetSut();
@@ -53,12 +29,14 @@ namespace Sentry.Tests.PlatformAbstractions
             _ = sut.Process(@event);
 
             //Assert
-            _ = Assert.IsAssignableFrom<Dictionary<string,string>>(@event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey]);
+            _ = Assert.IsAssignableFrom<Dictionary<string, string>>(@event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey]);
         }
 
-        [Fact]
+        [SkippableFact]
         public void Process_ContextWithGetInstallationsData()
         {
+            Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+
             //Arrange
             var @event = new SentryEvent();
             var sut = _fixture.GetSut();
@@ -74,9 +52,11 @@ namespace Sentry.Tests.PlatformAbstractions
             }
         }
 
-        [Fact]
+        [SkippableFact]
         public void Process_NetFxInstallationsKeyExist_UnchangedSentryEvent()
         {
+            Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+
             //Arrange
             var @event = new SentryEvent();
             var sut = _fixture.GetSut();
