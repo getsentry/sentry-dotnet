@@ -4,6 +4,7 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.PlatformAbstractions;
 using Xunit;
 
 namespace Sentry.Tests

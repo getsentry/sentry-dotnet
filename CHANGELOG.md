@@ -2,7 +2,7 @@
 
 ## unreleased
 
-* Add a list of .Net Frameworks installed when avaliable. (#531) @lucas-zimerman
+* Add a list of .NET Frameworks installed when available. (#531) @lucas-zimerman
 
 ## 3.0.0-alpha.4
 

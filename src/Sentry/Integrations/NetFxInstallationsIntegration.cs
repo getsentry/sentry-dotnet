@@ -1,5 +1,5 @@
 #if NETFX
-using Sentry.Internal;
+using Sentry.PlatformAbstractions;
 
 namespace Sentry.Integrations
 {
@@ -7,7 +7,7 @@ namespace Sentry.Integrations
     {
         public void Register(IHub hub, SentryOptions options)
         {
-            options.AddEventProcessor(new NetFxInstallationsEventProcessor());
+            options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
         }
     }
 }
