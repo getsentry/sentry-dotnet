@@ -86,10 +86,7 @@ namespace Sentry.Tests.Protocol
             {
                 User = new User { Id = "user-id" },
                 Request = new Request { Method = "POST" },
-                Contexts = new Contexts {
-                    ["context_key"] = "context_value",
-                    [".NET Framework"] = netFxInstallations
-                },
+                Contexts = new Contexts { [".NET Framework"] = netFxInstallations },
                 Sdk = new SdkVersion { Name = "SDK-test" },
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
@@ -128,7 +125,7 @@ namespace Sentry.Tests.Protocol
                          "\"exception\":{\"values\":[{\"value\":\"exception_value\"}]}," +
                          "\"threads\":{\"values\":[{\"crashed\":true}]}," +
                          "\"user\":{\"id\":\"user-id\"}," +
-                         "\"contexts\":{\".NET Framework\":{\".NET Framework\":\"\\\"v2.0.50727\\\", \\\"v3.0\\\", \\\"v3.5\\\"\",\".NET Framework Client\":\"\\\"v4.8\\\", \\\"v4.0.0.0\\\"\",\".NET Framework Full\":\"\\\"v4.8\\\"\"},\"context_key\":\"context_value\"}," +
+                         "\"contexts\":{\".NET Framework\":{\".NET Framework\":\"\\\"v2.0.50727\\\", \\\"v3.0\\\", \\\"v3.5\\\"\",\".NET Framework Client\":\"\\\"v4.8\\\", \\\"v4.0.0.0\\\"\",\".NET Framework Full\":\"\\\"v4.8\\\"\"}}," +
                          "\"request\":{\"method\":\"POST\"}," +
                          "\"fingerprint\":[\"fingerprint\"]," +
                          "\"breadcrumbs\":[{\"timestamp\":\"9999-12-31T23:59:59Z\",\"message\":\"crumb\"}]," +

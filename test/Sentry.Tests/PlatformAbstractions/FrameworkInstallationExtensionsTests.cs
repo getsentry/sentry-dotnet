@@ -59,7 +59,7 @@ namespace Sentry.Tests.PlatformAbstractions
             var version = frameworkInstallation.GetVersionNumber();
 
             //Assert
-            Assert.Equal("1.2", version);
+            Assert.Equal("v1.2", version);
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace Sentry.Tests.PlatformAbstractions
             var version = frameworkInstallation.GetVersionNumber();
 
             //Assert
-            Assert.Equal("1.2", version);
+            Assert.Equal("v1.2", version);
         }
     }
 }
