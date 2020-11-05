@@ -2,16 +2,42 @@
 using Xunit;
 using System.Collections.Generic;
 using Sentry.PlatformAbstractions;
+using Xunit.Abstractions;
+using Sentry.Extensibility;
+using System;
 
 namespace Sentry.Tests.PlatformAbstractions
 {
+
     public class NetFxInstallationsEventProcessorTests
     {
+
+        private class TestLogger : IDiagnosticLogger
+        {
+            public bool IsEnabled(SentryLevel level) => true;
+
+            public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+            {
+                _testOutputHelper.WriteLine($"sentry IDiagnosticLogger {logLevel} {message}, ex {exception?.Message} {exception?.StackTrace}");
+            }
+        }
+
         private class Fixture
         {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+
+            public SentryOptions SentryOptions { get; set; } = new SentryOptions()
+            {
+                Debug = true,
+                DiagnosticLogger = new TestLogger()
+            };
 
             public NetFxInstallationsEventProcessor GetSut() => new NetFxInstallationsEventProcessor(SentryOptions);
+        }
+        private  static ITestOutputHelper _testOutputHelper;
+
+        public NetFxInstallationsEventProcessorTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
         }
 
         private readonly Fixture _fixture = new Fixture();
