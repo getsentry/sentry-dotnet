@@ -5,6 +5,5 @@ namespace Sentry.PlatformAbstractions
         internal static string? GetVersionNumber(this FrameworkInstallation frameworkInstall)
             => frameworkInstall?.ShortName
                 ?? (frameworkInstall?.Version != null ? $"v{frameworkInstall.Version}" : null);
-
     }
 }
