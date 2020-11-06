@@ -389,6 +389,9 @@ namespace Sentry
             Integrations = new ISdkIntegration[] {
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
+#if NETFX
+                new NetFxInstallationsIntegration(),
+#endif
             };
 
             InAppExclude = new[] {
