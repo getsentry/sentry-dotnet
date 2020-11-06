@@ -54,7 +54,7 @@ namespace Sentry.Internal
 
         private async ValueTask CacheEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
-            if (GetCachedEnvelopeFiles().Count() >= 50)
+            if (GetCachedEnvelopeFiles().Count() >= 30)
             {
                 return;
             }
