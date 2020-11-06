@@ -40,7 +40,7 @@ namespace Sentry.Internal
 
             var transport = CreateTransport();
 
-            if (_options.CacheDirectory is { })
+            if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
             {
                 return new CachingBackgroundWorker(transport, _options);
             }

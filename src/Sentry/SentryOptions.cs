@@ -52,6 +52,7 @@ namespace Sentry
         /// </summary>
         internal ISdkIntegration[]? Integrations { get; set; }
 
+
         internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
         internal IBackgroundWorker? BackgroundWorker { get; set; }
@@ -365,7 +366,7 @@ namespace Sentry
         /// Path to the directory where events are stored locally for resilience purposes.
         /// If set to <code>null</code>, caching will not be used.
         /// </summary>
-        public DirectoryInfo? CacheDirectory { get; set; }
+        public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>

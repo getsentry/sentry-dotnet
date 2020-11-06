@@ -16,9 +16,9 @@ namespace Sentry.Internal
         public CachingBackgroundWorker(ITransport transport, SentryOptions options)
             : base(transport, options)
         {
-            _cacheDirectory =
-                options.CacheDirectory ??
-                throw new InvalidOperationException("Cache directory is not set.");
+            _cacheDirectory = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
+                ? _cacheDirectory = new DirectoryInfo(options.CacheDirectoryPath)
+                : throw new InvalidOperationException("Cache directory is not set.");
         }
 
         private IEnumerable<FileInfo> GetCachedEnvelopeFiles()
