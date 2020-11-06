@@ -4,24 +4,15 @@
 
 <button class="btn btn-primary" @onclick="Throw">Throw</button>
 
-@if (lastEventId != SentryId.Empty)
+@if (SentrySdk.LastEventId != SentryId.Empty)
 {
-<p>Event Id: @lastEventId</p>
+<p>Event Id: @SentrySdk.LastEventId</p>
 }
 
 @code {
-    private SentryId lastEventId;
-
     private void Throw()
     {
-        try
-        {
-            Stuff.DoSomething();
-        }
-        catch (Exception e)
-        {
-            lastEventId = SentrySdk.CaptureException(e);
-        }
+       Stuff.DoSomething();
     }
 
     private static class Stuff
