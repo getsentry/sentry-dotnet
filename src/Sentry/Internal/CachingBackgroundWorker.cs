@@ -86,8 +86,7 @@ namespace Sentry.Internal
                     // indicate a successfully completed, but error response.
                     envelopeFile.Delete();
 
-                    Options.DiagnosticLogger?.Log(
-                        SentryLevel.Error,
+                    Options.DiagnosticLogger?.LogError(
                         "Persistent failure when sending cached envelope: {0}",
                         ex,
                         envelope.TryGetEventId()
