@@ -36,7 +36,7 @@ namespace Sentry.Tests.Internals
             worker.WorkerTask.Status.Should().Be(TaskStatus.RanToCompletion);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 10000)]
         public void Dispose_WhenRequestInFlight_StopsTask()
         {
             // Arrange
@@ -59,12 +59,10 @@ namespace Sentry.Tests.Internals
         public void Dispose_TokenCancelledWhenRequestInFlight_StopsTask()
         {
             // Arrange
-            using var transport = new FakeTransport();
+            var transport = new FakeFailingTransport();
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions());
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
-
-            transport.EnvelopeSent += (_, __) => throw new OperationCanceledException();
 
             // Act
             worker.EnqueueEnvelope(envelope);
@@ -78,24 +76,20 @@ namespace Sentry.Tests.Internals
         public void Dispose_SwallowsException()
         {
             // Arrange
-            var transport = Substitute.For<ITransport>();
+            var transport = new FakeFailingTransport();
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions());
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
-            transport
-                .When(e => e.SendEnvelopeAsync(envelope))
-                .Do(_ => throw new Exception("Sending to sentry failed."));
-
             // Act
-            worker.EnqueueEnvelope(envelope);
+            worker.Shutdown();
             worker.Dispose();
 
             // Assert
-            worker.WorkerTask.Status.Should().Be(TaskStatus.Faulted);
+            worker.WorkerTask.Status.Should().Be(TaskStatus.RanToCompletion);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 10000)]
         public async Task Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
         {
             // Arrange
@@ -103,39 +97,25 @@ namespace Sentry.Tests.Internals
 
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions
             {
-                ShutdownTimeout = default // Don't wait
+                ShutdownTimeout = TimeSpan.Zero // Don't wait
             });
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var count = 0;
-            transport.SendEnvelopeAsync(Arg.Any<Envelope>()).Returns(_ =>
-            {
-                worker.EnqueueEnvelope(envelope);
-
-                if (count++ > 0)
-                {
-                    worker.Shutdown();
-                    worker.EnqueueEnvelope(envelope);
-                    worker.EnqueueEnvelope(envelope);
-                }
-
-                return default;
-            });
+            transport.SendEnvelopeAsync(Arg.Any<Envelope>()).Returns(new ValueTask(Task.Delay(3000)));
 
             // Act
+            worker.EnqueueEnvelope(envelope);
             worker.EnqueueEnvelope(envelope);
             worker.Dispose();
 
             await worker.WorkerTask;
 
             // Assert
-            // First event was sent, second hit transport with a cancelled token.
-            // Third never taken from the queue
             worker.QueueLength.Should().Be(1);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 10000)]
         public async Task Dispose_EventQueuedDefaultShutdownTimeout_EmptiesQueueBeforeShutdown()
         {
             // Arrange
@@ -160,7 +140,7 @@ namespace Sentry.Tests.Internals
             worker.QueueLength.Should().Be(0);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 10000)]
         public async Task Create_CancelledTaskAndNoShutdownTimeout_ConsumesNoEvents()
         {
             // Arrange
@@ -182,7 +162,7 @@ namespace Sentry.Tests.Internals
             worker.Dispose(); // no-op as task is already finished
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 10000)]
         public void CaptureEvent_LimitReached_EventDropped()
         {
             // Arrange
@@ -237,32 +217,31 @@ namespace Sentry.Tests.Internals
             transport.GetSentEnvelopes().Should().HaveCount(1);
         }
 
-        [Fact]
-        public void CaptureEvent_InnerTransportThrows_WorkerSuppresses()
+        [Fact(Timeout = 10000)]
+        public async Task CaptureEvent_InnerTransportThrows_WorkerSuppresses()
         {
             // Arrange
-            var logger = Substitute.For<IDiagnosticLogger>();
-            var transport = Substitute.For<ITransport>();
+            var logger = new AccumulativeDiagnosticLogger();
+            var transport = new FakeFailingTransport();
 
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions
             {
-                DiagnosticLogger = logger,
-                DiagnosticsLevel = SentryLevel.Debug
+                Debug = true,
+                DiagnosticLogger = logger
             });
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
-            transport
-                .When(e => e.SendEnvelopeAsync(envelope))
-                .Do(_ => throw new Exception("Sending to sentry failed."));
-
             // Act
             var isQueued = worker.EnqueueEnvelope(envelope);
+            await worker.FlushAsync(TimeSpan.FromSeconds(3));
 
             // Assert
             isQueued.Should().BeTrue();
-            logger.Received().Log(SentryLevel.Error, "Error while processing event {1}: {0}. #{2} in queue.",
-                Arg.Any<Exception>(), Arg.Any<object[]>());
+            logger.Entries.Should().Contain(e =>
+                e.Level == SentryLevel.Error &&
+                e.Message == "Error while processing event {1}: {0}. #{2} in queue."
+            );
         }
 
         [Fact]
@@ -290,57 +269,64 @@ namespace Sentry.Tests.Internals
             worker.QueueLength.Should().Be(1);
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task FlushAsync_DisposedWorker_LogsAndReturns()
         {
             // Arrange
-            var logger = Substitute.For<IDiagnosticLogger>();
+            var logger = new AccumulativeDiagnosticLogger();
 
             using var worker = new StatelessBackgroundWorker(new FakeTransport(), new SentryOptions
             {
-                DiagnosticLogger = logger,
-                DiagnosticsLevel = SentryLevel.Debug
+                Debug = true,
+                DiagnosticLogger = logger
             });
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
             // Act
             worker.Dispose();
-            await worker.FlushAsync(TimeSpan.MaxValue);
+            await worker.FlushAsync(TimeSpan.FromSeconds(3));
 
             // Assert
-            logger.Received().Log(SentryLevel.Debug, "Worker disposed. Nothing to flush.");
+            logger.Entries.Should().Contain(e =>
+                e.Level == SentryLevel.Debug &&
+                e.Message == "Worker disposed. Nothing to flush."
+            );
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task FlushAsync_EmptyQueue_LogsAndReturns()
         {
             // Arrange
-            var logger = Substitute.For<IDiagnosticLogger>();
+            var logger = new AccumulativeDiagnosticLogger();
 
             using var worker = new StatelessBackgroundWorker(new FakeTransport(), new SentryOptions
             {
-                DiagnosticLogger = logger,
-                DiagnosticsLevel = SentryLevel.Debug
+                Debug = true,
+                DiagnosticLogger = logger
             });
 
             using var envelope = Envelope.FromEvent(new SentryEvent());
 
             // Act
-            await worker.FlushAsync(TimeSpan.MaxValue);
+            await worker.FlushAsync(TimeSpan.FromSeconds(3));
 
             // Assert
-            logger.Received().Log(SentryLevel.Debug, "No events to flush.");
+            logger.Entries.Should().Contain(e =>
+                e.Level == SentryLevel.Debug &&
+                e.Message == "No events to flush."
+            );
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
         {
             // Arrange
-            var logger = Substitute.For<IDiagnosticLogger>();
+            var logger = new AccumulativeDiagnosticLogger();
             var transport = Substitute.For<ITransport>();
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions
             {
+                Debug = true,
                 DiagnosticLogger = logger
             });
 
@@ -361,7 +347,7 @@ namespace Sentry.Tests.Internals
             worker.EnqueueEnvelope(envelope);
             transportEvent.Wait(); // Wait first event to be in-flight
 
-            var flushTask = worker.FlushAsync(TimeSpan.FromDays(1));
+            var flushTask = worker.FlushAsync(TimeSpan.FromSeconds(3));
 
             // Assert
             worker.QueueLength.Should().Be(1);
@@ -369,11 +355,15 @@ namespace Sentry.Tests.Internals
             eventsQueuedEvent.Set();
             await flushTask;
 
-            logger.Received().Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
+            logger.Entries.Should().Contain(e =>
+                e.Level == SentryLevel.Debug &&
+                e.Message == "Successfully flushed all events up to call to FlushAsync."
+            );
+
             worker.QueueLength.Should().Be(0); // Only the item being processed at the blocked callback
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task FlushAsync_ZeroTimeout_Accepted()
         {
             // Arrange
@@ -396,18 +386,19 @@ namespace Sentry.Tests.Internals
             // Act
             worker.EnqueueEnvelope(envelope);
             transportEvent.Wait(); // Wait first event to be in-flight
-            await worker.FlushAsync(TimeSpan.Zero);
+            await worker.FlushAsync(TimeSpan.FromSeconds(3));
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task FlushAsync_FullQueue_RespectsTimeout()
         {
             // Arrange
-            var logger = Substitute.For<IDiagnosticLogger>();
+            var logger = new AccumulativeDiagnosticLogger();
             var transport = Substitute.For<ITransport>();
             using var worker = new StatelessBackgroundWorker(transport, new SentryOptions
             {
                 MaxQueueItems = 1,
+                Debug = true,
                 DiagnosticLogger = logger
             });
 
@@ -428,10 +419,14 @@ namespace Sentry.Tests.Internals
             worker.EnqueueEnvelope(envelope);
             transportEvent.Wait(); // Wait first event to be in-flight
 
-            await worker.FlushAsync(TimeSpan.FromSeconds(1));
+            await worker.FlushAsync(TimeSpan.FromSeconds(3));
 
             // Assert
-            logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
+            logger.Entries.Should().Contain(e =>
+                e.Level == SentryLevel.Debug &&
+                e.Message == "Timeout when trying to flush queue."
+            );
+
             worker.QueueLength.Should().Be(1);
         }
     }

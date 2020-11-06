@@ -29,7 +29,7 @@ namespace Sentry.Internal
 
         internal Task WorkerTask { get; }
 
-        public BackgroundWorkerBase(ITransport transport, SentryOptions options)
+        protected BackgroundWorkerBase(ITransport transport, SentryOptions options)
         {
             Transport = transport;
             Options = options;
