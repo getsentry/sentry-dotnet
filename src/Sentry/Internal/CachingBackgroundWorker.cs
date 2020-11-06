@@ -72,8 +72,7 @@ namespace Sentry.Internal
                     // i.e. loss of connection, failure to connect, etc.
                     // Instead break to not violate the order and wait until
                     // the next batch to attempt sending again.
-                    Options.DiagnosticLogger?.Log(
-                        SentryLevel.Error,
+                    Options.DiagnosticLogger?.LogError(
                         "Transient failure when sending cached envelope: {0}",
                         ex,
                         envelope.TryGetEventId()
