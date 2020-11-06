@@ -35,16 +35,24 @@ namespace Sentry.Internal
         private async ValueTask FlushCacheAsync(
             CancellationToken cancellationToken = default)
         {
+            Options.DiagnosticLogger?.LogDebug("Flushing cached envelopes.");
+
             while (TryGetNextEnvelopeFile() is { } envelopeFile)
             {
-                Options.DiagnosticLogger?.LogDebug("Reading cached envelope: {0}", envelopeFile.FullName);
+                Options.DiagnosticLogger?.LogDebug(
+                    "Reading cached envelope: {0}",
+                    envelopeFile.FullName
+                );
 
                 using var envelope = await Envelope.DeserializeAsync(
                     envelopeFile.OpenRead(),
                     cancellationToken
                 ).ConfigureAwait(false);
 
-                Options.DiagnosticLogger?.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
+                Options.DiagnosticLogger?.LogDebug(
+                    "Sending cached envelope: {0}",
+                    envelope.TryGetEventId()
+                );
 
                 try
                 {
@@ -52,20 +60,39 @@ namespace Sentry.Internal
 
                     // Delete the cache file in case of success
                     envelopeFile.Delete();
+
+                    Options.DiagnosticLogger?.LogDebug(
+                        "Successfully sent cached envelope: {0}",
+                        envelope.TryGetEventId()
+                    );
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
                     // Don't delete the cache file in case of transient exceptions,
                     // i.e. loss of connection, failure to connect, etc.
                     // Instead break to not violate the order and wait until
                     // the next batch to attempt sending again.
+                    Options.DiagnosticLogger?.Log(
+                        SentryLevel.Error,
+                        "Transient failure when sending cached envelope: {0}",
+                        ex,
+                        envelope.TryGetEventId()
+                    );
+
                     break;
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Delete the cache file for all other exceptions that could
                     // indicate a successfully completed, but error response.
                     envelopeFile.Delete();
+
+                    Options.DiagnosticLogger?.Log(
+                        SentryLevel.Error,
+                        "Persistent failure when sending cached envelope: {0}",
+                        ex,
+                        envelope.TryGetEventId()
+                    );
                 }
             }
         }
