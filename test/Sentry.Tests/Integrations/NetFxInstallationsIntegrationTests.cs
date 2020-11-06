@@ -1,8 +1,4 @@
 #if NETFX
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Sentry.Integrations;
 using Sentry.PlatformAbstractions;
 using Xunit;
@@ -12,7 +8,7 @@ namespace Sentry.Tests.Integrations
     public class NetFxInstallationsIntegrationTests
     {
         [SkippableFact]
-        public void Register_IgnoredIfPlattformIsMono()
+        public void Register_CurrentRuntimeIsMono_NetFxInstallationsEventProcessorNotAdded()
         {
             Skip.If(!Runtime.Current.IsMono());
 
@@ -28,7 +24,7 @@ namespace Sentry.Tests.Integrations
         }
 
         [SkippableFact]
-        public void Register_AddEventProcessorIfNotMono()
+        public void Register_CurrentRuntimeIsNotMono_NetFxInstallationsEventProcessorAdded()
         {
             Skip.If(Runtime.Current.IsMono());
 

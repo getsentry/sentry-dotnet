@@ -1,11 +1,9 @@
 #if NETFX
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
-using Sentry.PlatformAbstractions;
 
 namespace Sentry.PlatformAbstractions
 {
@@ -16,15 +14,11 @@ namespace Sentry.PlatformAbstractions
         private readonly Lazy<Dictionary<string, string>> _netFxInstallations =
             new Lazy<Dictionary<string, string>>(() => GetInstallationsDictionary(), LazyThreadSafetyMode.ExecutionAndPublication);
 
-        private bool _netFxInstallationEnabled = true;
+        private volatile bool _netFxInstallationEnabled = true;
 
         private readonly SentryOptions _options;
 
-        internal NetFxInstallationsEventProcessor(SentryOptions options)
-        {
-            Debug.Assert(options != null);
-            _options = options;
-        }
+        internal NetFxInstallationsEventProcessor(SentryOptions options) => _options = options;
 
         internal static Dictionary<string, string> GetInstallationsDictionary()
         {
@@ -59,7 +53,7 @@ namespace Sentry.PlatformAbstractions
             }
             else
             {
-                _options.DiagnosticLogger.LogDebug("Process skipped due to an exception with this with the processor.");
+                _options.DiagnosticLogger.LogDebug("NetFxInstallation disabled due to previous error.");
             }
             return @event;
         }
