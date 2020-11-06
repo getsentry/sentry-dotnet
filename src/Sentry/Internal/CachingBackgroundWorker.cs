@@ -22,21 +22,18 @@ namespace Sentry.Internal
                 : throw new InvalidOperationException("Cache directory is not set.");
         }
 
-        private IEnumerable<FileInfo> GetCachedEnvelopeFiles()
-        {
-            if (!_cacheDirectory.Exists)
-            {
-                return Enumerable.Empty<FileInfo>();
-            }
+        private IEnumerable<FileInfo> GetEnvelopeFiles() =>
+            _cacheDirectory.Exists
+                ? _cacheDirectory.EnumerateFiles($"*.{EnvelopeFileExt}")
+                : Enumerable.Empty<FileInfo>();
 
-            return _cacheDirectory.EnumerateFiles($"*.{EnvelopeFileExt}");
-        }
+        private FileInfo? TryGetNextEnvelopeFile() =>
+            GetEnvelopeFiles()
+                .OrderBy(f => f.CreationTimeUtc)
+                .FirstOrDefault();
 
-        private FileInfo? TryGetNextEnvelopeFile() => GetCachedEnvelopeFiles()
-            .OrderBy(f => f.CreationTimeUtc)
-            .FirstOrDefault();
-
-        private async ValueTask FlushCacheAsync(CancellationToken cancellationToken = default)
+        private async ValueTask FlushCacheAsync(
+            CancellationToken cancellationToken = default)
         {
             while (TryGetNextEnvelopeFile() is { } envelopeFile)
             {
@@ -70,13 +67,24 @@ namespace Sentry.Internal
             }
         }
 
-        private async ValueTask CacheEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+        private async ValueTask<FileInfo> StoreEnvelopeAsync(
+            Envelope envelope,
+            CancellationToken cancellationToken = default)
         {
-            if (GetCachedEnvelopeFiles().Count() >= 30)
+            // If over capacity - remove oldest envelope file
+            // TODO: probably a good idea to put a lock here to make sure this limit is maintained
+            if (GetEnvelopeFiles().Count() >= 30)
             {
-                return;
+                if (TryGetNextEnvelopeFile() is { } oldestEnvelopeFile)
+                {
+                    oldestEnvelopeFile.Delete();
+                }
             }
 
+            // Envelope file name can be either:
+            // 1604679692_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
+            // 1604679692__17754019.envelope
+            // (depending on whether event ID is present or not)
             var envelopeFile = new FileInfo(
                 Path.Combine(
                     _cacheDirectory.FullName,
@@ -89,22 +97,20 @@ namespace Sentry.Internal
             _cacheDirectory.Create();
             using var stream = envelopeFile.Create();
             await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+
+            return envelopeFile;
         }
 
         protected override async ValueTask ProcessEnvelopeAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
-            await FlushCacheAsync(cancellationToken).ConfigureAwait(false);
+            // Add this envelope to cache
+            await StoreEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
 
-            try
-            {
-                await Transport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception)
-            {
-                await CacheEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
-            }
+            // Send cached envelopes via transport, which includes all
+            // cached envelopes until this point and the current envelope.
+            await FlushCacheAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }
