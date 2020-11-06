@@ -11,6 +11,7 @@ namespace Sentry.Internal
 {
     internal class CachingBackgroundWorker : BackgroundWorkerBase
     {
+        private const string EnvelopeFileExt = "envelope";
         private readonly DirectoryInfo _cacheDirectory;
 
         public CachingBackgroundWorker(ITransport transport, SentryOptions options)
@@ -28,7 +29,7 @@ namespace Sentry.Internal
                 return Enumerable.Empty<FileInfo>();
             }
 
-            return _cacheDirectory.EnumerateFiles("*.envelope");
+            return _cacheDirectory.EnumerateFiles($"*.{EnvelopeFileExt}");
         }
 
         private FileInfo? TryGetNextEnvelopeFile() => GetCachedEnvelopeFiles()
@@ -39,16 +40,33 @@ namespace Sentry.Internal
         {
             while (TryGetNextEnvelopeFile() is { } envelopeFile)
             {
-                Options.DiagnosticLogger?.LogDebug("Sending cached envelope: {0}", envelopeFile.FullName);
+                Options.DiagnosticLogger?.LogDebug("Reading cached envelope: {0}", envelopeFile.FullName);
 
                 using var envelope = await Envelope.DeserializeAsync(
                     envelopeFile.OpenRead(),
                     cancellationToken
                 ).ConfigureAwait(false);
 
-                await Transport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+                Options.DiagnosticLogger?.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
 
-                envelopeFile.Delete();
+                try
+                {
+                    await Transport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+
+                    // Delete the cache file in case of success
+                    envelopeFile.Delete();
+                }
+                catch (IOException)
+                {
+                    // Don't delete the cache file in case of transient exceptions,
+                    // i.e. loss of connection, failure to connect, etc.
+                }
+                catch
+                {
+                    // Delete the cache file for all other exceptions that could
+                    // indicate a successfully completed, but error response.
+                    envelopeFile.Delete();
+                }
             }
         }
 
@@ -62,7 +80,10 @@ namespace Sentry.Internal
             var envelopeFile = new FileInfo(
                 Path.Combine(
                     _cacheDirectory.FullName,
-                    $"{DateTimeOffset.Now}_{envelope.TryGetEventId()}_{envelope.GetHashCode()}")
+                    $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" +
+                    $"{envelope.TryGetEventId()}_" +
+                    $"{envelope.GetHashCode()}" +
+                    $".{EnvelopeFileExt}")
             );
 
             _cacheDirectory.Create();
