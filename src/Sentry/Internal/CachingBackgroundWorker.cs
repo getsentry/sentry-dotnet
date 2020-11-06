@@ -73,7 +73,7 @@ namespace Sentry.Internal
         {
             // If over capacity - remove oldest envelope file
             // TODO: probably a good idea to put a lock here to make sure this limit is maintained
-            if (GetEnvelopeFiles().Count() >= 30)
+            while (GetEnvelopeFiles().Count() >= 30)
             {
                 if (TryGetNextEnvelopeFile() is { } oldestEnvelopeFile)
                 {
