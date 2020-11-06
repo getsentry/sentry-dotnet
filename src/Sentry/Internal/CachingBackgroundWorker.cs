@@ -57,6 +57,9 @@ namespace Sentry.Internal
                 {
                     // Don't delete the cache file in case of transient exceptions,
                     // i.e. loss of connection, failure to connect, etc.
+                    // Instead break to not violate the order and wait until
+                    // the next batch to attempt sending again.
+                    break;
                 }
                 catch
                 {
