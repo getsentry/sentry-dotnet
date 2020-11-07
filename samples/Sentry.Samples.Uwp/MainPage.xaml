@@ -25,7 +25,8 @@
         <Button x:Name="Message"
                 Grid.Row="1"
                 HorizontalAlignment="Center"
-                Content="Capute Message"
-                Width="200" Click="Message_Click"/>
+                Content="Capture Message"
+                Width="200"
+                Click="Message_Click"/>
     </StackPanel>
 </Page>

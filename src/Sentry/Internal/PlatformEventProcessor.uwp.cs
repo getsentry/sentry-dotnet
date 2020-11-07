@@ -52,13 +52,27 @@ namespace Sentry.Internal
         {
             if (_uwpContextLoaded)
             {
-                var uwpContext = _uwpContext.Value;
-                @event.Contexts.Device.Family = uwpContext.DeviceFamily;
-                @event.Contexts.Device.Manufacturer = uwpContext.DeviceManufacturer;
-                @event.Contexts.Device.Model = uwpContext.DeviceModel;
-                @event.Contexts.Device.Name = uwpContext.DeviceFriendlyName;
-                @event.Contexts.OperatingSystem.Name = uwpContext.OsName;
-                @event.Contexts.OperatingSystem.Version = uwpContext.OsVersion;
+                try
+                {
+                    var uwpContext = _uwpContext.Value;
+                    @event.Contexts.Device.Family = uwpContext.DeviceFamily;
+                    @event.Contexts.Device.Manufacturer = uwpContext.DeviceManufacturer;
+                    @event.Contexts.Device.Model = uwpContext.DeviceModel;
+                    @event.Contexts.Device.Name = uwpContext.DeviceFriendlyName;
+                    @event.Contexts.OperatingSystem.Name = uwpContext.OsName;
+                    @event.Contexts.OperatingSystem.Version = uwpContext.OsVersion;
+                }
+                catch(Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError("Failed to add UwpPlatformEventProcessor into event.", ex);
+                    //In case of any failure, this process function will be disabled to avoid throwing exceptions for future events.
+                    _uwpContextLoaded = false;
+                    _ = ex;
+                }
+            }
+            else
+            {
+                _options.DiagnosticLogger.LogDebug("UwpPlatformEventProcessor disabled due to previous error.");
             }
             return @event;
         }

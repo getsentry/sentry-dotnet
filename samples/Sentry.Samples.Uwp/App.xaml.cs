@@ -11,7 +11,7 @@ namespace Sentry.Samples.Uwp
     {
         public App()
         {
-            _ = SentrySdk.Init("https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537");
+            _ = SentrySdk.Init(new SentryOptions() { Dsn = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537", Debug = true });
             InitializeComponent();
             Suspending += OnSuspending;
         }
@@ -25,6 +25,7 @@ namespace Sentry.Samples.Uwp
                 rootFrame = new Frame();
                 rootFrame.NavigationFailed += OnNavigationFailed;
                 Window.Current.Content = rootFrame;
+
             }
 
             if (!e.PrelaunchActivated)
