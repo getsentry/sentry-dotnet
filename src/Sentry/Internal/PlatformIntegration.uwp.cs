@@ -1,4 +1,4 @@
-#if WINRT
+#if WINDOWS_UWP
 using System;
 
 namespace Sentry.Internal
@@ -7,7 +7,7 @@ namespace Sentry.Internal
     {
         public void Register(IHub hub, SentryOptions options)
         {
-            throw new NotImplementedException();
+            options.AddEventProcessor(new PlatformEventProcessor(options));
         }
 
         public void Unregister(IHub hub)

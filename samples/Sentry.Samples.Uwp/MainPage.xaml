@@ -1,0 +1,31 @@
+﻿<Page
+    x:Class="Sentry.Samples.Uwp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Sentry.Samples.Uwp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" RequestedTheme="Dark">
+    <Page.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="Black"/>
+            <GradientStop Color="#FF331B3B" Offset="0.352"/>
+        </LinearGradientBrush>
+    </Page.Background>
+
+    <StackPanel VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Spacing="20">
+        <TextBlock Text="Hello Sentry UWP"
+                   FontSize="72"/>
+        <Button Grid.Row="1"
+                HorizontalAlignment="Center"
+                Content="Crash"
+                Width="200" Click="Button_Click"/>
+        <Button x:Name="Message"
+                Grid.Row="1"
+                HorizontalAlignment="Center"
+                Content="Capute Message"
+                Width="200" Click="Message_Click"/>
+    </StackPanel>
+</Page>
