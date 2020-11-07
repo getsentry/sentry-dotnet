@@ -3,6 +3,7 @@
 ## vNext
 
 * Implement envelope caching.
+* Add a list of .NET Frameworks installed when available. (#531) @lucas-zimerman
 
 ## 3.0.0-alpha.4
 

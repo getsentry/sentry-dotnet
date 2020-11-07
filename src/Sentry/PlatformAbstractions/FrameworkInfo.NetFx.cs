@@ -103,7 +103,7 @@ namespace Sentry.PlatformAbstractions
                 if (version != null && versionKey.GetInt("Install") == 1)
                 {
                     // 1.0 to 3.5
-                    Version.TryParse(version, out var parsed);
+                    _ = Version.TryParse(version, out var parsed);
                     yield return new FrameworkInstallation
                     {
                         ShortName = versionKeyName,
@@ -146,7 +146,7 @@ namespace Sentry.PlatformAbstractions
 
             if (version == null)
             {
-                Version.TryParse(subKey.GetString("Version"), out var parsed);
+                _ = Version.TryParse(subKey.GetString("Version"), out var parsed);
                 version = parsed;
             }
 
@@ -174,8 +174,8 @@ namespace Sentry.PlatformAbstractions
 
         internal static Version GetNetFxVersionFromRelease(int release)
         {
-            NetFxReleaseVersionMap.TryGetValue(release, out var version);
-            Version.TryParse(version, out var parsed);
+            _ = NetFxReleaseVersionMap.TryGetValue(release, out var version);
+            _ = Version.TryParse(version, out var parsed);
             return parsed;
         }
     }
