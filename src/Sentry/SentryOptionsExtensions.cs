@@ -6,6 +6,7 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.PlatformAbstractions;
 
 namespace Sentry
 {
@@ -34,6 +35,19 @@ namespace Sentry
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) =>
             options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
+
+#if NETFX
+        /// <summary>
+        /// Disables the list addition of .Net Frameworks into events.
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableNetFxInstallationsIntegration(this SentryOptions options)
+        {
+            options.EventProcessors =
+                options.EventProcessors?.Where(p => p.GetType() != typeof(NetFxInstallationsEventProcessor)).ToArray();
+            options.RemoveIntegration<NetFxInstallationsIntegration>();
+        }
+#endif
 
         /// <summary>
         /// Disables the capture of errors through <see cref="AppDomain.ProcessExit"/>
@@ -188,20 +202,8 @@ namespace Sentry
             {
                 if (options.DiagnosticLogger == null)
                 {
-#if SYSTEM_WEB && DEBUG
-                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse - Hosted under IIS/IIS Express: use System.Diagnostic.Debug instead of System.Console.
-                    if (System.Web.HttpRuntime.AppDomainAppId != null)
-                    {
-                        options.DiagnosticLogger = new DebugDiagnosticLogger(options.DiagnosticsLevel);
-                    }
-                    else
-                    {
-                        options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
-                    }
-#else
                     options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
-#endif
-                    options.DiagnosticLogger?.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
+                    options.DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
                         options.DiagnosticsLevel);
                 }
             }

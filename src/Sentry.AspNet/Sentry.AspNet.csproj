@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <PackageTags>$(PackageTags);AspNet;MVC</PackageTags>
+    <PackageId>Sentry.AspNet</PackageId>
+    <AssemblyName>Sentry.AspNet</AssemblyName>
+    <RootNamespace>Sentry.AspNet</RootNamespace>
+    <Description>Official ASP.NET integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+</Project>

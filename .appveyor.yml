@@ -4,8 +4,6 @@ environment:
   global:
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1" # Used by the dotnet SDK prior to v3.0
     DOTNET_CLI_TELEMETRY_OPTOUT: "1"
-  ZEUS_HOOK_BASE:
-    secure: dcqtt6sxxBV0tDkXmPZOy0iOx17uW6ZfrPOivyLDzHaS9JeWUES653Lly9ZHQm7qZn1qbs4hL4BYaNSrhD5kraY9FXBkwtNmUC9eAxL/n8QtRFJu5uXrkSpewn+UAqbghVXAKCxOhD9WJYG72g+QcqmEBTZiO1RxRJhwsLBR5YY=
   PREVIEW_DOTNET: "5.0.100-preview.8.20417.9"
 branches:
   only:
@@ -17,9 +15,6 @@ install:
   - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
   - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
   - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:PREVIEW_DOTNET)) { .tmp\dotnet-install.ps1 -Version $Env:PREVIEW_DOTNET -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
-  # Push job information to Zeus
-  - npm install -g @zeus-ci/cli
-  - bash scripts\zeus.sh report_pending
 test: off
 build_script:
   - ps: ./build.ps1
@@ -30,13 +25,4 @@ dotnet_csproj:
   package_version: "{version}"
 artifacts:
   - path: '**\*.nupkg'
-on_success:
-  - ps: |
-      $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
-      Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
-      bash codecov.sh -f "**\coverage.xml"
-
-      # Upload *.nupkg files to Zeus
-      bash scripts/zeus.sh upload_artifacts
-on_failure:
-  - bash scripts\zeus.sh report_failed
+  - path: '**\*.snupkg'

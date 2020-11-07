@@ -70,8 +70,7 @@ namespace Sentry.Extensions.Logging
                         if (property.Key == "{OriginalFormat}" && property.Value is string template)
                         {
                             // Original format found, use Sentry logEntry interface
-                            @event.Message = null;
-                            @event.LogEntry = new LogEntry
+                            @event.Message = new SentryMessage
                             {
                                 Formatted = message,
                                 Message = template

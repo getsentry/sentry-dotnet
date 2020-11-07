@@ -109,7 +109,7 @@ namespace Sentry.Samples.NLog
 
                     // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If
                     // nothing is found, SDK is disabled.
-                    o.Dsn = new Dsn(DsnSample);
+                    o.Dsn = DsnSample;
 
                     o.AttachStacktrace = true;
                     o.SendDefaultPii = true; // Send Personal Identifiable information like the username of the user logged in to the device

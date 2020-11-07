@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">The services.</param>
         /// <returns></returns>
-        public static IServiceCollection AddSentry(this IServiceCollection services)
+        public static ISentryBuilder AddSentry(this IServiceCollection services)
         {
             _ = services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
             services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             _ = services.AddSentry<SentryAspNetCoreOptions>();
 
-            return services;
+            return new SentryAspNetCoreBuilder(services);
         }
     }
 }

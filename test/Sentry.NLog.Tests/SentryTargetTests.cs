@@ -26,7 +26,7 @@ namespace Sentry.NLog.Tests
 
         private class Fixture
         {
-            public SentryNLogOptions Options { get; set; } = new SentryNLogOptions { Dsn = Valid };
+            public SentryNLogOptions Options { get; set; } = new SentryNLogOptions { Dsn = ValidDsnWithSecret };
 
             public IHub Hub { get; set; } = Substitute.For<IHub>();
 
@@ -287,7 +287,7 @@ namespace Sentry.NLog.Tests
             manager.GetLogger("sentry").Log(evt);
 
             _ = _fixture.Hub.Received(1)
-                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.LogEntry.Formatted == expected));
+                        .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Formatted == expected));
         }
 
         [Fact]
@@ -385,8 +385,8 @@ namespace Sentry.NLog.Tests
             sut.Error(expectedMessage, param);
 
             _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
-                    p.LogEntry.Formatted == $"Test {param} log"
-                    && p.LogEntry.Message == expectedMessage));
+                    p.Message.Formatted == $"Test {param} log"
+                    && p.Message.Message == expectedMessage));
         }
 
         [Fact]
@@ -521,7 +521,7 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Dsn_ReturnsDsnFromOptions_Instance()
         {
-            var expectedDsn = new Dsn("https://a@sentry.io/1");
+            var expectedDsn = "https://a@sentry.io/1";
             _fixture.Options.Dsn = expectedDsn;
             var target = (SentryTarget)_fixture.GetTarget();
             Assert.Equal(expectedDsn.ToString(), target.Options.Dsn.ToString());
@@ -530,7 +530,7 @@ namespace Sentry.NLog.Tests
         [Fact]
         public void Dsn_SupportsNLogLayout_Lookup()
         {
-            var expectedDsn = new Dsn("https://a@sentry.io/1");
+            var expectedDsn = "https://a@sentry.io/1";
             var target = (SentryTarget)_fixture.GetTarget();
             target.Dsn = "${var:mydsn}";
             var logFactory = new LogFactory();

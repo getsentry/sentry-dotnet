@@ -87,8 +87,7 @@ namespace Sentry.Serilog
                 var evt = new SentryEvent(exception)
                 {
                     Logger = context,
-                    Message = null,
-                    LogEntry = new LogEntry
+                    Message = new SentryMessage
                     {
                         Formatted = formatted,
                         Message = template

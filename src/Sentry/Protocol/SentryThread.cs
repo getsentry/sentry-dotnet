@@ -5,7 +5,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// A thread running at the time of an event.
     /// </summary>
-    /// <see href="https://docs.sentry.io/clientdev/interfaces/threads/"/>
+    /// <see href="https://develop.sentry.dev/sdk/event-payloads/threads/"/>
     [DataContract]
     public class SentryThread
     {
@@ -36,7 +36,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Stack trace.
         /// </summary>
-        /// <see href="https://docs.sentry.io/clientdev/interfaces/stacktrace/"/>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
         [DataMember(Name = "stacktrace", EmitDefaultValue = false)]
         public SentryStackTrace? Stacktrace { get; set; }
     }

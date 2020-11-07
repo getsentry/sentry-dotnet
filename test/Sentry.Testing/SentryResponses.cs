@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using Sentry.Internal.Http;
+using Sentry.Internal;
 
 namespace Sentry.Testing
 {
@@ -13,7 +13,6 @@ namespace Sentry.Testing
         public static Guid ResponseId => new Guid(ResponseIdString);
 
         public static HttpContent GetOkContent() => new StringContent(SentryOkResponseBody);
-        public static HttpContent GetBadGatewayContent() => new StringContent(string.Empty);
 
         public static HttpResponseMessage GetOkResponse()
             => new HttpResponseMessage(HttpStatusCode.OK)
@@ -23,17 +22,16 @@ namespace Sentry.Testing
 
         public static HttpResponseMessage GetErrorResponse(HttpStatusCode code, string errorMessage)
         {
-            var response = new HttpResponseMessage(code)
+            var responseContent = Json.Serialize(new {detail = errorMessage});
+            return new HttpResponseMessage(code) {Content = new StringContent(responseContent)};
+        }
+
+        public static HttpResponseMessage GetRateLimitResponse(string rateLimitHeaderValue)
+        {
+            return new HttpResponseMessage((HttpStatusCode)429)
             {
-                Content = GetBadGatewayContent()
+                Headers = {{"X-Sentry-Rate-Limits", rateLimitHeaderValue}}
             };
-
-            if (errorMessage != null)
-            {
-                response.Headers.Add(SentryHeaders.SentryErrorHeader, errorMessage);
-            }
-
-            return response;
         }
     }
 }

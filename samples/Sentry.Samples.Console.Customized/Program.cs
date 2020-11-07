@@ -96,14 +96,14 @@ internal static class Program
             o.HttpProxy = null; //new WebProxy("https://localhost:3128");
 
             // Example customizing the HttpClientHandlers created
-            o.CreateHttpClientHandler = dsn => new HttpClientHandler
+            o.CreateHttpClientHandler = () => new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
                     !certificate.Archived
             };
 
             // Access to the HttpClient created to serve the SentryClint
-            o.ConfigureClient = (client, dsn) =>
+            o.ConfigureClient = client =>
             {
                 client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
             };
@@ -142,7 +142,14 @@ internal static class Program
                 SentrySdk.CaptureMessage("Fatal message!");
             });
 
-            SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
+            var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
+
+            // Send an user feedback linked to the warning.
+            var timestamp = DateTime.Now.Ticks;
+            var user = $"user{timestamp}";
+            var email = $"user{timestamp}@user{timestamp}.com";
+
+            SentrySdk.CaptureUserFeedback(new UserFeedback(eventId, email, "this is a sample user feedback", user));
 
             var error = new Exception("Attempting to send this multiple times");
 
@@ -161,7 +168,7 @@ internal static class Program
                 const string msg = "{0} of {1} items we'll wait to flush to Sentry!";
                 SentrySdk.CaptureEvent(new SentryEvent
                 {
-                    LogEntry = new LogEntry
+                    Message = new SentryMessage
                     {
                         Message = msg,
                         Formatted = string.Format(msg, i, count)
@@ -178,7 +185,7 @@ internal static class Program
             // would get disposed by the container on app shutdown
 
             var evt = new SentryEvent();
-            evt.Message ="Starting new client";
+            evt.Message = "Starting new client";
             evt.AddBreadcrumb("Breadcrumb directly to the event");
             evt.User.Username = "some@user";
             // Group all events with the following fingerprint:
@@ -187,8 +194,7 @@ internal static class Program
             SentrySdk.CaptureEvent(evt);
 
             // Using a different DSN:
-            var adminDsn = new Dsn(AdminDsn);
-            using (var adminClient = new SentryClient(new SentryOptions { Dsn = adminDsn }))
+            using (var adminClient = new SentryClient(new SentryOptions { Dsn = AdminDsn }))
             {
                 // Make believe web framework middleware
                 var middleware = new AdminPartMiddleware(adminClient, null);

@@ -9,9 +9,6 @@ using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Protocol;
-#if SYSTEM_WEB
-using Sentry.Internal.Web;
-#endif
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
 
@@ -84,7 +81,7 @@ namespace Sentry
         /// <example>
         /// 'System.CustomNamespace', 'Microsoft.Azure.App'
         /// </example>
-        /// <seealso href="https://docs.sentry.io/error-reporting/configuration/?platform=csharp#in-app-include"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/options/#in-app-include"/>
         internal string[]? InAppInclude { get; set; }
 
         /// <summary>
@@ -145,7 +142,7 @@ namespace Sentry
         /// <example>
         /// 0.1 = 10% of events are sent
         /// </example>
-        /// <see href="https://docs.sentry.io/clientdev/features/#event-sampling"/>
+        /// <see href="https://develop.sentry.dev/sdk/features/#event-sampling"/>
         private float? _sampleRate;
 
         /// <summary>
@@ -184,7 +181,7 @@ namespace Sentry
         /// default values for new projects, they are not considered valid by the discovery process.
         /// </para>
         /// </remarks>
-        /// <seealso href="https://docs.sentry.io/learn/releases/"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
         public string? Release { get; set; }
 
         /// <summary>
@@ -198,13 +195,13 @@ namespace Sentry
         /// <example>
         /// Production, Staging
         /// </example>
-        /// <seealso href="https://docs.sentry.io/learn/environments/"/>
+        /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/environments/"/>
         public string? Environment { get; set; }
 
         /// <summary>
         /// The Data Source Name of a given project in Sentry.
         /// </summary>
-        public Dsn? Dsn { get; set; }
+        public string? Dsn { get; set; }
 
         /// <summary>
         /// A callback to invoke before sending an event to Sentry
@@ -214,7 +211,7 @@ namespace Sentry
         /// a chance to inspect and/or modify the event before it's sent. If the event
         /// should not be sent at all, return null from the callback.
         /// </remarks>
-        public Func<SentryEvent, SentryEvent>? BeforeSend { get; set; }
+        public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
 
         /// <summary>
         /// A callback invoked when a breadcrumb is about to be stored.
@@ -222,7 +219,7 @@ namespace Sentry
         /// <remarks>
         /// Gives a chance to inspect and modify/reject a breadcrumb.
         /// </remarks>
-        public Func<Breadcrumb, Breadcrumb>? BeforeBreadcrumb { get; set; }
+        public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
 
         private int _maxQueueItems = 30;
 
@@ -291,24 +288,14 @@ namespace Sentry
         public IWebProxy? HttpProxy { get; set; }
 
         /// <summary>
-        /// A callback invoked when a <see cref="SentryClient"/> is created.
-        /// </summary>
-        /// <remarks>
-        /// This callback is invoked once configuration has been applied to the inner most <see cref="HttpClientHandler"/>.
-        /// </remarks>
-        [Obsolete("Please use '" + nameof(CreateHttpClientHandler) + "' instead. " +
-                  "You can create an instance of '" + nameof(HttpClientHandler) + "' and modify it at once.")]
-        public Action<HttpClientHandler, Dsn>? ConfigureHandler { get; set; }
-
-        /// <summary>
         /// Creates the inner most <see cref="HttpClientHandler"/>.
         /// </summary>
-        public Func<Dsn, HttpClientHandler>? CreateHttpClientHandler { get; set; }
+        public Func<HttpClientHandler>? CreateHttpClientHandler { get; set; }
 
         /// <summary>
         /// A callback invoked when a <see cref="SentryClient"/> is created.
         /// </summary>
-        public Action<HttpClient, Dsn>? ConfigureClient { get; set; }
+        public Action<HttpClient>? ConfigureClient { get; set; }
 
         private volatile bool _debug;
 
@@ -373,17 +360,6 @@ namespace Sentry
         /// </remarks>
         public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
 
-#if SYSTEM_WEB
-        /// <summary>
-        /// Max request body to be captured when a Web request exists on a ASP.NET Application.
-        /// </summary>
-        /// <remarks>
-        /// This configuration is visible to any .NET Framework application but is only relevant when running ASP.NET.
-        /// When set to a value other than 'None', the body from `HttpContext.Current.Request` is read when available.
-        /// </remarks>
-        public RequestSize MaxRequestBodySize { get; set; }
-#endif
-
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
@@ -412,20 +388,6 @@ namespace Sentry
                     new MainSentryEventProcessor(this, _sentryStackTraceFactoryAccessor),
             };
 
-#if SYSTEM_WEB
-            EventProcessors = EventProcessors.Concat(new ISentryEventProcessor[] {
-                new SystemWebRequestEventProcessor(
-                    new RequestBodyExtractionDispatcher(
-                        new IRequestPayloadExtractor[]
-                        {
-                                new FormRequestPayloadExtractor(),
-                                new DefaultRequestPayloadExtractor()
-                        },
-                        this,
-                        () => MaxRequestBodySize),
-                    this) }).ToArray();
-#endif
-
             ExceptionProcessors = new ISentryEventExceptionProcessor[] {
                 new MainExceptionProcessor(this, _sentryStackTraceFactoryAccessor)
             };
@@ -433,6 +395,9 @@ namespace Sentry
             Integrations = new ISdkIntegration[] {
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
+#if NETFX
+                new NetFxInstallationsIntegration(),
+#endif
             };
 
             InAppExclude = new[] {
@@ -447,6 +412,32 @@ namespace Sentry
                     "Serilog",
                     "Giraffe.",
                     "NLog",
+                    "Npgsql",
+                    "RabbitMQ",
+                    "Hangfire",
+                    "IdentityServer4",
+                    "AWSSDK",
+                    "Polly",
+                    "Swashbuckle",
+                    "FluentValidation",
+                    "Autofac",
+                    "Stackexchange.Redis",
+                    "Dapper",
+                    "RestSharp",
+                    "SkiaSharp",
+                    "IdentityModel",
+                    "SqlitePclRaw",
+                    "Xamarin",
+                    "Google.",
+                    "MongoDB.",
+                    "Remotion.Linq",
+                    "AutoMapper",
+                    "Nest",
+                    "Owin",
+                    "MediatR",
+                    "ICSharpCode",
+                    "Grpc",
+                    "ServiceStack"
             };
 
             InAppInclude = Array.Empty<string>();

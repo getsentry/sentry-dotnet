@@ -12,7 +12,7 @@ namespace Sentry.Protocol
     /// It carries additional information about the way the exception was created on the target system.
     /// This includes general exception values obtained from operating system or runtime APIs, as well as mechanism-specific values.
     /// </remarks>
-    /// <see href="https://docs.sentry.io/clientdev/interfaces/mechanism/"/>
+    /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception/#exception-mechanism"/>
     [DataContract]
     public class Mechanism
     {
@@ -70,7 +70,7 @@ namespace Sentry.Protocol
         /// SDKs can safely omit code names and descriptions for well known error codes, as it will be filled out by Sentry.
         /// For proprietary or vendor-specific error codes, adding these values will give additional information to the user.
         /// </remarks>
-        /// <see href="https://docs.sentry.io/clientdev/interfaces/mechanism/#meta-information"/>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception/#meta-information"/>
         public IDictionary<string, object> Meta => InternalMeta ??= new Dictionary<string, object>();
 
         /// <summary>

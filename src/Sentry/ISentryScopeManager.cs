@@ -23,7 +23,7 @@ namespace Sentry
         /// </summary>
         /// <param name="configureScope">The configure scope.</param>
         /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
-        Task ConfigureScopeAsync(Func<Scope, Task> configureScope);
+        ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope);
 
         /// <summary>
         /// Binds the client to the current scope.
@@ -52,7 +52,7 @@ namespace Sentry
         /// <remarks>
         /// Pushes a new scope, runs the callback, pops the scope.
         /// </remarks>
-        /// <see href="https://docs.sentry.io/learn/scopes/?platform=csharp#local-scopes"/>
+        /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
         /// <param name="scopeCallback">The callback to run with the one time scope.</param>
         void WithScope(Action<Scope> scopeCallback);
     }
