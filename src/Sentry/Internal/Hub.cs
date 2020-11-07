@@ -117,6 +117,24 @@ namespace Sentry.Internal
             }
         }
 
+        internal SentryEvent? PrepareEvent(SentryEvent evt, Scope? scope = null)
+        {
+            try
+            {
+                var currentScope = ScopeManager.GetCurrent();
+                var actualScope = scope ?? currentScope.Key;
+                if (currentScope.Value is SentryClient c)
+                {
+                    return c.PrepareEvent(evt, actualScope);
+                }
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
+            }
+            return null;
+        }
+
         public void CaptureUserFeedback(UserFeedback userFeedback)
         {
             try

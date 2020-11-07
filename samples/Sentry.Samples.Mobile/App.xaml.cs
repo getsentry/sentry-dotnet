@@ -9,8 +9,8 @@ namespace Sentry.Samples.Mobile
         {
             _ = SentrySdk.Init(o =>
             {
-                  o.Debug = false;
-                  o.Dsn = new Dsn("https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537");
+                  o.Debug = true;
+                  o.Dsn = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537";
             });
 
             InitializeComponent();

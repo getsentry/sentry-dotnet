@@ -20,7 +20,6 @@ namespace Sentry.Internal
         private volatile bool _disposed;
         private int _currentItems;
 
-        internal ITransport _transport;
         private event EventHandler? OnFlushObjectReceived;
 
         internal Task WorkerTask { get; }

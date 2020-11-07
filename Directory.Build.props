@@ -9,6 +9,11 @@
     <Features>strict</Features>
   </PropertyGroup>
 
+  <!-- Xamarin deps are not signed -->
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net'))">
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Roslynator.Analyzers" Version="3.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />

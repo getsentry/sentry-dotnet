@@ -148,16 +148,8 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            if (Worker.EnqueueEvent(processedEvent))
-            {
-                _options.DiagnosticLogger?.LogDebug("Event queued up.");
-                return processedEvent.EventId;
-            }
-
-            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
-                Worker.QueuedItems);
-
-            return SentryId.Empty;
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent)) ?
+                processedEvent.EventId : SentryId.Empty;
         }
 
         internal SentryEvent? PrepareEvent(SentryEvent @event, Scope? scope)
@@ -215,11 +207,7 @@ namespace Sentry
                 return null;
             }
 
-<<<<<<< HEAD
             return processedEvent;
-=======
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent)) ?
-                processedEvent.EventId : SentryId.Empty;
         }
 
         /// <summary>
@@ -238,7 +226,6 @@ namespace Sentry
             _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
                 Worker.QueuedItems);
             return false;
->>>>>>> main
         }
 
         private SentryEvent? BeforeSend(SentryEvent? @event)
