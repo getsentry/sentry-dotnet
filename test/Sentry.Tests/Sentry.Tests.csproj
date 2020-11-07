@@ -21,8 +21,4 @@
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Internals\MonoSentryStackTraceFactoryTests.samples.cs" />
-  </ItemGroup>
-
 </Project>

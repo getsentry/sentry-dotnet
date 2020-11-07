@@ -9,7 +9,7 @@ namespace Sentry.Internal
     /// <summary>
     /// Mono factory to <see cref="SentryStackTrace" /> from an <see cref="Exception" />.
     /// </summary>
-    public class MonoSentryStackTraceFactory : SentryStackTraceFactory
+    internal class MonoSentryStackTraceFactory : SentryStackTraceFactory
     {
         private readonly SentryOptions _options;
 
