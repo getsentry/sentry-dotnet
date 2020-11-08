@@ -59,16 +59,6 @@ namespace Sentry.Internal
                     InstructionOffset = f.Offset != 0 ? f.Offset : (long?)null,
                     Function = f.MethodSignature,
                     LineNumber = GetLineNumber(f.Line),
-
-                    // The following properties are not supported by the server and get dropped.
-                    // For that reason, misusing the ContextLine to transport the data to Sentry to test things out.
-                    // ContextLine = $"MVID:{f.Mvid}-AOTID:{f.Aotid}-MethodIndex:0x{f.MethodIndex:x4}-IsILOffset:{f.IsILOffset}-Offset:{f.Offset}-Line:{f.Line}",
-
-                    // Platform = "mono", // needs to be agreed with the backend
-                    // ModuleVersionId = f.Mvid,
-                    // AotId = f.Aotid,
-                    // MethodIndex = f.MethodIndex.ToString("x4"),
-                    // IsILOffset = f.IsILOffset,
                 }).Reverse().ToArray()
             };
 
