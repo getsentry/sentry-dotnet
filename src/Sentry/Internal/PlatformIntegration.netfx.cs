@@ -7,12 +7,10 @@ namespace Sentry.Internal
     {
         public void Register(IHub hub, SentryOptions options)
         {
-            throw new NotImplementedException();
         }
 
         public void Unregister(IHub hub)
         {
-            throw new NotImplementedException();
         }
     }
 }

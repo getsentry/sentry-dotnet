@@ -119,13 +119,16 @@
     <Compile Include="AboutPage.xaml.cs">
       <DependentUpon>AboutPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Action.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UiThreadHellper.cs" />
     <Compile Include="UserFeedbackDialog.xaml.cs">
       <DependentUpon>UserFeedbackDialog.xaml</DependentUpon>
     </Compile>
@@ -136,6 +139,13 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\bulboff.png" />
+    <Content Include="Assets\bulbon.png" />
+    <Content Include="Assets\cooker.png" />
+    <Content Include="Assets\crack.png" />
+    <Content Include="Assets\explosion.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

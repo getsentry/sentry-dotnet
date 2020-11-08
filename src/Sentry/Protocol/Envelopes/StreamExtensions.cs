@@ -1,3 +1,4 @@
+#if WINDOWS_UWP
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,3 +27,4 @@ namespace Sentry.Protocol.Envelopes
         }
     }
 }
+#endif
