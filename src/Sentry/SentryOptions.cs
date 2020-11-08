@@ -8,9 +8,11 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.PlatformAbstractions;
 using Sentry.Protocol;
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry
 {
@@ -373,7 +375,11 @@ namespace Sentry
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
-            SentryStackTraceFactory = new SentryStackTraceFactory(this);
+            SentryStackTraceFactory = Runtime.Current.IsMono()
+                // Also true for IL2CPP
+                ? new MonoSentryStackTraceFactory(this)
+                : new SentryStackTraceFactory(this);
+
             _sentryStackTraceFactoryAccessor = () => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
@@ -390,10 +396,14 @@ namespace Sentry
                 new PlatformIntegration(),
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
+#if NETFX
+                new NetFxInstallationsIntegration(),
+#endif
             };
 
             InAppExclude = new[] {
                     "System.",
+                    "Mono.",
                     "Sentry.",
                     "Microsoft.",
                     "MS", // MS.Win32, MS.Internal, etc: Desktop apps

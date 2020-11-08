@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Version>3.0.0-alpha.4</Version>
     <LangVersion>latest</LangVersion>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <Deterministic>True</Deterministic>
+    <Deterministic>true</Deterministic>
     <Features>strict</Features>
   </PropertyGroup>
 

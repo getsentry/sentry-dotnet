@@ -1,5 +1,11 @@
 # Changelog
 
+## unreleased
+
+* Add a list of .NET Frameworks installed when available. (#531) @lucas-zimerman
+* Parse Mono and IL2CPP stacktraces for Unity and Xamarin (#578) @bruno-garcia
+* Update TFMs and dependency min version (#580) @bruno-garcia
+
 ## 3.0.0-alpha.4
 
 * Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman

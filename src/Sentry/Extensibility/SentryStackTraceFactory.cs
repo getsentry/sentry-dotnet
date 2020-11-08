@@ -25,7 +25,7 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="exception">The exception to create the stacktrace from.</param>
         /// <returns>A Sentry stack trace.</returns>
-        public SentryStackTrace? Create(Exception? exception = null)
+        public virtual SentryStackTrace? Create(Exception? exception = null)
         {
             var isCurrentStackTrace = exception == null && _options.AttachStacktrace;
 

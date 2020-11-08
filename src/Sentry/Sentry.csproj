@@ -10,14 +10,15 @@
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
+    <DefineConstants>HAS_VALUE_TUPLE;NETSTANDARD;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
     <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
-    <DefineConstants>NETSTANDARD;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
-
+   
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>NETFX;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
