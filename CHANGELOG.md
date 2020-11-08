@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+* Add support for UWP projects (Xbox, Windows 10/Mobile,... ) (#560) @lucas-zimerman
+
 ## 3.0.0-alpha.4
 
 * Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman
