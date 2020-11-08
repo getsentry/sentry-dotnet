@@ -3,29 +3,21 @@ using System;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Security;
-using Sentry.Extensibility;
 using Sentry.Protocol;
 using Windows.UI.Xaml;
 
 namespace Sentry.Internal
 {
-    internal class Logger : IDiagnosticLogger
-    {
-        public bool IsEnabled(SentryLevel level) => true;
-
-        public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
-        {
-            global::System.Diagnostics.Debug.WriteLine($"Sentry UWP Logger - {logLevel} {message} {exception?.Message}");
-        }
-    }
     internal class PlatformIntegration : IInternalSdkIntegration
     {
         private SentryOptions _options;
+        private IHub? _hub;
+
         public void Register(IHub hub, SentryOptions options)
         {
             _options = options;
+            _hub = hub;
             //Sentry default Logger doesn't work with UWP.
-            options.DiagnosticLogger = new Logger();
             options.AddEventProcessor(new PlatformEventProcessor(options));
             var uwpApplication = Application.Current;
             uwpApplication.UnhandledException += Handle;
@@ -35,6 +27,7 @@ namespace Sentry.Internal
         public void Unregister(IHub hub)
         {
             _options.EventProcessors = _options.EventProcessors?.Where(p => p.GetType() != typeof(PlatformEventProcessor)).ToArray();
+            _hub = null;
             var uwpApplication = Application.Current;
             uwpApplication.UnhandledException -= Handle;
         }
@@ -52,9 +45,7 @@ namespace Sentry.Internal
                 _ = SentrySdk.CaptureException(exception);
                 if (!e.Handled)
                 {
-                    // App might crash so make sure we flush this event.
-                    SentrySdk.FlushAsync(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
-                    SentrySdk.Close();
+                    (_hub as IDisposable)?.Dispose();
                 }
             }
         }

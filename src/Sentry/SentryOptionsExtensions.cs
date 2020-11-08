@@ -188,8 +188,8 @@ namespace Sentry
             {
                 if (options.DiagnosticLogger == null)
                 {
-                    options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
-                    options.DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
+                    options.DiagnosticLogger = DefaultDiagnosticLogger.Get(options.DiagnosticsLevel);
+                    options.DiagnosticLogger.LogDebug($"Logging enabled with {options.DiagnosticLogger.GetType()} and min level: {0}",
                         options.DiagnosticsLevel);
                 }
             }

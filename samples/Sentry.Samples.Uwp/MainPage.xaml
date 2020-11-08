@@ -23,10 +23,14 @@
                 Content="Crash"
                 Width="200" Click="Button_Click"/>
         <Button x:Name="Message"
-                Grid.Row="1"
                 HorizontalAlignment="Center"
                 Content="Capture Message"
                 Width="200"
                 Click="Message_Click"/>
+        <Button x:Name="Navigation"
+                HorizontalAlignment="Center"
+                Content="About"
+                Width="200"
+                Click="Navigation_Click"/>
     </StackPanel>
 </Page>
