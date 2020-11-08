@@ -24,12 +24,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{9D7E2F87
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		.travis.yml = .travis.yml
-		after.Sentry.sln.targets = after.Sentry.sln.targets
 		build.ps1 = build.ps1
 		build.sh = build.sh
 		CHANGELOG.md = CHANGELOG.md
 		Directory.Build.props = Directory.Build.props
-		Directory.Build.targets = Directory.Build.targets
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -96,14 +94,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{3454831A-397C-4039-AAFC-9152A4E0B682}"
 	ProjectSection(SolutionItems) = preProject
 		scripts\bump-version.sh = scripts\bump-version.sh
-		scripts\zeus.sh = scripts\zeus.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F267BFB9-C5D5-4018-9D3F-B55443702AEC}"
 	ProjectSection(SolutionItems) = preProject
 		.github\CODEOWNERS = .github\CODEOWNERS
 		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
-		.github\release-drafter.yml = .github\release-drafter.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E1800E08-72E6-45AE-91EC-69B4FDBA7555}"
