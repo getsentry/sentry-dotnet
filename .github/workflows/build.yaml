@@ -54,5 +54,5 @@ jobs:
           with:
             name: ${{ github.sha }}
             path: |
-              ${{ github.workspace }}/**/*.snupkg
-              ${{ github.workspace }}/**/*.nupkg
+              ${{ github.workspace }}/src/**/Release/*.snupkg
+              ${{ github.workspace }}/src/**/Release/*.nupkg
