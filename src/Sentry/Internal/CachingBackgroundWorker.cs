@@ -12,24 +12,24 @@ namespace Sentry.Internal
     internal class CachingBackgroundWorker : BackgroundWorkerBase
     {
         private const string EnvelopeFileExt = "envelope";
-        private readonly DirectoryInfo _cacheDirectory;
+        private readonly string _cacheDirectoryPath;
 
         public CachingBackgroundWorker(ITransport transport, SentryOptions options)
             : base(transport, options)
         {
-            _cacheDirectory = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
-                ? _cacheDirectory = new DirectoryInfo(options.CacheDirectoryPath)
+            _cacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
+                ? _cacheDirectoryPath = options.CacheDirectoryPath
                 : throw new InvalidOperationException("Cache directory is not set.");
         }
 
-        private IEnumerable<FileInfo> GetEnvelopeFiles() =>
-            _cacheDirectory.Exists
-                ? _cacheDirectory.EnumerateFiles($"*.{EnvelopeFileExt}")
-                : Enumerable.Empty<FileInfo>();
+        private IEnumerable<string> GetEnvelopeFilePaths() =>
+            Directory.Exists(_cacheDirectoryPath)
+                ? Directory.EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                : Enumerable.Empty<string>();
 
-        private FileInfo? TryGetNextEnvelopeFile() =>
-            GetEnvelopeFiles()
-                .OrderBy(f => f.CreationTimeUtc)
+        private string? TryGetNextEnvelopeFilePath() =>
+            GetEnvelopeFilePaths()
+                .OrderBy(f => new FileInfo(f).CreationTimeUtc)
                 .FirstOrDefault();
 
         private async ValueTask FlushCacheAsync(
@@ -37,15 +37,15 @@ namespace Sentry.Internal
         {
             Options.DiagnosticLogger?.LogDebug("Flushing cached envelopes.");
 
-            while (TryGetNextEnvelopeFile() is { } envelopeFile)
+            while (TryGetNextEnvelopeFilePath() is { } envelopeFilePath)
             {
                 Options.DiagnosticLogger?.LogDebug(
                     "Reading cached envelope: {0}",
-                    envelopeFile.FullName
+                    envelopeFilePath
                 );
 
                 using var envelope = await Envelope.DeserializeAsync(
-                    envelopeFile.OpenRead(),
+                    File.OpenRead(envelopeFilePath),
                     cancellationToken
                 ).ConfigureAwait(false);
 
@@ -58,13 +58,13 @@ namespace Sentry.Internal
                 {
                     await Transport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
 
-                    // Delete the cache file in case of success
-                    envelopeFile.Delete();
-
                     Options.DiagnosticLogger?.LogDebug(
                         "Successfully sent cached envelope: {0}",
                         envelope.TryGetEventId()
                     );
+
+                    // Delete the cache file in case of success
+                    File.Delete(envelopeFilePath);
                 }
                 catch (IOException ex)
                 {
@@ -84,7 +84,7 @@ namespace Sentry.Internal
                 {
                     // Delete the cache file for all other exceptions that could
                     // indicate a successfully completed, but error response.
-                    envelopeFile.Delete();
+                    File.Delete(envelopeFilePath);
 
                     Options.DiagnosticLogger?.LogError(
                         "Persistent failure when sending cached envelope: {0}",
@@ -101,11 +101,11 @@ namespace Sentry.Internal
         {
             // If over capacity - remove oldest envelope file
             // TODO: probably a good idea to put a lock here to make sure this limit is maintained
-            while (GetEnvelopeFiles().Count() >= 30)
+            while (GetEnvelopeFilePaths().Count() >= Options.MaxQueueItems)
             {
-                if (TryGetNextEnvelopeFile() is { } oldestEnvelopeFile)
+                if (TryGetNextEnvelopeFilePath() is { } oldestEnvelopeFilePath)
                 {
-                    oldestEnvelopeFile.Delete();
+                    File.Delete(oldestEnvelopeFilePath);
                 }
             }
 
@@ -115,21 +115,22 @@ namespace Sentry.Internal
             // (depending on whether event ID is present or not)
             var envelopeFile = new FileInfo(
                 Path.Combine(
-                    _cacheDirectory.FullName,
+                    _cacheDirectoryPath,
                     $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" +
                     $"{envelope.TryGetEventId()}_" +
                     $"{envelope.GetHashCode()}" +
                     $".{EnvelopeFileExt}")
             );
 
-            if (!_cacheDirectory.Exists)
+            if (!Directory.Exists(_cacheDirectoryPath))
             {
                 Options.DiagnosticLogger?.LogDebug(
                     "Provided cache directory does not exist. Creating it."
                 );
+
+                Directory.CreateDirectory(_cacheDirectoryPath);
             }
 
-            _cacheDirectory.Create();
             using var stream = envelopeFile.Create();
             await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
 
