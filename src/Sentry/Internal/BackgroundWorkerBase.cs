@@ -154,10 +154,6 @@ namespace Sentry.Internal
                 Options.DiagnosticLogger?.LogFatal("Exception in the background worker.", e);
                 throw;
             }
-            finally
-            {
-                _queuedEnvelopeSemaphore.Dispose();
-            }
         }
 
         public void Shutdown() => _shutdownSource.Cancel();
@@ -296,10 +292,13 @@ namespace Sentry.Internal
             {
                 if (_queue.Count > 0)
                 {
-                    Options.DiagnosticLogger?.LogWarning("Worker stopped while {0} were still in the queue.",
-                        _queue.Count);
+                    Options.DiagnosticLogger?.LogWarning(
+                        "Worker stopped while {0} were still in the queue.",
+                        _queue.Count
+                    );
                 }
 
+                _queuedEnvelopeSemaphore.Dispose();
                 _shutdownSource.Dispose();
             }
         }
