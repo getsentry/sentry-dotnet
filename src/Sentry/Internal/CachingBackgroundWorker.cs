@@ -122,6 +122,13 @@ namespace Sentry.Internal
                     $".{EnvelopeFileExt}")
             );
 
+            if (!_cacheDirectory.Exists)
+            {
+                Options.DiagnosticLogger?.LogDebug(
+                    "Provided cache directory does not exist. Creating it."
+                );
+            }
+
             _cacheDirectory.Create();
             using var stream = envelopeFile.Create();
             await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);

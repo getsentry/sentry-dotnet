@@ -240,7 +240,7 @@ namespace Sentry.Tests.Internals
             isQueued.Should().BeTrue();
             logger.Entries.Should().Contain(e =>
                 e.Level == SentryLevel.Error &&
-                e.Message == "Error while processing event {1}: {0}. #{2} in queue."
+                e.Message == "Error while processing event {0}. #{1} in queue."
             );
         }
 
