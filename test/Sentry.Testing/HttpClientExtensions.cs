@@ -31,25 +31,6 @@ namespace Sentry
         {
             var clone = new HttpRequestMessage(source.Method, source.RequestUri) {Version = source.Version};
 
-            // Properties
-            foreach (var prop in source.
-#if NET5_0
-                Options
-#else
-                Properties
-#endif
-            )
-            {
-                clone.
-#if NET5_0
-                // No idea what I'm doing here but since this is test code:
-                Options.Set(new HttpRequestOptionsKey<string>(prop.Key), prop.Value.ToString());
-#else
-                Properties.Add(prop);
-#endif
-
-            }
-
             // Headers
             foreach (var (key, value) in source.Headers)
             {
