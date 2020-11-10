@@ -31,12 +31,6 @@ namespace Sentry
         {
             var clone = new HttpRequestMessage(source.Method, source.RequestUri) {Version = source.Version};
 
-            // Properties
-            foreach (var prop in source.Properties)
-            {
-                clone.Properties.Add(prop);
-            }
-
             // Headers
             foreach (var (key, value) in source.Headers)
             {
