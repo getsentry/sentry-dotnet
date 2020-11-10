@@ -17,7 +17,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
     <DefineConstants>HAS_VALUE_TUPLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
-
    
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>NETFX;$(AdditionalConstants)</DefineConstants>
@@ -45,9 +44,8 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('uap10'))">
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.10" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
   </ItemGroup>

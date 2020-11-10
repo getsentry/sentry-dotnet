@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 using Windows.Storage.Streams;
@@ -8,7 +7,6 @@ using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace Sentry.Samples.Uwp
@@ -98,7 +96,6 @@ namespace Sentry.Samples.Uwp
             });
             await Task.Delay(300);
             throw new InternalBufferOverflowException("Failed to handle explosion");
-            ;
         }
 
         private static async Task<Tuple<IRandomAccessStream, string>> LoadStreamAsync()
@@ -112,10 +109,7 @@ namespace Sentry.Samples.Uwp
         internal static async Task ExplodeSoundAsync(MediaElement mysong)
         {
             await UiThreadHelper.RunAsync(CoreDispatcherPriority.Normal,
-            () =>
-            {
-                mysong.Play();
-            });
+            () => mysong.Play());
         }
     }
 }

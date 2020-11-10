@@ -8,14 +8,14 @@
 
   <Identity
     Name="02cc31d0-dfec-4b01-96c7-b100fd5f41b3"
-    Publisher="CN=lucas"
+    Publisher="CN=io.sentry.samples.uwp"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="02cc31d0-dfec-4b01-96c7-b100fd5f41b3" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Sentry.Samples.Uwp</DisplayName>
-    <PublisherDisplayName>lucas</PublisherDisplayName>
+    <PublisherDisplayName>Sentry.Samples.Uwp</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

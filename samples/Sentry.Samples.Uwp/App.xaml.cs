@@ -11,7 +11,7 @@ namespace Sentry.Samples.Uwp
     {
         public App()
         {
-            _ = SentrySdk.Init(new SentryOptions() { Dsn = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537", Debug = true });
+            SentrySdk.Init("https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537");
             InitializeComponent();
             Suspending += OnSuspending;
         }
@@ -20,7 +20,7 @@ namespace Sentry.Samples.Uwp
         {
             Frame rootFrame = Window.Current.Content as Frame;
 
-            if (rootFrame == null)
+            if (rootFrame is null)
             {
                 rootFrame = new Frame();
                 rootFrame.NavigationFailed += OnNavigationFailed;
@@ -30,7 +30,7 @@ namespace Sentry.Samples.Uwp
 
             if (!e.PrelaunchActivated)
             {
-                if (rootFrame.Content == null)
+                if (rootFrame.Content is null)
                 {
                     rootFrame.Navigate(typeof(MainPage), e.Arguments);
                 }
@@ -46,7 +46,6 @@ namespace Sentry.Samples.Uwp
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
     }

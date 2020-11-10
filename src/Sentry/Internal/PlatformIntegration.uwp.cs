@@ -21,7 +21,6 @@ namespace Sentry.Internal
             options.AddEventProcessor(new PlatformEventProcessor(options));
             var uwpApplication = Application.Current;
             uwpApplication.UnhandledException += Handle;
-
         }
 
         public void Unregister(IHub hub)
@@ -38,7 +37,7 @@ namespace Sentry.Internal
             //We need to backup the reference, because the Exception reference last for one access.
             //After that, a new  Exception reference is going to be set into e.Exception.
             var exception = e.Exception;
-            if (e.Exception != null)
+            if (e != null)
             {
                 exception.Data[Mechanism.HandledKey] = e.Handled;
                 exception.Data[Mechanism.MechanismKey] = "Application.UnhandledException";

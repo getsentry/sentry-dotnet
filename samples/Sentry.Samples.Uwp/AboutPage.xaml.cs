@@ -5,23 +5,22 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace Sentry.Samples.Uwp
 {
     public sealed partial class AboutPage : Page
     {
-        public AboutPage()
-        {
-            InitializeComponent();
-        }
+        public AboutPage() => InitializeComponent();
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             SentrySdk.AddBreadcrumb(null,
                 "navigation",
                 "navigation",
-                new Dictionary<string, string>() { { "to", $"/{e.SourcePageType.Name}" }, { "from", $"{BaseUri.LocalPath}" } });
+                new Dictionary<string, string>()
+                {
+                    { "to", $"/{e.SourcePageType.Name}" },
+                    { "from", $"{BaseUri.LocalPath}" }
+                });
             base.OnNavigatedFrom(e);
         }
 
@@ -40,7 +39,6 @@ namespace Sentry.Samples.Uwp
             {
                 var dialog = new UserFeedbackDialog(sentryId);
                 _ = dialog.ShowAsync();
-
             }
         }
 
@@ -53,9 +51,9 @@ namespace Sentry.Samples.Uwp
                 int zeroDivision = 5 / doSomething;
                 return SentryId.Empty;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                SentrySdk.AddBreadcrumb(ex.Message, "error", level: BreadcrumbLevel.Error);
+                SentrySdk.AddBreadcrumb(ex.Message, level: BreadcrumbLevel.Error);
                 return  SentrySdk.CaptureException(ex);
             }
         }

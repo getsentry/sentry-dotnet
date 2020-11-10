@@ -12,10 +12,6 @@ namespace Sentry.Samples.Uwp
             InitializeComponent();
         }
 
-        private void ContentDialog_CloseButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-        {
-        }
-
         private void ContentDialog_SendButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             // SentryId, Email and Comments are required.

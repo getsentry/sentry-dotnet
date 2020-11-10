@@ -202,7 +202,9 @@ namespace Sentry
             {
                 if (options.DiagnosticLogger == null)
                 {
-                    options.DiagnosticLogger = DefaultDiagnosticLogger.Get(options.DiagnosticsLevel);
+                    options.DiagnosticLogger = Runtime.Current.IsUWP() ?
+                            new DebugDiagnosticLogger(options.DiagnosticsLevel) :
+                            (IDiagnosticLogger)new ConsoleDiagnosticLogger(options.DiagnosticsLevel);
                     options.DiagnosticLogger.LogDebug($"Logging enabled with {options.DiagnosticLogger.GetType()} and min level: {0}",
                         options.DiagnosticsLevel);
                 }

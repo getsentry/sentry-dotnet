@@ -28,6 +28,18 @@ namespace Sentry.PlatformAbstractions
         /// <returns>True if it's Mono, otherwise false.</returns>
         public static bool IsMono(this Runtime runtime) => runtime.IsRuntime("Mono");
 
+        /// <summary>
+        /// Is the runtime instance UWP.
+        /// </summary>
+        /// <param name="runtime">The runtime instance to check.</param>
+        /// <returns>True if it's UWP, otherwise false.</returns>
+        public static bool IsUWP(this Runtime runtime) =>
+#if WINDOWD_UWP
+            true;
+#else
+            false;
+#endif
+
         private static bool IsRuntime(this Runtime? runtime, string runtimeName)
         {
             return runtime?.Name?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true

@@ -58,7 +58,9 @@ namespace Sentry.Samples.Uwp
             Gradient.SizeChanged += (s, e) =>
             {
                 if (e.NewSize == e.PreviousSize)
+                {
                     return;
+                }
                 BackgroundVisual.Size = e.NewSize.ToVector2();
                 GradientBrush.CenterPoint = BackgroundVisual.Size / 2;
             };
@@ -67,19 +69,19 @@ namespace Sentry.Samples.Uwp
         private void Message_Click(object sender, RoutedEventArgs e)
         {
             if (Lock)
+            {
                 return;
+            }
             SentrySdk.AddBreadcrumb("message", "ui.click");
             _ = SentrySdk.CaptureMessage("Hello UWP");
             _ = new MessageDialog("Hello UWP").ShowAsync();
-
-
-
-
         }
         private void Navigation_Click(object sender, RoutedEventArgs e)
         {
             if (Lock)
+            {
                 return;
+            }
             SentrySdk.AddBreadcrumb(null, "navigation", "navigation", new Dictionary<string, string>() { { "to", $"/AboutPage" }, { "from", $"/MainPage" } });
             _ = Frame.Navigate(typeof(AboutPage));
 
@@ -97,7 +99,9 @@ namespace Sentry.Samples.Uwp
         private void BuldSwitch_Click(object sender, RoutedEventArgs e)
         {
             if (Lock)
+            {
                 return;
+            }
             if (BulbOn)
             {
                 SentrySdk.AddBreadcrumb("Light off", "ui.click");

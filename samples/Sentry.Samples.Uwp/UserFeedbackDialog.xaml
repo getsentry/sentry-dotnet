@@ -8,11 +8,8 @@
     Title="User Feedback"
     PrimaryButtonText="Close"
     SecondaryButtonText="Send"
-    PrimaryButtonClick="ContentDialog_CloseButtonClick"
     SecondaryButtonClick="ContentDialog_SendButtonClick">
-
     <StackPanel>
-        
         <TextBlock Text="Name"/>
         <TextBox x:Name="NameBox"
             PlaceholderText="Jane Doe"/>
