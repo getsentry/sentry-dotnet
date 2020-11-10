@@ -114,6 +114,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.Grpc.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Grpc", "samples\Sentry.Samples.AspNetCore.Grpc\Sentry.Samples.AspNetCore.Grpc.csproj", "{21599C29-C3D4-4DAC-A2D6-6C194600478F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{274CEDC2-2129-469D-B269-649EFA2EF5E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -720,14 +722,10 @@ Global
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Debug|x86.Build.0 = Debug|Any CPU
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|ARM.ActiveCfg = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|ARM.Build.0 = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|ARM64.Build.0 = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|x64.ActiveCfg = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|x64.Build.0 = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|x86.ActiveCfg = Release|Any CPU
-		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|x86.Build.0 = Release|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -766,6 +764,7 @@ Global
 		{720811C8-29C7-4368-86F2-D61DF415AC2A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{3818FA5C-8649-427D-8E68-0C44558CA0DD} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
