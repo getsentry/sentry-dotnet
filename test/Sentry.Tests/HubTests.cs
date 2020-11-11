@@ -20,7 +20,7 @@ namespace NotSentry.Tests
         {
             public List<Envelope> Queue { get; } = new List<Envelope>();
 
-            public int QueueLength => Queue.Count;
+            public int QueuedItems => Queue.Count;
 
             public bool EnqueueEnvelope(Envelope envelope)
             {

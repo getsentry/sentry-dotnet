@@ -25,7 +25,14 @@ namespace Sentry.Internal
             var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
             var httpClient = httpClientFactory.Create(_options);
 
-            return new HttpTransport(_options, httpClient);
+            var httpTransport = new HttpTransport(_options, httpClient);
+
+            if (string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
+            {
+                return httpTransport;
+            }
+
+            return new CachingTransport(httpTransport, _options);
         }
 
         public IBackgroundWorker CreateBackgroundWorker()
@@ -40,12 +47,7 @@ namespace Sentry.Internal
 
             var transport = CreateTransport();
 
-            if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
-            {
-                return new FileSystemBackgroundWorker(transport, _options);
-            }
-
-            return new InMemoryBackgroundWorker(transport, _options);
+            return new BackgroundWorker(transport, _options);
         }
     }
 }
