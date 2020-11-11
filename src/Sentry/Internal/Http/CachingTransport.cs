@@ -157,7 +157,8 @@ namespace Sentry.Internal.Http
 
         public async ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
-            // Store the envelope in a file and wait until it's picked up by the background thread
+            // Store the envelope in a file without actually sending it anywhere.
+            // The envelope will get picked up by the background thread eventually.
             await StoreEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
         }
 
