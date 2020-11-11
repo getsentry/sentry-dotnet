@@ -176,7 +176,12 @@ namespace Sentry.Internal.Http
             _workerSignal.Release();
         }
 
-        public async ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+        // This method asynchronously blocks until the envelope is written to cache, but not until it's sent.
+        // Additionally, if the worker is currently in the process of sending an envelope,
+        // this method will also block until the worker finishes processing and releases file system lock.
+        public async ValueTask SendEnvelopeAsync(
+            Envelope envelope,
+            CancellationToken cancellationToken = default)
         {
             // Store the envelope in a file without actually sending it anywhere.
             // The envelope will get picked up by the background thread eventually.
