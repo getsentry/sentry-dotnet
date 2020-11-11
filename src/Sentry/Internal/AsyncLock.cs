@@ -9,6 +9,14 @@ namespace Sentry.Internal
         private readonly object _lock = new object();
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(0, 1);
 
+        public AsyncLock(bool isReleasedInitially = false)
+        {
+            if (isReleasedInitially)
+            {
+                Release();
+            }
+        }
+
         public void Release()
         {
             // Make sure the semaphore does not go above 1

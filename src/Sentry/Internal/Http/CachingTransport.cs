@@ -18,7 +18,8 @@ namespace Sentry.Internal.Http
         private readonly SentryOptions _options;
         private readonly string _cacheDirectoryPath;
 
-        private readonly AsyncLock _workerLock = new AsyncLock();
+        // Lock is pre-released because the directory might already have files from previous sessions
+        private readonly AsyncLock _workerLock = new AsyncLock(true);
         private readonly CancellationTokenSource _workerCts = new CancellationTokenSource();
         private readonly Task _worker;
 
@@ -30,12 +31,6 @@ namespace Sentry.Internal.Http
             _cacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
                 ? _cacheDirectoryPath = options.CacheDirectoryPath
                 : throw new InvalidOperationException("Cache directory is not set.");
-
-            // Pre-release lock if there are existing files
-            if (GetEnvelopeFilePaths().Any())
-            {
-                _workerLock.Release();
-            }
 
             _worker = Task.Run(async () =>
             {
