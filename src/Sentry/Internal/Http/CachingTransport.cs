@@ -18,8 +18,14 @@ namespace Sentry.Internal.Http
         private readonly SentryOptions _options;
         private readonly string _cacheDirectoryPath;
 
-        // Lock is pre-released because the directory might already have files from previous sessions
-        private readonly AsyncLock _workerLock = new AsyncLock(true);
+        // Signal that tells the worker whether there's work it can do.
+        // Signal is pre-released because the directory might already have files from previous sessions.
+        private readonly Signal _workerSignal = new Signal(true);
+
+        // Lock to synchronize file system operations to prevent collisions when writing/reading from
+        // multiple threads.
+        private readonly Lock _fileSystemLock = new Lock();
+
         private readonly CancellationTokenSource _workerCts = new CancellationTokenSource();
         private readonly Task _worker;
 
@@ -38,12 +44,19 @@ namespace Sentry.Internal.Http
                 {
                     try
                     {
-                        await _workerLock.WaitAsync(_workerCts.Token).ConfigureAwait(false);
+                        await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
                         await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
-                        return;
+                        // Ignore
+                    }
+                    catch (Exception ex)
+                    {
+                        _options.DiagnosticLogger?.LogError(
+                            "Exception in background worker of CachingTransport.",
+                            ex
+                        );
                     }
                 }
             });
@@ -67,6 +80,8 @@ namespace Sentry.Internal.Http
 
             foreach (var envelopeFilePath in GetEnvelopeFilePaths())
             {
+                using var lockClaim = await _fileSystemLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+
                 _options.DiagnosticLogger?.LogDebug(
                     "Reading cached envelope: {0}",
                     envelopeFilePath
@@ -111,7 +126,7 @@ namespace Sentry.Internal.Http
                 }
 
                 // Delete the envelope file
-                // (envelope MUST BE DISPOSED prior to this)
+                // (envelope & file stream MUST BE DISPOSED prior to this)
                 File.Delete(envelopeFilePath);
             }
         }
@@ -120,14 +135,14 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
+            using var lockClaim = await _fileSystemLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+
             // If over capacity - remove oldest envelope file
-            // TODO: probably a good idea to put a lock here to make sure this limit is maintained
-            while (GetEnvelopeFilePaths().Count() >= _options.MaxQueueItems)
+            while (
+                GetEnvelopeFilePaths().Count() >= _options.MaxQueueItems &&
+                GetEnvelopeFilePaths().FirstOrDefault() is { } oldestEnvelopeFilePath)
             {
-                if (GetEnvelopeFilePaths().FirstOrDefault() is { } oldestEnvelopeFilePath)
-                {
-                    File.Delete(oldestEnvelopeFilePath);
-                }
+                File.Delete(oldestEnvelopeFilePath);
             }
 
             // Envelope file name can be either:
@@ -151,8 +166,14 @@ namespace Sentry.Internal.Http
                 Directory.CreateDirectory(_cacheDirectoryPath);
             }
 
-            using var stream = File.Create(envelopeFilePath);
-            await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            using (var stream = File.Create(envelopeFilePath))
+            {
+                await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            }
+
+            // Tell the worker that there is work for him
+            // (file stream MUST BE DISPOSED prior to this)
+            _workerSignal.Release();
         }
 
         public async ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
@@ -179,7 +200,7 @@ namespace Sentry.Internal.Http
         {
             ShutdownAsync().GetAwaiter().GetResult();
 
-            _workerLock.Dispose();
+            _workerSignal.Dispose();
             _workerCts.Dispose();
             _worker.Dispose();
         }

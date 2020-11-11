@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace Sentry.Internal
 {
-    internal class AsyncLock : IDisposable
+    internal class Signal : IDisposable
     {
         private readonly object _lock = new object();
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(0, 1);
 
-        public AsyncLock(bool isReleasedInitially = false)
+        public Signal(bool isReleasedInitially = false)
         {
             if (isReleasedInitially)
             {

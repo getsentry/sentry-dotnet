@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
@@ -21,7 +22,33 @@ namespace Sentry.Tests.Internals.Http
             $"EnvelopeCache_{Guid.NewGuid()}"
         );
 
-        [Fact]
+        [Fact(Timeout = 10000)]
+        public async Task WorksInBackground()
+        {
+            // Arrange
+            var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
+
+            using var innerTransport = new FakeTransport();
+            using var transport = new CachingTransport(innerTransport, options);
+
+            // Act
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+            await transport.SendEnvelopeAsync(envelope);
+
+            // Wait until directory is empty
+            while (
+                Directory.Exists(CacheDirectoryPath) &&
+                Directory.EnumerateFiles(CacheDirectoryPath).Any())
+            {
+                await Task.Delay(100);
+            }
+
+            // Assert
+            var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
+            sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+        }
+
+        [Fact(Timeout = 10000)]
         public async Task EnvelopeReachesInnerTransport()
         {
             // Arrange
@@ -40,29 +67,51 @@ namespace Sentry.Tests.Internals.Http
             sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task MaintainsLimit()
         {
             // Arrange
-            var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath, MaxQueueItems = 3};
+            var options = new SentryOptions
+            {
+                CacheDirectoryPath = CacheDirectoryPath,
+                MaxQueueItems = 3
+            };
 
-            using var innerTransport = new FakeTransport();
+            var innerTransport = Substitute.For<ITransport>();
+            using var signal = new ManualResetEventSlim(false);
+
+            // Transport is blocked until the signal is released
+            innerTransport
+                .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+                .Returns(_ =>
+                {
+                    signal.Wait();
+                    return default;
+                });
+
             using var transport = new CachingTransport(innerTransport, options);
 
             // Act
-            for (var i = 0; i < 20; i++)
-            {
-                using var envelope = Envelope.FromEvent(new SentryEvent());
-                await transport.SendEnvelopeAsync(envelope);
-            }
+            var sendTasks = Enumerable
+                .Range(0, 20)
+                .Select(async _ =>
+                {
+                    using var envelope = Envelope.FromEvent(new SentryEvent());
+                    await transport.SendEnvelopeAsync(envelope);
+                });
+
+            // Unblock the inner transport
+            signal.Set();
+            await Task.WhenAll(sendTasks);
 
             await transport.FlushAsync();
 
             // Assert
-            innerTransport.GetSentEnvelopes().Should().HaveCount(3);
+            // (only 3 envelopes were sent, rest were throttled)
+            _ = innerTransport.Received(3).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task AwareOfExistingFiles()
         {
             // Arrange
@@ -90,7 +139,7 @@ namespace Sentry.Tests.Internals.Http
             innerTransport.GetSentEnvelopes().Should().HaveCount(3);
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task RetriesOnTransientExceptions()
         {
             // Arrange
@@ -128,7 +177,7 @@ namespace Sentry.Tests.Internals.Http
             _ = innerTransport.Received(3).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
         }
 
-        [Fact]
+        [Fact(Timeout = 10000)]
         public async Task DoesNotRetryOnNonTransientExceptions()
         {
             // Arrange
