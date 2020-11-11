@@ -42,10 +42,10 @@ namespace Sentry.Internal
 
             if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
             {
-                return new CachingBackgroundWorker(transport, _options);
+                return new FileSystemBackgroundWorker(transport, _options);
             }
 
-            return new StatelessBackgroundWorker(transport, _options);
+            return new InMemoryBackgroundWorker(transport, _options);
         }
     }
 }

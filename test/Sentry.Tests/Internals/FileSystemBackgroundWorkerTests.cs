@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Sentry.Tests.Internals
 {
-    public class CachingBackgroundWorkerTests : IDisposable
+    public class FileSystemBackgroundWorkerTests : IDisposable
     {
         private string CacheDirectoryPath { get; } = Path.Combine(
             Directory.GetCurrentDirectory(),
@@ -25,7 +25,7 @@ namespace Sentry.Tests.Internals
             // Arrange
             using var transport = new FakeTransport();
 
-            using var worker = new CachingBackgroundWorker(transport, new SentryOptions
+            using var worker = new FileSystemBackgroundWorker(transport, new SentryOptions
             {
                 CacheDirectoryPath = CacheDirectoryPath
             });
@@ -49,7 +49,7 @@ namespace Sentry.Tests.Internals
             // Arrange
             using var transport = new FakeTransport();
 
-            using var worker = new CachingBackgroundWorker(transport, new SentryOptions
+            using var worker = new FileSystemBackgroundWorker(transport, new SentryOptions
             {
                 CacheDirectoryPath = CacheDirectoryPath,
                 MaxQueueItems = 5
@@ -78,7 +78,7 @@ namespace Sentry.Tests.Internals
                     new ValueTask()
                 );
 
-            using var worker = new CachingBackgroundWorker(transport, new SentryOptions
+            using var worker = new FileSystemBackgroundWorker(transport, new SentryOptions
             {
                 CacheDirectoryPath = CacheDirectoryPath
             });
@@ -103,7 +103,7 @@ namespace Sentry.Tests.Internals
             {
                 var previousTransport = new FakeFailingTransport();
 
-                using var previousWorker = new CachingBackgroundWorker(previousTransport, new SentryOptions
+                using var previousWorker = new FileSystemBackgroundWorker(previousTransport, new SentryOptions
                 {
                     CacheDirectoryPath = CacheDirectoryPath,
                     ShutdownTimeout = TimeSpan.Zero
@@ -119,7 +119,7 @@ namespace Sentry.Tests.Internals
 
             using var transport = new FakeTransport();
 
-            using var worker = new CachingBackgroundWorker(transport, new SentryOptions
+            using var worker = new FileSystemBackgroundWorker(transport, new SentryOptions
             {
                 CacheDirectoryPath = CacheDirectoryPath
             });
