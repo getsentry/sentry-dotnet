@@ -19,7 +19,7 @@ namespace Sentry.Internal.Http
         private readonly string _cacheDirectoryPath;
 
         // Signal that tells the worker whether there's work it can do.
-        // Signal is pre-released because the directory might already have files from previous sessions.
+        // Pre-released because the directory might already have files from previous sessions.
         private readonly Signal _workerSignal = new Signal(true);
 
         // Lock to synchronize file system operations to prevent collisions when writing/reading from
@@ -80,6 +80,9 @@ namespace Sentry.Internal.Http
 
             foreach (var envelopeFilePath in GetEnvelopeFilePaths())
             {
+                // We need to lock file system here, because the consumer might attempt
+                // to send an envelope, which in turn might attempt to delete an existing file,
+                // which in turn may lead to a race condition over file access.
                 using var lockClaim = await _fileSystemLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
 
                 _options.DiagnosticLogger?.LogDebug(
@@ -135,6 +138,8 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
+            // We need to lock file system here, because we may delete a file if the cache is full.
+            // Additionally, we don't want the worker to start processing a file we haven't finished writing yet.
             using var lockClaim = await _fileSystemLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
 
             // If over capacity - remove oldest envelope file
