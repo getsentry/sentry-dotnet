@@ -15,15 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-2016, macos-latest]
+        os: [windows-2016]
         include:
-          - os: windows-latest
+          - os: windows-2016
             build_script: .\build.ps1
-          - os: ubuntu-latest
-            build_script: ./build.sh
-          - os: macos-latest
-            build_script: ./build.sh
-
     steps:
         - name: Checkout
           uses: actions/checkout@v2
@@ -45,14 +40,3 @@ jobs:
 
         - name: Run build script
           run: ${{ matrix.build_script }}
-
-        - name: Publish coverage report
-          uses: codecov/codecov-action@v1
-
-        - name: Archive Artifacts
-          uses: actions/upload-artifact@v2
-          with:
-            name: ${{ github.sha }}
-            path: |
-              ${{ github.workspace }}/src/**/Release/*.snupkg
-              ${{ github.workspace }}/src/**/Release/*.nupkg
