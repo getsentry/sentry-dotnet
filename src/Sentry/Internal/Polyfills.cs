@@ -3,7 +3,7 @@
 // Polyfills to bridge the missing APIs in older versions of the framework/standard.
 // In some cases, these just proxy calls to existing methods but also provide a signature that matches .netstd2.1
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || WINDOWS_UWP
 namespace System.IO
 {
     using Threading;
