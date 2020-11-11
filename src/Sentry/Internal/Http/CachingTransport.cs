@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -17,7 +18,7 @@ namespace Sentry.Internal.Http
         private readonly SentryOptions _options;
         private readonly string _cacheDirectoryPath;
 
-        private readonly SemaphoreSlim _workerLock;
+        private readonly AsyncLock _workerLock = new AsyncLock();
         private readonly CancellationTokenSource _workerCts = new CancellationTokenSource();
         private readonly Task _worker;
 
@@ -30,8 +31,11 @@ namespace Sentry.Internal.Http
                 ? _cacheDirectoryPath = options.CacheDirectoryPath
                 : throw new InvalidOperationException("Cache directory is not set.");
 
-            // Pre-release locks according to already existing files in the directory
-            _workerLock = new SemaphoreSlim(GetEnvelopeFilePaths().Count());
+            // Pre-release lock if there are existing files
+            if (GetEnvelopeFilePaths().Any())
+            {
+                _workerLock.Release();
+            }
 
             _worker = Task.Run(async () =>
             {
@@ -73,58 +77,51 @@ namespace Sentry.Internal.Http
                     envelopeFilePath
                 );
 
-                using var envelope = await Envelope.DeserializeAsync(
-                    File.OpenRead(envelopeFilePath),
-                    cancellationToken
-                ).ConfigureAwait(false);
-
-                _options.DiagnosticLogger?.LogDebug(
-                    "Sending cached envelope: {0}",
-                    envelope.TryGetEventId()
-                );
-
-                try
+                using (var envelopeFile = File.OpenRead(envelopeFilePath))
+                using (var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false))
                 {
-                    await _innerTransport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
-
                     _options.DiagnosticLogger?.LogDebug(
-                        "Successfully sent cached envelope: {0}",
+                        "Sending cached envelope: {0}",
                         envelope.TryGetEventId()
                     );
 
-                    // Delete the cache file in case of success
-                    File.Delete(envelopeFilePath);
-                }
-                catch (IOException ex)
-                {
-                    // Don't delete the cache file in case of transient exceptions,
-                    // i.e. loss of connection, failure to connect, etc.
-                    // Instead break to not violate the order and wait until
-                    // the next batch to attempt sending again.
-                    _options.DiagnosticLogger?.LogError(
-                        "Transient failure when sending cached envelope: {0}",
-                        ex,
-                        envelope.TryGetEventId()
-                    );
+                    try
+                    {
+                        await _innerTransport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
 
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    // Delete the cache file for all other exceptions that could
-                    // indicate a successfully completed, but error response.
-                    File.Delete(envelopeFilePath);
+                        _options.DiagnosticLogger?.LogDebug(
+                            "Successfully sent cached envelope: {0}",
+                            envelope.TryGetEventId()
+                        );
+                    }
+                    catch (IOException ex)
+                    {
+                        _options.DiagnosticLogger?.LogError(
+                            "Transient failure when sending cached envelope: {0}",
+                            ex,
+                            envelope.TryGetEventId()
+                        );
 
-                    _options.DiagnosticLogger?.LogError(
-                        "Persistent failure when sending cached envelope: {0}",
-                        ex,
-                        envelope.TryGetEventId()
-                    );
+                        // Break on transient exceptions without deleting the cache file
+                        break;
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        _options.DiagnosticLogger?.LogError(
+                            "Persistent failure when sending cached envelope: {0}",
+                            ex,
+                            envelope.TryGetEventId()
+                        );
+                    }
                 }
+
+                // Delete the envelope file
+                // (envelope MUST BE DISPOSED prior to this)
+                File.Delete(envelopeFilePath);
             }
         }
 
-        private async ValueTask<FileInfo> StoreEnvelopeAsync(
+        private async ValueTask StoreEnvelopeAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
@@ -142,13 +139,12 @@ namespace Sentry.Internal.Http
             // 1604679692_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
             // 1604679692__17754019.envelope
             // (depending on whether event ID is present or not)
-            var envelopeFile = new FileInfo(
-                Path.Combine(
-                    _cacheDirectoryPath,
-                    $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" +
-                    $"{envelope.TryGetEventId()}_" +
-                    $"{envelope.GetHashCode()}" +
-                    $".{EnvelopeFileExt}")
+            var envelopeFilePath = Path.Combine(
+                _cacheDirectoryPath,
+                $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" +
+                $"{envelope.TryGetEventId()}_" +
+                $"{envelope.GetHashCode()}" +
+                $".{EnvelopeFileExt}"
             );
 
             if (!Directory.Exists(_cacheDirectoryPath))
@@ -160,15 +156,13 @@ namespace Sentry.Internal.Http
                 Directory.CreateDirectory(_cacheDirectoryPath);
             }
 
-            using var stream = envelopeFile.Create();
+            using var stream = File.Create(envelopeFilePath);
             await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
-
-            return envelopeFile;
         }
 
         public async ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
-            // Store the envelope in a file and wait until it's picked up by a background thread
+            // Store the envelope in a file and wait until it's picked up by the background thread
             await StoreEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
         }
 
