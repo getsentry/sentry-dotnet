@@ -15,9 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2016]
+        os: [windows-latest]
         include:
-          - os: windows-2016
+          - os: windows-latest
             build_script: .\build.ps1
     steps:
         - name: Checkout
