@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
@@ -78,37 +77,22 @@ namespace Sentry.Tests.Internals.Http
             };
 
             var innerTransport = Substitute.For<ITransport>();
-            using var signal = new ManualResetEventSlim(false);
 
-            // Transport is blocked until the signal is released
+            // Introduce enough delay for the cache to overflow under normal circumstances
             innerTransport
                 .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-                .Returns(_ =>
-                {
-                    signal.Wait();
-                    return default;
-                });
+                .Returns(new ValueTask(Task.Delay(3000)));
 
             using var transport = new CachingTransport(innerTransport, options);
 
-            // Act
-            var sendTasks = Enumerable
-                .Range(0, 20)
-                .Select(async _ =>
-                {
-                    using var envelope = Envelope.FromEvent(new SentryEvent());
-                    await transport.SendEnvelopeAsync(envelope);
-                });
+            // Act & assert
+            for (var i = 0; i < 20; i++)
+            {
+                using var envelope = Envelope.FromEvent(new SentryEvent());
+                await transport.SendEnvelopeAsync(envelope);
 
-            // Unblock the inner transport
-            signal.Set();
-            await Task.WhenAll(sendTasks);
-
-            await transport.FlushAsync();
-
-            // Assert
-            // (only 3 envelopes were sent, rest were throttled)
-            _ = innerTransport.Received(3).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+                transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxQueueItems);
+            }
         }
 
         [Fact(Timeout = 10000)]
