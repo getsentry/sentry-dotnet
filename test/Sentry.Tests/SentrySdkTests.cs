@@ -1,9 +1,12 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
@@ -197,6 +200,46 @@ namespace Sentry.Tests
 
             first.Dispose();
             second.Dispose();
+        }
+
+        [Fact]
+        public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
+        {
+            // Arrange
+            var cacheDirectoryPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                $"EnvelopeCache_{Guid.NewGuid()}"
+            );
+
+            {
+                // Pre-populate cache
+                var initialInnerTransport = new FakeFailingTransport();
+                using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
+                {
+                    CacheDirectoryPath = cacheDirectoryPath
+                });
+
+                for (var i = 0; i < 3; i++)
+                {
+                    using var envelope = Envelope.FromEvent(new SentryEvent());
+                    await initialTransport.SendEnvelopeAsync(envelope);
+                }
+            }
+
+            // Act
+            using var transport = new FakeTransport();
+            using var _ = SentrySdk.Init(o =>
+            {
+                o.Dsn = ValidDsnWithoutSecret;
+                o.CacheDirectoryPath = cacheDirectoryPath;
+                o.FlushCacheOnInit = true;
+                o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
+            });
+
+            // Assert
+            Directory
+                .EnumerateFiles(cacheDirectoryPath, "*", SearchOption.AllDirectories)
+                .Should().BeEmpty();
         }
 
         [Fact]

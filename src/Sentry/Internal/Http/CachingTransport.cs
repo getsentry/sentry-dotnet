@@ -18,13 +18,20 @@ namespace Sentry.Internal.Http
         private readonly SentryOptions _options;
         private readonly string _cacheDirectoryPath;
 
+        // When a file is getting processed, it's moved to a child directory
+        // to avoid getting picked up by other threads.
+        private readonly string _processingDirectoryPath;
+
         // Signal that tells the worker whether there's work it can do.
         // Pre-released because the directory might already have files from previous sessions.
         private readonly Signal _workerSignal = new Signal(true);
 
-        // Lock to synchronize file system operations to prevent collisions when writing/reading from
-        // multiple threads.
-        private readonly Lock _fileSystemLock = new Lock();
+        // Lock to synchronize file system operations inside the cache directory.
+        // It's required because there are multiple threads that may attempt to both read
+        // and write from/to the cache directory.
+        // Lock usage is minimized by moving files that are being processed to a special directory
+        // where collisions are not expected.
+        private readonly Lock _cachingDirectoryLock = new Lock();
 
         private readonly CancellationTokenSource _workerCts = new CancellationTokenSource();
         private readonly Task _worker;
@@ -37,6 +44,22 @@ namespace Sentry.Internal.Http
             _cacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
                 ? _cacheDirectoryPath = options.CacheDirectoryPath
                 : throw new InvalidOperationException("Cache directory is not set.");
+
+            _processingDirectoryPath = Path.Combine(_cacheDirectoryPath, "__processing");
+
+            // Processing directory may already contain some files left from previous session
+            // if the worker has been terminated unexpectedly.
+            // Move everything from that directory back to cache directory.
+            if (Directory.Exists(_processingDirectoryPath))
+            {
+                foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+                {
+                    File.Move(
+                        filePath,
+                        Path.Combine(_cacheDirectoryPath, Path.GetFileName(filePath))
+                    );
+                }
+            }
 
             _worker = Task.Run(async () =>
             {
@@ -76,24 +99,42 @@ namespace Sentry.Internal.Http
 
         public int GetCacheLength() => GetCacheFilePaths().Count();
 
+        // Gets the next cache file and moves it to "processing"
+        private async ValueTask<string?> TryPrepareNextCacheFileAsync(
+            CancellationToken cancellationToken = default)
+        {
+            using var lockClaim = await _cachingDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+
+            var filePath = GetCacheFilePaths().FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return null;
+            }
+
+            var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
+
+            Directory.CreateDirectory(_processingDirectoryPath);
+            File.Move(filePath, targetFilePath);
+
+            return targetFilePath;
+        }
+
         private async ValueTask ProcessCacheAsync(CancellationToken cancellationToken = default)
         {
             _options.DiagnosticLogger?.LogDebug("Flushing cached envelopes.");
 
-            foreach (var envelopeFilePath in GetCacheFilePaths())
+            while (await TryPrepareNextCacheFileAsync(cancellationToken).ConfigureAwait(false) is { } envelopeFilePath)
             {
-                // We need to lock file system here, because the consumer might attempt
-                // to send an envelope, which in turn might attempt to delete an existing file,
-                // which in turn may lead to a race condition over file access.
-                using var lockClaim = await _fileSystemLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
-
                 _options.DiagnosticLogger?.LogDebug(
                     "Reading cached envelope: {0}",
                     envelopeFilePath
                 );
 
+                var shouldRetry = false;
+
                 using (var envelopeFile = File.OpenRead(envelopeFilePath))
-                using (var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false))
+                using (var envelope =
+                    await Envelope.DeserializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false))
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "Sending cached envelope: {0}",
@@ -117,8 +158,7 @@ namespace Sentry.Internal.Http
                             envelope.TryGetEventId()
                         );
 
-                        // Break on transient exceptions without deleting the cache file
-                        break;
+                        shouldRetry = true;
                     }
                     catch (HttpRequestException ex)
                     {
@@ -130,9 +170,23 @@ namespace Sentry.Internal.Http
                     }
                 }
 
-                // Delete the envelope file
-                // (envelope & file stream MUST BE DISPOSED prior to this)
-                File.Delete(envelopeFilePath);
+                if (shouldRetry)
+                {
+                    // Move the file back to cache directory so it gets processed again in the future
+                    File.Move(
+                        envelopeFilePath,
+                        Path.Combine(_cacheDirectoryPath, Path.GetFileName(envelopeFilePath))
+                    );
+
+                    // Avoid processing other files because the order may end up corrupted
+                    break;
+                }
+                else
+                {
+                    // Delete the envelope file
+                    // (envelope & file stream MUST BE DISPOSED prior to this)
+                    File.Delete(envelopeFilePath);
+                }
             }
         }
 
@@ -140,9 +194,7 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
-            // We need to lock file system here, because we may delete a file if the cache is full.
-            // Additionally, we don't want the worker to start processing a file we haven't finished writing yet.
-            using var lockClaim = await _fileSystemLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+            using var lockClaim = await _cachingDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
 
             // If over capacity - remove oldest envelope file
             while (
@@ -195,7 +247,7 @@ namespace Sentry.Internal.Http
             await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
         }
 
-        public async ValueTask ShutdownAsync()
+        public async ValueTask StopWorkerAsync()
         {
             // Stop worker and wait until it finishes
             _workerCts.Cancel();
@@ -204,13 +256,12 @@ namespace Sentry.Internal.Http
 
         public async ValueTask FlushAsync(CancellationToken cancellationToken = default)
         {
-            await ShutdownAsync().ConfigureAwait(false);
             await ProcessCacheAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void Dispose()
         {
-            ShutdownAsync().GetAwaiter().GetResult();
+            StopWorkerAsync().GetAwaiter().GetResult();
 
             _workerSignal.Dispose();
             _workerCts.Dispose();

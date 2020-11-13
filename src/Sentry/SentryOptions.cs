@@ -369,6 +369,12 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
+        /// Whether to flush existing cached envelopes on initialization.
+        /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
+        /// </summary>
+        public bool FlushCacheOnInit { get; set; } = true;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Sentry.Tests.Internals.Http
 {
-    public class CachingTransportTests
+    public class CachingTransportTests : IDisposable
     {
         private string CacheDirectoryPath { get; } = Path.Combine(
             Directory.GetCurrentDirectory(),
@@ -37,7 +37,7 @@ namespace Sentry.Tests.Internals.Http
             // Wait until directory is empty
             while (
                 Directory.Exists(CacheDirectoryPath) &&
-                Directory.EnumerateFiles(CacheDirectoryPath).Any())
+                Directory.EnumerateFiles(CacheDirectoryPath, "*", SearchOption.AllDirectories).Any())
             {
                 await Task.Delay(100);
             }
@@ -59,7 +59,11 @@ namespace Sentry.Tests.Internals.Http
             // Act
             using var envelope = Envelope.FromEvent(new SentryEvent());
             await transport.SendEnvelopeAsync(envelope);
-            await transport.FlushAsync();
+
+            while (!innerTransport.GetSentEnvelopes().Any())
+            {
+                await Task.Delay(100);
+            }
 
             // Assert
             var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
@@ -117,7 +121,14 @@ namespace Sentry.Tests.Internals.Http
             using var transport = new CachingTransport(innerTransport, options);
 
             // Act
-            await transport.FlushAsync();
+
+            // Wait until directory is empty
+            while (
+                Directory.Exists(CacheDirectoryPath) &&
+                Directory.EnumerateFiles(CacheDirectoryPath, "*", SearchOption.AllDirectories).Any())
+            {
+                await Task.Delay(100);
+            }
 
             // Assert
             innerTransport.GetSentEnvelopes().Should().HaveCount(3);
@@ -141,6 +152,9 @@ namespace Sentry.Tests.Internals.Http
                 );
 
             using var transport = new CachingTransport(innerTransport, options);
+
+            // Can't really reliably test this with a worker
+            await transport.StopWorkerAsync();
 
             // Act
             for (var i = 0; i < 3; i++)
@@ -180,6 +194,9 @@ namespace Sentry.Tests.Internals.Http
 
             using var transport = new CachingTransport(innerTransport, options);
 
+            // Can't really reliably test this with a worker
+            await transport.StopWorkerAsync();
+
             // Act
             for (var i = 0; i < 3; i++)
             {
@@ -197,6 +214,14 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             // (0 envelopes retried)
             _ = innerTransport.Received(0).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+        }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(CacheDirectoryPath))
+            {
+                Directory.Delete(CacheDirectoryPath, true);
+            }
         }
     }
 }

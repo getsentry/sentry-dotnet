@@ -130,7 +130,7 @@ namespace Sentry.Tests.Internals.Http
         public async Task SendEnvelopeAsync_ItemRateLimit_DropsItem()
         {
             // Arrange
-            using var httpHandler = new FakeHttpMessageHandler(
+            using var httpHandler = new FakeHttpClientHandler(
                 _ => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
             );
 

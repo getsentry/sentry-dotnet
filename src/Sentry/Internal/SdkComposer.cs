@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Internal.Http;
 
@@ -18,8 +19,10 @@ namespace Sentry.Internal
         {
             if (_options.SentryHttpClientFactory is { })
             {
-                _options.DiagnosticLogger?.LogDebug("Using ISentryHttpClientFactory set through options: {0}.",
-                    _options.SentryHttpClientFactory.GetType().Name);
+                _options.DiagnosticLogger?.LogDebug(
+                    "Using ISentryHttpClientFactory set through options: {0}.",
+                    _options.SentryHttpClientFactory.GetType().Name
+                );
             }
 
             var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
@@ -27,12 +30,45 @@ namespace Sentry.Internal
 
             var httpTransport = new HttpTransport(_options, httpClient);
 
+            // Non-caching transport
             if (string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
             {
                 return httpTransport;
             }
 
-            return new CachingTransport(httpTransport, _options);
+            // Caching transport
+            var cachingTransport = new CachingTransport(httpTransport, _options);
+
+            // If configured, flush existing cache
+            if (_options.FlushCacheOnInit)
+            {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Flushing existing cache during transport activation."
+                );
+
+                // Use a timeout to avoid waiting for too long
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+                try
+                {
+                    cachingTransport.FlushAsync(timeout.Token).GetAwaiter().GetResult();
+                }
+                catch (OperationCanceledException)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Flushing timed out."
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogFatal(
+                        "Flushing failed.",
+                        ex
+                    );
+                }
+            }
+
+            return cachingTransport;
         }
 
         public IBackgroundWorker CreateBackgroundWorker()
