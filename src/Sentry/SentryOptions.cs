@@ -8,9 +8,11 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.PlatformAbstractions;
 using Sentry.Protocol;
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry
 {
@@ -373,13 +375,11 @@ namespace Sentry
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
-            // TODO: Make it configurable instead, flip default based on #ifdef
-            // This should be enabled for: Mono AOT so probably a better const here
-#if RELEASE && __MOBILE__
-            SentryStackTraceFactory = new MonoSentryStackTraceFactory(this);
-#else
-            SentryStackTraceFactory = new SentryStackTraceFactory(this);
-#endif
+            SentryStackTraceFactory = Runtime.Current.IsMono()
+                // Also true for IL2CPP
+                ? new MonoSentryStackTraceFactory(this)
+                : new SentryStackTraceFactory(this);
+
             _sentryStackTraceFactoryAccessor = () => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
@@ -402,8 +402,8 @@ namespace Sentry
 
             InAppExclude = new[] {
                     "System.",
-                    "Mono",
-                    "Xamarin",
+                    "Mono.",
+                    "Xamarin.",
                     "Sentry.",
                     "Microsoft.",
                     "MS", // MS.Win32, MS.Internal, etc: Desktop apps

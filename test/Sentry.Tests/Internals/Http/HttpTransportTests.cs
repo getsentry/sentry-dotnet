@@ -39,6 +39,9 @@ namespace Sentry.Tests.Internals.Http
                 new SentryEvent(eventId: SentryResponses.ResponseId)
             );
 
+#if NET5_0
+            await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token).AsTask());
+#else
             // Act
             await httpTransport.SendEnvelopeAsync(envelope, token);
 
@@ -46,6 +49,7 @@ namespace Sentry.Tests.Internals.Http
             await httpHandler
                 .Received(1)
                 .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
+#endif
         }
 
         [Fact]

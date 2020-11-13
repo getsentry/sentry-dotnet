@@ -24,12 +24,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{9D7E2F87
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		.travis.yml = .travis.yml
-		after.Sentry.sln.targets = after.Sentry.sln.targets
 		build.ps1 = build.ps1
 		build.sh = build.sh
 		CHANGELOG.md = CHANGELOG.md
 		Directory.Build.props = Directory.Build.props
-		Directory.Build.targets = Directory.Build.targets
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -96,14 +94,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{3454831A-397C-4039-AAFC-9152A4E0B682}"
 	ProjectSection(SolutionItems) = preProject
 		scripts\bump-version.sh = scripts\bump-version.sh
-		scripts\zeus.sh = scripts\zeus.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F267BFB9-C5D5-4018-9D3F-B55443702AEC}"
 	ProjectSection(SolutionItems) = preProject
 		.github\CODEOWNERS = .github\CODEOWNERS
 		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
-		.github\release-drafter.yml = .github\release-drafter.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E1800E08-72E6-45AE-91EC-69B4FDBA7555}"
@@ -123,6 +119,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Mobile.iOS", "samples\Sentry.Samples.Mobile.iOS\Sentry.Samples.Mobile.iOS.csproj", "{5B559AD5-CE4B-499A-BDA5-A5C1EBAB89EF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Mobile.Android", "samples\Sentry.Samples.Mobile.Android\Sentry.Samples.Mobile.Android.csproj", "{64E0D514-1062-4364-8E6D-B67170F39DD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{274CEDC2-2129-469D-B269-649EFA2EF5E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -262,6 +260,10 @@ Global
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -303,6 +305,7 @@ Global
 		{720811C8-29C7-4368-86F2-D61DF415AC2A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{3818FA5C-8649-427D-8E68-0C44558CA0DD} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{274CEDC2-2129-469D-B269-649EFA2EF5E0} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
