@@ -221,14 +221,7 @@ namespace Sentry.Internal.Http
                 $".{EnvelopeFileExt}"
             );
 
-            if (!Directory.Exists(_cacheDirectoryPath))
-            {
-                _options.DiagnosticLogger?.LogDebug(
-                    "Provided cache directory does not exist. Creating it."
-                );
-
-                Directory.CreateDirectory(_cacheDirectoryPath);
-            }
+            Directory.CreateDirectory(_cacheDirectoryPath);
 
             using (var stream = File.Create(envelopeFilePath))
             {
