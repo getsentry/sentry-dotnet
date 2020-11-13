@@ -31,7 +31,7 @@ namespace Sentry.Internal.Http
         // and write from/to the cache directory.
         // Lock usage is minimized by moving files that are being processed to a special directory
         // where collisions are not expected.
-        private readonly Lock _cachingDirectoryLock = new Lock();
+        private readonly Lock _cacheDirectoryLock = new Lock();
 
         private readonly CancellationTokenSource _workerCts = new CancellationTokenSource();
         private readonly Task _worker;
@@ -54,6 +54,8 @@ namespace Sentry.Internal.Http
             {
                 foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
                 {
+                    Directory.CreateDirectory(_cacheDirectoryPath);
+
                     File.Move(
                         filePath,
                         Path.Combine(_cacheDirectoryPath, Path.GetFileName(filePath))
@@ -103,7 +105,7 @@ namespace Sentry.Internal.Http
         private async ValueTask<string?> TryPrepareNextCacheFileAsync(
             CancellationToken cancellationToken = default)
         {
-            using var lockClaim = await _cachingDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+            using var lockClaim = await _cacheDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
 
             var filePath = GetCacheFilePaths().FirstOrDefault();
             if (string.IsNullOrWhiteSpace(filePath))
@@ -170,9 +172,13 @@ namespace Sentry.Internal.Http
                     }
                 }
 
+                // Envelope & file stream must be disposed prior to reaching this point
+
                 if (shouldRetry)
                 {
                     // Move the file back to cache directory so it gets processed again in the future
+                    Directory.CreateDirectory(_cacheDirectoryPath);
+
                     File.Move(
                         envelopeFilePath,
                         Path.Combine(_cacheDirectoryPath, Path.GetFileName(envelopeFilePath))
@@ -183,8 +189,7 @@ namespace Sentry.Internal.Http
                 }
                 else
                 {
-                    // Delete the envelope file
-                    // (envelope & file stream MUST BE DISPOSED prior to this)
+                    // Delete the envelope file and move on to the next one
                     File.Delete(envelopeFilePath);
                 }
             }
@@ -194,7 +199,7 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
-            using var lockClaim = await _cachingDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+            using var lockClaim = await _cacheDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
 
             // If over capacity - remove oldest envelope file
             while (
