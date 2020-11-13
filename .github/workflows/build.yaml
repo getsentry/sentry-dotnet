@@ -42,5 +42,8 @@ jobs:
           with:
             dotnet-version: '5.0.100'
 
+        - name: Setup MSBuild
+          uses: microsoft/setup-msbuild@v1.0.2
+        
         - name: Run build script
           run: ${{ matrix.build_script }}
