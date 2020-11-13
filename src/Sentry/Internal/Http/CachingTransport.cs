@@ -250,10 +250,8 @@ namespace Sentry.Internal.Http
             await _worker.ConfigureAwait(false);
         }
 
-        public async ValueTask FlushAsync(CancellationToken cancellationToken = default)
-        {
+        public async ValueTask FlushAsync(CancellationToken cancellationToken = default) =>
             await ProcessCacheAsync(cancellationToken).ConfigureAwait(false);
-        }
 
         public void Dispose()
         {
@@ -262,6 +260,7 @@ namespace Sentry.Internal.Http
             _workerSignal.Dispose();
             _workerCts.Dispose();
             _worker.Dispose();
+            _cacheDirectoryLock.Dispose();
         }
     }
 }
