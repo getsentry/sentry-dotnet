@@ -14,18 +14,14 @@ using Xunit;
 
 namespace Sentry.Tests.Internals.Http
 {
-    public class CachingTransportTests : IDisposable
+    public class CachingTransportTests
     {
-        private string CacheDirectoryPath { get; } = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            $"EnvelopeCache_{Guid.NewGuid()}"
-        );
-
         [Fact(Timeout = 10000)]
         public async Task WorksInBackground()
         {
             // Arrange
-            var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
+            using var cacheDirectory = new TempDirectory();
+            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
 
             using var innerTransport = new FakeTransport();
             await using var transport = new CachingTransport(innerTransport, options);
@@ -36,8 +32,8 @@ namespace Sentry.Tests.Internals.Http
 
             // Wait until directory is empty
             while (
-                Directory.Exists(CacheDirectoryPath) &&
-                Directory.EnumerateFiles(CacheDirectoryPath, "*", SearchOption.AllDirectories).Any())
+                Directory.Exists(cacheDirectory.Path) &&
+                Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
             {
                 await Task.Delay(100);
             }
@@ -51,7 +47,8 @@ namespace Sentry.Tests.Internals.Http
         public async Task EnvelopeReachesInnerTransport()
         {
             // Arrange
-            var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
+            using var cacheDirectory = new TempDirectory();
+            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
 
             using var innerTransport = new FakeTransport();
             await using var transport = new CachingTransport(innerTransport, options);
@@ -74,9 +71,10 @@ namespace Sentry.Tests.Internals.Http
         public async Task MaintainsLimit()
         {
             // Arrange
+            using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
-                CacheDirectoryPath = CacheDirectoryPath,
+                CacheDirectoryPath = cacheDirectory.Path,
                 MaxQueueItems = 3
             };
 
@@ -103,7 +101,8 @@ namespace Sentry.Tests.Internals.Http
         public async Task AwareOfExistingFiles()
         {
             // Arrange
-            var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
+            using var cacheDirectory = new TempDirectory();
+            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
 
             // Send some envelopes with a failing transport to make sure they all stay in cache
             {
@@ -124,8 +123,8 @@ namespace Sentry.Tests.Internals.Http
 
             // Wait until directory is empty
             while (
-                Directory.Exists(CacheDirectoryPath) &&
-                Directory.EnumerateFiles(CacheDirectoryPath, "*", SearchOption.AllDirectories).Any())
+                Directory.Exists(cacheDirectory.Path) &&
+                Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
             {
                 await Task.Delay(100);
             }
@@ -138,7 +137,8 @@ namespace Sentry.Tests.Internals.Http
         public async Task RetriesOnTransientExceptions()
         {
             // Arrange
-            var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
+            using var cacheDirectory = new TempDirectory();
+            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
 
             var innerTransport = Substitute.For<ITransport>();
             var isFailing = true;
@@ -179,7 +179,8 @@ namespace Sentry.Tests.Internals.Http
         public async Task DoesNotRetryOnNonTransientExceptions()
         {
             // Arrange
-            var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
+            using var cacheDirectory = new TempDirectory();
+            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
 
             var innerTransport = Substitute.For<ITransport>();
             var isFailing = true;
@@ -214,17 +215,6 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             // (0 envelopes retried)
             _ = innerTransport.Received(0).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                Directory.Delete(CacheDirectoryPath, true);
-            }
-            catch (DirectoryNotFoundException)
-            {
-            }
         }
     }
 }
