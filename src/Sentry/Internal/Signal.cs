@@ -26,9 +26,9 @@ namespace Sentry.Internal
                 {
                     return;
                 }
-            }
 
-            _semaphore.Release();
+                _semaphore.Release();
+            }
         }
 
         public async ValueTask WaitAsync(CancellationToken cancellationToken = default) =>
