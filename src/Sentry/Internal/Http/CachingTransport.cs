@@ -91,6 +91,36 @@ namespace Sentry.Internal.Http
             });
         }
 
+        private void EnsureMaxCacheCapacity()
+        {
+            var excessCacheFilePaths = GetCacheFilePaths().Skip(_options.MaxQueueItems).ToArray();
+            foreach (var filePath in excessCacheFilePaths)
+            {
+                try
+                {
+                    File.Delete(filePath);
+                }
+                catch (FileNotFoundException)
+                {
+                    // File has already been deleted?
+                }
+            }
+        }
+
+        private IEnumerable<string> GetCacheFilePaths()
+        {
+            try
+            {
+                return Directory
+                    .EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                    .OrderBy(f => new FileInfo(f).CreationTimeUtc);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return Array.Empty<string>();
+            }
+        }
+
         private async ValueTask ProcessCacheAsync(CancellationToken cancellationToken = default)
         {
             _options.DiagnosticLogger?.LogDebug("Flushing cached envelopes.");
@@ -191,13 +221,7 @@ namespace Sentry.Internal.Http
         {
             using var lockClaim = await _cacheDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
 
-            // If over capacity - remove oldest envelope file
-            while (
-                GetCacheFilePaths().Count() >= _options.MaxQueueItems &&
-                GetCacheFilePaths().FirstOrDefault() is { } oldestEnvelopeFilePath)
-            {
-                File.Delete(oldestEnvelopeFilePath);
-            }
+            EnsureMaxCacheCapacity();
 
             // Envelope file name can be either:
             // 1604679692_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
@@ -221,20 +245,6 @@ namespace Sentry.Internal.Http
             // Tell the worker that there is work available
             // (file stream MUST BE DISPOSED prior to this)
             _workerSignal.Release();
-        }
-
-        private IEnumerable<string> GetCacheFilePaths()
-        {
-            try
-            {
-                return Directory
-                    .EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
-                    .OrderBy(f => new FileInfo(f).CreationTimeUtc);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                return Array.Empty<string>();
-            }
         }
 
         public int GetCacheLength() => GetCacheFilePaths().Count();
