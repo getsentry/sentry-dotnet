@@ -91,42 +91,6 @@ namespace Sentry.Internal.Http
             });
         }
 
-        private IEnumerable<string> GetCacheFilePaths()
-        {
-            try
-            {
-                return Directory
-                    .EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
-                    .OrderBy(f => new FileInfo(f).CreationTimeUtc);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                return Array.Empty<string>();
-            }
-        }
-
-        public int GetCacheLength() => GetCacheFilePaths().Count();
-
-        // Gets the next cache file and moves it to "processing"
-        private async ValueTask<string?> TryPrepareNextCacheFileAsync(
-            CancellationToken cancellationToken = default)
-        {
-            using var lockClaim = await _cacheDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
-
-            var filePath = GetCacheFilePaths().FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(filePath))
-            {
-                return null;
-            }
-
-            var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
-
-            Directory.CreateDirectory(_processingDirectoryPath);
-            File.Move(filePath, targetFilePath);
-
-            return targetFilePath;
-        }
-
         private async ValueTask ProcessCacheAsync(CancellationToken cancellationToken = default)
         {
             _options.DiagnosticLogger?.LogDebug("Flushing cached envelopes.");
@@ -201,6 +165,26 @@ namespace Sentry.Internal.Http
             }
         }
 
+        // Gets the next cache file and moves it to "processing"
+        private async ValueTask<string?> TryPrepareNextCacheFileAsync(
+            CancellationToken cancellationToken = default)
+        {
+            using var lockClaim = await _cacheDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+
+            var filePath = GetCacheFilePaths().FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return null;
+            }
+
+            var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
+
+            Directory.CreateDirectory(_processingDirectoryPath);
+            File.Move(filePath, targetFilePath);
+
+            return targetFilePath;
+        }
+
         private async ValueTask StoreToCacheAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
@@ -238,6 +222,22 @@ namespace Sentry.Internal.Http
             // (file stream MUST BE DISPOSED prior to this)
             _workerSignal.Release();
         }
+
+        private IEnumerable<string> GetCacheFilePaths()
+        {
+            try
+            {
+                return Directory
+                    .EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                    .OrderBy(f => new FileInfo(f).CreationTimeUtc);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return Array.Empty<string>();
+            }
+        }
+
+        public int GetCacheLength() => GetCacheFilePaths().Count();
 
         // This method asynchronously blocks until the envelope is written to cache, but not until it's sent
         public async ValueTask SendEnvelopeAsync(
