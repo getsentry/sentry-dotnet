@@ -43,11 +43,12 @@ namespace Sentry.Internal
             if (_options.CacheFlushTimeout > TimeSpan.Zero)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Flushing existing cache during transport activation."
+                    "Flushing existing cache during transport activation up to {0}.",
+                    _options.CacheFlushTimeout
                 );
 
                 // Use a timeout to avoid waiting for too long
-                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                using var timeout = new CancellationTokenSource(_options.CacheFlushTimeout);
 
                 try
                 {
