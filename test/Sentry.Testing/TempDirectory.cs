@@ -9,7 +9,8 @@ namespace Sentry.Testing
 
         public TempDirectory(string path)
         {
-            Path = Directory.CreateDirectory(path).FullName;
+            Path = path;
+            Directory.CreateDirectory(path);
         }
 
         public TempDirectory()
