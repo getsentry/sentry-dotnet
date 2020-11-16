@@ -34,7 +34,7 @@ namespace Sentry.Protocol
         internal ConcurrentQueue<Breadcrumb>? InternalBreadcrumbs { get; set; }
 
         [DataMember(Name = "extra", EmitDefaultValue = false)]
-        internal ConcurrentDictionary<string, object>? InternalExtra { get; set; }
+        internal ConcurrentDictionary<string, object?>? InternalExtra { get; set; }
 
         [DataMember(Name = "tags", EmitDefaultValue = false)]
         internal ConcurrentDictionary<string, string>? InternalTags { get; set; }
@@ -142,11 +142,11 @@ namespace Sentry.Protocol
         /// </summary>
         public
 #if NET451
-            IDictionary<string, object>
+            IDictionary<string, object?>
 #else
-            IReadOnlyDictionary<string, object>
+            IReadOnlyDictionary<string, object?>
 #endif
-            Extra => InternalExtra ??= new ConcurrentDictionary<string, object>();
+            Extra => InternalExtra ??= new ConcurrentDictionary<string, object?>();
 
         /// <summary>
         /// Arbitrary key-value for this event

@@ -114,12 +114,12 @@ namespace Sentry.Serilog
             // Even if it was sent as event, add breadcrumb so next event includes it
             if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
             {
-                Dictionary<string, string> ?data = null;
+                Dictionary<string, string?> ?data = null;
                 if (exception != null && !string.IsNullOrWhiteSpace(formatted))
                 {
                     // Exception.Message won't be used as Breadcrumb message
                     // Avoid losing it by adding as data:
-                    data = new Dictionary<string, string>
+                    data = new Dictionary<string, string?>
                     {
                         {"exception_message", exception.Message}
                     };

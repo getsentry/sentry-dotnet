@@ -29,7 +29,7 @@ namespace Sentry.Integrations
 
         // Internal for testability
         [HandleProcessCorruptedStateExceptions, SecurityCritical]
-        internal void Handle(object sender, UnobservedTaskExceptionEventArgs e)
+        internal void Handle(object? sender, UnobservedTaskExceptionEventArgs e)
         {
             if (e.Exception != null)
             {

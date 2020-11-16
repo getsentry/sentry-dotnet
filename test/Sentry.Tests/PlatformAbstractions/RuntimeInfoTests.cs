@@ -69,6 +69,19 @@ namespace Sentry.Tests.PlatformAbstractions
         }
 #endif
 
+#if NET5_0
+        [Fact]
+        public void SetNetCoreVersion_NetAsNameAndFiveAsVersion()
+        {
+            var input = new Runtime(".NET");
+            RuntimeInfo.SetNetCoreVersion(input);
+
+            Assert.Equal(".NET", input.Name);
+            Assert.StartsWith("5.0", input.Version);
+        }
+#endif
+
+
         public static IEnumerable<object[]> ParseTestCases()
         {
             yield return new object[] { new ParseTestCase

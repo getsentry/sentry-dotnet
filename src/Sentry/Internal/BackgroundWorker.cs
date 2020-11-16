@@ -206,7 +206,7 @@ namespace Sentry.Internal
             var counter = 0;
             var depth = int.MaxValue;
 
-            void EventFlushedCallback(object objProcessed, EventArgs _)
+            void EventFlushedCallback(object? _, EventArgs __)
             {
                 // ReSharper disable once AccessToModifiedClosure
                 if (Interlocked.Increment(ref counter) >= depth)
