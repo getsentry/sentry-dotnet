@@ -240,6 +240,7 @@ namespace Sentry.Tests
             // Assert
             Directory
                 .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
+                .ToArray()
                 .Should().BeEmpty();
         }
 
