@@ -233,7 +233,7 @@ namespace Sentry.Tests
             {
                 o.Dsn = ValidDsnWithoutSecret;
                 o.CacheDirectoryPath = cacheDirectory.Path;
-                o.CacheFlushTimeout = TimeSpan.FromSeconds(1);
+                o.CacheFlushTimeout = TimeSpan.FromSeconds(5);
                 o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
             });
 
