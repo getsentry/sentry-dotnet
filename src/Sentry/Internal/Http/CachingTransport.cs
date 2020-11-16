@@ -10,7 +10,7 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {
-    internal class CachingTransport : ITransport, IDisposable
+    internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
     {
         private const string EnvelopeFileExt = "envelope";
 
@@ -42,7 +42,7 @@ namespace Sentry.Internal.Http
             _options = options;
 
             _cacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
-                ? _cacheDirectoryPath = options.CacheDirectoryPath
+                ? _cacheDirectoryPath = Path.Combine(options.CacheDirectoryPath, "Sentry", options.Dsn ?? "no-dsn")
                 : throw new InvalidOperationException("Cache directory is not set.");
 
             _processingDirectoryPath = Path.Combine(_cacheDirectoryPath, "__processing");
@@ -54,8 +54,6 @@ namespace Sentry.Internal.Http
             {
                 foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
                 {
-                    Directory.CreateDirectory(_cacheDirectoryPath);
-
                     File.Move(
                         filePath,
                         Path.Combine(_cacheDirectoryPath, Path.GetFileName(filePath))
@@ -65,38 +63,46 @@ namespace Sentry.Internal.Http
 
             _worker = Task.Run(async () =>
             {
-                while (!_workerCts.IsCancellationRequested)
+                try
                 {
-                    try
+                    while (!_workerCts.IsCancellationRequested)
                     {
-                        await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
-                        await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
+                        try
+                        {
+                            await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
+                            await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            _options.DiagnosticLogger?.LogError(
+                                "Exception in background worker of CachingTransport.",
+                                ex
+                            );
+
+                            // Wait a bit before retrying
+                            await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
+                        }
                     }
-                    catch (OperationCanceledException)
-                    {
-                        // Ignore
-                    }
-                    catch (Exception ex)
-                    {
-                        _options.DiagnosticLogger?.LogError(
-                            "Exception in background worker of CachingTransport.",
-                            ex
-                        );
-                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Worker has been shut down, it's okay
                 }
             });
         }
 
         private IEnumerable<string> GetCacheFilePaths()
         {
-            if (!Directory.Exists(_cacheDirectoryPath))
+            try
             {
-                return Enumerable.Empty<string>();
+                return Directory
+                    .EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                    .OrderBy(f => new FileInfo(f).CreationTimeUtc);
             }
-
-            return Directory
-                .EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
-                .OrderBy(f => new FileInfo(f).CreationTimeUtc);
+            catch (DirectoryNotFoundException)
+            {
+                return Array.Empty<string>();
+            }
         }
 
         public int GetCacheLength() => GetCacheFilePaths().Count();
@@ -253,14 +259,18 @@ namespace Sentry.Internal.Http
         public async ValueTask FlushAsync(CancellationToken cancellationToken = default) =>
             await ProcessCacheAsync(cancellationToken).ConfigureAwait(false);
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            StopWorkerAsync().GetAwaiter().GetResult();
+            await StopWorkerAsync().ConfigureAwait(false);
 
             _workerSignal.Dispose();
             _workerCts.Dispose();
             _worker.Dispose();
             _cacheDirectoryLock.Dispose();
+
+            (_innerTransport as IDisposable)?.Dispose();
         }
+
+        public void Dispose() => DisposeAsync().GetAwaiter().GetResult();
     }
 }

@@ -28,7 +28,7 @@ namespace Sentry.Tests.Internals.Http
             var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
 
             using var innerTransport = new FakeTransport();
-            using var transport = new CachingTransport(innerTransport, options);
+            await using var transport = new CachingTransport(innerTransport, options);
 
             // Act
             using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -54,7 +54,7 @@ namespace Sentry.Tests.Internals.Http
             var options = new SentryOptions {CacheDirectoryPath = CacheDirectoryPath};
 
             using var innerTransport = new FakeTransport();
-            using var transport = new CachingTransport(innerTransport, options);
+            await using var transport = new CachingTransport(innerTransport, options);
 
             // Act
             using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -87,7 +87,7 @@ namespace Sentry.Tests.Internals.Http
                 .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
                 .Returns(new ValueTask(Task.Delay(3000)));
 
-            using var transport = new CachingTransport(innerTransport, options);
+            await using var transport = new CachingTransport(innerTransport, options);
 
             // Act & assert
             for (var i = 0; i < 20; i++)
@@ -108,7 +108,7 @@ namespace Sentry.Tests.Internals.Http
             // Send some envelopes with a failing transport to make sure they all stay in cache
             {
                 var initialInnerTransport = new FakeFailingTransport();
-                using var initialTransport = new CachingTransport(initialInnerTransport, options);
+                await using var initialTransport = new CachingTransport(initialInnerTransport, options);
 
                 for (var i = 0; i < 3; i++)
                 {
@@ -118,7 +118,7 @@ namespace Sentry.Tests.Internals.Http
             }
 
             using var innerTransport = new FakeTransport();
-            using var transport = new CachingTransport(innerTransport, options);
+            await using var transport = new CachingTransport(innerTransport, options);
 
             // Act
 
@@ -151,7 +151,7 @@ namespace Sentry.Tests.Internals.Http
                         : new ValueTask()
                 );
 
-            using var transport = new CachingTransport(innerTransport, options);
+            await using var transport = new CachingTransport(innerTransport, options);
 
             // Can't really reliably test this with a worker
             await transport.StopWorkerAsync();
@@ -192,7 +192,7 @@ namespace Sentry.Tests.Internals.Http
                         : new ValueTask()
                 );
 
-            using var transport = new CachingTransport(innerTransport, options);
+            await using var transport = new CachingTransport(innerTransport, options);
 
             // Can't really reliably test this with a worker
             await transport.StopWorkerAsync();

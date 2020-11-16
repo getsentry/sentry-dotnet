@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
@@ -51,7 +50,6 @@ namespace Sentry
         /// A list of integrations to be added when the SDK is initialized.
         /// </summary>
         internal ISdkIntegration[]? Integrations { get; set; }
-
 
         internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
@@ -363,7 +361,7 @@ namespace Sentry
         public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
 
         /// <summary>
-        /// Path to the directory where events are stored locally for resilience purposes.
+        /// Path to the root directory used for storing events locally for resilience.
         /// If set to <code>null</code>, caching will not be used.
         /// </summary>
         public string? CacheDirectoryPath { get; set; }
