@@ -7,22 +7,22 @@ using System.Threading.Tasks;
 
 namespace Sentry.Testing
 {
-    public class FakeHttpMessageHandler : HttpMessageHandler
+    public class FakeHttpClientHandler : HttpClientHandler
     {
         private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> _getResponse;
         private readonly List<HttpRequestMessage> _requests = new List<HttpRequestMessage>();
 
-        public FakeHttpMessageHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> getResponse)
+        public FakeHttpClientHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> getResponse)
         {
             _getResponse = getResponse;
         }
 
-        public FakeHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> getResponse)
+        public FakeHttpClientHandler(Func<HttpRequestMessage, HttpResponseMessage> getResponse)
             : this(req => Task.FromResult(getResponse(req)))
         {
         }
 
-        public FakeHttpMessageHandler()
+        public FakeHttpClientHandler()
             : this(_ => new HttpResponseMessage(HttpStatusCode.OK))
         {
         }
