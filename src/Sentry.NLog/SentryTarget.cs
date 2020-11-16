@@ -391,12 +391,12 @@ namespace Sentry.NLog
                     ? exception?.Message ?? logEvent.FormattedMessage
                     : breadcrumbFormatted;
 
-                IDictionary<string, string?>? data = null;
+                IDictionary<string, string>? data = null;
                 // If this is true, an exception is being logged with no custom message
                 if (exception?.Message != null && !message.StartsWith(exception.Message))
                 {
                     // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
-                    data = new Dictionary<string, string?>
+                    data = new Dictionary<string, string>
                         {
                             { "exception_type", exception.GetType().ToString() },
                             { "exception_message", exception.Message },
@@ -408,7 +408,7 @@ namespace Sentry.NLog
                     if (shouldIncludeProperties)
                     {
                         var contextProps = GetAllProperties(logEvent);
-                        data ??= new Dictionary<string, string?>(contextProps.Count);
+                        data ??= new Dictionary<string, string>(contextProps.Count);
                         foreach (var contextProp in contextProps)
                         {
                             if (contextProp.Value?.ToString() is {} value)

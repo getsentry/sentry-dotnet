@@ -114,12 +114,12 @@ namespace Sentry.Serilog
             // Even if it was sent as event, add breadcrumb so next event includes it
             if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
             {
-                Dictionary<string, string?> ?data = null;
+                Dictionary<string, string> ?data = null;
                 if (exception != null && !string.IsNullOrWhiteSpace(formatted))
                 {
                     // Exception.Message won't be used as Breadcrumb message
                     // Avoid losing it by adding as data:
-                    data = new Dictionary<string, string?>
+                    data = new Dictionary<string, string>
                     {
                         {"exception_message", exception.Message}
                     };
@@ -136,7 +136,7 @@ namespace Sentry.Serilog
             }
         }
 
-        private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEvent logEvent)
+        private IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LogEvent logEvent)
         {
             var properties = logEvent.Properties;
 
@@ -145,11 +145,11 @@ namespace Sentry.Serilog
                 var value = property.Value;
                 if (value is ScalarValue scalarValue)
                 {
-                    yield return new KeyValuePair<string, object>(property.Key, scalarValue.Value);
+                    yield return new KeyValuePair<string, object?>(property.Key, scalarValue.Value);
                 }
                 else if (value != null)
                 {
-                    yield return new KeyValuePair<string, object>(property.Key, value);
+                    yield return new KeyValuePair<string, object?>(property.Key, value);
                 }
             }
         }

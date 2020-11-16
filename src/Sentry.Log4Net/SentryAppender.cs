@@ -127,7 +127,7 @@ namespace Sentry.Log4Net
             _ = Hub.CaptureEvent(evt);
         }
 
-        private static IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LoggingEvent loggingEvent)
+        private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LoggingEvent loggingEvent)
         {
             var properties = loggingEvent.GetProperties();
             if (properties == null)
@@ -144,7 +144,7 @@ namespace Sentry.Log4Net
                     if (value != null
                         && (!(value is string stringValue) || !string.IsNullOrWhiteSpace(stringValue)))
                     {
-                        yield return new KeyValuePair<string, object>(key, value);
+                        yield return new KeyValuePair<string, object?>(key, value);
                     }
                 }
             }
@@ -154,38 +154,38 @@ namespace Sentry.Log4Net
             {
                 if (!string.IsNullOrEmpty(locInfo.ClassName))
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.ClassName), locInfo.ClassName);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.ClassName), locInfo.ClassName);
                 }
 
                 if (!string.IsNullOrEmpty(locInfo.FileName))
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.FileName), locInfo.FileName);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.FileName), locInfo.FileName);
                 }
 
                 if (int.TryParse(locInfo.LineNumber, out var lineNumber) && lineNumber != 0)
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.LineNumber), lineNumber);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.LineNumber), lineNumber);
                 }
 
                 if (!string.IsNullOrEmpty(locInfo.MethodName))
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.MethodName), locInfo.MethodName);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.MethodName), locInfo.MethodName);
                 }
             }
 
             if (!string.IsNullOrEmpty(loggingEvent.ThreadName))
             {
-                yield return new KeyValuePair<string, object>(nameof(loggingEvent.ThreadName), loggingEvent.ThreadName);
+                yield return new KeyValuePair<string, object?>(nameof(loggingEvent.ThreadName), loggingEvent.ThreadName);
             }
 
             if (!string.IsNullOrEmpty(loggingEvent.Domain))
             {
-                yield return new KeyValuePair<string, object>(nameof(loggingEvent.Domain), loggingEvent.Domain);
+                yield return new KeyValuePair<string, object?>(nameof(loggingEvent.Domain), loggingEvent.Domain);
             }
 
             if (loggingEvent.Level != null)
             {
-                yield return new KeyValuePair<string, object>("log4net-level", loggingEvent.Level.Name);
+                yield return new KeyValuePair<string, object?>("log4net-level", loggingEvent.Level.Name);
             }
         }
 
