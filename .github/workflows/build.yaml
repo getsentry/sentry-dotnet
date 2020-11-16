@@ -15,14 +15,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: windows-latest
             build_script: .\build.ps1
-          - BuildConfiguration: Release
-            BuildPlatform: x64
-            UseRNFork: true
-    
+          - os: ubuntu-latest
+            build_script: ./build.sh
+          - os: macos-latest
+            build_script: ./build.sh
+
     steps:
         - name: Checkout
           uses: actions/checkout@v2
@@ -42,8 +43,16 @@ jobs:
           with:
             dotnet-version: '5.0.100'
 
-        - name: Setup MSBuild
-          uses: microsoft/setup-msbuild@v1.0.2
-        
         - name: Run build script
           run: ${{ matrix.build_script }}
+
+        - name: Publish coverage report
+          uses: codecov/codecov-action@v1
+
+        - name: Archive Artifacts
+          uses: actions/upload-artifact@v2
+          with:
+            name: ${{ github.sha }}
+            path: |
+              ${{ github.workspace }}/src/**/Release/*.snupkg
+              ${{ github.workspace }}/src/**/Release/*.nupkg
