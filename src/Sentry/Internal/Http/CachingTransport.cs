@@ -93,7 +93,7 @@ namespace Sentry.Internal.Http
 
         private void EnsureMaxCacheCapacity()
         {
-            var excessCacheFilePaths = GetCacheFilePaths().Skip(_options.MaxQueueItems).ToArray();
+            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(_options.MaxQueueItems).ToArray();
             foreach (var filePath in excessCacheFilePaths)
             {
                 try

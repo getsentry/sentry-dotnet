@@ -206,17 +206,15 @@ namespace Sentry.Tests
         public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
         {
             // Arrange
-            var cacheDirectoryPath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                $"EnvelopeCache_{Guid.NewGuid()}"
-            );
+            using var cacheDirectory = new TempDirectory();
 
             {
                 // Pre-populate cache
                 var initialInnerTransport = new FakeFailingTransport();
                 await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
                 {
-                    CacheDirectoryPath = cacheDirectoryPath
+                    Dsn = ValidDsnWithoutSecret,
+                    CacheDirectoryPath = cacheDirectory.Path
                 });
 
                 for (var i = 0; i < 3; i++)
@@ -231,14 +229,14 @@ namespace Sentry.Tests
             using var _ = SentrySdk.Init(o =>
             {
                 o.Dsn = ValidDsnWithoutSecret;
-                o.CacheDirectoryPath = cacheDirectoryPath;
+                o.CacheDirectoryPath = cacheDirectory.Path;
                 o.CacheFlushTimeout = TimeSpan.FromSeconds(1);
                 o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
             });
 
             // Assert
             Directory
-                .EnumerateFiles(cacheDirectoryPath, "*", SearchOption.AllDirectories)
+                .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
                 .Should().BeEmpty();
         }
 
