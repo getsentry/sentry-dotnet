@@ -199,7 +199,7 @@ namespace Sentry.Internal.Http
         private async ValueTask<string?> TryPrepareNextCacheFileAsync(
             CancellationToken cancellationToken = default)
         {
-            using var lockClaim = await _cacheDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+            using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
             var filePath = GetCacheFilePaths().FirstOrDefault();
             if (string.IsNullOrWhiteSpace(filePath))
@@ -219,7 +219,7 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
-            using var lockClaim = await _cacheDirectoryLock.ClaimAsync(cancellationToken).ConfigureAwait(false);
+            using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
             EnsureMaxCacheCapacity();
 

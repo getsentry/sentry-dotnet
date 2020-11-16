@@ -218,9 +218,12 @@ namespace Sentry.Tests.Internals.Http
 
         public void Dispose()
         {
-            if (Directory.Exists(CacheDirectoryPath))
+            try
             {
                 Directory.Delete(CacheDirectoryPath, true);
+            }
+            catch (DirectoryNotFoundException)
+            {
             }
         }
     }

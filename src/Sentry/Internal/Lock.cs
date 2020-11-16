@@ -10,7 +10,7 @@ namespace Sentry.Internal
 
         public Lock() => _signal = new Signal(true);
 
-        public async ValueTask<IDisposable> ClaimAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
         {
             await _signal.WaitAsync(cancellationToken).ConfigureAwait(false);
             return Disposable.Create(_signal.Release);
