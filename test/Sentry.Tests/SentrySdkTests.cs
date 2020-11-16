@@ -217,6 +217,9 @@ namespace Sentry.Tests
                     CacheDirectoryPath = cacheDirectory.Path
                 });
 
+                // Shutdown the worker to make sure nothing gets processed
+                await initialTransport.StopWorkerAsync();
+
                 for (var i = 0; i < 3; i++)
                 {
                     using var envelope = Envelope.FromEvent(new SentryEvent());

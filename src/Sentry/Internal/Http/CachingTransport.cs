@@ -95,15 +95,20 @@ namespace Sentry.Internal.Http
             });
         }
 
-        private void EnsureMaxCacheCapacity()
+        private void EnsureFreeSpaceInCache()
         {
-            // Trim files, leaving only (X - 1) of the newest ones
+            // Trim files, leaving only (X - 1) of the newest ones.
+            // X-1 because we need at least 1 empty space for an envelope we're about to add.
             // Example:
             // Limit: 3
             // [f1] [f2] [f3] [f4] [f5]
             //                |-------| <- keep these ones
             // |------------|           <- delete these ones
-            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(_options.MaxQueueItems - 1).ToArray();
+            var keepCount = _options.MaxQueueItems >= 1
+                ? _options.MaxQueueItems - 1
+                : 0; // just in case MaxQueueItems is set to an invalid value somehow (shouldn't happen)
+
+            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(keepCount).ToArray();
 
             foreach (var filePath in excessCacheFilePaths)
             {
@@ -113,7 +118,11 @@ namespace Sentry.Internal.Http
                 }
                 catch (FileNotFoundException)
                 {
-                    // File has already been deleted?
+                    // File has already been deleted (unexpected but not critical)
+                    _options.DiagnosticLogger?.LogWarning(
+                        "Cached envelope '{0}' has already been deleted.",
+                        filePath
+                    );
                 }
             }
         }
@@ -128,6 +137,10 @@ namespace Sentry.Internal.Http
             }
             catch (DirectoryNotFoundException)
             {
+                _options.DiagnosticLogger?.LogWarning(
+                    "Cache directory is empty."
+                );
+
                 return Array.Empty<string>();
             }
         }
@@ -207,7 +220,7 @@ namespace Sentry.Internal.Http
         {
             using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
-            EnsureMaxCacheCapacity();
+            EnsureFreeSpaceInCache();
 
             // Envelope file name can be either:
             // 1604679692_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
@@ -233,7 +246,8 @@ namespace Sentry.Internal.Http
             _workerSignal.Release();
         }
 
-        public int GetCacheLength() => GetCacheFilePaths().Count();
+        // Used locally and in tests
+        internal int GetCacheLength() => GetCacheFilePaths().Count();
 
         // This method asynchronously blocks until the envelope is written to cache, but not until it's sent
         public async ValueTask SendEnvelopeAsync(
