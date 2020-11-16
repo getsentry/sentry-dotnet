@@ -146,7 +146,8 @@ namespace Sentry.Internal.Http
                 try
                 {
                     using var envelopeFile = File.OpenRead(envelopeFilePath);
-                    using var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
+                    using var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken)
+                        .ConfigureAwait(false);
 
                     _options.DiagnosticLogger?.LogDebug(
                         "Sending cached envelope: {0}",
@@ -159,6 +160,10 @@ namespace Sentry.Internal.Http
                         "Successfully sent cached envelope: {0}",
                         envelope.TryGetEventId()
                     );
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception ex)
                 {
