@@ -103,7 +103,7 @@ namespace Sentry.Extensions.Logging
                 {
                     // Exception.Message won't be used as Breadcrumb message
                     // Avoid losing it by adding as data:
-                    data ??= new Dictionary<string, string?>();
+                    data ??= new Dictionary<string, string>();
                     data.Add("exception_message", exception.Message);
                 }
 
