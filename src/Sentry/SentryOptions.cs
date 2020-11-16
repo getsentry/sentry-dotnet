@@ -367,10 +367,11 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
-        /// Whether to flush existing cached envelopes on initialization.
+        /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
+        /// You can set it to <code>TimeSpan.Zero</code> to disable this feature.
         /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
         /// </summary>
-        public bool FlushCacheOnInit { get; set; } = true;
+        public TimeSpan CacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>

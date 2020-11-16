@@ -214,7 +214,7 @@ namespace Sentry.Tests
             {
                 // Pre-populate cache
                 var initialInnerTransport = new FakeFailingTransport();
-                using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
+                await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
                 {
                     CacheDirectoryPath = cacheDirectoryPath
                 });
@@ -232,7 +232,7 @@ namespace Sentry.Tests
             {
                 o.Dsn = ValidDsnWithoutSecret;
                 o.CacheDirectoryPath = cacheDirectoryPath;
-                o.FlushCacheOnInit = true;
+                o.CacheFlushTimeout = TimeSpan.FromSeconds(1);
                 o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
             });
 

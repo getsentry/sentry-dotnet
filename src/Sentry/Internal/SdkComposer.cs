@@ -40,7 +40,7 @@ namespace Sentry.Internal
             var cachingTransport = new CachingTransport(httpTransport, _options);
 
             // If configured, flush existing cache
-            if (_options.FlushCacheOnInit)
+            if (_options.CacheFlushTimeout > TimeSpan.Zero)
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Flushing existing cache during transport activation."
