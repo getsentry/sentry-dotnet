@@ -126,7 +126,7 @@ namespace Sentry.Internal
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.DiagnosticLogger?.LogDebug(
-                                "Envelope {0} in-flight to Sentry. #{1} in queue.",
+                                "Envelope {0} handed off to transport. #{1} in queue.",
                                 envelope.TryGetEventId(),
                                 _queue.Count
                             );

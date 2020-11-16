@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -144,19 +143,17 @@ namespace Sentry.Internal.Http
                     envelopeFilePath
                 );
 
-                var shouldRetry = false;
-
-                using (var envelopeFile = File.OpenRead(envelopeFilePath))
-                using (var envelope =
-                    await Envelope.DeserializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false))
+                try
                 {
-                    _options.DiagnosticLogger?.LogDebug(
-                        "Sending cached envelope: {0}",
-                        envelope.TryGetEventId()
-                    );
-
-                    try
+                    using (var envelopeFile = File.OpenRead(envelopeFilePath))
+                    using (var envelope =
+                        await Envelope.DeserializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false))
                     {
+                        _options.DiagnosticLogger?.LogDebug(
+                            "Sending cached envelope: {0}",
+                            envelope.TryGetEventId()
+                        );
+
                         await _innerTransport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
 
                         _options.DiagnosticLogger?.LogDebug(
@@ -164,46 +161,20 @@ namespace Sentry.Internal.Http
                             envelope.TryGetEventId()
                         );
                     }
-                    catch (IOException ex)
-                    {
-                        _options.DiagnosticLogger?.LogError(
-                            "Transient failure when sending cached envelope: {0}",
-                            ex,
-                            envelope.TryGetEventId()
-                        );
-
-                        shouldRetry = true;
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        _options.DiagnosticLogger?.LogError(
-                            "Persistent failure when sending cached envelope: {0}",
-                            ex,
-                            envelope.TryGetEventId()
-                        );
-                    }
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to send cached envelope: {0}",
+                        ex,
+                        envelopeFilePath
+                    );
                 }
 
                 // Envelope & file stream must be disposed prior to reaching this point
 
-                if (shouldRetry)
-                {
-                    // Move the file back to cache directory so it gets processed again in the future
-                    Directory.CreateDirectory(_isolatedCacheDirectoryPath);
-
-                    File.Move(
-                        envelopeFilePath,
-                        Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(envelopeFilePath))
-                    );
-
-                    // Avoid processing other files because the order may end up corrupted
-                    break;
-                }
-                else
-                {
-                    // Delete the envelope file and move on to the next one
-                    File.Delete(envelopeFilePath);
-                }
+                // Delete the envelope file and move on to the next one
+                File.Delete(envelopeFilePath);
             }
         }
 

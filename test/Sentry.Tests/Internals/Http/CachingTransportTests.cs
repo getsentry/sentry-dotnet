@@ -134,48 +134,6 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact(Timeout = 10000)]
-        public async Task RetriesOnTransientExceptions()
-        {
-            // Arrange
-            using var cacheDirectory = new TempDirectory();
-            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
-
-            var innerTransport = Substitute.For<ITransport>();
-            var isFailing = true;
-
-            innerTransport
-                .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-                .Returns(_ =>
-                    isFailing
-                        ? new ValueTask(Task.FromException(new IOException()))
-                        : new ValueTask()
-                );
-
-            await using var transport = new CachingTransport(innerTransport, options);
-
-            // Can't really reliably test this with a worker
-            await transport.StopWorkerAsync();
-
-            // Act
-            for (var i = 0; i < 3; i++)
-            {
-                using var envelope = Envelope.FromEvent(new SentryEvent());
-                await transport.SendEnvelopeAsync(envelope);
-            }
-
-            await transport.FlushAsync();
-
-            // (transport stops failing)
-            innerTransport.ClearReceivedCalls();
-            isFailing = false;
-            await transport.FlushAsync();
-
-            // Assert
-            // (3 envelope retried)
-            _ = innerTransport.Received(3).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
-        }
-
-        [Fact(Timeout = 10000)]
         public async Task DoesNotRetryOnNonTransientExceptions()
         {
             // Arrange
