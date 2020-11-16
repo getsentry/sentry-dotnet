@@ -93,7 +93,14 @@ namespace Sentry.Internal.Http
 
         private void EnsureMaxCacheCapacity()
         {
-            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(_options.MaxQueueItems).ToArray();
+            // Trim files, leaving only (X - 1) of the newest ones
+            // Example:
+            // Limit: 3
+            // [f1] [f2] [f3] [f4] [f5]
+            //                |-------| <- keep these ones
+            // |------------|           <- delete these ones
+            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(_options.MaxQueueItems - 1).ToArray();
+
             foreach (var filePath in excessCacheFilePaths)
             {
                 try
