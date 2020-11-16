@@ -241,7 +241,7 @@ namespace Sentry
                             {"message", e.Message},
                             {"stackTrace", e.StackTrace}
                         },
-                    level: BreadcrumbLevel.Error);
+                        level: BreadcrumbLevel.Error);
                 }
             }
 

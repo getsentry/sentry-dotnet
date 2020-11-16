@@ -98,7 +98,7 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
-                internal static Runtime? GetFromRuntimeInformation()
+        internal static Runtime? GetFromRuntimeInformation()
         {
             // Prefered API: netstandard2.0
             // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs

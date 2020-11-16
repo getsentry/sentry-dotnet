@@ -71,13 +71,13 @@ namespace Sentry.Tests.PlatformAbstractions
 
 #if NET5_0
         [Fact]
-        public void SetNetCoreVersion_NetAsNameAndFiveAsVersion()
+        public void SetNetCoreVersion_Net5Runtime_NullNetCoreVersion()
         {
             var input = new Runtime(".NET");
             RuntimeInfo.SetNetCoreVersion(input);
 
             Assert.Equal(".NET", input.Name);
-            Assert.StartsWith("5.0", input.Version);
+            Assert.Null(input.Version);
         }
 #endif
 
