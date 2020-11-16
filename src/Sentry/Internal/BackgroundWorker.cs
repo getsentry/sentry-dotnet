@@ -283,6 +283,9 @@ namespace Sentry.Internal
                 // If there's anything in the queue, it'll keep running until 'shutdownTimeout' is reached
                 // If the queue is empty it will quit immediately
                 _ = WorkerTask.Wait(_options.ShutdownTimeout);
+
+                // Dispose the transport if needed
+                (_transport as IDisposable)?.Dispose();
             }
             catch (OperationCanceledException)
             {
