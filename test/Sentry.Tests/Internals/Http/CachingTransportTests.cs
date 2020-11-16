@@ -15,7 +15,7 @@ namespace Sentry.Tests.Internals.Http
 {
     public class CachingTransportTests
     {
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 7000)]
         public async Task WorksInBackground()
         {
             // Arrange
@@ -42,7 +42,7 @@ namespace Sentry.Tests.Internals.Http
             sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 7000)]
         public async Task EnvelopeReachesInnerTransport()
         {
             // Arrange
@@ -66,7 +66,7 @@ namespace Sentry.Tests.Internals.Http
             sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 7000)]
         public async Task MaintainsLimit()
         {
             // Arrange
@@ -96,7 +96,7 @@ namespace Sentry.Tests.Internals.Http
             }
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 7000)]
         public async Task AwareOfExistingFiles()
         {
             // Arrange
@@ -135,7 +135,7 @@ namespace Sentry.Tests.Internals.Http
             innerTransport.GetSentEnvelopes().Should().HaveCount(3);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact(Timeout = 7000)]
         public async Task DoesNotRetryOnNonTransientExceptions()
         {
             // Arrange
