@@ -211,8 +211,11 @@ namespace Sentry
                 return true;
             }
 
-            _options.DiagnosticLogger?.LogWarning("The attempt to queue the event failed. Items in queue: {0}",
-                Worker.QueuedItems);
+            _options.DiagnosticLogger?.LogWarning(
+                "The attempt to queue the event failed. Items in queue: {0}",
+                Worker.QueuedItems
+            );
+
             return false;
         }
 
