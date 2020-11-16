@@ -35,8 +35,4 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <DefineConstants>NET5_0;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
-
 </Project>

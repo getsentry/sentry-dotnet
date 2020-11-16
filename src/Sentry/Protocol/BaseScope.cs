@@ -140,24 +140,14 @@ namespace Sentry.Protocol
         /// <summary>
         /// An arbitrary mapping of additional metadata to store with the event.
         /// </summary>
-        public
-#if NET451
-            IDictionary<string, object?>
-#else
-            IReadOnlyDictionary<string, object?>
-#endif
-            Extra => InternalExtra ??= new ConcurrentDictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra
+            => InternalExtra ??= new ConcurrentDictionary<string, object?>();
 
         /// <summary>
         /// Arbitrary key-value for this event
         /// </summary>
-        public
-#if NET451
-            IDictionary<string, string>
-#else
-            IReadOnlyDictionary<string, string>
-#endif
-            Tags => InternalTags ??= new ConcurrentDictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags
+            => InternalTags ??= new ConcurrentDictionary<string, string>();
 
         /// <summary>
         /// Creates a scope with the specified options

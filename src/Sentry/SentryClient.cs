@@ -234,18 +234,19 @@ namespace Sentry
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
-                if (e.StackTrace != null)
+                var data = new Dictionary<string, string>
                 {
-                    @event?.AddBreadcrumb(
-                        "BeforeSend callback failed.",
-                        category: "SentryClient",
-                        data: new Dictionary<string, string>
-                        {
-                            {"message", e.Message},
-                            {"stackTrace", e.StackTrace}
-                        },
-                        level: BreadcrumbLevel.Error);
+                    {"message", e.Message}
+                };
+                if(e.StackTrace is not null)
+                {
+                    data.Add("stackTrace", e.StackTrace);
                 }
+                @event?.AddBreadcrumb(
+                    "BeforeSend callback failed.",
+                    category: "SentryClient",
+                    data: data,
+                    level: BreadcrumbLevel.Error);
             }
 
             return @event;
