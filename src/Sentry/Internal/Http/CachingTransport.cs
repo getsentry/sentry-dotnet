@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
@@ -16,7 +17,7 @@ namespace Sentry.Internal.Http
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
-        private readonly string _cacheDirectoryPath;
+        private readonly string _isolatedCacheDirectoryPath;
 
         // When a file is getting processed, it's moved to a child directory
         // to avoid getting picked up by other threads.
@@ -41,11 +42,15 @@ namespace Sentry.Internal.Http
             _innerTransport = innerTransport;
             _options = options;
 
-            _cacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
-                ? _cacheDirectoryPath = Path.Combine(options.CacheDirectoryPath, "Sentry", options.Dsn ?? "no-dsn")
+            _isolatedCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
+                ? _isolatedCacheDirectoryPath = Path.Combine(
+                    options.CacheDirectoryPath,
+                    "Sentry",
+                    options.Dsn?.GetHashString() ?? "no-dsn"
+                )
                 : throw new InvalidOperationException("Cache directory is not set.");
 
-            _processingDirectoryPath = Path.Combine(_cacheDirectoryPath, "__processing");
+            _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
 
             // Processing directory may already contain some files left from previous session
             // if the worker has been terminated unexpectedly.
@@ -56,7 +61,7 @@ namespace Sentry.Internal.Http
                 {
                     File.Move(
                         filePath,
-                        Path.Combine(_cacheDirectoryPath, Path.GetFileName(filePath))
+                        Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
                     );
                 }
             }
@@ -119,7 +124,7 @@ namespace Sentry.Internal.Http
             try
             {
                 return Directory
-                    .EnumerateFiles(_cacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                    .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
                     .OrderBy(f => new FileInfo(f).CreationTimeUtc);
             }
             catch (DirectoryNotFoundException)
@@ -184,11 +189,11 @@ namespace Sentry.Internal.Http
                 if (shouldRetry)
                 {
                     // Move the file back to cache directory so it gets processed again in the future
-                    Directory.CreateDirectory(_cacheDirectoryPath);
+                    Directory.CreateDirectory(_isolatedCacheDirectoryPath);
 
                     File.Move(
                         envelopeFilePath,
-                        Path.Combine(_cacheDirectoryPath, Path.GetFileName(envelopeFilePath))
+                        Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(envelopeFilePath))
                     );
 
                     // Avoid processing other files because the order may end up corrupted
@@ -235,14 +240,14 @@ namespace Sentry.Internal.Http
             // 1604679692__17754019.envelope
             // (depending on whether event ID is present or not)
             var envelopeFilePath = Path.Combine(
-                _cacheDirectoryPath,
+                _isolatedCacheDirectoryPath,
                 $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" +
                 $"{envelope.TryGetEventId()}_" +
                 $"{envelope.GetHashCode()}" +
                 $".{EnvelopeFileExt}"
             );
 
-            Directory.CreateDirectory(_cacheDirectoryPath);
+            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
 
             using (var stream = File.Create(envelopeFilePath))
             {
