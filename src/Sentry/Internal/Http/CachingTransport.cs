@@ -261,7 +261,18 @@ namespace Sentry.Internal.Http
 
         public async ValueTask DisposeAsync()
         {
-            await StopWorkerAsync().ConfigureAwait(false);
+            try
+            {
+                await StopWorkerAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Don't throw inside dispose
+                _options.DiagnosticLogger?.LogError(
+                    "Error stopping worker during dispose.",
+                    ex
+                );
+            }
 
             _workerSignal.Dispose();
             _workerCts.Dispose();
