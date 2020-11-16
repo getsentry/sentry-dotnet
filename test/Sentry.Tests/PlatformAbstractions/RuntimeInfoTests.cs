@@ -81,7 +81,6 @@ namespace Sentry.Tests.PlatformAbstractions
         }
 #endif
 
-
         public static IEnumerable<object[]> ParseTestCases()
         {
             yield return new object[] { new ParseTestCase
