@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -106,8 +105,11 @@ namespace Sentry.Tests.Internals.Http
 
             // Send some envelopes with a failing transport to make sure they all stay in cache
             {
-                var initialInnerTransport = new FakeFailingTransport();
+                using var initialInnerTransport = new FakeTransport();
                 await using var initialTransport = new CachingTransport(initialInnerTransport, options);
+
+                // Shutdown the worker immediately so nothing gets processed
+                await initialTransport.StopWorkerAsync();
 
                 for (var i = 0; i < 3; i++)
                 {
