@@ -166,17 +166,18 @@ namespace Sentry
                 }
             }
 
-            var breadcrumbs = (ConcurrentQueue<Breadcrumb>)scope.Breadcrumbs;
-
-            var overflow = breadcrumbs.Count -
+            var overflow = scope.Breadcrumbs.Count -
                 (scope.ScopeOptions?.MaxBreadcrumbs ?? Constants.DefaultMaxBreadcrumbs) + 1;
 
             if (overflow > 0)
             {
-                _ = breadcrumbs.TryDequeue(out _);
+                if (scope.Breadcrumbs.LastOrDefault() is { } last)
+                {
+                    scope.Breadcrumbs.Remove(last);
+                }
             }
 
-            breadcrumbs.Enqueue(breadcrumb);
+            scope.Breadcrumbs.Add(breadcrumb);
         }
 
         /// <summary>
