@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Sentry.Protocol;
 using Xunit;
@@ -36,13 +35,10 @@ namespace Sentry.Tests.Protocol
                 Transaction = "transaction"
             };
 
-            sut.InternalBreadcrumbs = new ConcurrentQueue<Breadcrumb>();
-            sut.InternalBreadcrumbs.Enqueue(new Breadcrumb(timestamp, "crumb"));
-            sut.InternalExtra = new ConcurrentDictionary<string, object>();
-            _ = sut.InternalExtra.TryAdd("extra_key", "extra_value");
-            sut.InternalFingerprint = new[] { "fingerprint" };
-            sut.InternalTags = new ConcurrentDictionary<string, string>();
-            _ = sut.InternalTags.TryAdd("tag_key", "tag_value");
+            sut.Breadcrumbs.Add(new Breadcrumb(timestamp, "crumb"));
+            sut.SetExtra("extra_key", "extra_value");
+            sut.Fingerprint = new[] {"fingerprint"};
+            sut.SetTag("tag_key", "tag_value");
 
             var actual = JsonSerializer.SerializeObject(sut);
 
@@ -104,13 +100,10 @@ namespace Sentry.Tests.Protocol
                 Transaction = "transaction"
             };
 
-            sut.InternalBreadcrumbs = new ConcurrentQueue<Breadcrumb>();
-            sut.InternalBreadcrumbs.Enqueue(new Breadcrumb(timestamp, "crumb"));
-            sut.InternalExtra = new ConcurrentDictionary<string, object>();
-            _ = sut.InternalExtra.TryAdd("extra_key", "extra_value");
-            sut.InternalFingerprint = new[] { "fingerprint" };
-            sut.InternalTags = new ConcurrentDictionary<string, string>();
-            _ = sut.InternalTags.TryAdd("tag_key", "tag_value");
+            sut.Breadcrumbs.Add(new Breadcrumb(timestamp, "crumb"));
+            sut.SetExtra("extra_key", "extra_value");
+            sut.Fingerprint = new[] {"fingerprint"};
+            sut.SetTag("tag_key", "tag_value");
 
             var actual = JsonSerializer.SerializeObject(sut);
 
