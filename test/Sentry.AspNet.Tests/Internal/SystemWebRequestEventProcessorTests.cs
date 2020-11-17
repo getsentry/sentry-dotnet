@@ -64,7 +64,6 @@ namespace Sentry.Tests.Internals.Web
 
             var actual = sut.Process(expected);
             Assert.Same(expected, actual);
-            Assert.Null(expected.InternalRequest);
         }
 
         [Fact]

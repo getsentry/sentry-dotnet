@@ -157,7 +157,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             _ = sut.CaptureEvent(@event, scope);
 
-            Assert.Equal(scope.InternalBreadcrumbs, @event.InternalBreadcrumbs);
+            Assert.Equal(scope.Breadcrumbs, @event.Breadcrumbs);
         }
 
         [Fact]

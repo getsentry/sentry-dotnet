@@ -1,14 +1,52 @@
+using System;
+using System.Collections;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 namespace Sentry.Internal
 {
+    [AttributeUsage(AttributeTargets.Property)]
+    internal class DontSerializeEmptyAttribute : Attribute {}
+
     internal static class Json
     {
+        private class ContractResolver : DefaultContractResolver
+        {
+            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+            {
+                var property = base.CreateProperty(member, memberSerialization);
+
+                // Don't override custom serialization behavior
+                if (property.ShouldSerialize == null)
+                {
+                    // DontSerializeEmpty handling
+                    if (property.DeclaringType.GetProperty(property.UnderlyingName)
+                            ?.GetCustomAttribute<DontSerializeEmptyAttribute>() is {} &&
+                        property.PropertyType.GetInterfaces().Any(i => i == typeof(IEnumerable)))
+                    {
+                        property.ShouldSerialize = o =>
+                        {
+                            if (o?.GetType().GetProperty(property.PropertyName)?.GetValue(o) is IEnumerable value)
+                            {
+                                return !value.Cast<object>().Any();
+                            }
+
+                            return true;
+                        };
+                    }
+                }
+
+                return property;
+            }
+        }
+
         private static readonly Encoding Encoding = new UTF8Encoding(false, true);
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
 
@@ -19,7 +57,8 @@ namespace Sentry.Internal
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Formatting = Formatting.None,
             Converters = {StringEnumConverter},
-            DateFormatHandling = DateFormatHandling.IsoDateFormat
+            DateFormatHandling = DateFormatHandling.IsoDateFormat,
+            ContractResolver = new ContractResolver()
         };
 
         private static JsonTextWriter CreateWriter(Stream stream) => new JsonTextWriter(

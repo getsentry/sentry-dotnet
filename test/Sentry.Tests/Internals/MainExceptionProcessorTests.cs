@@ -26,7 +26,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
             sut.Process(new Exception(), evt);
 
-            Assert.Null(evt.InternalExtra);
+            Assert.Null(evt.Extra);
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
             sut.Process(new Exception("ex", new Exception()), evt);
 
-            Assert.Null(evt.InternalExtra);
+            Assert.Null(evt.Extra);
         }
 
         [Fact]

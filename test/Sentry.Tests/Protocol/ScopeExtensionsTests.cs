@@ -18,7 +18,7 @@ namespace Sentry.Tests.Protocol
             {
                 _ = ScopeOptions.BeforeBreadcrumb.Returns(null as Func<Breadcrumb, Breadcrumb>);
             }
-            public BaseScope GetSut() => new BaseScope(ScopeOptions);
+            public IScope GetSut() => new SentryEvent(options: ScopeOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -95,27 +95,16 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void SetFingerprint_NullArgument_ReplacesCurrentWithNull()
-        {
-            var sut = _fixture.GetSut();
-            sut.InternalFingerprint = Enumerable.Empty<string>();
-
-            sut.SetFingerprint(null);
-
-            Assert.Null(sut.InternalFingerprint);
-        }
-
-        [Fact]
         public void SetFingerprint_NewFingerprint_ReplacesCurrent()
         {
             var sut = _fixture.GetSut();
-            sut.InternalFingerprint = new[] { "to be dropped" };
+            sut.Fingerprint = new[] { "to be dropped" };
 
             var expectedFingerprint = new[] { "fingerprint" };
 
             sut.SetFingerprint(expectedFingerprint);
 
-            Assert.Equal(expectedFingerprint, sut.InternalFingerprint);
+            Assert.Equal(expectedFingerprint, sut.Fingerprint);
         }
 
         [Fact]
@@ -129,26 +118,18 @@ namespace Sentry.Tests.Protocol
 
             sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
 
-            Assert.Equal(expectedExtra, sut.InternalExtra);
+            Assert.Equal(expectedExtra, sut.Extra);
         }
 
         [Fact]
         public void SetExtra_SecondExtra_AddedToDictionary()
         {
-            var originalExtra = new ConcurrentDictionary<string, object>();
-            _ = originalExtra.TryAdd("original", new object());
             var sut = _fixture.GetSut();
-            sut.InternalExtra = originalExtra;
+            sut.SetExtra("original", "foo");
+            sut.SetExtra("expected", "extra");
 
-            var expectedExtra = new Dictionary<string, object>
-            {
-                {"expected", "extra" }
-            };
-
-            sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
-
-            Assert.Equal(originalExtra.First().Value, sut.InternalExtra[originalExtra.Keys.First()]);
-            Assert.Equal(expectedExtra.First().Value, sut.InternalExtra[expectedExtra.Keys.First()]);
+            Assert.Equal("foo", sut.Extra["original"]);
+            Assert.Equal("extra", sut.Extra["expected"]);
         }
 
         [Fact]
@@ -162,7 +143,7 @@ namespace Sentry.Tests.Protocol
 
             sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
 
-            Assert.Equal(expectedExtra, sut.InternalExtra);
+            Assert.Equal(expectedExtra, sut.Extra);
         }
 
         [Fact]
@@ -539,7 +520,7 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void Apply_Null_Source_DoesNotThrow()
         {
-            BaseScope sut = null;
+            IScope sut = null;
             sut.Apply(null);
         }
 
@@ -959,7 +940,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Sdk.AddPackage("nuget:Sentry.Extensions.Logging", "2.0.0-preview10");
 
-            var target = new BaseScope(null);
+            var target = new IScope(null);
 
             sut.Apply(target);
 
@@ -973,7 +954,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Sdk.AddPackage("nuget:Sentry.Extensions.Logging", "2.0.0-preview10");
 
-            var target = new BaseScope(null);
+            var target = new IScope(null);
             sut.Sdk.AddPackage("nuget:Sentry.AspNetCore", "1.0.0");
 
             sut.Apply(target);
@@ -985,7 +966,7 @@ namespace Sentry.Tests.Protocol
         public void Apply_Sdk_SourceNone_TargetSingle_DoesNotModifyTarget()
         {
             var sut = _fixture.GetSut();
-            var target = new BaseScope(null);
+            var target = new IScope(null);
             target.Sdk.AddPackage("nuget:Sentry", "1.0");
             var expected = target.Sdk.Packages.Single();
 
