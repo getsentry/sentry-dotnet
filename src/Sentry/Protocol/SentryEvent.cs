@@ -135,7 +135,7 @@ namespace Sentry
         /// <inheritdoc />
         public Request Request
         {
-            get => _request ?? new Request();
+            get => _request ??= new Request();
             set => _request = value;
         }
 
@@ -149,9 +149,15 @@ namespace Sentry
             set => _contexts = value;
         }
 
-        /// <inheritdoc />
         [DataMember(Name = "user", EmitDefaultValue = false)]
-        public User User { get; set; } = new User();
+        private User? _user;
+
+        /// <inheritdoc />
+        public User User
+        {
+            get => _user ??= new User();
+            set => _user = value;
+        }
 
         /// <inheritdoc />
         [DataMember(Name = "environment", EmitDefaultValue = false)]

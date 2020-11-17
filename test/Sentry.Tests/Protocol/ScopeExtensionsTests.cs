@@ -647,17 +647,6 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Apply_Tag_NullOnSource_TargetIsNull()
-        {
-            var sut = _fixture.GetSut();
-            var target = _fixture.GetSut();
-
-            sut.Apply(target);
-
-            Assert.Null(target.Tags);
-        }
-
-        [Fact]
         public void Apply_Tags_ConflictKey_KeepsTarget()
         {
             const string conflictingKey = "conflict";
