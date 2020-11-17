@@ -136,7 +136,7 @@ namespace Sentry.Serilog
             }
         }
 
-        private IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LogEvent logEvent)
+        private IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LogEvent logEvent)
         {
             var properties = logEvent.Properties;
 
@@ -145,11 +145,11 @@ namespace Sentry.Serilog
                 var value = property.Value;
                 if (value is ScalarValue scalarValue)
                 {
-                    yield return new KeyValuePair<string, object>(property.Key, scalarValue.Value);
+                    yield return new KeyValuePair<string, object?>(property.Key, scalarValue.Value);
                 }
                 else if (value != null)
                 {
-                    yield return new KeyValuePair<string, object>(property.Key, value);
+                    yield return new KeyValuePair<string, object?>(property.Key, value);
                 }
             }
         }

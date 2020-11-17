@@ -34,7 +34,8 @@ namespace Sentry.Internal.Extensions
             }
         }
 
-        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source) =>
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source)
+                where TKey : notnull =>
             source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }

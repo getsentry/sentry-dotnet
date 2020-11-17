@@ -49,8 +49,10 @@ namespace Sentry.Internal.Http
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            request.Content = new GzipContent(request.Content, _compressionLevel);
-
+            if (request.Content is not null)
+            {
+                request.Content = new GzipContent(request.Content, _compressionLevel);
+            }
             return base.SendAsync(request, cancellationToken);
         }
 
@@ -80,7 +82,7 @@ namespace Sentry.Internal.Http
                 return false;
             }
 
-            protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
             {
                 var gzipStream = new GZipStream(stream, _compressionLevel, leaveOpen: true);
                 try

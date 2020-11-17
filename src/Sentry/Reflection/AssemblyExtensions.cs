@@ -25,7 +25,7 @@ namespace Sentry.Reflection
             var name = asmName.Name;
             var version =
                 asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                ?? asmName.Version.ToString();
+                ?? asmName?.Version?.ToString();
 
             return new SdkVersion {Name = name, Version = version};
         }
