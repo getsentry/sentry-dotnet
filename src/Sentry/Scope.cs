@@ -110,15 +110,9 @@ namespace Sentry
             set => _contexts = value;
         }
 
-        [DataMember(Name = "user", EmitDefaultValue = false)]
-        private User? _user;
-
         /// <inheritdoc />
-        public User User
-        {
-            get => _user ?? new User();
-            set => _user = value;
-        }
+        [DataMember(Name = "user", EmitDefaultValue = false)]
+        public User User { get; set; } = new User();
 
         /// <inheritdoc />
         [DataMember(Name = "environment", EmitDefaultValue = false)]

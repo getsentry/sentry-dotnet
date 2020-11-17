@@ -21,19 +21,19 @@ namespace Sentry.Internal
         {
             protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
             {
-                var property = base.CreateProperty(member, memberSerialization);
+                var jsonProperty = base.CreateProperty(member, memberSerialization);
+                var property = jsonProperty.DeclaringType.GetProperty(jsonProperty.UnderlyingName);
 
-                // Don't override custom serialization behavior
-                if (property.ShouldSerialize == null)
+                // DontSerializeEmpty
+                if (jsonProperty.ShouldSerialize is null &&
+                    property?.GetCustomAttribute<DontSerializeEmptyAttribute>() is {})
                 {
-                    // DontSerializeEmpty handling
-                    if (property.DeclaringType.GetProperty(property.UnderlyingName)
-                            ?.GetCustomAttribute<DontSerializeEmptyAttribute>() is {} &&
-                        property.PropertyType.GetInterfaces().Any(i => i == typeof(IEnumerable)))
+                    // Collections
+                    if (property.PropertyType.GetInterfaces().Any(i => i == typeof(IEnumerable)))
                     {
-                        property.ShouldSerialize = o =>
+                        jsonProperty.ShouldSerialize = o =>
                         {
-                            if (o?.GetType().GetProperty(property.PropertyName)?.GetValue(o) is IEnumerable value)
+                            if (property.GetValue(o) is IEnumerable value)
                             {
                                 return !value.Cast<object>().Any();
                             }
@@ -43,7 +43,7 @@ namespace Sentry.Internal
                     }
                 }
 
-                return property;
+                return jsonProperty;
             }
         }
 
