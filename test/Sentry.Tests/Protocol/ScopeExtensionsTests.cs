@@ -255,7 +255,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Tags.Should().BeEquivalentTo(new Dictionary<string, string>
             {
-                ["original"] = "foo",
+                ["original"] = "value",
                 ["additional"] = "bar"
             });
         }
