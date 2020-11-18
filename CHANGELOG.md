@@ -2,6 +2,7 @@
 
 ## unreleased
 
+* Removed code coverage report from the test folder. (#592) @lucas-zimerman
 * Add a list of .NET Frameworks installed when available. (#531) @lucas-zimerman
 * Parse Mono and IL2CPP stacktraces for Unity and Xamarin (#578) @bruno-garcia
 * Update TFMs and dependency min version (#580) @bruno-garcia
