@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using Constants = Sentry.Protocol.Constants;
 
@@ -294,15 +292,7 @@ namespace Sentry
 
             foreach (var (key, value) in from.Extra)
             {
-                if (!from.Extra.ContainsKey(key))
-                {
-                    to.SetExtra(key, value);
-                }
-            }
-
-            foreach (var (key, value) in from.Extra)
-            {
-                if (!from.Extra.ContainsKey(key))
+                if (!to.Extra.ContainsKey(key))
                 {
                     to.SetExtra(key, value);
                 }
@@ -310,7 +300,7 @@ namespace Sentry
 
             foreach (var (key, value) in from.Tags)
             {
-                if (!from.Tags.ContainsKey(key))
+                if (!to.Tags.ContainsKey(key))
                 {
                     to.SetTag(key, value);
                 }
