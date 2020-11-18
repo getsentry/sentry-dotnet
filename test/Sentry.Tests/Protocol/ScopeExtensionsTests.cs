@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
-using NSubstitute;
 using Sentry.Protocol;
 using Xunit;
 
@@ -12,13 +11,9 @@ namespace Sentry.Tests.Protocol
     {
         private class Fixture
         {
-            public IScopeOptions ScopeOptions { get; set; } = Substitute.For<IScopeOptions>();
+            public SentryOptions ScopeOptions { get; set; } = new SentryOptions();
 
-            public Fixture()
-            {
-                _ = ScopeOptions.BeforeBreadcrumb.Returns(null as Func<Breadcrumb, Breadcrumb>);
-            }
-            public IScope GetSut() => new SentryEvent(options: ScopeOptions);
+            public IScope GetSut() => new Scope(ScopeOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -315,19 +310,19 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void AddBreadcrumb_BeforeBreadcrumbDropsCrumb_NoBreadcrumbInEvent()
         {
-            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns((Breadcrumb c) => null);
+            _fixture.ScopeOptions.BeforeBreadcrumb = c => null;
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb("no expected");
 
-            Assert.Null(sut.Breadcrumbs);
+            Assert.Empty(sut.Breadcrumbs);
         }
 
         [Fact]
         public void AddBreadcrumb_BeforeBreadcrumbNewCrumb_NewCrumbUsed()
         {
             var expected = new Breadcrumb();
-            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns(_ => expected);
+            _fixture.ScopeOptions.BeforeBreadcrumb = _ => expected;
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb("no expected");
@@ -339,7 +334,7 @@ namespace Sentry.Tests.Protocol
         public void AddBreadcrumb_BeforeBreadcrumbReturns_SameCrumb()
         {
             var expected = new Breadcrumb();
-            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns(c => c);
+            _fixture.ScopeOptions.BeforeBreadcrumb = c => c;
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb(expected);
@@ -367,7 +362,7 @@ namespace Sentry.Tests.Protocol
         [InlineData(10)]
         public void AddBreadcrumb_WithOptions_BoundOptionsLimit(int limit)
         {
-            _ = _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
+            _fixture.ScopeOptions.MaxBreadcrumbs = limit;
             var sut = _fixture.GetSut();
 
             for (var i = 0; i < limit + 1; i++)
@@ -383,7 +378,7 @@ namespace Sentry.Tests.Protocol
         {
             const int limit = 5;
 
-            _ = _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
+            _fixture.ScopeOptions.MaxBreadcrumbs = limit;
             var sut = _fixture.GetSut();
 
             for (var i = 0; i < limit + 1; i++)

@@ -171,9 +171,9 @@ namespace Sentry
 
             if (overflow > 0)
             {
-                if (scope.Breadcrumbs.LastOrDefault() is { } last)
+                if (scope.Breadcrumbs.FirstOrDefault() is { } first)
                 {
-                    scope.Breadcrumbs.Remove(last);
+                    scope.Breadcrumbs.Remove(first);
                 }
             }
 
