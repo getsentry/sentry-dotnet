@@ -2,6 +2,7 @@
 
 ## vNext
 
+* Removed code coverage report from the test folder. (#592) @lucas-zimerman
 * Add target framework NET5.0 on Sentry.csproj. Change the type of `Extra` where value parameter become nullable. @lucas-zimerman 
 * Implement envelope caching. (#576) @Tyrrrz
 * Add a list of .NET Frameworks installed when available. (#531) @lucas-zimerman
