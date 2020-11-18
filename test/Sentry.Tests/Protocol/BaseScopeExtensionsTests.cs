@@ -152,6 +152,39 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public void SetExtra_FirstExtraWithNullValue_NewDictionary()
+        {
+            var sut = _fixture.GetSut();
+            var expectedExtra = new Dictionary<string, object>
+            {
+                {"expected Extra", null}
+            };
+
+            sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
+
+            Assert.Equal(expectedExtra, sut.InternalExtra);
+        }
+
+        [Fact]
+        public void SetExtra_SecondExtraWithNullValue_AddedToDictionary()
+        {
+            var originalExtra = new ConcurrentDictionary<string, object>();
+            _ = originalExtra.TryAdd("original", null);
+            var sut = _fixture.GetSut();
+            sut.InternalExtra = originalExtra;
+
+            var expectedExtra = new Dictionary<string, object>
+            {
+                {"expected", null }
+            };
+
+            sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
+
+            Assert.Equal(originalExtra.First().Value, sut.InternalExtra[originalExtra.Keys.First()]);
+            Assert.Equal(expectedExtra.First().Value, sut.InternalExtra[expectedExtra.Keys.First()]);
+        }
+
+        [Fact]
         public void SetExtras_FirstExtra_NewDictionary()
         {
             var sut = _fixture.GetSut();

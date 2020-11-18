@@ -31,12 +31,12 @@ namespace Sentry.Internal
 
         public event EventHandler<UnobservedTaskExceptionEventArgs>? UnobservedTaskException;
 
-        private void OnProcessExit(object sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
+        private void OnProcessExit(object? sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
 
         [HandleProcessCorruptedStateExceptions, SecurityCritical]
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e) => UnhandledException?.Invoke(this, e);
 
         [HandleProcessCorruptedStateExceptions, SecurityCritical]
-        private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => UnobservedTaskException?.Invoke(this, e);
+        private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e) => UnobservedTaskException?.Invoke(this, e);
     }
 }

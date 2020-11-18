@@ -191,17 +191,17 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void SetExtra(this BaseScope scope, string key, object value)
-            => ((ConcurrentDictionary<string, object>)scope.Extra).AddOrUpdate(key, value, (s, o) => value);
+        public static void SetExtra(this BaseScope scope, string key, object? value)
+            => ((ConcurrentDictionary<string, object?>)scope.Extra).AddOrUpdate(key, value, (s, o) => value);
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="BaseScope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="values">The values.</param>
-        public static void SetExtras(this BaseScope scope, IEnumerable<KeyValuePair<string, object>> values)
+        public static void SetExtras(this BaseScope scope, IEnumerable<KeyValuePair<string, object?>> values)
         {
-            var extra = (ConcurrentDictionary<string, object>)scope.Extra;
+            var extra = (ConcurrentDictionary<string, object?>)scope.Extra;
             foreach (var keyValuePair in values)
             {
                 _ = extra.AddOrUpdate(keyValuePair.Key, keyValuePair.Value, (s, o) => keyValuePair.Value);
@@ -278,7 +278,7 @@ namespace Sentry
             {
                 foreach (var extra in from.Extra)
                 {
-                    _ = ((ConcurrentDictionary<string, object>)to.Extra).TryAdd(extra.Key, extra.Value);
+                    _ = ((ConcurrentDictionary<string, object?>)to.Extra).TryAdd(extra.Key, extra.Value);
                 }
             }
 

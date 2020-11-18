@@ -27,7 +27,7 @@ namespace Sentry.Integrations
             _hub = null;
         }
 
-        internal void HandleProcessExit(object sender, EventArgs e)
+        internal void HandleProcessExit(object? sender, EventArgs e)
         {
             (_hub as IDisposable)?.Dispose();
         }

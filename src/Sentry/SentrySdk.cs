@@ -83,6 +83,11 @@ namespace Sentry
 
                 options.Dsn = dsn.Source;
             }
+            else
+            {
+                // Validate DSN for early exception
+                _ = Dsn.Parse(options.Dsn);
+            }
 
             return UseHub(new Hub(options));
         }
