@@ -416,6 +416,7 @@ namespace Sentry.Tests.Internals
                 var sut = _fixture.GetSut();
 
                 var evt = new SentryEvent();
+
                 // Act
                 _ = sut.Process(evt);
 

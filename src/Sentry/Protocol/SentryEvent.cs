@@ -145,7 +145,7 @@ namespace Sentry
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ?? new Contexts();
+            get => _contexts ??= new Contexts();
             set => _contexts = value;
         }
 
