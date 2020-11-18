@@ -73,7 +73,7 @@ namespace Sentry.Protocol
         /// SDK information.
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>
-        SdkVersion? Sdk { get; }
+        SdkVersion Sdk { get; }
 
         /// <summary>
         /// A list of strings used to dictate the deduplication of this event.
@@ -91,16 +91,16 @@ namespace Sentry.Protocol
         /// A trail of events which happened prior to an issue.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/enriching-events/breadcrumbs/"/>
-        ICollection<Breadcrumb> Breadcrumbs { get; }
+        IEnumerable<Breadcrumb> Breadcrumbs { get; }
 
         /// <summary>
         /// An arbitrary mapping of additional metadata to store with the event.
         /// </summary>
-        IDictionary<string, object?> Extra { get; }
+        IReadOnlyDictionary<string, object?> Extra { get; }
 
         /// <summary>
         /// Arbitrary key-value for this event
         /// </summary>
-        IDictionary<string, string> Tags { get; }
+        IReadOnlyDictionary<string, string> Tags { get; }
     }
 }

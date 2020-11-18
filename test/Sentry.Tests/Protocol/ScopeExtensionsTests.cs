@@ -353,7 +353,7 @@ namespace Sentry.Tests.Protocol
                 sut.AddBreadcrumb(i.ToString());
             }
 
-            Assert.Equal(Constants.DefaultMaxBreadcrumbs, sut.Breadcrumbs.Count);
+            Assert.Equal(Constants.DefaultMaxBreadcrumbs, sut.Breadcrumbs.Count());
         }
 
         [Theory]
@@ -370,7 +370,7 @@ namespace Sentry.Tests.Protocol
                 sut.AddBreadcrumb(i.ToString());
             }
 
-            Assert.Equal(limit, sut.Breadcrumbs.Count);
+            Assert.Equal(limit, sut.Breadcrumbs.Count());
         }
 
         [Fact]
@@ -546,7 +546,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Apply(target);
 
-            Assert.Equal(2, target.Breadcrumbs.Count);
+            Assert.Equal(2, target.Breadcrumbs.Count());
         }
 
         [Fact]
@@ -571,7 +571,7 @@ namespace Sentry.Tests.Protocol
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Equal(expected.Count, target.Breadcrumbs.Count);
+            Assert.Equal(expected.Count(), target.Breadcrumbs.Count());
         }
 
         [Fact]

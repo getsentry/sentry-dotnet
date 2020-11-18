@@ -166,18 +166,21 @@ namespace Sentry
                 }
             }
 
-            var overflow = scope.Breadcrumbs.Count -
-                (scope.ScopeOptions?.MaxBreadcrumbs ?? Constants.DefaultMaxBreadcrumbs) + 1;
-
-            if (overflow > 0)
+            if (scope.Breadcrumbs is ICollection<Breadcrumb> breadcrumbs)
             {
-                if (scope.Breadcrumbs.FirstOrDefault() is { } first)
-                {
-                    scope.Breadcrumbs.Remove(first);
-                }
-            }
+                var overflow = breadcrumbs.Count -
+                    (scope.ScopeOptions?.MaxBreadcrumbs ?? Constants.DefaultMaxBreadcrumbs) + 1;
 
-            scope.Breadcrumbs.Add(breadcrumb);
+                if (overflow > 0)
+                {
+                    if (scope.Breadcrumbs.FirstOrDefault() is { } first)
+                    {
+                        breadcrumbs.Remove(first);
+                    }
+                }
+
+                breadcrumbs.Add(breadcrumb);
+            }
         }
 
         /// <summary>
@@ -195,7 +198,12 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetExtra(this IScope scope, string key, object? value)
-            => scope.Extra[key] = value;
+        {
+            if (scope.Extra is IDictionary<string, object?> extra)
+            {
+                extra[key] = value;
+            }
+        }
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="IScope"/>.
@@ -217,7 +225,12 @@ namespace Sentry
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         public static void SetTag(this IScope scope, string key, string value)
-            => scope.Tags[key] = value;
+        {
+            if (scope.Tags is IDictionary<string, string> tags)
+            {
+                tags[key] = value;
+            }
+        }
 
         /// <summary>
         /// Set all items as tags.
@@ -238,7 +251,12 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
         public static void UnsetTag(this IScope scope, string key)
-            => scope.Tags.Remove(key);
+        {
+            if (scope.Tags is IDictionary<string, string> tags)
+            {
+                tags.Remove(key);
+            }
+        }
 
         /// <summary>
         /// Applies the data from one scope to the other.
@@ -269,9 +287,35 @@ namespace Sentry
                 to.Fingerprint = from.Fingerprint;
             }
 
-            to.Breadcrumbs.AddRange(from.Breadcrumbs);
-            from.Extra.TryCopyTo(to.Extra);
-            from.Tags.TryCopyTo(to.Tags);
+            foreach (var breadcrumb in from.Breadcrumbs)
+            {
+                to.AddBreadcrumb(breadcrumb);
+            }
+
+            foreach (var (key, value) in from.Extra)
+            {
+                if (!from.Extra.ContainsKey(key))
+                {
+                    to.SetExtra(key, value);
+                }
+            }
+
+            foreach (var (key, value) in from.Extra)
+            {
+                if (!from.Extra.ContainsKey(key))
+                {
+                    to.SetExtra(key, value);
+                }
+            }
+
+            foreach (var (key, value) in from.Tags)
+            {
+                if (!from.Tags.ContainsKey(key))
+                {
+                    to.SetTag(key, value);
+                }
+            }
+
             from.Contexts.CopyTo(to.Contexts);
             from.Request.CopyTo(to.Request);
             from.User.CopyTo(to.User);

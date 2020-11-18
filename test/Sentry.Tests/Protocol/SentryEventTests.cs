@@ -35,7 +35,7 @@ namespace Sentry.Tests.Protocol
                 Transaction = "transaction"
             };
 
-            sut.Breadcrumbs.Add(new Breadcrumb(timestamp, "crumb"));
+            sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
             sut.SetExtra("extra_key", "extra_value");
             sut.Fingerprint = new[] {"fingerprint"};
             sut.SetTag("tag_key", "tag_value");
@@ -103,7 +103,7 @@ namespace Sentry.Tests.Protocol
                 Transaction = "transaction"
             };
 
-            sut.Breadcrumbs.Add(new Breadcrumb(timestamp, "crumb"));
+            sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
             sut.SetExtra("extra_key", "extra_value");
             sut.Fingerprint = new[] {"fingerprint"};
             sut.SetTag("tag_key", "tag_value");

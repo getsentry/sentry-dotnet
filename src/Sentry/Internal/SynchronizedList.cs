@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sentry.Internal
 {
@@ -31,7 +32,7 @@ namespace Sentry.Internal
         {
             lock (_lock)
             {
-                return _innerList.GetEnumerator();
+                return _innerList.ToList().GetEnumerator();
             }
         }
 

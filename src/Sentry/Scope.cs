@@ -126,7 +126,7 @@ namespace Sentry
 
         /// <inheritdoc />
         [DataMember(Name = "sdk", EmitDefaultValue = false)]
-        public SdkVersion? Sdk { get; internal set; } = new SdkVersion();
+        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
 
         /// <inheritdoc />
         [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
@@ -136,17 +136,17 @@ namespace Sentry
         /// <inheritdoc />
         [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
         [DontSerializeEmpty]
-        public ICollection<Breadcrumb> Breadcrumbs { get; } = new SynchronizedList<Breadcrumb>();
+        public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new SynchronizedList<Breadcrumb>();
 
         /// <inheritdoc />
         [DataMember(Name = "extra", EmitDefaultValue = false)]
         [DontSerializeEmpty]
-        public IDictionary<string, object?> Extra { get; } = new ConcurrentDictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra { get; } = new ConcurrentDictionary<string, object?>();
 
         /// <inheritdoc />
         [DataMember(Name = "tags", EmitDefaultValue = false)]
         [DontSerializeEmpty]
-        public IDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
         /// <summary>
         /// Creates a scope with the specified options.
