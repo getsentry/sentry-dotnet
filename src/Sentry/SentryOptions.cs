@@ -60,6 +60,9 @@ namespace Sentry
 
         internal ISentryHttpClientFactory SentryHttpClientFactory { get; set; }
 
+        /// <inheritdoc />
+        public ISentryScopeProcessor SentryScopeProcessor { get; set; } = new DefaultSentryScopeProcessor();
+
         /// <summary>
         /// A list of namespaces (or prefixes) considered not part of application code
         /// </summary>

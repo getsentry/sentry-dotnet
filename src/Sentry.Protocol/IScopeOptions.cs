@@ -8,6 +8,11 @@ namespace Sentry.Protocol
     public interface IScopeOptions
     {
         /// <summary>
+        /// Configured scope processor.
+        /// </summary>
+        ISentryScopeProcessor SentryScopeProcessor { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum breadcrumbs.
         /// </summary>
         /// <remarks>
