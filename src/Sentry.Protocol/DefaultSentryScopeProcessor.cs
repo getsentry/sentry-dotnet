@@ -4,8 +4,12 @@ using System.Linq;
 
 namespace Sentry.Protocol
 {
-    internal class DefaultSentryScopeProcessor : ISentryScopeProcessor
+    /// <summary>
+    /// Default implementation of <see cref="ISentryScopeProcessor"/>.
+    /// </summary>
+    public class DefaultSentryScopeProcessor : ISentryScopeProcessor
     {
+        /// <inheritdoc />
         public void Apply(BaseScope scope, object state)
         {
             switch (state)
