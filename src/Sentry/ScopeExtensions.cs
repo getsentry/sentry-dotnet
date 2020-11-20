@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -164,20 +165,32 @@ namespace Sentry
                 }
             }
 
-            if (scope.Breadcrumbs is ICollection<Breadcrumb> breadcrumbs)
+            if (scope.Breadcrumbs is ICollection<Breadcrumb> breadcrumbsCollection)
             {
-                var overflow = breadcrumbs.Count -
+                var overflow = breadcrumbsCollection.Count -
                     (scope.ScopeOptions?.MaxBreadcrumbs ?? Constants.DefaultMaxBreadcrumbs) + 1;
 
                 if (overflow > 0)
                 {
                     if (scope.Breadcrumbs.FirstOrDefault() is { } first)
                     {
-                        breadcrumbs.Remove(first);
+                        breadcrumbsCollection.Remove(first);
                     }
                 }
 
-                breadcrumbs.Add(breadcrumb);
+                breadcrumbsCollection.Add(breadcrumb);
+            }
+            else if (scope.Breadcrumbs is ConcurrentQueue<Breadcrumb> breadcrumbsQueue)
+            {
+                var overflow = breadcrumbsQueue.Count -
+                    (scope.ScopeOptions?.MaxBreadcrumbs ?? Constants.DefaultMaxBreadcrumbs) + 1;
+
+                if (overflow > 0)
+                {
+                    breadcrumbsQueue.TryDequeue(out _);
+                }
+
+                breadcrumbsQueue.Enqueue(breadcrumb);
             }
         }
 

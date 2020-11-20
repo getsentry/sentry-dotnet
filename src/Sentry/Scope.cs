@@ -136,7 +136,7 @@ namespace Sentry
         /// <inheritdoc />
         [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
         [DontSerializeEmpty]
-        public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new SynchronizedList<Breadcrumb>();
+        public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new ConcurrentQueue<Breadcrumb>();
 
         /// <inheritdoc />
         [DataMember(Name = "extra", EmitDefaultValue = false)]
