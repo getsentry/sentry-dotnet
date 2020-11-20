@@ -10,7 +10,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Configured scope processor.
         /// </summary>
-        ISentryScopeProcessor SentryScopeProcessor { get; set; }
+        ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.

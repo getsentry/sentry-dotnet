@@ -307,7 +307,7 @@ namespace Sentry
         /// <param name="state">The state object to apply.</param>
         public static void Apply(this BaseScope scope, object state)
         {
-            var processor = scope.ScopeOptions.SentryScopeProcessor ?? new DefaultSentryScopeProcessor();
+            var processor = scope.ScopeOptions.SentryScopeStateProcessor ?? new DefaultSentryScopeStateProcessor();
             processor.Apply(scope, state);
         }
     }
