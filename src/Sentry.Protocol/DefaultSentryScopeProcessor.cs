@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Sentry.Protocol
 {
-    public class DefaultSentryScopeProcessor : ISentryScopeProcessor
+    internal class DefaultSentryScopeProcessor : ISentryScopeProcessor
     {
         public void Apply(BaseScope scope, object state)
         {
