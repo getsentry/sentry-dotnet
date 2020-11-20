@@ -108,7 +108,7 @@ internal static class Program
                 client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
             };
 
-            // Control/override how to apple the State object into the scope
+            // Control/override how to apply the State object into the scope
             o.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
         }))
         {
