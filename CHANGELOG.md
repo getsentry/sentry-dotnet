@@ -2,7 +2,7 @@
 
 ## vNext
 
-* Add SentryScopeProcessor #603
+* Add SentryScopeStateProcessor #603
 
 ## 3.0.0-alpha.5
 
