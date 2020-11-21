@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Constants = Sentry.Protocol.Constants;
 
@@ -17,8 +18,11 @@ namespace Sentry
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public class SentryEvent : BaseScope
+    public class SentryEvent : IScope
     {
+        /// <inheritdoc />
+        public IScopeOptions? ScopeOptions { get; }
+
         [DataMember(Name = "modules", EmitDefaultValue = false)]
         internal IDictionary<string, string>? InternalModules { get; set; }
 
@@ -117,6 +121,72 @@ namespace Sentry
         /// </summary>
         public IDictionary<string, string> Modules => InternalModules ??= new Dictionary<string, string>();
 
+        /// <inheritdoc />
+        [DataMember(Name = "level", EmitDefaultValue = false)]
+        public SentryLevel? Level { get; set; }
+
+        /// <inheritdoc />
+        [DataMember(Name = "transaction", EmitDefaultValue = false)]
+        public string? Transaction { get; set; }
+
+        [DataMember(Name = "request", EmitDefaultValue = false)]
+        private Request? _request;
+
+        /// <inheritdoc />
+        public Request Request
+        {
+            get => _request ??= new Request();
+            set => _request = value;
+        }
+
+        [DataMember(Name = "contexts", EmitDefaultValue = false)]
+        private Contexts? _contexts;
+
+        /// <inheritdoc />
+        public Contexts Contexts
+        {
+            get => _contexts ??= new Contexts();
+            set => _contexts = value;
+        }
+
+        [DataMember(Name = "user", EmitDefaultValue = false)]
+        private User? _user;
+
+        /// <inheritdoc />
+        public User User
+        {
+            get => _user ??= new User();
+            set => _user = value;
+        }
+
+        /// <inheritdoc />
+        [DataMember(Name = "environment", EmitDefaultValue = false)]
+        public string? Environment { get; set; }
+
+        /// <inheritdoc />
+        [DataMember(Name = "sdk", EmitDefaultValue = false)]
+        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
+
+        /// <inheritdoc />
+        [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
+        [DontSerializeEmpty]
+        public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();
+
+        /// <inheritdoc />
+        [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
+        [DontSerializeEmpty]
+        public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new List<Breadcrumb>();
+
+        /// <inheritdoc />
+        [DataMember(Name = "extra", EmitDefaultValue = false)]
+        [DontSerializeEmpty]
+        public IReadOnlyDictionary<string, object?> Extra { get; } = new Dictionary<string, object?>();
+
+        /// <inheritdoc />
+        [DataMember(Name = "tags", EmitDefaultValue = false)]
+        [DontSerializeEmpty]
+        public IReadOnlyDictionary<string, string> Tags { get; } = new Dictionary<string, string>();
+
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
         /// </summary>
@@ -139,13 +209,11 @@ namespace Sentry
             DateTimeOffset? timestamp = null,
             SentryId eventId = default,
             IScopeOptions? options = null)
-            : base(options)
         {
-            EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
-
-            Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             Exception = exception;
-
+            Timestamp = timestamp ?? DateTimeOffset.UtcNow;
+            EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
+            ScopeOptions = options;
             Platform = Constants.Platform;
         }
     }

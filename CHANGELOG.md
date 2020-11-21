@@ -2,6 +2,7 @@
 
 ## vNext
 
+* Replaced `BaseScope` with `IScope`. (#590) @Tyrrrz
 * Removed code coverage report from the test folder. (#592) @lucas-zimerman
 * Add target framework NET5.0 on Sentry.csproj. Change the type of `Extra` where value parameter become nullable. @lucas-zimerman 
 * Implement envelope caching. (#576) @Tyrrrz

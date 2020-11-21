@@ -147,7 +147,7 @@ namespace Sentry.AspNetCore
             }
         }
 
-        private static void SetBody(BaseScope scope, HttpContext context, SentryAspNetCoreOptions options)
+        private static void SetBody(IScope scope, HttpContext context, SentryAspNetCoreOptions options)
         {
             var extractors = context.RequestServices.GetService<IEnumerable<IRequestPayloadExtractor>>();
             if (extractors == null)

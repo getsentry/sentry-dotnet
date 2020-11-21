@@ -23,14 +23,13 @@ namespace Sentry.Protocol.Tests.Context
 
             var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"type\":\"app\","
-                        + "\"app_start_time\":\"9999-12-31T23:59:59.9999999+00:00\","
-                        + "\"device_app_hash\":\"93fd0e9a\","
-                        + "\"build_type\":\"nightly\","
-                        + "\"app_name\":\"Sentry.Test.App\","
-                        + "\"app_version\":\"8b03fd7\","
-                        + "\"app_build\":\"1.23152\"}",
-                    actual);
+            Assert.Equal("{\"type\":\"app\"," +
+                         "\"app_start_time\":\"9999-12-31T23:59:59.9999999+00:00\"," +
+                         "\"device_app_hash\":\"93fd0e9a\"," +
+                         "\"build_type\":\"nightly\"," +
+                         "\"app_name\":\"Sentry.Test.App\"," +
+                         "\"app_version\":\"8b03fd7\"," +
+                         "\"app_build\":\"1.23152\"}", actual);
         }
 
         [Fact]
