@@ -396,7 +396,7 @@ namespace Sentry.NLog.Tests
 
             sut.Error("message {SourceContext}", "Sentry.NLog");
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
         }
 
         [Fact]
@@ -406,7 +406,7 @@ namespace Sentry.NLog.Tests
 
             sut.Error("message {SourceContext}", "Sentry");
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<BaseScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
         }
 
         [Fact]

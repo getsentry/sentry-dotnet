@@ -1,4 +1,3 @@
-using NSubstitute;
 using Sentry.Protocol;
 using Xunit;
 
@@ -6,7 +5,7 @@ namespace Sentry.Tests.Protocol
 {
     public class BaseScopeTests
     {
-        private readonly BaseScope _sut = new BaseScope(Substitute.For<IScopeOptions>());
+        private readonly IScope _sut = new Scope(new SentryOptions());
 
         [Fact]
         public void Fingerprint_ByDefault_ReturnsEmptyEnumerable()

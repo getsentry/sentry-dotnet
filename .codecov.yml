@@ -2,3 +2,5 @@ coverage:
   status:
     patch: false
     changes: false
+  ignore:
+    - "test/**/*"

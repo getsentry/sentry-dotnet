@@ -18,6 +18,10 @@ namespace Sentry.Extensibility
         /// </summary>
         protected override object? DoExtractPayLoad(IHttpRequest request)
         {
+            if(request.Body is null)
+            {
+                return null;
+            }
             // https://github.com/dotnet/corefx/blob/master/src/Common/src/CoreLib/System/IO/StreamReader.cs#L186
             // Default parameters other than 'leaveOpen'
             using var reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024,

@@ -3,7 +3,7 @@ using System;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Options used by <see cref="BaseScope"/>.
+    /// Options used by <see cref="IScope"/>.
     /// </summary>
     public interface IScopeOptions
     {

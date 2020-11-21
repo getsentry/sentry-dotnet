@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using NSubstitute;
+using FluentAssertions;
 using Sentry.Protocol;
 using Xunit;
 
@@ -12,13 +11,9 @@ namespace Sentry.Tests.Protocol
     {
         private class Fixture
         {
-            public IScopeOptions ScopeOptions { get; set; } = Substitute.For<IScopeOptions>();
+            public SentryOptions ScopeOptions { get; set; } = new SentryOptions();
 
-            public Fixture()
-            {
-                _ = ScopeOptions.BeforeBreadcrumb.Returns(null as Func<Breadcrumb, Breadcrumb>);
-            }
-            public BaseScope GetSut() => new BaseScope(ScopeOptions);
+            public IScope GetSut() => new Scope(ScopeOptions);
         }
 
         private readonly Fixture _fixture = new Fixture();
@@ -95,27 +90,16 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void SetFingerprint_NullArgument_ReplacesCurrentWithNull()
-        {
-            var sut = _fixture.GetSut();
-            sut.InternalFingerprint = Enumerable.Empty<string>();
-
-            sut.SetFingerprint(null);
-
-            Assert.Null(sut.InternalFingerprint);
-        }
-
-        [Fact]
         public void SetFingerprint_NewFingerprint_ReplacesCurrent()
         {
             var sut = _fixture.GetSut();
-            sut.InternalFingerprint = new[] { "to be dropped" };
+            sut.Fingerprint = new[] { "to be dropped" };
 
             var expectedFingerprint = new[] { "fingerprint" };
 
             sut.SetFingerprint(expectedFingerprint);
 
-            Assert.Equal(expectedFingerprint, sut.InternalFingerprint);
+            Assert.Equal(expectedFingerprint, sut.Fingerprint);
         }
 
         [Fact]
@@ -129,26 +113,49 @@ namespace Sentry.Tests.Protocol
 
             sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
 
-            Assert.Equal(expectedExtra, sut.InternalExtra);
+            Assert.Equal(expectedExtra, sut.Extra);
         }
 
         [Fact]
         public void SetExtra_SecondExtra_AddedToDictionary()
         {
-            var originalExtra = new ConcurrentDictionary<string, object>();
-            _ = originalExtra.TryAdd("original", new object());
             var sut = _fixture.GetSut();
-            sut.InternalExtra = originalExtra;
+            sut.SetExtra("original", "foo");
+            sut.SetExtra("another", "bar");
 
+            sut.Extra.Should().BeEquivalentTo(new Dictionary<string, object>
+            {
+                ["original"] = "foo",
+                ["another"] = "bar"
+            });
+        }
+
+        [Fact]
+        public void SetExtra_FirstExtraWithNullValue_NewDictionary()
+        {
+            var sut = _fixture.GetSut();
             var expectedExtra = new Dictionary<string, object>
             {
-                {"expected", "extra" }
+                {"expected Extra", null}
             };
 
             sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
 
-            Assert.Equal(originalExtra.First().Value, sut.InternalExtra[originalExtra.Keys.First()]);
-            Assert.Equal(expectedExtra.First().Value, sut.InternalExtra[expectedExtra.Keys.First()]);
+            Assert.Equal(expectedExtra, sut.Extra);
+        }
+
+        [Fact]
+        public void SetExtra_SecondExtraWithNullValue_AddedToDictionary()
+        {
+            var sut = _fixture.GetSut();
+            sut.SetExtra("original", "foo");
+            sut.SetExtra("another", null);
+
+            sut.Extra.Should().BeEquivalentTo(new Dictionary<string, object>
+            {
+                ["original"] = "foo",
+                ["another"] = null
+            });
         }
 
         [Fact]
@@ -162,27 +169,27 @@ namespace Sentry.Tests.Protocol
 
             sut.SetExtras(expectedExtra);
 
-            Assert.Equal(expectedExtra, sut.InternalExtra);
+            Assert.Equal(expectedExtra, sut.Extra);
         }
 
         [Fact]
         public void SetExtras_SecondExtra_AddedToDictionary()
         {
-            var originalExtra = new ConcurrentDictionary<string, object>();
-            _ = originalExtra.TryAdd("original", new object());
-
             var sut = _fixture.GetSut();
-            sut.InternalExtra = originalExtra;
+            sut.SetExtra("original", "foo");
 
             var expectedExtra = new Dictionary<string, object>
             {
-                {"expected", "extra" }
+                {"another", "bar"}
             };
 
             sut.SetExtras(expectedExtra);
 
-            Assert.Equal(originalExtra.First().Value, sut.InternalExtra[originalExtra.Keys.First()]);
-            Assert.Equal(expectedExtra.First().Value, sut.InternalExtra[expectedExtra.Keys.First()]);
+            sut.Extra.Should().BeEquivalentTo(new Dictionary<string, object>
+            {
+                ["original"] = "foo",
+                ["another"] = "bar"
+            });
         }
 
         [Fact]
@@ -199,7 +206,7 @@ namespace Sentry.Tests.Protocol
 
             sut.SetExtras(expectedExtra);
 
-            Assert.Equal(expectedExtra.Last(), sut.InternalExtra.Single());
+            Assert.Equal(expectedExtra.Last(), sut.Extra.Single());
         }
 
         [Fact]
@@ -214,17 +221,7 @@ namespace Sentry.Tests.Protocol
 
             sut.SetTag(expectedTag.Keys.Single(), expectedTag.Values.Single());
 
-            Assert.Equal(expectedTag, sut.InternalTags);
-        }
-
-        [Fact]
-        public void UnsetTag_NullDictionary_DoesNotCreateDictionary()
-        {
-            var sut = _fixture.GetSut();
-
-            sut.UnsetTag("non existent");
-
-            Assert.Null(sut.InternalTags);
+            Assert.Equal(expectedTag, sut.Tags);
         }
 
         [Fact]
@@ -241,55 +238,56 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void SetTag_SecondTag_AddedToDictionary()
         {
-            var originalTag = new ConcurrentDictionary<string, string>();
-            _ = originalTag.TryAdd("original", "value");
-
             var sut = _fixture.GetSut();
-            sut.InternalTags = originalTag;
+            sut.SetTag("original", "value");
 
             var expectedTag = new Dictionary<string, string>
             {
-                {"expected", "tag" }
+                {"additional", "bar"}
             };
 
             sut.SetTag(expectedTag.Keys.Single(), expectedTag.Values.Single());
 
-            Assert.Equal(originalTag.First().Value, sut.InternalTags[originalTag.Keys.First()]);
-            Assert.Equal(expectedTag.First().Value, sut.InternalTags[expectedTag.Keys.First()]);
+            sut.Tags.Should().BeEquivalentTo(new Dictionary<string, string>
+            {
+                ["original"] = "value",
+                ["additional"] = "bar"
+            });
         }
 
         [Fact]
         public void SetTags_FirstTag_NewDictionary()
         {
+            var expectedTags = new Dictionary<string, string>
+            {
+                ["expected"] = "tag"
+            };
+
             var sut = _fixture.GetSut();
-            var expectedTag = new ConcurrentDictionary<string, string>();
-            _ = expectedTag.TryAdd("expected", "tag");
 
-            sut.InternalTags = expectedTag;
+            sut.SetTags(expectedTags);
 
-            sut.SetTags(expectedTag);
-
-            Assert.Equal(expectedTag, sut.InternalTags);
+            Assert.Equal(expectedTags, sut.Tags);
         }
 
         [Fact]
         public void SetTags_SecondTag_AddedToDictionary()
         {
             var sut = _fixture.GetSut();
-            var originalTag = new ConcurrentDictionary<string, string>();
-            _ = originalTag.TryAdd("original", "value");
-
-            sut.InternalTags = originalTag;
+            sut.SetTag("original", "value");
 
             var expectedTags = new Dictionary<string, string>
             {
-                {"expected", "tag" }
+                {"expected", "tag"}
             };
 
             sut.SetTags(expectedTags);
 
-            Assert.Equal(originalTag.First().Value, sut.InternalTags[originalTag.Keys.First()]);
-            Assert.Equal(expectedTags.First().Value, sut.InternalTags[expectedTags.Keys.First()]);
+            sut.Tags.Should().BeEquivalentTo(new Dictionary<string, string>
+            {
+                ["original"] = "value",
+                ["expected"] = "tag"
+            });
         }
 
         [Fact]
@@ -306,42 +304,42 @@ namespace Sentry.Tests.Protocol
 
             sut.SetTags(expectedTag);
 
-            Assert.Equal(expectedTag.Last(), sut.InternalTags.Single());
+            Assert.Equal(expectedTag.Last(), sut.Tags.Single());
         }
 
         [Fact]
         public void AddBreadcrumb_BeforeBreadcrumbDropsCrumb_NoBreadcrumbInEvent()
         {
-            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns((Breadcrumb c) => null);
+            _fixture.ScopeOptions.BeforeBreadcrumb = c => null;
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb("no expected");
 
-            Assert.Null(sut.InternalBreadcrumbs);
+            Assert.Empty(sut.Breadcrumbs);
         }
 
         [Fact]
         public void AddBreadcrumb_BeforeBreadcrumbNewCrumb_NewCrumbUsed()
         {
             var expected = new Breadcrumb();
-            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns(_ => expected);
+            _fixture.ScopeOptions.BeforeBreadcrumb = _ => expected;
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb("no expected");
 
-            Assert.Same(expected, sut.InternalBreadcrumbs.Single());
+            Assert.Same(expected, sut.Breadcrumbs.Single());
         }
 
         [Fact]
         public void AddBreadcrumb_BeforeBreadcrumbReturns_SameCrumb()
         {
             var expected = new Breadcrumb();
-            _ = _fixture.ScopeOptions.BeforeBreadcrumb.Returns(c => c);
+            _fixture.ScopeOptions.BeforeBreadcrumb = c => c;
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb(expected);
 
-            Assert.Same(expected, sut.InternalBreadcrumbs.Single());
+            Assert.Same(expected, sut.Breadcrumbs.Single());
         }
 
         [Fact]
@@ -355,7 +353,7 @@ namespace Sentry.Tests.Protocol
                 sut.AddBreadcrumb(i.ToString());
             }
 
-            Assert.Equal(Constants.DefaultMaxBreadcrumbs, sut.InternalBreadcrumbs.Count);
+            Assert.Equal(Constants.DefaultMaxBreadcrumbs, sut.Breadcrumbs.Count());
         }
 
         [Theory]
@@ -364,7 +362,7 @@ namespace Sentry.Tests.Protocol
         [InlineData(10)]
         public void AddBreadcrumb_WithOptions_BoundOptionsLimit(int limit)
         {
-            _ = _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
+            _fixture.ScopeOptions.MaxBreadcrumbs = limit;
             var sut = _fixture.GetSut();
 
             for (var i = 0; i < limit + 1; i++)
@@ -372,7 +370,7 @@ namespace Sentry.Tests.Protocol
                 sut.AddBreadcrumb(i.ToString());
             }
 
-            Assert.Equal(limit, sut.InternalBreadcrumbs.Count);
+            Assert.Equal(limit, sut.Breadcrumbs.Count());
         }
 
         [Fact]
@@ -380,7 +378,7 @@ namespace Sentry.Tests.Protocol
         {
             const int limit = 5;
 
-            _ = _fixture.ScopeOptions.MaxBreadcrumbs.Returns(limit);
+            _fixture.ScopeOptions.MaxBreadcrumbs = limit;
             var sut = _fixture.GetSut();
 
             for (var i = 0; i < limit + 1; i++)
@@ -411,7 +409,7 @@ namespace Sentry.Tests.Protocol
                 expectedData,
                 expectedLevel);
 
-            var actual = Assert.Single(sut.InternalBreadcrumbs);
+            var actual = Assert.Single(sut.Breadcrumbs);
             Assert.Equal(expectedMessage, actual.Message);
             Assert.Equal(expectedCategory, actual.Category);
             Assert.Equal(expectedType, actual.Type);
@@ -438,7 +436,7 @@ namespace Sentry.Tests.Protocol
                 expectedData,
                 expectedLevel);
 
-            var actual = Assert.Single(sut.InternalBreadcrumbs);
+            var actual = Assert.Single(sut.Breadcrumbs);
             Assert.Equal(expectedMessage, actual.Message);
             Assert.Equal(expectedCategory, actual.Category);
             Assert.Equal(expectedType, actual.Type);
@@ -466,7 +464,7 @@ namespace Sentry.Tests.Protocol
                 expectedData,
                 expectedLevel);
 
-            var actual = Assert.Single(sut.InternalBreadcrumbs);
+            var actual = Assert.Single(sut.Breadcrumbs);
             Assert.Equal(expectedTimestamp, actual.Timestamp);
             Assert.Equal(expectedMessage, actual.Message);
             Assert.Equal(expectedCategory, actual.Category);
@@ -487,7 +485,7 @@ namespace Sentry.Tests.Protocol
                 expectedTimestamp,
                 expectedMessage);
 
-            var actual = Assert.Single(sut.InternalBreadcrumbs);
+            var actual = Assert.Single(sut.Breadcrumbs);
             Assert.Equal(expectedTimestamp, actual.Timestamp);
             Assert.Equal(expectedMessage, actual.Message);
             Assert.Null(actual.Category);
@@ -506,23 +504,8 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void Apply_Null_Source_DoesNotThrow()
         {
-            BaseScope sut = null;
+            IScope sut = null;
             sut.Apply(null);
-        }
-
-        [Fact]
-        public void Apply_Fingerprint_DoesNotSetWhenNull()
-        {
-            var sut = _fixture.GetSut();
-            sut.InternalFingerprint = null;
-
-            const string expected = "fingerprint";
-            var target = _fixture.GetSut();
-            target.SetFingerprint(new[] { expected });
-
-            sut.Apply(target);
-
-            Assert.Equal(expected, target.InternalFingerprint.Single());
         }
 
         [Fact]
@@ -536,7 +519,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Apply(target);
 
-            Assert.Same(sut.InternalFingerprint, target.InternalFingerprint);
+            Assert.Same(sut.Fingerprint, target.Fingerprint);
         }
 
         [Fact]
@@ -544,13 +527,13 @@ namespace Sentry.Tests.Protocol
         {
             var sut = _fixture.GetSut();
             sut.SetFingerprint(new[] { "fingerprint" });
-            var expected = sut.InternalFingerprint;
+            var expected = sut.Fingerprint;
 
             var target = _fixture.GetSut();
             sut.SetFingerprint(new[] { "new fingerprint" });
             sut.Apply(target);
 
-            Assert.Equal(expected.Count(), target.InternalFingerprint.Count());
+            Assert.Equal(expected.Count(), target.Fingerprint.Count());
         }
 
         [Fact]
@@ -563,18 +546,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Apply(target);
 
-            Assert.Equal(2, target.InternalBreadcrumbs.Count);
-        }
-
-        [Fact]
-        public void Apply_Breadcrumbs_NullOnSource_TargetIsNull()
-        {
-            var target = _fixture.GetSut();
-
-            var sut = _fixture.GetSut();
-            sut.Apply(target);
-
-            Assert.Null(target.InternalBreadcrumbs);
+            Assert.Equal(2, target.Breadcrumbs.Count());
         }
 
         [Fact]
@@ -586,7 +558,7 @@ namespace Sentry.Tests.Protocol
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            _ = Assert.Single(target.InternalBreadcrumbs);
+            _ = Assert.Single(target.Breadcrumbs);
         }
 
         [Fact]
@@ -594,12 +566,12 @@ namespace Sentry.Tests.Protocol
         {
             var sut = _fixture.GetSut();
             sut.AddBreadcrumb("test target");
-            var expected = sut.InternalBreadcrumbs;
+            var expected = sut.Breadcrumbs;
 
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Equal(expected.Count, target.InternalBreadcrumbs.Count);
+            Assert.Equal(expected.Count(), target.Breadcrumbs.Count());
         }
 
         [Fact]
@@ -612,18 +584,7 @@ namespace Sentry.Tests.Protocol
             target.SetExtra("target", "target");
             sut.Apply(target);
 
-            Assert.Equal(2, target.InternalExtra.Count);
-        }
-
-        [Fact]
-        public void Apply_Extra_NullOnSource_TargetIsNull()
-        {
-            var sut = _fixture.GetSut();
-
-            var target = _fixture.GetSut();
-            sut.Apply(target);
-
-            Assert.Null(target.InternalExtra);
+            Assert.Equal(2, target.Extra.Count);
         }
 
         [Fact]
@@ -638,8 +599,8 @@ namespace Sentry.Tests.Protocol
 
             sut.Apply(target);
 
-            _ = Assert.Single(target.InternalExtra);
-            Assert.Equal(expectedValue, target.InternalExtra[conflictingKey]);
+            _ = Assert.Single(target.Extra);
+            Assert.Equal(expectedValue, target.Extra[conflictingKey]);
         }
 
         [Fact]
@@ -651,7 +612,7 @@ namespace Sentry.Tests.Protocol
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            _ = Assert.Single(target.InternalExtra);
+            _ = Assert.Single(target.Extra);
         }
 
         [Fact]
@@ -659,12 +620,12 @@ namespace Sentry.Tests.Protocol
         {
             var target = _fixture.GetSut();
             target.SetExtra("target", "target");
-            var expected = target.InternalExtra;
+            var expected = target.Extra;
 
             var sut = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Same(expected, target.InternalExtra);
+            Assert.Same(expected, target.Extra);
         }
 
         [Fact]
@@ -677,18 +638,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Apply(target);
 
-            Assert.Equal(2, target.InternalTags.Count);
-        }
-
-        [Fact]
-        public void Apply_Tag_NullOnSource_TargetIsNull()
-        {
-            var sut = _fixture.GetSut();
-            var target = _fixture.GetSut();
-
-            sut.Apply(target);
-
-            Assert.Null(target.InternalTags);
+            Assert.Equal(2, target.Tags.Count);
         }
 
         [Fact]
@@ -703,8 +653,8 @@ namespace Sentry.Tests.Protocol
 
             sut.Apply(target);
 
-            _ = Assert.Single(target.InternalTags);
-            Assert.Equal(expectedValue, target.InternalTags[conflictingKey]);
+            _ = Assert.Single(target.Tags);
+            Assert.Equal(expectedValue, target.Tags[conflictingKey]);
         }
 
         [Fact]
@@ -716,7 +666,7 @@ namespace Sentry.Tests.Protocol
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            _ = Assert.Single(target.InternalTags);
+            _ = Assert.Single(target.Tags);
         }
 
         [Fact]
@@ -725,11 +675,11 @@ namespace Sentry.Tests.Protocol
             var sut = _fixture.GetSut();
             var target = _fixture.GetSut();
             target.SetTag("target", "target");
-            var expected = target.InternalTags;
+            var expected = target.Tags;
 
             sut.Apply(target);
 
-            Assert.Same(expected, target.InternalTags);
+            Assert.Same(expected, target.Tags);
         }
 
         [Fact]
@@ -808,17 +758,6 @@ namespace Sentry.Tests.Protocol
             sut.Apply(target);
 
             Assert.Equal(2, target.Contexts.Count);
-        }
-
-        [Fact]
-        public void Apply_Contexts_NullOnSource_TargetIsNull()
-        {
-            var sut = _fixture.GetSut();
-            var target = _fixture.GetSut();
-
-            sut.Apply(target);
-
-            Assert.Null(target.InternalContexts);
         }
 
         [Fact]
@@ -926,7 +865,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Sdk.AddPackage("nuget:Sentry.Extensions.Logging", "2.0.0-preview10");
 
-            var target = new BaseScope(null);
+            var target = new SentryEvent(null);
 
             sut.Apply(target);
 
@@ -940,7 +879,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Sdk.AddPackage("nuget:Sentry.Extensions.Logging", "2.0.0-preview10");
 
-            var target = new BaseScope(null);
+            var target = new SentryEvent(null);
             sut.Sdk.AddPackage("nuget:Sentry.AspNetCore", "1.0.0");
 
             sut.Apply(target);
@@ -952,7 +891,7 @@ namespace Sentry.Tests.Protocol
         public void Apply_Sdk_SourceNone_TargetSingle_DoesNotModifyTarget()
         {
             var sut = _fixture.GetSut();
-            var target = new BaseScope(null);
+            var target = new SentryEvent(null);
             target.Sdk.AddPackage("nuget:Sentry", "1.0");
             var expected = target.Sdk.Packages.Single();
 
@@ -1079,17 +1018,6 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Apply_User_NullOnSource_TargetIsNull()
-        {
-            var sut = _fixture.GetSut();
-            var target = _fixture.GetSut();
-
-            sut.Apply(target);
-
-            Assert.Null(target.InternalUser);
-        }
-
-        [Fact]
         public void Apply_User_NotSameReference()
         {
             var sut = _fixture.GetSut();
@@ -1154,18 +1082,6 @@ namespace Sentry.Tests.Protocol
             Assert.Equal("Email", target.User.Email);
             Assert.Equal("IpAddress", target.User.IpAddress);
             Assert.Equal("Username", target.User.Username);
-        }
-
-
-        [Fact]
-        public void Apply_Request_NullOnSource_TargetIsNull()
-        {
-            var target = _fixture.GetSut();
-
-            var sut = _fixture.GetSut();
-            sut.Apply(target);
-
-            Assert.Null(target.InternalUser);
         }
 
         [Fact]

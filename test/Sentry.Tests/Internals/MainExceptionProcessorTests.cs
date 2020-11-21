@@ -20,23 +20,23 @@ namespace Sentry.Tests.Internals
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
-        public void Process_ExceptionAndEventWithoutExtra_ExtraIsNull()
+        public void Process_ExceptionAndEventWithoutExtra_ExtraIsEmpty()
         {
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
             sut.Process(new Exception(), evt);
 
-            Assert.Null(evt.InternalExtra);
+            Assert.Empty(evt.Extra);
         }
 
         [Fact]
-        public void Process_ExceptionsWithoutData_ExtraIsNull()
+        public void Process_ExceptionsWithoutData_ExtraIsEmpty()
         {
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
             sut.Process(new Exception("ex", new Exception()), evt);
 
-            Assert.Null(evt.InternalExtra);
+            Assert.Empty(evt.Extra);
         }
 
         [Fact]

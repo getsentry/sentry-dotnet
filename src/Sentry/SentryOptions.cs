@@ -363,6 +363,24 @@ namespace Sentry
         public DeduplicateMode DeduplicateMode { get; set; } = DeduplicateMode.All ^ DeduplicateMode.InnerException;
 
         /// <summary>
+        /// Path to the root directory used for storing events locally for resilience.
+        /// If set to <code>null</code>, caching will not be used.
+        /// </summary>
+        public string? CacheDirectoryPath { get; set; }
+
+        /// <summary>
+        /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
+        /// You can set it to <code>TimeSpan.Zero</code> to disable this feature.
+        /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
+        /// </summary>
+        /// <remarks>
+        /// The trade off here is: Ensure a crash that happens during app start is sent to Sentry
+        /// even though that might slow down the app start. If set to false, the app might crash
+        /// too quickly, before Sentry can capture the cached error in the background.
+        /// </remarks>
+        public TimeSpan CacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
@@ -427,7 +445,6 @@ namespace Sentry
                     "SkiaSharp",
                     "IdentityModel",
                     "SqlitePclRaw",
-                    "Xamarin",
                     "Google.",
                     "MongoDB.",
                     "Remotion.Linq",

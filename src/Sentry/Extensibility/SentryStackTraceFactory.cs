@@ -163,7 +163,8 @@ namespace Sentry.Extensibility
         /// Get a <see cref="MethodBase"/> from <see cref="StackFrame"/>.
         /// </summary>
         /// <param name="stackFrame">The <see cref="StackFrame"/></param>.
-        protected virtual MethodBase GetMethod(StackFrame stackFrame) => stackFrame.GetMethod();
+        protected virtual MethodBase? GetMethod(StackFrame stackFrame)
+            => stackFrame.GetMethod();
 
         private bool IsSystemModuleName(string? moduleName)
         {

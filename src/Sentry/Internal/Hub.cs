@@ -13,7 +13,7 @@ namespace Sentry.Internal
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
 
-        internal readonly SentryClient _ownedClient;
+        private readonly SentryClient _ownedClient;
 
         internal SentryScopeManager ScopeManager { get; }
 

@@ -37,18 +37,7 @@ namespace Sentry.Integrations
                 ex.Data[Mechanism.HandledKey] = false;
                 ex.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
 
-#if RELEASE && __MOBILE__
-                if (_hub is Hub h)
-                {
-                    var evt = h.PrepareEvent(new SentryEvent(ex));
-                    // Mono AOT crashes before you can block for submission on a background thread
-                    // Blocking on a async I/O works correctly though
-                    // Work around to grab the transport and make sure we bypass the background worker
-                    (h._ownedClient.Worker as BackgroundWorker)?._transport.CaptureEventAsync(evt).Wait();
-                }
-#else
                 _ = _hub?.CaptureException(ex);
-#endif
             }
 
             if (e.IsTerminating)
