@@ -66,7 +66,7 @@ namespace Sentry.Internal
                     scope.Key.Apply(state);
                 }
 
-                return new ScopeSnapshot(_options, currentScopeAndClientStack, this);
+                return DisabledHub.Instance;
             }
 
             var clonedScope = scope.Key.Clone();
