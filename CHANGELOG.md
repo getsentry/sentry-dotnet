@@ -1,6 +1,6 @@
 # Changelog
 
-## vNext
+## 3.0.0-alpha.5
 
 * Replaced `BaseScope` with `IScope`. (#590) @Tyrrrz
 * Removed code coverage report from the test folder. (#592) @lucas-zimerman
