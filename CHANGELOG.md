@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+* Add SentryScopeProcessor #603
+
 ## 3.0.0-alpha.5
 
 * Replaced `BaseScope` with `IScope`. (#590) @Tyrrrz

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using Sentry.Extensibility;
+using System.Linq;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Constants = Sentry.Protocol.Constants;
@@ -354,7 +354,7 @@ namespace Sentry
         /// <param name="state">The state object to apply.</param>
         public static void Apply(this IScope scope, object state)
         {
-            var processor = scope.ScopeOptions.SentryScopeProcessor ?? new DefaultSentryScopeProcessor();
+            var processor = scope.ScopeOptions?.SentryScopeStateProcessor ?? new DefaultSentryScopeStateProcessor();
             processor.Apply(scope, state);
         }
 

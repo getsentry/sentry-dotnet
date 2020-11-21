@@ -273,7 +273,7 @@ internal static class Program
     {
         private readonly ISentryScopeStateProcessor _fallback = new DefaultSentryScopeStateProcessor();
 
-        public void Apply(BaseScope scope, object state)
+        public void Apply(IScope scope, object state)
         {
             if (state is SpecialContextObject specialState)
             {
