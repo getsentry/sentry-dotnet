@@ -250,7 +250,7 @@ namespace Sentry
                 {
                     {"message", e.Message}
                 };
-                if(e.StackTrace is not null)
+                if (e.StackTrace is { })
                 {
                     data.Add("stackTrace", e.StackTrace);
                 }

@@ -187,7 +187,7 @@ namespace Sentry.Internal
                     }
 
                     var asmName = assembly.GetName();
-                    if (asmName.Name is not null && asmName.Version is not null)
+                    if (asmName.Name is { } && asmName.Version is { })
                     {
                         @event.Modules[asmName.Name] = asmName.Version.ToString();
                     }

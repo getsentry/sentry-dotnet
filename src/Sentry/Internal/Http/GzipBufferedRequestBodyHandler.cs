@@ -52,7 +52,7 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             var memoryStream = new MemoryStream();
-            if (request.Content is not null)
+            if (request.Content is { })
             {
                 using (var gzipStream = new GZipStream(memoryStream, _compressionLevel, leaveOpen: true))
                 {

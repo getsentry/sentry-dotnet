@@ -49,7 +49,7 @@ namespace Sentry.Internal.Http
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            if (request.Content is not null)
+            if (request.Content is { })
             {
                 request.Content = new GzipContent(request.Content, _compressionLevel);
             }
