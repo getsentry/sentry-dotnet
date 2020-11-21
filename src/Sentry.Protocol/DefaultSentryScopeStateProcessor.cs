@@ -5,9 +5,9 @@ using System.Linq;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Default implementation of <see cref="ISentryScopeProcessor"/>.
+    /// Default implementation of <see cref="ISentryScopeStateProcessor"/>.
     /// </summary>
-    public class DefaultSentryScopeProcessor : ISentryScopeProcessor
+    public class DefaultSentryScopeStateProcessor : ISentryScopeStateProcessor
     {
         /// <inheritdoc />
         public void Apply(BaseScope scope, object state)
