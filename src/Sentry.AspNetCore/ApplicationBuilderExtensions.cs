@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Builder
         {
             // Container is built so resolve a logger and modify the SDK internal logger
             var options = app.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>();
-            if (options?.Value is SentryAspNetCoreOptions o)
+            if (options?.Value is { } o)
             {
                 if (o.Debug && (o.DiagnosticLogger == null || o.DiagnosticLogger.GetType() == typeof(ConsoleDiagnosticLogger)))
                 {
@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Builder
                 var stackTraceFactory = app.ApplicationServices.GetService<ISentryStackTraceFactory>();
                 if (stackTraceFactory != null)
                 {
-                    o.UseStackTraceFactory(stackTraceFactory);
+                    _ = o.UseStackTraceFactory(stackTraceFactory);
                 }
 
                 if (app.ApplicationServices.GetService<IEnumerable<ISentryEventProcessor>>().Any())
@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             var lifetime = app.ApplicationServices.GetService<IHostApplicationLifetime>();
-            lifetime?.ApplicationStopped.Register(SentrySdk.Close);
+            _ = lifetime?.ApplicationStopped.Register(SentrySdk.Close);
 
             return app.UseMiddleware<SentryMiddleware>();
         }

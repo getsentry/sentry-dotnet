@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 namespace Sentry
 {
     /// <summary>
-    /// Scope management
+    /// Scope management.
     /// </summary>
     /// <remarks>
     /// An implementation shall create new scopes and allow consumers
-    /// modify the current scope
+    /// modify the current scope.
     /// </remarks>
     public interface ISentryScopeManager
     {
@@ -23,7 +23,7 @@ namespace Sentry
         /// </summary>
         /// <param name="configureScope">The configure scope.</param>
         /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
-        Task ConfigureScopeAsync(Func<Scope, Task> configureScope);
+        ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope);
 
         /// <summary>
         /// Binds the client to the current scope.
@@ -32,28 +32,27 @@ namespace Sentry
         void BindClient(ISentryClient client);
 
         /// <summary>
-        /// Pushes a new scope into the stack which is removed upon Dispose
+        /// Pushes a new scope into the stack which is removed upon Dispose.
         /// </summary>
         /// <returns>A disposable which removes the scope
-        /// from the environment when invoked</returns>
+        /// from the environment when invoked.</returns>
         IDisposable PushScope();
 
         /// <summary>
-        /// Pushes a new scope into the stack which is removed upon Dispose
+        /// Pushes a new scope into the stack which is removed upon Dispose.
         /// </summary>
-        /// <param name="state">A state to associate with the scope</param>
-        /// <typeparam name="TState"></typeparam>
+        /// <param name="state">A state to associate with the scope.</param>
         /// <returns>A disposable which removes the scope
-        /// from the environment when invoked</returns>
+        /// from the environment when invoked.</returns>
         IDisposable PushScope<TState>(TState state);
 
         /// <summary>
-        /// Runs the callback with a new scope which gets dropped at the end
+        /// Runs the callback with a new scope which gets dropped at the end.
         /// </summary>
         /// <remarks>
         /// Pushes a new scope, runs the callback, pops the scope.
         /// </remarks>
-        /// <see href="https://docs.sentry.io/learn/scopes/?platform=csharp#local-scopes"/>
+        /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
         /// <param name="scopeCallback">The callback to run with the one time scope.</param>
         void WithScope(Action<Scope> scopeCallback);
     }

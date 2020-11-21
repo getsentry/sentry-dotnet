@@ -7,64 +7,44 @@ namespace Sentry.Extensions.Logging
     {
         public static BreadcrumbLevel ToBreadcrumbLevel(this LogLevel level)
         {
-            switch (level)
+            return level switch
             {
-                case LogLevel.Trace:
-                    return BreadcrumbLevel.Debug;
-                case LogLevel.Debug:
-                    return BreadcrumbLevel.Debug;
-                case LogLevel.Information:
-                    return BreadcrumbLevel.Info;
-                case LogLevel.Warning:
-                    return BreadcrumbLevel.Warning;
-                case LogLevel.Error:
-                    return BreadcrumbLevel.Error;
-                case LogLevel.Critical:
-                    return BreadcrumbLevel.Critical;
-                case LogLevel.None:
-                default:
-                    return (BreadcrumbLevel)level;
-            }
+                LogLevel.Trace => BreadcrumbLevel.Debug,
+                LogLevel.Debug => BreadcrumbLevel.Debug,
+                LogLevel.Information => BreadcrumbLevel.Info,
+                LogLevel.Warning => BreadcrumbLevel.Warning,
+                LogLevel.Error => BreadcrumbLevel.Error,
+                LogLevel.Critical => BreadcrumbLevel.Critical,
+                _ => (BreadcrumbLevel)level
+            };
         }
 
         public static LogLevel ToMicrosoft(this SentryLevel level)
         {
-            switch (level)
+            return level switch
             {
-                case SentryLevel.Debug:
-                    return LogLevel.Debug;
-                case SentryLevel.Info:
-                    return LogLevel.Information;
-                case SentryLevel.Warning:
-                    return LogLevel.Warning;
-                case SentryLevel.Error:
-                    return LogLevel.Error;
-                case SentryLevel.Fatal:
-                    return LogLevel.Critical;
-                default:
-                    return LogLevel.Debug;
-            }
+                SentryLevel.Debug => LogLevel.Debug,
+                SentryLevel.Info => LogLevel.Information,
+                SentryLevel.Warning => LogLevel.Warning,
+                SentryLevel.Error => LogLevel.Error,
+                SentryLevel.Fatal => LogLevel.Critical,
+                _ => LogLevel.Debug
+            };
         }
 
         public static SentryLevel ToSentryLevel(this LogLevel level)
         {
-            switch (level)
+            return level switch
             {
-                case LogLevel.None:
-                case LogLevel.Trace:
-                case LogLevel.Debug:
-                    return SentryLevel.Debug;
-                case LogLevel.Information:
-                    return SentryLevel.Info;
-                case LogLevel.Warning:
-                    return SentryLevel.Warning;
-                case LogLevel.Error:
-                    return SentryLevel.Error;
-                case LogLevel.Critical:
-                    return SentryLevel.Fatal;
-                default:
-                    return SentryLevel.Debug;
-            }
+                LogLevel.None => SentryLevel.Debug,
+                LogLevel.Trace => SentryLevel.Debug,
+                LogLevel.Debug => SentryLevel.Debug,
+                LogLevel.Information => SentryLevel.Info,
+                LogLevel.Warning => SentryLevel.Warning,
+                LogLevel.Error => SentryLevel.Error,
+                LogLevel.Critical => SentryLevel.Fatal,
+                _ => SentryLevel.Debug
+            };
         }
     }
 }

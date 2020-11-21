@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;NLog</PackageTags>
     <PackageId>Sentry.NLog</PackageId>
     <AssemblyName>Sentry.NLog</AssemblyName>
     <RootNamespace>Sentry.NLog</RootNamespace>
     <Description>Official NLog integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.5.11" />
   </ItemGroup>

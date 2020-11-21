@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.Logging
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
         public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
-            => builder.AddSentry((Action<SentryLoggingOptions>)null);
+            => builder.AddSentry((Action<SentryLoggingOptions>?)null);
 
         /// <summary>
         /// Adds the Sentry logging integration.
@@ -41,20 +41,20 @@ namespace Microsoft.Extensions.Logging
         /// <returns></returns>
         public static ILoggingBuilder AddSentry(
             this ILoggingBuilder builder,
-            Action<SentryLoggingOptions> optionsConfiguration)
+            Action<SentryLoggingOptions>? optionsConfiguration)
         {
             builder.AddConfiguration();
 
             if (optionsConfiguration != null)
             {
-                builder.Services.Configure(optionsConfiguration);
+                _ = builder.Services.Configure(optionsConfiguration);
             }
 
-            builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
+            _ = builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
 
-            builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
+            _ = builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
 
-            builder.Services.AddSentry<SentryLoggingOptions>();
+            _ = builder.Services.AddSentry<SentryLoggingOptions>();
             return builder;
         }
     }

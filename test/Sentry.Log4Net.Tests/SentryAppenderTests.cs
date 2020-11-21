@@ -53,8 +53,8 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
         }
 
         [Fact]
@@ -67,9 +67,9 @@ namespace Sentry.Log4Net.Tests
             sut.DoAppend(evt);
 
             var expected = typeof(SentryAppender).Assembly.GetNameAndVersion();
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
-                                                       && e.Sdk.Version == expected.Version));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
+                                                           && e.Sdk.Version == expected.Version));
         }
 
         [Fact]
@@ -106,9 +106,9 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == expectedLogger
-                                                       && e.Level == expectedLevel));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Logger == expectedLogger
+                                                           && e.Level == expectedLevel));
         }
 
         [Fact]
@@ -122,8 +122,8 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message == expected));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == expected));
         }
 
         [Fact]
@@ -145,8 +145,7 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.InternalUser == null));
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => !e.HasUser()));
         }
 
         [Fact]
@@ -162,8 +161,8 @@ namespace Sentry.Log4Net.Tests
             sut.SendIdentity = true;
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Id == expected));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Id == expected));
         }
 
         [Fact]
@@ -181,7 +180,7 @@ namespace Sentry.Log4Net.Tests
         [Fact]
         public void Append_WithEnabledHub_InitNotCalled()
         {
-            _fixture.Hub.IsEnabled.Returns(true);
+            _ = _fixture.Hub.IsEnabled.Returns(true);
             var sut = _fixture.GetSut();
 
             var evt = new LoggingEvent(new LoggingEventData());
@@ -212,21 +211,21 @@ namespace Sentry.Log4Net.Tests
             sut.DoAppend(evt);
 
             Assert.False(_fixture.InitInvoked);
-            _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(null);
+            _ = _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(null);
         }
 
         [Fact]
         public void Append_NoDsnAndDisabledHub_HubNotCalled()
         {
             _fixture.Dsn = null;
-            _fixture.Hub.IsEnabled.Returns(false);
+            _ = _fixture.Hub.IsEnabled.Returns(false);
             var sut = _fixture.GetSut();
 
             var evt = new LoggingEvent(new LoggingEventData());
             sut.DoAppend(evt);
 
             Assert.False(_fixture.InitInvoked);
-            _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(null);
+            _ = _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(null);
         }
 
         [Fact]
@@ -250,12 +249,12 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e =>
-                    e.Extra["ClassName"].ToString() == expectedClass
-                    && e.Extra["FileName"].ToString() == expectedFileName
-                    && e.Extra["MethodName"].ToString() == expectedMethod
-                    && (int)e.Extra["LineNumber"] == expectedLineNumber));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e =>
+                        e.Extra["ClassName"].ToString() == expectedClass
+                        && e.Extra["FileName"].ToString() == expectedFileName
+                        && e.Extra["MethodName"].ToString() == expectedMethod
+                        && (int)e.Extra["LineNumber"] == expectedLineNumber));
         }
 
         [Fact]
@@ -271,8 +270,8 @@ namespace Sentry.Log4Net.Tests
             var evt = new LoggingEvent(new LoggingEventData());
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra[id] == expected));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra[id] == expected));
         }
 
         [Fact]
@@ -283,8 +282,8 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == null));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == null));
         }
 
         [Fact]
@@ -297,8 +296,8 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
         }
 
         [Fact]

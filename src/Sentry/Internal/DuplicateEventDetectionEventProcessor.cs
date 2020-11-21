@@ -1,48 +1,18 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Sentry.Extensibility;
-
-namespace Sentry
-{
-    /// <summary>
-    /// Possible modes of dropping events that are detected to be duplicates.
-    /// </summary>
-    [Flags]
-    public enum DeduplicateMode
-    {
-        /// <summary>
-        /// Same event instance. Assumes no object reuse/pooling.
-        /// </summary>
-        SameEvent = 1,
-        /// <summary>
-        /// An exception that was captured twice.
-        /// </summary>
-        SameExceptionInstance = 2,
-        /// <summary>
-        /// An exception already captured exists as an inner exception.
-        /// </summary>
-        InnerException = 4,
-        /// <summary>
-        /// An exception already captured is part of the aggregate exception.
-        /// </summary>
-        AggregateException = 8,
-        /// <summary>
-        /// All modes combined.
-        /// </summary>
-        All = int.MaxValue
-    }
-}
 
 namespace Sentry.Internal
 {
     internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
     {
         private readonly SentryOptions _options;
-        private readonly ConditionalWeakTable<object, object> _capturedObjects = new ConditionalWeakTable<object, object>();
+        private readonly ConditionalWeakTable<object, object?> _capturedObjects = new ConditionalWeakTable<object, object?>();
 
         public DuplicateEventDetectionEventProcessor(SentryOptions options) => _options = options;
 
-        public SentryEvent Process(SentryEvent @event)
+        public SentryEvent? Process(SentryEvent @event)
         {
             if (_options.DeduplicateMode.HasFlag(DeduplicateMode.SameEvent))
             {
@@ -66,11 +36,6 @@ namespace Sentry.Internal
 
         private bool IsDuplicate(Exception ex)
         {
-            if (ex == null)
-            {
-                return false;
-            }
-
             if (_options.DeduplicateMode.HasFlag(DeduplicateMode.SameExceptionInstance))
             {
                 if (_capturedObjects.TryGetValue(ex, out _))
@@ -84,16 +49,11 @@ namespace Sentry.Internal
             if (_options.DeduplicateMode.HasFlag(DeduplicateMode.AggregateException)
                 && ex is AggregateException aex)
             {
-                foreach (var aexInnerException in aex.InnerExceptions)
-                {
-                    if (IsDuplicate(aexInnerException))
-                    {
-                        return true;
-                    }
-                }
+                return aex.InnerExceptions.Any(IsDuplicate);
             }
-            else if (_options.DeduplicateMode.HasFlag(DeduplicateMode.InnerException)
-                     && ex.InnerException != null)
+
+            if (_options.DeduplicateMode.HasFlag(DeduplicateMode.InnerException)
+                && ex.InnerException != null)
             {
                 if (IsDuplicate(ex.InnerException))
                 {

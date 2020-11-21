@@ -5,9 +5,9 @@ namespace Sentry.Internal
 {
     internal static class ApplicationVersionLocator
     {
-        public static string GetCurrent() => GetCurrent(Assembly.GetEntryAssembly());
+        public static string? GetCurrent() => GetCurrent(Assembly.GetEntryAssembly());
 
-        internal static string GetCurrent(Assembly asm)
+        internal static string? GetCurrent(Assembly? asm)
         {
             var version = asm?.GetNameAndVersion().Version;
 

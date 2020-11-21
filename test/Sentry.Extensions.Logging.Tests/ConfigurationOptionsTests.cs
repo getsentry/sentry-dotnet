@@ -19,14 +19,14 @@ namespace Sentry.Extensions.Logging.Tests
             public Fixture()
             {
                 Builder = new ConfigurationBuilder();
-                Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+                _ = Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
             }
 
             public IServiceProvider GetSut()
             {
                 var configuration = Builder.Build();
                 var services = new ServiceCollection();
-                services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry());
+                _ = services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry());
                 return services.BuildServiceProvider();
             }
         }
@@ -52,14 +52,14 @@ namespace Sentry.Extensions.Logging.Tests
                 {"Sentry:InitializeSdk", "true"},
             };
 
-            _fixture.Builder.AddInMemoryCollection(dict);
+            _ = _fixture.Builder.AddInMemoryCollection(dict);
 
             var provider = _fixture.GetSut();
             var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
 
             Assert.Equal(150, sentryLoggingOptions.MaxBreadcrumbs);
             Assert.Equal("e386dfd", sentryLoggingOptions.Release);
-            Assert.Equal("https://9f271c100c3248a4b074a0bead837061@o19635.ingest.sentry.io/5264714", sentryLoggingOptions.Dsn);
+            Assert.Equal("https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537", sentryLoggingOptions.Dsn);
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Sentry.Extensions.Logging.Tests
                 {"Sentry:DefaultTags:" + expectedKey, expectedValue},
             };
 
-            _fixture.Builder.AddInMemoryCollection(dict);
+            _ = _fixture.Builder.AddInMemoryCollection(dict);
 
             var provider = _fixture.GetSut();
             var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
@@ -84,7 +84,7 @@ namespace Sentry.Extensions.Logging.Tests
         public void SentryLoggerProvider_ResolvedFromILoggerProvider()
         {
             var provider = _fixture.GetSut();
-            Assert.Single(provider.GetServices<ILoggerProvider>().OfType<SentryLoggerProvider>());
+            _ = Assert.Single(provider.GetServices<ILoggerProvider>().OfType<SentryLoggerProvider>());
         }
     }
 }

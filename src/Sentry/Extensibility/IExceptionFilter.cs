@@ -11,7 +11,7 @@ namespace Sentry.Extensibility
         /// Whether to filter out or not the exception.
         /// </summary>
         /// <param name="ex">The exception about to be captured.</param>
-        /// <returns><c>true</c> if [the event should be filtered out]; otherwise, <c>false</c></returns>.
+        /// <returns><c>true</c> if [the event should be filtered out]; otherwise, <c>false</c>.</returns>
         bool Filter(Exception ex);
     }
 }

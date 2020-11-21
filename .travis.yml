@@ -19,6 +19,7 @@ matrix:
 script:
   - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 2.1.507
   - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 3.1.200
+  - curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 5.0.100
   - export PATH=$PATH:~/.dotnet
   - dotnet --info
   - ./build.sh
@@ -26,12 +27,3 @@ after_success:
   - curl -s https://codecov.io/bash > codecov
   - chmod +x codecov
   - ./codecov -f "*opencover.xml"
-notifications:
-  webhooks:
-    urls:
-      - https://zeus.ci/hooks/b6bbaf86-c598-11e8-aa19-0a580a280112/public/provider/travis/webhook
-    on_success: always
-    on_failure: always
-    on_start: always
-    on_cancel: always
-    on_error: always

@@ -20,23 +20,20 @@ namespace Sentry.AspNetCore.Tests
         public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; }
             = new SentryAspNetCoreOptions
             {
-#pragma warning disable 618
-                IncludeRequestPayload = true,
-#pragma warning restore 618
                 MaxRequestBodySize = RequestSize.Always
             };
 
         public ScopeExtensionsTests()
         {
-            _httpContext.RequestServices.Returns(_provider);
-            _httpContext.Request.Returns(_httpRequest);
+            _ = _httpContext.RequestServices.Returns(_provider);
+            _ = _httpContext.Request.Returns(_httpRequest);
         }
 
         [Fact]
         public void Populate_Request_Method_SetToScope()
         {
             const string expected = "method";
-            _httpContext.Request.Method.Returns(expected);
+            _ = _httpContext.Request.Method.Returns(expected);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -47,7 +44,7 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_Request_QueryString_SetToScope()
         {
             const string expected = "?query=bla&something=ble";
-            _httpContext.Request.QueryString.Returns(new QueryString(expected));
+            _ = _httpContext.Request.QueryString.Returns(new QueryString(expected));
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -58,13 +55,13 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_Request_Url_SetToScope()
         {
             const string expectedPath = "/request/path";
-            _httpContext.Request.Path.Returns(new PathString(expectedPath));
+            _ = _httpContext.Request.Path.Returns(new PathString(expectedPath));
 
             const string expectedHost = "host.com";
-            _httpContext.Request.Host.Returns(new HostString(expectedHost));
+            _ = _httpContext.Request.Host.Returns(new HostString(expectedHost));
 
             const string expectedScheme = "http";
-            _httpContext.Request.Scheme.Returns(expectedScheme);
+            _ = _httpContext.Request.Scheme.Returns(expectedScheme);
 
             const string expected = "http://host.com/request/path";
 
@@ -78,7 +75,7 @@ namespace Sentry.AspNetCore.Tests
         {
             const string expected = "/request/path";
             _sut.SetTag("RequestPath", expected);
-            _httpContext.Request.Path.Returns(new PathString(expected));
+            _ = _httpContext.Request.Path.Returns(new PathString(expected));
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -89,13 +86,13 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_Request_Url_IncludesPortWhenOnContext()
         {
             const string expectedPath = "/request/path";
-            _httpContext.Request.Path.Returns(new PathString(expectedPath));
+            _ = _httpContext.Request.Path.Returns(new PathString(expectedPath));
 
             const string expectedHost = "host.com:9000";
-            _httpContext.Request.Host.Returns(new HostString(expectedHost));
+            _ = _httpContext.Request.Host.Returns(new HostString(expectedHost));
 
             const string expectedScheme = "http";
-            _httpContext.Request.Scheme.Returns(expectedScheme);
+            _ = _httpContext.Request.Scheme.Returns(expectedScheme);
 
             const string expected = "http://host.com:9000/request/path";
 
@@ -115,7 +112,7 @@ namespace Sentry.AspNetCore.Tests
                 { secondKey, new StringValues(new [] { "gzip", "deflate", "br" }) }
             };
 
-            _httpRequest.Headers.Returns(headers);
+            _ = _httpRequest.Headers.Returns(headers);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -132,7 +129,7 @@ namespace Sentry.AspNetCore.Tests
                 { firstKey, new StringValues("Cookies data") }
             };
 
-            _httpRequest.Headers.Returns(headers);
+            _ = _httpRequest.Headers.Returns(headers);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -148,7 +145,7 @@ namespace Sentry.AspNetCore.Tests
                 { firstKey, new StringValues("Cookies data") }
             };
 
-            _httpRequest.Headers.Returns(headers);
+            _ = _httpRequest.Headers.Returns(headers);
 
             SentryAspNetCoreOptions.SendDefaultPii = true;
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
@@ -160,8 +157,8 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_RemoteIp_ByDefault_NotSetToEnv()
         {
             var connection = Substitute.For<ConnectionInfo>();
-            connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
-            _httpContext.Connection.Returns(connection);
+            _ = connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
+            _ = _httpContext.Connection.Returns(connection);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -173,8 +170,8 @@ namespace Sentry.AspNetCore.Tests
         {
             const string expected = "::1";
             var connection = Substitute.For<ConnectionInfo>();
-            connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
-            _httpContext.Connection.Returns(connection);
+            _ = connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
+            _ = _httpContext.Connection.Returns(connection);
 
             SentryAspNetCoreOptions.SendDefaultPii = true;
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
@@ -187,8 +184,8 @@ namespace Sentry.AspNetCore.Tests
         {
             const int expected = 1337;
             var connection = Substitute.For<ConnectionInfo>();
-            connection.LocalPort.Returns(expected);
-            _httpContext.Connection.Returns(connection);
+            _ = connection.LocalPort.Returns(expected);
+            _ = _httpContext.Connection.Returns(connection);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -202,8 +199,8 @@ namespace Sentry.AspNetCore.Tests
             var response = Substitute.For<HttpResponse>();
             var header = new HeaderDictionary { { "Server", expected } };
 
-            response.Headers.Returns(header);
-            _httpContext.Response.Returns(response);
+            _ = response.Headers.Returns(header);
+            _ = _httpContext.Response.Returns(response);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -223,9 +220,9 @@ namespace Sentry.AspNetCore.Tests
         {
             _sut.Populate(_httpContext, null);
 
-            _httpContext.RequestServices
-                .DidNotReceive()
-                .GetService(typeof(IEnumerable<IRequestPayloadExtractor>));
+            _ = _httpContext.RequestServices
+                    .DidNotReceive()
+                    .GetService(typeof(IEnumerable<IRequestPayloadExtractor>));
         }
 
         [Fact]
@@ -233,22 +230,22 @@ namespace Sentry.AspNetCore.Tests
         {
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            _httpContext.RequestServices
-                .Received(1)
-                .GetService(typeof(IEnumerable<IRequestPayloadExtractor>));
+            _ = _httpContext.RequestServices
+                    .Received(1)
+                    .GetService(typeof(IEnumerable<IRequestPayloadExtractor>));
         }
 
         [Fact]
         public void Populate_AspNetCoreOptionsSetTrue_PayloadExtractors_NoBodyRead()
         {
             var extractor = Substitute.For<IRequestPayloadExtractor>();
-            _httpContext.RequestServices
-                .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
-                .Returns(new[] { extractor });
+            _ = _httpContext.RequestServices
+                    .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
+                    .Returns(new[] { extractor });
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            extractor.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+            _ = extractor.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
         }
 
         [Theory]
@@ -256,14 +253,14 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_PayloadExtractors_DoesNotConsiderInvalidResponse(object expected)
         {
             var first = Substitute.For<IRequestPayloadExtractor>();
-            first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
-            _httpContext.RequestServices
-                .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
-                .Returns(new[] { first });
+            _ = first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
+            _ = _httpContext.RequestServices
+                    .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
+                    .Returns(new[] { first });
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+            _ = first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
 
             Assert.Null(_sut.Request.Data);
         }
@@ -279,7 +276,7 @@ namespace Sentry.AspNetCore.Tests
             };
             var features = new FeatureCollection();
             features.Set<IRoutingFeature>(routeFeature);
-            _httpContext.Features.Returns(features);
+            _ = _httpContext.Features.Returns(features);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -297,15 +294,15 @@ namespace Sentry.AspNetCore.Tests
         public void Populate_PayloadExtractors_StopsOnFirstDictionary(object expected)
         {
             var first = Substitute.For<IRequestPayloadExtractor>();
-            first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
+            _ = first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
             var second = Substitute.For<IRequestPayloadExtractor>();
-            _httpContext.RequestServices
-                .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
-                .Returns(new[] { first, second });
+            _ = _httpContext.RequestServices
+                    .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
+                    .Returns(new[] { first, second });
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            second.DidNotReceive().ExtractPayload(Arg.Any<IHttpRequest>());
+            _ = second.DidNotReceive().ExtractPayload(Arg.Any<IHttpRequest>());
 
             Assert.Same(expected, _sut.Request.Data);
         }
@@ -322,21 +319,21 @@ namespace Sentry.AspNetCore.Tests
         {
             var first = Substitute.For<IRequestPayloadExtractor>();
             var second = Substitute.For<IRequestPayloadExtractor>();
-            _httpContext.RequestServices
-                .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
-                .Returns(new[] { first, second });
+            _ = _httpContext.RequestServices
+                    .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
+                    .Returns(new[] { first, second });
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
-            second.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+            _ = first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+            _ = second.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
         }
 
         [Fact]
         public void Populate_TraceIdentifier_SetAsTag()
         {
             const string expected = "identifier";
-            _httpContext.TraceIdentifier.Returns(expected);
+            _ = _httpContext.TraceIdentifier.Returns(expected);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -348,7 +345,7 @@ namespace Sentry.AspNetCore.Tests
         {
             const string expected = "identifier";
             _sut.SetTag("RequestId", expected);
-            _httpContext.TraceIdentifier.Returns(expected);
+            _ = _httpContext.TraceIdentifier.Returns(expected);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -360,7 +357,7 @@ namespace Sentry.AspNetCore.Tests
         {
             const string expected = "identifier";
             _sut.SetTag("RequestId", "different identifier");
-            _httpContext.TraceIdentifier.Returns(expected);
+            _ = _httpContext.TraceIdentifier.Returns(expected);
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 

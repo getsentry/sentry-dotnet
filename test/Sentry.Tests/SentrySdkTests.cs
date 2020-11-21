@@ -1,10 +1,13 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
-using Sentry.Protocol;
+using Sentry.Internal.Http;
+using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
 using static Sentry.Internal.Constants;
@@ -47,7 +50,7 @@ namespace Sentry.Tests
         [Fact]
         public void Init_BrokenDsn_Throws()
         {
-            Assert.Throws<UriFormatException>(() => SentrySdk.Init("invalid stuff"));
+            _ = Assert.Throws<UriFormatException>(() => SentrySdk.Init("invalid stuff"));
         }
 
         [Fact]
@@ -61,14 +64,6 @@ namespace Sentry.Tests
         public void Init_ValidDsnWithoutSecret_EnablesSdk()
         {
             using (SentrySdk.Init(ValidDsnWithoutSecret))
-                Assert.True(SentrySdk.IsEnabled);
-        }
-
-        [Fact]
-        public void Init_DsnInstance_EnablesSdk()
-        {
-            var dsn = new Dsn(ValidDsnWithoutSecret);
-            using (SentrySdk.Init(dsn))
                 Assert.True(SentrySdk.IsEnabled);
         }
 
@@ -149,7 +144,7 @@ namespace Sentry.Tests
         public void Init_EmptyDsn_LogsWarning()
         {
             var logger = Substitute.For<IDiagnosticLogger>();
-            logger.IsEnabled(SentryLevel.Warning).Returns(true);
+            _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
 
             var options = new SentryOptions
             {
@@ -167,7 +162,7 @@ namespace Sentry.Tests
         public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogWarning()
         {
             var logger = Substitute.For<IDiagnosticLogger>();
-            logger.IsEnabled(SentryLevel.Warning).Returns(true);
+            _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
 
             var options = new SentryOptions
             {
@@ -190,7 +185,7 @@ namespace Sentry.Tests
             SentrySdk.ConfigureScope(p =>
             {
                 called = true;
-                Assert.Single(p.Breadcrumbs);
+                _ = Assert.Single(p.Breadcrumbs);
             });
             Assert.True(called);
             called = false;
@@ -205,6 +200,48 @@ namespace Sentry.Tests
 
             first.Dispose();
             second.Dispose();
+        }
+
+        [Fact]
+        public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
+        {
+            // Arrange
+            using var cacheDirectory = new TempDirectory();
+
+            {
+                // Pre-populate cache
+                var initialInnerTransport = new FakeFailingTransport();
+                await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
+                {
+                    Dsn = ValidDsnWithoutSecret,
+                    CacheDirectoryPath = cacheDirectory.Path
+                });
+
+                // Shutdown the worker to make sure nothing gets processed
+                await initialTransport.StopWorkerAsync();
+
+                for (var i = 0; i < 3; i++)
+                {
+                    using var envelope = Envelope.FromEvent(new SentryEvent());
+                    await initialTransport.SendEnvelopeAsync(envelope);
+                }
+            }
+
+            // Act
+            using var transport = new FakeTransport();
+            using var _ = SentrySdk.Init(o =>
+            {
+                o.Dsn = ValidDsnWithoutSecret;
+                o.CacheDirectoryPath = cacheDirectory.Path;
+                o.CacheFlushTimeout = TimeSpan.FromSeconds(30);
+                o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
+            });
+
+            // Assert
+            Directory
+                .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
+                .ToArray()
+                .Should().BeEmpty();
         }
 
         [Fact]
@@ -227,14 +264,14 @@ namespace Sentry.Tests
             SentrySdk.ConfigureScope(p =>
             {
                 called = true;
-                Assert.Single(p.Breadcrumbs);
+                _ = Assert.Single(p.Breadcrumbs);
             });
             Assert.True(called);
             second.Dispose();
         }
 
         [Fact]
-        public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+        public async Task FlushAsync_NotInit_NoOp() => await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
 
         [Fact]
         public void PushScope_InstanceOf_DisabledClient()
@@ -269,7 +306,7 @@ namespace Sentry.Tests
         public void PushScope_MultiCallParameterless_SameDisposableInstance() => Assert.Same(SentrySdk.PushScope(), SentrySdk.PushScope());
 
         [Fact]
-        public void AddBreadcrumb_NoClock_NoOp() => SentrySdk.AddBreadcrumb(message: null);
+        public void AddBreadcrumb_NoClock_NoOp() => SentrySdk.AddBreadcrumb(null);
 
         [Fact]
         public void AddBreadcrumb_WithClock_NoOp() => SentrySdk.AddBreadcrumb(clock: null, null);
@@ -336,7 +373,7 @@ namespace Sentry.Tests
             await SentrySdk.ConfigureScopeAsync(_ =>
             {
                 invoked = true;
-                return Task.CompletedTask;
+                return default;
             });
             Assert.False(invoked);
         }
@@ -360,14 +397,24 @@ namespace Sentry.Tests
             const string expected = "test";
             using (SentrySdk.Init(o =>
             {
-                o.Dsn = Valid;
+                o.Dsn = ValidDsnWithSecret;
                 o.BackgroundWorker = worker;
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);
-                SentrySdk.CaptureMessage("message");
+                _ = SentrySdk.CaptureMessage("message");
 
-                worker.EnqueueEvent(Arg.Is<SentryEvent>(e => e.Breadcrumbs.Single().Message == expected));
+                _ = worker.EnqueueEnvelope(
+                       Arg.Is<Envelope>(e => e.Items
+                               .Select(i => i.Payload)
+                               .OfType<JsonSerializable>()
+                               .Select(i => i.Source)
+                               .OfType<SentryEvent>()
+                               .Single()
+                               .Breadcrumbs
+                               .Single()
+                               .Message == expected)
+                );
             }
         }
 

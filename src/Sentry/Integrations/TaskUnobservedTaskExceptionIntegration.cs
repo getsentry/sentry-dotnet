@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Sentry.Internal;
 using System.Runtime.ExceptionServices;
 using System.Security;
@@ -11,14 +10,13 @@ namespace Sentry.Integrations
     internal class TaskUnobservedTaskExceptionIntegration : IInternalSdkIntegration
     {
         private readonly IAppDomain _appDomain;
-        private IHub _hub;
+        private IHub? _hub;
 
-        internal TaskUnobservedTaskExceptionIntegration(IAppDomain appDomain = null)
+        internal TaskUnobservedTaskExceptionIntegration(IAppDomain? appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
         public void Register(IHub hub, SentryOptions _)
         {
-            Debug.Assert(hub != null);
             _hub = hub;
             _appDomain.UnobservedTaskException += Handle;
         }
@@ -31,7 +29,7 @@ namespace Sentry.Integrations
 
         // Internal for testability
         [HandleProcessCorruptedStateExceptions, SecurityCritical]
-        internal void Handle(object sender, UnobservedTaskExceptionEventArgs e)
+        internal void Handle(object? sender, UnobservedTaskExceptionEventArgs e)
         {
             if (e.Exception != null)
             {

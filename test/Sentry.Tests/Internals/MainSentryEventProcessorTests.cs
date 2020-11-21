@@ -31,7 +31,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Null(evt.User.Username);
         }
@@ -44,7 +44,7 @@ namespace Sentry.Tests.Internals
             _fixture.SentryOptions.SendDefaultPii = true;
             var sut = _fixture.GetSut();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(Environment.UserName, evt.User.Username);
         }
@@ -58,9 +58,59 @@ namespace Sentry.Tests.Internals
             _fixture.SentryOptions.IsEnvironmentUser = true;
             var sut = _fixture.GetSut();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(Environment.UserName, evt.User.Username);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiTrueAndUserIpNull_UserIpSetServerInferredIp()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Equal(sut.UserIpServerInferred, evt.User.IpAddress);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiTrueAndUserIpSet_UserIpIgnoreServerInferredIp()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+            var @ip = "192.0.0.1";
+            evt.User.IpAddress = ip;
+
+            _fixture.SentryOptions.SendDefaultPii = true;
+
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Equal(ip, evt.User.IpAddress);
+        }
+
+        [Fact]
+        public void Process_SendDefaultPiiFalse_UserIpNotSet()
+        {
+            //Arrange
+            var evt = new SentryEvent();
+            _fixture.SentryOptions.SendDefaultPii = false;
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Null(evt.User.IpAddress);
         }
 
         [Fact]
@@ -71,7 +121,7 @@ namespace Sentry.Tests.Internals
             _fixture.SentryOptions.IsEnvironmentUser = false;
 
             var sut = _fixture.GetSut();
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Null(evt.User.Username);
         }
@@ -82,7 +132,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Null(evt.ServerName);
         }
@@ -94,7 +144,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
 
             _fixture.SentryOptions.SendDefaultPii = true;
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(Environment.MachineName, evt.ServerName);
         }
@@ -107,7 +157,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var evt = new SentryEvent { ServerName = expectedServerName };
             _fixture.SentryOptions.SendDefaultPii = true;
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(expectedServerName, evt.ServerName);
         }
@@ -121,7 +171,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
 
             _fixture.SentryOptions.SendDefaultPii = true;
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(expectedServerName, evt.ServerName);
         }
@@ -135,7 +185,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
 
             _fixture.SentryOptions.SendDefaultPii = false;
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(expectedServerName, evt.ServerName);
         }
@@ -148,7 +198,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(expectedVersion, evt.Release);
         }
@@ -159,40 +209,50 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(sut.Release, evt.Release);
         }
 
-        [Fact]
-        public void Process_EnvironmentOnOptions_SetToEvent()
+        [Theory]
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("a", "a")] // Provided: nothing will change.
+        [InlineData("production", "production")] // Provided: nothing will change. (value has a lower case 'p', different to default value)
+        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
+        public void Process_EnvironmentOnOptions_SetToEvent(string environment, string expectedEnvironment)
         {
-            const string expected = "Production";
-            _fixture.SentryOptions.Environment = expected;
+            _fixture.SentryOptions.Environment = environment;
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
-            Assert.Equal(expected, evt.Environment);
+            Assert.Equal(expectedEnvironment, evt.Environment);
         }
 
-        [Fact]
-        public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable()
+        [Theory]
+        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("a", "a")] // Provided: nothing will change.
+        [InlineData("Production", "Production")] // Provided: nothing will change. (value has a upper case 'p', different to default value)
+        [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
+        public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
         {
-            const string expected = "Staging";
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
             EnvironmentVariableGuard.WithVariable(
                 Constants.EnvironmentEnvironmentVariable,
-                expected,
+                environment,
                 () =>
                 {
-                    sut.Process(evt);
+                    _ = sut.Process(evt);
                 });
 
-            Assert.Equal(expected, evt.Environment);
+            Assert.Equal(expectedEnvironment, evt.Environment);
         }
 
         [Fact]
@@ -204,7 +264,7 @@ namespace Sentry.Tests.Internals
                 Level = null
             };
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(SentryLevel.Error, evt.Level);
         }
@@ -222,7 +282,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             var evt = new SentryEvent();
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.False(invoked);
         }
@@ -232,9 +292,9 @@ namespace Sentry.Tests.Internals
         {
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
-            Assert.Equal(Protocol.Constants.Platform, evt.Platform);
+            Assert.Equal(Sentry.Protocol.Constants.Platform, evt.Platform);
         }
 
         [Fact]
@@ -242,7 +302,7 @@ namespace Sentry.Tests.Internals
         {
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.NotEmpty(evt.Modules);
         }
@@ -253,7 +313,7 @@ namespace Sentry.Tests.Internals
             _fixture.SentryOptions.ReportAssemblies = false;
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Empty(evt.Modules);
         }
@@ -264,7 +324,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(Constants.SdkName, evt.Sdk.Name);
             Assert.Equal(typeof(ISentryClient).Assembly.GetNameAndVersion().Version, evt.Sdk.Version);
@@ -286,7 +346,7 @@ namespace Sentry.Tests.Internals
                 }
             };
 
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(expectedName, evt.Sdk.Name);
             Assert.Equal(expectedVersion, evt.Sdk.Version);
@@ -299,22 +359,22 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             var evt = new SentryEvent();
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
-            _fixture.SentryStackTraceFactory.Received(1).Create();
+            _ = _fixture.SentryStackTraceFactory.Received(1).Create();
         }
 
         [Fact]
         public void Process_AttachStacktraceTrueAndExistentThreadInEvent_AddsNewThread()
         {
             var expected = new SentryStackTrace();
-            _fixture.SentryStackTraceFactory.Create(Arg.Any<Exception>()).Returns(expected);
+            _ = _fixture.SentryStackTraceFactory.Create(Arg.Any<Exception>()).Returns(expected);
             _fixture.SentryOptions.AttachStacktrace = true;
             var sut = _fixture.GetSut();
 
             Thread.CurrentThread.Name = "second";
             var evt = new SentryEvent { SentryThreads = new []{ new SentryThread { Name = "first" }}};
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(2, evt.SentryThreads.Count());
             Assert.Equal("first", evt.SentryThreads.First().Name);
@@ -328,9 +388,9 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             var evt = new SentryEvent(new Exception());
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
-            _fixture.SentryStackTraceFactory.DidNotReceive().Create();
+            _ = _fixture.SentryStackTraceFactory.DidNotReceive().Create();
         }
 
         [Fact]
@@ -339,7 +399,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             var evt = new SentryEvent();
-            sut.Process(evt);
+            _ = sut.Process(evt);
 
             Assert.Equal(TimeZoneInfo.Local, evt.Contexts.Device.Timezone);
         }
@@ -356,14 +416,17 @@ namespace Sentry.Tests.Internals
                 var sut = _fixture.GetSut();
 
                 var evt = new SentryEvent();
+
                 // Act
-                sut.Process(evt);
+                _ = sut.Process(evt);
 
                 // Assert
                 dynamic ret = evt.Contexts[key];
+#pragma warning disable IDE0058 // Expression value is never used, cannot use _ = because it'll affect the test result
                 Assert.Equal(getter().Name, ret["Name"]);
                 Assert.Equal(getter().DisplayName, ret["DisplayName"]);
                 Assert.Equal(getter().Calendar.GetType().Name, ret["Calendar"]);
+#pragma warning restore IDE0058
             }
             finally
             {

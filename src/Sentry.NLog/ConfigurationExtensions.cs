@@ -1,5 +1,4 @@
 using System;
-
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
@@ -29,8 +28,15 @@ namespace NLog
         /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
         /// <returns>The configuration.</returns>
         public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
-                                                           Action<SentryNLogOptions> optionsConfig = null)
+                                                           Action<SentryNLogOptions>? optionsConfig = null)
         {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (configuration is null)
+            {
+                return configuration!;
+            }
+
             return configuration.AddSentry(null, DefaultTargetName, optionsConfig);
         }
 
@@ -45,9 +51,16 @@ namespace NLog
         /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
         /// <returns>The configuration.</returns>
         public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
-                                                           string dsn,
-                                                           Action<SentryNLogOptions> optionsConfig = null)
+                                                           string? dsn,
+                                                           Action<SentryNLogOptions>? optionsConfig = null)
         {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (configuration is null)
+            {
+                return configuration!;
+            }
+
             return configuration.AddSentry(dsn, DefaultTargetName, optionsConfig);
         }
 
@@ -60,10 +73,17 @@ namespace NLog
         /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
         /// <returns>The configuration.</returns>
         public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
-                                                           string dsn,
+                                                           string? dsn,
                                                            string targetName,
-                                                           Action<SentryNLogOptions> optionsConfig = null)
+                                                           Action<SentryNLogOptions>? optionsConfig = null)
         {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (configuration is null)
+            {
+                return configuration!;
+            }
+
             var options = new SentryNLogOptions();
 
             optionsConfig?.Invoke(options);
@@ -76,14 +96,14 @@ namespace NLog
                 Layout = "${message}",
             };
 
-            if (dsn != null && options.Dsn == null)
+            if (dsn != null && string.IsNullOrWhiteSpace(options.Dsn))
             {
-                options.Dsn = new Dsn(dsn);
+                options.Dsn = dsn;
             }
 
-            configuration?.AddTarget(targetName, target);
+            configuration.AddTarget(targetName, target);
 
-            configuration?.AddRuleForAllLevels(targetName);
+            configuration.AddRuleForAllLevels(targetName);
 
             return configuration;
         }

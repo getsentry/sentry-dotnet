@@ -15,7 +15,7 @@ namespace Sentry.Log4Net
     public class SentryAppender : AppenderSkeleton
     {
         private readonly Func<string, IDisposable> _initAction;
-        private volatile IDisposable _sdkHandle;
+        private volatile IDisposable? _sdkHandle;
 
         private readonly object _initSync = new object();
 
@@ -29,7 +29,7 @@ namespace Sentry.Log4Net
         /// <summary>
         /// Sentry DSN.
         /// </summary>
-        public string Dsn { get; set; }
+        public string? Dsn { get; set; }
         /// <summary>
         /// Whether to send the Identity or not.
         /// </summary>
@@ -37,7 +37,7 @@ namespace Sentry.Log4Net
         /// <summary>
         /// Environment to send in the event.
         /// </summary>
-        public string Environment { get; set; }
+        public string? Environment { get; set; }
 
         /// <summary>
         /// Creates a new instance of the <see cref="SentryAppender"/>.
@@ -62,7 +62,9 @@ namespace Sentry.Log4Net
         /// <param name="loggingEvent">The event.</param>
         protected override void Append(LoggingEvent loggingEvent)
         {
-            if (loggingEvent == null)
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (loggingEvent is null)
             {
                 return;
             }
@@ -87,16 +89,20 @@ namespace Sentry.Log4Net
             var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
             var evt = new SentryEvent(exception)
             {
-                Sdk =
-                {
-                    Name = Constants.SdkName,
-                    Version = NameAndVersion.Version
-                },
                 Logger = loggingEvent.LoggerName,
                 Level = loggingEvent.ToSentryLevel()
             };
 
-            evt.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+            if (evt.Sdk is {} sdk)
+            {
+                sdk.Name = Constants.SdkName;
+                sdk.Version = NameAndVersion.Version;
+
+                if (NameAndVersion.Version is {} version)
+                {
+                    sdk.AddPackage(ProtocolPackageName, version);
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage))
             {
@@ -118,10 +124,10 @@ namespace Sentry.Log4Net
                 evt.Environment = Environment;
             }
 
-            Hub.CaptureEvent(evt);
+            _ = Hub.CaptureEvent(evt);
         }
 
-        private static IEnumerable<KeyValuePair<string, object>> GetLoggingEventProperties(LoggingEvent loggingEvent)
+        private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LoggingEvent loggingEvent)
         {
             var properties = loggingEvent.GetProperties();
             if (properties == null)
@@ -138,7 +144,7 @@ namespace Sentry.Log4Net
                     if (value != null
                         && (!(value is string stringValue) || !string.IsNullOrWhiteSpace(stringValue)))
                     {
-                        yield return new KeyValuePair<string, object>(key, value);
+                        yield return new KeyValuePair<string, object?>(key, value);
                     }
                 }
             }
@@ -148,38 +154,38 @@ namespace Sentry.Log4Net
             {
                 if (!string.IsNullOrEmpty(locInfo.ClassName))
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.ClassName), locInfo.ClassName);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.ClassName), locInfo.ClassName);
                 }
 
                 if (!string.IsNullOrEmpty(locInfo.FileName))
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.FileName), locInfo.FileName);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.FileName), locInfo.FileName);
                 }
 
                 if (int.TryParse(locInfo.LineNumber, out var lineNumber) && lineNumber != 0)
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.LineNumber), lineNumber);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.LineNumber), lineNumber);
                 }
 
                 if (!string.IsNullOrEmpty(locInfo.MethodName))
                 {
-                    yield return new KeyValuePair<string, object>(nameof(locInfo.MethodName), locInfo.MethodName);
+                    yield return new KeyValuePair<string, object?>(nameof(locInfo.MethodName), locInfo.MethodName);
                 }
             }
 
             if (!string.IsNullOrEmpty(loggingEvent.ThreadName))
             {
-                yield return new KeyValuePair<string, object>(nameof(loggingEvent.ThreadName), loggingEvent.ThreadName);
+                yield return new KeyValuePair<string, object?>(nameof(loggingEvent.ThreadName), loggingEvent.ThreadName);
             }
 
             if (!string.IsNullOrEmpty(loggingEvent.Domain))
             {
-                yield return new KeyValuePair<string, object>(nameof(loggingEvent.Domain), loggingEvent.Domain);
+                yield return new KeyValuePair<string, object?>(nameof(loggingEvent.Domain), loggingEvent.Domain);
             }
 
             if (loggingEvent.Level != null)
             {
-                yield return new KeyValuePair<string, object>("log4net-level", loggingEvent.Level.Name);
+                yield return new KeyValuePair<string, object?>("log4net-level", loggingEvent.Level.Name);
             }
         }
 

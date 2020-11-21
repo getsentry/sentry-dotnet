@@ -31,7 +31,7 @@ namespace Sentry.AspNetCore.Tests
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
             public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
-            public ILogger<SentryMiddleware> MiddlewareLogger { get; set; }
+            public ILogger<SentryMiddleware> MiddlewareLogger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public ILogger SentryLogger { get; set; }
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
@@ -46,13 +46,13 @@ namespace Sentry.AspNetCore.Tests
                 };
                 loggingOptions.InitializeSdk = false;
 
-                var hub = new Hub(new SentryOptions { Dsn = DsnSamples.Valid });
+                var hub = new Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret });
                 hub.BindClient(Client);
                 Hub = hub;
                 var provider = new SentryLoggerProvider(hub, Clock, loggingOptions);
                 _disposable = provider;
                 SentryLogger = provider.CreateLogger(nameof(SentryLogger));
-                HttpContext.Features.Returns(FeatureCollection);
+                _ = HttpContext.Features.Returns(FeatureCollection);
             }
 
             public SentryMiddleware GetSut()
@@ -79,11 +79,11 @@ namespace Sentry.AspNetCore.Tests
             };
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Client.Received(1).CaptureEvent(
-                Arg.Any<SentryEvent>(),
-                Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
+            _ = _fixture.Client.Received(1).CaptureEvent(
+                    Arg.Any<SentryEvent>(),
+                    Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
         }
 
         [Fact]
@@ -100,11 +100,11 @@ namespace Sentry.AspNetCore.Tests
             };
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Client.Received(1).CaptureEvent(
-                Arg.Any<SentryEvent>(),
-                Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
+            _ = _fixture.Client.Received(1).CaptureEvent(
+                    Arg.Any<SentryEvent>(),
+                    Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
         }
 
         [Fact]
@@ -115,11 +115,11 @@ namespace Sentry.AspNetCore.Tests
             _fixture.RequestDelegate = context => throw new Exception();
             var sut = _fixture.GetSut();
 
-            await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+            _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
 
-            _fixture.Client.Received(1).CaptureEvent(
-                Arg.Any<SentryEvent>(),
-                Arg.Is<Scope>(e => e.Level == expected));
+            _ = _fixture.Client.Received(1).CaptureEvent(
+                    Arg.Any<SentryEvent>(),
+                    Arg.Is<Scope>(e => e.Level == expected));
         }
 
         public void Dispose() => _fixture.Dispose();

@@ -17,14 +17,14 @@ namespace Sentry.AspNetCore.Tests
 
             public Fixture()
             {
-                Stream.CanSeek.Returns(true);
-                Stream.CanRead.Returns(true);
+                _ = Stream.CanSeek.Returns(true);
+                _ = Stream.CanRead.Returns(true);
                 HttpRequest = new HttpRequestAdapter(HttpRequestCore);
             }
 
             public TExtractor GetSut()
             {
-                HttpRequest.Body.Returns(Stream);
+                _ = HttpRequest.Body.Returns(Stream);
                 return new TExtractor();
             }
         }
@@ -35,11 +35,11 @@ namespace Sentry.AspNetCore.Tests
         public void ExtractPayload_OriginalStreamPosition_Reset()
         {
             const int originalPosition = 100;
-            TestFixture.Stream.Position.Returns(originalPosition);
+            _ = TestFixture.Stream.Position.Returns(originalPosition);
 
             var sut = TestFixture.GetSut();
 
-            sut.ExtractPayload(TestFixture.HttpRequest);
+            _ = sut.ExtractPayload(TestFixture.HttpRequest);
 
             TestFixture.Stream.Received().Position = originalPosition;
         }
@@ -49,7 +49,7 @@ namespace Sentry.AspNetCore.Tests
         {
             var sut = TestFixture.GetSut();
 
-            sut.ExtractPayload(TestFixture.HttpRequest);
+            _ = sut.ExtractPayload(TestFixture.HttpRequest);
 
             TestFixture.Stream.DidNotReceive().Close();
         }
@@ -57,7 +57,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void ExtractPayload_CantSeekStream_DoesNotChangePosition()
         {
-            TestFixture.Stream.CanSeek.Returns(false);
+            _ = TestFixture.Stream.CanSeek.Returns(false);
 
             var sut = TestFixture.GetSut();
 
@@ -69,7 +69,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void ExtractPayload_CantReadStream_DoesNotChangePosition()
         {
-            TestFixture.Stream.CanRead.Returns(false);
+            _ = TestFixture.Stream.CanRead.Returns(false);
 
             var sut = TestFixture.GetSut();
 

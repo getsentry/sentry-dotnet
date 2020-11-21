@@ -7,9 +7,9 @@ namespace Sentry.Integrations
     internal class AppDomainProcessExitIntegration : IInternalSdkIntegration
     {
         private readonly IAppDomain _appDomain;
-        private IHub _hub;
+        private IHub? _hub;
 
-        public AppDomainProcessExitIntegration(IAppDomain appDomain = null)
+        public AppDomainProcessExitIntegration(IAppDomain? appDomain = null)
         {
             _appDomain = appDomain ?? AppDomainAdapter.Instance;
         }
@@ -27,7 +27,7 @@ namespace Sentry.Integrations
             _hub = null;
         }
 
-        internal void HandleProcessExit(object sender, EventArgs e)
+        internal void HandleProcessExit(object? sender, EventArgs e)
         {
             (_hub as IDisposable)?.Dispose();
         }

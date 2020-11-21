@@ -20,34 +20,23 @@ namespace Sentry.Tests.Internals
         private readonly Fixture _fixture = new Fixture();
 
         [Fact]
-        public void Process_NullException_NoSentryException()
-        {
-            var sut = _fixture.GetSut();
-            var evt = new SentryEvent();
-            sut.Process(null, evt);
-
-            Assert.Null(evt.Exception);
-            Assert.Null(evt.SentryExceptionValues);
-        }
-
-        [Fact]
-        public void Process_ExceptionAndEventWithoutExtra_ExtraIsNull()
+        public void Process_ExceptionAndEventWithoutExtra_ExtraIsEmpty()
         {
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
             sut.Process(new Exception(), evt);
 
-            Assert.Null(evt.InternalExtra);
+            Assert.Empty(evt.Extra);
         }
 
         [Fact]
-        public void Process_ExceptionsWithoutData_ExtraIsNull()
+        public void Process_ExceptionsWithoutData_ExtraIsEmpty()
         {
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
             sut.Process(new Exception("ex", new Exception()), evt);
 
-            Assert.Null(evt.InternalExtra);
+            Assert.Empty(evt.Extra);
         }
 
         [Fact]
@@ -136,7 +125,7 @@ namespace Sentry.Tests.Internals
             sut.Process(exp, evt);
             var x= evt.SentryExceptions.ToList();
 
-            Assert.Single(evt.SentryExceptions.Where(p => p.Mechanism.Handled == null));
+            _ = Assert.Single(evt.SentryExceptions.Where(p => p.Mechanism.Handled == null));
         }
 
         [Fact]
@@ -151,7 +140,7 @@ namespace Sentry.Tests.Internals
 
             sut.Process(exp, evt);
 
-            Assert.Single(evt.SentryExceptions.Where(p => p.Mechanism.Handled == true));
+            _ = Assert.Single(evt.SentryExceptions.Where(p => p.Mechanism.Handled == true));
         }
 
         [Fact]

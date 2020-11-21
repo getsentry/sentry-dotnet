@@ -16,8 +16,9 @@ namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
-        private readonly Lazy<string> _release = new Lazy<string>(ReleaseLocator.GetCurrent);
-        private readonly Lazy<Runtime> _runtime = new Lazy<Runtime>(() =>
+        private readonly Lazy<string?> _release = new Lazy<string?>(ReleaseLocator.GetCurrent);
+
+        private readonly Lazy<Runtime?> _runtime = new Lazy<Runtime?>(() =>
         {
             var current = PlatformAbstractions.Runtime.Current;
             return current != null
@@ -38,8 +39,13 @@ namespace Sentry.Internal
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
-        internal string Release => _release.Value;
-        internal Runtime Runtime => _runtime.Value;
+        internal string? Release => _release.Value;
+        internal Runtime? Runtime => _runtime.Value;
+
+        /// <summary>
+        /// A flag that tells the endpoint to figure out the user ip.
+        /// </summary>
+        internal string UserIpServerInferred = "{{auto}}";
 
         public MainSentryEventProcessor(
             SentryOptions options,
@@ -55,7 +61,7 @@ namespace Sentry.Internal
         {
             _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
 
-            if (!@event.Contexts.ContainsKey(Runtime.Type))
+            if (!@event.Contexts.ContainsKey(Runtime.Type) && Runtime != null)
             {
                 @event.Contexts[Runtime.Type] = Runtime;
             }
@@ -69,41 +75,51 @@ namespace Sentry.Internal
                 }
             }
 
-            if (TimeZoneInfo.Local is TimeZoneInfo timeZoneInfo)
+            if (TimeZoneInfo.Local is { } timeZoneInfo)
             {
                 @event.Contexts.Device.Timezone = timeZoneInfo;
             }
 
             const string currentUiCultureKey = "CurrentUICulture";
             if (!@event.Contexts.ContainsKey(currentUiCultureKey)
-                && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is IDictionary<string, string> currentUiCultureMap)
+                && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is { } currentUiCultureMap)
             {
                 @event.Contexts[currentUiCultureKey] = currentUiCultureMap;
             }
 
             const string cultureInfoKey = "CurrentCulture";
             if (!@event.Contexts.ContainsKey(cultureInfoKey)
-                && CultureInfoToDictionary(CultureInfo.CurrentCulture) is IDictionary<string, string> currentCultureMap)
+                && CultureInfoToDictionary(CultureInfo.CurrentCulture) is { } currentCultureMap)
             {
                 @event.Contexts[cultureInfoKey] = currentCultureMap;
             }
 
             @event.Platform = Protocol.Constants.Platform;
 
-            // SDK Name/Version might have be already set by an outer package
-            // e.g: ASP.NET Core can set itself as the SDK
-            if (@event.Sdk.Version == null && @event.Sdk.Name == null)
+            if (@event.Sdk != null)
             {
-                @event.Sdk.Name = Constants.SdkName;
-                @event.Sdk.Version = NameAndVersion.Version;
+                // SDK Name/Version might have be already set by an outer package
+                // e.g: ASP.NET Core can set itself as the SDK
+                if (@event.Sdk.Version == null && @event.Sdk.Name == null)
+                {
+                    @event.Sdk.Name = Constants.SdkName;
+                    @event.Sdk.Version = NameAndVersion.Version;
+                }
+
+                if (NameAndVersion.Version != null)
+                {
+                    @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+                }
             }
 
-            @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-            if (_options.SendDefaultPii && _options.IsEnvironmentUser && !@event.HasUser())
+            if (_options.SendDefaultPii)
             {
-                @event.User.Username = Environment.UserName;
+                if (_options.IsEnvironmentUser && !@event.HasUser())
+                {
+                    @event.User.Username = Environment.UserName;
+                }
+                @event.User.IpAddress ??= UserIpServerInferred;
             }
 
             if (@event.ServerName == null)
@@ -129,9 +145,16 @@ namespace Sentry.Internal
                 @event.Release = _options.Release ?? Release;
             }
 
-            if (@event.Environment == null)
+            // Recommendation: The 'Environment' setting should always be set
+            //                 with a default fallback.
+            if (string.IsNullOrWhiteSpace(@event.Environment))
             {
-                @event.Environment = _options.Environment ?? EnvironmentLocator.Locate();
+                var foundEnvironment = EnvironmentLocator.Locate();
+                @event.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
+                    ? string.IsNullOrWhiteSpace(_options.Environment)
+                        ? Constants.ProductionEnvironmentSetting
+                        : _options.Environment
+                    : foundEnvironment;
             }
 
             if (@event.Exception == null)
@@ -148,9 +171,9 @@ namespace Sentry.Internal
                         Stacktrace = stackTrace
                     };
 
-                    @event.SentryThreads = @event.SentryThreads.Any()
+                    @event.SentryThreads = @event.SentryThreads?.Any() == true
                         ? new List<SentryThread>(@event.SentryThreads) { thread }
-                        : new[] { thread } as IEnumerable<SentryThread>;
+                        : new[] { thread }.AsEnumerable();
                 }
             }
 
@@ -164,20 +187,18 @@ namespace Sentry.Internal
                     }
 
                     var asmName = assembly.GetName();
-                    @event.Modules[asmName.Name] = asmName.Version.ToString();
+                    if (asmName.Name is not null && asmName.Version is not null)
+                    {
+                        @event.Modules[asmName.Name] = asmName.Version.ToString();
+                    }
                 }
             }
 
             return @event;
         }
 
-        private static IDictionary<string, string> CultureInfoToDictionary(CultureInfo cultureInfo)
+        private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)
         {
-            if (cultureInfo is null)
-            {
-                return null;
-            }
-
             var dic = new Dictionary<string, string>();
 
             if (!string.IsNullOrWhiteSpace(cultureInfo.Name))
@@ -188,7 +209,7 @@ namespace Sentry.Internal
             {
                 dic.Add("DisplayName", cultureInfo.DisplayName);
             }
-            if (cultureInfo.Calendar is Calendar cal)
+            if (cultureInfo.Calendar is { } cal)
             {
                 dic.Add("Calendar", cal.GetType().Name);
             }

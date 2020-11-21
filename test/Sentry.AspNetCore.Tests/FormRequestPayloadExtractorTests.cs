@@ -12,7 +12,7 @@ namespace Sentry.AspNetCore.Tests
         public FormRequestPayloadExtractorTests()
         {
             TestFixture = new Fixture();
-            TestFixture.HttpRequest.ContentType.Returns("application/x-www-form-urlencoded");
+            _ = TestFixture.HttpRequest.ContentType.Returns("application/x-www-form-urlencoded");
         }
 
         [Fact]
@@ -20,7 +20,7 @@ namespace Sentry.AspNetCore.Tests
         {
             var expected = new Dictionary<string, StringValues> { { "key", new StringValues("val") } };
             var f = new FormCollection(expected);
-            TestFixture.HttpRequestCore.Form.Returns(f);
+            _ = TestFixture.HttpRequestCore.Form.Returns(f);
 
             var sut = TestFixture.GetSut();
 
@@ -36,7 +36,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void ExtractPayload_UnsupportedContentType_DoesNotReadStream()
         {
-            TestFixture.HttpRequest.ContentType.Returns("application/json");
+            _ = TestFixture.HttpRequest.ContentType.Returns("application/json");
 
             var sut = TestFixture.GetSut();
 

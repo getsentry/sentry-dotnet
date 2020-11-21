@@ -15,6 +15,6 @@ namespace Sentry.Extensibility
         /// Returning null will stop the processing pipeline.
         /// Meaning the event should no longer be processed nor send.
         /// </remarks>
-        SentryEvent Process(SentryEvent @event);
+        SentryEvent? Process(SentryEvent @event);
     }
 }

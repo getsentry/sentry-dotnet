@@ -13,8 +13,8 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void UseSentry_ValidDsnString_EnablesSdk()
         {
-            _webHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret)
-                .Build();
+            _ = _webHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret)
+                    .Build();
 
             try
             {
@@ -29,7 +29,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void UseSentry_NoDsnProvided_DisabledSdk()
         {
-            _webHostBuilder.UseSentry().Build();
+            _ = _webHostBuilder.UseSentry().Build();
 
             Assert.False(SentrySdk.IsEnabled);
         }
@@ -37,8 +37,8 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void UseSentry_DisableDsnString_DisabledSdk()
         {
-            _webHostBuilder.UseSentry(Protocol.Constants.DisableSdkDsnValue)
-                .Build();
+            _ = _webHostBuilder.UseSentry(Protocol.Constants.DisableSdkDsnValue)
+                    .Build();
 
             Assert.False(SentrySdk.IsEnabled);
         }
@@ -46,8 +46,8 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void UseSentry_OptionsNotInitializeSdk_DisabledSdk()
         {
-            _webHostBuilder.UseSentry(o => o.InitializeSdk = false)
-                .Build();
+            _ = _webHostBuilder.UseSentry(o => o.InitializeSdk = false)
+                    .Build();
 
             Assert.False(SentrySdk.IsEnabled);
         }

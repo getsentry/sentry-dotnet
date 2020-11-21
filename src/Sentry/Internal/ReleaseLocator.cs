@@ -8,7 +8,7 @@ namespace Sentry.Internal
         /// Attempts to locate the application release
         /// </summary>
         /// <returns>The app release or null, if it couldn't be located.</returns>
-        public static string GetCurrent()
+        public static string? GetCurrent()
             => Environment.GetEnvironmentVariable(Constants.ReleaseEnvironmentVariable)
                 ?? ApplicationVersionLocator.GetCurrent();
     }

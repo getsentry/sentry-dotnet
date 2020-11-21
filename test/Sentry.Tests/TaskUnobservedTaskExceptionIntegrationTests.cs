@@ -1,14 +1,12 @@
 using System;
+#if RELEASE
+using System.Threading;
+#endif
 using NSubstitute;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Xunit;
-using System.Linq;
 using System.Threading.Tasks;
-using Sentry.Extensibility;
-using Sentry.Protocol;
-using System.Threading;
-using Microsoft.Extensions.Logging;
 
 namespace Sentry.Tests
 {
@@ -56,14 +54,14 @@ namespace Sentry.Tests
                 var taskStartedEvent = new ManualResetEvent(false);
                 _ = Task.Run(() =>
                 {
-                    taskStartedEvent.Set();
+                    _ = taskStartedEvent.Set();
                     throw new Exception("Unhandled on Task");
                 });
-                Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(1)));
+                Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(4)));
                 var counter = 0;
                 do
                 {
-                    Assert.True(counter++ < 5);
+                    Assert.True(counter++ < 10);
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
                 } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));

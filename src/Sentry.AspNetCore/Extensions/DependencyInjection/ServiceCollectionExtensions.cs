@@ -18,19 +18,19 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">The services.</param>
         /// <returns></returns>
-        public static IServiceCollection AddSentry(this IServiceCollection services)
+        public static ISentryBuilder AddSentry(this IServiceCollection services)
         {
-            services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
+            _ = services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
             services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
 
-            services
-                .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
-                // Last
-                .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
+            _ = services
+                    .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
+                    // Last
+                    .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
 
-            services.AddSentry<SentryAspNetCoreOptions>();
+            _ = services.AddSentry<SentryAspNetCoreOptions>();
 
-            return services;
+            return new SentryAspNetCoreBuilder(services);
         }
     }
 }

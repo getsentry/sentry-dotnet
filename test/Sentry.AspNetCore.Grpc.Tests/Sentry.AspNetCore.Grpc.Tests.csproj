@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.33.1"/>
+    <PackageReference Include="Grpc.Net.Client" Version="2.33.1"/>
+    <PackageReference Include="Grpc.Tools" Version="2.33.1" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj"/>
+    <ProjectReference Include="..\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj"/>
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Proto\tests.proto" GrpcServices="Both"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

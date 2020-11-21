@@ -40,7 +40,7 @@ namespace Sentry.Extensions.Logging
         /// <summary>
         /// Logs the message.
         /// </summary>
-        public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+        public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
         {
             if (!IsEnabled(logLevel))
             {

@@ -44,8 +44,8 @@ namespace Sentry.Extensions.Logging
             LogLevel logLevel,
             EventId eventId,
             TState state,
-            Exception exception,
-            Func<TState, Exception, string> formatter)
+            Exception? exception,
+            Func<TState, Exception?, string>? formatter)
         {
             if (!IsEnabled(logLevel))
             {
@@ -70,8 +70,7 @@ namespace Sentry.Extensions.Logging
                         if (property.Key == "{OriginalFormat}" && property.Value is string template)
                         {
                             // Original format found, use Sentry logEntry interface
-                            @event.Message = null;
-                            @event.LogEntry = new LogEntry
+                            @event.Message = new SentryMessage
                             {
                                 Formatted = message,
                                 Message = template
@@ -92,26 +91,27 @@ namespace Sentry.Extensions.Logging
                     @event.SetTag(tuple.Value.name, tuple.Value.value);
                 }
 
-                _hub.CaptureEvent(@event);
+                _ = _hub.CaptureEvent(@event);
             }
 
             // Even if it was sent as event, add breadcrumb so next event includes it
             if (ShouldAddBreadcrumb(logLevel, eventId, exception))
             {
                 var data = eventId.ToDictionaryOrNull();
+
                 if (exception != null && message != null)
                 {
                     // Exception.Message won't be used as Breadcrumb message
                     // Avoid losing it by adding as data:
-                    data = data ?? new Dictionary<string, string>();
+                    data ??= new Dictionary<string, string>();
                     data.Add("exception_message", exception.Message);
                 }
 
                 _hub.AddBreadcrumb(
                     _clock,
-                    message ?? exception?.Message,
+                    message ?? exception?.Message!,
                     CategoryName,
-                    type: null,
+                    null,
                     data,
                     logLevel.ToBreadcrumbLevel());
             }
@@ -120,7 +120,7 @@ namespace Sentry.Extensions.Logging
         private bool ShouldCaptureEvent(
             LogLevel logLevel,
             EventId eventId,
-            Exception exception)
+            Exception? exception)
                 => _options.MinimumEventLevel != LogLevel.None
                    && logLevel >= _options.MinimumEventLevel
                    // No events from Sentry code using ILogger
@@ -129,24 +129,24 @@ namespace Sentry.Extensions.Logging
                    // often used by users experimenting with Sentry
                    && !CategoryName.StartsWith("Sentry.")
                    && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal)
-                   && _options.Filters?.All(
+                   && _options.Filters.All(
                        f => !f.Filter(
                            CategoryName,
                            logLevel,
                            eventId,
-                           exception)) != false;
+                           exception));
 
         private bool ShouldAddBreadcrumb(
             LogLevel logLevel,
             EventId eventId,
-            Exception exception)
+            Exception? exception)
             => _options.MinimumBreadcrumbLevel != LogLevel.None
                && logLevel >= _options.MinimumBreadcrumbLevel
-               && _options.Filters?.All(
+               && _options.Filters.All(
                    f => !f.Filter(
                        CategoryName,
                        logLevel,
                        eventId,
-                       exception)) != false;
+                       exception));
     }
 }

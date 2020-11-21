@@ -1,13 +1,15 @@
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
-using Sentry.Protocol;
+using Sentry.Infrastructure;
+using Sentry.Internal.Extensions;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {
@@ -15,66 +17,138 @@ namespace Sentry.Internal.Http
     {
         private readonly SentryOptions _options;
         private readonly HttpClient _httpClient;
-        private readonly Action<HttpRequestHeaders> _addAuth;
+        private readonly ISystemClock _clock = new SystemClock();
 
-        internal const string NoMessageFallback = "No message";
+        // Keep track of rate limits and their expiry dates
+        private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets =
+            new Dictionary<RateLimitCategory, DateTimeOffset>();
 
-        public HttpTransport(
-            SentryOptions options,
-            HttpClient httpClient,
-            Action<HttpRequestHeaders> addAuth)
+        internal const string DefaultErrorMessage = "No message";
+
+        public HttpTransport(SentryOptions options, HttpClient httpClient)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(httpClient != null);
-            Debug.Assert(addAuth != null);
-
             _options = options;
             _httpClient = httpClient;
-            _addAuth = addAuth;
         }
 
-        public async Task CaptureEventAsync(SentryEvent @event, CancellationToken cancellationToken = default)
+        private Envelope ApplyRateLimitsOnEnvelope(Envelope envelope, DateTimeOffset instant)
         {
-            if (@event == null)
+            // Re-package envelope, discarding items that don't fit the rate limit
+            var envelopeItems = new List<EnvelopeItem>();
+            foreach (var envelopeItem in envelope.Items)
+            {
+                // Check if there is at least one matching category for this item that is rate-limited
+                var isRateLimited = _categoryLimitResets
+                    .Any(kvp => kvp.Value > instant && kvp.Key.Matches(envelopeItem));
+
+                if (!isRateLimited)
+                {
+                    envelopeItems.Add(envelopeItem);
+                }
+                else
+                {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Envelope item of type {0} was discarded because it's rate-limited.",
+                        envelopeItem.TryGetType()
+                    );
+                }
+            }
+
+            return new Envelope(envelope.Header, envelopeItems);
+        }
+
+        private void ExtractRateLimits(HttpResponseMessage response, DateTimeOffset instant)
+        {
+            if (!response.Headers.TryGetValues("X-Sentry-Rate-Limits", out var rateLimitHeaderValues))
             {
                 return;
             }
 
-            var request = CreateRequest(@event);
+            // Join to a string to handle both single-header and multi-header cases
+            var rateLimitsEncoded = string.Join(",", rateLimitHeaderValues);
 
-            var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            // Parse and order by retry-after so that the longer rate limits are set last (and not overwritten)
+            var rateLimits = RateLimit.ParseMany(rateLimitsEncoded).OrderBy(rl => rl.RetryAfter);
+
+            // Persist rate limits
+            foreach (var rateLimit in rateLimits)
+            {
+                foreach (var rateLimitCategory in rateLimit.Categories)
+                {
+                    _categoryLimitResets[rateLimitCategory] = instant + rateLimit.RetryAfter;
+                }
+            }
+        }
+
+        public async ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+        {
+            var instant = DateTimeOffset.Now;
+
+            // Apply rate limiting and re-package envelope items
+            using var processedEnvelope = ApplyRateLimitsOnEnvelope(envelope, instant);
+            if (processedEnvelope.Items.Count == 0)
+            {
+                _options.DiagnosticLogger?.LogInfo(
+                    "Envelope {0} was discarded because all contained items are rate-limited.",
+                    envelope.TryGetEventId()
+                );
+
+                return;
+            }
+
+            // Send envelope to ingress
+            using var request = CreateRequest(processedEnvelope);
+            using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+            // Read & set rate limits for future requests
+            ExtractRateLimits(response, instant);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                _options.DiagnosticLogger?.LogDebug("Event {0} successfully received by Sentry.", @event.EventId);
-#if DEBUG
-                var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var responseId = JsonSerializer.DeserializeObject<SentrySuccessfulResponseBody>(body)?.id;
-                Debug.Assert(@event.EventId.ToString() == responseId);
-#endif
-                return;
+                _options.DiagnosticLogger?.LogDebug(
+                    "Envelope {0} successfully received by Sentry.",
+                    processedEnvelope.TryGetEventId()
+                );
             }
-
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
+            else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
-                response.Headers.TryGetValues(SentryHeaders.SentryErrorHeader, out var values);
-                var errorMessage = values?.FirstOrDefault() ?? NoMessageFallback;
-                _options.DiagnosticLogger?.Log(SentryLevel.Error, "Sentry rejected the event {0}. Status code: {1}. Sentry response: {2}", null,
-                    @event.EventId, response.StatusCode, errorMessage);
+                var responseJson = await response.Content.ReadAsJsonAsync().ConfigureAwait(false);
+                var errorMessage = responseJson.SelectToken("detail")?.Value<string>() ?? DefaultErrorMessage;
+
+                _options.DiagnosticLogger?.Log(
+                    SentryLevel.Error,
+                    "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}",
+                    null,
+                    processedEnvelope.TryGetEventId(),
+                    response.StatusCode,
+                    errorMessage
+                );
             }
         }
 
-        internal HttpRequestMessage CreateRequest(SentryEvent @event)
+        internal HttpRequestMessage CreateRequest(Envelope envelope)
         {
-            var request = new HttpRequestMessage
+            if (string.IsNullOrWhiteSpace(_options.Dsn))
             {
-                RequestUri = _options.Dsn.SentryUri,
-                Method = HttpMethod.Post,
-                Content = new StringContent(JsonSerializer.SerializeObject(@event))
-            };
+                throw new InvalidOperationException("The DSN is expected to be set at this point.");
+            }
 
-            _addAuth(request.Headers);
-            return request;
+            var dsn = Dsn.Parse(_options.Dsn);
+
+            var authHeader =
+                $"Sentry sentry_version={_options.SentryVersion}," +
+                $"sentry_client={_options.ClientVersion}," +
+                $"sentry_key={dsn.PublicKey}," +
+                (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
+                $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
+
+            return new HttpRequestMessage
+            {
+                RequestUri = dsn.GetEnvelopeEndpointUri(),
+                Method = HttpMethod.Post,
+                Headers = {{"X-Sentry-Auth", authHeader}},
+                Content = new EnvelopeHttpContent(envelope)
+            };
         }
     }
 }

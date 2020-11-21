@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -11,7 +10,7 @@ namespace Sentry.Internal
     internal class Hub : IHub, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly ISdkIntegration[] _integrations;
+        private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
 
         private readonly SentryClient _ownedClient;
@@ -25,14 +24,17 @@ namespace Sentry.Internal
             Debug.Assert(options != null);
             _options = options;
 
-            if (options.Dsn == null)
+            if (options.Dsn is null)
             {
-                if (!Dsn.TryParse(DsnLocator.FindDsnStringOrDisable(), out var dsn))
+                var dsn = DsnLocator.FindDsnStringOrDisable();
+
+                if (Dsn.TryParse(dsn) is null)
                 {
                     const string msg = "Attempt to instantiate a Hub without a DSN.";
                     options.DiagnosticLogger?.LogFatal(msg);
                     throw new InvalidOperationException(msg);
                 }
+
                 options.Dsn = dsn;
             }
 
@@ -68,7 +70,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
+        public async ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope)
         {
             try
             {
@@ -98,7 +100,7 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope scope = null)
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
             {
@@ -115,7 +117,19 @@ namespace Sentry.Internal
             }
         }
 
-        public async Task FlushAsync(TimeSpan timeout)
+        public void CaptureUserFeedback(UserFeedback userFeedback)
+        {
+            try
+            {
+                _ownedClient.CaptureUserFeedback(userFeedback);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+            }
+        }
+
+        public async ValueTask FlushAsync(TimeSpan timeout)
         {
             try
             {
@@ -143,9 +157,9 @@ namespace Sentry.Internal
                 }
             }
 
-            _ownedClient?.Dispose();
+            _ownedClient.Dispose();
             _rootScope.Dispose();
-            ScopeManager?.Dispose();
+            ScopeManager.Dispose();
         }
 
         public SentryId LastEventId

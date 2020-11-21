@@ -25,18 +25,18 @@ namespace Sentry.Internal
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
         }
 
-        public event UnhandledExceptionEventHandler UnhandledException;
+        public event UnhandledExceptionEventHandler? UnhandledException;
 
-        public event EventHandler ProcessExit;
+        public event EventHandler? ProcessExit;
 
-        public event EventHandler<UnobservedTaskExceptionEventArgs> UnobservedTaskException;
+        public event EventHandler<UnobservedTaskExceptionEventArgs>? UnobservedTaskException;
 
-        private void OnProcessExit(object sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
+        private void OnProcessExit(object? sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
 
         [HandleProcessCorruptedStateExceptions, SecurityCritical]
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e) => UnhandledException?.Invoke(this, e);
 
         [HandleProcessCorruptedStateExceptions, SecurityCritical]
-        private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => UnobservedTaskException?.Invoke(this, e);
+        private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e) => UnobservedTaskException?.Invoke(this, e);
     }
 }

@@ -21,32 +21,32 @@ namespace Sentry.AspNetCore.Tests
             {
                 var provider = Substitute.For<IServiceProvider>();
                 var options = Substitute.For<IOptions<SentryAspNetCoreOptions>>();
-                options.Value.Returns(SentryAspNetCoreOptions);
-                provider.GetService(typeof(IOptions<SentryAspNetCoreOptions>)).Returns(options);
+                _ = options.Value.Returns(SentryAspNetCoreOptions);
+                _ = provider.GetService(typeof(IOptions<SentryAspNetCoreOptions>)).Returns(options);
 
                 if (SentryEventProcessor != null)
                 {
-                    provider.GetService(typeof(ISentryEventProcessor)).Returns(SentryEventProcessor);
+                    _ = provider.GetService(typeof(ISentryEventProcessor)).Returns(SentryEventProcessor);
                 }
 
                 if (SentryEventExceptionProcessor != null)
                 {
-                    provider.GetService(typeof(ISentryEventExceptionProcessor)).Returns(SentryEventExceptionProcessor);
+                    _ = provider.GetService(typeof(ISentryEventExceptionProcessor)).Returns(SentryEventExceptionProcessor);
                 }
 
-                provider.GetService(typeof(IEnumerable<ISentryEventProcessor>))
-                    .Returns(SentryEventProcessor != null
-                        ? new[] { SentryEventProcessor }
-                        : Enumerable.Empty<ISentryEventProcessor>());
+                _ = provider.GetService(typeof(IEnumerable<ISentryEventProcessor>))
+                        .Returns(SentryEventProcessor != null
+                            ? new[] { SentryEventProcessor }
+                            : Enumerable.Empty<ISentryEventProcessor>());
 
-                provider.GetService(typeof(IEnumerable<ISentryEventExceptionProcessor>))
-                    .Returns(SentryEventExceptionProcessor != null
-                        ? new[] { SentryEventExceptionProcessor }
-                        : Enumerable.Empty<ISentryEventExceptionProcessor>());
+                _ = provider.GetService(typeof(IEnumerable<ISentryEventExceptionProcessor>))
+                        .Returns(SentryEventExceptionProcessor != null
+                            ? new[] { SentryEventExceptionProcessor }
+                            : Enumerable.Empty<ISentryEventExceptionProcessor>());
 
 
                 var sut = Substitute.For<IApplicationBuilder>();
-                sut.ApplicationServices.Returns(provider);
+                _ = sut.ApplicationServices.Returns(provider);
                 return sut;
             }
         }
@@ -60,7 +60,7 @@ namespace Sentry.AspNetCore.Tests
             _fixture.SentryAspNetCoreOptions.DiagnosticLogger = diagnosticLogger;
             _fixture.SentryAspNetCoreOptions.Debug = true;
             var sut = _fixture.GetSut();
-            sut.UseSentry();
+            _ = sut.UseSentry();
 
             Assert.Same(diagnosticLogger, _fixture.SentryAspNetCoreOptions.DiagnosticLogger);
         }
@@ -70,7 +70,7 @@ namespace Sentry.AspNetCore.Tests
         {
             var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+            _ = sut.UseSentry();
 
             Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllEventProcessors(),
                 actual => actual == _fixture.SentryEventProcessor);
@@ -83,7 +83,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+            _ = sut.UseSentry();
 
             var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.EventProcessorsProviders);
             Assert.Empty(missing);
@@ -94,7 +94,7 @@ namespace Sentry.AspNetCore.Tests
         {
             var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+            _ = sut.UseSentry();
 
             Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllExceptionProcessors(),
                 actual => actual == _fixture.SentryEventExceptionProcessor);
@@ -107,7 +107,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+            _ = sut.UseSentry();
 
             var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders);
             Assert.Empty(missing);
@@ -121,7 +121,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+            _ = sut.UseSentry();
 
             Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.EventProcessorsProviders);
         }
@@ -134,7 +134,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sut = _fixture.GetSut();
 
-            sut.UseSentry();
+            _ = sut.UseSentry();
 
             Assert.Same(originalProviders, _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders);
         }

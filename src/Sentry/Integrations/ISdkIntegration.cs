@@ -1,7 +1,7 @@
 namespace Sentry.Integrations
 {
     /// <summary>
-    /// An SDK Integration
+    /// An SDK Integration.
     /// </summary>
     public interface ISdkIntegration
     {

@@ -40,18 +40,18 @@ namespace Sentry.Testing
         {
             var builder = new WebHostBuilder();
 
-            builder.ConfigureServices(s =>
+            _ = builder.ConfigureServices(s =>
             {
                 var lastException = new LastExceptionFilter();
-                s.AddSingleton<IStartupFilter>(lastException);
-                s.AddSingleton(lastException);
+                _ = s.AddSingleton<IStartupFilter>(lastException);
+                _ = s.AddSingleton(lastException);
 
                 ConfigureServices?.Invoke(s);
             });
-            builder.Configure(app =>
+            _ = builder.Configure(app =>
             {
                 ConfigureApp?.Invoke(app);
-                app.Use(async (context, next) =>
+                _ = app.Use(async (context, next) =>
                 {
                     var handler = Handlers.FirstOrDefault(p => p.Path == context.Request.Path);
 

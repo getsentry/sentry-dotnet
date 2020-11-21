@@ -28,7 +28,7 @@ namespace Microsoft.Extensions.Logging
         /// <returns></returns>
         public static ILoggerFactory AddSentry(
             this ILoggerFactory factory,
-            Action<SentryLoggingOptions> optionsConfiguration = null)
+            Action<SentryLoggingOptions>? optionsConfiguration = null)
         {
             var options = new SentryLoggingOptions();
 
@@ -51,8 +51,8 @@ namespace Microsoft.Extensions.Logging
                 else
                 {
                     options.DiagnosticLogger?.LogDebug("Initializing from {0} and swapping current Hub.", nameof(SentryLoggerFactoryExtensions));
-                    hub = new OptionalHub(options);
-                    SentrySdk.UseHub(hub);
+                    hub = OptionalHub.FromOptions(options);
+                    _ = SentrySdk.UseHub(hub);
                 }
             }
             else
