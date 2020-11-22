@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net5.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
     <PackageTags>$(PackageTags);AspNetCore;MVC</PackageTags>
     <PackageId>Sentry.AspNetCore</PackageId>
     <AssemblyName>Sentry.AspNetCore</AssemblyName>
