@@ -2,6 +2,7 @@
 
 ## vNext
 
+* Abandon ValueTask #611
 * Fix Cache deleted on HttpTransport exception. (#610) @lucas-zimerman
 * Add SentryScopeStateProcessor #603
 * Add net5.0 TFM to libraries #606

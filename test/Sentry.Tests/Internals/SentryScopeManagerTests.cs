@@ -108,7 +108,7 @@ namespace Sentry.Tests.Internals
         public void ConfigureScopeAsync_NullArgument_ReturnsCompletedTask()
         {
             var sut = _fixture.GetSut();
-            Assert.Equal(default, sut.ConfigureScopeAsync(null));
+            Assert.Equal(Task.CompletedTask, sut.ConfigureScopeAsync(null));
         }
 
         [Fact]
