@@ -187,7 +187,7 @@ namespace Sentry.Tests.Internals.Http
             var options = new SentryOptions { CacheDirectoryPath = cacheDirectory.Path };
 
             var exception = new HttpRequestException(null, new SocketException());
-            Exception receivedException = new Exception();
+            var receivedException = new Exception();
             var innerTransport = Substitute.For<ITransport>();
 
             innerTransport
