@@ -2,8 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using Sentry.Extensibility;
+using System.Linq;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Constants = Sentry.Protocol.Constants;
@@ -354,39 +354,8 @@ namespace Sentry
         /// <param name="state">The state object to apply.</param>
         public static void Apply(this IScope scope, object state)
         {
-            switch (state)
-            {
-                case string scopeString:
-                    // TODO: find unique key to support multiple single-string scopes
-                    scope.SetTag("scope", scopeString);
-                    break;
-                case IEnumerable<KeyValuePair<string, string>> keyValStringString:
-                    scope.SetTags(keyValStringString
-                        .Where(kv => !string.IsNullOrEmpty(kv.Value)));
-                    break;
-                case IEnumerable<KeyValuePair<string, object>> keyValStringObject:
-                {
-                    scope.SetTags(keyValStringObject
-                        .Select(k => new KeyValuePair<string, string>(
-                            k.Key,
-                            k.Value?.ToString()!))
-                        .Where(kv => !string.IsNullOrEmpty(kv.Value)));
-
-                    break;
-                }
-#if HAS_VALUE_TUPLE
-                case ValueTuple<string, string> tupleStringString:
-                    if (!string.IsNullOrEmpty(tupleStringString.Item2))
-                    {
-                        scope.SetTag(tupleStringString.Item1, tupleStringString.Item2);
-                    }
-
-                    break;
-#endif
-                default:
-                    scope.SetExtra("state", state);
-                    break;
-            }
+            var processor = scope.ScopeOptions?.SentryScopeStateProcessor ?? new DefaultSentryScopeStateProcessor();
+            processor.Apply(scope, state);
         }
 
         /// <summary>
