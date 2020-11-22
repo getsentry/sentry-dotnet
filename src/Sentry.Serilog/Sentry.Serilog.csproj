@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>net5.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;Serilog</PackageTags>
     <PackageId>Sentry.Serilog</PackageId>
     <AssemblyName>Sentry.Serilog</AssemblyName>
@@ -17,7 +17,7 @@
     <PackageReference Include="Serilog" Version="2.7.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.1'">
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.1' or $(TargetFramework) == 'net5.0'">
     <PackageReference Include="Serilog" Version="2.10.0" />
   </ItemGroup>
 
