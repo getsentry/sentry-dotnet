@@ -47,12 +47,12 @@ namespace Microsoft.AspNetCore.Builder
                     _ = o.UseStackTraceFactory(stackTraceFactory);
                 }
 
-                if (app.ApplicationServices.GetService<IEnumerable<ISentryEventProcessor>>().Any())
+                if (app.ApplicationServices.GetService<IEnumerable<ISentryEventProcessor>>()?.Any() == true)
                 {
                     o.AddEventProcessorProvider(app.ApplicationServices.GetServices<ISentryEventProcessor>);
                 }
 
-                if (app.ApplicationServices.GetService<IEnumerable<ISentryEventExceptionProcessor>>().Any())
+                if (app.ApplicationServices.GetService<IEnumerable<ISentryEventExceptionProcessor>>()?.Any() == true)
                 {
                     o.AddExceptionProcessorProvider(app.ApplicationServices.GetServices<ISentryEventExceptionProcessor>);
                 }

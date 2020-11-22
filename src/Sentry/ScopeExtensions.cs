@@ -248,11 +248,14 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="tags"></param>
-        public static void SetTags(this IScope scope, IEnumerable<KeyValuePair<string, string>> tags)
+        public static void SetTags(this IScope scope, IEnumerable<KeyValuePair<string, string?>> tags)
         {
             foreach (var (key, value) in tags)
             {
-                scope.SetTag(key, value);
+                if (value is not null)
+                {
+                    scope.SetTag(key, value);
+                }
             }
         }
 
