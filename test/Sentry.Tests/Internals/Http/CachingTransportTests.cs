@@ -17,8 +17,7 @@ namespace Sentry.Tests.Internals.Http
 {
     public class CachingTransportTests
     {
-        // [Fact(Timeout = 7000)]
-        [Fact]
+        [Fact(Timeout = 7000)]
         public async Task WorksInBackground()
         {
             // Arrange
