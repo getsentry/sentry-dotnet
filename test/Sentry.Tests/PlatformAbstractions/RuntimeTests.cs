@@ -6,9 +6,9 @@ namespace Sentry.Tests.PlatformAbstractions
     public class RuntimeTests
     {
         [Fact]
-        public void Current_SameInstance()
+        public void Current_Equal()
         {
-            Assert.Same(Runtime.Current, Runtime.Current);
+            Assert.Equal(Runtime.Current, Runtime.Current);
         }
     }
 }
