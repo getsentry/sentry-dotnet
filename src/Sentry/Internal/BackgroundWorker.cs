@@ -68,7 +68,7 @@ namespace Sentry.Internal
             return true;
         }
 
-        private async ValueTask WorkerAsync()
+        private async Task WorkerAsync()
         {
             var cancellation = _shutdownSource.Token;
 
@@ -123,15 +123,15 @@ namespace Sentry.Internal
                             // Dispose inside try/catch
                             using var _ = envelope;
 
-                            var ValueTask = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
+                            var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.DiagnosticLogger?.LogDebug(
-                                "Envelope {0} in-flight to Sentry. #{1} in queue.",
+                                "Envelope {0} handed off to transport. #{1} in queue.",
                                 envelope.TryGetEventId(),
                                 _queue.Count
                             );
 
-                            await ValueTask.ConfigureAwait(false);
+                            await task.ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {
@@ -179,7 +179,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async ValueTask FlushAsync(TimeSpan timeout)
+        public async Task FlushAsync(TimeSpan timeout)
         {
             if (_disposed)
             {
@@ -201,12 +201,13 @@ namespace Sentry.Internal
             var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
                 timeoutSource.Token,
                 _shutdownSource.Token,
-                flushSuccessSource.Token);
+                flushSuccessSource.Token
+            );
 
             var counter = 0;
             var depth = int.MaxValue;
 
-            void EventFlushedCallback(object objProcessed, EventArgs _)
+            void EventFlushedCallback(object? _, EventArgs __)
             {
                 // ReSharper disable once AccessToModifiedClosure
                 if (Interlocked.Increment(ref counter) >= depth)
@@ -249,7 +250,8 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogDebug(flushSuccessSource.IsCancellationRequested
                     ? "Successfully flushed all events up to call to FlushAsync."
-                    : "Timeout when trying to flush queue.");
+                    : "Timeout when trying to flush queue."
+                );
             }
             finally
             {
@@ -281,6 +283,9 @@ namespace Sentry.Internal
                 // If there's anything in the queue, it'll keep running until 'shutdownTimeout' is reached
                 // If the queue is empty it will quit immediately
                 _ = WorkerTask.Wait(_options.ShutdownTimeout);
+
+                // Dispose the transport if needed
+                (_transport as IDisposable)?.Dispose();
             }
             catch (OperationCanceledException)
             {
@@ -293,8 +298,10 @@ namespace Sentry.Internal
 
             if (_queue.Count > 0)
             {
-                _options.DiagnosticLogger?.LogWarning("Worker stopped while {0} were still in the queue.",
-                    _queue.Count);
+                _options.DiagnosticLogger?.LogWarning(
+                    "Worker stopped while {0} were still in the queue.",
+                    _queue.Count
+                );
             }
         }
     }

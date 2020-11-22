@@ -52,13 +52,16 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             var memoryStream = new MemoryStream();
-            using (var gzipStream = new GZipStream(memoryStream, _compressionLevel, leaveOpen: true))
+            if (request.Content is not null)
             {
-                await request.Content.CopyToAsync(gzipStream).ConfigureAwait(false);
-            }
-            memoryStream.Position = 0;
+                using (var gzipStream = new GZipStream(memoryStream, _compressionLevel, leaveOpen: true))
+                {
+                    await request.Content.CopyToAsync(gzipStream).ConfigureAwait(false);
+                }
+                memoryStream.Position = 0;
 
-            request.Content = new BufferedStreamContent(memoryStream, memoryStream.Length, request.Content.Headers);
+                request.Content = new BufferedStreamContent(memoryStream, memoryStream.Length, request.Content.Headers);
+            }
 
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }

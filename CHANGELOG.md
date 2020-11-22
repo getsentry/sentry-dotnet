@@ -1,5 +1,23 @@
 # Changelog
 
+## vNext
+
+* Abandon ValueTask #611
+* Fix Cache deleted on HttpTransport exception. (#610) @lucas-zimerman
+* Add SentryScopeStateProcessor #603
+* Add net5.0 TFM to libraries #606
+
+## 3.0.0-alpha.5
+
+* Replaced `BaseScope` with `IScope`. (#590) @Tyrrrz
+* Removed code coverage report from the test folder. (#592) @lucas-zimerman
+* Add target framework NET5.0 on Sentry.csproj. Change the type of `Extra` where value parameter become nullable. @lucas-zimerman 
+* Implement envelope caching. (#576) @Tyrrrz
+* Add a list of .NET Frameworks installed when available. (#531) @lucas-zimerman
+* Parse Mono and IL2CPP stacktraces for Unity and Xamarin (#578) @bruno-garcia
+* Update TFMs and dependency min version (#580) @bruno-garcia
+* Run all tests on .NET 5 (#583) @bruno-garcia
+
 ## 3.0.0-alpha.4
 
 * Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman

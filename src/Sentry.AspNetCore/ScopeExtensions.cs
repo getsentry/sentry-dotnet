@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -147,7 +148,7 @@ namespace Sentry.AspNetCore
             }
         }
 
-        private static void SetBody(BaseScope scope, HttpContext context, SentryAspNetCoreOptions options)
+        private static void SetBody(IScope scope, HttpContext context, SentryAspNetCoreOptions options)
         {
             var extractors = context.RequestServices.GetService<IEnumerable<IRequestPayloadExtractor>>();
             if (extractors == null)
@@ -181,7 +182,9 @@ namespace Sentry.AspNetCore
             //scope.ActivityId = activity.Id;
 
             // TODO: enumerating Activity.Tags clears the collection and sets field to null?
-            scope.SetTags(activity.Tags);
+            scope.SetTags(activity.Tags
+                .Where(kv => !string.IsNullOrEmpty(kv.Value))
+                .Select(k => new KeyValuePair<string, string>(k.Key, k.Value!)));
         }
 
         internal static void SetWebRoot(this Scope scope, string webRoot)

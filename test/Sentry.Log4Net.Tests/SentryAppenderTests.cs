@@ -145,8 +145,7 @@ namespace Sentry.Log4Net.Tests
 
             sut.DoAppend(evt);
 
-            _ = _fixture.Hub.Received(1)
-                    .CaptureEvent(Arg.Is<SentryEvent>(e => e.InternalUser == null));
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e => !e.HasUser()));
         }
 
         [Fact]

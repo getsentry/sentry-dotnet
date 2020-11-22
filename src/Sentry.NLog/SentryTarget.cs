@@ -283,7 +283,6 @@ namespace Sentry.NLog
         {
             _ = HubAccessor()
                     .FlushAsync(Options.FlushTimeout)
-                    .AsTask()
                     .ContinueWith(t => asyncContinuation(t.Exception));
         }
 
@@ -350,7 +349,7 @@ namespace Sentry.NLog
                     }
                 }
 
-                if (Tags.Count > 0 || (IncludeEventPropertiesAsTags && logEvent.HasProperties))
+                if (Tags.Count > 0 || IncludeEventPropertiesAsTags && logEvent.HasProperties)
                 {
                     evt.SetTags(GetTagsFromLogEvent(logEvent));
                 }
@@ -361,14 +360,14 @@ namespace Sentry.NLog
                     evt.SetExtras(contextProps);
 
                     if (contextProps.TryGetValue(AdditionalGroupingKeyProperty, out var additionalGroupingKey)
-                        && additionalGroupingKey != null)
+                        && additionalGroupingKey is string groupingKey)
                     {
                         var overridenFingerprint = evt.Fingerprint.ToList();
                         if (!evt.Fingerprint.Any())
                         {
                             overridenFingerprint.Add("{{ default }}");
                         }
-                        overridenFingerprint.Add(additionalGroupingKey.ToString());
+                        overridenFingerprint.Add(groupingKey);
 
                         evt.SetFingerprint(overridenFingerprint);
                     }
@@ -469,7 +468,7 @@ namespace Sentry.NLog
                     {
                         if (kv.Value?.ToString() is {} value)
                         {
-                            yield return new KeyValuePair<string, string>(kv.Key.ToString(), value);
+                            yield return new KeyValuePair<string, string>(kv.Key?.ToString() ?? "", value);
                         }
                     }
                 }

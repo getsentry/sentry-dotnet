@@ -6,7 +6,7 @@ namespace Sentry.Internal.Extensions
 {
     internal static class HttpClientExtensions
     {
-        public static async ValueTask<JToken> ReadAsJsonAsync(this HttpContent content)
+        public static async Task<JToken> ReadAsJsonAsync(this HttpContent content)
         {
             var raw = await content.ReadAsStringAsync().ConfigureAwait(false);
             return JToken.Parse(raw);

@@ -107,6 +107,9 @@ internal static class Program
             {
                 client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
             };
+
+            // Control/override how to apply the State object into the scope
+            o.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
         }))
         {
             // Ignored by its type due to the setting above
@@ -222,7 +225,7 @@ internal static class Program
 
         public void Invoke(dynamic request)
         {
-            using (SentrySdk.PushScope())
+            using (SentrySdk.PushScope(new SpecialContextObject()))
             {
                 SentrySdk.AddBreadcrumb(request.Path, "request-path");
 
@@ -264,5 +267,28 @@ internal static class Program
             // Handle specific types of exceptions and add more data to the event
             sentryEvent.SetTag("parameter-name", exception.ParamName);
         }
+    }
+
+    private class MyCustomerScopeStateProcessor : ISentryScopeStateProcessor
+    {
+        private readonly ISentryScopeStateProcessor _fallback = new DefaultSentryScopeStateProcessor();
+
+        public void Apply(IScope scope, object state)
+        {
+            if (state is SpecialContextObject specialState)
+            {
+                scope.SetTag("SpecialContextObject", specialState.A + specialState.B);
+            }
+            else
+            {
+                _fallback.Apply(scope, state);
+            }
+        }
+    }
+
+    private class SpecialContextObject
+    {
+        public string A { get; } = "hello";
+        public string B { get; } = "world";
     }
 }

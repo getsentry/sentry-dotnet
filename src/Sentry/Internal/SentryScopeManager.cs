@@ -42,11 +42,11 @@ namespace Sentry.Internal
             configureScope?.Invoke(scope.Key);
         }
 
-        public ValueTask ConfigureScopeAsync(Func<Scope, ValueTask>? configureScope)
+        public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
         {
             _options.DiagnosticLogger?.LogDebug("Configuring the scope asynchronously.");
             var scope = GetCurrent();
-            return configureScope?.Invoke(scope.Key) ?? default;
+            return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }
 
         public IDisposable PushScope() => PushScope<object>(null!); // NRTs don't work well with generics
@@ -58,8 +58,14 @@ namespace Sentry.Internal
 
             if (scope.Key.Locked)
             {
-                // TODO: keep state on current scope?
-                _options.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
+                _options?.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
+
+                // Apply to current scope
+                if (state != null)
+                {
+                    scope.Key.Apply(state);
+                }
+
                 return DisabledHub.Instance;
             }
 

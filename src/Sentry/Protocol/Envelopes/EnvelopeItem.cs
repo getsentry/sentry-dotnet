@@ -54,7 +54,7 @@ namespace Sentry.Protocol.Envelopes
                 var value => Convert.ToInt64(value) // can be int, long, or another numeric type
             };
 
-        private async ValueTask<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
+        private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
         {
             var buffer = new MemoryStream();
             await Payload.SerializeAsync(buffer, cancellationToken).ConfigureAwait(false);
@@ -64,7 +64,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <inheritdoc />
-        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Length is known
             if (TryGetLength() != null)
@@ -161,7 +161,7 @@ namespace Sentry.Protocol.Envelopes
             return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
         }
 
-        private static async ValueTask<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
+        private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
@@ -185,7 +185,7 @@ namespace Sentry.Protocol.Envelopes
                 ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
-        private static async ValueTask<ISerializable> DeserializePayloadAsync(
+        private static async Task<ISerializable> DeserializePayloadAsync(
             Stream stream,
             IReadOnlyDictionary<string, object> header,
             CancellationToken cancellationToken = default)
@@ -234,7 +234,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Deserializes envelope item from stream.
         /// </summary>
-        public static async ValueTask<EnvelopeItem> DeserializeAsync(
+        public static async Task<EnvelopeItem> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {

@@ -3,10 +3,15 @@ using System;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Options used by <see cref="BaseScope"/>.
+    /// Options used by <see cref="IScope"/>.
     /// </summary>
     public interface IScopeOptions
     {
+        /// <summary>
+        /// Configured scope processor.
+        /// </summary>
+        ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }
+
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.
         /// </summary>

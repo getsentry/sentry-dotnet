@@ -1,9 +1,12 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
@@ -199,6 +202,48 @@ namespace Sentry.Tests
             second.Dispose();
         }
 
+        [Fact(Skip = "Flaky")]
+        public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
+        {
+            // Arrange
+            using var cacheDirectory = new TempDirectory();
+
+            {
+                // Pre-populate cache
+                var initialInnerTransport = new FakeFailingTransport();
+                await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
+                {
+                    Dsn = ValidDsnWithoutSecret,
+                    CacheDirectoryPath = cacheDirectory.Path
+                });
+
+                // Shutdown the worker to make sure nothing gets processed
+                await initialTransport.StopWorkerAsync();
+
+                for (var i = 0; i < 3; i++)
+                {
+                    using var envelope = Envelope.FromEvent(new SentryEvent());
+                    await initialTransport.SendEnvelopeAsync(envelope);
+                }
+            }
+
+            // Act
+            using var transport = new FakeTransport();
+            using var _ = SentrySdk.Init(o =>
+            {
+                o.Dsn = ValidDsnWithoutSecret;
+                o.CacheDirectoryPath = cacheDirectory.Path;
+                o.CacheFlushTimeout = TimeSpan.FromSeconds(30);
+                o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
+            });
+
+            // Assert
+            Directory
+                .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
+                .ToArray()
+                .Should().BeEmpty();
+        }
+
         [Fact]
         public void Disposable_MultipleCalls_NoOp()
         {
@@ -357,18 +402,18 @@ namespace Sentry.Tests
             }))
             {
                 SentrySdk.AddBreadcrumb(expected);
-                SentrySdk.CaptureMessage("message");
+                _ = SentrySdk.CaptureMessage("message");
 
-                worker.EnqueueEnvelope(
-                    Arg.Is<Envelope>(e => e.Items
-                            .Select(i => i.Payload)
-                            .OfType<JsonSerializable>()
-                            .Select(i => i.Source)
-                            .OfType<SentryEvent>()
-                            .Single()
-                            .Breadcrumbs
-                            .Single()
-                            .Message == expected)
+                _ = worker.EnqueueEnvelope(
+                       Arg.Is<Envelope>(e => e.Items
+                               .Select(i => i.Payload)
+                               .OfType<JsonSerializable>()
+                               .Select(i => i.Source)
+                               .OfType<SentryEvent>()
+                               .Single()
+                               .Breadcrumbs
+                               .Single()
+                               .Message == expected)
                 );
             }
         }

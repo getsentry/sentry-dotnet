@@ -42,9 +42,9 @@ namespace Sentry.Extensions.Logging.Tests
             Assert.False(sut.IsEnabled(SentryLevel.Info));
         }
 
-        // .NET Core 3 has turned FormattedLogValues into an internal readonly struct
+        // .NET Core 3 (and hence .NET 5) has turned FormattedLogValues into an internal readonly struct
         // and now we can't match that with NSubstitute
-#if !NETCOREAPP3_1
+#if NETCOREAPP2_1 || NET461
         [Fact]
         public void Log_PassedThrough()
         {

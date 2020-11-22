@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
@@ -17,7 +17,7 @@ namespace Sentry.Internal.Http
     {
         private readonly SentryOptions _options;
         private readonly HttpClient _httpClient;
-        private readonly Action<HttpRequestHeaders> _addAuth;
+        private readonly ISystemClock _clock = new SystemClock();
 
         // Keep track of rate limits and their expiry dates
         private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets =
@@ -25,14 +25,10 @@ namespace Sentry.Internal.Http
 
         internal const string DefaultErrorMessage = "No message";
 
-        public HttpTransport(
-            SentryOptions options,
-            HttpClient httpClient,
-            Action<HttpRequestHeaders> addAuth)
+        public HttpTransport(SentryOptions options, HttpClient httpClient)
         {
             _options = options;
             _httpClient = httpClient;
-            _addAuth = addAuth;
         }
 
         private Envelope ApplyRateLimitsOnEnvelope(Envelope envelope, DateTimeOffset instant)
@@ -43,8 +39,7 @@ namespace Sentry.Internal.Http
             {
                 // Check if there is at least one matching category for this item that is rate-limited
                 var isRateLimited = _categoryLimitResets
-                    .Where(kvp => kvp.Value > instant)
-                    .Any(kvp => kvp.Key.Matches(envelopeItem));
+                    .Any(kvp => kvp.Value > instant && kvp.Key.Matches(envelopeItem));
 
                 if (!isRateLimited)
                 {
@@ -85,13 +80,13 @@ namespace Sentry.Internal.Http
             }
         }
 
-        public async ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+        public async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
             var instant = DateTimeOffset.Now;
 
             // Apply rate limiting and re-package envelope items
             using var processedEnvelope = ApplyRateLimitsOnEnvelope(envelope, instant);
-            if (!processedEnvelope.Items.Any())
+            if (processedEnvelope.Items.Count == 0)
             {
                 _options.DiagnosticLogger?.LogInfo(
                     "Envelope {0} was discarded because all contained items are rate-limited.",
@@ -140,15 +135,20 @@ namespace Sentry.Internal.Http
 
             var dsn = Dsn.Parse(_options.Dsn);
 
-            var request = new HttpRequestMessage
+            var authHeader =
+                $"Sentry sentry_version={_options.SentryVersion}," +
+                $"sentry_client={_options.ClientVersion}," +
+                $"sentry_key={dsn.PublicKey}," +
+                (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
+                $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
+
+            return new HttpRequestMessage
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
+                Headers = {{"X-Sentry-Auth", authHeader}},
                 Content = new EnvelopeHttpContent(envelope)
             };
-
-            _addAuth(request.Headers);
-            return request;
         }
     }
 }

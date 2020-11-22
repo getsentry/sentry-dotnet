@@ -47,7 +47,7 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope)
+        public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
             => SentrySdk.ConfigureScopeAsync(configureScope);
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public ValueTask FlushAsync(TimeSpan timeout)
+        public Task FlushAsync(TimeSpan timeout)
             => SentrySdk.FlushAsync(timeout);
 
         /// <summary>

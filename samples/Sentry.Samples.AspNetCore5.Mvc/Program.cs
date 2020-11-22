@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Sentry.Extensibility;
 
-namespace Sentry.Samples.AspNetCore3.Mvc
+namespace Sentry.Samples.AspNetCore5.Mvc
 {
     public static class Program
     {

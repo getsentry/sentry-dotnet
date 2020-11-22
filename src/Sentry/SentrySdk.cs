@@ -83,6 +83,11 @@ namespace Sentry
 
                 options.Dsn = dsn.Source;
             }
+            else
+            {
+                // Validate DSN for early exception
+                _ = Dsn.Parse(options.Dsn);
+            }
 
             return UseHub(new Hub(options));
         }
@@ -98,7 +103,7 @@ namespace Sentry
         /// Flushes events queued up.
         /// </summary>
         [DebuggerStepThrough]
-        public static ValueTask FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
+        public static Task FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
 
         /// <summary>
         /// Close the SDK.
@@ -242,7 +247,7 @@ namespace Sentry
         /// <param name="configureScope">The configure scope callback.</param>
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
-        public static ValueTask ConfigureScopeAsync(Func<Scope, ValueTask> configureScope)
+        public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
             => _hub.ConfigureScopeAsync(configureScope);
 
         /// <summary>

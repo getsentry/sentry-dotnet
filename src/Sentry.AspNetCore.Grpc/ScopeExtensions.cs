@@ -35,7 +35,7 @@ namespace Sentry.AspNetCore.Grpc
             }
         }
 
-        private static void SetBody<TRequest>(BaseScope scope, ServerCallContext context, TRequest request,
+        private static void SetBody<TRequest>(IScope scope, ServerCallContext context, TRequest request,
             SentryAspNetCoreOptions options) where TRequest : class, IMessage
         {
             var httpContext = context.GetHttpContext();

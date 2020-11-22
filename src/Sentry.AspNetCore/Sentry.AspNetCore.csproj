@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net5.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
     <PackageTags>$(PackageTags);AspNetCore;MVC</PackageTags>
     <PackageId>Sentry.AspNetCore</PackageId>
     <AssemblyName>Sentry.AspNetCore</AssemblyName>
@@ -18,8 +18,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.Abstractions" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.1.0" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.1.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">

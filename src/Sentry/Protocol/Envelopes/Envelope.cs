@@ -45,7 +45,7 @@ namespace Sentry.Protocol.Envelopes
                 : (SentryId?)null;
 
         /// <inheritdoc />
-        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Header
             await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
@@ -98,7 +98,7 @@ namespace Sentry.Protocol.Envelopes
             return new Envelope(header, items);
         }
 
-        private static async ValueTask<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
+        private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
@@ -125,7 +125,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Deserializes envelope from stream.
         /// </summary>
-        public static async ValueTask<Envelope> DeserializeAsync(
+        public static async Task<Envelope> DeserializeAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {

@@ -14,6 +14,6 @@ namespace Sentry.Extensibility
         /// </summary>
         /// <param name="envelope">The envelope to send to Sentry.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        ValueTask SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default);
+        Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default);
     }
 }
