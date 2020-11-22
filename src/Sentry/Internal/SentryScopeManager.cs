@@ -58,8 +58,14 @@ namespace Sentry.Internal
 
             if (scope.Key.Locked)
             {
-                // TODO: keep state on current scope?
-                _options.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
+                _options?.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
+
+                // Apply to current scope
+                if (state != null)
+                {
+                    scope.Key.Apply(state);
+                }
+
                 return DisabledHub.Instance;
             }
 
