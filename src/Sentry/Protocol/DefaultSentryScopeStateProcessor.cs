@@ -27,10 +27,12 @@ namespace Sentry.Protocol
                 case IEnumerable<KeyValuePair<string, object>> keyValStringObject:
                 {
                     scope.SetTags(keyValStringObject
+                        .Where(kv => !string.IsNullOrEmpty(kv.Value as string))
                         .Select(k => new KeyValuePair<string, string>(
                             k.Key,
-                            k.Value?.ToString()!))
-                        .Where(kv => !string.IsNullOrEmpty(kv.Value)));
+                            // TODO: Candidate for serialization instead. Likely Contexts is a better fit.
+                            k.Value.ToString()!)));
+
 
                     break;
                 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Sentry.Samples.AspNetCore3.Mvc.Models;
 
-namespace Samples.AspNetCore3.Mvc.Controllers
+namespace Samples.AspNetCore5.Mvc.Controllers
 {
     public class HomeController : Controller
     {

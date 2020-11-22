@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Sentry.Samples.AspNetCore3.Mvc
+namespace Sentry.Samples.AspNetCore5.Mvc
 {
     public class Startup
     {

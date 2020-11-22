@@ -350,7 +350,7 @@ namespace Sentry.NLog
                     }
                 }
 
-                if (Tags.Count > 0 || (IncludeEventPropertiesAsTags && logEvent.HasProperties))
+                if (Tags.Count > 0 || IncludeEventPropertiesAsTags && logEvent.HasProperties)
                 {
                     evt.SetTags(GetTagsFromLogEvent(logEvent));
                 }

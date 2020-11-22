@@ -156,7 +156,7 @@ namespace Sentry.AspNetCore
 
             scope.Populate(context, _options);
 
-            if (_options.IncludeActivityData)
+            if (_options.IncludeActivityData && Activity.Current is not null)
             {
                 scope.Populate(Activity.Current);
             }
