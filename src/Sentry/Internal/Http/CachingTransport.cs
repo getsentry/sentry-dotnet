@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -180,8 +182,13 @@ namespace Sentry.Internal.Http
                 }
                 catch (Exception ex)
                 {
+                    // Device without connection (airplane mode, proxy with issues, ....)
+                    if(ex is HttpRequestException && ex.InnerException is SocketException)
+                    {
+                        throw;
+                    }
                     _options.DiagnosticLogger?.LogError(
-                        "Failed to send cached envelope: {0}",
+                        "Failed to send cached envelope: {0}, discarting cached envelope.",
                         ex,
                         envelopeFilePath
                     );

@@ -1,6 +1,8 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -175,6 +177,49 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             // (0 envelopes retried)
             _ = innerTransport.Received(0).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact(Timeout = 7000)]
+        public async Task DoesNotDeleteCacheIfConnectionWithIssue()
+        {
+            // Arrange
+            using var cacheDirectory = new TempDirectory();
+            var options = new SentryOptions { CacheDirectoryPath = cacheDirectory.Path };
+
+            var exception = new HttpRequestException(null, new SocketException());
+            Exception receivedException = new Exception();
+            var innerTransport = Substitute.For<ITransport>();
+
+            innerTransport
+                .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+                .Returns(_ =>  new ValueTask(Task.FromException(exception)));
+
+            await using var transport = new CachingTransport(innerTransport, options);
+
+            // Can't really reliably test this with a worker
+            await transport.StopWorkerAsync();
+
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+            await transport.SendEnvelopeAsync(envelope);
+
+            try
+            {
+                // Act
+                await transport.FlushAsync();
+            }
+            catch (Exception he)
+            {
+                receivedException = he;
+            }
+            finally
+            {
+                // (transport stops failing)
+                innerTransport.ClearReceivedCalls();
+                await transport.FlushAsync();
+            }
+            // Assert
+            Assert.Equal(exception, receivedException);
+            Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
         }
     }
 }
