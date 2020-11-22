@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -68,7 +70,7 @@ namespace Sentry.Internal.Http
             _worker = Task.Run(CachedTransportBackgroundTask);
         }
 
-        private async Task? CachedTransportBackgroundTask()
+        private async Task CachedTransportBackgroundTask()
         {
             try
             {
@@ -85,7 +87,10 @@ namespace Sentry.Internal.Http
                     }
                     catch (Exception ex)
                     {
-                        _options.DiagnosticLogger?.LogError("Exception in background worker of CachingTransport.", ex);
+                        _options.DiagnosticLogger?.LogError(
+                            "Exception in background worker of CachingTransport.",
+                            ex
+                        );
 
                         // Wait a bit before retrying
                         await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
@@ -178,17 +183,17 @@ namespace Sentry.Internal.Http
                         envelope.TryGetEventId()
                     );
                 }
-                catch (OperationCanceledException)
+                catch (Exception ex) when (IsRetryable(ex))
                 {
+                    // Let the worker catch, log, wait a bit and retry.
                     throw;
                 }
                 catch (Exception ex)
                 {
                     _options.DiagnosticLogger?.LogError(
-                        "Failed to send cached envelope: {0}",
+                        "Failed to send cached envelope: {0}, discarding cached envelope.",
                         ex,
-                        envelopeFilePath
-                    );
+                        envelopeFilePath);
                 }
 
                 // Envelope & file stream must be disposed prior to reaching this point
@@ -197,6 +202,15 @@ namespace Sentry.Internal.Http
                 File.Delete(envelopeFilePath);
             }
         }
+
+        // Loading an Envelope only reads the headers. The payload is read lazily, so we do Disk -> Network I/O
+        // via stream directly instead of loading the whole file in memory. For that reason capturing an envelope
+        // from disk could raise an IOException related to Disk I/O.
+        // For that reason, we're not retrying IOException, to avoid any disk related exception from retrying.
+        private static bool IsRetryable(Exception exception) =>
+            exception is OperationCanceledException // Timed-out or Shutdown triggered
+            || exception is HttpRequestException // Myriad of HTTP related errors
+            || exception is SocketException; // Network related
 
         // Gets the next cache file and moves it to "processing"
         private async Task<string?> TryPrepareNextCacheFileAsync(
