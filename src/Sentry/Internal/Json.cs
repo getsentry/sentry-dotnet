@@ -12,41 +12,8 @@ using Newtonsoft.Json.Serialization;
 
 namespace Sentry.Internal
 {
-    [AttributeUsage(AttributeTargets.Property)]
-    internal class DontSerializeEmptyAttribute : Attribute {}
-
     internal static class Json
     {
-        private class ContractResolver : DefaultContractResolver
-        {
-            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-            {
-                var jsonProperty = base.CreateProperty(member, memberSerialization);
-                var property = jsonProperty.DeclaringType.GetProperty(jsonProperty.UnderlyingName);
-
-                // DontSerializeEmpty
-                if (jsonProperty.ShouldSerialize is null &&
-                    property?.GetCustomAttribute<DontSerializeEmptyAttribute>() is {})
-                {
-                    // Collections
-                    if (property.PropertyType.GetInterfaces().Any(i => i == typeof(IEnumerable)))
-                    {
-                        jsonProperty.ShouldSerialize = o =>
-                        {
-                            if (property.GetValue(o) is IEnumerable value)
-                            {
-                                return !value.Cast<object>().Any();
-                            }
-
-                            return true;
-                        };
-                    }
-                }
-
-                return jsonProperty;
-            }
-        }
-
         private static readonly Encoding Encoding = new UTF8Encoding(false, true);
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
 
@@ -58,7 +25,6 @@ namespace Sentry.Internal
             Formatting = Formatting.None,
             Converters = {StringEnumConverter},
             DateFormatHandling = DateFormatHandling.IsoDateFormat,
-            ContractResolver = new ContractResolver()
         };
 
         private static JsonTextWriter CreateWriter(Stream stream) => new JsonTextWriter(

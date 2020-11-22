@@ -130,22 +130,18 @@ namespace Sentry
 
         /// <inheritdoc />
         [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();
 
         /// <inheritdoc />
         [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new ConcurrentQueue<Breadcrumb>();
 
         /// <inheritdoc />
         [DataMember(Name = "extra", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IReadOnlyDictionary<string, object?> Extra { get; } = new ConcurrentDictionary<string, object?>();
 
         /// <inheritdoc />
         [DataMember(Name = "tags", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
         /// <summary>

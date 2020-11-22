@@ -24,7 +24,26 @@ namespace Sentry
         public IScopeOptions? ScopeOptions { get; }
 
         [DataMember(Name = "modules", EmitDefaultValue = false)]
-        internal IDictionary<string, string>? InternalModules { get; set; }
+        private IDictionary<string, string>? _modules;
+
+        [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
+        private IEnumerable<string>? _fingerprint;
+
+        // Default values are null so no serialization of empty objects or arrays
+        [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
+        private Queue<Breadcrumb>? _breadcrumbs;
+
+        [DataMember(Name = "extra", EmitDefaultValue = false)]
+        private Dictionary<string, object?>? InternalExtra { get; set; }
+
+        [DataMember(Name = "tags", EmitDefaultValue = false)]
+        private Dictionary<string, string>? InternalTags { get; set; }
+
+        [DataMember(Name = "exception", EmitDefaultValue = false)]
+        private SentryValues<SentryException>? SentryExceptionValues { get; set; }
+
+        [DataMember(Name = "threads", EmitDefaultValue = false)]
+        private SentryValues<SentryThread>? SentryThreadValues { get; set; }
 
         /// <summary>
         /// The <see cref="System.Exception"/> used to create this event.
@@ -91,12 +110,6 @@ namespace Sentry
         [DataMember(Name = "release", EmitDefaultValue = false)]
         public string? Release { get; set; }
 
-        [DataMember(Name = "exception", EmitDefaultValue = false)]
-        internal SentryValues<SentryException>? SentryExceptionValues { get; set; }
-
-        [DataMember(Name = "threads", EmitDefaultValue = false)]
-        internal SentryValues<SentryThread>? SentryThreadValues { get; set; }
-
         /// <summary>
         /// The Sentry Exception interface.
         /// </summary>
@@ -119,7 +132,7 @@ namespace Sentry
         /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
-        public IDictionary<string, string> Modules => InternalModules ??= new Dictionary<string, string>();
+        public IDictionary<string, string> Modules => _modules ??= new Dictionary<string, string>();
 
         /// <inheritdoc />
         [DataMember(Name = "level", EmitDefaultValue = false)]
@@ -168,24 +181,20 @@ namespace Sentry
         public SdkVersion Sdk { get; internal set; } = new SdkVersion();
 
         /// <inheritdoc />
-        [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();
+        public IEnumerable<string> Fingerprint
+        {
+            get => _fingerprint ?? Enumerable.Empty<string>();
+            set => _fingerprint = value;
+        }
 
         /// <inheritdoc />
-        [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new List<Breadcrumb>();
+        public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new Queue<Breadcrumb>();
 
         /// <inheritdoc />
-        [DataMember(Name = "extra", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IReadOnlyDictionary<string, object?> Extra { get; } = new Dictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => InternalExtra ??= new Dictionary<string, object?>();
 
         /// <inheritdoc />
-        [DataMember(Name = "tags", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IReadOnlyDictionary<string, string> Tags { get; } = new Dictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags => InternalTags ??= new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
