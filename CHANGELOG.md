@@ -19,7 +19,7 @@
 ## 3.0.0-alpha.4
 
 * Add the client user ip if both SendDefaultPii and IsEnvironmentUser are set. (#1015) @lucas-zimerman
-* Replace Task with Task where possible. (#564) @Tyrrrz
+* Replace Task with ValueTask where possible. (#564) @Tyrrrz
 * Add support for ASP.NET Core gRPC (#563) @Mitch528
 * Push API docs to GitHub Pages GH Actions (#570) @bruno-garcia
 * Refactor envelopes
