@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+* Fix Cache being deleted when there was a problem with the connection on HttpTransport. @lucas-zimerman
+
 ## 3.0.0-alpha.5
 
 * Replaced `BaseScope` with `IScope`. (#590) @Tyrrrz
