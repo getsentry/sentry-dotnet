@@ -42,11 +42,11 @@ namespace Sentry.Internal
             configureScope?.Invoke(scope.Key);
         }
 
-        public ValueTask ConfigureScopeAsync(Func<Scope, ValueTask>? configureScope)
+        public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
         {
             _options.DiagnosticLogger?.LogDebug("Configuring the scope asynchronously.");
             var scope = GetCurrent();
-            return configureScope?.Invoke(scope.Key) ?? default;
+            return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }
 
         public IDisposable PushScope() => PushScope<object>(null!); // NRTs don't work well with generics

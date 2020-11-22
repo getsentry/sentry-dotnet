@@ -14,7 +14,7 @@ namespace Sentry.Testing
 
         public event EventHandler<Envelope> EnvelopeSent;
 
-        public ValueTask SendEnvelopeAsync(
+        public Task SendEnvelopeAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
@@ -23,7 +23,7 @@ namespace Sentry.Testing
             _envelopes.Add(envelope);
             EnvelopeSent?.Invoke(this, envelope);
 
-            return default;
+            return Task.CompletedTask;
         }
 
         public IReadOnlyList<Envelope> GetSentEnvelopes() => _envelopes.ToArray();

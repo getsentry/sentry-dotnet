@@ -68,7 +68,7 @@ namespace Sentry.Internal
             return true;
         }
 
-        private async ValueTask WorkerAsync()
+        private async Task WorkerAsync()
         {
             var cancellation = _shutdownSource.Token;
 
@@ -179,7 +179,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async ValueTask FlushAsync(TimeSpan timeout)
+        public async Task FlushAsync(TimeSpan timeout)
         {
             if (_disposed)
             {

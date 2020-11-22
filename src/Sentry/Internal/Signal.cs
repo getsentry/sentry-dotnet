@@ -31,7 +31,7 @@ namespace Sentry.Internal
             }
         }
 
-        public async ValueTask WaitAsync(CancellationToken cancellationToken = default) =>
+        public async Task WaitAsync(CancellationToken cancellationToken = default) =>
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         public void Dispose() => _semaphore.Dispose();

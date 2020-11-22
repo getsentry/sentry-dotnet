@@ -283,7 +283,6 @@ namespace Sentry.NLog
         {
             _ = HubAccessor()
                     .FlushAsync(Options.FlushTimeout)
-                    .AsTask()
                     .ContinueWith(t => asyncContinuation(t.Exception));
         }
 

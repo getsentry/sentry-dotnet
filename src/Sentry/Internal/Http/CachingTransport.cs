@@ -65,34 +65,38 @@ namespace Sentry.Internal.Http
                 }
             }
 
-            _worker = Task.Run(async () =>
-            {
-                try
-                {
-                    while (!_workerCts.IsCancellationRequested)
-                    {
-                        try
-                        {
-                            await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
-                            await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
-                        }
-                        catch (Exception ex)
-                        {
-                            _options.DiagnosticLogger?.LogError(
-                                "Exception in background worker of CachingTransport.",
-                                ex
-                            );
+            _worker = Task.Run(CachedTransportBackgroundTask);
+        }
 
-                            // Wait a bit before retrying
-                            await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
-                        }
+        private async Task? CachedTransportBackgroundTask()
+        {
+            try
+            {
+                while (!_workerCts.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
+                        await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw; // Avoid logging an error.
+                    }
+                    catch (Exception ex)
+                    {
+                        _options.DiagnosticLogger?.LogError("Exception in background worker of CachingTransport.", ex);
+
+                        // Wait a bit before retrying
+                        await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                    // Worker has been shut down, it's okay
-                }
-            });
+            }
+            catch (OperationCanceledException)
+            {
+                // Worker has been shut down, it's okay
+                _options.DiagnosticLogger?.LogDebug("Background worker of CachingTransport has shutdown.");
+            }
         }
 
         private void EnsureFreeSpaceInCache()
@@ -145,7 +149,7 @@ namespace Sentry.Internal.Http
             }
         }
 
-        private async ValueTask ProcessCacheAsync(CancellationToken cancellationToken = default)
+        private async Task ProcessCacheAsync(CancellationToken cancellationToken = default)
         {
             _options.DiagnosticLogger?.LogDebug("Flushing cached envelopes.");
 
@@ -195,7 +199,7 @@ namespace Sentry.Internal.Http
         }
 
         // Gets the next cache file and moves it to "processing"
-        private async ValueTask<string?> TryPrepareNextCacheFileAsync(
+        private async Task<string?> TryPrepareNextCacheFileAsync(
             CancellationToken cancellationToken = default)
         {
             using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
@@ -214,7 +218,7 @@ namespace Sentry.Internal.Http
             return targetFilePath;
         }
 
-        private async ValueTask StoreToCacheAsync(
+        private async Task StoreToCacheAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
@@ -250,7 +254,7 @@ namespace Sentry.Internal.Http
         internal int GetCacheLength() => GetCacheFilePaths().Count();
 
         // This method asynchronously blocks until the envelope is written to cache, but not until it's sent
-        public async ValueTask SendEnvelopeAsync(
+        public async Task SendEnvelopeAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
@@ -259,14 +263,14 @@ namespace Sentry.Internal.Http
             await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
         }
 
-        public async ValueTask StopWorkerAsync()
+        public async Task StopWorkerAsync()
         {
             // Stop worker and wait until it finishes
             _workerCts.Cancel();
             await _worker.ConfigureAwait(false);
         }
 
-        public async ValueTask FlushAsync(CancellationToken cancellationToken = default) =>
+        public async Task FlushAsync(CancellationToken cancellationToken = default) =>
             await ProcessCacheAsync(cancellationToken).ConfigureAwait(false);
 
         public async ValueTask DisposeAsync()
