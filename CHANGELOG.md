@@ -2,7 +2,7 @@
 
 ## vNext
 
-* Fix Cache being deleted when there was a problem with the connection on HttpTransport. (#610) @lucas-zimerman
+* Fix Cache deleted on HttpTransport exception. (#610) @lucas-zimerman
 * Add SentryScopeStateProcessor #603
 * Add net5.0 TFM to libraries #606
 
