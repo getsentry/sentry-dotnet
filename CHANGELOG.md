@@ -3,6 +3,7 @@
 ## vNext
 
 * Add SentryScopeStateProcessor #603
+* Add net5.0 TFM to libraries #606
 
 ## 3.0.0-alpha.5
 

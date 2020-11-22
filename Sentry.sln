@@ -85,7 +85,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.NLog.Tests", "test\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.NLog", "samples\Sentry.Samples.NLog\Sentry.Samples.NLog.csproj", "{DC90D63E-E4F3-40CB-AF6D-2EAEE5F619B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore3.Mvc", "samples\Sentry.Samples.AspNetCore3.Mvc\Sentry.Samples.AspNetCore3.Mvc.csproj", "{3CCB5D82-1D19-4FDE-B92D-CA726C418171}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore5.Mvc", "samples\Sentry.Samples.AspNetCore5.Mvc\Sentry.Samples.AspNetCore5.Mvc.csproj", "{3CCB5D82-1D19-4FDE-B92D-CA726C418171}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNet", "src\Sentry.AspNet\Sentry.AspNet.csproj", "{22AA261A-F8B4-41E2-95DD-82632EED0AA5}"
 EndProject
