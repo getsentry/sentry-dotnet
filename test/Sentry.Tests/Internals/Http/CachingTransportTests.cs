@@ -151,7 +151,7 @@ namespace Sentry.Tests.Internals.Http
                 .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
                 .Returns(_ =>
                     isFailing
-                        ? new ValueTask(Task.FromException(new HttpRequestException()))
+                        ? new ValueTask(Task.FromException(new InvalidOperationException()))
                         : new ValueTask()
                 );
 
