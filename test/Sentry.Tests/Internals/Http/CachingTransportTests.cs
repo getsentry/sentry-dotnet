@@ -84,7 +84,7 @@ namespace Sentry.Tests.Internals.Http
             // Introduce enough delay for the cache to overflow under normal circumstances
             innerTransport
                 .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-                .Returns(new ValueTask(Task.Delay(3000)));
+                .Returns(Task.Delay(3000));
 
             await using var transport = new CachingTransport(innerTransport, options);
 
@@ -151,8 +151,8 @@ namespace Sentry.Tests.Internals.Http
                 .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
                 .Returns(_ =>
                     isFailing
-                        ? new ValueTask(Task.FromException(new InvalidOperationException()))
-                        : new ValueTask()
+                        ? Task.FromException(new InvalidOperationException())
+                        : Task.CompletedTask
                 );
 
             await using var transport = new CachingTransport(innerTransport, options);
@@ -192,7 +192,7 @@ namespace Sentry.Tests.Internals.Http
 
             innerTransport
                 .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-                .Returns(_ =>  new ValueTask(Task.FromException(exception)));
+                .Returns(_ =>  Task.FromException(exception));
 
             await using var transport = new CachingTransport(innerTransport, options);
 

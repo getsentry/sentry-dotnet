@@ -39,7 +39,7 @@ namespace Sentry.Tests.Internals.Http
             );
 
 #if NET5_0
-            await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token).AsTask());
+            await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
 #else
             // Act
             await httpTransport.SendEnvelopeAsync(envelope, token);

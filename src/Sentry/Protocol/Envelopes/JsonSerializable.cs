@@ -21,7 +21,7 @@ namespace Sentry.Protocol.Envelopes
         public JsonSerializable(object source) => Source = source;
 
         /// <inheritdoc />
-        public async ValueTask SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
             await Json.SerializeToStreamAsync(Source, stream, cancellationToken).ConfigureAwait(false);
     }
 }

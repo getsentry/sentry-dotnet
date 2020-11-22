@@ -67,7 +67,7 @@ namespace Sentry.Tests.Extensibility
         [Fact]
         public void ConfigureScopeAsync_MockInvoked()
         {
-            static ValueTask Expected(Scope _) => default;
+            static Task Expected(Scope _) => default;
 
             _ = HubAdapter.Instance.ConfigureScopeAsync(Expected);
             _ = Hub.Received(1).ConfigureScopeAsync(Expected);

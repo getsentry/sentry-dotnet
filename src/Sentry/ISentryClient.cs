@@ -33,6 +33,6 @@ namespace Sentry
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>
         /// <returns>A task to await for the flush operation.</returns>
-        ValueTask FlushAsync(TimeSpan timeout);
+        Task FlushAsync(TimeSpan timeout);
     }
 }
