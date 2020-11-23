@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -41,6 +42,7 @@ namespace Sentry.Internal
             Serializer.Serialize(writer, obj);
         }
 
+        [return: MaybeNull]
         public static T DeserializeFromStream<T>(Stream stream)
         {
             using var reader = CreateReader(stream);
@@ -55,6 +57,7 @@ namespace Sentry.Internal
             return buffer.ToArray();
         }
 
+        [return: MaybeNull]
         public static T DeserializeFromByteArray<T>(byte[] data)
         {
             using var buffer = new MemoryStream(data);
@@ -64,6 +67,7 @@ namespace Sentry.Internal
         public static string Serialize(object obj) =>
             Encoding.GetString(SerializeToByteArray(obj));
 
+        [return: MaybeNull]
         public static T Deserialize<T>(string json) =>
             DeserializeFromByteArray<T>(Encoding.GetBytes(json));
 

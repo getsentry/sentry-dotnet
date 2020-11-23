@@ -74,7 +74,12 @@ namespace Sentry.Protocol
             Type objectType,
             SentryId existingValue,
             bool hasExistingValue,
-            JsonSerializer serializer) =>
-            new SentryId(Guid.Parse((string)reader.Value));
+            JsonSerializer serializer)
+            => reader.Value switch
+            {
+                string o => new SentryId(Guid.Parse(o)),
+                _ => SentryId.Empty
+            };
+
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Sentry.Tests.Protocol;
+using FluentAssertions;
+using Newtonsoft.Json;
 using Xunit;
+using JsonSerializer = Sentry.Tests.Protocol.JsonSerializer;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol.Tests.Context
@@ -21,15 +23,10 @@ namespace Sentry.Protocol.Tests.Context
                 StartTime = DateTimeOffset.MaxValue
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actualString  = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"type\":\"app\"," +
-                         "\"app_start_time\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-                         "\"device_app_hash\":\"93fd0e9a\"," +
-                         "\"build_type\":\"nightly\"," +
-                         "\"app_name\":\"Sentry.Test.App\"," +
-                         "\"app_version\":\"8b03fd7\"," +
-                         "\"app_build\":\"1.23152\"}", actual);
+            var actual = JsonConvert.DeserializeObject<App>(actualString);
+            actual.Should().BeEquivalentTo(sut);
         }
 
         [Fact]

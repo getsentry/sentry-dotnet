@@ -369,13 +369,13 @@ namespace Sentry.Tests.Protocol.Envelopes
                 },
                 Modules = { { "module_key", "module_value" } },
                 Release = "release",
-                // SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
+                // SentryExceptions = new SentryException[0],
+                // SentryExceptions = new [] { new SentryException { Value = "exception_value" } },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
                 ServerName = "server_name",
                 Transaction = "transaction",
             };
 
-            @event.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
             @event.SetExtra("extra_key", "extra_value");
             @event.Fingerprint = new[] {"fingerprint"};
             @event.SetTag("tag_key", "tag_value");

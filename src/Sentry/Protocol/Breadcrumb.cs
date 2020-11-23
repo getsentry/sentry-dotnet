@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace Sentry.Protocol
 {
@@ -15,7 +16,7 @@ namespace Sentry.Protocol
     public sealed class Breadcrumb
     {
         [DataMember(Name = "timestamp", EmitDefaultValue = false)]
-        private string SerializableTimestamp => Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ssZ", DateTimeFormatInfo.InvariantInfo);
+        private string SerializableTimestamp => Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffZ", DateTimeFormatInfo.InvariantInfo);
 
         /// <summary>
         /// A timestamp representing when the breadcrumb occurred.
@@ -104,6 +105,7 @@ namespace Sentry.Protocol
         /// <param name="data">The data.</param>
         /// <param name="category">The category.</param>
         /// <param name="level">The level.</param>
+        [JsonConstructor]
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal Breadcrumb(
             DateTimeOffset? timestamp = null,

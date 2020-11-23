@@ -96,7 +96,7 @@ namespace NotSentry.Tests
                 .Select(i => i.Source)
                 .OfType<SentryEvent>()
                 .Single()
-                .SentryExceptions;
+                .SentryExceptionValues;
 
             stackTrace.Should().BeNull();
         }

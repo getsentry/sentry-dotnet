@@ -204,7 +204,12 @@ namespace Sentry.Protocol.Envelopes
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                return new JsonSerializable(Json.DeserializeFromByteArray<SentryEvent>(buffer));
+                if (Json.DeserializeFromByteArray<SentryEvent>(buffer) is { } @event)
+                {
+                    return new JsonSerializable(@event);
+                }
+
+                throw new InvalidOperationException("Can't deserialize payload.");
             }
 
             // User report
@@ -213,7 +218,13 @@ namespace Sentry.Protocol.Envelopes
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
 
-                return new JsonSerializable(Json.DeserializeFromByteArray<UserFeedback>(buffer));
+
+                if (Json.DeserializeFromByteArray<UserFeedback>(buffer) is { } userFeedback)
+                {
+                    return new JsonSerializable(userFeedback);
+                }
+
+                throw new InvalidOperationException("Can't deserialize payload.");
             }
 
             // Arbitrary payload

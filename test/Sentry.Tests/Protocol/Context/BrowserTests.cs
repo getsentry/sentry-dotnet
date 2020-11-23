@@ -1,6 +1,8 @@
 using System.Collections.Generic;
-using Sentry.Tests.Protocol;
+using FluentAssertions;
+using Newtonsoft.Json;
 using Xunit;
+using JsonSerializer = Sentry.Tests.Protocol.JsonSerializer;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol.Tests.Context
@@ -16,9 +18,10 @@ namespace Sentry.Protocol.Tests.Context
                 Name = "Internet Explorer",
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actualString  = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"type\":\"browser\",\"name\":\"Internet Explorer\",\"version\":\"6\"}", actual);
+            var actual = JsonConvert.DeserializeObject<Browser>(actualString);
+            actual.Should().BeEquivalentTo(sut);
         }
 
         [Fact]

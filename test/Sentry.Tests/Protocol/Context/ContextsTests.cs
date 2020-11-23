@@ -1,5 +1,7 @@
-using Sentry.Tests.Protocol;
+using FluentAssertions;
+using Newtonsoft.Json;
 using Xunit;
+using JsonSerializer = Sentry.Tests.Protocol.JsonSerializer;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol.Tests.Context
@@ -11,9 +13,12 @@ namespace Sentry.Protocol.Tests.Context
         {
             var sut = new Contexts();
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actualString  = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{}", actual);
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{}", actualString);
         }
 
         [Fact]
@@ -26,9 +31,12 @@ namespace Sentry.Protocol.Tests.Context
                 [expectedKey] = os
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actualString  = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"server\":{\"type\":\"os\",\"name\":\"Linux\"}}", actual);
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{\"server\":{\"type\":\"os\",\"name\":\"Linux\"}}", actualString);
         }
 
         [Fact]
@@ -36,9 +44,13 @@ namespace Sentry.Protocol.Tests.Context
         {
             var sut = new Contexts();
             sut.Device.Architecture = "x86";
-            var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"device\":{\"type\":\"device\",\"arch\":\"x86\"}}", actual);
+            var actualString  = JsonSerializer.SerializeObject(sut);
+
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{\"device\":{\"type\":\"device\",\"arch\":\"x86\"}}", actualString);
         }
 
         [Fact]
@@ -46,9 +58,13 @@ namespace Sentry.Protocol.Tests.Context
         {
             var sut = new Contexts();
             sut.App.Name = "My.App";
-            var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"app\":{\"type\":\"app\",\"app_name\":\"My.App\"}}", actual);
+            var actualString  = JsonSerializer.SerializeObject(sut);
+
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{\"app\":{\"type\":\"app\",\"app_name\":\"My.App\"}}", actualString);
         }
 
         [Fact]
@@ -56,9 +72,13 @@ namespace Sentry.Protocol.Tests.Context
         {
             var sut = new Contexts();
             sut.Gpu.Name = "My.Gpu";
-            var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"gpu\":{\"type\":\"gpu\",\"name\":\"My.Gpu\"}}", actual);
+            var actualString  = JsonSerializer.SerializeObject(sut);
+
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{\"gpu\":{\"type\":\"gpu\",\"name\":\"My.Gpu\"}}", actualString);
         }
 
         [Fact]
@@ -66,29 +86,41 @@ namespace Sentry.Protocol.Tests.Context
         {
             var sut = new Contexts();
             sut.Runtime.Version = "2.1.1.100";
-            var actual = JsonSerializer.SerializeObject(sut);
 
-            Assert.Equal("{\"runtime\":{\"type\":\"runtime\",\"version\":\"2.1.1.100\"}}", actual);
+            var actualString  = JsonSerializer.SerializeObject(sut);
+
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{\"runtime\":{\"type\":\"runtime\",\"version\":\"2.1.1.100\"}}", actualString);
         }
 
         [Fact]
         public void Ctor_SingleBrowserPropertySet_SerializeSingleProperty()
         {
-            var contexts = new Contexts();
-            contexts.Browser.Name = "Netscape 1";
-            var actual = JsonSerializer.SerializeObject(contexts);
+            var sut = new Contexts();
+            sut.Browser.Name = "Netscape 1";
 
-            Assert.Equal("{\"browser\":{\"type\":\"browser\",\"name\":\"Netscape 1\"}}", actual);
+            var actualString  = JsonSerializer.SerializeObject(sut);
+
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{\"browser\":{\"type\":\"browser\",\"name\":\"Netscape 1\"}}", actualString);
         }
 
         [Fact]
         public void Ctor_SingleOperatingSystemPropertySet_SerializeSingleProperty()
         {
-            var contexts = new Contexts();
-            contexts.OperatingSystem.Name = "BeOS 1";
-            var actual = JsonSerializer.SerializeObject(contexts);
+            var sut = new Contexts();
+            sut.OperatingSystem.Name = "BeOS 1";
 
-            Assert.Equal("{\"os\":{\"type\":\"os\",\"name\":\"BeOS 1\"}}", actual);
+            var actualString  = JsonSerializer.SerializeObject(sut);
+
+            var actual = JsonConvert.DeserializeObject<Contexts>(actualString);
+            actual.Should().BeEquivalentTo(sut);
+
+            Assert.Equal("{\"os\":{\"type\":\"os\",\"name\":\"BeOS 1\"}}", actualString);
         }
 
         [Fact]

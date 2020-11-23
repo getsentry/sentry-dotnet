@@ -14,7 +14,7 @@ namespace Sentry.Protocol
         /// The values.
         /// </summary>
         [DataMember(Name = "values", EmitDefaultValue = false)]
-        public IEnumerable<T> Values { get; }
+        public IEnumerable<T> Values { get; private set; }
 
         /// <summary>
         /// Creates an instance from the specified <see cref="IEnumerable{T}"/>.
