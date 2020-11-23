@@ -19,6 +19,7 @@ namespace Sentry.Internal.Http
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
         private readonly string _isolatedCacheDirectoryPath;
+        private readonly int _keepCount;
 
         // When a file is getting processed, it's moved to a child directory
         // to avoid getting picked up by other threads.
@@ -42,6 +43,10 @@ namespace Sentry.Internal.Http
         {
             _innerTransport = innerTransport;
             _options = options;
+
+            _keepCount = _options.MaxQueueItems >= 1
+                ? _options.MaxQueueItems - 1
+                : 0; // just in case MaxQueueItems is set to an invalid value somehow (shouldn't happen)
 
             _isolatedCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
                 ? _isolatedCacheDirectoryPath = Path.Combine(
@@ -113,17 +118,14 @@ namespace Sentry.Internal.Http
             // [f1] [f2] [f3] [f4] [f5]
             //                |-------| <- keep these ones
             // |------------|           <- delete these ones
-            var keepCount = _options.MaxQueueItems >= 1
-                ? _options.MaxQueueItems - 1
-                : 0; // just in case MaxQueueItems is set to an invalid value somehow (shouldn't happen)
-
-            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(keepCount).ToArray();
+            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(_keepCount).ToArray();
 
             foreach (var filePath in excessCacheFilePaths)
             {
                 try
                 {
                     File.Delete(filePath);
+                    _options.DiagnosticLogger?.LogDebug("Deleted cached file {0}.", filePath);
                 }
                 catch (FileNotFoundException)
                 {
@@ -221,6 +223,7 @@ namespace Sentry.Internal.Http
             var filePath = GetCacheFilePaths().FirstOrDefault();
             if (string.IsNullOrWhiteSpace(filePath))
             {
+                _options.DiagnosticLogger?.LogDebug("No cached file to process.");
                 return null;
             }
 
@@ -236,10 +239,6 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
-            using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
-
-            EnsureFreeSpaceInCache();
-
             // Envelope file name can be either:
             // 1604679692_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
             // 1604679692__17754019.envelope
@@ -251,6 +250,12 @@ namespace Sentry.Internal.Http
                 $"{envelope.GetHashCode()}" +
                 $".{EnvelopeFileExt}"
             );
+
+            _options.DiagnosticLogger?.LogDebug("Storing file {0}.", envelopeFilePath);
+
+            using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
+
+            EnsureFreeSpaceInCache();
 
             Directory.CreateDirectory(_isolatedCacheDirectoryPath);
 
