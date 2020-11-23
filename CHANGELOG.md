@@ -6,6 +6,7 @@
 * Fix Cache deleted on HttpTransport exception. (#610) @lucas-zimerman
 * Add SentryScopeStateProcessor #603
 * Add net5.0 TFM to libraries #606
+* Add more logging to CachingTransport #619
 
 ## 3.0.0-alpha.5
 
