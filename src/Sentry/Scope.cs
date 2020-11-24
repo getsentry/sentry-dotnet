@@ -2,10 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
+using System.Text.Json;
 using System.Threading;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -17,10 +16,10 @@ namespace Sentry
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
-    /// <inheritdoc />
-    public class Scope : IScope
+    public class Scope : IScope, IJsonSerializable
     {
         internal SentryOptions Options { get; }
+        IScopeOptions IScope.ScopeOptions => Options;
 
         internal bool Locked { get; set; }
 
@@ -83,14 +82,11 @@ namespace Sentry
         internal event EventHandler? OnEvaluating;
 
         /// <inheritdoc />
-        [DataMember(Name = "level", EmitDefaultValue = false)]
         public SentryLevel? Level { get; set; }
 
         /// <inheritdoc />
-        [DataMember(Name = "transaction", EmitDefaultValue = false)]
         public string? Transaction { get; set; }
 
-        [DataMember(Name = "request", EmitDefaultValue = false)]
         private Request? _request;
 
         /// <inheritdoc />
@@ -100,7 +96,6 @@ namespace Sentry
             set => _request = value;
         }
 
-        [DataMember(Name = "contexts", EmitDefaultValue = false)]
         private Contexts? _contexts;
 
         /// <inheritdoc />
@@ -110,7 +105,6 @@ namespace Sentry
             set => _contexts = value;
         }
 
-        [DataMember(Name = "user", EmitDefaultValue = false)]
         private User? _user;
 
         /// <inheritdoc />
@@ -121,27 +115,21 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        [DataMember(Name = "environment", EmitDefaultValue = false)]
         public string? Environment { get; set; }
 
         /// <inheritdoc />
-        [DataMember(Name = "sdk", EmitDefaultValue = false)]
         public SdkVersion Sdk { get; internal set; } = new SdkVersion();
 
         /// <inheritdoc />
-        [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
         public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();
 
         /// <inheritdoc />
-        [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
         public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new ConcurrentQueue<Breadcrumb>();
 
         /// <inheritdoc />
-        [DataMember(Name = "extra", EmitDefaultValue = false)]
         public IReadOnlyDictionary<string, object?> Extra { get; } = new ConcurrentDictionary<string, object?>();
 
         /// <inheritdoc />
-        [DataMember(Name = "tags", EmitDefaultValue = false)]
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
         /// <summary>
@@ -209,6 +197,102 @@ namespace Sentry
             }
         }
 
-        IScopeOptions IScope.ScopeOptions => Options;
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            // Level
+            if (Level != null)
+            {
+                writer.WriteString("level", Level.ToString());
+            }
+
+            // Transaction
+            if (!string.IsNullOrWhiteSpace(Transaction))
+            {
+                writer.WriteString("transaction", Transaction);
+            }
+
+            // Request
+            if (_request != null)
+            {
+                // todo
+            }
+
+            // Contexts
+            if (_contexts != null)
+            {
+                // todo
+            }
+
+            // User
+            if (_user != null)
+            {
+                // todo
+            }
+
+            // Environment
+            if (!string.IsNullOrWhiteSpace(Environment))
+            {
+                writer.WriteString("environment", Environment);
+            }
+
+            // SDK
+            writer.WriteSerializable("sdk", Sdk);
+
+            // Fingerprint
+            var fingerprint = Fingerprint.ToArray();
+            if (fingerprint.Any())
+            {
+                writer.WriteStartArray("fingerprint");
+
+                foreach (var i in fingerprint)
+                {
+                    writer.WriteStringValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Breadcrumbs
+            var breadcrumbs = Breadcrumbs.ToArray();
+            if (breadcrumbs.Any())
+            {
+                writer.WriteStartArray("breadcrumbs");
+
+                foreach (var i in breadcrumbs)
+                {
+                    writer.WriteSerializableValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Extra
+            var extra = Extra;
+            if (extra.Any())
+            {
+                writer.WriteStartObject("extra");
+
+                foreach (var (key, value) in extra)
+                {
+                    writer.WriteDynamic(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+
+            // Tags
+            var tags = Tags;
+            if (tags.Any())
+            {
+                writer.WriteStartObject("tags");
+
+                foreach (var (key, value) in tags)
+                {
+                    writer.WriteString(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+        }
     }
 }
