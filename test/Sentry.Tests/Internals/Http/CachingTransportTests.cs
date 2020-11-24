@@ -12,17 +12,29 @@ using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Sentry.Tests.Internals.Http
 {
     public class CachingTransportTests
     {
+        private readonly IDiagnosticLogger _logger;
+
+        public CachingTransportTests(ITestOutputHelper testOutputHelper)
+        {
+            _logger = new TestOutputDiagnosticLogger(testOutputHelper);
+        }
+
         [Fact(Timeout = 7000)]
         public async Task WorksInBackground()
         {
             // Arrange
             using var cacheDirectory = new TempDirectory();
-            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = _logger,
+                CacheDirectoryPath = cacheDirectory.Path
+            };
 
             using var innerTransport = new FakeTransport();
             await using var transport = new CachingTransport(innerTransport, options);
@@ -49,7 +61,11 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             using var cacheDirectory = new TempDirectory();
-            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = _logger,
+                CacheDirectoryPath = cacheDirectory.Path
+            };
 
             using var innerTransport = new FakeTransport();
             await using var transport = new CachingTransport(innerTransport, options);
@@ -75,6 +91,7 @@ namespace Sentry.Tests.Internals.Http
             using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
+                DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path,
                 MaxQueueItems = 2
             };
@@ -105,7 +122,11 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             using var cacheDirectory = new TempDirectory();
-            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = _logger,
+                CacheDirectoryPath = cacheDirectory.Path
+            };
 
             // Send some envelopes with a failing transport to make sure they all stay in cache
             {
@@ -144,7 +165,11 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             using var cacheDirectory = new TempDirectory();
-            var options = new SentryOptions {CacheDirectoryPath = cacheDirectory.Path};
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = _logger,
+                CacheDirectoryPath = cacheDirectory.Path
+            };
 
             var innerTransport = Substitute.For<ITransport>();
             var isFailing = true;
@@ -186,7 +211,11 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             using var cacheDirectory = new TempDirectory();
-            var options = new SentryOptions { CacheDirectoryPath = cacheDirectory.Path };
+            var options = new SentryOptions
+            {
+                DiagnosticLogger = _logger,
+                CacheDirectoryPath = cacheDirectory.Path
+            };
 
             var exception = new HttpRequestException(null, new SocketException());
             var receivedException = new Exception();
