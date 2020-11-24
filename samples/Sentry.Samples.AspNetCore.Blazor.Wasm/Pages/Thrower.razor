@@ -1,4 +1,6 @@
 ﻿@page "/thrower"
+@using Microsoft.Extensions.Logging
+@inject ILogger<Thrower> Logger
 
 <h1>Throw Exception</h1>
 
@@ -12,7 +14,8 @@
 @code {
     private void Throw()
     {
-       Stuff.DoSomething();
+        Logger.LogInformation("Doing something ... ");
+        Stuff.DoSomething();
     }
 
     private static class Stuff
