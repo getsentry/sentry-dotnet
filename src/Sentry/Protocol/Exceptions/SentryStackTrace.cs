@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Linq;
+using System.Text.Json;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
@@ -12,10 +13,8 @@ namespace Sentry.Protocol
     /// Frames should be sorted from oldest to newest.
     /// </remarks>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
-    [DataContract]
-    public class SentryStackTrace
+    public class SentryStackTrace : IJsonSerializable
     {
-        [DataMember(Name = "frames", EmitDefaultValue = false)]
         internal IList<SentryStackFrame>? InternalFrames { get; private set; }
 
         /// <summary>
@@ -28,6 +27,21 @@ namespace Sentry.Protocol
         {
             get => InternalFrames ??= new List<SentryStackFrame>();
             set => InternalFrames = value;
+        }
+
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            if (InternalFrames is {} frames && frames.Any())
+            {
+                writer.WriteStartArray("frames");
+
+                foreach (var frame in frames)
+                {
+                    writer.WriteSerializableValue(frame);
+                }
+
+                writer.WriteEndArray();
+            }
         }
     }
 }
