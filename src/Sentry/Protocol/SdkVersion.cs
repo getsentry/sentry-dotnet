@@ -91,7 +91,7 @@ namespace Sentry.Protocol
             }
 
             // Name
-            var name = json.GetProperty("name").GetString() ?? "";
+            var name = json.GetProperty("name").GetString() ?? "dotnet.unknown";
 
             // Version
             var version = json.GetProperty("version").GetString() ?? "";
