@@ -108,11 +108,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\changelog.yaml = .github\workflows\changelog.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Grpc", "src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj", "{720811C8-29C7-4368-86F2-D61DF415AC2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.Grpc", "src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj", "{720811C8-29C7-4368-86F2-D61DF415AC2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Grpc.Tests", "test\Sentry.AspNetCore.Grpc.Tests\Sentry.AspNetCore.Grpc.Tests.csproj", "{3818FA5C-8649-427D-8E68-0C44558CA0DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.Grpc.Tests", "test\Sentry.AspNetCore.Grpc.Tests\Sentry.AspNetCore.Grpc.Tests.csproj", "{3818FA5C-8649-427D-8E68-0C44558CA0DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.Grpc", "samples\Sentry.Samples.AspNetCore.Grpc\Sentry.Samples.AspNetCore.Grpc.csproj", "{21599C29-C3D4-4DAC-A2D6-6C194600478F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Grpc", "samples\Sentry.Samples.AspNetCore.Grpc\Sentry.Samples.AspNetCore.Grpc.csproj", "{21599C29-C3D4-4DAC-A2D6-6C194600478F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.Blazor.Wasm", "samples\Sentry.Samples.AspNetCore.Blazor.Wasm\Sentry.Samples.AspNetCore.Blazor.Wasm.csproj", "{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{274CEDC2-2129-469D-B269-649EFA2EF5E0}"
 EndProject
@@ -242,6 +244,10 @@ Global
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -284,6 +290,7 @@ Global
 		{720811C8-29C7-4368-86F2-D61DF415AC2A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{3818FA5C-8649-427D-8E68-0C44558CA0DD} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
