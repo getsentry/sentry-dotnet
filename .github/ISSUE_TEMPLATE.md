@@ -27,4 +27,4 @@ Please mark the NuGet packages used:
 
 * Version:
 
-<!-- Please describe the the steps to reproduce the issue or link to a repository with a small reproducible code. -->
+<!-- Please describe the steps to reproduce the issue or link to a repository with a small reproducible code. -->
