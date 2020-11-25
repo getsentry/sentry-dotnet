@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
@@ -21,7 +22,17 @@ namespace Sentry.Protocol.Envelopes
         public JsonSerializable(object source) => Source = source;
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            await Json.SerializeToStreamAsync(Source, stream, cancellationToken).ConfigureAwait(false);
+        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        {
+            if (Source is IJsonSerializable s)
+            {
+                await using var writer = new Utf8JsonWriter(stream);
+                s.WriteTo(writer);
+            }
+            else
+            {
+                await Json.SerializeToStreamAsync(Source, stream, cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 }
