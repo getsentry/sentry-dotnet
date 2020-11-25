@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Runtime.Serialization;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -10,7 +9,6 @@ namespace Sentry.Protocol
     /// Represents Sentry's structured Context.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
-    [DataContract]
     public class Contexts : ConcurrentDictionary<string, object>, IJsonSerializable
     {
         /// <summary>
