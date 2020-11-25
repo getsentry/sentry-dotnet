@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 

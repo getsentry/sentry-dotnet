@@ -17,6 +17,30 @@ namespace Sentry.Internal.Extensions
         public static void WriteDictionary(
             this Utf8JsonWriter writer,
             string propertyName,
+            Dictionary<string, object?>? dic)
+        {
+            writer.WritePropertyName(propertyName);
+
+            if (dic != null)
+            {
+                writer.WriteStartObject();
+
+                foreach (var (key, value) in dic)
+                {
+                    writer.WriteDynamic(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+            else
+            {
+                writer.WriteNullValue();
+            }
+        }
+
+        public static void WriteDictionary(
+            this Utf8JsonWriter writer,
+            string propertyName,
             Dictionary<string, string?>? dic)
         {
             writer.WritePropertyName(propertyName);
@@ -66,6 +90,53 @@ namespace Sentry.Internal.Extensions
         {
             writer.WritePropertyName(propertyName);
             writer.WriteDictionaryValue(dic);
+        }
+
+        public static void WriteDictionary(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            IReadOnlyDictionary<string, string?>? dic)
+        {
+            writer.WritePropertyName(propertyName);
+            if (dic != null)
+            {
+                writer.WriteStartObject();
+
+                foreach (var (key, value) in dic)
+                {
+                    writer.WriteString(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+            else
+            {
+                writer.WriteNullValue();
+            }
+        }
+
+        public static void WriteDictionary(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            IDictionary<string, object?>? dic)
+        {
+            writer.WritePropertyName(propertyName);
+
+            if (dic != null)
+            {
+                writer.WriteStartObject();
+
+                foreach (var (key, value) in dic)
+                {
+                    writer.WriteDynamic(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+            else
+            {
+                writer.WriteNullValue();
+            }
         }
 
         public static void WriteDictionary(
