@@ -1,10 +1,42 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 
 namespace Sentry.Internal.Extensions
 {
     internal static class JsonExtensions
     {
+        public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
+        {
+            name = jsonProperty.Name;
+            value = jsonProperty.Value;
+        }
+
+        public static void WriteDictionary(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            Dictionary<string, string?>? dic)
+        {
+            writer.WritePropertyName(propertyName);
+
+            if (dic != null)
+            {
+                writer.WriteStartObject();
+
+                foreach (var (key, value) in dic)
+                {
+                    writer.WriteString(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+            else
+            {
+                writer.WriteNullValue();
+            }
+        }
+
         public static void WriteDictionary(
             this Utf8JsonWriter writer,
             string propertyName,
@@ -28,5 +60,88 @@ namespace Sentry.Internal.Extensions
                 writer.WriteNullValue();
             }
         }
+
+        public static void WriteDictionary(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            IDictionary<string, string?>? dic)
+        {
+            writer.WritePropertyName(propertyName);
+
+            if (dic != null)
+            {
+                writer.WriteStartObject();
+
+                foreach (var (key, value) in dic)
+                {
+                    writer.WriteString(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+            else
+            {
+                writer.WriteNullValue();
+            }
+        }
+
+        public static IReadOnlyDictionary<string, object?>? GetObjectDictionary(this JsonElement json)
+        {
+            if (json.ValueKind == JsonValueKind.Null)
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, object?>();
+
+            foreach (var (name, value) in json.EnumerateObject())
+            {
+                result[name] = value.GetDynamic();
+            }
+
+            return result;
+        }
+
+        public static IReadOnlyDictionary<string, string?>? GetDictionary(this JsonElement json)
+        {
+            if (json.ValueKind == JsonValueKind.Null)
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, string?>(StringComparer.Ordinal);
+
+            foreach (var (name, value) in json.EnumerateObject())
+            {
+                result[name] = value.GetString();
+            }
+
+            return result;
+        }
+
+        public static JsonElement? GetPropertyOrNull(this JsonElement json, string name)
+        {
+            if (json.TryGetProperty(name, out var result))
+            {
+                return result;
+            }
+
+            return null;
+        }
+
+        public static TOut Pipe<TIn, TOut>(this TIn input, Func<TIn, TOut> pipe) => pipe(input);
+
+        public static object? GetDynamic(this JsonElement json) => json.ValueKind switch
+        {
+            JsonValueKind.Null => null,
+            JsonValueKind.Undefined => null,
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Number => json.GetDouble(),
+            JsonValueKind.String => json.GetString(),
+            JsonValueKind.Array => json.EnumerateArray().Select(GetDynamic).ToArray(),
+            JsonValueKind.Object => json.GetDictionary(), // TODO: this should be Dictionary<string, object>
+            _ => null
+        };
     }
 }

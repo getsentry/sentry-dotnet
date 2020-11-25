@@ -117,6 +117,8 @@ namespace Sentry.Protocol
 
         public void WriteTo(Utf8JsonWriter writer)
         {
+            writer.WriteStartObject();
+
             // Timestamp
             writer.WriteString(
                 "timestamp",
@@ -153,6 +155,20 @@ namespace Sentry.Protocol
             {
                 writer.WriteString("level", Level.ToString());
             }
+
+            writer.WriteEndObject();
+        }
+
+        public static Breadcrumb FromJson(JsonElement json)
+        {
+            var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
+            var message = json.GetPropertyOrNull("message")?.GetString();
+            var type = json.GetPropertyOrNull("type")?.GetString();
+            var data = json.GetPropertyOrNull("data")?.GetDictionary();
+            var category = json.GetPropertyOrNull("category")?.GetString();
+            var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<BreadcrumbLevel>()) ?? default;
+
+            return new Breadcrumb(timestamp, message, type, data!, category, level);
         }
     }
 }

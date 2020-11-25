@@ -59,9 +59,9 @@ namespace Sentry.Tests.Protocol
             sut.Fingerprint = new[] {"fingerprint"};
             sut.SetTag("tag_key", "tag_value");
 
-            var actualString  = JsonSerializer.SerializeObject(sut);
+            var actualString = sut.ToJsonString();
 
-            var actual = JsonConvert.DeserializeObject<SentryEvent>(actualString);
+            var actual = SentryEvent.FromJson(actualString);
             actual.Should().BeEquivalentTo(sut, o =>
                 // Due to timestamp precision
                 o.Excluding(e => e.Breadcrumbs)

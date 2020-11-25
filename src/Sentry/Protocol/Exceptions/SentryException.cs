@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
@@ -60,6 +61,8 @@ namespace Sentry.Protocol
 
         public void WriteTo(Utf8JsonWriter writer)
         {
+            writer.WriteStartObject();
+
             // Type
             if (!string.IsNullOrWhiteSpace(Type))
             {
@@ -95,6 +98,28 @@ namespace Sentry.Protocol
             {
                 writer.WriteSerializable("mechanism", mechanism);
             }
+
+            writer.WriteEndObject();
+        }
+
+        public static SentryException FromJson(JsonElement json)
+        {
+            var type = json.GetPropertyOrNull("type")?.GetString();
+            var value = json.GetPropertyOrNull("value")?.GetString();
+            var module = json.GetPropertyOrNull("module")?.GetString();
+            var threadId = json.GetPropertyOrNull("thread_id")?.GetInt32() ?? 0;
+            var stacktrace = json.GetPropertyOrNull("stacktrace")?.Pipe(SentryStackTrace.FromJson);
+            var mechanism = json.GetPropertyOrNull("mechanism")?.Pipe(Mechanism.FromJson);
+
+            return new SentryException
+            {
+                Type = type,
+                Value = value,
+                Module = module,
+                ThreadId = threadId,
+                Stacktrace = stacktrace,
+                Mechanism = mechanism
+            };
         }
     }
 }

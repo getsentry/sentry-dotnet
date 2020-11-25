@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
@@ -74,6 +75,8 @@ namespace Sentry.Protocol
 
         public void WriteTo(Utf8JsonWriter writer)
         {
+            writer.WriteStartObject();
+
             // Data
             if (InternalData is {} data && data.Any())
             {
@@ -123,6 +126,28 @@ namespace Sentry.Protocol
             {
                 writer.WriteBoolean("handled", handled);
             }
+
+            writer.WriteEndObject();
+        }
+
+        public static Mechanism FromJson(JsonElement json)
+        {
+            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary();
+            var meta = json.GetPropertyOrNull("meta")?.GetObjectDictionary();
+            var type = json.GetPropertyOrNull("type")?.GetString();
+            var description = json.GetPropertyOrNull("description")?.GetString();
+            var helpLink = json.GetPropertyOrNull("help_link")?.GetString();
+            var handled = json.GetPropertyOrNull("handled")?.GetBoolean();
+
+            return new Mechanism
+            {
+                InternalData = data?.ToDictionary()!,
+                InternalMeta = meta?.ToDictionary()!,
+                Type = type,
+                Description = description,
+                HelpLink = helpLink,
+                Handled = handled
+            };
         }
     }
 }

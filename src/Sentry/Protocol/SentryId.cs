@@ -1,5 +1,7 @@
 using System;
+using System.Text.Json;
 using Newtonsoft.Json;
+using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Sentry.Protocol
 {
@@ -7,7 +9,7 @@ namespace Sentry.Protocol
     /// The identifier of an event in Sentry.
     /// </summary>
     [JsonConverter(typeof(SentryIdJsonConverter))]
-    public readonly struct SentryId : IEquatable<SentryId>
+    public readonly struct SentryId : IEquatable<SentryId>, IJsonSerializable
     {
         private readonly Guid _eventId;
 
@@ -39,6 +41,17 @@ namespace Sentry.Protocol
 
         /// <inheritdoc />
         public override int GetHashCode() => _eventId.GetHashCode();
+
+        public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
+
+        public static SentryId FromJson(JsonElement json)
+        {
+            var id = json.GetString();
+
+            return !string.IsNullOrWhiteSpace(id)
+                ? new SentryId(Guid.Parse(id))
+                : Empty;
+        }
 
         /// <summary>
         /// Equality operator.

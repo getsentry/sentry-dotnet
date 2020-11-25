@@ -128,6 +128,8 @@ namespace Sentry.Protocol
 
         public void WriteTo(Utf8JsonWriter writer)
         {
+            writer.WriteStartObject();
+
             // Pre-context
             if (InternalPreContext is {} preContext && preContext.Any())
             {
@@ -250,6 +252,50 @@ namespace Sentry.Protocol
             {
                 writer.WriteNumber("instruction_offset", instructionOffset);
             }
+
+            writer.WriteEndObject();
+        }
+
+        public static SentryStackFrame FromJson(JsonElement json)
+        {
+            var preContext = json.GetPropertyOrNull("pre_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
+            var postContext = json.GetPropertyOrNull("post_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
+            var vars = json.GetPropertyOrNull("vars")?.GetDictionary();
+            var framesOmitted = json.GetPropertyOrNull("frames_omitted")?.EnumerateArray().Select(j => j.GetInt32()).ToList();
+            var filename = json.GetPropertyOrNull("filename")?.GetString();
+            var function = json.GetPropertyOrNull("function")?.GetString();
+            var module = json.GetPropertyOrNull("module")?.GetString();
+            var lineNumber = json.GetPropertyOrNull("line_no")?.GetInt32();
+            var columnNumber = json.GetPropertyOrNull("col_no")?.GetInt32();
+            var absolutePath = json.GetPropertyOrNull("abs_path")?.GetString();
+            var contextLine = json.GetPropertyOrNull("context_line")?.GetString();
+            var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
+            var package = json.GetPropertyOrNull("package")?.GetString();
+            var platform = json.GetPropertyOrNull("platform")?.GetString();
+            var imageAddress = json.GetPropertyOrNull("image_addr")?.GetInt64() ?? 0;
+            var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetInt64();
+            var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
+
+            return new SentryStackFrame
+            {
+                InternalPreContext = preContext!,
+                InternalPostContext = postContext!,
+                InternalVars = vars?.ToDictionary()!,
+                InternalFramesOmitted = framesOmitted,
+                FileName = filename,
+                Function = function,
+                Module = module,
+                LineNumber = lineNumber,
+                ColumnNumber = columnNumber,
+                AbsolutePath = absolutePath,
+                ContextLine = contextLine,
+                InApp = inApp,
+                Package = package,
+                Platform = platform,
+                ImageAddress = imageAddress,
+                SymbolAddress = symbolAddress,
+                InstructionOffset = instructionOffset
+            };
         }
     }
 }

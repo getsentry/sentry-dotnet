@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
@@ -31,6 +32,8 @@ namespace Sentry.Protocol
 
         public void WriteTo(Utf8JsonWriter writer)
         {
+            writer.WriteStartObject();
+
             if (InternalFrames is {} frames && frames.Any())
             {
                 writer.WriteStartArray("frames");
@@ -42,6 +45,18 @@ namespace Sentry.Protocol
 
                 writer.WriteEndArray();
             }
+
+            writer.WriteEndObject();
+        }
+
+        public static SentryStackTrace FromJson(JsonElement json)
+        {
+            var frames = json.GetPropertyOrNull("frames")?.EnumerateArray().Select(SentryStackFrame.FromJson).ToArray();
+
+            return new SentryStackTrace
+            {
+                InternalFrames = frames
+            };
         }
     }
 }

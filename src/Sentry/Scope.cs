@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Protocol;
@@ -16,7 +15,7 @@ namespace Sentry
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
-    public class Scope : IScope, IJsonSerializable
+    public class Scope : IScope
     {
         internal SentryOptions Options { get; }
         IScopeOptions IScope.ScopeOptions => Options;
@@ -194,104 +193,6 @@ namespace Sentry
                 {
                     _hasEvaluated = true;
                 }
-            }
-        }
-
-        public void WriteTo(Utf8JsonWriter writer)
-        {
-            // Level
-            if (Level != null)
-            {
-                writer.WriteString("level", Level.ToString());
-            }
-
-            // Transaction
-            if (!string.IsNullOrWhiteSpace(Transaction))
-            {
-                writer.WriteString("transaction", Transaction);
-            }
-
-            // Request
-            if (_request != null)
-            {
-                // todo
-            }
-
-            // Contexts
-            if (_contexts != null)
-            {
-                // todo
-            }
-
-            // User
-            if (_user != null)
-            {
-                // todo
-            }
-
-            // Environment
-            if (!string.IsNullOrWhiteSpace(Environment))
-            {
-                writer.WriteString("environment", Environment);
-            }
-
-            // SDK
-            writer.WriteSerializable("sdk", Sdk);
-
-            // Fingerprint
-            var fingerprint = Fingerprint.ToArray();
-            if (fingerprint.Any())
-            {
-                writer.WriteStartArray("fingerprint");
-
-                foreach (var i in fingerprint)
-                {
-                    writer.WriteStringValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Breadcrumbs
-            var breadcrumbs = Breadcrumbs.ToArray();
-            if (breadcrumbs.Any())
-            {
-                writer.WriteStartArray("breadcrumbs");
-
-                foreach (var i in breadcrumbs)
-                {
-                    writer.WriteSerializableValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Extra
-            var extra = Extra;
-            if (extra.Any())
-            {
-                writer.WriteStartObject("extra");
-
-                foreach (var (key, value) in extra)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            // Tags
-            var tags = Tags;
-            if (tags.Any())
-            {
-                writer.WriteStartObject("tags");
-
-                foreach (var (key, value) in tags)
-                {
-                    writer.WriteString(key, value);
-                }
-
-                writer.WriteEndObject();
             }
         }
     }
