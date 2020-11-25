@@ -276,19 +276,19 @@ namespace Sentry
             // Request
             if (_request is {} request)
             {
-                // todo
+                writer.WriteSerializable("request", request);
             }
 
             // Contexts
             if (_contexts is {} contexts)
             {
-                // todo
+                writer.WriteSerializable("contexts", contexts);
             }
 
             // User
             if (_user is {} user)
             {
-                // todo
+                writer.WriteSerializable("user", user);
             }
 
             // Environment
@@ -369,6 +369,9 @@ namespace Sentry
             var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).Pipe(v => new SentryValues<SentryThread>(v));
             var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
             var transaction = json.GetPropertyOrNull("transaction")?.GetString();
+            var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
+            var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
+            var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
             var environment = json.GetPropertyOrNull("environment")?.GetString();
             var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
             var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
@@ -388,6 +391,9 @@ namespace Sentry
                 SentryThreadValues = threadValues,
                 Level = level,
                 Transaction = transaction,
+                _request = request,
+                _contexts = contexts,
+                _user = user,
                 Environment = environment,
                 Sdk = sdk,
                 _fingerprint = fingerprint!,

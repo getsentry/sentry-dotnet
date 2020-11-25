@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Runtime.Serialization;
+using System.Text.Json;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -10,7 +11,7 @@ namespace Sentry.Protocol
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
     [DataContract]
-    public class Contexts : ConcurrentDictionary<string, object>
+    public class Contexts : ConcurrentDictionary<string, object>, IJsonSerializable
     {
         /// <summary>
         /// Describes the application.
@@ -77,6 +78,30 @@ namespace Sentry.Protocol
 
                 to.TryAdd(kv.Key, value);
             }
+        }
+
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteDictionaryValue(this!);
+        }
+
+        public static Contexts FromJson(JsonElement json)
+        {
+            var result = new Contexts();
+
+            var dic = json.GetObjectDictionary();
+            if (dic is {})
+            {
+                foreach (var (key, value) in dic)
+                {
+                    if (value is {})
+                    {
+                        result[key] = value;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }
