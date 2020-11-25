@@ -27,7 +27,7 @@ namespace Sentry.Tests.Protocol
                         [".NET Framework Full"] = "\"v4.8\""
                     }
                 },
-                Sdk = new SdkVersion { Name = "SDK-test" },
+                Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
@@ -41,7 +41,7 @@ namespace Sentry.Tests.Protocol
                 // SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
                 ServerName = "server_name",
-                Transaction = "transaction"
+                Transaction = "transaction",
             };
 
             sut.Sdk.AddPackage(new Package("name", "version"));

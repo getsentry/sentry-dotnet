@@ -14,13 +14,10 @@ namespace Sentry.Internal.Extensions
             value = jsonProperty.Value;
         }
 
-        public static void WriteDictionary(
+        public static void WriteDictionaryValue(
             this Utf8JsonWriter writer,
-            string propertyName,
-            Dictionary<string, object?>? dic)
+            IEnumerable<KeyValuePair<string, object?>>? dic)
         {
-            writer.WritePropertyName(propertyName);
-
             if (dic != null)
             {
                 writer.WriteStartObject();
@@ -28,30 +25,6 @@ namespace Sentry.Internal.Extensions
                 foreach (var (key, value) in dic)
                 {
                     writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-            else
-            {
-                writer.WriteNullValue();
-            }
-        }
-
-        public static void WriteDictionary(
-            this Utf8JsonWriter writer,
-            string propertyName,
-            Dictionary<string, string?>? dic)
-        {
-            writer.WritePropertyName(propertyName);
-
-            if (dic != null)
-            {
-                writer.WriteStartObject();
-
-                foreach (var (key, value) in dic)
-                {
-                    writer.WriteString(key, value);
                 }
 
                 writer.WriteEndObject();
@@ -64,7 +37,7 @@ namespace Sentry.Internal.Extensions
 
         public static void WriteDictionaryValue(
             this Utf8JsonWriter writer,
-            IReadOnlyDictionary<string, object?>? dic)
+            IEnumerable<KeyValuePair<string, string?>>? dic)
         {
             if (dic != null)
             {
@@ -72,7 +45,7 @@ namespace Sentry.Internal.Extensions
 
                 foreach (var (key, value) in dic)
                 {
-                    writer.WriteDynamic(key, value);
+                    writer.WriteString(key, value);
                 }
 
                 writer.WriteEndObject();
@@ -86,7 +59,7 @@ namespace Sentry.Internal.Extensions
         public static void WriteDictionary(
             this Utf8JsonWriter writer,
             string propertyName,
-            IReadOnlyDictionary<string, object?>? dic)
+            IEnumerable<KeyValuePair<string, object?>>? dic)
         {
             writer.WritePropertyName(propertyName);
             writer.WriteDictionaryValue(dic);
@@ -95,72 +68,10 @@ namespace Sentry.Internal.Extensions
         public static void WriteDictionary(
             this Utf8JsonWriter writer,
             string propertyName,
-            IReadOnlyDictionary<string, string?>? dic)
+            IEnumerable<KeyValuePair<string, string?>>? dic)
         {
             writer.WritePropertyName(propertyName);
-            if (dic != null)
-            {
-                writer.WriteStartObject();
-
-                foreach (var (key, value) in dic)
-                {
-                    writer.WriteString(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-            else
-            {
-                writer.WriteNullValue();
-            }
-        }
-
-        public static void WriteDictionary(
-            this Utf8JsonWriter writer,
-            string propertyName,
-            IDictionary<string, object?>? dic)
-        {
-            writer.WritePropertyName(propertyName);
-
-            if (dic != null)
-            {
-                writer.WriteStartObject();
-
-                foreach (var (key, value) in dic)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-            else
-            {
-                writer.WriteNullValue();
-            }
-        }
-
-        public static void WriteDictionary(
-            this Utf8JsonWriter writer,
-            string propertyName,
-            IDictionary<string, string?>? dic)
-        {
-            writer.WritePropertyName(propertyName);
-
-            if (dic != null)
-            {
-                writer.WriteStartObject();
-
-                foreach (var (key, value) in dic)
-                {
-                    writer.WriteString(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-            else
-            {
-                writer.WriteNullValue();
-            }
+            writer.WriteDictionaryValue(dic);
         }
 
         public static IReadOnlyDictionary<string, object?>? GetObjectDictionary(this JsonElement json)
@@ -211,14 +122,12 @@ namespace Sentry.Internal.Extensions
 
         public static object? GetDynamic(this JsonElement json) => json.ValueKind switch
         {
-            JsonValueKind.Null => null,
-            JsonValueKind.Undefined => null,
             JsonValueKind.True => true,
             JsonValueKind.False => false,
             JsonValueKind.Number => json.GetDouble(),
             JsonValueKind.String => json.GetString(),
             JsonValueKind.Array => json.EnumerateArray().Select(GetDynamic).ToArray(),
-            JsonValueKind.Object => json.GetDictionary(), // TODO: this should be Dictionary<string, object>
+            JsonValueKind.Object => json.GetObjectDictionary(),
             _ => null
         };
     }

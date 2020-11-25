@@ -218,11 +218,8 @@ namespace Sentry
             // Message
             if (Message is {} message)
             {
-                writer.WriteStartObject("logentry");
-
+                writer.WritePropertyName("logentry");
                 writer.WriteSerializableValue(message);
-
-                writer.WriteEndObject();
             }
 
             // Logger
@@ -406,7 +403,7 @@ namespace Sentry
         public static SentryEvent FromJson(string json)
         {
             using var document = JsonDocument.Parse(json);
-            return FromJson(document.RootElement);
+            return FromJson(document.RootElement.Clone());
         }
     }
 }

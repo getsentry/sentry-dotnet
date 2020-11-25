@@ -37,11 +37,15 @@ namespace Sentry.Protocol
 
         public void WriteTo(Utf8JsonWriter writer)
         {
+            writer.WriteStartObject();
+
             // Name
             writer.WriteString("name", Name);
 
             // Version
             writer.WriteString("version", Version);
+
+            writer.WriteEndObject();
         }
 
         public static Package FromJson(JsonElement json)

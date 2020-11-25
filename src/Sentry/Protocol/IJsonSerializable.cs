@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
@@ -51,6 +53,14 @@ namespace Sentry.Protocol
             else if (value is IJsonSerializable serializable)
             {
                 writer.WriteSerializableValue(serializable);
+            }
+            else if (value is IEnumerable<KeyValuePair<string, string?>> sdic)
+            {
+                writer.WriteDictionaryValue(sdic);
+            }
+            else if (value is IEnumerable<KeyValuePair<string, object?>> dic)
+            {
+                writer.WriteDictionaryValue(dic);
             }
             else if (value is string str)
             {
