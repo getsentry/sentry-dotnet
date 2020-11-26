@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -88,15 +89,39 @@ namespace Sentry.Protocol
         {
             var result = new Contexts();
 
-            var dic = json.GetObjectDictionary();
-            if (dic is {})
+            foreach (var (name, value) in json.EnumerateObject())
             {
-                foreach (var (key, value) in dic)
+                var type = value.GetPropertyOrNull("type")?.GetString();
+
+                // Handle known context types
+                if (string.Equals(type, App.Type, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (value is {})
-                    {
-                        result[key] = value;
-                    }
+                    result[name] = App.FromJson(value);
+                }
+                else if (string.Equals(type, Browser.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Browser.FromJson(value);
+                }
+                else if (string.Equals(type, Device.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Device.FromJson(value);
+                }
+                else if (string.Equals(type, OperatingSystem.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = OperatingSystem.FromJson(value);
+                }
+                else if (string.Equals(type, Runtime.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Runtime.FromJson(value);
+                }
+                else if (string.Equals(type, Gpu.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Gpu.FromJson(value);
+                }
+                else
+                {
+                    // Unknown context - parse as dictionary
+                    result[name] = value.GetObjectDictionary() ?? new Dictionary<string, object?>();
                 }
             }
 
