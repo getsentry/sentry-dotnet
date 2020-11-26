@@ -110,7 +110,9 @@ namespace Sentry.Internal.Extensions
 
         public static JsonElement? GetPropertyOrNull(this JsonElement json, string name)
         {
-            if (json.TryGetProperty(name, out var result))
+            if (json.TryGetProperty(name, out var result) &&
+                result.ValueKind != JsonValueKind.Null &&
+                result.ValueKind != JsonValueKind.Undefined)
             {
                 return result;
             }
