@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Verify.Xunit" Version="8.7.4-beta.1" />
+    <PackageReference Include="Verify.Xunit" Version="8.7.4-beta.2" />
   </ItemGroup>
 
   <ItemGroup>
