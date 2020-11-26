@@ -104,6 +104,7 @@ namespace Sentry.Protocol
                 NpotSupport = NpotSupport,
             };
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -158,6 +159,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static Gpu FromJson(JsonElement json)
         {
             var name = json.GetPropertyOrNull("name")?.GetString();

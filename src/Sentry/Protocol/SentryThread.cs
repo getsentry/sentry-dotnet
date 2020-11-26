@@ -35,6 +35,7 @@ namespace Sentry.Protocol
         /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
         public SentryStackTrace? Stacktrace { get; set; }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -72,6 +73,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryThread FromJson(JsonElement json)
         {
             var id = json.GetPropertyOrNull("id")?.GetInt32();

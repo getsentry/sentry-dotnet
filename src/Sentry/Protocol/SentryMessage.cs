@@ -43,6 +43,7 @@ namespace Sentry.Protocol
         /// </summary>
         public static implicit operator SentryMessage(string? message) => new SentryMessage {Message = message};
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -75,6 +76,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryMessage FromJson(JsonElement json)
         {
             var message = json.GetPropertyOrNull("message")?.GetString();

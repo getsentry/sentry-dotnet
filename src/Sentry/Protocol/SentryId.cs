@@ -42,8 +42,12 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public override int GetHashCode() => _eventId.GetHashCode();
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryId FromJson(JsonElement json)
         {
             var id = json.GetString();

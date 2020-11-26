@@ -19,6 +19,7 @@ namespace Sentry.Protocol
         /// </summary>
         public SentryValues(IEnumerable<T>? values) => Values = values ?? Enumerable.Empty<T>();
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();

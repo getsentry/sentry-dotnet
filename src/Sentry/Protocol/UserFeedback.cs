@@ -40,6 +40,7 @@ namespace Sentry
             Comments = comments;
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -68,6 +69,9 @@ namespace Sentry
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static UserFeedback FromJson(JsonElement json)
         {
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;

@@ -59,6 +59,7 @@ namespace Sentry.Protocol
         /// </remarks>
         public IDictionary<string, object?> Data => InternalData ??= new Dictionary<string, object?>();
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -102,6 +103,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryException FromJson(JsonElement json)
         {
             var type = json.GetPropertyOrNull("type")?.GetString();

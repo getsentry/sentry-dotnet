@@ -70,6 +70,7 @@ namespace Sentry.Protocol
                 Build = Build
             };
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -114,6 +115,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static App FromJson(JsonElement json)
         {
             var identifier = json.GetPropertyOrNull("app_identifier")?.GetString();

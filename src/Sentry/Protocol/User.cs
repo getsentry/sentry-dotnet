@@ -85,6 +85,7 @@ namespace Sentry.Protocol
             );
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -122,6 +123,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static User FromJson(JsonElement json)
         {
             var email = json.GetPropertyOrNull("email")?.GetString();

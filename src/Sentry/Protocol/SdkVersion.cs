@@ -55,6 +55,7 @@ namespace Sentry.Protocol
         internal void AddPackage(Package package)
             => InternalPackages.Add(package);
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -82,6 +83,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SdkVersion FromJson(JsonElement json)
         {
             // Packages

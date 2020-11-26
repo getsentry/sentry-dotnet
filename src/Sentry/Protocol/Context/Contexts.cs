@@ -80,11 +80,15 @@ namespace Sentry.Protocol
             }
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteDictionaryValue(this!);
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static Contexts FromJson(JsonElement json)
         {
             var result = new Contexts();

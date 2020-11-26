@@ -115,6 +115,7 @@ namespace Sentry.Protocol
             Level = level;
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -159,6 +160,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static Breadcrumb FromJson(JsonElement json)
         {
             var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();

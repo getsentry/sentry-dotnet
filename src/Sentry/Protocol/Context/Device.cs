@@ -192,6 +192,7 @@ namespace Sentry.Protocol
                 LowMemory = LowMemory
             };
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -327,6 +328,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static Device FromJson(JsonElement json)
         {
             var timezone = json.GetPropertyOrNull("timezone")?.GetString()?.Pipe(TimeZoneInfo.FindSystemTimeZoneById);

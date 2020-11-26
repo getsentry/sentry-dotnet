@@ -199,6 +199,7 @@ namespace Sentry
             Platform = Constants.Platform;
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -352,6 +353,9 @@ namespace Sentry
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryEvent FromJson(JsonElement json)
         {
             var modules = json.GetPropertyOrNull("modules")?.GetDictionary();
@@ -400,6 +404,9 @@ namespace Sentry
             };
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryEvent FromJson(string json)
         {
             using var document = JsonDocument.Parse(json);

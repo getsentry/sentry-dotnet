@@ -30,6 +30,7 @@ namespace Sentry.Protocol
             set => InternalFrames = value;
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -49,6 +50,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryStackTrace FromJson(JsonElement json)
         {
             var frames = json.GetPropertyOrNull("frames")?.EnumerateArray().Select(SentryStackFrame.FromJson).ToArray();

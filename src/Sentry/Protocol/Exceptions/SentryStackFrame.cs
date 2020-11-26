@@ -126,6 +126,7 @@ namespace Sentry.Protocol
         /// </remarks>
         public long? InstructionOffset { get; set; }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -256,6 +257,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static SentryStackFrame FromJson(JsonElement json)
         {
             var preContext = json.GetPropertyOrNull("pre_context")?.EnumerateArray().Select(j => j.GetString()).ToList();

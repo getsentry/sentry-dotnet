@@ -10,6 +10,9 @@ namespace Sentry.Protocol
 {
     internal interface IJsonSerializable
     {
+        /// <summary>
+        /// Writes the object as JSON.
+        /// </summary>
         void WriteTo(Utf8JsonWriter writer);
     }
 

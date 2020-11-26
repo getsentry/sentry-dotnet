@@ -127,6 +127,7 @@ namespace Sentry.Protocol
             InternalHeaders?.TryCopyTo(request.Headers);
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -182,6 +183,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static Request FromJson(JsonElement json)
         {
             var env = json.GetPropertyOrNull("env")?.GetDictionary();

@@ -35,6 +35,7 @@ namespace Sentry.Protocol
             Version = version;
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -48,6 +49,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
         public static Package FromJson(JsonElement json)
         {
             var name = json.GetProperty("name").GetString() ?? "";
