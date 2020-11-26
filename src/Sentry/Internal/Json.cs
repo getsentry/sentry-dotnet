@@ -1,16 +1,11 @@
-using System;
-using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Sentry.Internal
@@ -81,6 +76,12 @@ namespace Sentry.Internal
             using var writer = CreateWriter(stream);
             Serializer.Serialize(writer, obj);
             await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public static JsonElement Parse(string json)
+        {
+            using var jsonDocument = JsonDocument.Parse(json);
+            return jsonDocument.RootElement.Clone();
         }
     }
 }

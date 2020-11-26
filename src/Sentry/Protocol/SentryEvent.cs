@@ -403,14 +403,5 @@ namespace Sentry
                 _tags = tags?.ToDictionary()!
             };
         }
-
-        /// <summary>
-        /// Parses from JSON.
-        /// </summary>
-        public static SentryEvent FromJson(string json)
-        {
-            using var document = JsonDocument.Parse(json);
-            return FromJson(document.RootElement.Clone());
-        }
     }
 }

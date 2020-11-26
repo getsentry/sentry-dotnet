@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using Newtonsoft.Json;
+using Sentry.Internal;
 using Xunit;
 using JsonSerializer = Sentry.Tests.Protocol.JsonSerializer;
 
@@ -18,9 +19,9 @@ namespace Sentry.Protocol.Tests.Context
                 Name = "Internet Explorer",
             };
 
-            var actualString  = JsonSerializer.SerializeObject(sut);
+            var actualString = sut.ToJsonString();
 
-            var actual = JsonConvert.DeserializeObject<Browser>(actualString);
+            var actual = Browser.FromJson(Json.Parse(actualString));
             actual.Should().BeEquivalentTo(sut);
         }
 

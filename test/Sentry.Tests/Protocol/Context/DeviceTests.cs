@@ -13,7 +13,7 @@ namespace Sentry.Protocol.Tests.Context
         {
             var sut = new Device();
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
             Assert.Equal("{\"type\":\"device\"}", actual);
         }
@@ -49,34 +49,35 @@ namespace Sentry.Protocol.Tests.Context
                 LowMemory = true
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"device\","+
-                         $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
-                         $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName}\"," +
-                         "\"name\":\"testing.sentry.io\"," +
-                         "\"manufacturer\":\"Manufacturer\"," +
-                         "\"brand\":\"Brand\"," +
-                         "\"family\":\"Windows\"," +
-                         "\"model\":\"Windows Server 2012 R2\"," +
-                         "\"model_id\":\"0921309128012\"," +
-                         "\"arch\":\"x64\"," +
-                         "\"battery_level\":99," +
-                         "\"charging\":true," +
-                         "\"orientation\":\"portrait\"," +
-                         "\"simulator\":false," +
-                         "\"memory_size\":500000000000," +
-                         "\"free_memory\":200000000000," +
-                         "\"usable_memory\":100," +
-                         "\"low_memory\":true," +
-                         "\"storage_size\":100000000," +
-                         "\"free_storage\":0," +
-                         "\"external_storage_size\":1000000000000000," +
-                         "\"external_free_storage\":100000000000000," +
-                         "\"screen_resolution\":\"800x600\"," +
-                         "\"screen_density\":42.0," +
-                         "\"screen_dpi\":42," +
-                         "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}",
+            Assert.Equal(
+                "{\"type\":\"device\"," +
+                $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
+                $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName}\"," +
+                "\"name\":\"testing.sentry.io\"," +
+                "\"manufacturer\":\"Manufacturer\"," +
+                "\"brand\":\"Brand\"," +
+                "\"family\":\"Windows\"," +
+                "\"model\":\"Windows Server 2012 R2\"," +
+                "\"model_id\":\"0921309128012\"," +
+                "\"arch\":\"x64\"," +
+                "\"battery_level\":99," +
+                "\"charging\":true," +
+                "\"orientation\":\"portrait\"," +
+                "\"simulator\":false," +
+                "\"memory_size\":500000000000," +
+                "\"free_memory\":200000000000," +
+                "\"usable_memory\":100," +
+                "\"low_memory\":true," +
+                "\"storage_size\":100000000," +
+                "\"free_storage\":0," +
+                "\"external_storage_size\":1000000000000000," +
+                "\"external_free_storage\":100000000000000," +
+                "\"screen_resolution\":\"800x600\"," +
+                "\"screen_density\":42.0," +
+                "\"screen_dpi\":42," +
+                "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}",
                 actual);
         }
 

@@ -21,15 +21,16 @@ namespace Sentry.Tests.Protocol
                             }
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"other\":{\"testCustomValueKey\":\"testCustomValue\"},"
-                        + "\"email\":\"test@sentry.io\","
-                        + "\"id\":\"user-id\","
-                        + "\"ip_address\":\"::1\","
-                        + "\"username\":\"user-name\"}"
-                        ,
-                    actual);
+            Assert.Equal(
+                "{\"other\":{\"testCustomValueKey\":\"testCustomValue\"}," +
+                "\"email\":\"test@sentry.io\"," +
+                "\"id\":\"user-id\"," +
+                "\"ip_address\":\"::1\"," +
+                "\"username\":\"user-name\"}",
+                actual
+            );
         }
 
         [Fact]

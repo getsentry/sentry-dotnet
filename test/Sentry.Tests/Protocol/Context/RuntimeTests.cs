@@ -18,7 +18,7 @@ namespace Sentry.Protocol.Tests.Context
                 RawDescription = ".NET Framework 4.7.2"
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
             Assert.Equal("{\"type\":\"runtime\",\"name\":\".NET Framework\",\"version\":\"4.7.2\",\"raw_description\":\".NET Framework 4.7.2\",\"build\":\"461814\"}", actual);
         }

@@ -24,14 +24,16 @@ namespace Sentry.Tests.Protocol
                 }
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"id\":0,"
-                        + "\"name\":\"thread11\","
-                        + "\"crashed\":true,"
-                        + "\"current\":true,"
-                        + "\"stacktrace\":{\"frames\":[{\"filename\":\"test\"}]}}",
-                    actual);
+            Assert.Equal(
+                "{\"id\":0," +
+                "\"name\":\"thread11\"," +
+                "\"crashed\":true," +
+                "\"current\":true," +
+                "\"stacktrace\":{\"frames\":[{\"filename\":\"test\"}]}}",
+                actual
+            );
         }
 
         [Theory]

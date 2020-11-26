@@ -20,16 +20,18 @@ namespace Sentry.Protocol.Tests.Context
                 Rooted = true
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"os\","
-                         + "\"name\":\"Windows\","
-                         + "\"version\":\"2016\","
-                         + "\"raw_description\":\"Windows 2016\","
-                         + "\"build\":\"14393\","
-                         + "\"kernel_version\":\"who knows\","
-                         + "\"rooted\":true}",
-                    actual);
+            Assert.Equal(
+                "{\"type\":\"os\"," +
+                "\"name\":\"Windows\"," +
+                "\"version\":\"2016\"," +
+                "\"raw_description\":\"Windows 2016\"," +
+                "\"build\":\"14393\"," +
+                "\"kernel_version\":\"who knows\"," +
+                "\"rooted\":true}",
+                actual
+            );
         }
 
         [Fact]

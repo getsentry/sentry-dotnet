@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
+using Constants = Sentry.Protocol.Constants;
 
 namespace Sentry.Tests.Protocol
 {
@@ -60,7 +62,7 @@ namespace Sentry.Tests.Protocol
 
             var actualString = sut.ToJsonString();
 
-            var actual = SentryEvent.FromJson(actualString);
+            var actual = SentryEvent.FromJson(Json.Parse(actualString));
             actual.Should().BeEquivalentTo(sut, o =>
                 // Due to timestamp precision
                 o.Excluding(e => e.Breadcrumbs)

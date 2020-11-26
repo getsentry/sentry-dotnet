@@ -11,11 +11,13 @@ namespace Sentry.Tests.Protocol
         {
             var sut = new Package("nuget:Sentry", "1.0.0-preview");
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"name\":\"nuget:Sentry\","
-                        + "\"version\":\"1.0.0-preview\"}",
-                    actual);
+            Assert.Equal(
+                "{\"name\":\"nuget:Sentry\"," +
+                "\"version\":\"1.0.0-preview\"}",
+                actual
+            );
         }
 
         [Theory]

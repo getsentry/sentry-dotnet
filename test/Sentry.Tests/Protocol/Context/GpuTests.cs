@@ -23,19 +23,21 @@ namespace Sentry.Protocol.Tests.Context
                 NpotSupport = "Full NPOT",
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"gpu\","
-                        + "\"name\":\"Sentry.Test.Gpu\","
-                        + "\"id\":123,"
-                        + "\"vendor_id\":\"321\","
-                        + "\"vendor_name\":\"Vendor name\","
-                        + "\"memory_size\":1000,"
-                        + "\"api_type\":\"API Type\","
-                        + "\"multi_threaded_rendering\":true,"
-                        + "\"version\":\"Version 3232\","
-                        + "\"npot_support\":\"Full NPOT\"}",
-                    actual);
+            Assert.Equal(
+                "{\"type\":\"gpu\"," +
+                "\"name\":\"Sentry.Test.Gpu\"," +
+                "\"id\":123," +
+                "\"vendor_id\":\"321\"," +
+                "\"vendor_name\":\"Vendor name\"," +
+                "\"memory_size\":1000," +
+                "\"api_type\":\"API Type\"," +
+                "\"multi_threaded_rendering\":true," +
+                "\"version\":\"Version 3232\"," +
+                "\"npot_support\":\"Full NPOT\"}",
+                actual
+            );
         }
 
         [Fact]
