@@ -1,4 +1,5 @@
-using System.Runtime.Serialization;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -6,31 +7,26 @@ namespace Sentry
     /// <summary>
     /// Sentry User Feedback.
     /// </summary>
-    [DataContract]
-    public class UserFeedback
+    public class UserFeedback : IJsonSerializable
     {
         /// <summary>
         /// The eventId of the event to which the user feedback is associated.
         /// </summary>
-        [DataMember(Name = "event_id", EmitDefaultValue = false)]
         public SentryId EventId { get; }
 
         /// <summary>
         /// The name of the user.
         /// </summary>
-        [DataMember(Name = "name", EmitDefaultValue = false)]
         public string? Name { get; }
 
         /// <summary>
         /// The name of the user.
         /// </summary>
-        [DataMember(Name = "email", EmitDefaultValue = false)]
         public string Email { get; }
 
         /// <summary>
         /// Comments of the user about what happened.
         /// </summary>
-        [DataMember(Name = "comments", EmitDefaultValue = false)]
         public string Comments { get; }
 
         /// <summary>
@@ -42,6 +38,44 @@ namespace Sentry
             Name = name;
             Email = email;
             Comments = comments;
+        }
+
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Event ID
+            writer.WriteSerializable("event_id", EventId);
+
+            // Name
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                writer.WriteString("name", Name);
+            }
+
+            // Email
+            if (!string.IsNullOrWhiteSpace(Email))
+            {
+                writer.WriteString("email", Email);
+            }
+
+            // Comments
+            if (!string.IsNullOrWhiteSpace(Comments))
+            {
+                writer.WriteString("comments", Comments);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        public static UserFeedback FromJson(JsonElement json)
+        {
+            var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
+            var name = json.GetPropertyOrNull("name")?.GetString() ?? "";
+            var email = json.GetPropertyOrNull("email")?.GetString() ?? "";
+            var comments = json.GetPropertyOrNull("comments")?.GetString() ?? "";
+
+            return new UserFeedback(eventId, email, comments, name);
         }
     }
 }

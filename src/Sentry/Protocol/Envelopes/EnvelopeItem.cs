@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
@@ -203,13 +204,11 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                using var jsonDocument = JsonDocument.Parse(buffer);
 
-                if (Json.DeserializeFromByteArray<SentryEvent>(buffer) is { } @event)
-                {
-                    return new JsonSerializable(@event);
-                }
-
-                throw new InvalidOperationException("Can't deserialize payload.");
+                return new JsonSerializable(
+                    SentryEvent.FromJson(jsonDocument.RootElement.Clone())
+                );
             }
 
             // User report
@@ -217,17 +216,16 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                using var jsonDocument = JsonDocument.Parse(buffer);
 
-
-                if (Json.DeserializeFromByteArray<UserFeedback>(buffer) is { } userFeedback)
-                {
-                    return new JsonSerializable(userFeedback);
-                }
-
-                throw new InvalidOperationException("Can't deserialize payload.");
+                return new JsonSerializable(
+                    UserFeedback.FromJson(jsonDocument.RootElement.Clone())
+                );
             }
 
             // Arbitrary payload
+            var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
+
             if (payloadLength != null)
             {
                 stream.Seek(payloadLength.Value, SeekOrigin.Current);
@@ -236,8 +234,6 @@ namespace Sentry.Protocol.Envelopes
             {
                 stream.Seek(0, SeekOrigin.End);
             }
-
-            var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
 
             return new StreamSerializable(payloadStream);
         }

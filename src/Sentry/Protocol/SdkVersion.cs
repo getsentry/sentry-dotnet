@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
@@ -29,7 +31,7 @@ namespace Sentry.Protocol
             // For integrations to set their name
             [EditorBrowsable(EditorBrowsableState.Never)]
             set;
-        }
+        } = "dotnet.unknown";
 
         /// <summary>
         /// SDK Version.
@@ -40,7 +42,7 @@ namespace Sentry.Protocol
             // For integrations to set their version
             [EditorBrowsable(EditorBrowsableState.Never)]
             set;
-        }
+        } = "0.0.0";
 
         /// <summary>
         /// Add a package used to compose the SDK.
@@ -83,18 +85,15 @@ namespace Sentry.Protocol
         public static SdkVersion FromJson(JsonElement json)
         {
             // Packages
-            var packages = new List<Package>();
-            foreach (var packageJson in json.GetProperty("packages").EnumerateArray())
-            {
-                var package = Package.FromJson(packageJson);
-                packages.Add(package);
-            }
+            var packages =
+                json.GetPropertyOrNull("packages")?.EnumerateArray().Select(Package.FromJson).ToArray() ??
+                Array.Empty<Package>();
 
             // Name
-            var name = json.GetProperty("name").GetString() ?? "dotnet.unknown";
+            var name = json.GetPropertyOrNull("name")?.GetString() ?? "dotnet.unknown";
 
             // Version
-            var version = json.GetProperty("version").GetString() ?? "0.0.0";
+            var version = json.GetPropertyOrNull("version")?.GetString() ?? "0.0.0";
 
             return new SdkVersion
             {
