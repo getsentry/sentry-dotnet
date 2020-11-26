@@ -5,8 +5,8 @@
     data: {
       message: Exception message!,
       stackTrace: 
-   at Sentry.Tests.SentryClientTests.<>c__DisplayClass18_0.<CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb>b__0(SentryEvent e) in ProjectDirectory/SentryClientTests.cs:line 262
-   at Sentry.SentryClient.BeforeSend(SentryEvent event) in SolutionDirectory/src/Sentry/SentryClient.cs:line 232
+   at Sentry.Tests.SentryClientTests.<>c__DisplayClass18_0.<CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb>b__0(SentryEvent e) in {ProjectDirectory}SentryClientTests.cs:line 262
+   at Sentry.SentryClient.BeforeSend(SentryEvent event) in {SolutionDirectory}src/Sentry/SentryClient.cs:line 232
     },
     category: SentryClient,
     level: error
