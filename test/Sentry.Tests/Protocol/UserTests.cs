@@ -15,20 +15,19 @@ namespace Sentry.Tests.Protocol
                 Email = "test@sentry.io",
                 IpAddress = "::1",
                 Username = "user-name",
-                Other = new Dictionary<string, string>
-                            {
-                                {"testCustomValueKey", "testCustomValue"}
-                            }
+                Other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}}
             };
 
             var actual = sut.ToJsonString();
 
             Assert.Equal(
-                "{\"other\":{\"testCustomValueKey\":\"testCustomValue\"}," +
+                "{" +
                 "\"email\":\"test@sentry.io\"," +
                 "\"id\":\"user-id\"," +
                 "\"ip_address\":\"::1\"," +
-                "\"username\":\"user-name\"}",
+                "\"username\":\"user-name\"," +
+                "\"other\":{\"testCustomValueKey\":\"testCustomValue\"}" +
+                "}",
                 actual
             );
         }

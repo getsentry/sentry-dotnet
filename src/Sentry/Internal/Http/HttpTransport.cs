@@ -111,7 +111,7 @@ namespace Sentry.Internal.Http
             }
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
-                var responseJson = await response.Content.ReadAsJsonAsync().ConfigureAwait(false);
+                var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
                 var errorMessage = responseJson.GetPropertyOrNull("detail")?.GetString() ?? DefaultErrorMessage;
 
                 _options.DiagnosticLogger?.Log(

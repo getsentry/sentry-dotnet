@@ -50,13 +50,13 @@ namespace Sentry.Tests.Protocol
 
         public static IEnumerable<object[]> TestCases()
         {
-            yield return new object[] { (new SdkVersion(), "{}") };
-            yield return new object[] { (new SdkVersion { Name = "some name" }, "{\"name\":\"some name\"}") };
-            yield return new object[] { (new SdkVersion { Version = "some version" }, "{\"version\":\"some version\"}") };
+            yield return new object[] { (new SdkVersion(), "{\"name\":\"dotnet.unknown\",\"version\":\"0.0.0\"}") };
+            yield return new object[] { (new SdkVersion { Name = "some name" }, "{\"name\":\"some name\",\"version\":\"0.0.0\"}") };
+            yield return new object[] { (new SdkVersion { Version = "some version" }, "{\"name\":\"dotnet.unknown\",\"version\":\"some version\"}") };
             var sdk = new SdkVersion();
             sdk.AddPackage("b","2");
             sdk.AddPackage("a","1");
-            yield return new object[] { (sdk, "{\"packages\":[{\"name\":\"a\",\"version\":\"1\"},{\"name\":\"b\",\"version\":\"2\"}]}") };
+            yield return new object[] { (sdk, "{\"packages\":[{\"name\":\"a\",\"version\":\"1\"},{\"name\":\"b\",\"version\":\"2\"}],\"name\":\"dotnet.unknown\",\"version\":\"0.0.0\"}") };
         }
     }
 }

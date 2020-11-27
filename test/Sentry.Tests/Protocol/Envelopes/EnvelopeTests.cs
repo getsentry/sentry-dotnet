@@ -440,7 +440,7 @@ namespace Sentry.Tests.Protocol.Envelopes
             using var input = new MemoryStream();
 
             // Act & assert
-            await Assert.ThrowsAsync<InvalidOperationException>(
+            await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );
         }
@@ -452,7 +452,7 @@ namespace Sentry.Tests.Protocol.Envelopes
             using var input = new MemoryStream(new byte[1_000_000]); // all 0's
 
             // Act & assert
-            await Assert.ThrowsAsync<InvalidOperationException>(
+            await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );
         }
@@ -467,7 +467,6 @@ namespace Sentry.Tests.Protocol.Envelopes
             ).ToMemoryStream();
 
             // Act & assert
-            // Currently throws a Newtonsoft.Json exception, which is an implementation detail
             await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );

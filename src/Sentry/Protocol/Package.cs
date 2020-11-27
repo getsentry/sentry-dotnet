@@ -41,10 +41,16 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             // Name
-            writer.WriteString("name", Name);
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                writer.WriteString("name", Name);
+            }
 
             // Version
-            writer.WriteString("version", Version);
+            if (!string.IsNullOrWhiteSpace(Version))
+            {
+                writer.WriteString("version", Version);
+            }
 
             writer.WriteEndObject();
         }

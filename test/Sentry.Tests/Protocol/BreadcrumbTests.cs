@@ -56,7 +56,7 @@ namespace Sentry.Tests.Protocol
         {
             // Timestamp is included in every breadcrumb
             var expectedTimestamp = DateTimeOffset.MaxValue;
-            var expectedTimestampString = "9999-12-31T23:59:59Z";
+            var expectedTimestampString = "9999-12-31T23:59:59.999Z";
             var timestampString = $"\"timestamp\":\"{expectedTimestampString}\"";
 
             yield return new object[] { (new Breadcrumb (expectedTimestamp), $"{{{timestampString}}}") };
