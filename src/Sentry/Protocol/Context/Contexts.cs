@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -130,7 +129,7 @@ namespace Sentry.Protocol
                 else
                 {
                     // Unknown context - parse as dictionary
-                    result[name] = value.GetObjectDictionary() ?? new Dictionary<string, object?>();
+                    result[name] = value.GetDynamic()!;
                 }
             }
 

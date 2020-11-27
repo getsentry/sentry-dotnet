@@ -76,7 +76,7 @@ namespace Sentry.Internal.Extensions
 
         public static IReadOnlyDictionary<string, object?>? GetObjectDictionary(this JsonElement json)
         {
-            if (json.ValueKind == JsonValueKind.Null)
+            if (json.ValueKind != JsonValueKind.Object)
             {
                 return null;
             }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
@@ -11,10 +12,6 @@ namespace Sentry.Protocol
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception"/>
     public class SentryException : IJsonSerializable
     {
-        // Not serialized since not part of the protocol yet.
-        // Used by Sentry SDK though to transfer data from Exception.Data to Event.Data when parsing.
-        internal Dictionary<string, object?>? InternalData { get; private set; }
-
         /// <summary>
         /// Exception Type.
         /// </summary>
@@ -57,7 +54,7 @@ namespace Sentry.Protocol
         /// For this reason this property is not serialized.
         /// The data is moved to the event level on Extra until such support is added
         /// </remarks>
-        public IDictionary<string, object?> Data => InternalData ??= new Dictionary<string, object?>();
+        public IDictionary<string, object?> Data { get; } = new Dictionary<string, object?>(StringComparer.Ordinal);
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)

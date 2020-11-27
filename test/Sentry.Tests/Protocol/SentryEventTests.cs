@@ -40,7 +40,7 @@ namespace Sentry.Tests.Protocol
                 },
                 Modules = { { "module_key", "module_value" } },
                 Release = "release",
-                // SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
+                SentryExceptions = new[] { new SentryException { Value = "exception_value"} },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
                 ServerName = "server_name",
                 Transaction = "transaction",
@@ -63,10 +63,15 @@ namespace Sentry.Tests.Protocol
             var actualString = sut.ToJsonString();
 
             var actual = SentryEvent.FromJson(Json.Parse(actualString));
+
             actual.Should().BeEquivalentTo(sut, o =>
+            {
                 // Due to timestamp precision
-                o.Excluding(e => e.Breadcrumbs)
-                    .Excluding(e => e.Exception));
+                o.Excluding(e => e.Breadcrumbs);
+                o.Excluding(e => e.Exception);
+
+                return o;
+            });
 
             // Expected item[0].Timestamp to be <9999-12-31 23:59:59.9999999>, but found <9999-12-31 23:59:59.999>.
             actual.Breadcrumbs.Should().BeEquivalentTo(sut.Breadcrumbs, o => o.Excluding(b => b.Timestamp));

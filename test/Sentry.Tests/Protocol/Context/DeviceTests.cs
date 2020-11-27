@@ -75,7 +75,7 @@ namespace Sentry.Protocol.Tests.Context
                 "\"external_storage_size\":1000000000000000," +
                 "\"external_free_storage\":100000000000000," +
                 "\"screen_resolution\":\"800x600\"," +
-                "\"screen_density\":42.0," +
+                "\"screen_density\":42," +
                 "\"screen_dpi\":42," +
                 "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}",
                 actual);
