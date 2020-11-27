@@ -33,7 +33,7 @@ namespace Sentry.Tests.Protocol
             var actual = sut.ToJsonString();
 
             Assert.Equal(
-                "{\"timestamp\":\"9999-12-31T23:59:59Z\"," +
+                "{\"timestamp\":\"9999-12-31T23:59:59.999Z\"," +
                 "\"message\":\"message1\"," +
                 "\"type\":\"type1\"," +
                 "\"data\":{\"key\":\"val\"}," +

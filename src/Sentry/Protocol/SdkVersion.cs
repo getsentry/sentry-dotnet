@@ -31,7 +31,7 @@ namespace Sentry.Protocol
             // For integrations to set their name
             [EditorBrowsable(EditorBrowsableState.Never)]
             set;
-        } = "dotnet.unknown";
+        }
 
         /// <summary>
         /// SDK Version.
@@ -42,7 +42,7 @@ namespace Sentry.Protocol
             // For integrations to set their version
             [EditorBrowsable(EditorBrowsableState.Never)]
             set;
-        } = "0.0.0";
+        }
 
         /// <summary>
         /// Add a package used to compose the SDK.
@@ -75,10 +75,16 @@ namespace Sentry.Protocol
             }
 
             // Name
-            writer.WriteString("name", Name);
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                writer.WriteString("name", Name);
+            }
 
             // Version
-            writer.WriteString("version", Version);
+            if (!string.IsNullOrWhiteSpace(Version))
+            {
+                writer.WriteString("version", Version);
+            }
 
             writer.WriteEndObject();
         }

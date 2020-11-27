@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
-using Constants = Sentry.Protocol.Constants;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
