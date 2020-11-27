@@ -1,0 +1,25 @@
+﻿@using Microsoft.Extensions.Logging
+@inject ILogger<NavMenu> Logger
+
+<div @onclick="ToggleNavMenu">
+    <ul>
+        <li>
+            <NavLink href="thrower">
+                Throw, Catch and Capture
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool _collapseNavMenu = true;
+
+    private string NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        Logger.LogInformation("ToggleNavMenu {_collapseNavMenu}", _collapseNavMenu);
+        _collapseNavMenu = !_collapseNavMenu;
+    }
+
+}
