@@ -269,8 +269,8 @@ namespace Sentry.Protocol
             var filename = json.GetPropertyOrNull("filename")?.GetString();
             var function = json.GetPropertyOrNull("function")?.GetString();
             var module = json.GetPropertyOrNull("module")?.GetString();
-            var lineNumber = json.GetPropertyOrNull("line_no")?.GetInt32();
-            var columnNumber = json.GetPropertyOrNull("col_no")?.GetInt32();
+            var lineNumber = json.GetPropertyOrNull("lineno")?.GetInt32();
+            var columnNumber = json.GetPropertyOrNull("colno")?.GetInt32();
             var absolutePath = json.GetPropertyOrNull("abs_path")?.GetString();
             var contextLine = json.GetPropertyOrNull("context_line")?.GetString();
             var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
