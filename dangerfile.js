@@ -52,7 +52,7 @@ async function checkChangelog() {
 
 async function checkIfFeature() {
    const title = getCleanTitle();
-   if(title.startsWith('feat'){
+   if(title.startsWith('feat')){
      message("Do not forget to update https://github.com/getsentry/sentry-docs with your feature once the pull request gets approved.");
    }
   
