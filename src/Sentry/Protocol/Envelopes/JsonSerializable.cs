@@ -25,6 +25,7 @@ namespace Sentry.Protocol.Envelopes
         {
             await using var writer = new Utf8JsonWriter(stream);
             Source.WriteTo(writer);
+            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }
