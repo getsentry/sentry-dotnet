@@ -1,14 +1,11 @@
 using System;
 using System.Text.Json;
-using Newtonsoft.Json;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// The identifier of an event in Sentry.
     /// </summary>
-    [JsonConverter(typeof(SentryIdJsonConverter))]
     public readonly struct SentryId : IEquatable<SentryId>, IJsonSerializable
     {
         private readonly Guid _eventId;
@@ -76,27 +73,5 @@ namespace Sentry.Protocol
         /// A <see cref="SentryId"/> from a <see cref="Guid"/>.
         /// </summary>
         public static implicit operator SentryId(Guid guid) => new SentryId(guid);
-    }
-
-    internal class SentryIdJsonConverter : JsonConverter<SentryId>
-    {
-        public override void WriteJson(
-            JsonWriter writer,
-            SentryId value,
-            JsonSerializer serializer) =>
-            writer.WriteValue(value.ToString());
-
-        public override SentryId ReadJson(
-            JsonReader reader,
-            Type objectType,
-            SentryId existingValue,
-            bool hasExistingValue,
-            JsonSerializer serializer)
-            => reader.Value switch
-            {
-                string o => new SentryId(Guid.Parse(o)),
-                _ => SentryId.Empty
-            };
-
     }
 }

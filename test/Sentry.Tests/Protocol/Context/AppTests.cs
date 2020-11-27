@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using Newtonsoft.Json;
 using Sentry.Internal;
 using Xunit;
-using JsonSerializer = Sentry.Tests.Protocol.JsonSerializer;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol.Tests.Context
@@ -59,7 +57,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((App app, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.app);
+            var actual = @case.app.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

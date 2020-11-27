@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal.Extensions;
@@ -113,7 +112,7 @@ namespace Sentry.Internal.Http
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
                 var responseJson = await response.Content.ReadAsJsonAsync().ConfigureAwait(false);
-                var errorMessage = responseJson.SelectToken("detail")?.Value<string>() ?? DefaultErrorMessage;
+                var errorMessage = responseJson.GetPropertyOrNull("detail")?.GetString() ?? DefaultErrorMessage;
 
                 _options.DiagnosticLogger?.Log(
                     SentryLevel.Error,

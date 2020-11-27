@@ -146,7 +146,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Device device, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.device);
+            var actual = @case.device.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

@@ -262,7 +262,7 @@ namespace Sentry
             // Level
             if (Level is {} level)
             {
-                writer.WriteString("level", level.ToString());
+                writer.WriteString("level", level.ToString().ToLowerInvariant());
             }
 
             // Transaction

@@ -1,8 +1,6 @@
 using FluentAssertions;
-using Newtonsoft.Json;
 using Sentry.Internal;
 using Xunit;
-using JsonSerializer = Sentry.Tests.Protocol.JsonSerializer;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol.Tests.Context

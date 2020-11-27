@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using Sentry.Internal;
 
 namespace Sentry.Testing
 {
@@ -22,7 +21,7 @@ namespace Sentry.Testing
 
         public static HttpResponseMessage GetErrorResponse(HttpStatusCode code, string errorMessage)
         {
-            var responseContent = Json.Serialize(new {detail = errorMessage});
+            var responseContent = $"{{\"detail\":\"{errorMessage}\"}}";
             return new HttpResponseMessage(code) {Content = new StringContent(responseContent)};
         }
 

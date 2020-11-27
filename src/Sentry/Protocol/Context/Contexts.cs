@@ -47,6 +47,11 @@ namespace Sentry.Protocol
         public Gpu Gpu => this.GetOrCreate<Gpu>(Gpu.Type);
 
         /// <summary>
+        /// Initializes an instance of <see cref="Contexts"/>.
+        /// </summary>
+        public Contexts() : base(StringComparer.Ordinal) { }
+
+        /// <summary>
         /// Creates a deep clone of this context.
         /// </summary>
         internal Contexts Clone()

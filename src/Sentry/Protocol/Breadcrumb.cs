@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
-using Newtonsoft.Json;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -97,7 +96,6 @@ namespace Sentry.Protocol
         /// <param name="data">The data.</param>
         /// <param name="category">The category.</param>
         /// <param name="level">The level.</param>
-        [JsonConstructor]
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal Breadcrumb(
             DateTimeOffset? timestamp = null,
@@ -154,7 +152,7 @@ namespace Sentry.Protocol
             // Level
             if (Level != default)
             {
-                writer.WriteString("level", Level.ToString());
+                writer.WriteString("level", Level.ToString().ToLowerInvariant());
             }
 
             writer.WriteEndObject();

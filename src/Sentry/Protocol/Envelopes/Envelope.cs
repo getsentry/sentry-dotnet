@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
@@ -18,7 +19,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Header associated with the envelope.
         /// </summary>
-        public IReadOnlyDictionary<string, object> Header { get; }
+        public IReadOnlyDictionary<string, object?> Header { get; }
 
         /// <summary>
         /// Envelope items.
@@ -28,7 +29,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Initializes an instance of <see cref="Envelope"/>.
         /// </summary>
-        public Envelope(IReadOnlyDictionary<string, object> header, IReadOnlyList<EnvelopeItem> items)
+        public Envelope(IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
         {
             Header = header;
             Items = items;
@@ -44,11 +45,18 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : (SentryId?)null;
 
+        private async Task SerializeHeaderAsync(Stream stream, CancellationToken cancellationToken = default)
+        {
+            await using var writer = new Utf8JsonWriter(stream);
+            writer.WriteDictionaryValue(Header);
+            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             // Header
-            await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
+            await SerializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
             await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
             // Items
@@ -67,7 +75,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromEvent(SentryEvent @event)
         {
-            var header = new Dictionary<string, object>
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [EventIdKey] = @event.EventId.ToString()
             };
@@ -85,7 +93,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = new Dictionary<string, object>
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [EventIdKey] = sentryUserFeedback.EventId.ToString()
             };
@@ -98,7 +106,7 @@ namespace Sentry.Protocol.Envelopes
             return new Envelope(header, items);
         }
 
-        private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
+        private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
@@ -118,7 +126,7 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return
-                Json.DeserializeFromByteArray<Dictionary<string, object>?>(buffer.ToArray())
+                Json.Parse(buffer.ToArray()).GetObjectDictionary()
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
         }
 

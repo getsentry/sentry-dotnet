@@ -61,7 +61,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((OperatingSystem os, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.os);
+            var actual = @case.os.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

@@ -257,7 +257,7 @@ namespace Sentry.Protocol
 
             if (Orientation is {} orientation)
             {
-                writer.WriteString("orientation", orientation.ToString());
+                writer.WriteString("orientation", orientation.ToString().ToLowerInvariant());
             }
 
             if (Simulator is {} simulator)

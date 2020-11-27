@@ -40,7 +40,7 @@ namespace Sentry.Tests.Protocol
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((SentryThread thread, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.thread);
+            var actual = @case.thread.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

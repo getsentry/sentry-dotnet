@@ -72,7 +72,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Gpu gpu, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.gpu);
+            var actual = @case.gpu.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }
