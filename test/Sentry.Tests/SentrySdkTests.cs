@@ -10,6 +10,7 @@ using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
+using Xunit.Abstractions;
 using static Sentry.Internal.Constants;
 using static Sentry.Protocol.Constants;
 using static Sentry.DsnSamples;
@@ -19,6 +20,13 @@ namespace Sentry.Tests
     [Collection(nameof(SentrySdkCollection))]
     public class SentrySdkTests : SentrySdkTestFixture
     {
+        private readonly IDiagnosticLogger _logger;
+
+        public SentrySdkTests(ITestOutputHelper testOutputHelper)
+        {
+            _logger = new TestOutputDiagnosticLogger(testOutputHelper);
+        }
+
         [Fact]
         public void IsEnabled_StartsOfFalse()
         {
@@ -213,6 +221,7 @@ namespace Sentry.Tests
                 var initialInnerTransport = new FakeFailingTransport();
                 await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
                 {
+                    DiagnosticLogger = _logger,
                     Dsn = ValidDsnWithoutSecret,
                     CacheDirectoryPath = cacheDirectory.Path
                 });
@@ -232,6 +241,7 @@ namespace Sentry.Tests
             using var _ = SentrySdk.Init(o =>
             {
                 o.Dsn = ValidDsnWithoutSecret;
+                o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cacheDirectory.Path;
                 o.CacheFlushTimeout = TimeSpan.FromSeconds(30);
                 o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
