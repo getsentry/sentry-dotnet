@@ -13,12 +13,19 @@ namespace Sentry.Tests
             VerifierSettings.ModifySerialization(
                 settings => settings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(
                     target => target.Data,
-                    value =>
+                    (_, value) =>
                     {
                         var dictionary = new Dictionary<string, string>();
                         foreach (var pair in value)
                         {
-                            dictionary[pair.Key] = pair.Value.Replace('\\','/');
+                            if (pair.Key == "stackTrace")
+                            {
+                                dictionary[pair.Key] = Scrubbers.ScrubStackTrace(pair.Value);
+                            }
+                            else
+                            {
+                                dictionary[pair.Key] = pair.Value.Replace('\\','/');
+                            }
                         }
                         return dictionary;
                     }));
