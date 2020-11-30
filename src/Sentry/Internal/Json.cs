@@ -22,7 +22,7 @@ namespace Sentry.Internal
             protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
             {
                 var jsonProperty = base.CreateProperty(member, memberSerialization);
-                var property = jsonProperty.DeclaringType.GetProperty(jsonProperty.UnderlyingName);
+                var property = jsonProperty.DeclaringType!.GetProperty(jsonProperty.UnderlyingName!);
 
                 // DontSerializeEmpty
                 if (jsonProperty.ShouldSerialize is null &&
@@ -78,7 +78,7 @@ namespace Sentry.Internal
         public static T DeserializeFromStream<T>(Stream stream)
         {
             using var reader = CreateReader(stream);
-            return Serializer.Deserialize<T>(reader);
+            return Serializer.Deserialize<T>(reader)!;
         }
 
         public static byte[] SerializeToByteArray(object obj)
