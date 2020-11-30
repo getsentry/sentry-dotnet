@@ -3,20 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.Serialization;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Series of application events.
     /// </summary>
-    [DataContract]
     [DebuggerDisplay("Message: {" + nameof(Message) + "}, Type: {" + nameof(Type) + "}")]
-    public sealed class Breadcrumb
+    public sealed class Breadcrumb : IJsonSerializable
     {
-        [DataMember(Name = "timestamp", EmitDefaultValue = false)]
-        private string SerializableTimestamp => Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ssZ", DateTimeFormatInfo.InvariantInfo);
-
         /// <summary>
         /// A timestamp representing when the breadcrumb occurred.
         /// </summary>
@@ -29,7 +26,6 @@ namespace Sentry.Protocol
         /// If a message is provided, it’s rendered as text and the whitespace is preserved.
         /// Very long text might be abbreviated in the UI.
         /// </summary>
-        [DataMember(Name = "message", EmitDefaultValue = false)]
         public string? Message { get; }
 
         /// <summary>
@@ -39,7 +35,6 @@ namespace Sentry.Protocol
         /// The default type is default which indicates no specific handling.
         /// Other types are currently http for HTTP requests and navigation for navigation events.
         /// </remarks>
-        [DataMember(Name = "type", EmitDefaultValue = false)]
         public string? Type { get; }
 
         /// <summary>
@@ -49,7 +44,6 @@ namespace Sentry.Protocol
         /// Contains a sub-object whose contents depend on the breadcrumb type.
         /// Additional parameters that are unsupported by the type are rendered as a key/value table.
         /// </remarks>
-        [DataMember(Name = "data", EmitDefaultValue = false)]
         public IReadOnlyDictionary<string, string>? Data { get; }
 
         /// <summary>
@@ -59,7 +53,6 @@ namespace Sentry.Protocol
         /// Typically it’s a module name or a descriptive string.
         /// For instance aspnet.mvc.filter could be used to indicate that it came from an Action Filter.
         /// </remarks>
-        [DataMember(Name = "category", EmitDefaultValue = false)]
         public string? Category { get; }
 
         /// <summary>
@@ -68,7 +61,6 @@ namespace Sentry.Protocol
         /// <remarks>
         /// Levels are used in the UI to emphasize and de-emphasize the crumb.
         /// </remarks>
-        [DataMember(Name = "level", EmitDefaultValue = false)]
         public BreadcrumbLevel Level { get; }
 
         /// <summary>
@@ -119,6 +111,66 @@ namespace Sentry.Protocol
             Data = data;
             Category = category;
             Level = level;
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Timestamp
+            writer.WriteString(
+                "timestamp",
+                Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffZ", DateTimeFormatInfo.InvariantInfo)
+            );
+
+            // Message
+            if (!string.IsNullOrWhiteSpace(Message))
+            {
+                writer.WriteString("message", Message);
+            }
+
+            // Type
+            if (!string.IsNullOrWhiteSpace(Type))
+            {
+                writer.WriteString("type", Type);
+            }
+
+            // Data
+            if (Data is { } data)
+            {
+                // Why is ! required here? No idea
+                writer.WriteDictionary("data", data!);
+            }
+
+            // Category
+            if (!string.IsNullOrWhiteSpace(Category))
+            {
+                writer.WriteString("category", Category);
+            }
+
+            // Level
+            if (Level != default)
+            {
+                writer.WriteString("level", Level.ToString().ToLowerInvariant());
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static Breadcrumb FromJson(JsonElement json)
+        {
+            var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
+            var message = json.GetPropertyOrNull("message")?.GetString();
+            var type = json.GetPropertyOrNull("type")?.GetString();
+            var data = json.GetPropertyOrNull("data")?.GetDictionary();
+            var category = json.GetPropertyOrNull("category")?.GetString();
+            var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<BreadcrumbLevel>()) ?? default;
+
+            return new Breadcrumb(timestamp, message, type, data!, category, level);
         }
     }
 }

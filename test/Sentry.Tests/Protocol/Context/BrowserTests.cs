@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Sentry.Tests.Protocol;
+using FluentAssertions;
+using Sentry.Internal;
 using Xunit;
 
 // ReSharper disable once CheckNamespace
@@ -16,9 +17,10 @@ namespace Sentry.Protocol.Tests.Context
                 Name = "Internet Explorer",
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actualString = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"browser\",\"name\":\"Internet Explorer\",\"version\":\"6\"}", actual);
+            var actual = Browser.FromJson(Json.Parse(actualString));
+            actual.Should().BeEquivalentTo(sut);
         }
 
         [Fact]
@@ -40,7 +42,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Browser browser, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.browser);
+            var actual = @case.browser.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

@@ -1,15 +1,20 @@
 using System.Net.Http;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace Sentry.Internal.Extensions
 {
     internal static class HttpClientExtensions
     {
-        public static async Task<JToken> ReadAsJsonAsync(this HttpContent content)
+        public static async Task<JsonElement> ReadAsJsonAsync(
+            this HttpContent content,
+            CancellationToken cancellationToken = default)
         {
-            var raw = await content.ReadAsStringAsync().ConfigureAwait(false);
-            return JToken.Parse(raw);
+            using var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+            using var jsonDocument = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
+
+            return jsonDocument.RootElement.Clone();
         }
     }
 }

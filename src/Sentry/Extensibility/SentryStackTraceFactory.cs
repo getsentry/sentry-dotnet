@@ -91,6 +91,11 @@ namespace Sentry.Extensibility
             var firstFrame = true;
             foreach (var stackFrame in frames)
             {
+                if (stackFrame is null)
+                {
+                    continue;
+                }
+
                 // Remove the frames until the call for capture with the SDK
                 if (firstFrame
                     && isCurrentStackTrace

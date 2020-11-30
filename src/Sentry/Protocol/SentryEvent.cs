@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Sentry.Internal;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
-using Constants = Sentry.Protocol.Constants;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry
@@ -16,15 +14,13 @@ namespace Sentry
     /// An event to be sent to Sentry.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
-    [DataContract]
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public class SentryEvent : IScope
+    public sealed class SentryEvent : IScope, IJsonSerializable
     {
         /// <inheritdoc />
         public IScopeOptions? ScopeOptions { get; }
 
-        [DataMember(Name = "modules", EmitDefaultValue = false)]
-        internal IDictionary<string, string>? InternalModules { get; set; }
+        private IDictionary<string, string>? _modules;
 
         /// <summary>
         /// The <see cref="System.Exception"/> used to create this event.
@@ -43,14 +39,12 @@ namespace Sentry
         /// Hexadecimal string representing a uuid4 value.
         /// The length is exactly 32 characters (no dashes!).
         /// </remarks>
-        [DataMember(Name = "event_id", EmitDefaultValue = false)]
         public SentryId EventId { get; }
 
         /// <summary>
         /// Indicates when the event was created.
         /// </summary>
         /// <example>2018-04-03T17:41:36</example>
-        [DataMember(Name = "timestamp", EmitDefaultValue = false)]
         public DateTimeOffset Timestamp { get; }
 
         /// <summary>
@@ -64,38 +58,29 @@ namespace Sentry
         /// SentryMessage will have a template like: 'user {0} logged in'
         /// Or structured logging template: '{user} has logged in'
         /// </example>
-        [DataMember(Name = "logentry", EmitDefaultValue = false)]
         public SentryMessage? Message { get; set; }
 
         /// <summary>
         /// Name of the logger (or source) of the event.
         /// </summary>
-        [DataMember(Name = "logger", EmitDefaultValue = false)]
         public string? Logger { get; set; }
 
         /// <summary>
         /// The name of the platform.
         /// </summary>
-        [DataMember(Name = "platform", EmitDefaultValue = false)]
         public string? Platform { get; set; }
 
         /// <summary>
         /// Identifies the host SDK from which the event was recorded.
         /// </summary>
-        [DataMember(Name = "server_name", EmitDefaultValue = false)]
         public string? ServerName { get; set; }
 
         /// <summary>
         /// The release version of the application.
         /// </summary>
-        [DataMember(Name = "release", EmitDefaultValue = false)]
         public string? Release { get; set; }
 
-        [DataMember(Name = "exception", EmitDefaultValue = false)]
         internal SentryValues<SentryException>? SentryExceptionValues { get; set; }
-
-        [DataMember(Name = "threads", EmitDefaultValue = false)]
-        internal SentryValues<SentryThread>? SentryThreadValues { get; set; }
 
         /// <summary>
         /// The Sentry Exception interface.
@@ -105,6 +90,8 @@ namespace Sentry
             get => SentryExceptionValues?.Values ?? Enumerable.Empty<SentryException>();
             set => SentryExceptionValues = value != null ? new SentryValues<SentryException>(value) : null;
         }
+
+        private SentryValues<SentryThread>? SentryThreadValues { get; set; }
 
         /// <summary>
         /// The Sentry Thread interface.
@@ -119,19 +106,15 @@ namespace Sentry
         /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
-        public IDictionary<string, string> Modules => InternalModules ??= new Dictionary<string, string>();
+        public IDictionary<string, string> Modules => _modules ??= new Dictionary<string, string>();
 
         /// <inheritdoc />
-        [DataMember(Name = "level", EmitDefaultValue = false)]
         public SentryLevel? Level { get; set; }
 
         /// <inheritdoc />
-        [DataMember(Name = "transaction", EmitDefaultValue = false)]
         public string? Transaction { get; set; }
 
-        [DataMember(Name = "request", EmitDefaultValue = false)]
         private Request? _request;
-
         /// <inheritdoc />
         public Request Request
         {
@@ -139,7 +122,6 @@ namespace Sentry
             set => _request = value;
         }
 
-        [DataMember(Name = "contexts", EmitDefaultValue = false)]
         private Contexts? _contexts;
 
         /// <inheritdoc />
@@ -149,7 +131,6 @@ namespace Sentry
             set => _contexts = value;
         }
 
-        [DataMember(Name = "user", EmitDefaultValue = false)]
         private User? _user;
 
         /// <inheritdoc />
@@ -160,32 +141,33 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        [DataMember(Name = "environment", EmitDefaultValue = false)]
         public string? Environment { get; set; }
 
         /// <inheritdoc />
-        [DataMember(Name = "sdk", EmitDefaultValue = false)]
         public SdkVersion Sdk { get; internal set; } = new SdkVersion();
 
-        /// <inheritdoc />
-        [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();
+        private IEnumerable<string>? _fingerprint;
 
         /// <inheritdoc />
-        [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new List<Breadcrumb>();
+        public IEnumerable<string> Fingerprint
+        {
+            get => _fingerprint ?? Enumerable.Empty<string>();
+            set => _fingerprint = value;
+        }
+
+        // Default values are null so no serialization of empty objects or arrays
+        private List<Breadcrumb>? _breadcrumbs;
 
         /// <inheritdoc />
-        [DataMember(Name = "extra", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IReadOnlyDictionary<string, object?> Extra { get; } = new Dictionary<string, object?>();
+        public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
+        private Dictionary<string, object?>? _internalExtra;
         /// <inheritdoc />
-        [DataMember(Name = "tags", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
-        public IReadOnlyDictionary<string, string> Tags { get; } = new Dictionary<string, string>();
+        public IReadOnlyDictionary<string, object?> Extra => _internalExtra ??= new Dictionary<string, object?>();
+
+        private Dictionary<string, string>? _tags;
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
@@ -203,7 +185,6 @@ namespace Sentry
         {
         }
 
-        [JsonConstructor]
         internal SentryEvent(
             Exception? exception = null,
             DateTimeOffset? timestamp = null,
@@ -215,6 +196,211 @@ namespace Sentry
             EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
             ScopeOptions = options;
             Platform = Constants.Platform;
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Modules
+            if (_modules is {} modules && modules.Any())
+            {
+                writer.WriteDictionary("modules", modules!);
+            }
+
+            // Event id
+            writer.WriteSerializable("event_id", EventId);
+
+            // Timestamp
+            writer.WriteString("timestamp", Timestamp);
+
+            // Message
+            if (Message is {} message)
+            {
+                writer.WritePropertyName("logentry");
+                writer.WriteSerializableValue(message);
+            }
+
+            // Logger
+            if (!string.IsNullOrWhiteSpace(Logger))
+            {
+                writer.WriteString("logger", Logger);
+            }
+
+            // Platform
+            if (!string.IsNullOrWhiteSpace(Platform))
+            {
+                writer.WriteString("platform", Platform);
+            }
+
+            // Server name
+            if (!string.IsNullOrWhiteSpace(ServerName))
+            {
+                writer.WriteString("server_name", ServerName);
+            }
+
+            // Release
+            if (!string.IsNullOrWhiteSpace(Release))
+            {
+                writer.WriteString("release", Release);
+            }
+
+            // Exceptions
+            if (SentryExceptionValues is {} exceptionValues)
+            {
+                writer.WriteSerializable("exception", exceptionValues);
+            }
+
+            // Threads
+            if (SentryThreadValues is {} threadValues)
+            {
+                writer.WriteSerializable("threads", threadValues);
+            }
+
+            // Level
+            if (Level is {} level)
+            {
+                writer.WriteString("level", level.ToString().ToLowerInvariant());
+            }
+
+            // Transaction
+            if (!string.IsNullOrWhiteSpace(Transaction))
+            {
+                writer.WriteString("transaction", Transaction);
+            }
+
+            // Request
+            if (_request is {} request)
+            {
+                writer.WriteSerializable("request", request);
+            }
+
+            // Contexts
+            if (_contexts is {} contexts)
+            {
+                writer.WriteSerializable("contexts", contexts);
+            }
+
+            // User
+            if (_user is {} user)
+            {
+                writer.WriteSerializable("user", user);
+            }
+
+            // Environment
+            if (!string.IsNullOrWhiteSpace(Environment))
+            {
+                writer.WriteString("environment", Environment);
+            }
+
+            // SDK
+            writer.WriteSerializable("sdk", Sdk);
+
+            // Fingerprint
+            if (_fingerprint is {} fingerprint && fingerprint.Any())
+            {
+                writer.WriteStartArray("fingerprint");
+
+                foreach (var i in fingerprint)
+                {
+                    writer.WriteStringValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Breadcrumbs
+            if (_breadcrumbs is {} breadcrumbs && breadcrumbs.Any())
+            {
+                writer.WriteStartArray("breadcrumbs");
+
+                foreach (var i in breadcrumbs)
+                {
+                    writer.WriteSerializableValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Extra
+            if (_internalExtra is {} extra && extra.Any())
+            {
+                writer.WriteStartObject("extra");
+
+                foreach (var (key, value) in extra)
+                {
+                    writer.WriteDynamic(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+
+            // Tags
+            if (_tags is {} tags && tags.Any())
+            {
+                writer.WriteStartObject("tags");
+
+                foreach (var (key, value) in tags)
+                {
+                    writer.WriteString(key, value);
+                }
+
+                writer.WriteEndObject();
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static SentryEvent FromJson(JsonElement json)
+        {
+            var modules = json.GetPropertyOrNull("modules")?.GetDictionary();
+            var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
+            var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
+            var message = json.GetPropertyOrNull("logentry")?.Pipe(SentryMessage.FromJson);
+            var logger = json.GetPropertyOrNull("logger")?.GetString();
+            var platform = json.GetPropertyOrNull("platform")?.GetString();
+            var serverName = json.GetPropertyOrNull("server_name")?.GetString();
+            var release = json.GetPropertyOrNull("release")?.GetString();
+            var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).Pipe(v => new SentryValues<SentryException>(v));
+            var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).Pipe(v => new SentryValues<SentryThread>(v));
+            var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
+            var transaction = json.GetPropertyOrNull("transaction")?.GetString();
+            var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
+            var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
+            var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
+            var environment = json.GetPropertyOrNull("environment")?.GetString();
+            var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
+            var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
+            var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
+            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary();
+            var tags = json.GetPropertyOrNull("tags")?.GetDictionary();
+
+            return new SentryEvent(null, timestamp, eventId)
+            {
+                _modules = modules?.ToDictionary()!,
+                Message = message,
+                Logger = logger,
+                Platform = platform,
+                ServerName = serverName,
+                Release = release,
+                SentryExceptionValues = exceptionValues,
+                SentryThreadValues = threadValues,
+                Level = level,
+                Transaction = transaction,
+                _request = request,
+                _contexts = contexts,
+                _user = user,
+                Environment = environment,
+                Sdk = sdk,
+                _fingerprint = fingerprint!,
+                _breadcrumbs = breadcrumbs,
+                _internalExtra = extra?.ToDictionary(),
+                _tags = tags?.ToDictionary()!
+            };
         }
     }
 }

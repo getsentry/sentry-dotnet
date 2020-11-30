@@ -1,5 +1,7 @@
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Linq;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
@@ -8,37 +10,29 @@ namespace Sentry.Protocol
     /// A frame of a stacktrace.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
-    [DataContract]
-    public class SentryStackFrame
+    public sealed class SentryStackFrame : IJsonSerializable
     {
-        [DataMember(Name = "pre_context", EmitDefaultValue = false)]
         internal List<string>? InternalPreContext { get; private set; }
 
-        [DataMember(Name = "post_context", EmitDefaultValue = false)]
         internal List<string>? InternalPostContext { get; private set; }
 
-        [DataMember(Name = "vars", EmitDefaultValue = false)]
         internal Dictionary<string, string>? InternalVars { get; private set; }
 
-        [DataMember(Name = "frames_omitted ", EmitDefaultValue = false)]
         internal List<int>? InternalFramesOmitted { get; private set; }
 
         /// <summary>
         /// The relative file path to the call.
         /// </summary>
-        [DataMember(Name = "filename", EmitDefaultValue = false)]
         public string? FileName { get; set; }
 
         /// <summary>
         /// The name of the function being called.
         /// </summary>
-        [DataMember(Name = "function", EmitDefaultValue = false)]
         public string? Function { get; set; }
 
         /// <summary>
         /// Platform-specific module path.
         /// </summary>
-        [DataMember(Name = "module", EmitDefaultValue = false)]
         public string? Module { get; set; }
 
         // Optional fields
@@ -46,25 +40,21 @@ namespace Sentry.Protocol
         /// <summary>
         /// The line number of the call.
         /// </summary>
-        [DataMember(Name = "lineno", EmitDefaultValue = false)]
         public int? LineNumber { get; set; }
 
         /// <summary>
         /// The column number of the call.
         /// </summary>
-        [DataMember(Name = "colno", EmitDefaultValue = false)]
         public int? ColumnNumber { get; set; }
 
         /// <summary>
         /// The absolute path to filename.
         /// </summary>
-        [DataMember(Name = "abs_path", EmitDefaultValue = false)]
         public string? AbsolutePath { get; set; }
 
         /// <summary>
         /// Source code in filename at line number.
         /// </summary>
-        [DataMember(Name = "context_line", EmitDefaultValue = false)]
         public string? ContextLine { get; set; }
 
         /// <summary>
@@ -84,7 +74,6 @@ namespace Sentry.Protocol
         /// For example, the frames that might power the framework’s web server of your app are probably not relevant,
         /// however calls to the framework’s library once you start handling code likely are.
         /// </example>
-        [DataMember(Name = "in_app", EmitDefaultValue = false)]
         public bool? InApp { get; set; }
 
         /// <summary>
@@ -109,27 +98,23 @@ namespace Sentry.Protocol
         /// <summary>
         /// The assembly where the code resides.
         /// </summary>
-        [DataMember(Name = "package", EmitDefaultValue = false)]
         public string? Package { get; set; }
 
         /// <summary>
         /// This can override the platform for a single frame. Otherwise the platform of the event is assumed.
         /// </summary>
-        [DataMember(Name = "platform", EmitDefaultValue = false)]
         public string? Platform { get; set; }
 
         /// <summary>
         /// Optionally an address of the debug image to reference.
         /// If this is set and a known image is defined by debug_meta then symbolication can take place.
         /// </summary>
-        [DataMember(Name = "image_addr", EmitDefaultValue = false)]
         public long ImageAddress { get; set; }
 
         /// <summary>
         /// An optional address that points to a symbol.
         /// We actually use the instruction address for symbolication but this can be used to calculate an instruction offset automatically.
         /// </summary>
-        [DataMember(Name = "symbol_addr", EmitDefaultValue = false)]
         public long? SymbolAddress { get; set; }
 
         /// <summary>
@@ -139,7 +124,182 @@ namespace Sentry.Protocol
         /// The official docs refer to it as 'The difference between instruction address and symbol address in bytes.'
         /// In .NET this means the IL Offset within the assembly.
         /// </remarks>
-        [DataMember(Name = "instruction_offset", EmitDefaultValue = false)]
         public long? InstructionOffset { get; set; }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Pre-context
+            if (InternalPreContext is {} preContext && preContext.Any())
+            {
+                writer.WriteStartArray("pre_context");
+
+                foreach (var i in preContext)
+                {
+                    writer.WriteStringValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Post-context
+            if (InternalPostContext is {} postContext && postContext.Any())
+            {
+                writer.WriteStartArray("post_context");
+
+                foreach (var i in postContext)
+                {
+                    writer.WriteStringValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Vars
+            if (InternalVars is {} vars && vars.Any())
+            {
+                writer.WriteDictionary("vars", vars!);
+            }
+
+            // Frames omitted
+            if (InternalFramesOmitted is {} framesOmitted && framesOmitted.Any())
+            {
+                writer.WriteStartArray("frames_omitted");
+
+                foreach (var i in framesOmitted)
+                {
+                    writer.WriteNumberValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Filename
+            if (!string.IsNullOrWhiteSpace(FileName))
+            {
+                writer.WriteString("filename", FileName);
+            }
+
+            // Function
+            if (!string.IsNullOrWhiteSpace(Function))
+            {
+                writer.WriteString("function", Function);
+            }
+
+            // Module
+            if (!string.IsNullOrWhiteSpace(Module))
+            {
+                writer.WriteString("module", Module);
+            }
+
+            // Line
+            if (LineNumber is {} lineNumber)
+            {
+                writer.WriteNumber("lineno", lineNumber);
+            }
+
+            // Column
+            if (ColumnNumber is {} columnNumber)
+            {
+                writer.WriteNumber("colno", columnNumber);
+            }
+
+            // Absolute path
+            if (!string.IsNullOrWhiteSpace(AbsolutePath))
+            {
+                writer.WriteString("abs_path", AbsolutePath);
+            }
+
+            // Context line
+            if (!string.IsNullOrWhiteSpace(ContextLine))
+            {
+                writer.WriteString("context_line", ContextLine);
+            }
+
+            // In app
+            if (InApp is {} inApp)
+            {
+                writer.WriteBoolean("in_app", inApp);
+            }
+
+            // Package
+            if (!string.IsNullOrWhiteSpace(Package))
+            {
+                writer.WriteString("package", Package);
+            }
+
+            // Platform
+            if (!string.IsNullOrWhiteSpace(Platform))
+            {
+                writer.WriteString("platform", Platform);
+            }
+
+            // Image address
+            if (ImageAddress != default)
+            {
+                writer.WriteNumber("image_addr", ImageAddress);
+            }
+
+            // Symbol address
+            if (SymbolAddress is {} symbolAddress)
+            {
+                writer.WriteNumber("symbol_addr", symbolAddress);
+            }
+
+            // Instruction offset
+            if (InstructionOffset is {} instructionOffset)
+            {
+                writer.WriteNumber("instruction_offset", instructionOffset);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static SentryStackFrame FromJson(JsonElement json)
+        {
+            var preContext = json.GetPropertyOrNull("pre_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
+            var postContext = json.GetPropertyOrNull("post_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
+            var vars = json.GetPropertyOrNull("vars")?.GetDictionary();
+            var framesOmitted = json.GetPropertyOrNull("frames_omitted")?.EnumerateArray().Select(j => j.GetInt32()).ToList();
+            var filename = json.GetPropertyOrNull("filename")?.GetString();
+            var function = json.GetPropertyOrNull("function")?.GetString();
+            var module = json.GetPropertyOrNull("module")?.GetString();
+            var lineNumber = json.GetPropertyOrNull("lineno")?.GetInt32();
+            var columnNumber = json.GetPropertyOrNull("colno")?.GetInt32();
+            var absolutePath = json.GetPropertyOrNull("abs_path")?.GetString();
+            var contextLine = json.GetPropertyOrNull("context_line")?.GetString();
+            var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
+            var package = json.GetPropertyOrNull("package")?.GetString();
+            var platform = json.GetPropertyOrNull("platform")?.GetString();
+            var imageAddress = json.GetPropertyOrNull("image_addr")?.GetInt64() ?? 0;
+            var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetInt64();
+            var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
+
+            return new SentryStackFrame
+            {
+                InternalPreContext = preContext!,
+                InternalPostContext = postContext!,
+                InternalVars = vars?.ToDictionary()!,
+                InternalFramesOmitted = framesOmitted,
+                FileName = filename,
+                Function = function,
+                Module = module,
+                LineNumber = lineNumber,
+                ColumnNumber = columnNumber,
+                AbsolutePath = absolutePath,
+                ContextLine = contextLine,
+                InApp = inApp,
+                Package = package,
+                Platform = platform,
+                ImageAddress = imageAddress,
+                SymbolAddress = symbolAddress,
+                InstructionOffset = instructionOffset
+            };
+        }
     }
 }

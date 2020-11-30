@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Linq;
+using System.Text.Json;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -25,30 +26,24 @@ namespace Sentry.Protocol
     /// }
     /// </example>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/request/"/>
-    [DataContract]
-    public class Request
+    public sealed class Request : IJsonSerializable
     {
-        [DataMember(Name = "env", EmitDefaultValue = false)]
         internal Dictionary<string, string>? InternalEnv { get; set; }
 
-        [DataMember(Name = "other", EmitDefaultValue = false)]
         internal Dictionary<string, string>? InternalOther { get; set; }
 
-        [DataMember(Name = "headers", EmitDefaultValue = false)]
         internal Dictionary<string, string>? InternalHeaders { get; set; }
 
         /// <summary>
         /// Gets or sets the full request URL, if available.
         /// </summary>
         /// <value>The request URL.</value>
-        [DataMember(Name = "url", EmitDefaultValue = false)]
         public string? Url { get; set; }
 
         /// <summary>
         /// Gets or sets the method of the request.
         /// </summary>
         /// <value>The HTTP method.</value>
-        [DataMember(Name = "method", EmitDefaultValue = false)]
         public string? Method { get; set; }
 
         // byte[] or Memory<T>?
@@ -60,21 +55,18 @@ namespace Sentry.Protocol
         /// This data should not be provided by default as it can get quite large.
         /// </remarks>
         /// <value>The request payload.</value>
-        [DataMember(Name = "data", EmitDefaultValue = false)]
         public object? Data { get; set; }
 
         /// <summary>
         /// Gets or sets the unparsed query string.
         /// </summary>
         /// <value>The query string.</value>
-        [DataMember(Name = "query_string", EmitDefaultValue = false)]
         public string? QueryString { get; set; }
 
         /// <summary>
         /// Gets or sets the cookies.
         /// </summary>
         /// <value>The cookies.</value>
-        [DataMember(Name = "cookies", EmitDefaultValue = false)]
         public string? Cookies { get; set; }
 
         /// <summary>
@@ -133,6 +125,89 @@ namespace Sentry.Protocol
             InternalEnv?.TryCopyTo(request.Env);
             InternalOther?.TryCopyTo(request.Other);
             InternalHeaders?.TryCopyTo(request.Headers);
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Env
+            if (InternalEnv is {} env && env.Any())
+            {
+                writer.WriteDictionary("env", env!);
+            }
+
+            // Other
+            if (InternalOther is {} other && other.Any())
+            {
+                writer.WriteDictionary("other", other!);
+            }
+
+            // Headers
+            if (InternalHeaders is {} headers && headers.Any())
+            {
+                writer.WriteDictionary("headers", headers!);
+            }
+
+            // Url
+            if (!string.IsNullOrWhiteSpace(Url))
+            {
+                writer.WriteString("url", Url);
+            }
+
+            // Method
+            if (!string.IsNullOrWhiteSpace(Method))
+            {
+                writer.WriteString("method", Method);
+            }
+
+            // Data
+            if (Data is {} data)
+            {
+                writer.WriteDynamic("data", data);
+            }
+
+            // Query
+            if (!string.IsNullOrWhiteSpace(QueryString))
+            {
+                writer.WriteString("query_string", QueryString);
+            }
+
+            // Cookies
+            if (!string.IsNullOrWhiteSpace(Cookies))
+            {
+                writer.WriteString("cookies", Cookies);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static Request FromJson(JsonElement json)
+        {
+            var env = json.GetPropertyOrNull("env")?.GetDictionary();
+            var other = json.GetPropertyOrNull("other")?.GetDictionary();
+            var headers = json.GetPropertyOrNull("headers")?.GetDictionary();
+            var url = json.GetPropertyOrNull("url")?.GetString();
+            var method = json.GetPropertyOrNull("method")?.GetString();
+            var data = json.GetPropertyOrNull("data")?.GetDynamic();
+            var query = json.GetPropertyOrNull("query_string")?.GetString();
+            var cookies = json.GetPropertyOrNull("cookies")?.GetString();
+
+            return new Request
+            {
+                InternalEnv = env?.ToDictionary()!,
+                InternalOther = other?.ToDictionary()!,
+                InternalHeaders = headers?.ToDictionary()!,
+                Url = url,
+                Method = method,
+                Data = data,
+                QueryString = query,
+                Cookies = cookies
+            };
         }
     }
 }

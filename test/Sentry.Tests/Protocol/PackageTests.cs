@@ -11,18 +11,20 @@ namespace Sentry.Tests.Protocol
         {
             var sut = new Package("nuget:Sentry", "1.0.0-preview");
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"name\":\"nuget:Sentry\","
-                        + "\"version\":\"1.0.0-preview\"}",
-                    actual);
+            Assert.Equal(
+                "{\"name\":\"nuget:Sentry\"," +
+                "\"version\":\"1.0.0-preview\"}",
+                actual
+            );
         }
 
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Package msg, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.msg);
+            var actual = @case.msg.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

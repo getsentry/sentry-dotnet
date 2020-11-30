@@ -29,15 +29,17 @@ namespace Sentry.Tests.Protocol.Exceptions
                 }
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"Type\"," +
-                         "\"value\":\"Value\"," +
-                         "\"module\":\"Module\"," +
-                         "\"thread_id\":1," +
-                         "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
-                         "\"mechanism\":{\"description\":\"Description\"}}",
-                    actual);
+            Assert.Equal(
+                "{\"type\":\"Type\"," +
+                "\"value\":\"Value\"," +
+                "\"module\":\"Module\"," +
+                "\"thread_id\":1," +
+                "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
+                "\"mechanism\":{\"description\":\"Description\"}}",
+                actual
+            );
         }
 
         [Fact]

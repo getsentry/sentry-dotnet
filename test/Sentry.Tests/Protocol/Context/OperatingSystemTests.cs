@@ -20,16 +20,18 @@ namespace Sentry.Protocol.Tests.Context
                 Rooted = true
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"os\","
-                         + "\"name\":\"Windows\","
-                         + "\"version\":\"2016\","
-                         + "\"raw_description\":\"Windows 2016\","
-                         + "\"build\":\"14393\","
-                         + "\"kernel_version\":\"who knows\","
-                         + "\"rooted\":true}",
-                    actual);
+            Assert.Equal(
+                "{\"type\":\"os\"," +
+                "\"name\":\"Windows\"," +
+                "\"version\":\"2016\"," +
+                "\"raw_description\":\"Windows 2016\"," +
+                "\"build\":\"14393\"," +
+                "\"kernel_version\":\"who knows\"," +
+                "\"rooted\":true}",
+                actual
+            );
         }
 
         [Fact]
@@ -59,7 +61,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((OperatingSystem os, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.os);
+            var actual = @case.os.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

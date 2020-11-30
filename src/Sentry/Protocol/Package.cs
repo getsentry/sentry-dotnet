@@ -1,12 +1,12 @@
-using System.Runtime.Serialization;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Represents a package used to compose the SDK.
     /// </summary>
-    [DataContract]
-    public class Package
+    public sealed class Package : IJsonSerializable
     {
         /// <summary>
         /// The name of the package.
@@ -15,7 +15,6 @@ namespace Sentry.Protocol
         /// nuget:Sentry
         /// nuget:Sentry.AspNetCore
         /// </example>
-        [DataMember(Name = "name", EmitDefaultValue = false)]
         public string Name { get; }
 
         /// <summary>
@@ -24,7 +23,6 @@ namespace Sentry.Protocol
         /// <example>
         /// 1.0.0-rc1
         /// </example>
-        [DataMember(Name = "version", EmitDefaultValue = false)]
         public string Version { get; }
 
         /// <summary>
@@ -36,6 +34,37 @@ namespace Sentry.Protocol
         {
             Name = name;
             Version = version;
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Name
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                writer.WriteString("name", Name);
+            }
+
+            // Version
+            if (!string.IsNullOrWhiteSpace(Version))
+            {
+                writer.WriteString("version", Version);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static Package FromJson(JsonElement json)
+        {
+            var name = json.GetProperty("name").GetStringOrThrow();
+            var version = json.GetProperty("version").GetStringOrThrow();
+
+            return new Package(name, version);
         }
     }
 }

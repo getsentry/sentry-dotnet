@@ -13,7 +13,7 @@ namespace Sentry.Protocol.Tests.Context
         {
             var sut = new Device();
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
             Assert.Equal("{\"type\":\"device\"}", actual);
         }
@@ -49,34 +49,35 @@ namespace Sentry.Protocol.Tests.Context
                 LowMemory = true
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"device\","+
-                         $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
-                         $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName}\"," +
-                         "\"name\":\"testing.sentry.io\"," +
-                         "\"manufacturer\":\"Manufacturer\"," +
-                         "\"brand\":\"Brand\"," +
-                         "\"family\":\"Windows\"," +
-                         "\"model\":\"Windows Server 2012 R2\"," +
-                         "\"model_id\":\"0921309128012\"," +
-                         "\"arch\":\"x64\"," +
-                         "\"battery_level\":99," +
-                         "\"charging\":true," +
-                         "\"orientation\":\"portrait\"," +
-                         "\"simulator\":false," +
-                         "\"memory_size\":500000000000," +
-                         "\"free_memory\":200000000000," +
-                         "\"usable_memory\":100," +
-                         "\"low_memory\":true," +
-                         "\"storage_size\":100000000," +
-                         "\"free_storage\":0," +
-                         "\"external_storage_size\":1000000000000000," +
-                         "\"external_free_storage\":100000000000000," +
-                         "\"screen_resolution\":\"800x600\"," +
-                         "\"screen_density\":42.0," +
-                         "\"screen_dpi\":42," +
-                         "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}",
+            Assert.Equal(
+                "{\"type\":\"device\"," +
+                $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
+                $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName.Replace("+", "\\u002B")}\"," +
+                "\"name\":\"testing.sentry.io\"," +
+                "\"manufacturer\":\"Manufacturer\"," +
+                "\"brand\":\"Brand\"," +
+                "\"family\":\"Windows\"," +
+                "\"model\":\"Windows Server 2012 R2\"," +
+                "\"model_id\":\"0921309128012\"," +
+                "\"arch\":\"x64\"," +
+                "\"battery_level\":99," +
+                "\"charging\":true," +
+                "\"orientation\":\"portrait\"," +
+                "\"simulator\":false," +
+                "\"memory_size\":500000000000," +
+                "\"free_memory\":200000000000," +
+                "\"usable_memory\":100," +
+                "\"low_memory\":true," +
+                "\"storage_size\":100000000," +
+                "\"free_storage\":0," +
+                "\"external_storage_size\":1000000000000000," +
+                "\"external_free_storage\":100000000000000," +
+                "\"screen_resolution\":\"800x600\"," +
+                "\"screen_density\":42," +
+                "\"screen_dpi\":42," +
+                "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}",
                 actual);
         }
 
@@ -145,7 +146,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Device device, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.device);
+            var actual = @case.device.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }
@@ -174,7 +175,7 @@ namespace Sentry.Protocol.Tests.Context
             yield return new object[] { (new Device { ExternalStorageSize = 1 }, "{\"type\":\"device\",\"external_storage_size\":1}") };
             yield return new object[] { (new Device { ExternalFreeStorage = 1 }, "{\"type\":\"device\",\"external_free_storage\":1}") };
             yield return new object[] { (new Device { ScreenResolution = "1x1" }, "{\"type\":\"device\",\"screen_resolution\":\"1x1\"}") };
-            yield return new object[] { (new Device { ScreenDensity = 1 }, "{\"type\":\"device\",\"screen_density\":1.0}") };
+            yield return new object[] { (new Device { ScreenDensity = 1 }, "{\"type\":\"device\",\"screen_density\":1}") };
             yield return new object[] { (new Device { ScreenDpi = 1 }, "{\"type\":\"device\",\"screen_dpi\":1}") };
             yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, "{\"type\":\"device\",\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
             yield return new object[] { (new Device { Timezone = TimeZoneInfo.Utc }, $"{{\"type\":\"device\",\"timezone\":\"UTC\",\"timezone_display_name\":\"{TimeZoneInfo.Utc.DisplayName}\"}}") };

@@ -1,5 +1,6 @@
+using System;
 using System.Collections.Concurrent;
-using System.Runtime.Serialization;
+using System.Text.Json;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -9,8 +10,7 @@ namespace Sentry.Protocol
     /// Represents Sentry's structured Context.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
-    [DataContract]
-    public class Contexts : ConcurrentDictionary<string, object>
+    public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerializable
     {
         /// <summary>
         /// Describes the application.
@@ -46,6 +46,11 @@ namespace Sentry.Protocol
         public Gpu Gpu => this.GetOrCreate<Gpu>(Gpu.Type);
 
         /// <summary>
+        /// Initializes an instance of <see cref="Contexts"/>.
+        /// </summary>
+        public Contexts() : base(StringComparer.Ordinal) { }
+
+        /// <summary>
         /// Creates a deep clone of this context.
         /// </summary>
         internal Contexts Clone()
@@ -77,6 +82,55 @@ namespace Sentry.Protocol
 
                 to.TryAdd(kv.Key, value);
             }
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer) => writer.WriteDictionaryValue(this!);
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static Contexts FromJson(JsonElement json)
+        {
+            var result = new Contexts();
+
+            foreach (var (name, value) in json.EnumerateObject())
+            {
+                var type = value.GetPropertyOrNull("type")?.GetString();
+
+                // Handle known context types
+                if (string.Equals(type, App.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = App.FromJson(value);
+                }
+                else if (string.Equals(type, Browser.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Browser.FromJson(value);
+                }
+                else if (string.Equals(type, Device.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Device.FromJson(value);
+                }
+                else if (string.Equals(type, OperatingSystem.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = OperatingSystem.FromJson(value);
+                }
+                else if (string.Equals(type, Runtime.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Runtime.FromJson(value);
+                }
+                else if (string.Equals(type, Gpu.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Gpu.FromJson(value);
+                }
+                else
+                {
+                    // Unknown context - parse as dictionary
+                    result[name] = value.GetDynamic()!;
+                }
+            }
+
+            return result;
         }
     }
 }

@@ -1,6 +1,8 @@
-using System.Runtime.Serialization;
-
 // ReSharper disable once CheckNamespace
+
+using System.Text.Json;
+using Sentry.Internal.Extensions;
+
 namespace Sentry.Protocol
 {
     /// <summary>
@@ -9,25 +11,21 @@ namespace Sentry.Protocol
     /// web request that triggered the event.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    [DataContract]
-    public class Browser
+    public sealed class Browser : IJsonSerializable
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
         /// </summary>
-        [DataMember(Name = "type", EmitDefaultValue = false)]
         public const string Type = "browser";
 
         /// <summary>
         /// Display name of the browser application.
         /// </summary>
-        [DataMember(Name = "name", EmitDefaultValue = false)]
         public string? Name { get; set; }
 
         /// <summary>
         /// Version string of the browser.
         /// </summary>
-        [DataMember(Name = "version", EmitDefaultValue = false)]
         public string? Version { get; set; }
 
         /// <summary>
@@ -39,5 +37,36 @@ namespace Sentry.Protocol
                 Name = Name,
                 Version = Version
             };
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            writer.WriteString("type", Type);
+
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                writer.WriteString("name", Name);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Version))
+            {
+                writer.WriteString("version", Version);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static Browser FromJson(JsonElement json)
+        {
+            var name = json.GetPropertyOrNull("name")?.GetString();
+            var version = json.GetPropertyOrNull("version")?.GetString();
+
+            return new Browser {Name = name, Version = version};
+        }
     }
 }

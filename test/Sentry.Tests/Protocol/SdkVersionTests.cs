@@ -29,19 +29,21 @@ namespace Sentry.Tests.Protocol
             sut.AddPackage("Sentry.AspNetCore", "2.0");
             sut.AddPackage("Sentry", "1.0");
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"packages\":[{\"name\":\"Sentry\",\"version\":\"1.0\"},{\"name\":\"Sentry.AspNetCore\",\"version\":\"2.0\"}],"
-                        + "\"name\":\"Sentry.Test.SDK\","
-                        + "\"version\":\"0.0.1-preview1\"}",
-                    actual);
+            Assert.Equal(
+                "{\"packages\":[{\"name\":\"Sentry\",\"version\":\"1.0\"},{\"name\":\"Sentry.AspNetCore\",\"version\":\"2.0\"}]," +
+                "\"name\":\"Sentry.Test.SDK\"," +
+                "\"version\":\"0.0.1-preview1\"}",
+                actual
+            );
         }
 
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((SdkVersion sdkVersion, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.sdkVersion);
+            var actual = @case.sdkVersion.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

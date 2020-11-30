@@ -21,22 +21,24 @@ namespace Sentry.Protocol.Tests.Exceptions
             sut.Data.Add("data-key", "data-value");
             sut.Meta.Add("meta-key", "meta-value");
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"data\":{\"data-key\":\"data-value\"},"
-                        + "\"meta\":{\"meta-key\":\"meta-value\"},"
-                        + "\"type\":\"mechanism type\","
-                        + "\"description\":\"mechanism description\","
-                        + "\"help_link\":\"https://helplink\","
-                        + "\"handled\":true}",
-                    actual);
+            Assert.Equal(
+                "{\"data\":{\"data-key\":\"data-value\"}," +
+                "\"meta\":{\"meta-key\":\"meta-value\"}," +
+                "\"type\":\"mechanism type\"," +
+                "\"description\":\"mechanism description\"," +
+                "\"help_link\":\"https://helplink\"," +
+                "\"handled\":true}",
+                actual
+            );
         }
 
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((Mechanism mechanism, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.mechanism);
+            var actual = @case.mechanism.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }
