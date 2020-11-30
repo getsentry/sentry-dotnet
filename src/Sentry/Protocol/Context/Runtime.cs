@@ -12,7 +12,7 @@ namespace Sentry.Protocol
     /// Typically this context is used multiple times if multiple runtimes are involved (for instance if you have a JavaScript application running on top of JVM)
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public class Runtime : IJsonSerializable
+    public sealed class Runtime : IJsonSerializable
     {
         /// <summary>
         /// Tells Sentry which type of context this is.

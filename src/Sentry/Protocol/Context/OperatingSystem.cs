@@ -12,7 +12,7 @@ namespace Sentry.Protocol
     /// Defines the operating system that caused the event. In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#os-context"/>
-    public class OperatingSystem : IJsonSerializable
+    public sealed class OperatingSystem : IJsonSerializable
     {
         /// <summary>
         /// Tells Sentry which type of context this is.

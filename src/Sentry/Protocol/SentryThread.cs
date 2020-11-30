@@ -7,7 +7,7 @@ namespace Sentry.Protocol
     /// A thread running at the time of an event.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/threads/"/>
-    public class SentryThread : IJsonSerializable
+    public sealed class SentryThread : IJsonSerializable
     {
         /// <summary>
         /// The Id of the thread.

@@ -15,7 +15,7 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public class SentryEvent : IScope, IJsonSerializable
+    public sealed class SentryEvent : IScope, IJsonSerializable
     {
         /// <inheritdoc />
         public IScopeOptions? ScopeOptions { get; }

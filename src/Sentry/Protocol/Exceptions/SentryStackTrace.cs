@@ -14,7 +14,7 @@ namespace Sentry.Protocol
     /// Frames should be sorted from oldest to newest.
     /// </remarks>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
-    public class SentryStackTrace : IJsonSerializable
+    public sealed class SentryStackTrace : IJsonSerializable
     {
         internal IList<SentryStackFrame>? InternalFrames { get; private set; }
 
@@ -55,7 +55,11 @@ namespace Sentry.Protocol
         /// </summary>
         public static SentryStackTrace FromJson(JsonElement json)
         {
-            var frames = json.GetPropertyOrNull("frames")?.EnumerateArray().Select(SentryStackFrame.FromJson).ToArray();
+            var frames = json
+                .GetPropertyOrNull("frames")
+                ?.EnumerateArray()
+                .Select(SentryStackFrame.FromJson)
+                .ToArray();
 
             return new SentryStackTrace
             {

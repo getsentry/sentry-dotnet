@@ -10,7 +10,7 @@ namespace Sentry.Protocol
     /// Represents Sentry's structured Context.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
-    public class Contexts : ConcurrentDictionary<string, object>, IJsonSerializable
+    public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerializable
     {
         /// <summary>
         /// Describes the application.
@@ -85,10 +85,7 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
-        {
-            writer.WriteDictionaryValue(this!);
-        }
+        public void WriteTo(Utf8JsonWriter writer) => writer.WriteDictionaryValue(this!);
 
         /// <summary>
         /// Parses from JSON.

@@ -9,7 +9,7 @@ namespace Sentry.Protocol
     /// Graphics device unit.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#gpu-context"/>
-    public class Gpu : IJsonSerializable
+    public sealed class Gpu : IJsonSerializable
     {
         /// <summary>
         /// Tells Sentry which type of context this is.

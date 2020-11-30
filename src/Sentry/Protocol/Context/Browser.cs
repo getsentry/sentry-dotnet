@@ -11,7 +11,7 @@ namespace Sentry.Protocol
     /// web request that triggered the event.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public class Browser : IJsonSerializable
+    public sealed class Browser : IJsonSerializable
     {
         /// <summary>
         /// Tells Sentry which type of context this is.

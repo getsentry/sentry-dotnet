@@ -10,7 +10,7 @@ namespace Sentry.Protocol
     /// A frame of a stacktrace.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
-    public class SentryStackFrame : IJsonSerializable
+    public sealed class SentryStackFrame : IJsonSerializable
     {
         internal List<string>? InternalPreContext { get; private set; }
 

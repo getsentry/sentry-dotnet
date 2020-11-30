@@ -8,7 +8,7 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Represents an object serializable in JSON format.
     /// </summary>
-    internal class JsonSerializable : ISerializable
+    internal sealed class JsonSerializable : ISerializable
     {
         /// <summary>
         /// Source object.

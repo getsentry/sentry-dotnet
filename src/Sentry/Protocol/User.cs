@@ -9,7 +9,7 @@ namespace Sentry.Protocol
     /// An interface which describes the authenticated User for a request.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
-    public class User : IJsonSerializable
+    public sealed class User : IJsonSerializable
     {
         /// <summary>
         /// The email address of the user.

@@ -12,7 +12,7 @@ namespace Sentry.Protocol
     /// Information about the SDK to be sent with the SentryEvent.
     /// </summary>
     /// <remarks>Requires Sentry version 8.4 or higher.</remarks>
-    public class SdkVersion : IJsonSerializable
+    public sealed class SdkVersion : IJsonSerializable
     {
         internal ConcurrentBag<Package> InternalPackages { get; set; } = new ConcurrentBag<Package>();
 

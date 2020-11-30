@@ -6,7 +6,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Represents a package used to compose the SDK.
     /// </summary>
-    public class Package : IJsonSerializable
+    public sealed class Package : IJsonSerializable
     {
         /// <summary>
         /// The name of the package.

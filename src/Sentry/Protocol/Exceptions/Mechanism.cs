@@ -15,7 +15,7 @@ namespace Sentry.Protocol
     /// This includes general exception values obtained from operating system or runtime APIs, as well as mechanism-specific values.
     /// </remarks>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception/#exception-mechanism"/>
-    public class Mechanism : IJsonSerializable
+    public sealed class Mechanism : IJsonSerializable
     {
         /// <summary>
         /// Keys found inside of the Exception Dictionary to inform if the exception was handled and which mechanism tracked it.

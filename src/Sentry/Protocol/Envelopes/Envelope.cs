@@ -12,7 +12,7 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Envelope.
     /// </summary>
-    internal class Envelope : ISerializable, IDisposable
+    internal sealed class Envelope : ISerializable, IDisposable
     {
         private const string EventIdKey = "event_id";
 
