@@ -20,7 +20,7 @@ namespace Sentry.Tests
                         {
                             if (pair.Key == "stackTrace")
                             {
-                                dictionary[pair.Key] = Scrubbers.ScrubStackTrace(pair.Value);
+                                dictionary[pair.Key] = Scrubbers.ScrubStackTrace(pair.Value, true);
                             }
                             else
                             {
