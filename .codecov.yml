@@ -1,6 +1,11 @@
 coverage:
   status:
-    patch: false
     changes: false
+    project:
+      default:
+        threshold: 5%
+    patch:
+      default:
+        threshold: 5%
   ignore:
     - "test/**/*"
