@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Verify.Xunit" Version="8.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
