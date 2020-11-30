@@ -106,6 +106,25 @@ namespace Sentry.Protocol.Envelopes
             return new Envelope(header, items);
         }
 
+        /// <summary>
+        /// Creates an envelope that contains a single transaction.
+        /// </summary>
+        public static Envelope FromTransaction(Transaction transaction)
+        {
+            var header = new Dictionary<string, object>
+            {
+                // TODO: Is this right?
+                [EventIdKey] = transaction.SpanId.ToString()
+            };
+
+            var items = new[]
+            {
+                EnvelopeItem.FromTransaction(transaction)
+            };
+
+            return new Envelope(header, items);
+        }
+
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
