@@ -29,27 +29,31 @@ namespace Sentry.Tests.Protocol.Exceptions
                 InstructionOffset = 5,
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"pre_context\":[\"pre\"]," +
-                         "\"post_context\":[\"post\"]," +
-                         "\"vars\":{\"var\":\"val\"}," +
-                         "\"frames_omitted \":[1,2]," +
-                         "\"filename\":\"FileName\"," +
-                         "\"function\":\"Function\"," +
-                         "\"module\":\"Module\"," +
-                         "\"lineno\":1," +
-                         "\"colno\":2," +
-                         "\"abs_path\":" +
-                         "\"AbsolutePath\"," +
-                         "\"context_line\":\"ContextLine\"," +
-                         "\"in_app\":true," +
-                         "\"package\":\"Package\",\"" +
-                         "platform\":\"Platform\"," +
-                         "\"image_addr\":3," +
-                         "\"symbol_addr\":4," +
-                         "\"instruction_offset\":5}",
-                actual);
+            Assert.Equal(
+                "{" +
+                "\"pre_context\":[\"pre\"]," +
+                "\"post_context\":[\"post\"]," +
+                "\"vars\":{\"var\":\"val\"}," +
+                "\"frames_omitted\":[1,2]," +
+                "\"filename\":\"FileName\"," +
+                "\"function\":\"Function\"," +
+                "\"module\":\"Module\"," +
+                "\"lineno\":1," +
+                "\"colno\":2," +
+                "\"abs_path\":" +
+                "\"AbsolutePath\"," +
+                "\"context_line\":\"ContextLine\"," +
+                "\"in_app\":true," +
+                "\"package\":\"Package\"," +
+                "\"platform\":\"Platform\"," +
+                "\"image_addr\":3," +
+                "\"symbol_addr\":4," +
+                "\"instruction_offset\":5" +
+                "}",
+                actual
+            );
         }
 
         [Fact]

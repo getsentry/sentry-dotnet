@@ -1,6 +1,6 @@
 # Changelog
 
-## vNext
+## 3.0.0-alpha.6
 
 * Abandon ValueTask #611
 * Fix Cache deleted on HttpTransport exception. (#610) @lucas-zimerman

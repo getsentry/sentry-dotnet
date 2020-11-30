@@ -2,8 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.Serialization;
-using System.Threading;
+using System.Linq;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
@@ -11,28 +12,19 @@ namespace Sentry.Protocol
     /// Information about the SDK to be sent with the SentryEvent.
     /// </summary>
     /// <remarks>Requires Sentry version 8.4 or higher.</remarks>
-    [DataContract]
-    public class SdkVersion
+    public sealed class SdkVersion : IJsonSerializable
     {
-        private readonly Lazy<ConcurrentBag<Package>> _lazyPackages =
-            new Lazy<ConcurrentBag<Package>>(LazyThreadSafetyMode.PublicationOnly);
-
-        [DataMember(Name = "packages", EmitDefaultValue = false)]
-        internal ConcurrentBag<Package>? InternalPackages
-            => _lazyPackages.IsValueCreated
-                ? _lazyPackages.Value
-                : null;
+        internal ConcurrentBag<Package> InternalPackages { get; set; } = new ConcurrentBag<Package>();
 
         /// <summary>
         /// SDK packages.
         /// </summary>
         /// <remarks>This property is not required.</remarks>
-        public IEnumerable<Package> Packages => _lazyPackages.Value;
+        public IEnumerable<Package> Packages => InternalPackages;
 
         /// <summary>
         /// SDK name.
         /// </summary>
-        [DataMember(Name = "name", EmitDefaultValue = false)]
         public string? Name
         {
             get;
@@ -44,7 +36,6 @@ namespace Sentry.Protocol
         /// <summary>
         /// SDK Version.
         /// </summary>
-        [DataMember(Name = "version", EmitDefaultValue = false)]
         public string? Version
         {
             get;
@@ -62,6 +53,64 @@ namespace Sentry.Protocol
             => AddPackage(new Package(name, version));
 
         internal void AddPackage(Package package)
-            => _lazyPackages.Value.Add(package);
+            => InternalPackages.Add(package);
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Packages
+            var packages = InternalPackages.ToArray();
+            if (packages.Any())
+            {
+                writer.WriteStartArray("packages");
+
+                foreach (var package in packages)
+                {
+                    writer.WriteSerializableValue(package);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            // Name
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                writer.WriteString("name", Name);
+            }
+
+            // Version
+            if (!string.IsNullOrWhiteSpace(Version))
+            {
+                writer.WriteString("version", Version);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static SdkVersion FromJson(JsonElement json)
+        {
+            // Packages
+            var packages =
+                json.GetPropertyOrNull("packages")?.EnumerateArray().Select(Package.FromJson).ToArray()
+                ?? Array.Empty<Package>();
+
+            // Name
+            var name = json.GetPropertyOrNull("name")?.GetString() ?? "dotnet.unknown";
+
+            // Version
+            var version = json.GetPropertyOrNull("version")?.GetString() ?? "0.0.0";
+
+            return new SdkVersion
+            {
+                InternalPackages = new ConcurrentBag<Package>(packages),
+                Name = name,
+                Version = version
+            };
+        }
     }
 }

@@ -2,10 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -17,10 +15,10 @@ namespace Sentry
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
-    /// <inheritdoc />
     public class Scope : IScope
     {
         internal SentryOptions Options { get; }
+        IScopeOptions IScope.ScopeOptions => Options;
 
         internal bool Locked { get; set; }
 
@@ -83,14 +81,11 @@ namespace Sentry
         internal event EventHandler? OnEvaluating;
 
         /// <inheritdoc />
-        [DataMember(Name = "level", EmitDefaultValue = false)]
         public SentryLevel? Level { get; set; }
 
         /// <inheritdoc />
-        [DataMember(Name = "transaction", EmitDefaultValue = false)]
         public string? Transaction { get; set; }
 
-        [DataMember(Name = "request", EmitDefaultValue = false)]
         private Request? _request;
 
         /// <inheritdoc />
@@ -100,7 +95,6 @@ namespace Sentry
             set => _request = value;
         }
 
-        [DataMember(Name = "contexts", EmitDefaultValue = false)]
         private Contexts? _contexts;
 
         /// <inheritdoc />
@@ -110,7 +104,6 @@ namespace Sentry
             set => _contexts = value;
         }
 
-        [DataMember(Name = "user", EmitDefaultValue = false)]
         private User? _user;
 
         /// <inheritdoc />
@@ -121,31 +114,21 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        [DataMember(Name = "environment", EmitDefaultValue = false)]
         public string? Environment { get; set; }
 
         /// <inheritdoc />
-        [DataMember(Name = "sdk", EmitDefaultValue = false)]
         public SdkVersion Sdk { get; internal set; } = new SdkVersion();
 
         /// <inheritdoc />
-        [DataMember(Name = "fingerprint", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();
 
         /// <inheritdoc />
-        [DataMember(Name = "breadcrumbs", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IEnumerable<Breadcrumb> Breadcrumbs { get; } = new ConcurrentQueue<Breadcrumb>();
 
         /// <inheritdoc />
-        [DataMember(Name = "extra", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IReadOnlyDictionary<string, object?> Extra { get; } = new ConcurrentDictionary<string, object?>();
 
         /// <inheritdoc />
-        [DataMember(Name = "tags", EmitDefaultValue = false)]
-        [DontSerializeEmpty]
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
         /// <summary>
@@ -212,7 +195,5 @@ namespace Sentry
                 }
             }
         }
-
-        IScopeOptions IScope.ScopeOptions => Options;
     }
 }

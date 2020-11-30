@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Sentry.Tests.Protocol;
+using FluentAssertions;
+using Sentry.Internal;
 using Xunit;
 
 // ReSharper disable once CheckNamespace
@@ -21,15 +22,10 @@ namespace Sentry.Protocol.Tests.Context
                 StartTime = DateTimeOffset.MaxValue
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actualString = sut.ToJsonString();
 
-            Assert.Equal("{\"type\":\"app\"," +
-                         "\"app_start_time\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-                         "\"device_app_hash\":\"93fd0e9a\"," +
-                         "\"build_type\":\"nightly\"," +
-                         "\"app_name\":\"Sentry.Test.App\"," +
-                         "\"app_version\":\"8b03fd7\"," +
-                         "\"app_build\":\"1.23152\"}", actual);
+            var actual = App.FromJson(Json.Parse(actualString));
+            actual.Should().BeEquivalentTo(sut);
         }
 
         [Fact]
@@ -61,7 +57,7 @@ namespace Sentry.Protocol.Tests.Context
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((App app, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.app);
+            var actual = @case.app.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

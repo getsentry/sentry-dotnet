@@ -1,9 +1,7 @@
 using System;
 using System.IO.Compression;
 using System.Net;
-using Newtonsoft.Json;
-using Sentry.Internal;
-using Sentry.Protocol;
+using System.Text.Json;
 using Serilog;
 using Serilog.Events;
 using Xunit;
@@ -146,8 +144,8 @@ namespace Sentry.Serilog.Tests
 
         private static void AssertDeep(object left, object right, bool shouldCheckEqual)
         {
-            var serializedLeftObject = JsonConvert.SerializeObject(left);
-            var serializedRightObject = JsonConvert.SerializeObject(right);
+            var serializedLeftObject = JsonSerializer.Serialize(left);
+            var serializedRightObject = JsonSerializer.Serialize(right);
 
             if (shouldCheckEqual)
             {

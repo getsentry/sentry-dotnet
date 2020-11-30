@@ -1,5 +1,7 @@
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Linq;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
@@ -12,10 +14,8 @@ namespace Sentry.Protocol
     /// Frames should be sorted from oldest to newest.
     /// </remarks>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
-    [DataContract]
-    public class SentryStackTrace
+    public sealed class SentryStackTrace : IJsonSerializable
     {
-        [DataMember(Name = "frames", EmitDefaultValue = false)]
         internal IList<SentryStackFrame>? InternalFrames { get; private set; }
 
         /// <summary>
@@ -28,6 +28,43 @@ namespace Sentry.Protocol
         {
             get => InternalFrames ??= new List<SentryStackFrame>();
             set => InternalFrames = value;
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            if (InternalFrames is {} frames && frames.Any())
+            {
+                writer.WriteStartArray("frames");
+
+                foreach (var frame in frames)
+                {
+                    writer.WriteSerializableValue(frame);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static SentryStackTrace FromJson(JsonElement json)
+        {
+            var frames = json
+                .GetPropertyOrNull("frames")
+                ?.EnumerateArray()
+                .Select(SentryStackFrame.FromJson)
+                .ToArray();
+
+            return new SentryStackTrace
+            {
+                InternalFrames = frames
+            };
         }
     }
 }

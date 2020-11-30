@@ -24,21 +24,23 @@ namespace Sentry.Tests.Protocol
                 }
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"id\":0,"
-                        + "\"name\":\"thread11\","
-                        + "\"crashed\":true,"
-                        + "\"current\":true,"
-                        + "\"stacktrace\":{\"frames\":[{\"filename\":\"test\"}]}}",
-                    actual);
+            Assert.Equal(
+                "{\"id\":0," +
+                "\"name\":\"thread11\"," +
+                "\"crashed\":true," +
+                "\"current\":true," +
+                "\"stacktrace\":{\"frames\":[{\"filename\":\"test\"}]}}",
+                actual
+            );
         }
 
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((SentryThread thread, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.thread);
+            var actual = @case.thread.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

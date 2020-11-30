@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using FluentAssertions;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
+using Constants = Sentry.Protocol.Constants;
 
 namespace Sentry.Tests.Protocol
 {
@@ -17,8 +21,15 @@ namespace Sentry.Tests.Protocol
             {
                 User = new User { Id = "user-id" },
                 Request = new Request { Method = "POST" },
-                Contexts = new Contexts { ["context_key"] = "context_value" },
-                Sdk = new SdkVersion { Name = "SDK-test" },
+                Contexts = new Contexts {
+                    ["context_key"] = "context_value",
+                    [".NET Framework"] = new Dictionary<string, string> {
+                        [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",
+                        [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
+                        [".NET Framework Full"] = "\"v4.8\""
+                    }
+                },
+                Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
                 Logger = "logger",
@@ -29,111 +40,46 @@ namespace Sentry.Tests.Protocol
                 },
                 Modules = { { "module_key", "module_value" } },
                 Release = "release",
-                SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
+                SentryExceptions = new[] { new SentryException { Value = "exception_value"} },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
                 ServerName = "server_name",
-                Transaction = "transaction"
+                Transaction = "transaction",
             };
 
+            sut.Sdk.AddPackage(new Package("name", "version"));
             sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
+            sut.AddBreadcrumb(new Breadcrumb(
+                timestamp,
+                "message",
+                "type",
+                new Dictionary<string, string> {{"data-key","data-value"}},
+                "category",
+                BreadcrumbLevel.Warning));
+
             sut.SetExtra("extra_key", "extra_value");
             sut.Fingerprint = new[] {"fingerprint"};
             sut.SetTag("tag_key", "tag_value");
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actualString = sut.ToJsonString();
 
-            Assert.Equal(
-                "{\"request\":{\"method\":\"POST\"}," +
-                "\"contexts\":{\"context_key\":\"context_value\"}," +
-                "\"user\":{\"id\":\"user-id\"}," +
-                "\"modules\":{\"module_key\":\"module_value\"}," +
-                "\"event_id\":\"4b780f4cec0342a78ef8a41c9d5621f8\"," +
-                "\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-                "\"logentry\":{\"message\":\"message\",\"formatted\":\"structured_message\"}," +
-                "\"logger\":\"logger\"," +
-                "\"platform\":\"csharp\"," +
-                "\"server_name\":\"server_name\"," +
-                "\"release\":\"release\"," +
-                "\"exception\":{\"values\":[{\"value\":\"exception_value\"}]}," +
-                "\"threads\":{\"values\":[{\"crashed\":true}]}," +
-                "\"level\":\"fatal\"," +
-                "\"transaction\":\"transaction\"," +
-                "\"environment\":\"environment\"," +
-                "\"sdk\":{\"name\":\"SDK-test\"}," +
-                "\"fingerprint\":[\"fingerprint\"]," +
-                "\"breadcrumbs\":[{\"timestamp\":\"9999-12-31T23:59:59Z\",\"message\":\"crumb\"}]," +
-                "\"extra\":{\"extra_key\":\"extra_value\"}," +
-                "\"tags\":{\"tag_key\":\"tag_value\"}}",
-                actual
-            );
-        }
+            var actual = SentryEvent.FromJson(Json.Parse(actualString));
 
-        [Fact]
-        public void SerializeObject_NetFxInstallationIsSetToContext_SerializesValidObject()
-        {
-            var ex = new Exception("exception message");
-            var netFxInstallations = new Dictionary<string, string>
+            actual.Should().BeEquivalentTo(sut, o =>
             {
-                [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",
-                [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
-                [".NET Framework Full"] = "\"v4.8\""
+                // Due to timestamp precision
+                o.Excluding(e => e.Breadcrumbs);
+                o.Excluding(e => e.Exception);
 
-            };
-            var timestamp = DateTimeOffset.MaxValue;
-            var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
-            var sut = new SentryEvent(ex, timestamp, id)
+                return o;
+            });
+
+            // Expected item[0].Timestamp to be <9999-12-31 23:59:59.9999999>, but found <9999-12-31 23:59:59.999>.
+            actual.Breadcrumbs.Should().BeEquivalentTo(sut.Breadcrumbs, o => o.Excluding(b => b.Timestamp));
+            var counter = 0;
+            foreach (var sutBreadcrumb in sut.Breadcrumbs)
             {
-                User = new User { Id = "user-id" },
-                Request = new Request { Method = "POST" },
-                Contexts = new Contexts { [".NET Framework"] = netFxInstallations },
-                Sdk = new SdkVersion { Name = "SDK-test" },
-                Environment = "environment",
-                Level = SentryLevel.Fatal,
-                Logger = "logger",
-                Message = new SentryMessage
-                {
-                    Message = "message",
-                    Formatted = "structured_message"
-                },
-                Modules = { { "module_key", "module_value" } },
-                Release = "release",
-                SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
-                SentryThreads = new[] { new SentryThread { Crashed = true } },
-                ServerName = "server_name",
-                Transaction = "transaction"
-            };
-
-            sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
-            sut.SetExtra("extra_key", "extra_value");
-            sut.Fingerprint = new[] {"fingerprint"};
-            sut.SetTag("tag_key", "tag_value");
-
-            var actual = JsonSerializer.SerializeObject(sut);
-
-            Assert.Equal(
-                "{\"request\":{\"method\":\"POST\"}," +
-                "\"contexts\":{\".NET Framework\":{\".NET Framework\":\"\\\"v2.0.50727\\\", \\\"v3.0\\\", \\\"v3.5\\\"\",\".NET Framework Client\":\"\\\"v4.8\\\", \\\"v4.0.0.0\\\"\",\".NET Framework Full\":\"\\\"v4.8\\\"\"}}," +
-                "\"user\":{\"id\":\"user-id\"}," +
-                "\"modules\":{\"module_key\":\"module_value\"}," +
-                "\"event_id\":\"4b780f4cec0342a78ef8a41c9d5621f8\"," +
-                "\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-                "\"logentry\":{\"message\":\"message\",\"formatted\":\"structured_message\"}," +
-                "\"logger\":\"logger\"," +
-                "\"platform\":\"csharp\"," +
-                "\"server_name\":\"server_name\"," +
-                "\"release\":\"release\"," +
-                "\"exception\":{\"values\":[{\"value\":\"exception_value\"}]}," +
-                "\"threads\":{\"values\":[{\"crashed\":true}]}," +
-                "\"level\":\"fatal\"," +
-                "\"transaction\":\"transaction\"," +
-                "\"environment\":\"environment\"," +
-                "\"sdk\":{\"name\":\"SDK-test\"}," +
-                "\"fingerprint\":[\"fingerprint\"]," +
-                "\"breadcrumbs\":[{\"timestamp\":\"9999-12-31T23:59:59Z\",\"message\":\"crumb\"}]," +
-                "\"extra\":{\"extra_key\":\"extra_value\"}," +
-                "\"tags\":{\"tag_key\":\"tag_value\"}}",
-                actual
-            );
+                sutBreadcrumb.Timestamp.Should().BeCloseTo(actual.Breadcrumbs.ElementAt(counter++).Timestamp);
+            }
         }
 
         [Fact]

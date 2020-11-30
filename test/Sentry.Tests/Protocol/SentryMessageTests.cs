@@ -16,19 +16,21 @@ namespace Sentry.Tests.Protocol
                 Formatted = "Message 100 test-name"
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"message\":\"Message {eventId} {name}\","
-                        + "\"params\":[100,\"test-name\"],"
-                        + "\"formatted\":\"Message 100 test-name\"}",
-                    actual);
+            Assert.Equal(
+                "{\"message\":\"Message {eventId} {name}\"," +
+                "\"params\":[100,\"test-name\"]," +
+                "\"formatted\":\"Message 100 test-name\"}",
+                actual
+            );
         }
 
         [Theory]
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((SentryMessage msg, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.msg);
+            var actual = @case.msg.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

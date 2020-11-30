@@ -15,21 +15,21 @@ namespace Sentry.Tests.Protocol
                 Email = "test@sentry.io",
                 IpAddress = "::1",
                 Username = "user-name",
-                Other = new Dictionary<string, string>
-                            {
-                                {"testCustomValueKey", "testCustomValue"}
-                            }
+                Other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}}
             };
 
-            var actual = JsonSerializer.SerializeObject(sut);
+            var actual = sut.ToJsonString();
 
-            Assert.Equal("{\"other\":{\"testCustomValueKey\":\"testCustomValue\"},"
-                        + "\"email\":\"test@sentry.io\","
-                        + "\"id\":\"user-id\","
-                        + "\"ip_address\":\"::1\","
-                        + "\"username\":\"user-name\"}"
-                        ,
-                    actual);
+            Assert.Equal(
+                "{" +
+                "\"email\":\"test@sentry.io\"," +
+                "\"id\":\"user-id\"," +
+                "\"ip_address\":\"::1\"," +
+                "\"username\":\"user-name\"," +
+                "\"other\":{\"testCustomValueKey\":\"testCustomValue\"}" +
+                "}",
+                actual
+            );
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Sentry.Tests.Protocol
         [MemberData(nameof(TestCases))]
         public void SerializeObject_TestCase_SerializesAsExpected((User user, string serialized) @case)
         {
-            var actual = JsonSerializer.SerializeObject(@case.user);
+            var actual = @case.user.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
         }

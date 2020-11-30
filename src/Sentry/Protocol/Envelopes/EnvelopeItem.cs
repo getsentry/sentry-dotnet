@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
@@ -12,7 +13,7 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Envelope item.
     /// </summary>
-    internal class EnvelopeItem : ISerializable, IDisposable
+    internal sealed class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
         private const string TypeValueEvent = "event";
@@ -23,7 +24,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Header associated with this envelope item.
         /// </summary>
-        public IReadOnlyDictionary<string, object> Header { get; }
+        public IReadOnlyDictionary<string, object?> Header { get; }
 
         /// <summary>
         /// Item payload.
@@ -33,7 +34,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopeItem"/>.
         /// </summary>
-        public EnvelopeItem(IReadOnlyDictionary<string, object> header, ISerializable payload)
+        public EnvelopeItem(IReadOnlyDictionary<string, object?> header, ISerializable payload)
         {
             Header = header;
             Payload = payload;
@@ -63,6 +64,21 @@ namespace Sentry.Protocol.Envelopes
             return buffer;
         }
 
+        private async Task SerializeHeaderAsync(
+            Stream stream,
+            IReadOnlyDictionary<string, object?> header,
+            CancellationToken cancellationToken = default)
+        {
+            await using var writer = new Utf8JsonWriter(stream);
+            writer.WriteDictionaryValue(header);
+            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task SerializeHeaderAsync(
+            Stream stream,
+            CancellationToken cancellationToken = default) =>
+            await SerializeHeaderAsync(stream, Header, cancellationToken).ConfigureAwait(false);
+
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
@@ -70,7 +86,7 @@ namespace Sentry.Protocol.Envelopes
             if (TryGetLength() != null)
             {
                 // Header
-                await Json.SerializeToStreamAsync(Header, stream, cancellationToken).ConfigureAwait(false);
+                await SerializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
                 await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
                 // Payload
@@ -84,9 +100,8 @@ namespace Sentry.Protocol.Envelopes
                 // Header
                 var headerWithLength = Header.ToDictionary();
                 headerWithLength[LengthKey] = payloadBuffer.Length;
-                var headerData = Json.SerializeToByteArray(headerWithLength);
 
-                await stream.WriteAsync(headerData, cancellationToken).ConfigureAwait(false);
+                await SerializeHeaderAsync(stream, headerWithLength, cancellationToken).ConfigureAwait(false);
                 await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
                 // Payload
@@ -105,7 +120,7 @@ namespace Sentry.Protocol.Envelopes
             var file = File.OpenRead(filePath);
             var payload = new StreamSerializable(file);
 
-            var header = new Dictionary<string, object>
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = "attachment",
                 [FileNameKey] = Path.GetFileName(filePath),
@@ -126,7 +141,7 @@ namespace Sentry.Protocol.Envelopes
 
             var payload = new StreamSerializable(buffer);
 
-            var header = new Dictionary<string, object>
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = "attachment",
                 [LengthKey] = buffer.Length
@@ -140,7 +155,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
-            var header = new Dictionary<string, object>
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueEvent
             };
@@ -153,7 +168,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = new Dictionary<string, object>
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueUserReport
             };
@@ -161,7 +176,7 @@ namespace Sentry.Protocol.Envelopes
             return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
         }
 
-        private static async Task<IReadOnlyDictionary<string, object>> DeserializeHeaderAsync(
+        private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
@@ -181,13 +196,13 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return
-                Json.DeserializeFromByteArray<Dictionary<string, object>?>(buffer.ToArray())
+                Json.Parse(buffer.ToArray()).GetObjectDictionary()
                 ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
         private static async Task<ISerializable> DeserializePayloadAsync(
             Stream stream,
-            IReadOnlyDictionary<string, object> header,
+            IReadOnlyDictionary<string, object?> header,
             CancellationToken cancellationToken = default)
         {
             var payloadLength = header.GetValueOrDefault(LengthKey) switch
@@ -203,8 +218,11 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                using var jsonDocument = JsonDocument.Parse(buffer);
 
-                return new JsonSerializable(Json.DeserializeFromByteArray<SentryEvent>(buffer));
+                return new JsonSerializable(
+                    SentryEvent.FromJson(jsonDocument.RootElement.Clone())
+                );
             }
 
             // User report
@@ -212,11 +230,16 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                using var jsonDocument = JsonDocument.Parse(buffer);
 
-                return new JsonSerializable(Json.DeserializeFromByteArray<UserFeedback>(buffer));
+                return new JsonSerializable(
+                    UserFeedback.FromJson(jsonDocument.RootElement.Clone())
+                );
             }
 
             // Arbitrary payload
+            var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
+
             if (payloadLength != null)
             {
                 stream.Seek(payloadLength.Value, SeekOrigin.Current);
@@ -225,8 +248,6 @@ namespace Sentry.Protocol.Envelopes
             {
                 stream.Seek(0, SeekOrigin.End);
             }
-
-            var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
 
             return new StreamSerializable(payloadStream);
         }

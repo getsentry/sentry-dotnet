@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Sentry.Internal;
+using FluentAssertions;
 using Sentry.Protocol;
 using Xunit;
 
@@ -17,11 +17,17 @@ namespace Sentry.Tests.Protocol
             using var stream = new MemoryStream();
 
             // Act
-            var serializedContent = Json.Serialize(userFeedback);
+            var serializedContent = userFeedback.ToJsonString();
 
             // Assert
-            var assertExpected = "{\"event_id\":\"acbe351c61494e7b807fd7e82a435ffc\",\"name\":\"myName\",\"email\":\"myEmail@service.com\",\"comments\":\"my comment\"}";
-            Assert.Equal(assertExpected, serializedContent);
+            serializedContent.Should().Be(
+                "{" +
+                "\"event_id\":\"acbe351c61494e7b807fd7e82a435ffc\"," +
+                "\"name\":\"myName\"," +
+                "\"email\":\"myEmail@service.com\"," +
+                "\"comments\":\"my comment\"" +
+                "}"
+            );
         }
     }
 }

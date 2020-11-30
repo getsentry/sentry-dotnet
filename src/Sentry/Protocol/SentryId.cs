@@ -1,13 +1,12 @@
 using System;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// The identifier of an event in Sentry.
     /// </summary>
-    [JsonConverter(typeof(SentryIdJsonConverter))]
-    public readonly struct SentryId : IEquatable<SentryId>
+    public readonly struct SentryId : IEquatable<SentryId>, IJsonSerializable
     {
         private readonly Guid _eventId;
 
@@ -40,6 +39,21 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public override int GetHashCode() => _eventId.GetHashCode();
 
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static SentryId FromJson(JsonElement json)
+        {
+            var id = json.GetString();
+
+            return !string.IsNullOrWhiteSpace(id)
+                ? new SentryId(Guid.Parse(id))
+                : Empty;
+        }
+
         /// <summary>
         /// Equality operator.
         /// </summary>
@@ -59,22 +73,5 @@ namespace Sentry.Protocol
         /// A <see cref="SentryId"/> from a <see cref="Guid"/>.
         /// </summary>
         public static implicit operator SentryId(Guid guid) => new SentryId(guid);
-    }
-
-    internal class SentryIdJsonConverter : JsonConverter<SentryId>
-    {
-        public override void WriteJson(
-            JsonWriter writer,
-            SentryId value,
-            JsonSerializer serializer) =>
-            writer.WriteValue(value.ToString());
-
-        public override SentryId ReadJson(
-            JsonReader reader,
-            Type objectType,
-            SentryId existingValue,
-            bool hasExistingValue,
-            JsonSerializer serializer) =>
-            new SentryId(Guid.Parse((string)reader.Value));
     }
 }

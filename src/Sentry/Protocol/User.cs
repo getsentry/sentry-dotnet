@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
+using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
@@ -8,8 +9,7 @@ namespace Sentry.Protocol
     /// An interface which describes the authenticated User for a request.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
-    [DataContract]
-    public class User
+    public sealed class User : IJsonSerializable
     {
         /// <summary>
         /// The email address of the user.
@@ -17,7 +17,6 @@ namespace Sentry.Protocol
         /// <value>
         /// The user's email address.
         /// </value>
-        [DataMember(Name = "email", EmitDefaultValue = false)]
         public string? Email { get; set; }
 
         /// <summary>
@@ -26,7 +25,6 @@ namespace Sentry.Protocol
         /// <value>
         /// The unique identifier.
         /// </value>
-        [DataMember(Name = "id", EmitDefaultValue = false)]
         public string? Id { get; set; }
 
         /// <summary>
@@ -35,7 +33,6 @@ namespace Sentry.Protocol
         /// <value>
         /// The user's IP address.
         /// </value>
-        [DataMember(Name = "ip_address", EmitDefaultValue = false)]
         public string? IpAddress { get; set; }
 
         /// <summary>
@@ -44,10 +41,8 @@ namespace Sentry.Protocol
         /// <value>
         /// The user's username.
         /// </value>
-        [DataMember(Name = "username", EmitDefaultValue = false)]
         public string? Username { get; set; }
 
-        [DataMember(Name = "other", EmitDefaultValue = false)]
         internal IDictionary<string, string>? InternalOther;
 
         /// <summary>
@@ -88,6 +83,65 @@ namespace Sentry.Protocol
                 entry => entry.Key,
                 entry => entry.Value
             );
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            writer.WriteStartObject();
+
+            // Email
+            if (!string.IsNullOrWhiteSpace(Email))
+            {
+                writer.WriteString("email", Email);
+            }
+
+            // Id
+            if (!string.IsNullOrWhiteSpace(Id))
+            {
+                writer.WriteString("id", Id);
+            }
+
+            // IP
+            if (!string.IsNullOrWhiteSpace(IpAddress))
+            {
+                writer.WriteString("ip_address", IpAddress);
+            }
+
+            // Username
+            if (!string.IsNullOrWhiteSpace(Username))
+            {
+                writer.WriteString("username", Username);
+            }
+
+            // Other
+            if (InternalOther is {} other && other.Any())
+            {
+                writer.WriteDictionary("other", other!);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Parses from JSON.
+        /// </summary>
+        public static User FromJson(JsonElement json)
+        {
+            var email = json.GetPropertyOrNull("email")?.GetString();
+            var id = json.GetPropertyOrNull("id")?.GetString();
+            var ip = json.GetPropertyOrNull("ip_address")?.GetString();
+            var username = json.GetPropertyOrNull("username")?.GetString();
+            var other = json.GetPropertyOrNull("other")?.GetDictionary();
+
+            return new User
+            {
+                Email = email,
+                Id = id,
+                IpAddress = ip,
+                Username = username,
+                Other = other?.ToDictionary()!
+            };
         }
     }
 }

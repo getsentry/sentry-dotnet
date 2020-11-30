@@ -350,11 +350,34 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Roundtrip_WithEvent_Success()
         {
             // Arrange
-            var @event = new SentryEvent
+            var ex = new Exception("exception message");
+            var timestamp = DateTimeOffset.MaxValue;
+            var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
+            var @event = new SentryEvent(ex, timestamp, id)
             {
-                Message = "Foo bar",
-                Environment = "release"
+                User = new User { Id = "user-id" },
+                Request = new Request { Method = "POST" },
+                Contexts = new Contexts { ["context_key"] = "context_value" },
+                Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" },
+                Environment = "environment",
+                Level = SentryLevel.Fatal,
+                Logger = "logger",
+                Message = new SentryMessage
+                {
+                    Message = "message",
+                    Formatted = "structured_message"
+                },
+                Modules = { { "module_key", "module_value" } },
+                Release = "release",
+                SentryExceptions = new [] { new SentryException { Value = "exception_value" } },
+                SentryThreads = new[] { new SentryThread { Crashed = true } },
+                ServerName = "server_name",
+                Transaction = "transaction",
             };
+
+            @event.SetExtra("extra_key", "extra_value");
+            @event.Fingerprint = new[] {"fingerprint"};
+            @event.SetTag("tag_key", "tag_value");
 
             using var envelope = Envelope.FromEvent(@event);
 
@@ -374,7 +397,7 @@ namespace Sentry.Tests.Protocol.Envelopes
             envelopeRoundtrip.Items.Should().ContainSingle();
 
             var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
-            payloadContent.Should().BeEquivalentTo(@event);
+            payloadContent.Should().BeEquivalentTo(@event, o => o.Excluding(x => x.Exception));
         }
 
         [Fact]
@@ -416,7 +439,7 @@ namespace Sentry.Tests.Protocol.Envelopes
             using var input = new MemoryStream();
 
             // Act & assert
-            await Assert.ThrowsAsync<InvalidOperationException>(
+            await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );
         }
@@ -428,7 +451,7 @@ namespace Sentry.Tests.Protocol.Envelopes
             using var input = new MemoryStream(new byte[1_000_000]); // all 0's
 
             // Act & assert
-            await Assert.ThrowsAsync<InvalidOperationException>(
+            await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );
         }
@@ -443,7 +466,6 @@ namespace Sentry.Tests.Protocol.Envelopes
             ).ToMemoryStream();
 
             // Act & assert
-            // Currently throws a Newtonsoft.Json exception, which is an implementation detail
             await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );
