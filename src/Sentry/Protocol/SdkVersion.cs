@@ -96,8 +96,8 @@ namespace Sentry.Protocol
         {
             // Packages
             var packages =
-                json.GetPropertyOrNull("packages")?.EnumerateArray().Select(Package.FromJson).ToArray() ??
-                Array.Empty<Package>();
+                json.GetPropertyOrNull("packages")?.EnumerateArray().Select(Package.FromJson).ToArray()
+                ?? Array.Empty<Package>();
 
             // Name
             var name = json.GetPropertyOrNull("name")?.GetString() ?? "dotnet.unknown";
