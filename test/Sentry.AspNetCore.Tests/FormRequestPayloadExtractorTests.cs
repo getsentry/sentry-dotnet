@@ -42,7 +42,7 @@ namespace Sentry.AspNetCore.Tests
 
             Assert.Null(sut.ExtractPayload(TestFixture.HttpRequest));
 
-            TestFixture.Stream.DidNotReceive().Position = Arg.Any<int>();
+            TestFixture.Stream.DidNotReceive().Position = Arg.Any<long>();
         }
     }
 }

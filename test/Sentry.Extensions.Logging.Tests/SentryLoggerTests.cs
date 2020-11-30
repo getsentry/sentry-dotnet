@@ -370,14 +370,25 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogDebug("anything");
 
-            _fixture.Hub.DidNotReceive()
+
+            _fixture.Hub.DidNotReceiveWithAnyArgs()
                 .AddBreadcrumb(
-                    _fixture.Clock,
-                    Arg.Any<string>(),
-                    _fixture.CategoryName,
-                    BreadcrumbType,
-                    null,
-                    Arg.Any<BreadcrumbLevel>());
+                    default,
+                    string.Empty,
+                    default,
+                    default,
+                    default,
+                    default);
+
+            // The below test is the original one, but for some reason NSubstitute 4 refuses to use the Arg.Any() parameters even though they should be correct and therefore throws an error
+            // _fixture.Hub.DidNotReceive()
+            //     .AddBreadcrumb(
+            //         _fixture.Clock,
+            //         Arg.Any<string>(),
+            //         _fixture.CategoryName,
+            //         BreadcrumbType,
+            //         null,
+            //         Arg.Any<BreadcrumbLevel>());
         }
 
         [Fact]
@@ -387,14 +398,24 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogTrace("anything");
 
-            _fixture.Hub.DidNotReceive()
+            _fixture.Hub.DidNotReceiveWithAnyArgs()
                 .AddBreadcrumb(
-                    _fixture.Clock,
-                    Arg.Any<string>(),
-                    _fixture.CategoryName,
-                    BreadcrumbType,
-                    null,
-                    Arg.Any<BreadcrumbLevel>());
+                    default,
+                    string.Empty,
+                    default,
+                    default,
+                    default,
+                    default);
+
+            // The below test is the original one, but for some reason NSubstitute 4 refuses to use the Arg.Any() parameters even though they should be correct and therefore throws an error
+            // _fixture.Hub.DidNotReceive()
+            //     .AddBreadcrumb(
+            //         _fixture.Clock,
+            //         Arg.Any<string>(),
+            //         _fixture.CategoryName,
+            //         BreadcrumbType,
+            //         null,
+            //         Arg.Any<BreadcrumbLevel>());
         }
 
         [Fact]
