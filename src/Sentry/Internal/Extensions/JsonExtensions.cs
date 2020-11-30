@@ -6,6 +6,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal.Extensions
 {
+    // TODO: refactor this mess
     internal static class JsonExtensions
     {
         public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
@@ -54,15 +55,6 @@ namespace Sentry.Internal.Extensions
             {
                 writer.WriteNullValue();
             }
-        }
-
-        public static void WriteDictionary(
-            this Utf8JsonWriter writer,
-            string propertyName,
-            IEnumerable<KeyValuePair<string, object?>>? dic)
-        {
-            writer.WritePropertyName(propertyName);
-            writer.WriteDictionaryValue(dic);
         }
 
         public static void WriteDictionary(
@@ -141,5 +133,8 @@ namespace Sentry.Internal.Extensions
             JsonValueKind.Object => json.GetObjectDictionary(),
             _ => null
         };
+
+        public static string GetStringOrThrow(this JsonElement json) =>
+            json.GetString() ?? throw new InvalidOperationException("JSON string is null.");
     }
 }

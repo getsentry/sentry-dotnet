@@ -75,9 +75,9 @@ namespace Sentry
         public static UserFeedback FromJson(JsonElement json)
         {
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var name = json.GetPropertyOrNull("name")?.GetString() ?? "";
-            var email = json.GetPropertyOrNull("email")?.GetString() ?? "";
-            var comments = json.GetPropertyOrNull("comments")?.GetString() ?? "";
+            var name = json.GetProperty("name").GetStringOrThrow();
+            var email = json.GetProperty("email").GetStringOrThrow();
+            var comments = json.GetProperty("comments").GetStringOrThrow();
 
             return new UserFeedback(eventId, email, comments, name);
         }

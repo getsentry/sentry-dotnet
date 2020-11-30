@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
@@ -60,8 +61,8 @@ namespace Sentry.Protocol
         /// </summary>
         public static Package FromJson(JsonElement json)
         {
-            var name = json.GetProperty("name").GetString() ?? "";
-            var version = json.GetProperty("version").GetString() ?? "";
+            var name = json.GetProperty("name").GetStringOrThrow();
+            var version = json.GetProperty("version").GetStringOrThrow();
 
             return new Package(name, version);
         }
