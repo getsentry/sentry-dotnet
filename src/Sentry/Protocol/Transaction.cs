@@ -10,11 +10,11 @@ namespace Sentry.Protocol
     public class Transaction : ISpan, IJsonSerializable
     {
         public string? Name { get; set; }
-        public SentryId SpanId { get; set; }
-        public SentryId? ParentSpanId { get; set; }
+        public SentryId SpanId { get; }
+        public SentryId? ParentSpanId { get; }
         public SentryId TraceId { get; set; }
-        public DateTimeOffset StartTimestamp { get; set; }
-        public DateTimeOffset EndTimestamp { get; set; }
+        public DateTimeOffset StartTimestamp { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset EndTimestamp { get; set; } = DateTimeOffset.Now;
         public string? Operation { get; set; }
         public string? Description { get; set; }
         public SpanStatus? Status { get; set; }
@@ -29,12 +29,23 @@ namespace Sentry.Protocol
         private List<Span>? _children;
         public IReadOnlyList<Span> Children => _children ??= new List<Span>();
 
+        public Transaction(SentryId? spanId = null, SentryId? parentSpanId = null)
+        {
+            SpanId = spanId ?? SentryId.Create();
+            ParentSpanId = parentSpanId;
+        }
+
         public ISpan StartChild()
         {
-            var span = new Span {ParentSpanId = SpanId};
+            var span = new Span(parentSpanId: SpanId);
             (_children ??= new List<Span>()).Add(span);
 
             return span;
+        }
+
+        public void Finish()
+        {
+            EndTimestamp = DateTimeOffset.Now;
         }
 
         public void WriteTo(Utf8JsonWriter writer)
@@ -115,11 +126,9 @@ namespace Sentry.Protocol
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new Dictionary<string, object>(v!));
             var children = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(Span.FromJson).ToList();
 
-            return new Transaction
+            return new Transaction(spanId, parentSpanId)
             {
                 Name = name,
-                SpanId = spanId,
-                ParentSpanId = parentSpanId,
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,

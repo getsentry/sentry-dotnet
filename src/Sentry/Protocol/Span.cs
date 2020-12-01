@@ -10,11 +10,11 @@ namespace Sentry.Protocol
     // https://develop.sentry.dev/sdk/event-payloads/span
     public class Span : ISpan, IJsonSerializable
     {
-        public SentryId SpanId { get; set; }
-        public SentryId? ParentSpanId { get; set; }
+        public SentryId SpanId { get; }
+        public SentryId? ParentSpanId { get; }
         public SentryId TraceId { get; set; }
-        public DateTimeOffset StartTimestamp { get; set; }
-        public DateTimeOffset EndTimestamp { get; set; }
+        public DateTimeOffset StartTimestamp { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset EndTimestamp { get; set; } = DateTimeOffset.Now;
         public string? Operation { get; set; }
         public string? Description { get; set; }
         public SpanStatus? Status { get; set; }
@@ -26,7 +26,18 @@ namespace Sentry.Protocol
         private ConcurrentDictionary<string, object>? _data;
         public IReadOnlyDictionary<string, object> Data => _data ??= new ConcurrentDictionary<string, object>();
 
-        public ISpan StartChild() => new Span {ParentSpanId = SpanId};
+        public Span(SentryId? spanId = null, SentryId? parentSpanId = null)
+        {
+            SpanId = spanId ?? SentryId.Create();
+            ParentSpanId = parentSpanId;
+        }
+
+        public ISpan StartChild() => new Span(parentSpanId: SpanId);
+
+        public void Finish()
+        {
+            EndTimestamp = DateTimeOffset.Now;
+        }
 
         public void WriteTo(Utf8JsonWriter writer)
         {
@@ -87,10 +98,8 @@ namespace Sentry.Protocol
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object>(v!));
 
-            return new Span
+            return new Span(spanId, parentSpanId)
             {
-                SpanId = spanId,
-                ParentSpanId = parentSpanId,
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,

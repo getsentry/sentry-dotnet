@@ -39,6 +39,11 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public override int GetHashCode() => _eventId.GetHashCode();
 
+        /// <summary>
+        /// Generates a new Sentry ID.
+        /// </summary>
+        public static SentryId Create() => new SentryId(Guid.NewGuid());
+
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
 

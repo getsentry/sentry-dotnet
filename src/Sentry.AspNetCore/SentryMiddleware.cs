@@ -104,7 +104,9 @@ namespace Sentry.AspNetCore
                     // event creation will be sent to Sentry
 
                     scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
+                    scope.Transaction.StartTimestamp = DateTimeOffset.Now;
                 });
+
                 try
                 {
                     await _next(context).ConfigureAwait(false);
@@ -121,6 +123,13 @@ namespace Sentry.AspNetCore
                     CaptureException(e);
 
                     ExceptionDispatchInfo.Capture(e).Throw();
+                }
+                finally
+                {
+                    hub.ConfigureScope(scope =>
+                    {
+                        scope.Transaction.Finish();
+                    });
                 }
 
                 void CaptureException(Exception e)

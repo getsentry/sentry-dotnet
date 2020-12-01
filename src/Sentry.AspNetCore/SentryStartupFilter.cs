@@ -7,12 +7,11 @@ namespace Sentry.AspNetCore
     /// <inheritdoc />
     internal class SentryStartupFilter : IStartupFilter
     {
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-            => e =>
-            {
-                _ = e.UseSentry();
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => e =>
+        {
+            e.UseSentry();
 
-                next(e);
-            };
+            next(e);
+        };
     }
 }

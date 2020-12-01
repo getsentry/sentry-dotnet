@@ -5,9 +5,9 @@ namespace Sentry.Protocol
 {
     public interface ISpan
     {
-        SentryId SpanId { get; set; }
+        SentryId SpanId { get; }
 
-        SentryId? ParentSpanId { get; set; }
+        SentryId? ParentSpanId { get; }
 
         SentryId TraceId { get; set; }
 
@@ -28,5 +28,7 @@ namespace Sentry.Protocol
         IReadOnlyDictionary<string, object> Data { get; }
 
         ISpan StartChild();
+
+        void Finish();
     }
 }
