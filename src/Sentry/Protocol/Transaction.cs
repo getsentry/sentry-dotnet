@@ -6,6 +6,7 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
+    // https://develop.sentry.dev/sdk/event-payloads/transaction
     public class Transaction : ISpan, IJsonSerializable
     {
         public string? Name { get; set; }
@@ -16,7 +17,7 @@ namespace Sentry.Protocol
         public DateTimeOffset EndTimestamp { get; set; }
         public string? Operation { get; set; }
         public string? Description { get; set; }
-        public string? Status { get; set; }
+        public SpanStatus? Status { get; set; }
         public bool IsSampled { get; set; }
 
         private Dictionary<string, string>? _tags;
@@ -25,7 +26,16 @@ namespace Sentry.Protocol
         private Dictionary<string, object>? _data;
         public IReadOnlyDictionary<string, object> Data => _data ??= new Dictionary<string, object>();
 
-        public ISpan StartChild() => new Span {ParentSpanId = SpanId};
+        private List<Span>? _children;
+        public IReadOnlyList<Span> Children => _children ??= new List<Span>();
+
+        public ISpan StartChild()
+        {
+            var span = new Span {ParentSpanId = SpanId};
+            (_children ??= new List<Span>()).Add(span);
+
+            return span;
+        }
 
         public void WriteTo(Utf8JsonWriter writer)
         {
@@ -57,9 +67,9 @@ namespace Sentry.Protocol
                 writer.WriteString("description", Description);
             }
 
-            if (!string.IsNullOrWhiteSpace(Status))
+            if (Status is {} status)
             {
-                writer.WriteString("status", Status);
+                writer.WriteString("status", status.ToString().ToLowerInvariant());
             }
 
             writer.WriteBoolean("sampled", IsSampled);
@@ -72,6 +82,18 @@ namespace Sentry.Protocol
             if (_data is {} data && data.Any())
             {
                 writer.WriteDictionary("data", data!);
+            }
+
+            if (_children is {} children && children.Any())
+            {
+                writer.WriteStartArray("spans");
+
+                foreach (var i in children)
+                {
+                    writer.WriteSerializableValue(i);
+                }
+
+                writer.WriteEndArray();
             }
 
             writer.WriteEndObject();
@@ -87,10 +109,11 @@ namespace Sentry.Protocol
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset() ?? default;
             var operation = json.GetPropertyOrNull("op")?.GetString();
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var status = json.GetPropertyOrNull("status")?.GetString();
+            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
             var sampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new Dictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new Dictionary<string, object>(v!));
+            var children = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(Span.FromJson).ToList();
 
             return new Transaction
             {
@@ -105,7 +128,8 @@ namespace Sentry.Protocol
                 Status = status,
                 IsSampled = sampled,
                 _tags = tags,
-                _data = data
+                _data = data,
+                _children = children
             };
         }
     }

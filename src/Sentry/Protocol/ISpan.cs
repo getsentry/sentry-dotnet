@@ -19,7 +19,7 @@ namespace Sentry.Protocol
 
         string? Description { get; set; }
 
-        string? Status { get; set; }
+        SpanStatus? Status { get; set; }
 
         bool IsSampled { get; set; }
 

@@ -7,6 +7,7 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
+    // https://develop.sentry.dev/sdk/event-payloads/span
     public class Span : ISpan, IJsonSerializable
     {
         public SentryId SpanId { get; set; }
@@ -16,7 +17,7 @@ namespace Sentry.Protocol
         public DateTimeOffset EndTimestamp { get; set; }
         public string? Operation { get; set; }
         public string? Description { get; set; }
-        public string? Status { get; set; }
+        public SpanStatus? Status { get; set; }
         public bool IsSampled { get; set; }
 
         private ConcurrentDictionary<string, string>? _tags;
@@ -52,9 +53,9 @@ namespace Sentry.Protocol
                 writer.WriteString("description", Description);
             }
 
-            if (!string.IsNullOrWhiteSpace(Status))
+            if (Status is {} status)
             {
-                writer.WriteString("status", Status);
+                writer.WriteString("status", status.ToString().ToLowerInvariant());
             }
 
             writer.WriteBoolean("sampled", IsSampled);
@@ -81,7 +82,7 @@ namespace Sentry.Protocol
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset() ?? default;
             var operation = json.GetPropertyOrNull("op")?.GetString();
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var status = json.GetPropertyOrNull("status")?.GetString();
+            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
             var sampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object>(v!));

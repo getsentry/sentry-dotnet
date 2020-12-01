@@ -383,6 +383,35 @@ namespace Sentry
         /// </remarks>
         public TimeSpan CacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
+        private double _traceSampleRate = 1.0;
+
+        /// <summary>
+        /// Indicates the percentage of the tracing data that is collected.
+        /// Setting this to <code>0</code> discards all trace data.
+        /// Setting this to <code>1.0</code> collects all trace data.
+        /// Values outside of this range are invalid.
+        /// </summary>
+        public double TraceSampleRate
+        {
+            get => _traceSampleRate;
+            set
+            {
+                if (value < 0 || value > 1)
+                {
+                    throw new InvalidOperationException(
+                        $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1."
+                    );
+                }
+
+                _traceSampleRate = value;
+            }
+        }
+
+        /// <summary>
+        /// Custom logic that determines trace sample rate depending on the context.
+        /// </summary>
+        public ISentryTraceSampler? TraceSampler { get; set; }
+
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
