@@ -13,8 +13,8 @@ namespace Sentry.Protocol
         public SentryId SpanId { get; }
         public SentryId? ParentSpanId { get; }
         public SentryId TraceId { get; set; }
-        public DateTimeOffset StartTimestamp { get; set; } = DateTimeOffset.Now;
-        public DateTimeOffset EndTimestamp { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset StartTimestamp { get; set; }
+        public DateTimeOffset EndTimestamp { get; set; }
         public string? Operation { get; set; }
         public string? Description { get; set; }
         public SpanStatus? Status { get; set; }
@@ -30,6 +30,7 @@ namespace Sentry.Protocol
         {
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
+            StartTimestamp = EndTimestamp = DateTimeOffset.Now;
         }
 
         public ISpan StartChild() => new Span(parentSpanId: SpanId);
