@@ -91,8 +91,8 @@ namespace Sentry.Protocol
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SentryId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var startTimestamp = json.GetPropertyOrNull("start_timestamp")?.GetDateTimeOffset() ?? default;
-            var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset() ?? default;
+            var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
+            var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());

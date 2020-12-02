@@ -52,8 +52,6 @@ namespace Sentry.Extensibility
         {
         }
 
-        public Transaction GetTransaction(string operation) => new Transaction(operation);
-
         /// <summary>
         /// No-Op.
         /// </summary>

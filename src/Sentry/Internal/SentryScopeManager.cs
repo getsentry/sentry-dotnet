@@ -97,12 +97,6 @@ namespace Sentry.Internal
             }
         }
 
-        public Transaction GetTransaction(string operation)
-        {
-            var (scope, _) = GetCurrent();
-            return scope.Transaction ?? scope.CreateTransaction(operation);
-        }
-
         public void BindClient(ISentryClient? client)
         {
             _options.DiagnosticLogger?.LogDebug("Binding a new client to the current scope.");

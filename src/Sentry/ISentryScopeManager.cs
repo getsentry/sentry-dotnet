@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -56,7 +55,5 @@ namespace Sentry
         /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
         /// <param name="scopeCallback">The callback to run with the one time scope.</param>
         void WithScope(Action<Scope> scopeCallback);
-
-        Transaction GetTransaction(string operation);
     }
 }

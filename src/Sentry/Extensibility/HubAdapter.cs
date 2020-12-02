@@ -71,10 +71,6 @@ namespace Sentry.Extensibility
         public void WithScope(Action<Scope> scopeCallback)
             => SentrySdk.WithScope(scopeCallback);
 
-        [DebuggerStepThrough]
-        public Transaction GetTransaction(string operation)
-            => SentrySdk.GetTransaction(operation);
-
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>

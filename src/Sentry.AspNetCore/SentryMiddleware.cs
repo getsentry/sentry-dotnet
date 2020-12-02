@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETSTANDARD2_0
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -9,11 +10,13 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
+using Transaction = Sentry.Protocol.Transaction;
 
 namespace Sentry.AspNetCore
 {
@@ -94,6 +97,19 @@ namespace Sentry.AspNetCore
                     });
                 }
 
+                var routeData = context.GetRouteData();
+                var controller = routeData.Values["controller"]?.ToString();
+                var action = routeData.Values["action"]?.ToString();
+                var area = routeData.Values["area"]?.ToString();
+
+                // TODO: What if it's not using controllers (i.e. endpoints)?
+
+                var transactionName = area == null
+                    ? $"{controller}.{action}"
+                    : $"{area}.{controller}.{action}";
+
+                var transaction = new Transaction(transactionName, "http.server");
+
                 hub.ConfigureScope(scope =>
                 {
                     // At the point lots of stuff from the request are not yet filled
@@ -104,12 +120,12 @@ namespace Sentry.AspNetCore
                     // event creation will be sent to Sentry
 
                     scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
+                    scope.Transaction = transaction;
                 });
-
-                var transaction = hub.GetTransaction("http.server");
 
                 try
                 {
+                    transaction.StartTimestamp = DateTimeOffset.Now;
                     await _next(context).ConfigureAwait(false);
 
                     // When an exception was handled by other component (i.e: UseExceptionHandler feature).

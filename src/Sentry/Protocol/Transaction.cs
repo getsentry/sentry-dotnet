@@ -9,7 +9,7 @@ namespace Sentry.Protocol
     // https://develop.sentry.dev/sdk/event-payloads/transaction
     public class Transaction : ISpan, IJsonSerializable
     {
-        public string? Name { get; set; }
+        public string Name { get; }
         public SentryId SpanId { get; }
         public SentryId? ParentSpanId { get; }
         public SentryId TraceId { get; set; }
@@ -29,15 +29,20 @@ namespace Sentry.Protocol
         private List<Span>? _children;
         public IReadOnlyList<Span> Children => _children ??= new List<Span>();
 
-        internal Transaction(SentryId? spanId = null, SentryId? parentSpanId = null, string operation = "unknown")
+        internal Transaction(
+            string name,
+            SentryId? spanId = null,
+            SentryId? parentSpanId = null,
+            string operation = "unknown")
         {
+            Name = name;
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
             Operation = operation;
             StartTimestamp = EndTimestamp = DateTimeOffset.Now;
         }
 
-        public Transaction(string operation) : this(null, null, operation) {}
+        public Transaction(string name, string operation) : this(name, null, null, operation) {}
 
         public ISpan StartChild(string operation)
         {
@@ -116,12 +121,12 @@ namespace Sentry.Protocol
 
         public static Transaction FromJson(JsonElement json)
         {
-            var name = json.GetPropertyOrNull("name")?.GetString();
+            var name = json.GetProperty("name").GetStringOrThrow();
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SentryId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var startTimestamp = json.GetPropertyOrNull("start_timestamp")?.GetDateTimeOffset() ?? default;
-            var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset() ?? default;
+            var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
+            var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
@@ -130,9 +135,8 @@ namespace Sentry.Protocol
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
             var children = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(Span.FromJson).ToList();
 
-            return new Transaction(spanId, parentSpanId, operation)
+            return new Transaction(name, spanId, parentSpanId, operation)
             {
-                Name = name,
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
