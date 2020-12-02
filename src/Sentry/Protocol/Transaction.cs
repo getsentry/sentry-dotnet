@@ -123,8 +123,8 @@ namespace Sentry.Protocol
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
             var sampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new Dictionary<string, string>(v!));
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new Dictionary<string, object>(v!));
+            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
             var children = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(Span.FromJson).ToList();
 
             return new Transaction(spanId, parentSpanId)
@@ -137,8 +137,8 @@ namespace Sentry.Protocol
                 Description = description,
                 Status = status,
                 IsSampled = sampled,
-                _tags = tags,
-                _data = data,
+                _tags = tags!,
+                _data = data!,
                 _children = children
             };
         }

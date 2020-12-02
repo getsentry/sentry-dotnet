@@ -129,7 +129,11 @@ namespace Sentry
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
         private Transaction? _transaction;
-        public Transaction Transaction => _transaction ??= new Transaction();
+        public Transaction Transaction
+        {
+            get => _transaction ??= new Transaction();
+            set => _transaction = value;
+        }
 
         /// <summary>
         /// Creates a scope with the specified options.

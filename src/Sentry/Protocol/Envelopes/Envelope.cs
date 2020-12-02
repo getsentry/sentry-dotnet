@@ -111,9 +111,8 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromTransaction(Transaction transaction)
         {
-            var header = new Dictionary<string, object>
+            var header = new Dictionary<string, object?>
             {
-                // TODO: Is this right?
                 [EventIdKey] = transaction.SpanId.ToString()
             };
 

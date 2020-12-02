@@ -280,7 +280,7 @@ namespace Sentry
         /// Conflicting keys are not overriden.
         /// This is a shallow copy.
         /// </remarks>
-        public static void Apply(this IScope from, IScope to)
+        public static void Apply(this Scope from, Scope to)
         {
             // Not to throw on code that ignores nullability warnings.
             // ReSharper disable ConditionIsAlwaysTrueOrFalse

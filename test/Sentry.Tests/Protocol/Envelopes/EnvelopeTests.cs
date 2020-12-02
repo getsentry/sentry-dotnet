@@ -405,7 +405,7 @@ namespace Sentry.Tests.Protocol.Envelopes
         {
             // Arrange
             var feedback = new UserFeedback(
-                new SentryId(Guid.NewGuid()),
+                SentryId.Create(),
                 "foo@bar.com",
                 "Everything sucks",
                 "Donald J. Trump"

@@ -94,6 +94,8 @@ namespace Sentry.AspNetCore
                     });
                 }
 
+                Transaction? transaction = null;
+
                 hub.ConfigureScope(scope =>
                 {
                     // At the point lots of stuff from the request are not yet filled
@@ -104,11 +106,17 @@ namespace Sentry.AspNetCore
                     // event creation will be sent to Sentry
 
                     scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
-                    scope.Transaction.StartTimestamp = DateTimeOffset.Now;
+                    transaction = scope.Transaction;
                 });
 
                 try
                 {
+                    if (transaction is {})
+                    {
+                        transaction.StartTimestamp = DateTimeOffset.Now;
+                        transaction.Operation = "http.server";
+                    }
+
                     await _next(context).ConfigureAwait(false);
 
                     // When an exception was handled by other component (i.e: UseExceptionHandler feature).
@@ -126,10 +134,7 @@ namespace Sentry.AspNetCore
                 }
                 finally
                 {
-                    hub.ConfigureScope(scope =>
-                    {
-                        scope.Transaction.Finish();
-                    });
+                    transaction?.Finish();
                 }
 
                 void CaptureException(Exception e)

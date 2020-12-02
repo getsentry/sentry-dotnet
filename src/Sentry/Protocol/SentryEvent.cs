@@ -201,7 +201,7 @@ namespace Sentry
         {
             Exception = exception;
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
-            EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
+            EventId = eventId != default ? eventId : SentryId.Create();
             ScopeOptions = options;
             Platform = Constants.Platform;
         }

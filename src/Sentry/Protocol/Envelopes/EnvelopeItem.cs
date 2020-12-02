@@ -182,7 +182,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromTransaction(Transaction transaction)
         {
-            var header = new Dictionary<string, object>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueTransaction
             };
