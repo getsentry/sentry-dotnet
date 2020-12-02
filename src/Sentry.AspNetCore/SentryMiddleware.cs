@@ -144,7 +144,7 @@ namespace Sentry.AspNetCore
                 finally
                 {
                     transaction.Finish(
-                        SpanStatusMapper.FromStatusCode(context.Response.StatusCode)
+                        GetSpanStatusFromCode(context.Response.StatusCode)
                     );
                 }
 
@@ -186,5 +186,24 @@ namespace Sentry.AspNetCore
                 scope.Populate(Activity.Current);
             }
         }
+
+        private static SpanStatus GetSpanStatusFromCode(int statusCode) => statusCode switch
+        {
+            < 400 => SpanStatus.Ok,
+            400 => SpanStatus.InvalidArgument,
+            401 => SpanStatus.Unauthenticated,
+            403 => SpanStatus.PermissionDenied,
+            404 => SpanStatus.NotFound,
+            409 => SpanStatus.AlreadyExists,
+            429 => SpanStatus.ResourceExhausted,
+            499 => SpanStatus.Cancelled,
+            < 500 => SpanStatus.InvalidArgument,
+            500 => SpanStatus.InternalError,
+            501 => SpanStatus.Unimplemented,
+            503 => SpanStatus.Unavailable,
+            504 => SpanStatus.DeadlineExceeded,
+            < 600 => SpanStatus.InternalError,
+            _ => SpanStatus.UnknownError
+        };
     }
 }
