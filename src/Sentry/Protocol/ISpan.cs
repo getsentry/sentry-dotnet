@@ -29,6 +29,6 @@ namespace Sentry.Protocol
 
         ISpan StartChild(string operation);
 
-        void Finish();
+        void Finish(SpanStatus status = SpanStatus.Ok);
     }
 }

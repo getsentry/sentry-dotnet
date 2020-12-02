@@ -36,9 +36,10 @@ namespace Sentry.Protocol
 
         public ISpan StartChild(string operation) => new Span(null, SpanId, operation);
 
-        public void Finish()
+        public void Finish(SpanStatus status = SpanStatus.Ok)
         {
             EndTimestamp = DateTimeOffset.Now;
+            Status = status;
         }
 
         public void WriteTo(Utf8JsonWriter writer)

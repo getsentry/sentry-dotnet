@@ -52,9 +52,10 @@ namespace Sentry.Protocol
             return span;
         }
 
-        public void Finish()
+        public void Finish(SpanStatus status = SpanStatus.Ok)
         {
             EndTimestamp = DateTimeOffset.Now;
+            Status = status;
         }
 
         public void WriteTo(Utf8JsonWriter writer)
