@@ -15,7 +15,7 @@ namespace Sentry.Protocol
         public SentryId TraceId { get; set; }
         public DateTimeOffset StartTimestamp { get; set; }
         public DateTimeOffset EndTimestamp { get; set; }
-        public string? Operation { get; set; }
+        public string Operation { get; }
         public string? Description { get; set; }
         public SpanStatus? Status { get; set; }
         public bool IsSampled { get; set; }
@@ -29,16 +29,19 @@ namespace Sentry.Protocol
         private List<Span>? _children;
         public IReadOnlyList<Span> Children => _children ??= new List<Span>();
 
-        public Transaction(SentryId? spanId = null, SentryId? parentSpanId = null)
+        internal Transaction(SentryId? spanId = null, SentryId? parentSpanId = null, string operation = "unknown")
         {
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
+            Operation = operation;
             StartTimestamp = EndTimestamp = DateTimeOffset.Now;
         }
 
-        public ISpan StartChild()
+        public Transaction(string operation) : this(null, null, operation) {}
+
+        public ISpan StartChild(string operation)
         {
-            var span = new Span(parentSpanId: SpanId);
+            var span = new Span(null, SpanId, operation);
             (_children ??= new List<Span>()).Add(span);
 
             return span;
@@ -119,7 +122,7 @@ namespace Sentry.Protocol
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var startTimestamp = json.GetPropertyOrNull("start_timestamp")?.GetDateTimeOffset() ?? default;
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset() ?? default;
-            var operation = json.GetPropertyOrNull("op")?.GetString();
+            var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
             var sampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
@@ -127,13 +130,12 @@ namespace Sentry.Protocol
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
             var children = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(Span.FromJson).ToList();
 
-            return new Transaction(spanId, parentSpanId)
+            return new Transaction(spanId, parentSpanId, operation)
             {
                 Name = name,
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
-                Operation = operation,
                 Description = description,
                 Status = status,
                 IsSampled = sampled,

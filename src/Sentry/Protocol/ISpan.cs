@@ -15,7 +15,7 @@ namespace Sentry.Protocol
 
         DateTimeOffset EndTimestamp { get; set; }
 
-        string? Operation { get; set; }
+        string Operation { get; }
 
         string? Description { get; set; }
 
@@ -27,7 +27,7 @@ namespace Sentry.Protocol
 
         IReadOnlyDictionary<string, object> Data { get; }
 
-        ISpan StartChild();
+        ISpan StartChild(string operation);
 
         void Finish();
     }

@@ -307,5 +307,9 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
             => _hub.CaptureUserFeedback(new UserFeedback(eventId, email, comments, name));
+
+        [DebuggerStepThrough]
+        public static Transaction GetTransaction(string operation)
+            => _hub.GetTransaction(operation);
     }
 }

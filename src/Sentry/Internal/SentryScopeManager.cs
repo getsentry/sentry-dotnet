@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
@@ -94,6 +95,12 @@ namespace Sentry.Internal
                 var scope = GetCurrent();
                 scopeCallback.Invoke(scope.Key);
             }
+        }
+
+        public Transaction GetTransaction(string operation)
+        {
+            var (scope, _) = GetCurrent();
+            return scope.Transaction ?? scope.CreateTransaction(operation);
         }
 
         public void BindClient(ISentryClient? client)

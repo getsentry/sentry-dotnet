@@ -98,6 +98,11 @@ namespace Sentry.Internal
             }
         }
 
+        public Transaction GetTransaction(string operation)
+        {
+            return ScopeManager.GetTransaction(operation);
+        }
+
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)

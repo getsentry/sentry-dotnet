@@ -128,12 +128,7 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
-        private Transaction? _transaction;
-        public Transaction Transaction
-        {
-            get => _transaction ??= new Transaction();
-            set => _transaction = value;
-        }
+        public Transaction? Transaction { get; set; }
 
         /// <summary>
         /// Creates a scope with the specified options.
@@ -148,6 +143,9 @@ namespace Sentry
             : this(new SentryOptions())
         {
         }
+
+        public Transaction CreateTransaction(string operation) =>
+            Transaction = new Transaction(operation);
 
         /// <summary>
         /// Clones the current <see cref="Scope"/>.
