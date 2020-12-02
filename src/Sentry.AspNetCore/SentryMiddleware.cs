@@ -144,6 +144,7 @@ namespace Sentry.AspNetCore
                 finally
                 {
                     transaction.Finish();
+                    transaction.Status = SpanStatusMapper.FromStatusCode(context.Response.StatusCode);
                 }
 
                 void CaptureException(Exception e)
