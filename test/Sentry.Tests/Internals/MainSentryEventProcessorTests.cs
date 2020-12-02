@@ -434,6 +434,24 @@ namespace Sentry.Tests.Internals
             }
         }
 
+        [Fact]
+        public void Process_AppliesDefaultTags()
+        {
+            //Arrange
+            const string key = "key";
+            const string expected = "default tag value";
+
+            var evt = new SentryEvent();
+            _fixture.SentryOptions.DefaultTags[key] = expected;
+            var sut = _fixture.GetSut();
+
+            //Act
+            _ = sut.Process(evt);
+
+            //Assert
+            Assert.Equal(expected, evt.Tags[key]);
+        }
+
         public static IEnumerable<object[]> CultureInfoTestCase()
         {
             yield return new object[]

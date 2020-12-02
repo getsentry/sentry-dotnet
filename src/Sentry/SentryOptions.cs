@@ -384,6 +384,14 @@ namespace Sentry
         public TimeSpan CacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
         /// <summary>
+        /// Defaults tags to add to all events. (These are indexed by Sentry).
+        /// </summary>
+        /// <remarks>
+        /// If the key already exists in the event, it will not be overwritten by a default tag.
+        /// </remarks>
+        public Dictionary<string, string> DefaultTags { get; } = new Dictionary<string, string>();
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
