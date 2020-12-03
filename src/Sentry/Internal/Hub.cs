@@ -129,6 +129,18 @@ namespace Sentry.Internal
             }
         }
 
+        public void CaptureTransaction(Transaction transaction)
+        {
+            try
+            {
+                _ownedClient.CaptureTransaction(transaction);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+            }
+        }
+
         public async Task FlushAsync(TimeSpan timeout)
         {
             try

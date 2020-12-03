@@ -88,6 +88,7 @@ namespace Sentry.AspNetCore
                 {
                     context.Request.EnableBuffering();
                 }
+
                 if (_options.FlushOnCompletedRequest)
                 {
                     context.Response.OnCompleted(async () =>

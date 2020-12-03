@@ -56,6 +56,8 @@ namespace Sentry.Protocol
         {
             EndTimestamp = DateTimeOffset.Now;
             Status = status;
+
+            SentrySdk.CaptureTransaction(this);
         }
 
         public void WriteTo(Utf8JsonWriter writer)

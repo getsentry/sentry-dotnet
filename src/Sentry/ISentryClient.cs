@@ -28,6 +28,8 @@ namespace Sentry
         /// <param name="userFeedback">The user feedback to send to Sentry.</param>
         void CaptureUserFeedback(UserFeedback userFeedback);
 
+        void CaptureTransaction(Transaction transaction);
+
         /// <summary>
         /// Flushes events queued up.
         /// </summary>

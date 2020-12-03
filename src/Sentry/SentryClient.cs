@@ -112,15 +112,39 @@ namespace Sentry
                 _options.DiagnosticLogger?.LogWarning("User feedback dropped due to empty id.");
                 return;
             }
-            else if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
-                 string.IsNullOrWhiteSpace(userFeedback.Comments))
+
+            if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
+                string.IsNullOrWhiteSpace(userFeedback.Comments))
             {
                 //Ignore the userfeedback if a required field is null or empty.
                 _options.DiagnosticLogger?.LogWarning("User feedback discarded due to one or more required fields missing.");
                 return;
             }
 
-            _ = CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+            CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+        }
+
+        public void CaptureTransaction(Transaction transaction)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            if (transaction.SpanId.Equals(SentryId.Empty))
+            {
+                _options.DiagnosticLogger?.LogWarning("Transaction dropped due to empty id.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(transaction.Name) ||
+                string.IsNullOrWhiteSpace(transaction.Operation))
+            {
+                _options.DiagnosticLogger?.LogWarning("Transaction discarded due to one or more required fields missing.");
+                return;
+            }
+
+            CaptureEnvelope(Envelope.FromTransaction(transaction));
         }
 
         /// <summary>

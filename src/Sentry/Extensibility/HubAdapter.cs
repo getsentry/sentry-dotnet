@@ -133,6 +133,14 @@ namespace Sentry.Extensibility
             => SentrySdk.CaptureEvent(evt, scope);
 
         /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void CaptureTransaction(Transaction transaction)
+            => SentrySdk.CaptureTransaction(transaction);
+
+        /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>
         /// </summary>
         [DebuggerStepThrough]
