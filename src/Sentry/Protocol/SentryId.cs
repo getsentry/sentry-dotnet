@@ -47,6 +47,8 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
 
+        public static SentryId Parse(string value) => new SentryId(Guid.Parse(value));
+
         /// <summary>
         /// Parses from JSON.
         /// </summary>

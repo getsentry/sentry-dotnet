@@ -72,6 +72,12 @@ namespace Sentry.Protocol
             _hub.CaptureTransaction(this);
         }
 
+        public SentryTraceHeader GetTraceHeader() => new SentryTraceHeader(
+            TraceId,
+            SpanId,
+            IsSampled
+        );
+
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();

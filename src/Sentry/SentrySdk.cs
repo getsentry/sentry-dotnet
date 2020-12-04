@@ -315,5 +315,9 @@ namespace Sentry
         [DebuggerStepThrough]
         public static Transaction CreateTransaction(string name, string operation)
             => _hub.CreateTransaction(name, operation);
+
+        [DebuggerStepThrough]
+        public static SentryTraceHeader? GetTraceHeader()
+            => _hub.GetTraceHeader();
     }
 }

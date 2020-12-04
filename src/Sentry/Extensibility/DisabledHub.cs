@@ -52,8 +52,16 @@ namespace Sentry.Extensibility
         {
         }
 
+        /// <summary>
+        /// Returns a dummy transaction.
+        /// </summary>
         public Transaction CreateTransaction(string name, string operation) =>
             new Transaction(this, name, operation);
+
+        /// <summary>
+        /// Returns null.
+        /// </summary>
+        public SentryTraceHeader? GetTraceHeader() => null;
 
         /// <summary>
         /// No-Op.

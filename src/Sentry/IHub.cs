@@ -22,5 +22,7 @@ namespace Sentry
         SentryId LastEventId { get; }
 
         Transaction CreateTransaction(string name, string operation);
+
+        SentryTraceHeader? GetTraceHeader();
     }
 }
