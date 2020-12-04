@@ -121,7 +121,6 @@ namespace Sentry.AspNetCore
                     // event creation will be sent to Sentry
 
                     scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
-                    scope.Transaction = transaction;
                 });
 
                 try
