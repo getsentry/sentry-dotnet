@@ -22,6 +22,8 @@ namespace Sentry
     public class SentryOptions : IScopeOptions
     {
         private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
+        private Dictionary<string, string>? _defaultTags;
+
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal string ClientVersion { get; } = SdkName;
@@ -389,7 +391,7 @@ namespace Sentry
         /// <remarks>
         /// If the key already exists in the event, it will not be overwritten by a default tag.
         /// </remarks>
-        public Dictionary<string, string> DefaultTags => _defaultTags =?? new Dictionary();
+        public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
