@@ -308,7 +308,7 @@ namespace Serilog
 
             if (defaultTags?.Any() == true)
             {
-                foreach(var tag in defaultTags)
+                foreach (var tag in defaultTags)
                 {
                     sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
                 }
