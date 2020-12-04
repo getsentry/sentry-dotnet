@@ -370,14 +370,16 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogDebug("anything");
 
-            _fixture.Hub.DidNotReceive()
+
+            _fixture.Hub.DidNotReceiveWithAnyArgs()
                 .AddBreadcrumb(
-                    _fixture.Clock,
-                    Arg.Any<string>(),
-                    _fixture.CategoryName,
-                    BreadcrumbType,
-                    null,
-                    Arg.Any<BreadcrumbLevel>());
+                    default,
+                    string.Empty,
+                    default,
+                    default,
+                    default,
+                    default);
+
         }
 
         [Fact]
@@ -387,14 +389,15 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.LogTrace("anything");
 
-            _fixture.Hub.DidNotReceive()
+            _fixture.Hub.DidNotReceiveWithAnyArgs()
                 .AddBreadcrumb(
-                    _fixture.Clock,
-                    Arg.Any<string>(),
-                    _fixture.CategoryName,
-                    BreadcrumbType,
-                    null,
-                    Arg.Any<BreadcrumbLevel>());
+                    default,
+                    string.Empty,
+                    default,
+                    default,
+                    default,
+                    default);
+
         }
 
         [Fact]

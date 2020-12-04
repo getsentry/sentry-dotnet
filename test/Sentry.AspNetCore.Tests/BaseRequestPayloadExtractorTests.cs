@@ -12,7 +12,7 @@ namespace Sentry.AspNetCore.Tests
         protected class Fixture
         {
             public HttpRequest HttpRequestCore { get; set; } = Substitute.For<HttpRequest>();
-            public IHttpRequest HttpRequest { get; set; } 
+            public IHttpRequest HttpRequest { get; set; }
             public Stream Stream { get; set; } = Substitute.For<Stream>();
 
             public Fixture()
@@ -63,7 +63,7 @@ namespace Sentry.AspNetCore.Tests
 
             Assert.Null(sut.ExtractPayload(TestFixture.HttpRequest));
 
-            TestFixture.Stream.DidNotReceive().Position = Arg.Any<int>();
+            TestFixture.Stream.DidNotReceive().Position = Arg.Any<long>();
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace Sentry.AspNetCore.Tests
 
             Assert.Null(sut.ExtractPayload(TestFixture.HttpRequest));
 
-            TestFixture.Stream.DidNotReceive().Position = Arg.Any<int>();
+            TestFixture.Stream.DidNotReceive().Position = Arg.Any<long>();
         }
     }
 }
