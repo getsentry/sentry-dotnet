@@ -52,6 +52,9 @@ namespace Sentry.Extensibility
         {
         }
 
+        public Transaction CreateTransaction(string name, string operation) =>
+            new Transaction(this, name, operation);
+
         /// <summary>
         /// No-Op.
         /// </summary>
@@ -63,6 +66,10 @@ namespace Sentry.Extensibility
         /// No-Op.
         /// </summary>
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => SentryId.Empty;
+
+        public void CaptureTransaction(Transaction transaction)
+        {
+        }
 
         /// <summary>
         /// No-Op.

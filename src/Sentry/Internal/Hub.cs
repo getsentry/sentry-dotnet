@@ -100,6 +100,14 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
+        public Transaction CreateTransaction(string name, string operation)
+        {
+            var trans = new Transaction(this, name, operation);
+            ConfigureScope(scope => scope.Transaction = trans);
+
+            return trans;
+        }
+
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try

@@ -311,5 +311,9 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void CaptureTransaction(Transaction transaction)
             => _hub.CaptureTransaction(transaction);
+
+        [DebuggerStepThrough]
+        public static Transaction CreateTransaction(string name, string operation)
+            => _hub.CreateTransaction(name, operation);
     }
 }

@@ -9,6 +9,8 @@ namespace Sentry.Protocol
     // https://develop.sentry.dev/sdk/event-payloads/transaction
     public class Transaction : ISpan, IJsonSerializable
     {
+        private readonly IHub _hub;
+
         public string Name { get; }
         public SentryId SpanId { get; }
         public SentryId? ParentSpanId { get; }
@@ -30,11 +32,13 @@ namespace Sentry.Protocol
         public IReadOnlyList<Span> Children => _children ??= new List<Span>();
 
         internal Transaction(
+            IHub hub,
             string name,
             SentryId? spanId = null,
             SentryId? parentSpanId = null,
             string operation = "unknown")
         {
+            _hub = hub;
             Name = name;
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
@@ -42,7 +46,15 @@ namespace Sentry.Protocol
             StartTimestamp = EndTimestamp = DateTimeOffset.Now;
         }
 
-        public Transaction(string name, string operation) : this(name, null, null, operation) {}
+        public Transaction(IHub hub, string name, string operation)
+            : this(
+                hub,
+                name,
+                null,
+                null,
+                operation)
+        {
+        }
 
         public ISpan StartChild(string operation)
         {
@@ -57,7 +69,7 @@ namespace Sentry.Protocol
             EndTimestamp = DateTimeOffset.Now;
             Status = status;
 
-            SentrySdk.CaptureTransaction(this);
+            _hub.CaptureTransaction(this);
         }
 
         public void WriteTo(Utf8JsonWriter writer)
