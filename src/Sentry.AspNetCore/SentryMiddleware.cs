@@ -109,7 +109,7 @@ namespace Sentry.AspNetCore
                     ? $"{controller}.{action}"
                     : $"{area}.{controller}.{action}";
 
-                var transaction = new Transaction(transactionName, "http.server");
+                var transaction = hub.CreateTransaction(transactionName, "http.server");
 
                 hub.ConfigureScope(scope =>
                 {
