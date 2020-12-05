@@ -40,15 +40,15 @@ namespace Sentry.Internal
             var cachingTransport = new CachingTransport(httpTransport, _options);
 
             // If configured, flush existing cache
-            if (_options.CacheFlushTimeout > TimeSpan.Zero)
+            if (_options.InitCacheFlushTimeout > TimeSpan.Zero)
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Flushing existing cache during transport activation up to {0}.",
-                    _options.CacheFlushTimeout
+                    _options.InitCacheFlushTimeout
                 );
 
                 // Use a timeout to avoid waiting for too long
-                using var timeout = new CancellationTokenSource(_options.CacheFlushTimeout);
+                using var timeout = new CancellationTokenSource(_options.InitCacheFlushTimeout);
 
                 try
                 {
