@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sentry.Protocol;
@@ -20,14 +19,6 @@ namespace Sentry.Extensions.Logging
         /// The minimum breadcrumb level.
         /// </value>
         public LogLevel MinimumBreadcrumbLevel { get; set; } = LogLevel.Information;
-
-        /// <summary>
-        /// Defaults tags to add to all events.
-        /// </summary>
-        /// <remarks>
-        /// If the key already exists in the event, it will not be overwritten by a default tag.
-        /// </remarks>
-        public Dictionary<string, string> DefaultTags { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets or sets the minimum event level.

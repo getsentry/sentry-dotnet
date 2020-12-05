@@ -4,10 +4,12 @@
 
 * Abandon ValueTask #611
 * Fix Cache deleted on HttpTransport exception. (#610) @lucas-zimerman
-* Add SentryScopeStateProcessor #603
+* Add `SentryScopeStateProcessor` #603
 * Add net5.0 TFM to libraries #606
 * Add more logging to CachingTransport #619
-* Bump Microsoft.Bcl.AsyncInterfaces to 5.0.0 #618
+* Bump `Microsoft.Bcl.AsyncInterfaces` to 5.0.0 #618
+* `DefaultTags` moved from `SentryLoggingOptions` to `SentryOptions` (#637) @PureKrome
+* `Sentry.Serilog` can accept DefaultTags (#637) @PureKrome 
 
 ## 3.0.0-alpha.5
 

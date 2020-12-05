@@ -196,6 +196,20 @@ namespace Sentry
             return options;
         }
 
+        /// <summary>
+        /// Applies the default tags to an event without resetting existing tags.
+        /// </summary>
+        /// <param name="options">The options to read the default tags from.</param>
+        /// <param name="event">The event to apply the tags to.</param>
+        public static void ApplyDefaultTags(this SentryOptions options, SentryEvent @event)
+        {
+            foreach (var defaultTag in options.DefaultTags
+                .Where(t => !@event.Tags.TryGetValue(t.Key, out _)))
+            {
+                @event.SetTag(defaultTag.Key, defaultTag.Value);
+            }
+        }
+
         internal static void SetupLogging(this SentryOptions options)
         {
             if (options.Debug)
@@ -212,6 +226,5 @@ namespace Sentry
                 options.DiagnosticLogger = null;
             }
         }
-
     }
 }
