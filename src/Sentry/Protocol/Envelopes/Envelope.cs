@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -86,6 +87,28 @@ namespace Sentry.Protocol.Envelopes
             };
 
             return new Envelope(header, items);
+        }
+
+        /// <summary>
+        /// Creates an envelope that contains a single event.
+        /// </summary>
+        public static Envelope FromEvent(SentryEvent @event, IEnumerable<EnvelopeItem> items)
+        {
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                [EventIdKey] = @event.EventId.ToString()
+            };
+
+            IEnumerable<EnvelopeItem> Get()
+            {
+                yield return EnvelopeItem.FromEvent(@event);
+                foreach (var item in items)
+                {
+                    yield return item;
+                }
+            }
+
+            return new Envelope(header, Get().ToList());
         }
 
         /// <summary>

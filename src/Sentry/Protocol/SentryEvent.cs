@@ -169,6 +169,9 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
+        // This isn't supposed to show up on the event so we need to reconsider this.
+        IReadOnlyCollection<Attachment> IScope.Attachments => Array.Empty<Attachment>();
+
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
         /// </summary>

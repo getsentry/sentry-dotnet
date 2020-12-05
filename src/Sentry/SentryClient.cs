@@ -194,7 +194,8 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent)) ?
+            var attachments = scope.Attachments.Select(a => a.ToEnvelopeItem());
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, attachments)) ?
                 processedEvent.EventId : SentryId.Empty;
         }
 
@@ -238,7 +239,7 @@ namespace Sentry
                 {
                     {"message", e.Message}
                 };
-                if(e.StackTrace is not null)
+                if (e.StackTrace is not null)
                 {
                     data.Add("stackTrace", e.StackTrace);
                 }

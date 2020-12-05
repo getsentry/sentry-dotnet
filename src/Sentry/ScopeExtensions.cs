@@ -195,6 +195,41 @@ namespace Sentry
         }
 
         /// <summary>
+        /// Add an attachment to be sent with any event captured while this scope is active.
+        /// </summary>
+        /// <param name="scope">The scope to apply.</param>
+        /// <param name="filePath">The path to the file to attach.</param>
+        public static void AddAttachment(this IScope scope, string filePath)
+        {
+            if (scope.Attachments is ConcurrentBag<Attachment> attachments)
+            {
+                attachments.Add(new Attachment(filePath));
+            }
+        }
+
+        /// <summary>
+        /// Add an attachment to be sent with any event captured while this scope is active.
+        /// </summary>
+        /// <param name="scope">The scope to apply.</param>
+        /// <param name="bytes">The bytes to send.</param>
+        /// <param name="name">The name of the attachment.</param>
+        public static void AddAttachment(this IScope scope, byte[] bytes, string name)
+        {
+            if (scope.Attachments is ConcurrentBag<Attachment> attachments)
+            {
+                attachments.Add(new Attachment(bytes, name));
+            }
+        }
+
+        internal static void AddAttachment(this IScope scope, Attachment attachment)
+        {
+            if (scope.Attachments is ConcurrentBag<Attachment> attachments)
+            {
+                attachments.Add(attachment);
+            }
+        }
+
+        /// <summary>
         /// Sets the fingerprint to the <see cref="IScope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
@@ -317,6 +352,11 @@ namespace Sentry
                 {
                     to.SetTag(key, value);
                 }
+            }
+
+            foreach (var attachment in from.Attachments)
+            {
+                to.AddAttachment(attachment);
             }
 
             from.Contexts.CopyTo(to.Contexts);

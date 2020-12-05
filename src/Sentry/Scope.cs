@@ -51,6 +51,14 @@ namespace Sentry
         /// </summary>
         internal bool HasEvaluated => _hasEvaluated;
 
+        private readonly Lazy<ConcurrentBag<Attachment>> _lazyAttachments =
+            new Lazy<ConcurrentBag<Attachment>>(LazyThreadSafetyMode.PublicationOnly);
+
+        /// <summary>
+        /// Attachments to be sent when events within this scope are captured.
+        /// </summary>
+        public IReadOnlyCollection<Attachment> Attachments => _lazyAttachments.Value;
+
         private readonly Lazy<ConcurrentBag<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
             new Lazy<ConcurrentBag<ISentryEventExceptionProcessor>>(LazyThreadSafetyMode.PublicationOnly);
 

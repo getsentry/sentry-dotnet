@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Xsl;
 using Sentry;
@@ -141,11 +143,13 @@ internal static class Program
                 s.Level = SentryLevel.Fatal;
                 s.Transaction = "main";
                 s.Environment = "SpecialEnvironment";
+                s.AddAttachment("README.md");
+                s.AddAttachment(Encoding.UTF8.GetBytes(new string('i', 300)), "iiiiii.txt");
 
-                SentrySdk.CaptureMessage("Fatal message!");
+                SentrySdk.CaptureMessage("Fatal message with attachments!");
             });
 
-            var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
+            var eventId = SentrySdk.CaptureMessage("Some warning! (With user feedback)", SentryLevel.Warning);
 
             // Send an user feedback linked to the warning.
             var timestamp = DateTime.Now.Ticks;

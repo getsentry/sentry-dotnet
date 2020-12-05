@@ -19,7 +19,7 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
         private const string LengthKey = "length";
-        private const string FileNameKey = "file_name";
+        private const string FileNameKey = "filename";
 
         /// <summary>
         /// Header associated with this envelope item.
@@ -123,8 +123,26 @@ namespace Sentry.Protocol.Envelopes
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = "attachment",
+                ["content_type"] = "plain/text",
                 [FileNameKey] = Path.GetFileName(filePath),
                 [LengthKey] = file.Length
+            };
+
+            return new EnvelopeItem(header, payload);
+        }
+
+        /// <summary>
+        /// Creates an envelope item from bytes.
+        /// </summary>
+        public static EnvelopeItem FromBytes(byte[] bytes, string name)
+        {
+            var payload = new StreamSerializable(new MemoryStream(bytes));
+
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                [TypeKey] = "attachment",
+                [FileNameKey] = name,
+                [LengthKey] = bytes.Length
             };
 
             return new EnvelopeItem(header, payload);

@@ -102,5 +102,10 @@ namespace Sentry.Protocol
         /// Arbitrary key-value for this event
         /// </summary>
         IReadOnlyDictionary<string, string> Tags { get; }
+
+        /// <summary>
+        /// The attachments of the current scope.
+        /// </summary>
+        IReadOnlyCollection<Attachment> Attachments { get; }
     }
 }
