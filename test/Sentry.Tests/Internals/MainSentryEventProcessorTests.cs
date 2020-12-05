@@ -434,22 +434,120 @@ namespace Sentry.Tests.Internals
             }
         }
 
-        [Fact]
-        public void Process_AppliesDefaultTags()
+        public static TheoryData<IDictionary<string, string>, IDictionary<string, string>, IDictionary<string, string>> AppliesDefaultTagTheoryData =>
+            new TheoryData<IDictionary<string, string>, IDictionary<string, string>, IDictionary<string, string>>
+        {
+                // No event tags, single default.
+                {
+                    null, // No event tags.
+                    new Dictionary<string, string>{ { "key-1", "value-1" } }, // 1x default tags.
+                    new Dictionary<string, string>{ { "key-1", "value-1" } }  // No event tags, so expect just the default tags.
+                },
+
+                // No event tags, multiple defaults.
+                {
+                    null, // No event tags.
+                    new Dictionary<string, string>
+                    {
+                        { "key-1", "value-1" },
+                        { "key-2", "value-2" },
+                        { "key-3", "value-3" }
+                    },
+                    new Dictionary<string, string>
+                    {
+                        { "key-1", "value-1" },
+                        { "key-2", "value-2" },
+                        { "key-3", "value-3" }
+                    }
+                },
+
+                // 1x event tags, 1x default tag (which is not the same as the event tag)
+                {
+                    new Dictionary<string, string>{ { "key-1", "value-1" } }, // 1x event tags.
+                    new Dictionary<string, string>{ { "key-2", "value-2" } }, // 1x default tags.
+                    new Dictionary<string, string>
+                    {
+                        { "key-1", "value-1" },
+                        { "key-2", "value-2" }
+                    }
+                },
+
+                // 3x event tags, 3x default tag (which _all are the same_ as the event tags).
+                // Expected: no duplicates, just the event tags.
+                {
+                    new Dictionary<string, string>{
+                        { "key-1", "value-1" },
+                        { "key-2", "value-2" },
+                        { "key-3", "value-3" }
+                    },
+                    new Dictionary<string, string>
+                    {
+                        { "key-1", "value-1" }, // Note: these are the same as the event tags, above.
+                        { "key-2", "value-2" },
+                        { "key-3", "value-3" }
+                    },
+                    new Dictionary<string, string>
+                    {
+                        { "key-1", "value-1" },
+                        { "key-2", "value-2" },
+                        { "key-3", "value-3" }
+                    }
+                },
+
+                // 3x event tags, 3x default tag but _we have a mix of both_ 
+                // Expected: the unique event tags and the unique default tags. no duplicates.
+                {
+                    new Dictionary<string, string>{
+                        { "key-1", "value-1" },
+                        { "key-2", "value-2" },
+                        { "key-3", "value-3" }
+                    },
+                    new Dictionary<string, string>
+                    {
+                        { "key-1", "value-1" }, // Duplicate (will be ignored).
+                        { "key-4", "value-4" }, // Unique.
+                        { "key-3", "value-3" }  // Duplicate (will be ignored).
+                    },
+                    new Dictionary<string, string>
+                    {
+                        { "key-1", "value-1" }, // Event tag.
+                        { "key-2", "value-2" }, // Event tag.
+                        { "key-3", "value-3" }, // Event tag.
+                        { "key-4", "value-4" }  // Default tag.
+                    }
+                }
+        };
+
+        [Theory]
+        [MemberData(nameof(AppliesDefaultTagTheoryData))]
+        public void Process_AppliesDefaultTags(IDictionary<string, string> eventTags,
+            IDictionary<string, string> defaultTags,
+            IDictionary<string, string> expectedTags)
         {
             //Arrange
-            const string key = "key";
-            const string expected = "default tag value";
-
             var evt = new SentryEvent();
-            _fixture.SentryOptions.DefaultTags[key] = expected;
+
+            // Any scoped tags for this event?
+            if (eventTags != null)
+            {
+                evt.SetTags(eventTags);
+            }
+
+            foreach(var defaultTag in defaultTags)
+            {
+                _fixture.SentryOptions.DefaultTags[defaultTag.Key] = defaultTag.Value;
+            }
+            
             var sut = _fixture.GetSut();
 
             //Act
             _ = sut.Process(evt);
 
             //Assert
-            Assert.Equal(expected, evt.Tags[key]);
+            foreach(var expectedTag in expectedTags)
+            {
+                Assert.Equal(expectedTag.Value, evt.Tags[expectedTag.Key]);
+            }
         }
 
         public static IEnumerable<object[]> CultureInfoTestCase()
