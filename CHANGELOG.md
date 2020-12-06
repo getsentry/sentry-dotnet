@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+* Ref renamed `CacheFlushTimeout` to `InitCacheFlushTimeout` (#638) @lucas-zimerman
+
 ## 3.0.0-alpha.6
 
 * Abandon ValueTask #611

@@ -383,7 +383,7 @@ namespace Sentry
         /// even though that might slow down the app start. If set to false, the app might crash
         /// too quickly, before Sentry can capture the cached error in the background.
         /// </remarks>
-        public TimeSpan CacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan InitCacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// Defaults tags to add to all events. (These are indexed by Sentry).
