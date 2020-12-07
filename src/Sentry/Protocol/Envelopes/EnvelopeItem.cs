@@ -18,6 +18,7 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeKey = "type";
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
+        private const string TypeValueTransaction = "transaction";
         private const string LengthKey = "length";
         private const string FileNameKey = "file_name";
 
@@ -227,23 +228,14 @@ namespace Sentry.Protocol.Envelopes
 
             var payloadType = header.GetValueOrDefault(TypeKey) as string;
 
-            // Event (or transaction)
+            // Event
             if (string.Equals(payloadType, TypeValueEvent, StringComparison.OrdinalIgnoreCase))
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
                 var json = Json.Parse(buffer);
 
-                var innerType = json.GetPropertyOrNull("type")?.GetString();
-
-                if (string.Equals(innerType, "transaction", StringComparison.OrdinalIgnoreCase))
-                {
-                    return new JsonSerializable(Transaction.FromJson(json));
-                }
-                else
-                {
-                    return new JsonSerializable(SentryEvent.FromJson(json));
-                }
+                return new JsonSerializable(SentryEvent.FromJson(json));
             }
 
             // User report
@@ -254,6 +246,16 @@ namespace Sentry.Protocol.Envelopes
                 var json = Json.Parse(buffer);
 
                 return new JsonSerializable(UserFeedback.FromJson(json));
+            }
+
+            // Transaction
+            if (string.Equals(payloadType, TypeValueTransaction, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                var json = Json.Parse(buffer);
+
+                return new JsonSerializable(Transaction.FromJson(json));
             }
 
             // Arbitrary payload

@@ -16,7 +16,6 @@ using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
-using Transaction = Sentry.Protocol.Transaction;
 
 namespace Sentry.AspNetCore
 {
