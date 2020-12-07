@@ -108,7 +108,7 @@ namespace Sentry
 
             if (userFeedback.EventId.Equals(SentryId.Empty))
             {
-                //Ignore the userfeedback if EventId is empty
+                // Ignore the user feedback if EventId is empty
                 _options.DiagnosticLogger?.LogWarning("User feedback dropped due to empty id.");
                 return;
             }
@@ -116,7 +116,7 @@ namespace Sentry
             if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
                 string.IsNullOrWhiteSpace(userFeedback.Comments))
             {
-                //Ignore the userfeedback if a required field is null or empty.
+                // Ignore the user feedback if a required field is null or empty.
                 _options.DiagnosticLogger?.LogWarning("User feedback discarded due to one or more required fields missing.");
                 return;
             }
@@ -165,6 +165,7 @@ namespace Sentry
                     return SentryId.Empty;
                 }
             }
+
             if (@event.Exception != null && _options.ExceptionFilters?.Length > 0)
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
@@ -174,6 +175,7 @@ namespace Sentry
                     return SentryId.Empty;
                 }
             }
+
             scope ??= new Scope(_options);
 
             _options.DiagnosticLogger?.LogInfo("Capturing event.");
@@ -181,6 +183,12 @@ namespace Sentry
             // Evaluate and copy before invoking the callback
             scope.Evaluate();
             scope.Apply(@event);
+
+            // Set transaction's span ID
+            if (scope.Transaction is {} transaction)
+            {
+                @event.SetTag("span_id", transaction.SpanId.ToString());
+            }
 
             if (scope.Level != null)
             {
