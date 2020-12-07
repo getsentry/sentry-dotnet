@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -42,8 +43,9 @@ namespace Sentry.Protocol
             Name = name;
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
-            Operation = operation;
+            TraceId = SentryId.Create();
             StartTimestamp = EndTimestamp = DateTimeOffset.Now;
+            Operation = operation;
         }
 
         public Transaction(IHub hub, string name, string operation)
@@ -82,19 +84,21 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
+            writer.WriteString("type", "transaction");
+
             if (!string.IsNullOrWhiteSpace(Name))
             {
                 writer.WriteString("name", Name);
             }
 
-            writer.WriteString("span_id", SpanId);
+            writer.WriteSerializable("span_id", SpanId);
 
             if (ParentSpanId is {} parentSpanId)
             {
-                writer.WriteString("parent_span_id", parentSpanId);
+                writer.WriteSerializable("parent_span_id", parentSpanId);
             }
 
-            writer.WriteString("trace_id", TraceId);
+            writer.WriteSerializable("trace_id", TraceId);
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteString("timestamp", EndTimestamp);
 
@@ -142,6 +146,8 @@ namespace Sentry.Protocol
 
         public static Transaction FromJson(JsonElement json)
         {
+            var hub = HubAdapter.Instance;
+
             var name = json.GetProperty("name").GetStringOrThrow();
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SentryId.FromJson);
@@ -156,7 +162,7 @@ namespace Sentry.Protocol
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
             var children = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(Span.FromJson).ToList();
 
-            return new Transaction(name, spanId, parentSpanId, operation)
+            return new Transaction(hub, name, spanId, parentSpanId, operation)
             {
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,

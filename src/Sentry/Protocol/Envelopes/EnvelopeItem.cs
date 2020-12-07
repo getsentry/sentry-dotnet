@@ -18,7 +18,6 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeKey = "type";
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
-        private const string TypeValueTransaction = "transaction";
         private const string LengthKey = "length";
         private const string FileNameKey = "file_name";
 
@@ -184,7 +183,8 @@ namespace Sentry.Protocol.Envelopes
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
-                [TypeKey] = TypeValueTransaction
+                // Transaction is an event
+                [TypeKey] = TypeValueEvent
             };
 
             return new EnvelopeItem(header, new JsonSerializable(transaction));
@@ -227,16 +227,23 @@ namespace Sentry.Protocol.Envelopes
 
             var payloadType = header.GetValueOrDefault(TypeKey) as string;
 
-            // Event
+            // Event (or transaction)
             if (string.Equals(payloadType, TypeValueEvent, StringComparison.OrdinalIgnoreCase))
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                using var jsonDocument = JsonDocument.Parse(buffer);
+                var json = Json.Parse(buffer);
 
-                return new JsonSerializable(
-                    SentryEvent.FromJson(jsonDocument.RootElement.Clone())
-                );
+                var innerType = json.GetPropertyOrNull("type")?.GetString();
+
+                if (string.Equals(innerType, "transaction", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new JsonSerializable(Transaction.FromJson(json));
+                }
+                else
+                {
+                    return new JsonSerializable(SentryEvent.FromJson(json));
+                }
             }
 
             // User report
@@ -244,23 +251,9 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                using var jsonDocument = JsonDocument.Parse(buffer);
+                var json = Json.Parse(buffer);
 
-                return new JsonSerializable(
-                    UserFeedback.FromJson(jsonDocument.RootElement.Clone())
-                );
-            }
-
-            // Transaction
-            if (string.Equals(payloadType, TypeValueTransaction, StringComparison.OrdinalIgnoreCase))
-            {
-                var bufferLength = (int)(payloadLength ?? stream.Length);
-                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                using var jsonDocument = JsonDocument.Parse(buffer);
-
-                return new JsonSerializable(
-                    Transaction.FromJson(jsonDocument.RootElement.Clone())
-                );
+                return new JsonSerializable(UserFeedback.FromJson(json));
             }
 
             // Arbitrary payload

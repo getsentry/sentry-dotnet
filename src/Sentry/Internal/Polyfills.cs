@@ -3,9 +3,16 @@
 // Polyfills to bridge the missing APIs in older versions of the framework/standard.
 // In some cases, these just proxy calls to existing methods but also provide a signature that matches .netstd2.1
 
-using System.Linq;
-
 #if NET461 || NETSTANDARD2_0
+namespace System
+{
+    internal static class Extensions
+    {
+        public static string[] Split(this string str, char c, StringSplitOptions options = StringSplitOptions.None) =>
+            str.Split(new[] {c}, options);
+    }
+}
+
 namespace System.IO
 {
     using Threading;
@@ -26,6 +33,8 @@ namespace System.IO
 
 namespace System.Collections.Generic
 {
+    using Linq;
+
     internal static class Extensions
     {
         public static void Deconstruct<TKey, TValue>(

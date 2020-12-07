@@ -2,12 +2,18 @@ using System;
 
 namespace Sentry.Protocol
 {
+    /// <summary>
+    /// Sentry trace header.
+    /// </summary>
     public class SentryTraceHeader
     {
         private readonly SentryId _traceId;
         private readonly SentryId _spanId;
         private readonly bool? _isSampled;
 
+        /// <summary>
+        /// Initializes an instance of <see cref="SentryTraceHeader"/>.
+        /// </summary>
         public SentryTraceHeader(SentryId traceId, SentryId spanId, bool? isSampled)
         {
             _traceId = traceId;
@@ -15,10 +21,14 @@ namespace Sentry.Protocol
             _isSampled = isSampled;
         }
 
+        /// <inheritdoc />
         public override string ToString() => _isSampled is {} isSampled
             ? $"{_traceId}-{_spanId}-{(isSampled ? 1 : 0)}"
             : $"{_traceId}-{_spanId}";
 
+        /// <summary>
+        /// Parses <see cref="SentryTraceHeader"/> from string.
+        /// </summary>
         public static SentryTraceHeader Parse(string value)
         {
             var components = value.Split('-', StringSplitOptions.RemoveEmptyEntries);

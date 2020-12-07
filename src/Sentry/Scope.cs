@@ -144,9 +144,6 @@ namespace Sentry
         {
         }
 
-        public Transaction CreateTransaction(string operation) =>
-            Transaction = new Transaction(operation);
-
         /// <summary>
         /// Clones the current <see cref="Scope"/>.
         /// </summary>

@@ -63,14 +63,6 @@ namespace Sentry
             }
         }
 
-        /// <summary>
-        /// Queues the event to be sent to Sentry.
-        /// </summary>
-        /// <remarks>
-        /// An optional scope, if provided, will be applied to the event.
-        /// </remarks>
-        /// <param name="event">The event to send to Sentry.</param>
-        /// <param name="scope">The optional scope to augment the event with.</param>
         /// <inheritdoc />
         public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
         {
@@ -95,10 +87,7 @@ namespace Sentry
             }
         }
 
-        /// <summary>
-        /// Captures a user feedback.
-        /// </summary>
-        /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+        /// <inheritdoc />
         public void CaptureUserFeedback(UserFeedback userFeedback)
         {
             if (_disposed)
@@ -124,6 +113,7 @@ namespace Sentry
             CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
         }
 
+        /// <inheritdoc />
         public void CaptureTransaction(Transaction transaction)
         {
             if (_disposed)

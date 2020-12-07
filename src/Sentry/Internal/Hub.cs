@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -110,7 +111,7 @@ namespace Sentry.Internal
 
         public SentryTraceHeader? GetTraceHeader()
         {
-            var (currentScope,_) = ScopeManager.GetCurrent();
+            var (currentScope, _) = ScopeManager.GetCurrent();
             return currentScope.Transaction?.GetTraceHeader();
         }
 

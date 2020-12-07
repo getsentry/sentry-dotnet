@@ -30,8 +30,9 @@ namespace Sentry.Protocol
         {
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
-            Operation = operation;
+            TraceId = SentryId.Create();
             StartTimestamp = EndTimestamp = DateTimeOffset.Now;
+            Operation = operation;
         }
 
         public ISpan StartChild(string operation) => new Span(null, SpanId, operation);
@@ -46,14 +47,14 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
-            writer.WriteString("span_id", SpanId);
+            writer.WriteSerializable("span_id", SpanId);
 
             if (ParentSpanId is {} parentSpanId)
             {
-                writer.WriteString("parent_span_id", parentSpanId);
+                writer.WriteSerializable("parent_span_id", parentSpanId);
             }
 
-            writer.WriteString("trace_id", TraceId);
+            writer.WriteSerializable("trace_id", TraceId);
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteString("timestamp", EndTimestamp);
 
