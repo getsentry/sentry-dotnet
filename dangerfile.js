@@ -1,3 +1,5 @@
+import * as core from '@actions/core';
+
 const PR_NUMBER = danger.github.pr.number;
 const PR_AUTHOR   = danger.github.pr.user.login;
 const PR_URL = danger.github.pr.html_url;
@@ -8,34 +10,9 @@ const octokit = new github.GitHub(process.env.GITHUB_TOKEN);
 const perms = ["none", "read", "write", "admin"];
 
 const username  = github.context.actor;
-async function HasCommentPermission()
+function HasCommentPermission()
 {
-  const response = await octokit.repos.getCollaboratorPermissionLevel({
-    ...github.context.repo,
-    username: username
-  });
-
-  let permission = response.data.permission; // Permission level of actual user
-  let argPerm = core.getInput("permission"); // Permission level passed in through args
-
-  let yourPermIdx = perms.indexOf(permission);
-  let requiredPermIdx = perms.indexOf(argPerm);
-
-  core.debug(`[Action] User Permission: ${permission}`);
-  core.debug(`[Action] Minimum Action Permission: ${argPerm}`);
-
-  // If the index of your permission is at least or greater than the required,
-  // exit successfully. Otherwise fail.
-  if (yourPermIdx >= requiredPermIdx) 
-  {
-	console.log("no permission");
-    return false;
-  } 
-  else 
-  {
-	console.log("has permission");
-    return true;
-  }
+	return core.getInput('comment-permitted') !== 0;
 }
 
 
@@ -93,7 +70,7 @@ async function checkChangelog() {
 
   if (!hasChangelog) 
   {
-	if(await HasCommentPermission()){
+	if(HasCommentPermission()){
 		fail("Please consider adding a changelog entry for the next release.");
 		markdown(getChangelogDetailsHtml());
 	}
@@ -108,7 +85,7 @@ async function checkChangelog() {
 async function checkIfFeature() {
    const title = danger.github.pr.title;
    if(title.startsWith('feat:')){
-		if(await HasCommentPermission()){
+		if(HasCommentPermission()){
 			 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
 		}
    }  
