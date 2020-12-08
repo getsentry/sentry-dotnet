@@ -75,6 +75,7 @@ async function checkChangelog() {
 	}
 	fail("Please consider adding a changelog entry for the next release.");
   }
+}
 
 async function checkIfFeature() {
    const title = danger.github.pr.title;
