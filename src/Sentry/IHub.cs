@@ -23,6 +23,6 @@ namespace Sentry
 
         Transaction CreateTransaction(string name, string operation);
 
-        SentryTraceHeader? GetTraceHeader();
+        SentryTraceHeader? GetSentryTrace();
     }
 }

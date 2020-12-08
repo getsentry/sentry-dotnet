@@ -76,7 +76,7 @@ namespace Sentry.Extensibility
             => SentrySdk.CreateTransaction(name, operation);
 
         [DebuggerStepThrough]
-        public SentryTraceHeader? GetTraceHeader()
+        public SentryTraceHeader? GetSentryTrace()
             => SentrySdk.GetTraceHeader();
 
         /// <summary>

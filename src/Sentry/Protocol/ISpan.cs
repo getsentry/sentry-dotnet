@@ -9,17 +9,17 @@ namespace Sentry.Protocol
 
         SentryId? ParentSpanId { get; }
 
-        SentryId TraceId { get; set; }
+        SentryId TraceId { get; }
 
-        DateTimeOffset StartTimestamp { get; set; }
+        DateTimeOffset StartTimestamp { get; }
 
-        DateTimeOffset EndTimestamp { get; set; }
+        DateTimeOffset? EndTimestamp { get; }
 
         string Operation { get; }
 
         string? Description { get; set; }
 
-        SpanStatus? Status { get; set; }
+        SpanStatus? Status { get; }
 
         bool IsSampled { get; set; }
 

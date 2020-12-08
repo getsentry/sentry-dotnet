@@ -12,12 +12,12 @@ namespace Sentry.Protocol
     {
         public SentryId SpanId { get; }
         public SentryId? ParentSpanId { get; }
-        public SentryId TraceId { get; set; }
-        public DateTimeOffset StartTimestamp { get; set; }
-        public DateTimeOffset EndTimestamp { get; set; }
+        public SentryId TraceId { get; private set; }
+        public DateTimeOffset StartTimestamp { get; private set; }
+        public DateTimeOffset? EndTimestamp { get; private set; }
         public string Operation { get; }
         public string? Description { get; set; }
-        public SpanStatus? Status { get; set; }
+        public SpanStatus? Status { get; private set; }
         public bool IsSampled { get; set; }
 
         private ConcurrentDictionary<string, string>? _tags;
@@ -31,7 +31,7 @@ namespace Sentry.Protocol
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
-            StartTimestamp = EndTimestamp = DateTimeOffset.Now;
+            StartTimestamp = DateTimeOffset.Now;
             Operation = operation;
         }
 
@@ -56,7 +56,11 @@ namespace Sentry.Protocol
 
             writer.WriteSerializable("trace_id", TraceId);
             writer.WriteString("start_timestamp", StartTimestamp);
-            writer.WriteString("timestamp", EndTimestamp);
+
+            if (EndTimestamp is {} endTimestamp)
+            {
+                writer.WriteString("timestamp", endTimestamp);
+            }
 
             if (!string.IsNullOrWhiteSpace(Operation))
             {

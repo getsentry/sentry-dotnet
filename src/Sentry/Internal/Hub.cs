@@ -109,7 +109,7 @@ namespace Sentry.Internal
             return trans;
         }
 
-        public SentryTraceHeader? GetTraceHeader()
+        public SentryTraceHeader? GetSentryTrace()
         {
             var (currentScope, _) = ScopeManager.GetCurrent();
             return currentScope.Transaction?.GetTraceHeader();

@@ -61,7 +61,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns null.
         /// </summary>
-        public SentryTraceHeader? GetTraceHeader() => null;
+        public SentryTraceHeader? GetSentryTrace() => null;
 
         /// <summary>
         /// No-Op.
