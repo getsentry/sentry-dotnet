@@ -73,7 +73,10 @@ async function checkChangelog() {
 async function checkIfFeature() {
    const title = danger.github.pr.title;
    if(title.startsWith('feat:')){
-     message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
+	 try{
+		 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
+	 }
+	 catch(error){}
    }  
 }
 
