@@ -1,7 +1,7 @@
-const PR_NUMBER = danger.github.pr.number;
-const PR_AUTHOR   = danger.github.pr.user.login;
-const PR_URL = danger.github.pr.html_url;
-const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
+var PR_NUMBER;
+var PR_AUTHOR;
+var PR_URL;
+var PR_LINK;
 
 const CHANGELOG_SUMMARY_TITLE = `Instructions and example for changelog`;
 const CHANGELOG_BODY = `Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
@@ -82,6 +82,12 @@ async function checkIfFeature() {
 
 async function checkAll() {
 	/*
+
+	PR_NUMBER = danger.github.pr.number;
+	PR_AUTHOR   = danger.github.pr.user.login;
+	PR_URL = danger.github.pr.html_url;
+	PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
+
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
 
