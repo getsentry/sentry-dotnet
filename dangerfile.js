@@ -98,7 +98,6 @@ async function checkAll() {
 
   await checkIfFeature();
   await checkChangelog();
-  */
 }
 
 schedule(checkAll);
