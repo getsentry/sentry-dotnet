@@ -1,5 +1,4 @@
 using log4net.Core;
-using Sentry.Protocol;
 
 namespace Sentry.Log4Net
 {

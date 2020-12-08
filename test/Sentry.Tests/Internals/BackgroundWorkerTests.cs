@@ -6,7 +6,6 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using Xunit;
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sentry;
 using Sentry.Extensions.Logging;
-using Sentry.Protocol;
 
 internal class Program
 {

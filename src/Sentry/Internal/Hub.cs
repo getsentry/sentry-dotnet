@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
-using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
