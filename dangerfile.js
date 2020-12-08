@@ -1,7 +1,43 @@
-var PR_NUMBER;
-var PR_AUTHOR;
-var PR_URL;
-var PR_LINK;
+const PR_NUMBER = danger.github.pr.number;
+const PR_AUTHOR   = danger.github.pr.user.login;
+const PR_URL = danger.github.pr.html_url;
+const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
+
+const github = require("@actions/github");
+const octokit = new github.GitHub(process.env.GITHUB_TOKEN);
+const perms = ["none", "read", "write", "admin"];
+
+const username  = github.context.actor;
+async function HasCommentPermission()
+{
+  const response = await octokit.repos.getCollaboratorPermissionLevel({
+    ...github.context.repo,
+    username: username
+  });
+
+  let permission = response.data.permission; // Permission level of actual user
+  let argPerm = core.getInput("permission"); // Permission level passed in through args
+
+  let yourPermIdx = perms.indexOf(permission);
+  let requiredPermIdx = perms.indexOf(argPerm);
+
+  core.debug(`[Action] User Permission: ${permission}`);
+  core.debug(`[Action] Minimum Action Permission: ${argPerm}`);
+
+  // If the index of your permission is at least or greater than the required,
+  // exit successfully. Otherwise fail.
+  if (yourPermIdx >= requiredPermIdx) 
+  {
+	console.log("no permission");
+    return false;
+  } 
+  else 
+  {
+	console.log("has permission");
+    return true;
+  }
+}
+
 
 const CHANGELOG_SUMMARY_TITLE = `Instructions and example for changelog`;
 const CHANGELOG_BODY = `Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
@@ -47,59 +83,40 @@ async function containsChangelog(path) {
 }
 
 async function checkChangelog() {
-  console.log("A");
   const skipChangelog =
     danger.github && (danger.github.pr.body + "").includes("#skip-changelog");
-  console.log("B");
   if (skipChangelog) {
     return;
   }
 
   const hasChangelog = await containsChangelog("CHANGELOG.md");
 
-  console.log("C");
   if (!hasChangelog) {
     fail("Please consider adding a changelog entry for the next release.");
 	try
 	{
-		console.log("D");
-		markdown(getChangelogDetailsHtml());
-	}
-	catch(error)
-	{
-		//Fallback
-		console.log("E");
-		fail(getChangelogDetailsTxt());
+		if(await HasCommentPermission()){
+			markdown(getChangelogDetailsHtml());
+		}
+		else
+		{
+			//Fallback
+			console.log(getChangelogDetailsTxt());
+		}
 	}
   }
 }
 
 async function checkIfFeature() {
-   console.log("CheckIfFeature");
    const title = danger.github.pr.title;
-   console.log("check");
    if(title.startsWith('feat:')){
-	 try{
-		 console.log("EEE");
-		 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
-	 }
-	 catch(error)
-	 {
-		 console.log("III");
-	 }
+		if(await HasCommentPermission()){
+			 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
+		}
    }  
 }
 
 async function checkAll() {
-   PR_NUMBER = danger.github.pr.number;
-   console.log(PR_NUMBER);
-   PR_AUTHOR   = danger.github.pr.user.login;
-   console.log(PR_AUTHOR);
-   PR_URL = danger.github.pr.html_url;
-   console.log(PR_URL);
-   PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
-   console.log(PR_LINK);
-
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
 
