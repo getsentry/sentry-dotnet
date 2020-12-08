@@ -9,6 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: npx danger@10.5.2 ci
+      - run: npx danger ci
         env:
           DANGER_GITHUB_API_TOKEN: ${{ secrets.DANGER_TOKEN }}
