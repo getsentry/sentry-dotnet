@@ -1,7 +1,7 @@
 const PR_NUMBER = danger.github.pr.number;
 const PR_AUTHOR   = danger.github.pr.user.login;
 const PR_URL = danger.github.pr.html_url;
-const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR})`;
+const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
 
 function getCleanTitle() {
   const title = danger.github.pr.title;
