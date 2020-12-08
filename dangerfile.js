@@ -47,47 +47,58 @@ async function containsChangelog(path) {
 }
 
 async function checkChangelog() {
+  console.log("A");
   const skipChangelog =
     danger.github && (danger.github.pr.body + "").includes("#skip-changelog");
-
+  console.log("B");
   if (skipChangelog) {
     return;
   }
 
   const hasChangelog = await containsChangelog("CHANGELOG.md");
 
+  console.log("C");
   if (!hasChangelog) {
     fail("Please consider adding a changelog entry for the next release.");
 	try
 	{
+		console.log("D");
 		markdown(getChangelogDetailsHtml());
 	}
 	catch(error)
 	{
 		//Fallback
+		console.log("E");
 		fail(getChangelogDetailsTxt());
 	}
   }
 }
 
 async function checkIfFeature() {
+   console.log("CheckIfFeature");
    const title = danger.github.pr.title;
+   console.log("check");
    if(title.startsWith('feat:')){
 	 try{
+		 console.log("EEE");
 		 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
 	 }
-	 catch(error){}
+	 catch(error)
+	 {
+		 console.log("III");
+	 }
    }  
 }
 
 async function checkAll() {
-   console.log("Number");
    PR_NUMBER = danger.github.pr.number;
-   console.log("Author");
+   console.log(PR_NUMBER);
    PR_AUTHOR   = danger.github.pr.user.login;
-   console.log("Url");
+   console.log(PR_AUTHOR);
    PR_URL = danger.github.pr.html_url;
+   console.log(PR_URL);
    PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
+   console.log(PR_LINK);
 
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
