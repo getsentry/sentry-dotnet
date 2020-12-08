@@ -41,6 +41,10 @@ function getChangelogDetailsTxt() {
 		   CHANGELOG_END_BODY;
 }
 
+function HasPermissionToComment(){
+	return danger.github.pr.head.repo.git_url == danger.github.pr.base.repo.git_url;
+}
+
 async function containsChangelog(path) {
   const contents = await danger.github.utils.fileContents(path);
   return contents.includes(PR_LINK);
@@ -57,16 +61,21 @@ async function checkChangelog() {
 
   if (!hasChangelog) 
   {
-		//Fallback
-		console.log(getChangelogDetailsTxt());
-		fail("Please consider adding a changelog entry for the next release.");
+	if(HasPermissionToComment()
+	{
 		markdown(getChangelogDetailsHtml());
+	}
+	else
+	{
+		//Fallback
+		console.log(getChangelogDetailsTxt());			
+	}
+	fail("Please consider adding a changelog entry for the next release.");
   }
-}
 
 async function checkIfFeature() {
    const title = danger.github.pr.title;
-   if(title.startsWith('feat:')){
+   if(title.startsWith('feat:') && HasPermissionToComment()){
 	 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
    }  
 }
@@ -74,10 +83,7 @@ async function checkIfFeature() {
 async function checkAll() {
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
-  console.log("test");
-  console.log(danger.github.pr);
-  console.log("test2");
-  console.log(danger.github);
+  
   if (isDraft) {
     return;
   }
