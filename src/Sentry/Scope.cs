@@ -128,7 +128,13 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
+        /// <summary>
+        /// Transaction.
+        /// </summary>
         public Transaction? Transaction { get; set; }
+
+        /// <inheritdoc />
+        public string? TransactionName { get; set; }
 
         /// <summary>
         /// Creates a scope with the specified options.

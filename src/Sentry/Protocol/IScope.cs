@@ -59,6 +59,17 @@ namespace Sentry.Protocol
         string? Environment { get; set; }
 
         /// <summary>
+        /// The name of the transaction in which there was an event.
+        /// </summary>
+        /// <remarks>
+        /// A transaction should only be defined when it can be well defined.
+        /// On a Web framework, for example, a transaction is the route template
+        /// rather than the actual request path. That is so GET /user/10 and /user/20
+        /// (which have route template /user/{id}) are identified as the same transaction.
+        /// </remarks>
+        string? TransactionName { get; set; }
+
+        /// <summary>
         /// SDK information.
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>

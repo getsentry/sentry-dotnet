@@ -107,8 +107,6 @@ namespace Sentry.AspNetCore
                     ? $"{controller}.{action}"
                     : $"{area}.{controller}.{action}";
 
-                var transaction = hub.CreateTransaction(transactionName, "http.server");
-
                 hub.ConfigureScope(scope =>
                 {
                     // At the point lots of stuff from the request are not yet filled
@@ -121,9 +119,10 @@ namespace Sentry.AspNetCore
                     scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
                 });
 
+                var transaction = hub.CreateTransaction(transactionName, "http.server");
+
                 try
                 {
-                    transaction.StartTimestamp = DateTimeOffset.Now;
                     await _next(context).ConfigureAwait(false);
 
                     // When an exception was handled by other component (i.e: UseExceptionHandler feature).

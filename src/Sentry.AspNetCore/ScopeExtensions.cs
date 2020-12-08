@@ -86,6 +86,10 @@ namespace Sentry.AspNetCore
                     {
                         scope.SetTag("route.area", area);
                     }
+
+                    scope.TransactionName = area == null
+                        ? $"{controller}.{action}"
+                        : $"{area}.{controller}.{action}";
                 }
             }
             catch(Exception e)

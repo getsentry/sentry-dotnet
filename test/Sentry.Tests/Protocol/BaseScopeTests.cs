@@ -77,8 +77,8 @@ namespace Sentry.Tests.Protocol
         public void Transaction_Settable()
         {
             var expected = "Transaction";
-            _sut.Transaction = expected;
-            Assert.Same(expected, _sut.Transaction);
+            _sut.TransactionName = expected;
+            Assert.Same(expected, _sut.TransactionName);
         }
 
         [Fact]
