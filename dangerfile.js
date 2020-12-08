@@ -69,8 +69,9 @@ async function checkChangelog() {
 	else
 	{
 		//Fallback
+		console.log("Please consider adding a changelog entry for the next release.");
 		console.log(getChangelogDetailsTxt());			
-		exit 1;
+		process.exitCode = 1;
 	}
   }
 }
