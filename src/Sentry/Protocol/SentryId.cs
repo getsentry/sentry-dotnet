@@ -8,7 +8,7 @@ namespace Sentry.Protocol
     /// </summary>
     public readonly struct SentryId : IEquatable<SentryId>, IJsonSerializable
     {
-        private readonly Guid _eventId;
+        private readonly Guid _guid;
 
         /// <summary>
         /// An empty sentry id.
@@ -18,7 +18,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Creates a new instance of a Sentry Id.
         /// </summary>
-        public SentryId(Guid guid) => _eventId = guid;
+        public SentryId(Guid guid) => _guid = guid;
 
         /// <summary>
         /// Sentry Id in the format Sentry recognizes.
@@ -28,16 +28,25 @@ namespace Sentry.Protocol
         /// dashes which sentry doesn't expect when searching events.
         /// </remarks>
         /// <returns>String representation of the event id.</returns>
-        public override string ToString() => _eventId.ToString("n");
+        public override string ToString() => _guid.ToString("n");
+
+        // Note: spans are sentry IDs with only 16 characters, rest being truncated.
+        // This is obviously a bad idea as it invalidates GUID's uniqueness properties
+        // (https://devblogs.microsoft.com/oldnewthing/20080627-00/?p=21823)
+        // but all other SDKs do it this way, so we have no choice but to comply.
+        /// <summary>
+        /// Returns a truncated ID.
+        /// </summary>
+        public string ToShortString() => ToString().Substring(0, 16);
 
         /// <inheritdoc />
-        public bool Equals(SentryId other) => _eventId.Equals(other._eventId);
+        public bool Equals(SentryId other) => _guid.Equals(other._guid);
 
         /// <inheritdoc />
         public override bool Equals(object? obj) => obj is SentryId other && Equals(other);
 
         /// <inheritdoc />
-        public override int GetHashCode() => _eventId.GetHashCode();
+        public override int GetHashCode() => _guid.GetHashCode();
 
         /// <summary>
         /// Generates a new Sentry ID.
@@ -74,7 +83,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// The <see cref="Guid"/> from the <see cref="SentryId"/>.
         /// </summary>
-        public static implicit operator Guid(SentryId sentryId) => sentryId._eventId;
+        public static implicit operator Guid(SentryId sentryId) => sentryId._guid;
 
         /// <summary>
         /// A <see cref="SentryId"/> from a <see cref="Guid"/>.

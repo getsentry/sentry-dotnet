@@ -91,11 +91,11 @@ namespace Sentry.Protocol
                 writer.WriteString("name", Name);
             }
 
-            writer.WriteSerializable("span_id", SpanId);
+            writer.WriteString("span_id", SpanId.ToShortString());
 
             if (ParentSpanId is {} parentSpanId)
             {
-                writer.WriteSerializable("parent_span_id", parentSpanId);
+                writer.WriteString("parent_span_id", parentSpanId.ToShortString());
             }
 
             writer.WriteSerializable("trace_id", TraceId);
