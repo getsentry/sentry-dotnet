@@ -1,20 +1,7 @@
-import * as core from '@actions/core';
-
 const PR_NUMBER = danger.github.pr.number;
 const PR_AUTHOR   = danger.github.pr.user.login;
 const PR_URL = danger.github.pr.html_url;
 const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
-
-const github = require("@actions/github");
-const octokit = new github.GitHub(process.env.GITHUB_TOKEN);
-const perms = ["none", "read", "write", "admin"];
-
-const username  = github.context.actor;
-function HasCommentPermission()
-{
-	return core.getInput('comment-permitted') !== 0;
-}
-
 
 const CHANGELOG_SUMMARY_TITLE = `Instructions and example for changelog`;
 const CHANGELOG_BODY = `Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
@@ -70,24 +57,17 @@ async function checkChangelog() {
 
   if (!hasChangelog) 
   {
-	if(HasCommentPermission()){
-		fail("Please consider adding a changelog entry for the next release.");
-		markdown(getChangelogDetailsHtml());
-	}
-	else
-	{
 		//Fallback
 		console.log(getChangelogDetailsTxt());
-	}
+		fail("Please consider adding a changelog entry for the next release.");
+		markdown(getChangelogDetailsHtml());
   }
 }
 
 async function checkIfFeature() {
    const title = danger.github.pr.title;
    if(title.startsWith('feat:')){
-		if(HasCommentPermission()){
-			 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
-		}
+	 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
    }  
 }
 
