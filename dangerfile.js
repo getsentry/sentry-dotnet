@@ -91,18 +91,16 @@ async function checkChangelog() {
 
   const hasChangelog = await containsChangelog("CHANGELOG.md");
 
-  if (!hasChangelog) {
-    fail("Please consider adding a changelog entry for the next release.");
-	try
+  if (!hasChangelog) 
+  {
+	if(await HasCommentPermission()){
+		fail("Please consider adding a changelog entry for the next release.");
+		markdown(getChangelogDetailsHtml());
+	}
+	else
 	{
-		if(await HasCommentPermission()){
-			markdown(getChangelogDetailsHtml());
-		}
-		else
-		{
-			//Fallback
-			console.log(getChangelogDetailsTxt());
-		}
+		//Fallback
+		console.log(getChangelogDetailsTxt());
 	}
   }
 }
