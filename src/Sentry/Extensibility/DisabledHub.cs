@@ -75,6 +75,9 @@ namespace Sentry.Extensibility
         /// </summary>
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => SentryId.Empty;
 
+        /// <summary>
+        /// No-Op.
+        /// </summary>
         public void CaptureTransaction(Transaction transaction)
         {
         }
