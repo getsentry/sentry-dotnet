@@ -61,7 +61,7 @@ async function checkChangelog() {
 
   if (!hasChangelog) 
   {
-	if(HasPermissionToComment()
+	if(HasPermissionToComment())
 	{
 		markdown(getChangelogDetailsHtml());
 	}
