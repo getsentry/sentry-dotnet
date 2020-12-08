@@ -1,7 +1,8 @@
 using System;
 using System.Text.Json;
+using Sentry.Protocol;
 
-namespace Sentry.Protocol
+namespace Sentry
 {
     /// <summary>
     /// The identifier of an event in Sentry.

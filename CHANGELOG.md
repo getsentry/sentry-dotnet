@@ -1,7 +1,8 @@
 # Changelog
 
 ## vNext
-
+ 
+* Ref moved SentryId from namespace Sentry.Protocol to Sentry (#643) @lucas-zimerman
 * Ref renamed `CacheFlushTimeout` to `InitCacheFlushTimeout` (#638) @lucas-zimerman
 
 ## 3.0.0-alpha.6

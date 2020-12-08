@@ -13,7 +13,6 @@ using NSubstitute;
 using Sentry.Extensions.Logging;
 using Sentry.Infrastructure;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests

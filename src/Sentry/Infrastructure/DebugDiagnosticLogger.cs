@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry.Infrastructure
 {
