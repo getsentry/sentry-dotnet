@@ -1,6 +1,7 @@
 const PR_NUMBER = danger.github.pr.number;
+const PR_AUTHOR   = danger.github.pr.author;
 const PR_URL = danger.github.pr.html_url;
-const PR_LINK = `[#${PR_NUMBER}](${PR_URL})`;
+const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR})`;
 
 function getCleanTitle() {
   const title = danger.github.pr.title;
@@ -15,12 +16,12 @@ function getChangelogDetails() {
 Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
  1. **Feat**: For new user-visible functionality.
  2. **Fix**: For user-visible bug fixes.
- 3. **Ref**: For features, refactory and bug fixes in internal operation.
+ 3. **Ref**: For features, refactors and bug fixes in internal operation.
 
 To the changelog entry, please add a link to this PR (consider a more descriptive message):
 
 \`\`\`md
-- ${getCleanTitle()}. (${PR_LINK})
+- ${getCleanTitle()}${PR_LINK}
 \`\`\`
 
 If none of the above apply, you can opt out by adding _#skip-changelog_ to the PR description.
@@ -54,8 +55,7 @@ async function checkIfFeature() {
    const title = danger.github.pr.title;
    if(title.startsWith('feat:')){
      message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
-   }
-  
+   }  
 }
 
 async function checkAll() {
