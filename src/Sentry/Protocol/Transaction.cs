@@ -82,46 +82,26 @@ namespace Sentry.Protocol
 
         public void WriteTo(Utf8JsonWriter writer)
         {
+            // Transaction has a weird structure where some of the fields
+            // are apparently stored inside "contexts.trace" object for
+            // unknown reasons.
+
             writer.WriteStartObject();
 
             writer.WriteString("type", "transaction");
+            writer.WriteString("event_id", SentryId.Create().ToString());
 
             if (!string.IsNullOrWhiteSpace(Name))
             {
-                writer.WriteString("name", Name);
+                writer.WriteString("transaction", Name);
             }
 
-            writer.WriteString("span_id", SpanId.ToShortString());
-
-            if (ParentSpanId is {} parentSpanId)
-            {
-                writer.WriteString("parent_span_id", parentSpanId.ToShortString());
-            }
-
-            writer.WriteSerializable("trace_id", TraceId);
             writer.WriteString("start_timestamp", StartTimestamp);
 
             if (EndTimestamp is {} endTimestamp)
             {
                 writer.WriteString("timestamp", endTimestamp);
             }
-
-            if (!string.IsNullOrWhiteSpace(Operation))
-            {
-                writer.WriteString("op", Operation);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            if (Status is {} status)
-            {
-                writer.WriteString("status", status.ToString().ToLowerInvariant());
-            }
-
-            writer.WriteBoolean("sampled", IsSampled);
 
             if (_tags is {} tags && tags.Any())
             {
@@ -144,6 +124,38 @@ namespace Sentry.Protocol
 
                 writer.WriteEndArray();
             }
+
+            writer.WriteStartObject("contexts");
+            writer.WriteStartObject("trace");
+
+            writer.WriteString("span_id", SpanId.ToShortString());
+
+            if (ParentSpanId is {} parentSpanId)
+            {
+                writer.WriteString("parent_span_id", parentSpanId.ToShortString());
+            }
+
+            writer.WriteSerializable("trace_id", TraceId);
+
+            if (!string.IsNullOrWhiteSpace(Operation))
+            {
+                writer.WriteString("op", Operation);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Description))
+            {
+                writer.WriteString("description", Description);
+            }
+
+            if (Status is {} status)
+            {
+                writer.WriteString("status", status.ToString().ToLowerInvariant());
+            }
+
+            writer.WriteBoolean("sampled", IsSampled);
+
+            writer.WriteEndObject();
+            writer.WriteEndObject();
 
             writer.WriteEndObject();
         }

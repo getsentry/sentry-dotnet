@@ -47,6 +47,29 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
+            writer.WriteString("type", "transaction");
+            writer.WriteString("event_id", SentryId.Create().ToString());
+
+            writer.WriteString("start_timestamp", StartTimestamp);
+
+            if (EndTimestamp is {} endTimestamp)
+            {
+                writer.WriteString("timestamp", endTimestamp);
+            }
+
+            if (_tags is {} tags && tags.Any())
+            {
+                writer.WriteDictionary("tags", tags!);
+            }
+
+            if (_data is {} data && data.Any())
+            {
+                writer.WriteDictionary("data", data!);
+            }
+
+            writer.WriteStartObject("contexts");
+            writer.WriteStartObject("trace");
+
             writer.WriteString("span_id", SpanId.ToShortString());
 
             if (ParentSpanId is {} parentSpanId)
@@ -55,12 +78,6 @@ namespace Sentry.Protocol
             }
 
             writer.WriteSerializable("trace_id", TraceId);
-            writer.WriteString("start_timestamp", StartTimestamp);
-
-            if (EndTimestamp is {} endTimestamp)
-            {
-                writer.WriteString("timestamp", endTimestamp);
-            }
 
             if (!string.IsNullOrWhiteSpace(Operation))
             {
@@ -79,15 +96,8 @@ namespace Sentry.Protocol
 
             writer.WriteBoolean("sampled", IsSampled);
 
-            if (_tags is {} tags && tags.Any())
-            {
-                writer.WriteDictionary("tags", tags!);
-            }
-
-            if (_data is {} data && data.Any())
-            {
-                writer.WriteDictionary("data", data!);
-            }
+            writer.WriteEndObject();
+            writer.WriteEndObject();
 
             writer.WriteEndObject();
         }
