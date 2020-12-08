@@ -1,3 +1,5 @@
+using Sentry.Protocol;
+
 namespace Sentry
 {
     /// <summary>
@@ -19,8 +21,14 @@ namespace Sentry
         /// </summary>
         SentryId LastEventId { get; }
 
+        /// <summary>
+        /// Creates a transaction.
+        /// </summary>
         Transaction CreateTransaction(string name, string operation);
 
+        /// <summary>
+        /// Gets the sentry trace header.
+        /// </summary>
         SentryTraceHeader? GetSentryTrace();
     }
 }

@@ -8,30 +8,65 @@ using Sentry.Internal.Extensions;
 namespace Sentry.Protocol
 {
     // https://develop.sentry.dev/sdk/event-payloads/transaction
+    /// <summary>
+    /// Sentry performance transaction.
+    /// </summary>
     public class Transaction : ISpan, IJsonSerializable
     {
         private readonly IHub _hub;
 
+        /// <summary>
+        /// Transaction name.
+        /// </summary>
         public string Name { get; }
+
+        /// <inheritdoc />
         public SentryId SpanId { get; }
+
+        /// <inheritdoc />
         public SentryId? ParentSpanId { get; }
+
+        /// <inheritdoc />
         public SentryId TraceId { get; private set; }
+
+        /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; }
+
+        /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
+
+        /// <inheritdoc />
         public string Operation { get; }
+
+        /// <inheritdoc />
         public string? Description { get; set; }
+
+        /// <inheritdoc />
         public SpanStatus? Status { get; private set; }
+
+        /// <inheritdoc />
         public bool IsSampled { get; set; }
 
         private Dictionary<string, string>? _tags;
+
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
         private Dictionary<string, object>? _data;
+
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, object> Data => _data ??= new Dictionary<string, object>();
 
         private List<Span>? _children;
+
+        /// <summary>
+        /// Child spans.
+        /// </summary>
         public IReadOnlyList<Span> Children => _children ??= new List<Span>();
 
+        /// <summary>
+        /// Initializes an instance of <see cref="Transaction"/>.
+        /// </summary>
         internal Transaction(
             IHub hub,
             string name,
@@ -48,6 +83,9 @@ namespace Sentry.Protocol
             Operation = operation;
         }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="Transaction"/>.
+        /// </summary>
         public Transaction(IHub hub, string name, string operation)
             : this(
                 hub,
@@ -58,6 +96,7 @@ namespace Sentry.Protocol
         {
         }
 
+        /// <inheritdoc />
         public ISpan StartChild(string operation)
         {
             var span = new Span(null, SpanId, operation);
@@ -66,6 +105,7 @@ namespace Sentry.Protocol
             return span;
         }
 
+        /// <inheritdoc />
         public void Finish(SpanStatus status = SpanStatus.Ok)
         {
             EndTimestamp = DateTimeOffset.Now;
@@ -74,12 +114,16 @@ namespace Sentry.Protocol
             _hub.CaptureTransaction(this);
         }
 
+        /// <summary>
+        /// Get Sentry trace header.
+        /// </summary>
         public SentryTraceHeader GetTraceHeader() => new SentryTraceHeader(
             TraceId,
             SpanId,
             IsSampled
         );
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             // Transaction has a weird structure where some of the fields
@@ -160,6 +204,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses transaction from JSON.
+        /// </summary>
         public static Transaction FromJson(JsonElement json)
         {
             var hub = HubAdapter.Instance;

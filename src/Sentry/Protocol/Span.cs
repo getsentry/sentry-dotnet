@@ -8,22 +8,46 @@ using Sentry.Internal.Extensions;
 namespace Sentry.Protocol
 {
     // https://develop.sentry.dev/sdk/event-payloads/span
+    /// <summary>
+    /// Transaction span.
+    /// </summary>
     public class Span : ISpan, IJsonSerializable
     {
+        /// <inheritdoc />
         public SentryId SpanId { get; }
+
+        /// <inheritdoc />
         public SentryId? ParentSpanId { get; }
+
+        /// <inheritdoc />
         public SentryId TraceId { get; private set; }
+
+        /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; }
+
+        /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
+
+        /// <inheritdoc />
         public string Operation { get; }
+
+        /// <inheritdoc />
         public string? Description { get; set; }
+
+        /// <inheritdoc />
         public SpanStatus? Status { get; private set; }
+
+        /// <inheritdoc />
         public bool IsSampled { get; set; }
 
         private ConcurrentDictionary<string, string>? _tags;
+
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
 
         private ConcurrentDictionary<string, object>? _data;
+
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, object> Data => _data ??= new ConcurrentDictionary<string, object>();
 
         internal Span(SentryId? spanId = null, SentryId? parentSpanId = null, string operation = "unknown")
@@ -35,14 +59,17 @@ namespace Sentry.Protocol
             Operation = operation;
         }
 
+        /// <inheritdoc />
         public ISpan StartChild(string operation) => new Span(null, SpanId, operation);
 
+        /// <inheritdoc />
         public void Finish(SpanStatus status = SpanStatus.Ok)
         {
             EndTimestamp = DateTimeOffset.Now;
             Status = status;
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -102,6 +129,9 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses a span from JSON.
+        /// </summary>
         public static Span FromJson(JsonElement json)
         {
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
