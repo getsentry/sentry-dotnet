@@ -42,9 +42,6 @@ function getChangelogDetailsTxt() {
 }
 
 function HasPermissionToComment(){
-	console.log(danger.github.pr.head.repo.git_url);
-	console.log(danger.github.pr.base.repo.git_url);
-	console.log(danger.github.pr.head.repo.git_url == danger.github.pr.base.repo.git_url);
 	return danger.github.pr.head.repo.git_url == danger.github.pr.base.repo.git_url;
 }
 
@@ -66,14 +63,15 @@ async function checkChangelog() {
   {
 	if(HasPermissionToComment())
 	{
+		fail("Please consider adding a changelog entry for the next release.");
 		markdown(getChangelogDetailsHtml());
 	}
 	else
 	{
 		//Fallback
 		console.log(getChangelogDetailsTxt());			
+		exit 1;
 	}
-	fail("Please consider adding a changelog entry for the next release.");
   }
 }
 
