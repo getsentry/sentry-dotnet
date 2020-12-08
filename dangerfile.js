@@ -42,6 +42,9 @@ function getChangelogDetailsTxt() {
 }
 
 function HasPermissionToComment(){
+	console.log(danger.github.pr.head.repo.git_url);
+	console.log(danger.github.pr.base.repo.git_url);
+	console.log(danger.github.pr.head.repo.git_url == danger.github.pr.base.repo.git_url);
 	return danger.github.pr.head.repo.git_url == danger.github.pr.base.repo.git_url;
 }
 
