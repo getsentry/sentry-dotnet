@@ -185,7 +185,7 @@ namespace Sentry.Protocol.Envelopes
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 // Transaction is an event
-                [TypeKey] = TypeValueEvent
+                [TypeKey] = TypeValueTransaction
             };
 
             return new EnvelopeItem(header, new JsonSerializable(transaction));
