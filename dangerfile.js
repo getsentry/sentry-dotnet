@@ -3,31 +3,42 @@ const PR_AUTHOR   = danger.github.pr.user.login;
 const PR_URL = danger.github.pr.html_url;
 const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
 
-function getCleanTitle() {
-  const title = danger.github.pr.title;
-  return title.split(": ").slice(-1)[0].trim().replace(/\.+$/, "");
-}
-
-function getChangelogDetails() {
-  return `
-<details>
-<summary><b>Instructions and example for changelog</b></summary>
-
-Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
+const CHANGELOG_SUMMARY_TITLE = `Instructions and example for changelog`;
+const CHANGELOG_BODY = `Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
  1. **Feat**: For new user-visible functionality.
  2. **Fix**: For user-visible bug fixes.
  3. **Ref**: For features, refactors and bug fixes in internal operation.
 
-To the changelog entry, please add a link to this PR (consider a more descriptive message):
+To the changelog entry, please add a link to this PR (consider a more descriptive message):`;
+
+const CHANGELOG_END_BODY = `If none of the above apply, you can opt out by adding _#skip-changelog_ to the PR description.`;
+
+function getCleanTitleWithPrLink() {
+  const title = danger.github.pr.title;
+  return title.split(": ").slice(-1)[0].trim().replace(/\.+$/, "") + PR_LINK;
+}
+
+function getChangelogDetailsHtml() {
+  return `
+<details>
+<summary><b>\`${CHANGELOG_SUMMARY_TITLE}\`$</b></summary>
+
+\`${CHANGELOG_BODY}\`
 
 \`\`\`md
-- ${getCleanTitle()}${PR_LINK}
+- ${getCleanTitleWithPrLink()}
 \`\`\`
 
-If none of the above apply, you can opt out by adding _#skip-changelog_ to the PR description.
-
+\`${CHANGELOG_END_BODY}\`
 </details>
 `;
+}
+
+function getChangelogDetailsTxt() {
+	return CHANGELOG_SUMMARY_TITLE + '\n' +
+		   CHANGELOG_BODY + '\n' +
+		   getCleanTitleWithPrLink() + '\n' +
+		   CHANGELOG_END_BODY;
 }
 
 async function containsChangelog(path) {
@@ -47,7 +58,15 @@ async function checkChangelog() {
 
   if (!hasChangelog) {
     fail("Please consider adding a changelog entry for the next release.");
-    markdown(getChangelogDetails());
+	try
+	{
+		markdown(getChangelogDetailsHtml());
+	}
+	catch(error)
+	{
+		//Fallback
+		fail(getChangelogDetailsTxt());
+	}
   }
 }
 
