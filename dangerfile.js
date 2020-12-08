@@ -74,7 +74,10 @@ async function checkIfFeature() {
 async function checkAll() {
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
-
+  console.log("test");
+  console.log(danger.github.pr);
+  console.log("test2");
+  console.log(danger.github);
   if (isDraft) {
     return;
   }
