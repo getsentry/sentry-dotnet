@@ -1,9 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using Sentry;
-using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -42,6 +42,7 @@ namespace Serilog
         /// <param name="reportAssemblies">Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>. <seealso cref="SentryOptions.ReportAssemblies"/></param>
         /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
         /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
+        /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
         /// <returns><see cref="LoggerConfiguration"/></returns>
         /// <example>This sample shows how each item may be set from within a configuration file:
         /// <code>
@@ -75,7 +76,11 @@ namespace Serilog
         ///                     "diagnosticsLevel": "Debug",
         ///                     "reportAssemblies": false,
         ///                     "deduplicateMode": "All",
-        ///                     "initializeSdk": true
+        ///                     "initializeSdk": true,
+        ///                     "defaultTags": {
+        ///                         "key-1", "value-1",
+        ///                         "key-2", "value-2"
+        ///                     }
         ///                 }
         ///             }
         ///         ]
@@ -106,7 +111,8 @@ namespace Serilog
             SentryLevel? diagnosticsLevel = null,
             bool? reportAssemblies = null,
             DeduplicateMode? deduplicateMode = null,
-            bool? initializeSdk = null)
+            bool? initializeSdk = null,
+            Dictionary<string, string>? defaultTags = null)
         {
             return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
                 dsn,
@@ -130,7 +136,8 @@ namespace Serilog
                 diagnosticsLevel,
                 reportAssemblies,
                 deduplicateMode,
-                initializeSdk));
+                initializeSdk,
+                defaultTags));
         }
 
         /// <summary>
@@ -159,8 +166,9 @@ namespace Serilog
         /// <param name="reportAssemblies">Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>. <seealso cref="SentryOptions.ReportAssemblies"/></param>
         /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
         /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
+        /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
         public static void ConfigureSentrySerilogOptions(
-            SentrySerilogOptions sentrySerilogOptions,
+        SentrySerilogOptions sentrySerilogOptions,
             string? dsn = null,
             LogEventLevel? minimumEventLevel = null,
             LogEventLevel? minimumBreadcrumbLevel = null,
@@ -182,7 +190,8 @@ namespace Serilog
             SentryLevel? diagnosticsLevel = null,
             bool? reportAssemblies = null,
             DeduplicateMode? deduplicateMode = null,
-            bool? initializeSdk = null)
+            bool? initializeSdk = null,
+            Dictionary<string, string>? defaultTags = null)
         {
             if (!string.IsNullOrWhiteSpace(dsn))
             {
@@ -293,6 +302,14 @@ namespace Serilog
             if (initializeSdk.HasValue)
             {
                 sentrySerilogOptions.InitializeSdk = initializeSdk.Value;
+            }
+
+            if (defaultTags?.Any() == true)
+            {
+                foreach (var tag in defaultTags)
+                {
+                    sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
+                }
             }
         }
 

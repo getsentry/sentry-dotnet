@@ -1,5 +1,4 @@
 using System;
-using Sentry;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;

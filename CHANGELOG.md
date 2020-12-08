@@ -1,14 +1,22 @@
 # Changelog
 
 ## vNext
+ 
+* Ref moved SentryId from namespace Sentry.Protocol to Sentry (#643) @lucas-zimerman
+* Ref renamed `CacheFlushTimeout` to `InitCacheFlushTimeout` (#638) @lucas-zimerman
+
+## 3.0.0-alpha.6
 
 * Abandon ValueTask #611
 * Fix Cache deleted on HttpTransport exception. (#610) @lucas-zimerman
-* Add SentryScopeStateProcessor #603
+* Add `SentryScopeStateProcessor` #603
 * Add net5.0 TFM to libraries #606
 * Add more logging to CachingTransport #619
 * Bump Microsoft.Bcl.AsyncInterfaces to 5.0.0 #618
 * Add support for performance
+* Bump `Microsoft.Bcl.AsyncInterfaces` to 5.0.0 #618
+* `DefaultTags` moved from `SentryLoggingOptions` to `SentryOptions` (#637) @PureKrome
+* `Sentry.Serilog` can accept DefaultTags (#637) @PureKrome 
 
 ## 3.0.0-alpha.5
 

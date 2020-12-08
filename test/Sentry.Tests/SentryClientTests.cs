@@ -1,15 +1,17 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
+using VerifyXunit;
 using Xunit;
 
 namespace Sentry.Tests
 {
+    [UsesVerify]
     public class SentryClientTests
     {
         private class Fixture
@@ -252,7 +254,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
+        public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
         {
             var error = new Exception("Exception message!");
             _fixture.SentryOptions.BeforeSend = e => throw error;
@@ -262,10 +264,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             _ = sut.CaptureEvent(@event);
 
-            var crumb = @event.Breadcrumbs.First();
-            Assert.Equal("BeforeSend callback failed.", crumb.Message);
-            Assert.Equal(error.Message, crumb.Data["message"]);
-            Assert.Equal(error.StackTrace, crumb.Data["stackTrace"]);
+            return Verifier.Verify(@event.Breadcrumbs);
         }
 
         [Fact]

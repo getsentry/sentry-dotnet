@@ -1,7 +1,5 @@
 using System;
-using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
-using Sentry.Extensions.Logging;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
@@ -9,11 +7,6 @@ namespace Sentry.AspNetCore
 {
     internal class AspNetCoreEventProcessor : ISentryEventProcessor
     {
-        private readonly SentryAspNetCoreOptions _options;
-
-        public AspNetCoreEventProcessor(IOptions<SentryAspNetCoreOptions> options)
-            => _options = options.Value;
-
         public SentryEvent Process(SentryEvent @event)
         {
             // Move 'runtime' under key 'server-runtime' as User-Agent parsing done at
@@ -36,8 +29,6 @@ namespace Sentry.AspNetCore
                 // For ASP.NET Core apps, we always set the machine name if not explicitly set by the user.
                 @event.ServerName = Environment.MachineName;
             }
-
-            _options.ApplyDefaultTags(@event);
 
             return @event;
         }

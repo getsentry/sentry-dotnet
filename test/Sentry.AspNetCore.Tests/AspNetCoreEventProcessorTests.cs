@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Options;
 using Sentry.Protocol;
 using Xunit;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
@@ -8,12 +7,11 @@ namespace Sentry.AspNetCore.Tests
 {
     public class AspNetCoreEventProcessorTests
     {
-        private readonly SentryAspNetCoreOptions _options = new SentryAspNetCoreOptions();
         private readonly AspNetCoreEventProcessor _sut;
 
         public AspNetCoreEventProcessorTests()
         {
-            _sut = new AspNetCoreEventProcessor(Options.Create(_options));
+            _sut = new AspNetCoreEventProcessor();
         }
 
         [Fact]
@@ -79,19 +77,6 @@ namespace Sentry.AspNetCore.Tests
             _ = _sut.Process(target);
 
             Assert.Equal(Environment.MachineName, target.ServerName);
-        }
-
-        [Fact]
-        public void Process_AppliesDefaultTags()
-        {
-            const string key = "key";
-            const string expected = "default tag value";
-            var target = new SentryEvent();
-            _options.DefaultTags[key] = expected;
-
-            _ = _sut.Process(target);
-
-            Assert.Equal(expected, target.Tags[key]);
         }
     }
 }

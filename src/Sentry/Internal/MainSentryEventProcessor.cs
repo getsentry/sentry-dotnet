@@ -194,6 +194,8 @@ namespace Sentry.Internal
                 }
             }
 
+            _options.ApplyDefaultTags(@event);
+
             return @event;
         }
 

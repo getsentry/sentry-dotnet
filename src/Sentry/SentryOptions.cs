@@ -22,6 +22,8 @@ namespace Sentry
     public class SentryOptions : IScopeOptions
     {
         private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
+        private Dictionary<string, string>? _defaultTags;
+
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal string ClientVersion { get; } = SdkName;
@@ -381,7 +383,15 @@ namespace Sentry
         /// even though that might slow down the app start. If set to false, the app might crash
         /// too quickly, before Sentry can capture the cached error in the background.
         /// </remarks>
-        public TimeSpan CacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan InitCacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
+
+        /// <summary>
+        /// Defaults tags to add to all events. (These are indexed by Sentry).
+        /// </summary>
+        /// <remarks>
+        /// If the key already exists in the event, it will not be overwritten by a default tag.
+        /// </remarks>
+        public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
         private double _traceSampleRate = 1.0;
 

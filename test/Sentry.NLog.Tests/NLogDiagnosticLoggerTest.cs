@@ -1,5 +1,4 @@
 using System;
-using Sentry.Protocol;
 using NLog;
 using NLog.Common;
 using Xunit;

@@ -1,6 +1,5 @@
 using System;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 using NLog.Common;
 using Sentry.Infrastructure;

@@ -1,5 +1,4 @@
 using System;
-using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {

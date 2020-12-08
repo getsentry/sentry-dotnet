@@ -2,8 +2,6 @@ using System;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
-
-using Sentry;
 using Sentry.NLog;
 
 // ReSharper disable once CheckNamespace
