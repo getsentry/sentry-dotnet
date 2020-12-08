@@ -81,12 +81,13 @@ async function checkIfFeature() {
 }
 
 async function checkAll() {
-	/*
-
-	PR_NUMBER = danger.github.pr.number;
-	PR_AUTHOR   = danger.github.pr.user.login;
-	PR_URL = danger.github.pr.html_url;
-	PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
+   console.log("Number");
+   PR_NUMBER = danger.github.pr.number;
+   console.log("Author");
+   PR_AUTHOR   = danger.github.pr.user.login;
+   console.log("Url");
+   PR_URL = danger.github.pr.html_url;
+   PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
 
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
