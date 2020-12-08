@@ -2,7 +2,7 @@
 
 ## vNext
  
-* Ref moved SentryId from namespace Sentry.Protocol to Sentry (#643) @lucas-zimerman
+* Ref moved SentryId from namespace Sentry.Protocol to Sentry (#643) @lucas-zimerman ([#643](https://github.com/getsentry/sentry-dotnet/pull/644))
 * Ref renamed `CacheFlushTimeout` to `InitCacheFlushTimeout` (#638) @lucas-zimerman
 
 ## 3.0.0-alpha.6
