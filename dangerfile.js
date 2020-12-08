@@ -1,5 +1,5 @@
 const PR_NUMBER = danger.github.pr.number;
-const PR_AUTHOR   = danger.github.pr.author;
+const PR_AUTHOR   = danger.github.pr_author;
 const PR_URL = danger.github.pr.html_url;
 const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR})`;
 
