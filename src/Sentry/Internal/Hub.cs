@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -108,6 +107,20 @@ namespace Sentry.Internal
                 Name = name,
                 Operation = operation
             };
+
+            var nameAndVersion = MainSentryEventProcessor.NameAndVersion;
+            var protocolPackageName = MainSentryEventProcessor.ProtocolPackageName;
+
+            if (trans.Sdk.Version == null && trans.Sdk.Name == null)
+            {
+                trans.Sdk.Name = Constants.SdkName;
+                trans.Sdk.Version = nameAndVersion.Version;
+            }
+
+            if (nameAndVersion.Version != null)
+            {
+                trans.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
+            }
 
             ConfigureScope(scope => scope.Transaction = trans);
 

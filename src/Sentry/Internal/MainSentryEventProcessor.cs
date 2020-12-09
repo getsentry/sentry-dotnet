@@ -31,10 +31,10 @@ namespace Sentry.Internal
                    : null;
         });
 
-        private static readonly SdkVersion NameAndVersion
+        internal static readonly SdkVersion NameAndVersion
             = typeof(ISentryClient).Assembly.GetNameAndVersion();
 
-        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
+        internal static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
@@ -96,20 +96,17 @@ namespace Sentry.Internal
 
             @event.Platform = Protocol.Constants.Platform;
 
-            if (@event.Sdk != null)
+            // SDK Name/Version might have be already set by an outer package
+            // e.g: ASP.NET Core can set itself as the SDK
+            if (@event.Sdk.Version == null && @event.Sdk.Name == null)
             {
-                // SDK Name/Version might have be already set by an outer package
-                // e.g: ASP.NET Core can set itself as the SDK
-                if (@event.Sdk.Version == null && @event.Sdk.Name == null)
-                {
-                    @event.Sdk.Name = Constants.SdkName;
-                    @event.Sdk.Version = NameAndVersion.Version;
-                }
+                @event.Sdk.Name = Constants.SdkName;
+                @event.Sdk.Version = NameAndVersion.Version;
+            }
 
-                if (NameAndVersion.Version != null)
-                {
-                    @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-                }
+            if (NameAndVersion.Version != null)
+            {
+                @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
             }
 
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:

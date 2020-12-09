@@ -174,12 +174,6 @@ namespace Sentry
             scope.Evaluate();
             scope.Apply(@event);
 
-            // Set transaction's span ID
-            if (scope.Transaction is {} transaction)
-            {
-                @event.SetTag("span_id", transaction.SpanId.ToString());
-            }
-
             if (scope.Level != null)
             {
                 // Level on scope takes precedence over the one on event
