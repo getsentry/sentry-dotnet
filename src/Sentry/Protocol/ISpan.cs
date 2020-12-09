@@ -6,22 +6,12 @@ namespace Sentry.Protocol
     /// <summary>
     /// Span.
     /// </summary>
-    public interface ISpan
+    public interface ISpan : ISpanContext
     {
         /// <summary>
-        /// Span ID.
+        /// Description.
         /// </summary>
-        SentryId SpanId { get; }
-
-        /// <summary>
-        /// Parent ID.
-        /// </summary>
-        SentryId? ParentSpanId { get; }
-
-        /// <summary>
-        /// Trace ID.
-        /// </summary>
-        SentryId TraceId { get; }
+        string? Description { get; set; }
 
         /// <summary>
         /// Start timestamp.
@@ -32,21 +22,6 @@ namespace Sentry.Protocol
         /// End timestamp.
         /// </summary>
         DateTimeOffset? EndTimestamp { get; }
-
-        /// <summary>
-        /// Operation.
-        /// </summary>
-        string Operation { get; }
-
-        /// <summary>
-        /// Description.
-        /// </summary>
-        string? Description { get; set; }
-
-        /// <summary>
-        /// Status.
-        /// </summary>
-        SpanStatus? Status { get; }
 
         /// <summary>
         /// Is sampled.
@@ -61,7 +36,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Data.
         /// </summary>
-        IReadOnlyDictionary<string, object> Data { get; }
+        IReadOnlyDictionary<string, object?> Extra { get; }
 
         /// <summary>
         /// Starts a child span.

@@ -11,90 +11,145 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ISpan, IJsonSerializable
+    public class Transaction : ISpan, IScope, IJsonSerializable
     {
         private readonly IHub _hub;
+
+        /// <inheritdoc />
+        public IScopeOptions? ScopeOptions { get; }
 
         /// <summary>
         /// Transaction name.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; } = "unnamed";
 
         /// <inheritdoc />
-        public SentryId SpanId { get; }
+        public SentryId SpanId
+        {
+            get => Contexts.Trace.SpanId;
+            private set => Contexts.Trace.SpanId = value;
+        }
 
         /// <inheritdoc />
-        public SentryId? ParentSpanId { get; }
+        public SentryId TraceId
+        {
+            get => Contexts.Trace.TraceId;
+            private set => Contexts.Trace.TraceId = value;
+        }
 
         /// <inheritdoc />
-        public SentryId TraceId { get; private set; }
-
-        /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; private set; }
+        public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
 
         /// <inheritdoc />
-        public string Operation { get; }
+        public string Operation
+        {
+            get => Contexts.Trace.Operation;
+            internal set => Contexts.Trace.Operation = value;
+        }
 
         /// <inheritdoc />
         public string? Description { get; set; }
 
         /// <inheritdoc />
-        public SpanStatus? Status { get; private set; }
+        public SpanStatus? Status
+        {
+            get => Contexts.Trace.Status;
+            private set => Contexts.Trace.Status = value;
+        }
 
         /// <inheritdoc />
         public bool IsSampled { get; set; }
+
+        /// <inheritdoc />
+        public SentryLevel? Level { get; set; }
+
+        private Request? _request;
+
+        /// <inheritdoc />
+        public Request Request
+        {
+            get => _request ??= new Request();
+            set => _request = value;
+        }
+
+        private Contexts? _contexts;
+
+        /// <inheritdoc />
+        public Contexts Contexts
+        {
+            get => _contexts ??= new Contexts();
+            set => _contexts = value;
+        }
+
+        private User? _user;
+
+        /// <inheritdoc />
+        public User User
+        {
+            get => _user ??= new User();
+            set => _user = value;
+        }
+
+        /// <inheritdoc />
+        public string? Environment { get; set; }
+
+        /// <inheritdoc />
+        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
+
+        private IEnumerable<string>? _fingerprint;
+
+        /// <inheritdoc />
+        public IEnumerable<string> Fingerprint
+        {
+            get => _fingerprint ?? Enumerable.Empty<string>();
+            set => _fingerprint = value;
+        }
+
+        private List<Breadcrumb>? _breadcrumbs;
+
+        /// <inheritdoc />
+        public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
+
+        private Dictionary<string, object?>? _extra;
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
         private Dictionary<string, string>? _tags;
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
-        private Dictionary<string, object>? _data;
-
-        /// <inheritdoc />
-        public IReadOnlyDictionary<string, object> Data => _data ??= new Dictionary<string, object>();
-
         private List<Span>? _children;
 
+        // Transaction never has a parent
+        SentryId? ISpanContext.ParentSpanId => null;
+
+        string? IScope.TransactionName
+        {
+            get => Name;
+            set => Name = value ?? "unnamed";
+        }
+
+        internal Transaction(IHub hub, IScopeOptions? scopeOptions)
+        {
+            _hub = hub;
+            ScopeOptions = scopeOptions;
+
+            SpanId = SentryId.Create();
+            TraceId = SentryId.Create();
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="Transaction"/>.
+        /// </summary>
         /// <summary>
         /// Child spans.
         /// </summary>
         public IReadOnlyList<Span> Children => _children ??= new List<Span>();
-
-        /// <summary>
-        /// Initializes an instance of <see cref="Transaction"/>.
-        /// </summary>
-        internal Transaction(
-            IHub hub,
-            string name,
-            SentryId? spanId = null,
-            SentryId? parentSpanId = null,
-            string operation = "unknown")
-        {
-            _hub = hub;
-            Name = name;
-            SpanId = spanId ?? SentryId.Create();
-            ParentSpanId = parentSpanId;
-            TraceId = SentryId.Create();
-            StartTimestamp = DateTimeOffset.Now;
-            Operation = operation;
-        }
-
-        /// <summary>
-        /// Initializes an instance of <see cref="Transaction"/>.
-        /// </summary>
-        public Transaction(IHub hub, string name, string operation)
-            : this(
-                hub,
-                name,
-                null,
-                null,
-                operation)
-        {
-        }
 
         /// <inheritdoc />
         public ISpan StartChild(string operation)
@@ -108,7 +163,7 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public void Finish(SpanStatus status = SpanStatus.Ok)
         {
-            EndTimestamp = DateTimeOffset.Now;
+            EndTimestamp = DateTimeOffset.UtcNow;
             Status = status;
 
             _hub.CaptureTransaction(this);
@@ -126,18 +181,24 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
-            // Transaction has a weird structure where some of the fields
-            // are apparently stored inside "contexts.trace" object for
-            // unknown reasons.
-
             writer.WriteStartObject();
 
             writer.WriteString("type", "transaction");
-            writer.WriteString("event_id", SentryId.Create().ToString());
+            writer.WriteSerializable("event_id", SentryId.Create());
+
+            if (Level is {} level)
+            {
+                writer.WriteString("level", level.ToString().ToLowerInvariant());
+            }
 
             if (!string.IsNullOrWhiteSpace(Name))
             {
                 writer.WriteString("transaction", Name);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Description))
+            {
+                writer.WriteString("description", Description);
             }
 
             writer.WriteString("start_timestamp", StartTimestamp);
@@ -147,21 +208,47 @@ namespace Sentry.Protocol
                 writer.WriteString("timestamp", endTimestamp);
             }
 
-            if (_tags is {} tags && tags.Any())
+            writer.WriteBoolean("sampled", IsSampled);
+
+            if (_request is {} request)
             {
-                writer.WriteDictionary("tags", tags!);
+                writer.WriteSerializable("request", request);
             }
 
-            if (_data is {} data && data.Any())
+            if (_contexts is {} contexts)
             {
-                writer.WriteDictionary("data", data!);
+                writer.WriteSerializable("contexts", contexts);
             }
 
-            if (_children is {} children && children.Any())
+            if (_user is {} user)
             {
-                writer.WriteStartArray("spans");
+                writer.WriteSerializable("user", user);
+            }
 
-                foreach (var i in children)
+            if (!string.IsNullOrWhiteSpace(Environment))
+            {
+                writer.WriteString("environment", Environment);
+            }
+
+            writer.WriteSerializable("sdk", Sdk);
+
+            if (_fingerprint is {} fingerprint && fingerprint.Any())
+            {
+                writer.WriteStartArray("fingerprint");
+
+                foreach (var i in fingerprint)
+                {
+                    writer.WriteStringValue(i);
+                }
+
+                writer.WriteEndArray();
+            }
+
+            if (_breadcrumbs is {} breadcrumbs && breadcrumbs.Any())
+            {
+                writer.WriteStartArray("breadcrumbs");
+
+                foreach (var i in breadcrumbs)
                 {
                     writer.WriteSerializableValue(i);
                 }
@@ -169,37 +256,29 @@ namespace Sentry.Protocol
                 writer.WriteEndArray();
             }
 
-            writer.WriteStartObject("contexts");
-            writer.WriteStartObject("trace");
-
-            writer.WriteString("span_id", SpanId.ToShortString());
-
-            if (ParentSpanId is {} parentSpanId)
+            if (_extra is {} extra && extra.Any())
             {
-                writer.WriteString("parent_span_id", parentSpanId.ToShortString());
+                writer.WriteStartObject("extra");
+
+                foreach (var (key, value) in extra)
+                {
+                    writer.WriteDynamic(key, value);
+                }
+
+                writer.WriteEndObject();
             }
 
-            writer.WriteSerializable("trace_id", TraceId);
-
-            if (!string.IsNullOrWhiteSpace(Operation))
+            if (_tags is {} tags && tags.Any())
             {
-                writer.WriteString("op", Operation);
+                writer.WriteStartObject("tags");
+
+                foreach (var (key, value) in tags)
+                {
+                    writer.WriteString(key, value);
+                }
+
+                writer.WriteEndObject();
             }
-
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            if (Status is {} status)
-            {
-                writer.WriteString("status", status.ToString().ToLowerInvariant());
-            }
-
-            writer.WriteBoolean("sampled", IsSampled);
-
-            writer.WriteEndObject();
-            writer.WriteEndObject();
 
             writer.WriteEndObject();
         }
@@ -211,31 +290,39 @@ namespace Sentry.Protocol
         {
             var hub = HubAdapter.Instance;
 
-            var name = json.GetProperty("name").GetStringOrThrow();
-            var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SentryId.FromJson);
-            var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
-            var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
-            var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
+            var name = json.GetProperty("transaction").GetStringOrThrow();
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
-            var sampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
+            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
+            var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
+            var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
+            var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
+            var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
+            var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
+            var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
+            var environment = json.GetPropertyOrNull("environment")?.GetString();
+            var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
+            var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
+            var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
+            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
-            var children = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(Span.FromJson).ToList();
 
-            return new Transaction(hub, name, spanId, parentSpanId, operation)
+            return new Transaction(hub, null)
             {
-                TraceId = traceId,
+                Name = name,
+                Description = description,
+                IsSampled = isSampled,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
-                Description = description,
-                Status = status,
-                IsSampled = sampled,
-                _tags = tags!,
-                _data = data!,
-                _children = children
+                Level = level,
+                _request = request,
+                _contexts = contexts,
+                _user = user,
+                Environment = environment,
+                Sdk = sdk,
+                _fingerprint = fingerprint!,
+                _breadcrumbs = breadcrumbs!,
+                _extra = extra!,
+                _tags = tags!
             };
         }
     }

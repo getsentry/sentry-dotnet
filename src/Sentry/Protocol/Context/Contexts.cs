@@ -46,6 +46,11 @@ namespace Sentry.Protocol
         public Gpu Gpu => this.GetOrCreate<Gpu>(Gpu.Type);
 
         /// <summary>
+        /// This describes trace information.
+        /// </summary>
+        public Trace Trace => this.GetOrCreate<Trace>(Trace.Type);
+
+        /// <summary>
         /// Initializes an instance of <see cref="Contexts"/>.
         /// </summary>
         public Contexts() : base(StringComparer.Ordinal) { }
@@ -122,6 +127,10 @@ namespace Sentry.Protocol
                 else if (string.Equals(type, Gpu.Type, StringComparison.OrdinalIgnoreCase))
                 {
                     result[name] = Gpu.FromJson(value);
+                }
+                else if (string.Equals(type, Trace.Type, StringComparison.OrdinalIgnoreCase))
+                {
+                    result[name] = Trace.FromJson(value);
                 }
                 else
                 {

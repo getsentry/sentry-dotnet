@@ -103,7 +103,12 @@ namespace Sentry.Internal
 
         public Transaction CreateTransaction(string name, string operation)
         {
-            var trans = new Transaction(this, name, operation);
+            var trans = new Transaction(this, _options)
+            {
+                Name = name,
+                Operation = operation
+            };
+
             ConfigureScope(scope => scope.Transaction = trans);
 
             return trans;

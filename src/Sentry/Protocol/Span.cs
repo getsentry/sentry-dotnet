@@ -23,7 +23,7 @@ namespace Sentry.Protocol
         public SentryId TraceId { get; private set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; private set; }
+        public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
@@ -45,17 +45,16 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
 
-        private ConcurrentDictionary<string, object>? _data;
+        private ConcurrentDictionary<string, object?>? _data;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object> Data => _data ??= new ConcurrentDictionary<string, object>();
+        public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
 
         internal Span(SentryId? spanId = null, SentryId? parentSpanId = null, string operation = "unknown")
         {
             SpanId = spanId ?? SentryId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
-            StartTimestamp = DateTimeOffset.Now;
             Operation = operation;
         }
 
@@ -65,7 +64,7 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public void Finish(SpanStatus status = SpanStatus.Ok)
         {
-            EndTimestamp = DateTimeOffset.Now;
+            EndTimestamp = DateTimeOffset.UtcNow;
             Status = status;
         }
 
@@ -73,29 +72,6 @@ namespace Sentry.Protocol
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
-
-            writer.WriteString("type", "transaction");
-            writer.WriteString("event_id", SentryId.Create().ToString());
-
-            writer.WriteString("start_timestamp", StartTimestamp);
-
-            if (EndTimestamp is {} endTimestamp)
-            {
-                writer.WriteString("timestamp", endTimestamp);
-            }
-
-            if (_tags is {} tags && tags.Any())
-            {
-                writer.WriteDictionary("tags", tags!);
-            }
-
-            if (_data is {} data && data.Any())
-            {
-                writer.WriteDictionary("data", data!);
-            }
-
-            writer.WriteStartObject("contexts");
-            writer.WriteStartObject("trace");
 
             writer.WriteString("span_id", SpanId.ToShortString());
 
@@ -123,8 +99,22 @@ namespace Sentry.Protocol
 
             writer.WriteBoolean("sampled", IsSampled);
 
-            writer.WriteEndObject();
-            writer.WriteEndObject();
+            writer.WriteString("start_timestamp", StartTimestamp);
+
+            if (EndTimestamp is {} endTimestamp)
+            {
+                writer.WriteString("timestamp", endTimestamp);
+            }
+
+            if (_tags is {} tags && tags.Any())
+            {
+                writer.WriteDictionary("tags", tags!);
+            }
+
+            if (_data is {} data && data.Any())
+            {
+                writer.WriteDictionary("data", data!);
+            }
 
             writer.WriteEndObject();
         }
@@ -142,9 +132,9 @@ namespace Sentry.Protocol
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
-            var sampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
+            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object>(v!));
+            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
 
             return new Span(spanId, parentSpanId, operation)
             {
@@ -153,7 +143,7 @@ namespace Sentry.Protocol
                 EndTimestamp = endTimestamp,
                 Description = description,
                 Status = status,
-                IsSampled = sampled,
+                IsSampled = isSampled,
                 _tags = tags,
                 _data = data
             };
