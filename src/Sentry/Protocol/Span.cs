@@ -94,7 +94,7 @@ namespace Sentry.Protocol
 
             if (Status is {} status)
             {
-                writer.WriteString("status", status.ToString().ToLowerInvariant());
+                writer.WriteString("status", status.ToString().ToSnakeCase());
             }
 
             writer.WriteBoolean("sampled", IsSampled);
@@ -131,7 +131,7 @@ namespace Sentry.Protocol
             var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
+            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));

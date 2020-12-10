@@ -49,7 +49,7 @@ namespace Sentry.Protocol
 
             if (Status is {} status)
             {
-                writer.WriteString("status", status.ToString().ToLowerInvariant());
+                writer.WriteString("status", status.ToString().ToSnakeCase());
             }
 
             writer.WriteBoolean("sampled", IsSampled);
@@ -66,7 +66,7 @@ namespace Sentry.Protocol
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SentryId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
-            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.ParseEnum<SpanStatus>());
+            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
 
             return new Trace
             {
