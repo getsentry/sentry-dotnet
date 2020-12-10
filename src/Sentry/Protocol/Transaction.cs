@@ -146,18 +146,10 @@ namespace Sentry.Protocol
             TraceId = SentryId.Create();
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="Transaction"/>.
-        /// </summary>
-        /// <summary>
-        /// Child spans.
-        /// </summary>
-        public IReadOnlyList<Span> Children => _spanRecorder.GetAll();
-
         /// <inheritdoc />
         public ISpan StartChild(string operation)
         {
-            var span = new Span(null, SpanId, operation);
+            var span = new Span(_spanRecorder, null, SpanId, operation);
             _spanRecorder.Add(span);
 
             return span;
