@@ -32,5 +32,10 @@ namespace Sentry.Protocol
         /// Status.
         /// </summary>
         SpanStatus? Status { get; }
+
+        /// <summary>
+        /// Is sampled.
+        /// </summary>
+        bool IsSampled { get; set; }
     }
 }

@@ -24,11 +24,6 @@ namespace Sentry.Protocol
         DateTimeOffset? EndTimestamp { get; }
 
         /// <summary>
-        /// Is sampled.
-        /// </summary>
-        bool IsSampled { get; set; }
-
-        /// <summary>
         /// Tags.
         /// </summary>
         IReadOnlyDictionary<string, string> Tags { get; }

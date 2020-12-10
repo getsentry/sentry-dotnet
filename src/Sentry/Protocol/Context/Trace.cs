@@ -26,6 +26,9 @@ namespace Sentry.Protocol
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
+        public bool IsSampled { get; set; }
+
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -48,6 +51,8 @@ namespace Sentry.Protocol
             {
                 writer.WriteString("status", status.ToString().ToLowerInvariant());
             }
+
+            writer.WriteBoolean("sampled", IsSampled);
 
             writer.WriteEndObject();
         }

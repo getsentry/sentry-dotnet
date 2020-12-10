@@ -61,7 +61,11 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public bool IsSampled { get; set; }
+        public bool IsSampled
+        {
+            get => Contexts.Trace.IsSampled;
+            set => Contexts.Trace.IsSampled = value;
+        }
 
         /// <inheritdoc />
         public SentryLevel? Level { get; set; }
@@ -208,8 +212,6 @@ namespace Sentry.Protocol
                 writer.WriteString("timestamp", endTimestamp);
             }
 
-            writer.WriteBoolean("sampled", IsSampled);
-
             if (_request is {} request)
             {
                 writer.WriteSerializable("request", request);
@@ -292,7 +294,6 @@ namespace Sentry.Protocol
 
             var name = json.GetProperty("transaction").GetStringOrThrow();
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
@@ -310,7 +311,6 @@ namespace Sentry.Protocol
             {
                 Name = name,
                 Description = description,
-                IsSampled = isSampled,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
                 Level = level,
