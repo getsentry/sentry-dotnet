@@ -14,6 +14,7 @@ namespace Sentry.Protocol
     public class Transaction : ISpan, IScope, IJsonSerializable
     {
         private readonly IHub _hub;
+        private readonly SpanRecorder _spanRecorder = new SpanRecorder();
 
         /// <inheritdoc />
         public IScopeOptions? ScopeOptions { get; }
@@ -127,8 +128,6 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
-        private List<Span>? _children;
-
         // Transaction never has a parent
         SentryId? ISpanContext.ParentSpanId => null;
 
@@ -153,13 +152,13 @@ namespace Sentry.Protocol
         /// <summary>
         /// Child spans.
         /// </summary>
-        public IReadOnlyList<Span> Children => _children ??= new List<Span>();
+        public IReadOnlyList<Span> Children => _spanRecorder.GetAll();
 
         /// <inheritdoc />
         public ISpan StartChild(string operation)
         {
             var span = new Span(null, SpanId, operation);
-            (_children ??= new List<Span>()).Add(span);
+            _spanRecorder.Add(span);
 
             return span;
         }
