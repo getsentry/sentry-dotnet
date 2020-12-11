@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:59739/",
+      "applicationUrl": "http://localhost:59739",
       "sslPort": 0
     }
   },
@@ -27,7 +27,7 @@
         "SENTRY_RELEASE": "e386dfd",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:59740/"
+      "applicationUrl": "http://localhost:59740"
     }
   }
 }

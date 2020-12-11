@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
@@ -96,17 +97,6 @@ namespace Sentry.AspNetCore
                     });
                 }
 
-                var routeData = context.GetRouteData();
-                var controller = routeData.Values["controller"]?.ToString();
-                var action = routeData.Values["action"]?.ToString();
-                var area = routeData.Values["area"]?.ToString();
-
-                // TODO: What if it's not using controllers (i.e. endpoints)?
-
-                var transactionName = area == null
-                    ? $"{controller}.{action}"
-                    : $"{area}.{controller}.{action}";
-
                 hub.ConfigureScope(scope =>
                 {
                     // At the point lots of stuff from the request are not yet filled
@@ -119,14 +109,18 @@ namespace Sentry.AspNetCore
                     scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
                 });
 
-                var transaction = hub.CreateTransaction(transactionName, "http.server");
+                var transaction = hub.CreateTransaction(
+                    // Try to get the route template or fallback to the request path
+                    context.TryGetRouteTemplate() ?? context.Request.Path,
+                    "http.server"
+                );
 
                 try
                 {
                     await _next(context).ConfigureAwait(false);
 
                     // When an exception was handled by other component (i.e: UseExceptionHandler feature).
-                    var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+                    var exceptionFeature = context.Features.Get<IExceptionHandlerFeature?>();
                     if (exceptionFeature?.Error != null)
                     {
                         CaptureException(exceptionFeature.Error);

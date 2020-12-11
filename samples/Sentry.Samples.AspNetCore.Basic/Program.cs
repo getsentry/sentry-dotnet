@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,20 +27,24 @@ namespace Sentry.Samples.AspNetCore.Basic
                 // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
 
                 // The App:
-                .Configure(a =>
+                .Configure(app =>
                 {
                     // An example ASP.NET Core middleware that throws an
                     // exception when serving a request to path: /throw
-                    a.Use(async (context, next) =>
+                    app.UseRouting();
+                    app.UseEndpoints(endpoints =>
                     {
-                        var log = context.RequestServices.GetService<ILoggerFactory>()
-                            .CreateLogger<Program>();
-
-                        log.LogInformation("Handling some request...");
-
-                        if (context.Request.Path == "/throw")
+                        // Reported events will be grouped by route pattern
+                        endpoints.MapGet("/throw/{message?}", context =>
                         {
-                            var hub = context.RequestServices.GetService<IHub>();
+                            var exceptionMessage = context.GetRouteValue("message") as string;
+
+                            var log = context.RequestServices.GetRequiredService<ILoggerFactory>()
+                                .CreateLogger<Program>();
+
+                            log.LogInformation("Handling some request...");
+
+                            var hub = context.RequestServices.GetRequiredService<IHub>();
                             hub.ConfigureScope(s =>
                             {
                                 // More data can be added to the scope like this:
@@ -53,10 +58,10 @@ namespace Sentry.Samples.AspNetCore.Basic
                             // The following exception will be captured by the SDK and the event
                             // will include the Log messages and any custom scope modifications
                             // as exemplified above.
-                            throw new Exception("An exception thrown from the ASP.NET Core pipeline");
-                        }
-
-                        await next();
+                            throw new Exception(
+                                exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline"
+                            );
+                        });
                     });
                 })
                 .Build();
