@@ -134,6 +134,15 @@ namespace Sentry
                 return;
             }
 
+            if (_options.TraceSampleRate < 1)
+            {
+                if (Random.NextDouble() > _options.TraceSampleRate)
+                {
+                    _options.DiagnosticLogger?.LogDebug("Event sampled.");
+                    return;
+                }
+            }
+
             CaptureEnvelope(Envelope.FromTransaction(transaction));
         }
 
