@@ -36,6 +36,7 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
+            writer.WriteString("type", Type);
             writer.WriteString("span_id", SpanId.ToShortString());
 
             if (ParentSpanId is {} parentSpanId)
