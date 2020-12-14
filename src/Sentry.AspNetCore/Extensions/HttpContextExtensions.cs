@@ -31,8 +31,8 @@ namespace Sentry.AspNetCore.Extensions
             if (!string.IsNullOrWhiteSpace(action))
             {
                 return !string.IsNullOrWhiteSpace(area)
-                    ? $"{controller}.{action}"
-                    : $"{area}.{controller}.{action}";
+                    ? $"{area}.{controller}.{action}"
+                    : $"{controller}.{action}";
             }
 
             // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
