@@ -14,10 +14,10 @@ namespace Sentry.Protocol
         public const string Type = "trace";
 
         /// <inheritdoc />
-        public SentryId SpanId { get; set; }
+        public SpanId SpanId { get; set; }
 
         /// <inheritdoc />
-        public SentryId? ParentSpanId { get; set; }
+        public SpanId? ParentSpanId { get; set; }
 
         /// <inheritdoc />
         public SentryId TraceId { get; set; }
@@ -37,11 +37,11 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-            writer.WriteString("span_id", SpanId.ToShortString());
+            writer.WriteSerializable("span_id", SpanId);
 
             if (ParentSpanId is {} parentSpanId)
             {
-                writer.WriteString("parent_span_id", parentSpanId.ToShortString());
+                writer.WriteSerializable("parent_span_id", parentSpanId);
             }
 
             writer.WriteSerializable("trace_id", TraceId);
@@ -66,8 +66,8 @@ namespace Sentry.Protocol
         /// </summary>
         public static Trace FromJson(JsonElement json)
         {
-            var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SentryId.FromJson);
+            var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
+            var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());

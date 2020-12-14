@@ -8,13 +8,13 @@ namespace Sentry.Protocol
     public class SentryTraceHeader
     {
         private readonly SentryId _traceId;
-        private readonly SentryId _spanId;
+        private readonly SpanId _spanId;
         private readonly bool? _isSampled;
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryTraceHeader"/>.
         /// </summary>
-        public SentryTraceHeader(SentryId traceId, SentryId spanId, bool? isSampled)
+        public SentryTraceHeader(SentryId traceId, SpanId spanId, bool? isSampled)
         {
             _traceId = traceId;
             _spanId = spanId;
@@ -38,7 +38,7 @@ namespace Sentry.Protocol
             }
 
             var traceId = SentryId.Parse(components[0]);
-            var spanId = SentryId.Parse(components[1]);
+            var spanId = SpanId.Parse(components[1]);
 
             var isSampled = components.Length >= 3
                 ? string.Equals(components[2], "1", StringComparison.OrdinalIgnoreCase)

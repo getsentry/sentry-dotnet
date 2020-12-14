@@ -11,12 +11,12 @@ namespace Sentry.Protocol
         /// <summary>
         /// Span ID.
         /// </summary>
-        SentryId SpanId { get; }
+        SpanId SpanId { get; }
 
         /// <summary>
         /// Parent ID.
         /// </summary>
-        SentryId? ParentSpanId { get; }
+        SpanId? ParentSpanId { get; }
 
         /// <summary>
         /// Trace ID.

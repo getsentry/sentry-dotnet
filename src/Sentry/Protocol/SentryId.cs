@@ -31,15 +31,6 @@ namespace Sentry
         /// <returns>String representation of the event id.</returns>
         public override string ToString() => _guid.ToString("n");
 
-        // Note: spans are sentry IDs with only 16 characters, rest being truncated.
-        // This is obviously a bad idea as it invalidates GUID's uniqueness properties
-        // (https://devblogs.microsoft.com/oldnewthing/20080627-00/?p=21823)
-        // but all other SDKs do it this way, so we have no choice but to comply.
-        /// <summary>
-        /// Returns a truncated ID.
-        /// </summary>
-        public string ToShortString() => ToString().Substring(0, 16);
-
         /// <inheritdoc />
         public bool Equals(SentryId other) => _guid.Equals(other._guid);
 
@@ -52,7 +43,7 @@ namespace Sentry
         /// <summary>
         /// Generates a new Sentry ID.
         /// </summary>
-        public static SentryId Create() => new SentryId(Guid.NewGuid());
+        public static SentryId Create() => new(Guid.NewGuid());
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
@@ -60,7 +51,7 @@ namespace Sentry
         /// <summary>
         /// Parses from string.
         /// </summary>
-        public static SentryId Parse(string value) => new SentryId(Guid.Parse(value));
+        public static SentryId Parse(string value) => new(Guid.Parse(value));
 
         /// <summary>
         /// Parses from JSON.
@@ -92,6 +83,6 @@ namespace Sentry
         /// <summary>
         /// A <see cref="SentryId"/> from a <see cref="Guid"/>.
         /// </summary>
-        public static implicit operator SentryId(Guid guid) => new SentryId(guid);
+        public static implicit operator SentryId(Guid guid) => new(guid);
     }
 }

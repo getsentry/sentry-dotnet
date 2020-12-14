@@ -16,10 +16,10 @@ namespace Sentry.Protocol
         private readonly SpanRecorder _parentSpanRecorder;
 
         /// <inheritdoc />
-        public SentryId SpanId { get; }
+        public SpanId SpanId { get; }
 
         /// <inheritdoc />
-        public SentryId? ParentSpanId { get; }
+        public SpanId? ParentSpanId { get; }
 
         /// <inheritdoc />
         public SentryId TraceId { get; private set; }
@@ -52,10 +52,10 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
 
-        internal Span(SpanRecorder parentSpanRecorder, SentryId? spanId = null, SentryId? parentSpanId = null, string operation = "unknown")
+        internal Span(SpanRecorder parentSpanRecorder, SpanId? spanId = null, SpanId? parentSpanId = null, string operation = "unknown")
         {
             _parentSpanRecorder = parentSpanRecorder;
-            SpanId = spanId ?? SentryId.Create();
+            SpanId = spanId ?? SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
             Operation = operation;
@@ -82,11 +82,11 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
-            writer.WriteString("span_id", SpanId.ToShortString());
+            writer.WriteSerializable("span_id", SpanId);
 
             if (ParentSpanId is {} parentSpanId)
             {
-                writer.WriteString("parent_span_id", parentSpanId.ToShortString());
+                writer.WriteSerializable("parent_span_id", parentSpanId);
             }
 
             writer.WriteSerializable("trace_id", TraceId);
@@ -136,8 +136,8 @@ namespace Sentry.Protocol
             // TODO
             var parentSpanRecorder = new SpanRecorder();
 
-            var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SentryId.FromJson);
+            var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
+            var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();

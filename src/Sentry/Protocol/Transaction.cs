@@ -25,7 +25,7 @@ namespace Sentry.Protocol
         public string Name { get; set; } = "unnamed";
 
         /// <inheritdoc />
-        public SentryId SpanId
+        public SpanId SpanId
         {
             get => Contexts.Trace.SpanId;
             private set => Contexts.Trace.SpanId = value;
@@ -129,7 +129,7 @@ namespace Sentry.Protocol
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
         // Transaction never has a parent
-        SentryId? ISpanContext.ParentSpanId => null;
+        SpanId? ISpanContext.ParentSpanId => null;
 
         string? IScope.TransactionName
         {
@@ -149,7 +149,7 @@ namespace Sentry.Protocol
             _hub = hub;
             ScopeOptions = scopeOptions;
 
-            SpanId = SentryId.Create();
+            SpanId = SpanId.Create();
             TraceId = SentryId.Create();
         }
 
