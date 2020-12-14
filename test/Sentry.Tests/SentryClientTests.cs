@@ -390,7 +390,11 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance, null));
+            sut.CaptureTransaction(new Transaction(DisabledHub.Instance, null)
+            {
+                Name = null!,
+                Operation = null!
+            });
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
