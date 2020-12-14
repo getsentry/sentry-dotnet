@@ -128,9 +128,7 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
 
-        /// <summary>
-        /// Transaction.
-        /// </summary>
+        /// <inheritdoc />
         public Transaction? Transaction { get; set; }
 
         /// <inheritdoc />

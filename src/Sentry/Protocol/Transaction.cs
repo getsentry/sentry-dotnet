@@ -137,6 +137,13 @@ namespace Sentry.Protocol
             set => Name = value ?? "unnamed";
         }
 
+        // TODO: this is a workaround, ideally Transaction should not inherit from IScope
+        Transaction? IScope.Transaction
+        {
+            get => null;
+            set {}
+        }
+
         internal Transaction(IHub hub, IScopeOptions? scopeOptions)
         {
             _hub = hub;

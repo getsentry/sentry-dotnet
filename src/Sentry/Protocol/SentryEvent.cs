@@ -169,6 +169,13 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
+        // TODO: this is a workaround, ideally Event should not inherit from IScope
+        Transaction? IScope.Transaction
+        {
+            get => null;
+            set {}
+        }
+
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
         /// </summary>
