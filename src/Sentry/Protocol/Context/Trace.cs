@@ -3,6 +3,9 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
+    /// <summary>
+    /// Trace context data.
+    /// </summary>
     public class Trace : ISpanContext, IJsonSerializable
     {
         /// <summary>
