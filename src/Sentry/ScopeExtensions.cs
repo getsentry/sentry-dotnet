@@ -325,6 +325,7 @@ namespace Sentry
 
             to.Environment ??= from.Environment;
             to.Transaction ??= from.Transaction;
+            to.TransactionName ??= from.TransactionName;
             to.Level ??= from.Level;
 
             if (from.Sdk is null || to.Sdk is null)
