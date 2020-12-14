@@ -23,10 +23,10 @@ namespace Sentry.AspNetCore.Extensions
 #endif
 
             // Requires legacy .UseMvc()
-            var routeData = context.GetRouteData();
-            var controller = routeData.Values["controller"]?.ToString();
-            var action = routeData.Values["action"]?.ToString();
-            var area = routeData.Values["area"]?.ToString();
+            var routeData = context.Features.Get<IRoutingFeature?>()?.RouteData;
+            var controller = routeData?.Values["controller"]?.ToString();
+            var action = routeData?.Values["action"]?.ToString();
+            var area = routeData?.Values["area"]?.ToString();
 
             if (!string.IsNullOrWhiteSpace(action))
             {
