@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Sentry.Extensibility;
+using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -35,6 +36,7 @@ namespace Sentry.AspNetCore.Tests
             {
                 HubAccessor = () => Hub;
                 _ = Hub.IsEnabled.Returns(true);
+                _ = Hub.CreateTransaction(default, default).ReturnsForAnyArgs(new Transaction(Hub, Options));
                 _ = HttpContext.Features.Returns(FeatureCollection);
             }
 
