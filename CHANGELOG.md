@@ -4,8 +4,8 @@
  
 * Ref moved SentryId from namespace Sentry.Protocol to Sentry (#643) @lucas-zimerman
 * Ref renamed `CacheFlushTimeout` to `InitCacheFlushTimeout` (#638) @lucas-zimerman
-* Add support for performance
-* Transaction (of type `string`) on Scope and Event now is called TransactionName
+* Add support for performance. ([#633](https://github.com/getsentry/sentry-dotnet/pull/633))
+* Transaction (of type `string`) on Scope and Event now is called TransactionName. ([#633](https://github.com/getsentry/sentry-dotnet/pull/633))
 
 ## 3.0.0-alpha.6
 
