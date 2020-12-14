@@ -280,7 +280,7 @@ namespace Sentry.AspNetCore.Tests
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            Assert.Equal($"{controller}.{action}", _sut.Transaction?.Name);
+            Assert.Equal($"{controller}.{action}", _sut.TransactionName);
         }
 
         public static IEnumerable<object[]> InvalidRequestBodies()
