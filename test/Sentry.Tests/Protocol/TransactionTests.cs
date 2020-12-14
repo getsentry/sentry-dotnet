@@ -20,7 +20,8 @@ namespace Sentry.Tests.Protocol
                 Request = new Request {Method = "GET", Url = "https://test.com"},
                 User = new User {Email = "foo@bar.com", Username = "john"},
                 Environment = "release",
-                Fingerprint = new[] {"foo", "bar"}
+                Fingerprint = new[] {"foo", "bar"},
+                Sdk = new SdkVersion {Name = "SDK", Version = "1.1.1"}
             };
 
             transaction.Finish();
