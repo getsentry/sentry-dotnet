@@ -17,8 +17,8 @@ namespace Sentry.Tests.Protocol
                 Name = "my transaction",
                 Operation = "some op",
                 Description = "description",
-                Request = new Request {Method = "GET", Url = "https://test.com"},
-                User = new User {Email = "foo@bar.com", Username = "john"},
+                Request = new Request {Method = "GET", Url = "https://example.com"},
+                User = new User {Email = "test@sentry.example", Username = "john"},
                 Environment = "release",
                 Fingerprint = new[] {"foo", "bar"},
                 Sdk = new SdkVersion {Name = "SDK", Version = "1.1.1"}
