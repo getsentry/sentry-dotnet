@@ -1,32 +1,48 @@
 const PR_NUMBER = danger.github.pr.number;
+const PR_AUTHOR   = danger.github.pr.user.login;
 const PR_URL = danger.github.pr.html_url;
-const PR_LINK = `[#${PR_NUMBER}](${PR_URL})`;
+const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
 
-function getCleanTitle() {
-  const title = danger.github.pr.title;
-  return title.split(": ").slice(-1)[0].trim().replace(/\.+$/, "");
-}
-
-function getChangelogDetails() {
-  return `
-<details>
-<summary><b>Instructions and example for changelog</b></summary>
-
-Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
+const CHANGELOG_SUMMARY_TITLE = `Instructions and example for changelog`;
+const CHANGELOG_BODY = `Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
  1. **Feat**: For new user-visible functionality.
  2. **Fix**: For user-visible bug fixes.
- 3. **Ref**: For features, refactory and bug fixes in internal operation.
+ 3. **Ref**: For features, refactors and bug fixes in internal operation.
 
-To the changelog entry, please add a link to this PR (consider a more descriptive message):
+To the changelog entry, please add a link to this PR (consider a more descriptive message):`;
+
+const CHANGELOG_END_BODY = `If none of the above apply, you can opt out by adding _#skip-changelog_ to the PR description.`;
+
+function getCleanTitleWithPrLink() {
+  const title = danger.github.pr.title;
+  return title.split(": ").slice(-1)[0].trim().replace(/\.+$/, "") + PR_LINK;
+}
+
+function getChangelogDetailsHtml() {
+  return `
+<details>
+<summary><b>\`${CHANGELOG_SUMMARY_TITLE}\`$</b></summary>
+
+\`${CHANGELOG_BODY}\`
 
 \`\`\`md
-- ${getCleanTitle()}. (${PR_LINK})
+- ${getCleanTitleWithPrLink()}
 \`\`\`
 
-If none of the above apply, you can opt out by adding _#skip-changelog_ to the PR description.
-
+\`${CHANGELOG_END_BODY}\`
 </details>
 `;
+}
+
+function getChangelogDetailsTxt() {
+	return CHANGELOG_SUMMARY_TITLE + '\n' +
+		   CHANGELOG_BODY + '\n' +
+		   getCleanTitleWithPrLink() + '\n' +
+		   CHANGELOG_END_BODY;
+}
+
+function HasPermissionToComment(){
+	return danger.github.pr.head.repo.git_url == danger.github.pr.base.repo.git_url;
 }
 
 async function containsChangelog(path) {
@@ -37,31 +53,40 @@ async function containsChangelog(path) {
 async function checkChangelog() {
   const skipChangelog =
     danger.github && (danger.github.pr.body + "").includes("#skip-changelog");
-
   if (skipChangelog) {
     return;
   }
 
   const hasChangelog = await containsChangelog("CHANGELOG.md");
 
-  if (!hasChangelog) {
-    fail("Please consider adding a changelog entry for the next release.");
-    markdown(getChangelogDetails());
+  if (!hasChangelog) 
+  {
+	if(HasPermissionToComment())
+	{
+		fail("Please consider adding a changelog entry for the next release.");
+		markdown(getChangelogDetailsHtml());
+	}
+	else
+	{
+		//Fallback
+		console.log("Please consider adding a changelog entry for the next release.");
+		console.log(getChangelogDetailsTxt());			
+		process.exitCode = 1;
+	}
   }
 }
 
 async function checkIfFeature() {
    const title = danger.github.pr.title;
-   if(title.startsWith('feat:')){
-     message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
-   }
-  
+   if(title.startsWith('feat:') && HasPermissionToComment()){
+	 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
+   }  
 }
 
 async function checkAll() {
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
-
+  
   if (isDraft) {
     return;
   }
