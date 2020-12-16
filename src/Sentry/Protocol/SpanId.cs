@@ -82,12 +82,12 @@ namespace Sentry.Protocol
         public static bool operator !=(SpanId left, SpanId right) => !(left == right);
 
         /// <summary>
-        /// The <see cref="Guid"/> from the <see cref="SentryId"/>.
+        /// The <see cref="string"/> from the <see cref="SentryId"/>.
         /// </summary>
         public static implicit operator string(SpanId id) => id._value;
 
         /// <summary>
-        /// A <see cref="SentryId"/> from a <see cref="Guid"/>.
+        /// A <see cref="SentryId"/> from a <see cref="string"/>.
         /// </summary>
         public static implicit operator SpanId(string value) => new(value);
     }
