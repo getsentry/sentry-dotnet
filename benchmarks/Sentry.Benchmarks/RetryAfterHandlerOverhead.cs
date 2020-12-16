@@ -13,7 +13,7 @@ namespace Sentry.Benchmarks
         private readonly HttpRequestMessage _request = new(HttpMethod.Get, "/");
 
         [Params(1, 10, 100)]
-        public int RequestCount;
+        public int RequestCount { get; set; }
 
         [GlobalSetup(Target = nameof(With_RetryAfterHandler_OkResponse))]
         public void Setup_With_RetryAfterHandler_OkResponse()
