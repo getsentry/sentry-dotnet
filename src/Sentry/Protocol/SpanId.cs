@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
 {
@@ -8,6 +10,14 @@ namespace Sentry.Protocol
     /// </summary>
     public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
     {
+        private static readonly Random Random = new();
+
+        private static readonly char[] AllowedChars =
+        {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'a', 'b', 'c', 'd', 'e', 'f'
+        };
+
         private readonly string _value;
 
         /// <summary>
@@ -32,14 +42,14 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public override string ToString() => _value;
 
-        // Note: spans are sentry IDs with only 16 characters, rest being truncated.
-        // This is obviously a bad idea as it invalidates GUID's uniqueness properties
-        // (https://devblogs.microsoft.com/oldnewthing/20080627-00/?p=21823)
-        // but all other SDKs do it this way, so we have no choice but to comply.
         /// <summary>
         /// Generates a new Sentry ID.
         /// </summary>
-        public static SpanId Create() => new(Guid.NewGuid().ToString("n").Substring(0, 16));
+        public static SpanId Create() => new(
+            Enumerable.Range(0, 16)
+                .Select(_ => AllowedChars[Random.Next(0, AllowedChars.Length)])
+                .ConcatToString()
+        );
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(_value);
