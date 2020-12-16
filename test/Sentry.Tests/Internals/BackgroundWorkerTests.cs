@@ -17,9 +17,9 @@ namespace Sentry.Tests.Internals
         {
             public ITransport Transport { get; set; } = Substitute.For<ITransport>();
             public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
-            public ConcurrentQueue<Envelope> Queue { get; set; } = new ConcurrentQueue<Envelope>();
-            public CancellationTokenSource CancellationTokenSource { get; set; } = new CancellationTokenSource();
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public ConcurrentQueue<Envelope> Queue { get; set; } = new();
+            public CancellationTokenSource CancellationTokenSource { get; set; } = new();
+            public SentryOptions SentryOptions { get; set; } = new();
 
             public Fixture()
             {
@@ -29,14 +29,14 @@ namespace Sentry.Tests.Internals
             }
 
             public BackgroundWorker GetSut()
-                => new BackgroundWorker(
+                => new(
                     Transport,
                     SentryOptions,
                     CancellationTokenSource,
                     Queue);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Ctor_Task_Created()

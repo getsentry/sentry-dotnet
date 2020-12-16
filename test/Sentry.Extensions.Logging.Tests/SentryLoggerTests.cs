@@ -16,8 +16,8 @@ namespace Sentry.Extensions.Logging.Tests
             public string CategoryName { get; set; } = "SomeApp";
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
             public IHub Hub { get; set; } = Substitute.For<IHub>();
-            public SentryLoggingOptions Options { get; set; } = new SentryLoggingOptions();
-            public Scope Scope { get; } = new Scope(new SentryOptions());
+            public SentryLoggingOptions Options { get; set; } = new();
+            public Scope Scope { get; } = new(new SentryOptions());
 
             public Fixture()
             {
@@ -26,10 +26,10 @@ namespace Sentry.Extensions.Logging.Tests
                 Hub.ConfigureScope(Arg.Invoke(Scope));
             }
 
-            public SentryLogger GetSut() => new SentryLogger(CategoryName, Options, Clock, Hub);
+            public SentryLogger GetSut() => new(CategoryName, Options, Clock, Hub);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
         private const string BreadcrumbType = null;
 
         [Fact]
@@ -79,7 +79,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             var props = new List<KeyValuePair<string, object>>
             {
-                new KeyValuePair<string, object>("foo", "bar")
+                new("foo", "bar")
             };
             var sut = _fixture.GetSut();
 

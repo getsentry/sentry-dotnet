@@ -20,11 +20,11 @@ namespace Sentry.Tests
             public Fixture() => Hub.IsEnabled.Returns(true);
 
             public TaskUnobservedTaskExceptionIntegration GetSut()
-                => new TaskUnobservedTaskExceptionIntegration(AppDomain);
+                => new(AppDomain);
         }
 
-        private readonly Fixture _fixture = new Fixture();
-        public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+        private readonly Fixture _fixture = new();
+        public SentryOptions SentryOptions { get; set; } = new();
 
         [Fact]
         public void Handle_WithException_CaptureEvent()

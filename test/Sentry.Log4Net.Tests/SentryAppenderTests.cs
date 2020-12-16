@@ -39,7 +39,7 @@ namespace Sentry.Log4Net.Tests
             }
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Append_WithException_CreatesEventWithException()

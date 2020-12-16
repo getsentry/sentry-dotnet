@@ -11,7 +11,7 @@ namespace Sentry.Tests.Extensibility
     {
         private class Fixture
         {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public SentryOptions SentryOptions { get; set; } = new();
             public RequestSize RequestSize { get; set; } = RequestSize.Small;
             public IHttpRequest HttpRequest { get; set; } = Substitute.For<IHttpRequest>();
             public IRequestPayloadExtractor Extractor { get; set; } = Substitute.For<IRequestPayloadExtractor>();
@@ -24,10 +24,10 @@ namespace Sentry.Tests.Extensibility
                 Extractors = new[] { Extractor };
             }
 
-            public RequestBodyExtractionDispatcher GetSut() => new RequestBodyExtractionDispatcher(Extractors, SentryOptions, () => RequestSize);
+            public RequestBodyExtractionDispatcher GetSut() => new(Extractors, SentryOptions, () => RequestSize);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void ExtractPayload_DefaultFixture_ReadsMockPayload()

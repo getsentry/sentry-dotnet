@@ -4,7 +4,7 @@ namespace Sentry.Internal
 {
     internal static class EnvironmentLocator
     {
-        private static readonly Lazy<string?> Environment = new Lazy<string?>(Locate);
+        private static readonly Lazy<string?> Environment = new(Locate);
 
         /// <summary>
         /// Attempts to locate the environment the app is running in.

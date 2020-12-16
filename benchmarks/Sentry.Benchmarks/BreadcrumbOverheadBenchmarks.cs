@@ -10,7 +10,7 @@ namespace Sentry.Benchmarks
         private const string Message = "Message";
         private const string Type = "Type";
         private const string Category = "Category";
-        private static readonly Dictionary<string, string> Data = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> Data = new()
         {
             { Message, Type }
         };

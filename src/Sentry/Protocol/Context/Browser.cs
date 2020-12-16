@@ -32,7 +32,7 @@ namespace Sentry.Protocol
         /// Clones this instance
         /// </summary>
         internal Browser Clone()
-            => new Browser
+            => new()
             {
                 Name = Name,
                 Version = Version

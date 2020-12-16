@@ -10,7 +10,7 @@ namespace Sentry.Internal
     internal sealed class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         private readonly SentryOptions _options;
-        private readonly AsyncLocal<KeyValuePair<Scope, ISentryClient>[]?> _asyncLocalScope = new AsyncLocal<KeyValuePair<Scope, ISentryClient>[]?>();
+        private readonly AsyncLocal<KeyValuePair<Scope, ISentryClient>[]?> _asyncLocalScope = new();
 
         internal KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
         {

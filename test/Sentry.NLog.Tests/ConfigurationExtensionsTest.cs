@@ -8,7 +8,7 @@ namespace Sentry.NLog.Tests
 {
     public class ConfigurationExtensionsTest
     {
-        private LoggingConfiguration _sut = new LoggingConfiguration();
+        private LoggingConfiguration _sut = new();
 
         [Fact]
         public void AddSentry_Parameterless_DefaultTargetName()

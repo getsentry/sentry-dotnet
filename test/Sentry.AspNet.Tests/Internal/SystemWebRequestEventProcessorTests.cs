@@ -13,8 +13,8 @@ namespace Sentry.Tests.Internals.Web
         private class Fixture
         {
             public IRequestPayloadExtractor RequestPayloadExtractor { get; set; } = Substitute.For<IRequestPayloadExtractor>();
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public object MockBody { get; set; } = new object();
+            public SentryOptions SentryOptions { get; set; } = new();
+            public object MockBody { get; set; } = new();
             public HttpContext HttpContext { get; set; }
 
             public Fixture()
@@ -30,7 +30,7 @@ namespace Sentry.Tests.Internals.Web
             }
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Ctor_NullEvent_ThrowsArgumentNullException()

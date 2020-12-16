@@ -144,7 +144,7 @@ namespace Sentry
         public string? Environment { get; set; }
 
         /// <inheritdoc />
-        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
+        public SdkVersion Sdk { get; internal set; } = new();
 
         private IEnumerable<string>? _fingerprint;
 

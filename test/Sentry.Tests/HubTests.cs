@@ -18,7 +18,7 @@ namespace NotSentry.Tests
     {
         private class FakeBackgroundWorker : IBackgroundWorker
         {
-            public List<Envelope> Queue { get; } = new List<Envelope>();
+            public List<Envelope> Queue { get; } = new();
 
             public int QueuedItems => Queue.Count;
 

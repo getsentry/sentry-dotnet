@@ -8,7 +8,7 @@ namespace Sentry.PlatformAbstractions
     // https://github.com/dotnet/corefx/issues/17452
     internal static class RuntimeInfo
     {
-        private static readonly Regex RuntimeParseRegex = new Regex("^(?<name>[^\\d]*)(?<version>(\\d+\\.)+[^\\s]+)",
+        private static readonly Regex RuntimeParseRegex = new("^(?<name>[^\\d]*)(?<version>(\\d+\\.)+[^\\s]+)",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         /// <summary>

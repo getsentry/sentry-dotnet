@@ -27,16 +27,16 @@ namespace Sentry.Internal.Http
 
         // Signal that tells the worker whether there's work it can do.
         // Pre-released because the directory might already have files from previous sessions.
-        private readonly Signal _workerSignal = new Signal(true);
+        private readonly Signal _workerSignal = new(true);
 
         // Lock to synchronize file system operations inside the cache directory.
         // It's required because there are multiple threads that may attempt to both read
         // and write from/to the cache directory.
         // Lock usage is minimized by moving files that are being processed to a special directory
         // where collisions are not expected.
-        private readonly Lock _cacheDirectoryLock = new Lock();
+        private readonly Lock _cacheDirectoryLock = new();
 
-        private readonly CancellationTokenSource _workerCts = new CancellationTokenSource();
+        private readonly CancellationTokenSource _workerCts = new();
         private readonly Task _worker;
 
         public CachingTransport(ITransport innerTransport, SentryOptions options)

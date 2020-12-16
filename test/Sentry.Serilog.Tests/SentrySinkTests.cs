@@ -16,12 +16,12 @@ namespace Sentry.Serilog.Tests
     {
         private class Fixture
         {
-            public SentrySerilogOptions Options { get; set; } = new SentrySerilogOptions();
+            public SentrySerilogOptions Options { get; set; } = new();
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public Func<IHub> HubAccessor { get; set; }
             public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
-            public Scope Scope { get; } = new Scope(new SentryOptions());
+            public Scope Scope { get; } = new(new SentryOptions());
 
             public Fixture()
             {
@@ -31,14 +31,14 @@ namespace Sentry.Serilog.Tests
             }
 
             public SentrySink GetSut()
-                => new SentrySink(
+                => new(
                     Options,
                     HubAccessor,
                     SdkDisposeHandle,
                     Clock);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Emit_WithException_CreatesEventWithException()

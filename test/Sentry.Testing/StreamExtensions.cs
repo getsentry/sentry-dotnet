@@ -7,7 +7,7 @@ namespace Sentry.Testing
 {
     public static class StreamExtensions
     {
-        private static readonly Random _random = new Random();
+        private static readonly Random _random = new();
 
         public static async Task FillWithRandomBytesAsync(this Stream stream, long length)
         {
@@ -26,7 +26,7 @@ namespace Sentry.Testing
         }
 
         public static MemoryStream ToMemoryStream(this string source, Encoding encoding) =>
-            new MemoryStream(encoding.GetBytes(source));
+            new(encoding.GetBytes(source));
 
         public static MemoryStream ToMemoryStream(this string source) =>
             source.ToMemoryStream(Encoding.UTF8);

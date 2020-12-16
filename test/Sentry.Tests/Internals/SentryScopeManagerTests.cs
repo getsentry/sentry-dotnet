@@ -13,12 +13,12 @@ namespace Sentry.Tests.Internals
     {
         private class Fixture
         {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public SentryOptions SentryOptions { get; set; } = new();
             public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
-            public SentryScopeManager GetSut() => new SentryScopeManager(SentryOptions, Client);
+            public SentryScopeManager GetSut() => new(SentryOptions, Client);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void GetCurrent_Scope_ReturnsInstance() => Assert.NotNull(_fixture.GetSut().GetCurrent().Key);

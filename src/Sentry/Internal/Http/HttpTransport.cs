@@ -20,7 +20,7 @@ namespace Sentry.Internal.Http
 
         // Keep track of rate limits and their expiry dates
         private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets =
-            new Dictionary<RateLimitCategory, DateTimeOffset>();
+            new();
 
         internal const string DefaultErrorMessage = "No message";
 

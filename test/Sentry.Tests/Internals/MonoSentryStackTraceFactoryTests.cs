@@ -14,11 +14,11 @@ namespace Other.Tests.Internals
     {
         private class Fixture
         {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public MonoSentryStackTraceFactory GetSut() => new MonoSentryStackTraceFactory(SentryOptions);
+            public SentryOptions SentryOptions { get; set; } = new();
+            public MonoSentryStackTraceFactory GetSut() => new(SentryOptions);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Create_UnityIl2Cpp_LeavesOutZeroedOutPath()

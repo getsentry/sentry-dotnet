@@ -10,10 +10,9 @@ namespace Sentry.Benchmarks
     public class RetryAfterHandlerOverhead
     {
         private HttpMessageInvoker _invoker;
-        private readonly HttpRequestMessage _request = new HttpRequestMessage(HttpMethod.Get, "/");
+        private readonly HttpRequestMessage _request = new(HttpMethod.Get, "/");
 
-        [Params(1, 10, 100)]
-        public int RequestCount;
+        [Params(1, 10, 100)] public int RequestCount;
 
         [GlobalSetup(Target = nameof(With_RetryAfterHandler_OkResponse))]
         public void Setup_With_RetryAfterHandler_OkResponse()

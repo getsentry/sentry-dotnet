@@ -16,7 +16,7 @@ namespace Sentry.Internal
 
     internal sealed class AppDomainAdapter : IAppDomain
     {
-        public static AppDomainAdapter Instance { get; } = new AppDomainAdapter();
+        public static AppDomainAdapter Instance { get; } = new();
 
         private AppDomainAdapter()
         {

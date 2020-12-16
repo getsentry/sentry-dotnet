@@ -41,7 +41,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Coerces <see cref="System.String"/> into <see cref="SentryMessage"/>.
         /// </summary>
-        public static implicit operator SentryMessage(string? message) => new SentryMessage {Message = message};
+        public static implicit operator SentryMessage(string? message) => new() {Message = message};
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)

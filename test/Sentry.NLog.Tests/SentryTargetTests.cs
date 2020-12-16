@@ -27,7 +27,7 @@ namespace Sentry.NLog.Tests
 
         private class Fixture
         {
-            public SentryNLogOptions Options { get; set; } = new SentryNLogOptions { Dsn = ValidDsnWithSecret };
+            public SentryNLogOptions Options { get; set; } = new() { Dsn = ValidDsnWithSecret };
 
             public IHub Hub { get; set; } = Substitute.For<IHub>();
 
@@ -86,7 +86,7 @@ namespace Sentry.NLog.Tests
             public Logger GetLogger() => GetLoggerFactory().GetLogger("sentry");
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Can_configure_from_xml_file()

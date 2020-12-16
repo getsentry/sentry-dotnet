@@ -17,13 +17,13 @@ namespace Sentry.Tests
     {
         private class Fixture
         {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public SentryOptions SentryOptions { get; set; } = new();
             public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
 
-            public SentryClient GetSut() => new SentryClient(SentryOptions, BackgroundWorker);
+            public SentryClient GetSut() => new(SentryOptions, BackgroundWorker);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void CaptureEvent_ExceptionFiltered_EmptySentryId()

@@ -6,7 +6,7 @@ namespace Sentry.Tests
 {
     public class ScopeTests
     {
-        private readonly Scope _sut = new Scope();
+        private readonly Scope _sut = new();
 
         [Fact]
         public void OnEvaluate_FiresOnlyOnce()

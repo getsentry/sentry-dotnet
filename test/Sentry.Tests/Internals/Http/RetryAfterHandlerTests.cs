@@ -20,7 +20,7 @@ namespace Sentry.Tests.Internals.Http
             public DateTimeOffset TimeReturned { get; set; } = DateTimeOffset.UtcNow;
 
             public ISystemClock Clock { get; } = Substitute.For<ISystemClock>();
-            public FuncHandler StubHandler { get; } = new FuncHandler();
+            public FuncHandler StubHandler { get; } = new();
             public RetryAfterHandler Sut { get; private set; }
 
             public Fixture() => Clock.GetUtcNow().Returns(TimeReturned);
@@ -33,7 +33,7 @@ namespace Sentry.Tests.Internals.Http
         }
 
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public async Task SendAsync_BadRequest_NoRetryAfterSet()

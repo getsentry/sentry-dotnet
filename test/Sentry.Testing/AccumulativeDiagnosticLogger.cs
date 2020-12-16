@@ -6,7 +6,7 @@ namespace Sentry.Testing
 {
     public class AccumulativeDiagnosticLogger : IDiagnosticLogger
     {
-        public List<Entry> Entries { get; } = new List<Entry>();
+        public List<Entry> Entries { get; } = new();
 
         public bool IsEnabled(SentryLevel level) => true;
 
@@ -15,23 +15,11 @@ namespace Sentry.Testing
             Entries.Add(new Entry(logLevel, message, exception, args));
         }
 
-        public class Entry
-        {
-            public SentryLevel Level { get; }
-
-            public string Message { get; }
-
-            public Exception Exception { get; }
-
-            public object[] Args { get; }
-
-            public Entry(SentryLevel level, string message, Exception exception, object[] args)
-            {
-                Level = level;
-                Message = message;
-                Exception = exception;
-                Args = args;
-            }
-        }
+        public record Entry(
+            SentryLevel Level,
+            string Message,
+            Exception Exception,
+            object[] Args
+        );
     }
 }

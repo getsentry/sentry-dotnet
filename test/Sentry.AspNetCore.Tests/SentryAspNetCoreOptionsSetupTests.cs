@@ -14,11 +14,11 @@ namespace Sentry.AspNetCore.Tests
 {
     public class SentryAspNetCoreOptionsSetupTests
     {
-        private readonly SentryAspNetCoreOptionsSetup _sut = new SentryAspNetCoreOptionsSetup(
+        private readonly SentryAspNetCoreOptionsSetup _sut = new(
             Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
             Substitute.For<IHostingEnvironment>());
 
-        private readonly SentryAspNetCoreOptions _target = new SentryAspNetCoreOptions();
+        private readonly SentryAspNetCoreOptions _target = new();
 
         [Fact]
         public void Filters_KestrelApplicationEvent_NoException_Filtered()

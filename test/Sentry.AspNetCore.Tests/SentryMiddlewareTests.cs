@@ -26,7 +26,7 @@ namespace Sentry.AspNetCore.Tests
             public RequestDelegate RequestDelegate { get; set; } = _ => Task.CompletedTask;
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public Func<IHub> HubAccessor { get; set; }
-            public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
+            public SentryAspNetCoreOptions Options { get; set; } = new();
             public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
             public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
@@ -41,7 +41,7 @@ namespace Sentry.AspNetCore.Tests
             }
 
             public SentryMiddleware GetSut()
-                => new SentryMiddleware(
+                => new(
                     RequestDelegate,
                     HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
@@ -49,7 +49,7 @@ namespace Sentry.AspNetCore.Tests
                     Logger);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public async Task InvokeAsync_DisabledSdk_InvokesNextHandlers()

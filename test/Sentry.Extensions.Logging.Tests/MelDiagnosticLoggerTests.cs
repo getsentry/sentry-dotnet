@@ -12,10 +12,10 @@ namespace Sentry.Extensions.Logging.Tests
             public ILogger<ISentryClient> MelLogger { get; set; } = Substitute.For<ILogger<ISentryClient>>();
             public SentryLevel Level { get; set; } = SentryLevel.Warning;
 
-            public MelDiagnosticLogger GetSut() => new MelDiagnosticLogger(MelLogger, Level);
+            public MelDiagnosticLogger GetSut() => new(MelLogger, Level);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void LogLevel_ErrorLevel_IsEnabledTrue()
