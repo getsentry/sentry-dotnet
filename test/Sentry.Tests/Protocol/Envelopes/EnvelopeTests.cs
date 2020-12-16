@@ -372,7 +372,7 @@ namespace Sentry.Tests.Protocol.Envelopes
                 SentryExceptions = new [] { new SentryException { Value = "exception_value" } },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
                 ServerName = "server_name",
-                Transaction = "transaction",
+                TransactionName = "transaction",
             };
 
             @event.SetExtra("extra_key", "extra_value");
@@ -405,7 +405,7 @@ namespace Sentry.Tests.Protocol.Envelopes
         {
             // Arrange
             var feedback = new UserFeedback(
-                new SentryId(Guid.NewGuid()),
+                SentryId.Create(),
                 "foo@bar.com",
                 "Everything sucks",
                 "Donald J. Trump"

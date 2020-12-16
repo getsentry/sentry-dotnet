@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -26,6 +27,12 @@ namespace Sentry
         /// </summary>
         /// <param name="userFeedback">The user feedback to send to Sentry.</param>
         void CaptureUserFeedback(UserFeedback userFeedback);
+
+        /// <summary>
+        /// Captures a transaction.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        void CaptureTransaction(Transaction transaction);
 
         /// <summary>
         /// Flushes events queued up.

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using VerifyXunit;
 using Xunit;
@@ -363,6 +364,48 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut.Dispose();
             _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureUserFeedback(null));
+        }
+
+        [Fact]
+        public void CaptureTransaction_ValidTransaction_Sent()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Act
+            sut.CaptureTransaction(new Transaction(DisabledHub.Instance, null)
+            {
+                Name = "test name",
+                Operation = "test operation"
+            });
+
+            // Assert
+            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_InvalidTransaction_Ignored()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Act
+            sut.CaptureTransaction(new Transaction(DisabledHub.Instance, null)
+            {
+                Name = null!,
+                Operation = null!
+            });
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_DisposedClient_ThrowsObjectDisposedException()
+        {
+            var sut = _fixture.GetSut();
+            sut.Dispose();
+            _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureTransaction(null));
         }
 
         [Fact]

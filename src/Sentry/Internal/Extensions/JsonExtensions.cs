@@ -60,6 +60,15 @@ namespace Sentry.Internal.Extensions
         public static void WriteDictionary(
             this Utf8JsonWriter writer,
             string propertyName,
+            IEnumerable<KeyValuePair<string, object?>>? dic)
+        {
+            writer.WritePropertyName(propertyName);
+            writer.WriteDictionaryValue(dic);
+        }
+
+        public static void WriteDictionary(
+            this Utf8JsonWriter writer,
+            string propertyName,
             IEnumerable<KeyValuePair<string, string?>>? dic)
         {
             writer.WritePropertyName(propertyName);

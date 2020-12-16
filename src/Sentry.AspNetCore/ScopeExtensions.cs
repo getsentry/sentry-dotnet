@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
+using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 
@@ -68,27 +69,26 @@ namespace Sentry.AspNetCore
             try
             {
                 var routeData = context.GetRouteData();
-                if (routeData != null)
+                var controller = routeData.Values["controller"]?.ToString();
+                var action = routeData.Values["action"]?.ToString();
+                var area = routeData.Values["area"]?.ToString();
+
+                if (controller != null)
                 {
-                    var controller = routeData.Values["controller"]?.ToString();
-                    var action = routeData.Values["action"]?.ToString();
-                    var area = routeData.Values["area"]?.ToString();
-
-                    if (controller != null)
-                    {
-                        scope.SetTag("route.controller", controller);
-                    }
-                    if (action != null)
-                    {
-                        scope.SetTag("route.action", action);
-                    }
-                    if (area != null)
-                    {
-                        scope.SetTag("route.area", area);
-                    }
-
-                    scope.Transaction = area == null ? $"{controller}.{action}" : $"{area}.{controller}.{action}";
+                    scope.SetTag("route.controller", controller);
                 }
+
+                if (action != null)
+                {
+                    scope.SetTag("route.action", action);
+                }
+
+                if (area != null)
+                {
+                    scope.SetTag("route.area", area);
+                }
+
+                scope.TransactionName = context.TryGetRouteTemplate() ?? context.Request.Path;
             }
             catch(Exception e)
             {

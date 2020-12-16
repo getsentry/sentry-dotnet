@@ -75,6 +75,20 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
+        public Transaction CreateTransaction(string name, string operation)
+            => SentrySdk.CreateTransaction(name, operation);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public SentryTraceHeader? GetSentryTrace()
+            => SentrySdk.GetTraceHeader();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
         public void BindClient(ISentryClient client)
             => SentrySdk.BindClient(client);
 
@@ -131,6 +145,14 @@ namespace Sentry.Extensibility
         [EditorBrowsable(EditorBrowsableState.Never)]
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
             => SentrySdk.CaptureEvent(evt, scope);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void CaptureTransaction(Transaction transaction)
+            => SentrySdk.CaptureTransaction(transaction);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>

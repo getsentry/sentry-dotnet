@@ -139,7 +139,7 @@ internal static class Program
             SentrySdk.WithScope(s =>
             {
                 s.Level = SentryLevel.Fatal;
-                s.Transaction = "main";
+                s.TransactionName = "main";
                 s.Environment = "SpecialEnvironment";
 
                 SentrySdk.CaptureMessage("Fatal message!");

@@ -9,7 +9,7 @@ namespace Sentry
     /// </summary>
     public readonly struct SentryId : IEquatable<SentryId>, IJsonSerializable
     {
-        private readonly Guid _eventId;
+        private readonly Guid _guid;
 
         /// <summary>
         /// An empty sentry id.
@@ -19,7 +19,7 @@ namespace Sentry
         /// <summary>
         /// Creates a new instance of a Sentry Id.
         /// </summary>
-        public SentryId(Guid guid) => _eventId = guid;
+        public SentryId(Guid guid) => _guid = guid;
 
         /// <summary>
         /// Sentry Id in the format Sentry recognizes.
@@ -29,19 +29,29 @@ namespace Sentry
         /// dashes which sentry doesn't expect when searching events.
         /// </remarks>
         /// <returns>String representation of the event id.</returns>
-        public override string ToString() => _eventId.ToString("n");
+        public override string ToString() => _guid.ToString("n");
 
         /// <inheritdoc />
-        public bool Equals(SentryId other) => _eventId.Equals(other._eventId);
+        public bool Equals(SentryId other) => _guid.Equals(other._guid);
 
         /// <inheritdoc />
         public override bool Equals(object? obj) => obj is SentryId other && Equals(other);
 
         /// <inheritdoc />
-        public override int GetHashCode() => _eventId.GetHashCode();
+        public override int GetHashCode() => _guid.GetHashCode();
+
+        /// <summary>
+        /// Generates a new Sentry ID.
+        /// </summary>
+        public static SentryId Create() => new(Guid.NewGuid());
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
+
+        /// <summary>
+        /// Parses from string.
+        /// </summary>
+        public static SentryId Parse(string value) => new(Guid.Parse(value));
 
         /// <summary>
         /// Parses from JSON.
@@ -68,11 +78,11 @@ namespace Sentry
         /// <summary>
         /// The <see cref="Guid"/> from the <see cref="SentryId"/>.
         /// </summary>
-        public static implicit operator Guid(SentryId sentryId) => sentryId._eventId;
+        public static implicit operator Guid(SentryId sentryId) => sentryId._guid;
 
         /// <summary>
         /// A <see cref="SentryId"/> from a <see cref="Guid"/>.
         /// </summary>
-        public static implicit operator SentryId(Guid guid) => new SentryId(guid);
+        public static implicit operator SentryId(Guid guid) => new(guid);
     }
 }

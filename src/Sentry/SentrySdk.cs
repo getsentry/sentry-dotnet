@@ -307,5 +307,26 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
             => _hub.CaptureUserFeedback(new UserFeedback(eventId, email, comments, name));
+
+        /// <summary>
+        /// Captures a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static void CaptureTransaction(Transaction transaction)
+            => _hub.CaptureTransaction(transaction);
+
+        /// <summary>
+        /// Creates a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static Transaction CreateTransaction(string name, string operation)
+            => _hub.CreateTransaction(name, operation);
+
+        /// <summary>
+        /// Gets the Sentry trace header.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static SentryTraceHeader? GetTraceHeader()
+            => _hub.GetSentryTrace();
     }
 }

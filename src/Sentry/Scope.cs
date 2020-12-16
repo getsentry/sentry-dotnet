@@ -83,9 +83,6 @@ namespace Sentry
         /// <inheritdoc />
         public SentryLevel? Level { get; set; }
 
-        /// <inheritdoc />
-        public string? Transaction { get; set; }
-
         private Request? _request;
 
         /// <inheritdoc />
@@ -130,6 +127,12 @@ namespace Sentry
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags { get; } = new ConcurrentDictionary<string, string>();
+
+        /// <inheritdoc />
+        public Transaction? Transaction { get; set; }
+
+        /// <inheritdoc />
+        public string? TransactionName { get; set; }
 
         /// <summary>
         /// Creates a scope with the specified options.

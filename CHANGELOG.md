@@ -4,6 +4,8 @@
  
 * Ref moved SentryId from namespace Sentry.Protocol to Sentry (#643) @lucas-zimerman
 * Ref renamed `CacheFlushTimeout` to `InitCacheFlushTimeout` (#638) @lucas-zimerman
+* Add support for performance. ([#633](https://github.com/getsentry/sentry-dotnet/pull/633))
+* Transaction (of type `string`) on Scope and Event now is called TransactionName. ([#633](https://github.com/getsentry/sentry-dotnet/pull/633))
 
 ## 3.0.0-alpha.6
 
@@ -12,6 +14,7 @@
 * Add `SentryScopeStateProcessor` #603
 * Add net5.0 TFM to libraries #606
 * Add more logging to CachingTransport #619
+* Bump Microsoft.Bcl.AsyncInterfaces to 5.0.0 #618
 * Bump `Microsoft.Bcl.AsyncInterfaces` to 5.0.0 #618
 * `DefaultTags` moved from `SentryLoggingOptions` to `SentryOptions` (#637) @PureKrome
 * `Sentry.Serilog` can accept DefaultTags (#637) @PureKrome 

@@ -63,14 +63,6 @@ namespace Sentry
             }
         }
 
-        /// <summary>
-        /// Queues the event to be sent to Sentry.
-        /// </summary>
-        /// <remarks>
-        /// An optional scope, if provided, will be applied to the event.
-        /// </remarks>
-        /// <param name="event">The event to send to Sentry.</param>
-        /// <param name="scope">The optional scope to augment the event with.</param>
         /// <inheritdoc />
         public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
         {
@@ -95,10 +87,7 @@ namespace Sentry
             }
         }
 
-        /// <summary>
-        /// Captures a user feedback.
-        /// </summary>
-        /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+        /// <inheritdoc />
         public void CaptureUserFeedback(UserFeedback userFeedback)
         {
             if (_disposed)
@@ -108,19 +97,53 @@ namespace Sentry
 
             if (userFeedback.EventId.Equals(SentryId.Empty))
             {
-                //Ignore the userfeedback if EventId is empty
+                // Ignore the user feedback if EventId is empty
                 _options.DiagnosticLogger?.LogWarning("User feedback dropped due to empty id.");
                 return;
             }
-            else if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
-                 string.IsNullOrWhiteSpace(userFeedback.Comments))
+
+            if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
+                string.IsNullOrWhiteSpace(userFeedback.Comments))
             {
-                //Ignore the userfeedback if a required field is null or empty.
+                // Ignore the user feedback if a required field is null or empty.
                 _options.DiagnosticLogger?.LogWarning("User feedback discarded due to one or more required fields missing.");
                 return;
             }
 
-            _ = CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+            CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+        }
+
+        /// <inheritdoc />
+        public void CaptureTransaction(Transaction transaction)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            if (transaction.SpanId.Equals(SentryId.Empty))
+            {
+                _options.DiagnosticLogger?.LogWarning("Transaction dropped due to empty id.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(transaction.Name) ||
+                string.IsNullOrWhiteSpace(transaction.Operation))
+            {
+                _options.DiagnosticLogger?.LogWarning("Transaction discarded due to one or more required fields missing.");
+                return;
+            }
+
+            if (_options.TraceSampleRate < 1)
+            {
+                if (Random.NextDouble() > _options.TraceSampleRate)
+                {
+                    _options.DiagnosticLogger?.LogDebug("Transaction sampled.");
+                    return;
+                }
+            }
+
+            CaptureEnvelope(Envelope.FromTransaction(transaction));
         }
 
         /// <summary>
@@ -141,6 +164,7 @@ namespace Sentry
                     return SentryId.Empty;
                 }
             }
+
             if (@event.Exception != null && _options.ExceptionFilters?.Length > 0)
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
@@ -150,6 +174,7 @@ namespace Sentry
                     return SentryId.Empty;
                 }
             }
+
             scope ??= new Scope(_options);
 
             _options.DiagnosticLogger?.LogInfo("Capturing event.");

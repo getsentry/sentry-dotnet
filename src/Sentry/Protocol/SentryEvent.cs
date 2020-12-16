@@ -112,7 +112,7 @@ namespace Sentry
         public SentryLevel? Level { get; set; }
 
         /// <inheritdoc />
-        public string? Transaction { get; set; }
+        public string? TransactionName { get; set; }
 
         private Request? _request;
         /// <inheritdoc />
@@ -169,6 +169,13 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
+        // TODO: this is a workaround, ideally Event should not inherit from IScope
+        Transaction? IScope.Transaction
+        {
+            get => null;
+            set {}
+        }
+
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
         /// </summary>
@@ -193,7 +200,7 @@ namespace Sentry
         {
             Exception = exception;
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
-            EventId = eventId != default ? eventId : (SentryId)Guid.NewGuid();
+            EventId = eventId != default ? eventId : SentryId.Create();
             ScopeOptions = options;
             Platform = Constants.Platform;
         }
@@ -265,9 +272,9 @@ namespace Sentry
             }
 
             // Transaction
-            if (!string.IsNullOrWhiteSpace(Transaction))
+            if (!string.IsNullOrWhiteSpace(TransactionName))
             {
-                writer.WriteString("transaction", Transaction);
+                writer.WriteString("transaction", TransactionName);
             }
 
             // Request
@@ -390,7 +397,7 @@ namespace Sentry
                 SentryExceptionValues = exceptionValues,
                 SentryThreadValues = threadValues,
                 Level = level,
-                Transaction = transaction,
+                TransactionName = transaction,
                 _request = request,
                 _contexts = contexts,
                 _user = user,

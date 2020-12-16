@@ -943,12 +943,12 @@ namespace Sentry.Tests.Protocol
         public void Apply_Transaction_Null()
         {
             var sut = _fixture.GetSut();
-            sut.Transaction = null;
+            sut.TransactionName = null;
 
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Null(target.Transaction);
+            Assert.Null(target.TransactionName);
         }
 
         [Fact]
@@ -957,11 +957,11 @@ namespace Sentry.Tests.Protocol
             const string expected = "transaction";
 
             var sut = _fixture.GetSut();
-            sut.Transaction = expected;
+            sut.TransactionName = expected;
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Equal(expected, target.Transaction);
+            Assert.Equal(expected, target.TransactionName);
         }
 
         [Fact]
@@ -970,12 +970,12 @@ namespace Sentry.Tests.Protocol
             const string expected = "transaction";
             var sut = _fixture.GetSut();
             var target = _fixture.GetSut();
-            target.Transaction = expected;
+            target.TransactionName = expected;
 
-            sut.Transaction = "other";
+            sut.TransactionName = "other";
             sut.Apply(target);
 
-            Assert.Equal(expected, target.Transaction);
+            Assert.Equal(expected, target.TransactionName);
         }
 
         [Fact]

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {
@@ -52,6 +53,17 @@ namespace Sentry.Extensibility
         }
 
         /// <summary>
+        /// Returns a dummy transaction.
+        /// </summary>
+        public Transaction CreateTransaction(string name, string operation) =>
+            new Transaction(this, null);
+
+        /// <summary>
+        /// Returns null.
+        /// </summary>
+        public SentryTraceHeader? GetSentryTrace() => null;
+
+        /// <summary>
         /// No-Op.
         /// </summary>
         public void BindClient(ISentryClient client)
@@ -62,6 +74,13 @@ namespace Sentry.Extensibility
         /// No-Op.
         /// </summary>
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => SentryId.Empty;
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void CaptureTransaction(Transaction transaction)
+        {
+        }
 
         /// <summary>
         /// No-Op.

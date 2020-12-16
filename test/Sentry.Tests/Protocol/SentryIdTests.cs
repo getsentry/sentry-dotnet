@@ -16,7 +16,7 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void Implicit_ToGuid()
         {
-            var expected = new SentryId(Guid.NewGuid());
+            var expected = SentryId.Create();
             Guid actual = expected;
             Assert.Equal(expected.ToString(), actual.ToString("N"));
         }

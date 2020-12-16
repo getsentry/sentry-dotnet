@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
+using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
@@ -99,6 +101,39 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
+        public Transaction CreateTransaction(string name, string operation)
+        {
+            var trans = new Transaction(this, _options)
+            {
+                Name = name,
+                Operation = operation
+            };
+
+            var nameAndVersion = MainSentryEventProcessor.NameAndVersion;
+            var protocolPackageName = MainSentryEventProcessor.ProtocolPackageName;
+
+            if (trans.Sdk.Version == null && trans.Sdk.Name == null)
+            {
+                trans.Sdk.Name = Constants.SdkName;
+                trans.Sdk.Version = nameAndVersion.Version;
+            }
+
+            if (nameAndVersion.Version != null)
+            {
+                trans.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
+            }
+
+            ConfigureScope(scope => scope.Transaction = trans);
+
+            return trans;
+        }
+
+        public SentryTraceHeader? GetSentryTrace()
+        {
+            var (currentScope, _) = ScopeManager.GetCurrent();
+            return currentScope.Transaction?.GetTraceHeader();
+        }
+
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
@@ -125,6 +160,18 @@ namespace Sentry.Internal
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+            }
+        }
+
+        public void CaptureTransaction(Transaction transaction)
+        {
+            try
+            {
+                _ownedClient.CaptureTransaction(transaction);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
             }
         }
 

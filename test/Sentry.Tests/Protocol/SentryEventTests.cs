@@ -43,7 +43,7 @@ namespace Sentry.Tests.Protocol
                 SentryExceptions = new[] { new SentryException { Value = "exception_value"} },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
                 ServerName = "server_name",
-                Transaction = "transaction",
+                TransactionName = "transaction",
             };
 
             sut.Sdk.AddPackage(new Package("name", "version"));
