@@ -31,7 +31,7 @@ namespace Sentry.Extensions.Logging.Tests
             }
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void SentryLoggingOptions_ValuesFromAppSettings()

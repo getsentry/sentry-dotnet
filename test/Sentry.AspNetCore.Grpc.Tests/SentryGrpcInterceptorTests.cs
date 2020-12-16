@@ -15,7 +15,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
         {
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public Func<IHub> HubAccessor { get; set; }
-            public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
+            public SentryAspNetCoreOptions Options { get; set; } = new();
             public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
 
             public ILogger<SentryGrpcInterceptor> Logger { get; set; } =
@@ -24,7 +24,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             public ServerCallContext Context { get; set; } = Substitute.For<ServerCallContext>();
 
             public ClientInterceptorContext<TestRequest, TestResponse> InterceptorContext { get; set; } =
-                new ClientInterceptorContext<TestRequest, TestResponse>();
+                new();
 
             public UnaryServerMethod<TestRequest, TestResponse> Continuation { get; set; } =
                 (request, context) => Task.FromResult(new TestResponse());
@@ -36,13 +36,13 @@ namespace Sentry.AspNetCore.Grpc.Tests
             }
 
             public SentryGrpcInterceptor GetSut()
-                => new SentryGrpcInterceptor(
+                => new(
                     HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
                     HostingEnvironment);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public async Task UnaryServerHandler_DisabledSdk_InvokesNextHandlers()

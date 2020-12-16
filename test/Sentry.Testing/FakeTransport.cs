@@ -10,7 +10,7 @@ namespace Sentry.Testing
 {
     internal class FakeTransport : ITransport, IDisposable
     {
-        private readonly List<Envelope> _envelopes = new List<Envelope>();
+        private readonly List<Envelope> _envelopes = new();
 
         public event EventHandler<Envelope> EnvelopeSent;
 

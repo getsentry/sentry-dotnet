@@ -22,7 +22,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// The single instance which forwards all calls to <see cref="SentrySdk"/>
         /// </summary>
-        public static readonly HubAdapter Instance = new HubAdapter();
+        public static readonly HubAdapter Instance = new();
 
         private HubAdapter() { }
 

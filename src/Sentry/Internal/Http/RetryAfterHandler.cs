@@ -23,7 +23,7 @@ namespace Sentry.Internal.Http
         private long _retryAfterUtcTicks;
         internal long RetryAfterUtcTicks => _retryAfterUtcTicks;
 
-        private readonly HttpResponseMessage _tooManyRequestsResponse = new HttpResponseMessage(TooManyRequests);
+        private readonly HttpResponseMessage _tooManyRequestsResponse = new(TooManyRequests);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RetryAfterHandler"/> class.

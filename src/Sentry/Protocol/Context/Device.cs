@@ -163,7 +163,7 @@ namespace Sentry.Protocol
         /// Clones this instance.
         /// </summary>
         internal Device Clone()
-            => new Device
+            => new()
             {
                 Name = Name,
                 Manufacturer = Manufacturer,

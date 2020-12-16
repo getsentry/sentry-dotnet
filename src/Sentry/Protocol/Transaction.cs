@@ -14,7 +14,7 @@ namespace Sentry.Protocol
     public class Transaction : ISpan, IScope, IJsonSerializable
     {
         private readonly IHub _hub;
-        private readonly SpanRecorder _spanRecorder = new SpanRecorder();
+        private readonly SpanRecorder _spanRecorder = new();
 
         /// <inheritdoc />
         public IScopeOptions? ScopeOptions { get; }
@@ -102,7 +102,7 @@ namespace Sentry.Protocol
         public string? Environment { get; set; }
 
         /// <inheritdoc />
-        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
+        public SdkVersion Sdk { get; internal set; } = new();
 
         private IEnumerable<string>? _fingerprint;
 
@@ -174,7 +174,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Get Sentry trace header.
         /// </summary>
-        public SentryTraceHeader GetTraceHeader() => new SentryTraceHeader(
+        public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
             IsSampled

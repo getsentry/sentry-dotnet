@@ -7,7 +7,7 @@ namespace Sentry.Internal
     // https://github.com/mono/mono/blob/d336d6be307dfea8b7a07268270c6d885db9d399/mcs/tools/mono-symbolicate/StackFrameData.cs
     internal class StackFrameData
     {
-        static readonly Regex _regex = new Regex(
+        static readonly Regex _regex = new(
             @"\w*at (?<Method>.+) *(\[0x(?<IL>.+)\]|<0x.+ \+ 0x(?<NativeOffset>.+)>( (?<MethodIndex>\d+)|)) in <(?<MVID>[^>#]+)(#(?<AOTID>[^>]+)|)>:0");
 
         public string TypeFullName { get; }
@@ -40,7 +40,7 @@ namespace Sentry.Internal
         }
 
         public StackFrameData Relocate(string typeName, string methodName)
-            => new StackFrameData(Line, typeName, methodName, Offset, IsILOffset, MethodIndex, Mvid, Aotid);
+            => new(Line, typeName, methodName, Offset, IsILOffset, MethodIndex, Mvid, Aotid);
 
         public static bool TryParse(string line, [NotNullWhen(true)] out StackFrameData? stackFrame)
         {

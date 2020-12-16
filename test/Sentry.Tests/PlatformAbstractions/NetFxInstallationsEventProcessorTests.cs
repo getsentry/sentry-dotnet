@@ -9,12 +9,12 @@ namespace Sentry.Tests.PlatformAbstractions
     {
         private class Fixture
         {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+            public SentryOptions SentryOptions { get; set; } = new();
 
-            public NetFxInstallationsEventProcessor GetSut() => new NetFxInstallationsEventProcessor(SentryOptions);
+            public NetFxInstallationsEventProcessor GetSut() => new(SentryOptions);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [SkippableFact]
         public void Process_SentryEventWithNetFxList()

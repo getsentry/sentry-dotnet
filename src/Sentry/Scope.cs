@@ -22,7 +22,7 @@ namespace Sentry
 
         internal bool Locked { get; set; }
 
-        private readonly object _lastEventIdSync = new object();
+        private readonly object _lastEventIdSync = new();
         private SentryId _lastEventId;
 
         internal SentryId LastEventId
@@ -43,7 +43,7 @@ namespace Sentry
             }
         }
 
-        private readonly object _evaluationSync = new object();
+        private readonly object _evaluationSync = new();
         private volatile bool _hasEvaluated;
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Sentry
         internal bool HasEvaluated => _hasEvaluated;
 
         private readonly Lazy<ConcurrentBag<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
-            new Lazy<ConcurrentBag<ISentryEventExceptionProcessor>>(LazyThreadSafetyMode.PublicationOnly);
+            new(LazyThreadSafetyMode.PublicationOnly);
 
         /// <summary>
         /// A list of exception processors.
@@ -60,7 +60,7 @@ namespace Sentry
         internal ConcurrentBag<ISentryEventExceptionProcessor> ExceptionProcessors => _lazyExceptionProcessors.Value;
 
         private readonly Lazy<ConcurrentBag<ISentryEventProcessor>> _lazyEventProcessors =
-            new Lazy<ConcurrentBag<ISentryEventProcessor>>(LazyThreadSafetyMode.PublicationOnly);
+            new(LazyThreadSafetyMode.PublicationOnly);
 
         /// <summary>
         /// A list of event processors.
@@ -114,7 +114,7 @@ namespace Sentry
         public string? Environment { get; set; }
 
         /// <inheritdoc />
-        public SdkVersion Sdk { get; internal set; } = new SdkVersion();
+        public SdkVersion Sdk { get; internal set; } = new();
 
         /// <inheritdoc />
         public IEnumerable<string> Fingerprint { get; set; } = Enumerable.Empty<string>();

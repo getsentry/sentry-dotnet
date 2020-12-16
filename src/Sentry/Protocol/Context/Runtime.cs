@@ -49,7 +49,7 @@ namespace Sentry.Protocol
         /// </summary>
         /// <returns></returns>
         public Runtime Clone()
-            => new Runtime
+            => new()
             {
                 Name = Name,
                 Version = Version,

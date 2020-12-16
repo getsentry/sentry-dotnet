@@ -58,7 +58,7 @@ namespace Sentry.Protocol
         /// Clones this instance
         /// </summary>
         internal OperatingSystem Clone()
-            => new OperatingSystem
+            => new()
             {
                 Name = Name,
                 Version = Version,

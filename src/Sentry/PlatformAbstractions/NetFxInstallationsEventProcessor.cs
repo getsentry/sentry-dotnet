@@ -12,7 +12,7 @@ namespace Sentry.PlatformAbstractions
         internal static readonly string NetFxInstallationsKey = ".NET Framework";
 
         private readonly Lazy<Dictionary<string, string>> _netFxInstallations =
-            new Lazy<Dictionary<string, string>>(() => GetInstallationsDictionary(), LazyThreadSafetyMode.ExecutionAndPublication);
+            new(() => GetInstallationsDictionary(), LazyThreadSafetyMode.ExecutionAndPublication);
 
         private volatile bool _netFxInstallationEnabled = true;
 

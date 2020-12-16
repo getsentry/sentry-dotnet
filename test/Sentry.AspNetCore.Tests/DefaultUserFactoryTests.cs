@@ -24,9 +24,9 @@ namespace Sentry.AspNetCore.Tests
             _ = Identity.Name.Returns(username); // by default reads: ClaimTypes.Name
             Claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, username +"@sentry.io"),
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.NameIdentifier, "927391237"),
+                new(ClaimTypes.Email, username +"@sentry.io"),
+                new(ClaimTypes.Name, username),
+                new(ClaimTypes.NameIdentifier, "927391237"),
             };
 
             _ = ConnectionInfo.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
@@ -37,7 +37,7 @@ namespace Sentry.AspNetCore.Tests
             _ = HttpContext.Connection.Returns(ConnectionInfo);
         }
 
-        private readonly DefaultUserFactory _sut = new DefaultUserFactory();
+        private readonly DefaultUserFactory _sut = new();
 
         [Fact]
         public void Create_Fixture_CreatesCompleteUser()

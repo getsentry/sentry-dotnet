@@ -4,7 +4,7 @@ namespace Sentry.Extensions.Logging.Tests
 {
     public class SentryLoggingOptionsExtensionsTests
     {
-        private readonly SentryLoggingOptions _sut = new SentryLoggingOptions();
+        private readonly SentryLoggingOptions _sut = new();
 
         [Fact]
         public void ApplyDefaultTags_TagInEvent_DoesNotOverrideTag()

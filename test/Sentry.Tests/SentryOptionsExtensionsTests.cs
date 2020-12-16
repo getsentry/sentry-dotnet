@@ -11,7 +11,7 @@ namespace Sentry.Tests
 {
     public class SentryOptionsExtensionsTests
     {
-        public SentryOptions Sut { get; set; } = new SentryOptions();
+        public SentryOptions Sut { get; set; } = new();
 
         [Fact]
         public void DisableDuplicateEventDetection_RemovesDisableDuplicateEventDetection()

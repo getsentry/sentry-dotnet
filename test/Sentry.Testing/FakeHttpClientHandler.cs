@@ -10,7 +10,7 @@ namespace Sentry.Testing
     public class FakeHttpClientHandler : HttpClientHandler
     {
         private readonly Func<HttpRequestMessage, Task<HttpResponseMessage>> _getResponse;
-        private readonly List<HttpRequestMessage> _requests = new List<HttpRequestMessage>();
+        private readonly List<HttpRequestMessage> _requests = new();
 
         public FakeHttpClientHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> getResponse)
         {

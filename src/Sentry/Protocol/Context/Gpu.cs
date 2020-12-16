@@ -91,7 +91,7 @@ namespace Sentry.Protocol
         /// Clones this instance.
         /// </summary>
         internal Gpu Clone()
-            => new Gpu
+            => new()
             {
                 Name = Name,
                 Id = Id,

@@ -272,7 +272,7 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void IsDisabled_EmptyStringDsn_True() => Assert.True(Dsn.IsDisabled(string.Empty));
 
-        private static readonly Random Rnd = new Random();
+        private static readonly Random Rnd = new();
 
         private class DsnTestCase
         {
@@ -291,7 +291,7 @@ namespace Sentry.Tests.Protocol
                 => $"{Scheme}://{PublicKey}{(SecretKey == null ? null : $"{CredentialSeparator}{SecretKey}")}{UserInfoSeparator}{Host}{(Port != null ? $":{Port}" : "")}{Path}/{ProjectId}";
 
             public static implicit operator string(DsnTestCase @case) => @case.ToString();
-            public static implicit operator Uri(DsnTestCase @case) => new Uri($"{@case.Scheme}://{@case.Host}:{@case.Port}{@case.Path}/api/{@case.ProjectId}/store/");
+            public static implicit operator Uri(DsnTestCase @case) => new($"{@case.Scheme}://{@case.Host}:{@case.Port}{@case.Path}/api/{@case.ProjectId}/store/");
         }
 
         private static void AssertEqual(DsnTestCase @case, Dsn dsn)

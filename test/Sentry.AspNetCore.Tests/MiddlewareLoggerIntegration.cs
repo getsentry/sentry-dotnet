@@ -28,7 +28,7 @@ namespace Sentry.AspNetCore.Tests
             public Func<IHub> HubAccessor { get; set; }
             public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
-            public SentryAspNetCoreOptions Options { get; set; } = new SentryAspNetCoreOptions();
+            public SentryAspNetCoreOptions Options { get; set; } = new();
             public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
             public ILogger<SentryMiddleware> MiddlewareLogger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public ILogger SentryLogger { get; set; }
@@ -55,7 +55,7 @@ namespace Sentry.AspNetCore.Tests
             }
 
             public SentryMiddleware GetSut()
-                => new SentryMiddleware(
+                => new(
                     RequestDelegate,
                     HubAccessor,
                     Microsoft.Extensions.Options.Options.Create(Options),
@@ -65,7 +65,7 @@ namespace Sentry.AspNetCore.Tests
             public void Dispose() => _disposable.Dispose();
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public async Task InvokeAsync_LoggerMessage_AsBreadcrumb()

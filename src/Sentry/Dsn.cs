@@ -57,9 +57,9 @@ namespace Sentry
             ApiBaseUri = apiBaseUri;
         }
 
-        public Uri GetStoreEndpointUri() => new Uri(ApiBaseUri, "store/");
+        public Uri GetStoreEndpointUri() => new(ApiBaseUri, "store/");
 
-        public Uri GetEnvelopeEndpointUri() => new Uri(ApiBaseUri, "envelope/");
+        public Uri GetEnvelopeEndpointUri() => new(ApiBaseUri, "envelope/");
 
         public override string ToString() => Source;
 

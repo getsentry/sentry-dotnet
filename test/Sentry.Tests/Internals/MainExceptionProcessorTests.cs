@@ -13,11 +13,11 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public MainExceptionProcessor GetSut() => new MainExceptionProcessor(SentryOptions, () => SentryStackTraceFactory);
+            public SentryOptions SentryOptions { get; set; } = new();
+            public MainExceptionProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Process_ExceptionAndEventWithoutExtra_ExtraIsEmpty()

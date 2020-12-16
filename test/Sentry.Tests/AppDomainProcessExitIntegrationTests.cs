@@ -16,12 +16,12 @@ namespace Sentry.Tests
 
             public Fixture() => Hub.IsEnabled.Returns(true);
 
-            public AppDomainProcessExitIntegration GetSut() => new AppDomainProcessExitIntegration(AppDomain);
+            public AppDomainProcessExitIntegration GetSut() => new(AppDomain);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
-        public SentryOptions SentryOptions { get; set; } = new SentryOptions();
+        public SentryOptions SentryOptions { get; set; } = new();
 
         [Fact]
         public void Handle_WithException_CaptureEvent()

@@ -11,12 +11,12 @@ namespace Sentry.Tests.Protocol
     {
         private class Fixture
         {
-            public SentryOptions ScopeOptions { get; set; } = new SentryOptions();
+            public SentryOptions ScopeOptions { get; set; } = new();
 
             public IScope GetSut() => new Scope(ScopeOptions);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void HasUser_DefaultScope_ReturnsFalse()
@@ -199,9 +199,9 @@ namespace Sentry.Tests.Protocol
 
             var expectedExtra = new List<KeyValuePair<string, object>>
             {
-                new KeyValuePair<string, object>("expected", "extra"),
+                new("expected", "extra"),
                 // second item has dup key:
-                new KeyValuePair<string, object>("expected", "extra 2"),
+                new("expected", "extra 2"),
             };
 
             sut.SetExtras(expectedExtra);
@@ -297,9 +297,9 @@ namespace Sentry.Tests.Protocol
 
             var expectedTag = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("expected", "tag"),
+                new("expected", "tag"),
                 // second item has dup key:
-                new KeyValuePair<string, string>("expected", "tag 2"),
+                new("expected", "tag 2"),
             };
 
             sut.SetTags(expectedTag);

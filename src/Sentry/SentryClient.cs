@@ -24,7 +24,7 @@ namespace Sentry
         private volatile bool _disposed;
         private readonly SentryOptions _options;
 
-        private readonly Lazy<Random> _random = new Lazy<Random>(() => new Random(), LazyThreadSafetyMode.PublicationOnly);
+        private readonly Lazy<Random> _random = new(() => new Random(), LazyThreadSafetyMode.PublicationOnly);
         internal Random Random => _random.Value;
 
         // Internal for testing.

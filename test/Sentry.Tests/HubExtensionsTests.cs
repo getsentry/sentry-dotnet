@@ -12,7 +12,7 @@ namespace Sentry.Tests
     public class HubExtensionsTests
     {
         public IHub Sut { get; set; } = Substitute.For<IHub>();
-        public Scope Scope { get; set; } = new Scope();
+        public Scope Scope { get; set; } = new();
 
         public HubExtensionsTests()
         {

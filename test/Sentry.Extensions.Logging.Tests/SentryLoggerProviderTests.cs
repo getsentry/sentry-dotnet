@@ -11,11 +11,11 @@ namespace Sentry.Extensions.Logging.Tests
         {
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
-            public SentryLoggingOptions SentryLoggingOptions { get; set; } = new SentryLoggingOptions();
-            public SentryLoggerProvider GetSut() => new SentryLoggerProvider(Hub, Clock, SentryLoggingOptions);
+            public SentryLoggingOptions SentryLoggingOptions { get; set; } = new();
+            public SentryLoggerProvider GetSut() => new(Hub, Clock, SentryLoggingOptions);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void CreateLogger_LoggerType_SentryLogger()

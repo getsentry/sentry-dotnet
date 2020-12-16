@@ -12,7 +12,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// The singleton instance.
         /// </summary>
-        public static readonly DisabledHub Instance = new DisabledHub();
+        public static readonly DisabledHub Instance = new();
 
         /// <summary>
         /// Always disabled.
@@ -56,7 +56,7 @@ namespace Sentry.Extensibility
         /// Returns a dummy transaction.
         /// </summary>
         public Transaction CreateTransaction(string name, string operation) =>
-            new Transaction(this, null);
+            new(this, null);
 
         /// <summary>
         /// Returns null.

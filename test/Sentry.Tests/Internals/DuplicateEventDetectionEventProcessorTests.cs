@@ -8,12 +8,12 @@ namespace Sentry.Tests.Internals
     {
         private class Fixture
         {
-            public SentryOptions Options { get; set; } = new SentryOptions();
+            public SentryOptions Options { get; set; } = new();
 
-            public DuplicateEventDetectionEventProcessor GetSut() => new DuplicateEventDetectionEventProcessor(Options);
+            public DuplicateEventDetectionEventProcessor GetSut() => new(Options);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Process_DuplicateEvent_ReturnsNull()

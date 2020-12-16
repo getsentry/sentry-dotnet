@@ -11,16 +11,16 @@ namespace Sentry.Tests.Internals
     {
         private class Fixture
         {
-            public SentryOptions HttpOptions { get; set; } = new SentryOptions
+            public SentryOptions HttpOptions { get; set; } = new()
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
             };
 
             public DefaultSentryHttpClientFactory GetSut()
-                => new DefaultSentryHttpClientFactory();
+                => new();
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Create_Returns_HttpClient()

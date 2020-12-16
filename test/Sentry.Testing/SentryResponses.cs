@@ -10,12 +10,12 @@ namespace Sentry.Testing
         private const string ResponseIdString = "fc6d8c0c43fc4630ad850ee518f1b9d0";
         public const string SentryOkResponseBody = "{\n    \"id\": \"" + ResponseIdString + "\"\n    }";
 
-        public static Guid ResponseId => new Guid(ResponseIdString);
+        public static Guid ResponseId => new(ResponseIdString);
 
         public static HttpContent GetOkContent() => new StringContent(SentryOkResponseBody);
 
         public static HttpResponseMessage GetOkResponse()
-            => new HttpResponseMessage(HttpStatusCode.OK)
+            => new(HttpStatusCode.OK)
             {
                 Content = GetOkContent()
             };
@@ -28,7 +28,7 @@ namespace Sentry.Testing
 
         public static HttpResponseMessage GetRateLimitResponse(string rateLimitHeaderValue)
         {
-            return new HttpResponseMessage((HttpStatusCode)429)
+            return new((HttpStatusCode)429)
             {
                 Headers = {{"X-Sentry-Rate-Limits", rateLimitHeaderValue}}
             };

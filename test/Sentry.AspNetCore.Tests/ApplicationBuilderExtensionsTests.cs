@@ -15,7 +15,7 @@ namespace Sentry.AspNetCore.Tests
         {
             public ISentryEventProcessor SentryEventProcessor { get; set; } = Substitute.For<ISentryEventProcessor>();
             public ISentryEventExceptionProcessor SentryEventExceptionProcessor { get; set; } = Substitute.For<ISentryEventExceptionProcessor>();
-            public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; } = new SentryAspNetCoreOptions();
+            public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; } = new();
 
             public IApplicationBuilder GetSut()
             {
@@ -51,7 +51,7 @@ namespace Sentry.AspNetCore.Tests
             }
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void UseSentry_DiagnosticSet_NoOverriden()

@@ -16,7 +16,7 @@ namespace Sentry.AspNetCore.Tests
     public class SentryWebHostBuilderExtensionsTests
     {
         public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
-        public ServiceCollection Services { get; set; } = new ServiceCollection();
+        public ServiceCollection Services { get; set; } = new();
         public IConfiguration Configuration { get; set; } = Substitute.For<IConfiguration>();
         public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
 

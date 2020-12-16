@@ -13,7 +13,7 @@ namespace Sentry.Serilog.Tests
     {
         private class Fixture
         {
-            public SentrySerilogOptions Options { get; } = new SentrySerilogOptions();
+            public SentrySerilogOptions Options { get; } = new();
 
             // Parameter values that are NOT set to the default values in SentryOptions or SentrySerilogOptions
             public bool SendDefaultPii { get; } = true;
@@ -38,10 +38,10 @@ namespace Sentry.Serilog.Tests
             public LogEventLevel MinimumEventLevel { get; } = LogEventLevel.Verbose;
             public LogEventLevel MinimumBreadcrumbLevel { get; } = LogEventLevel.Fatal;
 
-            public SentrySerilogOptions GetSut() => new SentrySerilogOptions();
+            public SentrySerilogOptions GetSut() => new();
         }
 
-        private readonly SentrySerilogSinkExtensionsTests.Fixture _fixture = new SentrySerilogSinkExtensionsTests.Fixture();
+        private readonly SentrySerilogSinkExtensionsTests.Fixture _fixture = new();
 
         [Fact]
         public void ConfigureSentrySerilogOptions_WithNoParameters_MakesNoChangesToObject()

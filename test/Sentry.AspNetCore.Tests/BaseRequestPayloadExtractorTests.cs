@@ -29,7 +29,7 @@ namespace Sentry.AspNetCore.Tests
             }
         }
 
-        protected Fixture TestFixture = new Fixture();
+        protected Fixture TestFixture = new();
 
         [Fact]
         public void ExtractPayload_OriginalStreamPosition_Reset()

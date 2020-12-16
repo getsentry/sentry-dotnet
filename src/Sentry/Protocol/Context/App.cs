@@ -59,7 +59,7 @@ namespace Sentry.Protocol
         /// Clones this instance.
         /// </summary>
         internal App Clone()
-            => new App
+            => new()
             {
                 Identifier = Identifier,
                 StartTime = StartTime,

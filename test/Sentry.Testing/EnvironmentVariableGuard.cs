@@ -5,7 +5,7 @@ namespace Sentry.Testing
     public static class EnvironmentVariableGuard
     {
         // To allow different xunit collections use of this
-        private static readonly object Lock = new object();
+        private static readonly object Lock = new();
 
         public static void WithVariable(string key, string value, Action action)
         {

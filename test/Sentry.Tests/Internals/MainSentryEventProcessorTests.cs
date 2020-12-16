@@ -19,11 +19,11 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public MainSentryEventProcessor GetSut() => new MainSentryEventProcessor(SentryOptions, () => SentryStackTraceFactory);
+            public SentryOptions SentryOptions { get; set; } = new();
+            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Process_DefaultOptions_NoUserNameSet()
@@ -435,8 +435,8 @@ namespace Sentry.Tests.Internals
         }
 
         public static TheoryData<IDictionary<string, string>, IDictionary<string, string>, IDictionary<string, string>> AppliesDefaultTagTheoryData =>
-            new TheoryData<IDictionary<string, string>, IDictionary<string, string>, IDictionary<string, string>>
-        {
+            new()
+            {
                 // No event tags, single default.
                 {
                     null, // No event tags.

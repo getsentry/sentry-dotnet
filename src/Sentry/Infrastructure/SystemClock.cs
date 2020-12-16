@@ -11,7 +11,7 @@ namespace Sentry.Infrastructure
         /// <summary>
         /// System clock singleton.
         /// </summary>
-        public static readonly SystemClock Clock = new SystemClock();
+        public static readonly SystemClock Clock = new();
 
         /// <summary>
         /// Gets the current time in UTC.

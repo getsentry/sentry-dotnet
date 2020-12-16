@@ -9,8 +9,8 @@ namespace Sentry.Protocol
     {
         private const int MaxSpans = 1000;
 
-        private readonly object _lock = new object();
-        private readonly List<Span> _spans = new List<Span>();
+        private readonly object _lock = new();
+        private readonly List<Span> _spans = new();
 
         /// <summary>
         /// Records a span.

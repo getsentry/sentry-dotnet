@@ -32,10 +32,10 @@ namespace Sentry.Tests.Internals.Http
             }
 
             public HttpMessageInvoker GetSut()
-                => new HttpMessageInvoker(new GzipRequestBodyHandler(Handler, CompressionLevel));
+                => new(new GzipRequestBodyHandler(Handler, CompressionLevel));
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public async Task SendAsync_Content_Compressed()

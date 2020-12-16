@@ -14,11 +14,11 @@ namespace Other.Tests.Internals
     {
         private class Fixture
         {
-            public SentryOptions SentryOptions { get; set; } = new SentryOptions();
-            public SentryStackTraceFactory GetSut() => new SentryStackTraceFactory(SentryOptions);
+            public SentryOptions SentryOptions { get; set; } = new();
+            public SentryStackTraceFactory GetSut() => new(SentryOptions);
         }
 
-        private readonly Fixture _fixture = new Fixture();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Create_NoExceptionAndDefaultAttachStackTraceOption_NullResult()

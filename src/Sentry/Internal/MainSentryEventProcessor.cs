@@ -16,9 +16,9 @@ namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
-        private readonly Lazy<string?> _release = new Lazy<string?>(ReleaseLocator.GetCurrent);
+        private readonly Lazy<string?> _release = new(ReleaseLocator.GetCurrent);
 
-        private readonly Lazy<Runtime?> _runtime = new Lazy<Runtime?>(() =>
+        private readonly Lazy<Runtime?> _runtime = new(() =>
         {
             var current = PlatformAbstractions.Runtime.Current;
             return current != null

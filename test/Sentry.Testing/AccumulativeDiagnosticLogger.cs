@@ -6,7 +6,7 @@ namespace Sentry.Testing
 {
     public class AccumulativeDiagnosticLogger : IDiagnosticLogger
     {
-        public List<Entry> Entries { get; } = new List<Entry>();
+        public List<Entry> Entries { get; } = new();
 
         public bool IsEnabled(SentryLevel level) => true;
 
