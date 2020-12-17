@@ -44,8 +44,12 @@ namespace Sentry.AspNetCore.Extensions
         {
             // Try to get the route template or fallback to the request path
 
+            var method = context.Request.Method?.ToUpperInvariant();
             var route = context.TryGetRouteTemplate() ?? context.Request.Path;
-            return $"{context.Request.Method.ToUpperInvariant()} {route}";
+
+            return !string.IsNullOrWhiteSpace(method)
+                ? $"{method} {route}"
+                : route;
         }
     }
 }
