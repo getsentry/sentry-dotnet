@@ -33,7 +33,7 @@ namespace Sentry.Protocol
         {
             lock (_lock)
             {
-                return _spans;
+                return _spans.ToArray();
             }
         }
     }
