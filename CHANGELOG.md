@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Make all fields on UserFeedback optional. (#660) @Tyrrrz
+
 ## 3.0.0-alpha.7
 
 * Ref moved SentryId from namespace Sentry.Protocol to Sentry (#643) @lucas-zimerman
