@@ -66,8 +66,18 @@ namespace Other.Tests.Internals
             var stackTrace = sut.Create();
 
             Assert.NotNull(stackTrace);
-            Assert.Equal(nameof(Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace), stackTrace.Frames.Last().Function);
-            Assert.DoesNotContain(stackTrace.Frames, p => p.Function == nameof(SentryStackTraceFactory.CreateFrame));
+
+            Assert.Equal(
+                nameof(Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace) + "()",
+                stackTrace.Frames.Last().Function
+            );
+
+            Assert.DoesNotContain(stackTrace.Frames, p =>
+                p.Function?.StartsWith(
+                    nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                    StringComparison.Ordinal
+                ) == true
+            );
         }
 
         [Fact]
