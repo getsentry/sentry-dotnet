@@ -124,13 +124,20 @@ namespace Sentry.Extensibility
         protected SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
         {
             const string unknownRequiredField = "(unknown)";
+
             var frame = new SentryStackFrame();
             if (GetMethod(stackFrame) is { } method)
             {
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
-                frame.Function = method.Name;
+
+                // Include parameters in the function name
+                frame.Function =
+                    method.Name +
+                    '(' +
+                    string.Join(", ", method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}")) +
+                    ')';
             }
 
             frame.InApp = !IsSystemModuleName(frame.Module);
