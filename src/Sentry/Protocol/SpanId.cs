@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -45,11 +46,16 @@ namespace Sentry.Protocol
         /// <summary>
         /// Generates a new Sentry ID.
         /// </summary>
-        public static SpanId Create() => new(
-            Enumerable.Range(0, 16)
-                .Select(_ => AllowedChars[Random.Next(0, AllowedChars.Length)])
-                .ConcatToString()
-        );
+        public static SpanId Create()
+        {
+            var buffer = new StringBuilder(16);
+            for (var i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = AllowedChars[Random.Next(0, AllowedChars.Length)];
+            }
+
+            return new(buffer.ToString());
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(_value);
