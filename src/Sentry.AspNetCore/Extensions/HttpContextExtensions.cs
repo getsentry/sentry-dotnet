@@ -39,5 +39,15 @@ namespace Sentry.AspNetCore.Extensions
             // then there is no way for us to extract anything that resembles a route template.
             return null;
         }
+
+        public static string GetTransactionName(this HttpContext context)
+        {
+            // Try to get the route template or fallback to the request path
+
+            var method = context.Request.Method.ToUpperInvariant();
+            var route = context.TryGetRouteTemplate() ?? context.Request.Path;
+
+            return $"{method} {route}";
+        }
     }
 }

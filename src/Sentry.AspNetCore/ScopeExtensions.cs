@@ -88,7 +88,7 @@ namespace Sentry.AspNetCore
                     scope.SetTag("route.area", area);
                 }
 
-                scope.TransactionName = context.TryGetRouteTemplate() ?? context.Request.Path;
+                scope.TransactionName = context.GetTransactionName();
             }
             catch(Exception e)
             {
