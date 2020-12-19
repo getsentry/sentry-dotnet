@@ -152,7 +152,7 @@ internal static class Program
             var user = $"user{timestamp}";
             var email = $"user{timestamp}@user{timestamp}.com";
 
-            SentrySdk.CaptureUserFeedback(new UserFeedback(eventId, email, "this is a sample user feedback", user));
+            SentrySdk.CaptureUserFeedback(new UserFeedback(eventId, user, email, "this is a sample user feedback"));
 
             var error = new Exception("Attempting to send this multiple times");
 
