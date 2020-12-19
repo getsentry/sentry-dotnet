@@ -110,8 +110,7 @@ namespace Sentry.AspNetCore
                 });
 
                 var transaction = hub.CreateTransaction(
-                    // Try to get the route template or fallback to the request path
-                    context.TryGetRouteTemplate() ?? context.Request.Path,
+                    context.GetTransactionName(),
                     "http.server"
                 );
 
