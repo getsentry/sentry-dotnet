@@ -407,8 +407,7 @@ namespace Sentry.Tests.Internals
 
             //Assert
             Assert.False(evt.Contexts.ContainsKey(MainSentryEventProcessor.CurrentUiCultureKey));
-            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));
-        }
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));        }
 
         [Fact]
         public void Process_DiffentCultureInfoAndCultureUiInfo_CultureInfoAndCultureUiInfoSet()
@@ -590,13 +589,13 @@ namespace Sentry.Tests.Internals
             {
                 new Action<CultureInfo>(c => CultureInfo.CurrentUICulture = c),
                 new Func<CultureInfo>(() => CultureInfo.CurrentUICulture),
-                nameof(CultureInfo.CurrentUICulture)
+                MainSentryEventProcessor.CurrentUiCultureKey
             };
             yield return new object[]
             {
                 new Action<CultureInfo>(c => CultureInfo.CurrentCulture = c),
                 new Func<CultureInfo>(() => CultureInfo.CurrentCulture),
-                nameof(CultureInfo.CurrentCulture)
+                MainSentryEventProcessor.CultureInfoKey
             };
         }
     }
