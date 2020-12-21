@@ -394,6 +394,40 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
+        public void Process_CultureInfoAndCultureInfoAreEqual_OnlyCultureInfoSet()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent(new Exception());
+            CultureInfo.CurrentCulture = new CultureInfo(1042);
+            CultureInfo.CurrentUICulture = new CultureInfo(1042);
+
+            //Act
+            evt = sut.Process(evt);
+
+            //Assert
+            Assert.False(evt.Contexts.ContainsKey(MainSentryEventProcessor.CurrentUiCultureKey));
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));
+        }
+
+        [Fact]
+        public void Process_DiffentCultureInfoAndCultureUiInfo_CultureInfoAndCultureUiInfoSet()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent(new Exception());
+            CultureInfo.CurrentCulture = new CultureInfo(1041);
+            CultureInfo.CurrentUICulture = new CultureInfo(1033);
+
+            //Act
+            evt = sut.Process(evt);
+
+            //Assert
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CurrentUiCultureKey));
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));
+        }
+
+        [Fact]
         public void Process_DeviceTimezoneSet()
         {
             var sut = _fixture.GetSut();
