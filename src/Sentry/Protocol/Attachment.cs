@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Sentry.Protocol
@@ -6,6 +7,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry attachment.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(Length) + "}")]
     public class Attachment : IDisposable
     {
         /// <summary>
