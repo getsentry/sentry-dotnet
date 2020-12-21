@@ -7,7 +7,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry attachment.
     /// </summary>
-    [DebuggerDisplay("{" + nameof(Length) + "}")]
+    [DebuggerDisplay("{" + nameof(FileName) + "}")]
     public class Attachment : IDisposable
     {
         /// <summary>
