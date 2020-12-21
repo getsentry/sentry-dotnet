@@ -16,8 +16,8 @@ namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
-        internal const string CultureInfoKey = "CurrentCulture";
-        internal const string CurrentUiCultureKey = "CurrentUICulture";
+        internal const string CultureInfoKey = "Current Culture";
+        internal const string CurrentUiCultureKey = "Current UI Culture";
 
         private readonly Lazy<string?> _release = new(ReleaseLocator.GetCurrent);
 
