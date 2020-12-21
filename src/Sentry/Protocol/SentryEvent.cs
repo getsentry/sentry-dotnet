@@ -15,11 +15,8 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public sealed class SentryEvent : IScope, IJsonSerializable
+    public sealed class SentryEvent : IJsonSerializable
     {
-        /// <inheritdoc />
-        public IScopeOptions? ScopeOptions { get; }
-
         private IDictionary<string, string>? _modules;
 
         /// <summary>
@@ -115,6 +112,7 @@ namespace Sentry
         public string? TransactionName { get; set; }
 
         private Request? _request;
+
         /// <inheritdoc />
         public Request Request
         {
@@ -162,19 +160,14 @@ namespace Sentry
         public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
         private Dictionary<string, object?>? _internalExtra;
+
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _internalExtra ??= new Dictionary<string, object?>();
 
         private Dictionary<string, string>? _tags;
+
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
-
-        // TODO: this is a workaround, ideally Event should not inherit from IScope
-        Transaction? IScope.Transaction
-        {
-            get => null;
-            set {}
-        }
 
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
@@ -195,13 +188,11 @@ namespace Sentry
         internal SentryEvent(
             Exception? exception = null,
             DateTimeOffset? timestamp = null,
-            SentryId eventId = default,
-            IScopeOptions? options = null)
+            SentryId eventId = default)
         {
             Exception = exception;
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             EventId = eventId != default ? eventId : SentryId.Create();
-            ScopeOptions = options;
             Platform = Constants.Platform;
         }
 

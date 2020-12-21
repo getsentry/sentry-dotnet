@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using Sentry.Extensibility;
 using System.Linq;
 using Sentry.Internal;
 using Sentry.Protocol;
-using Constants = Sentry.Protocol.Constants;
 
 namespace Sentry
 {
@@ -21,12 +20,12 @@ namespace Sentry
         /// </summary>
         /// <param name="scope"></param>
         /// <returns>True if a User was set to the scope. Otherwise, false.</returns>
-        public static bool HasUser(this IScope scope)
-            => scope.User.Email != null
-               || scope.User.Id != null
-               || scope.User.Username != null
+        public static bool HasUser(this Scope scope)
+            => scope.User.Email is not null
+               || scope.User.Id is not null
+               || scope.User.Username is not null
                || scope.User.InternalOther?.Count > 0
-               || scope.User.IpAddress != null;
+               || scope.User.IpAddress is not null;
 
 #if HAS_VALUE_TUPLE
         /// <summary>
@@ -39,7 +38,7 @@ namespace Sentry
         /// <param name="dataPair">The data key-value pair.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-            this IScope scope,
+            this Scope scope,
             string message,
             string? category,
             string? type,
@@ -83,7 +82,7 @@ namespace Sentry
         /// <param name="data">The data.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-            this IScope scope,
+            this Scope scope,
             string message,
             string? category = null,
             string? type = null,
@@ -121,7 +120,7 @@ namespace Sentry
         /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
-            this IScope scope,
+            this Scope scope,
             DateTimeOffset? timestamp,
             string message,
             string? category = null,
@@ -146,69 +145,20 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Adds a breadcrumb to the <see cref="IScope"/>.
-        /// </summary>
-        /// <param name="scope">Scope.</param>
-        /// <param name="breadcrumb">The breadcrumb.</param>
-        internal static void AddBreadcrumb(this IScope scope, Breadcrumb breadcrumb)
-        {
-            if (scope.ScopeOptions?.BeforeBreadcrumb is { } beforeBreadcrumb)
-            {
-                if (beforeBreadcrumb(breadcrumb) is { } processedBreadcrumb)
-                {
-                    breadcrumb = processedBreadcrumb;
-                }
-                else
-                {
-                    // Callback returned null, which means the breadcrumb should be dropped
-                    return;
-                }
-            }
-
-            if (scope.Breadcrumbs is ICollection<Breadcrumb> breadcrumbsCollection)
-            {
-                var overflow = breadcrumbsCollection.Count -
-                    (scope.ScopeOptions?.MaxBreadcrumbs ?? Constants.DefaultMaxBreadcrumbs) + 1;
-
-                if (overflow > 0)
-                {
-                    if (scope.Breadcrumbs.FirstOrDefault() is { } first)
-                    {
-                        breadcrumbsCollection.Remove(first);
-                    }
-                }
-
-                breadcrumbsCollection.Add(breadcrumb);
-            }
-            else if (scope.Breadcrumbs is ConcurrentQueue<Breadcrumb> breadcrumbsQueue)
-            {
-                var overflow = breadcrumbsQueue.Count -
-                    (scope.ScopeOptions?.MaxBreadcrumbs ?? Constants.DefaultMaxBreadcrumbs) + 1;
-
-                if (overflow > 0)
-                {
-                    breadcrumbsQueue.TryDequeue(out _);
-                }
-
-                breadcrumbsQueue.Enqueue(breadcrumb);
-            }
-        }
-
-        /// <summary>
-        /// Sets the fingerprint to the <see cref="IScope"/>.
+        /// Sets the fingerprint to the <see cref="Scope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
-        public static void SetFingerprint(this IScope scope, IEnumerable<string> fingerprint)
-            => scope.Fingerprint = fingerprint;
+        public static void SetFingerprint(this Scope scope, IEnumerable<string> fingerprint)
+            => scope.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
 
         /// <summary>
-        /// Sets the extra key-value to the <see cref="IScope"/>.
+        /// Sets the extra key-value to the <see cref="Scope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void SetExtra(this IScope scope, string key, object? value)
+        public static void SetExtra(this Scope scope, string key, object? value)
         {
             if (scope.Extra is IDictionary<string, object?> extra)
             {
@@ -217,11 +167,11 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Sets the extra key-value pairs to the <see cref="IScope"/>.
+        /// Sets the extra key-value pairs to the <see cref="Scope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="values">The values.</param>
-        public static void SetExtras(this IScope scope, IEnumerable<KeyValuePair<string, object?>> values)
+        public static void SetExtras(this Scope scope, IEnumerable<KeyValuePair<string, object?>> values)
         {
             foreach (var (key, value) in values)
             {
@@ -230,12 +180,12 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Sets the tag to the <see cref="IScope"/>.
+        /// Sets the tag to the <see cref="Scope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void SetTag(this IScope scope, string key, string value)
+        public static void SetTag(this Scope scope, string key, string value)
         {
             if (scope.Tags is IDictionary<string, string> tags)
             {
@@ -248,7 +198,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="tags"></param>
-        public static void SetTags(this IScope scope, IEnumerable<KeyValuePair<string, string>> tags)
+        public static void SetTags(this Scope scope, IEnumerable<KeyValuePair<string, string>> tags)
         {
             foreach (var (key, value) in tags)
             {
@@ -257,106 +207,16 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Removes a tag from the <see cref="IScope"/>.
+        /// Removes a tag from the <see cref="Scope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
-        public static void UnsetTag(this IScope scope, string key)
+        public static void UnsetTag(this Scope scope, string key)
         {
             if (scope.Tags is IDictionary<string, string> tags)
             {
                 tags.Remove(key);
             }
-        }
-
-        /// <summary>
-        /// Applies the data from one scope to the other.
-        /// </summary>
-        /// <param name="from">The scope to data copy from.</param>
-        /// <param name="to">The scope to copy data to.</param>
-        /// <remarks>
-        /// Applies the data of 'from' into 'to'.
-        /// If data in 'from' is null, 'to' is unmodified.
-        /// Conflicting keys are not overriden.
-        /// This is a shallow copy.
-        /// </remarks>
-        public static void Apply(this IScope from, IScope to)
-        {
-            // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            if (from is null || to is null)
-            // ReSharper enable ConditionIsAlwaysTrueOrFalse
-            {
-                return;
-            }
-
-            // Fingerprint isn't combined. It's absolute.
-            // One set explicitly on target (i.e: event)
-            // takes precedence and is not overwritten
-            if (!to.Fingerprint.Any() && from.Fingerprint.Any())
-            {
-                to.Fingerprint = from.Fingerprint;
-            }
-
-            foreach (var breadcrumb in from.Breadcrumbs)
-            {
-                to.AddBreadcrumb(breadcrumb);
-            }
-
-            foreach (var (key, value) in from.Extra)
-            {
-                if (!to.Extra.ContainsKey(key))
-                {
-                    to.SetExtra(key, value);
-                }
-            }
-
-            foreach (var (key, value) in from.Tags)
-            {
-                if (!to.Tags.ContainsKey(key))
-                {
-                    to.SetTag(key, value);
-                }
-            }
-
-            from.Contexts.CopyTo(to.Contexts);
-            from.Request.CopyTo(to.Request);
-            from.User.CopyTo(to.User);
-
-            to.Environment ??= from.Environment;
-            to.Transaction ??= from.Transaction;
-            to.TransactionName ??= from.TransactionName;
-            to.Level ??= from.Level;
-
-            if (from.Sdk is null || to.Sdk is null)
-            {
-                return;
-            }
-
-            if (from.Sdk.Name != null && from.Sdk.Version != null)
-            {
-                to.Sdk.Name = from.Sdk.Name;
-                to.Sdk.Version = from.Sdk.Version;
-            }
-
-            if (from.Sdk.InternalPackages is { })
-            {
-                foreach (var package in from.Sdk.InternalPackages)
-                {
-                    to.Sdk.AddPackage(package);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Applies the state object into the scope.
-        /// </summary>
-        /// <param name="scope">The scope to apply the data.</param>
-        /// <param name="state">The state object to apply.</param>
-        public static void Apply(this IScope scope, object state)
-        {
-            var processor = scope.ScopeOptions?.SentryScopeStateProcessor ?? new DefaultSentryScopeStateProcessor();
-            processor.Apply(scope, state);
         }
 
         /// <summary>
@@ -441,6 +301,28 @@ namespace Sentry
             {
                 scope.EventProcessors.Add(processor);
             }
+        }
+
+        /// <summary>
+        /// Adds an attachment.
+        /// </summary>
+        public static void AddAttachment(this Scope scope, Stream stream, string fileName) =>
+            scope.AddAttachment(new Attachment(stream, fileName));
+
+        /// <summary>
+        /// Adds an attachment.
+        /// </summary>
+        public static void AddAttachment(this Scope scope, byte[] data, string fileName) =>
+            scope.AddAttachment(new MemoryStream(data), fileName);
+
+        /// <summary>
+        /// Adds an attachment.
+        /// </summary>
+        public static void AddAttachment(this Scope scope, string filePath)
+        {
+            var stream = File.OpenRead(filePath);
+            var fileName = Path.GetFileName(filePath);
+            scope.AddAttachment(stream, fileName);
         }
     }
 }

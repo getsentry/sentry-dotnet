@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -103,7 +102,7 @@ namespace Sentry.Internal
 
         public Transaction CreateTransaction(string name, string operation)
         {
-            var trans = new Transaction(this, _options)
+            var trans = new Transaction(this)
             {
                 Name = name,
                 Operation = operation

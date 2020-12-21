@@ -11,13 +11,10 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ISpan, IScope, IJsonSerializable
+    public class Transaction : ISpan, IJsonSerializable
     {
         private readonly IHub _hub;
         private readonly SpanRecorder _spanRecorder = new();
-
-        /// <inheritdoc />
-        public IScopeOptions? ScopeOptions { get; }
 
         /// <summary>
         /// Transaction name.
@@ -131,23 +128,9 @@ namespace Sentry.Protocol
         // Transaction never has a parent
         SpanId? ISpanContext.ParentSpanId => null;
 
-        string? IScope.TransactionName
-        {
-            get => Name;
-            set => Name = value ?? "unnamed";
-        }
-
-        // TODO: this is a workaround, ideally Transaction should not inherit from IScope
-        Transaction? IScope.Transaction
-        {
-            get => null;
-            set {}
-        }
-
-        internal Transaction(IHub hub, IScopeOptions? scopeOptions)
+        internal Transaction(IHub hub)
         {
             _hub = hub;
-            ScopeOptions = scopeOptions;
 
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
@@ -305,7 +288,7 @@ namespace Sentry.Protocol
             var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
 
-            return new Transaction(hub, null)
+            return new Transaction(hub)
             {
                 Name = name,
                 Description = description,

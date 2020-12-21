@@ -2,27 +2,8 @@ using System.Collections.Generic;
 
 namespace Sentry.Protocol
 {
-    /// <summary>
-    /// The Scoped part of the protocol.
-    /// </summary>
-    /// <remarks>
-    /// Members are included in the event but often modified as part
-    /// of a scope manipulation which could affect multiple outgoing events.
-    /// </remarks>
-    public interface IScope
+    public interface IEventLike
     {
-        /// <summary>
-        /// An optional scope option.
-        /// </summary>
-        /// <remarks>
-        /// Options are not mandatory. it allows defining callback for deciding
-        /// on adding breadcrumbs and the max breadcrumbs allowed.
-        /// </remarks>
-        /// <returns>
-        /// The options or null, if no options were defined.
-        /// </returns>
-        IScopeOptions? ScopeOptions { get; }
-
         /// <summary>
         /// Sentry level.
         /// </summary>
@@ -90,13 +71,13 @@ namespace Sentry.Protocol
         /// </remarks>
         /// <example> { "fingerprint": ["myrpc", "POST", "/foo.bar"] } </example>
         /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
-        IEnumerable<string> Fingerprint { get; set; }
+        IReadOnlyList<string> Fingerprint { get; set; }
 
         /// <summary>
         /// A trail of events which happened prior to an issue.
         /// </summary>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/enriching-events/breadcrumbs/"/>
-        IEnumerable<Breadcrumb> Breadcrumbs { get; }
+        IReadOnlyCollection<Breadcrumb> Breadcrumbs { get; }
 
         /// <summary>
         /// An arbitrary mapping of additional metadata to store with the event.
