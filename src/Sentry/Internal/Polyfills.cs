@@ -38,7 +38,7 @@ namespace System.Collections.Generic
 {
     using Linq;
 
-    internal static partial class PolyfillExtensions
+    internal static class PolyfillExtensions
     {
         public static TValue GetValueOrDefault<TKey, TValue>(
             this IReadOnlyDictionary<TKey, TValue> dic,

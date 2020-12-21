@@ -11,7 +11,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ISpan, IJsonSerializable
+    public class Transaction : ISpan, IEventLike, IJsonSerializable
     {
         private readonly IHub _hub;
         private readonly SpanRecorder _spanRecorder = new();
@@ -98,22 +98,29 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public string? Environment { get; set; }
 
+        // TODO: merge SentryEvent and Transaction, there is no reason to treat them as separate entities
+        string? IEventLike.TransactionName
+        {
+            get => Name;
+            set => Name = value ?? "<unnamed>";
+        }
+
         /// <inheritdoc />
         public SdkVersion Sdk { get; internal set; } = new();
 
-        private IEnumerable<string>? _fingerprint;
+        private IReadOnlyList<string>? _fingerprint;
 
         /// <inheritdoc />
-        public IEnumerable<string> Fingerprint
+        public IReadOnlyList<string> Fingerprint
         {
-            get => _fingerprint ?? Enumerable.Empty<string>();
+            get => _fingerprint ?? Array.Empty<string>();
             set => _fingerprint = value;
         }
 
         private List<Breadcrumb>? _breadcrumbs;
 
         /// <inheritdoc />
-        public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
+        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
         private Dictionary<string, object?>? _extra;
 

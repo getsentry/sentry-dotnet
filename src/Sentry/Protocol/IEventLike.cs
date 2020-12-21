@@ -51,11 +51,6 @@ namespace Sentry.Protocol
         string? TransactionName { get; set; }
 
         /// <summary>
-        /// Transaction.
-        /// </summary>
-        Transaction? Transaction { get; set; }
-
-        /// <summary>
         /// SDK information.
         /// </summary>
         /// <remarks>New in Sentry version: 8.4</remarks>

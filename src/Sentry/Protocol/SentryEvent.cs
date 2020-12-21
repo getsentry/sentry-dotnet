@@ -15,7 +15,7 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public sealed class SentryEvent : IJsonSerializable
+    public sealed class SentryEvent : IEventLike, IJsonSerializable
     {
         private IDictionary<string, string>? _modules;
 
@@ -144,12 +144,12 @@ namespace Sentry
         /// <inheritdoc />
         public SdkVersion Sdk { get; internal set; } = new();
 
-        private IEnumerable<string>? _fingerprint;
+        private IReadOnlyList<string>? _fingerprint;
 
         /// <inheritdoc />
-        public IEnumerable<string> Fingerprint
+        public IReadOnlyList<string> Fingerprint
         {
-            get => _fingerprint ?? Enumerable.Empty<string>();
+            get => _fingerprint ?? Array.Empty<string>();
             set => _fingerprint = value;
         }
 
@@ -157,7 +157,7 @@ namespace Sentry
         private List<Breadcrumb>? _breadcrumbs;
 
         /// <inheritdoc />
-        public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
+        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
         private Dictionary<string, object?>? _internalExtra;
 
