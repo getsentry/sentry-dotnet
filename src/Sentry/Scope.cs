@@ -194,6 +194,9 @@ namespace Sentry
         /// <inheritdoc />
         public void SetTag(string key, string value) => _tags[key] = value;
 
+        /// <summary>
+        /// Adds an attachment.
+        /// </summary>
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
 
         /// <summary>

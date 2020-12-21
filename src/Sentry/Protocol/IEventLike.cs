@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace Sentry.Protocol
 {
+    /// <summary>
+    /// Models members common between types that represent event-like data.
+    /// </summary>
     public interface IEventLike
     {
         /// <summary>
