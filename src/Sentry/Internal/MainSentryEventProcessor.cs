@@ -97,7 +97,7 @@ namespace Sentry.Internal
 
             if (!@event.Contexts.ContainsKey(CurrentUiCultureKey)
                 && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is { } currentUiCultureMap
-                && !currentUiCultureMap.Any(p => cultureInfoMapped.Contains(p)))
+                && currentUiCultureMap.Any(p => !cultureInfoMapped.Contains(p)))
             {
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
