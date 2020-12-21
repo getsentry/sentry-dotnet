@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,17 +74,23 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates an envelope that contains a single event.
         /// </summary>
-        public static Envelope FromEvent(SentryEvent @event)
+        // TODO: use builders for this?
+        public static Envelope FromEvent(SentryEvent @event, IReadOnlyCollection<Attachment>? attachments = null)
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [EventIdKey] = @event.EventId.ToString()
             };
 
-            var items = new[]
+            var items = new List<EnvelopeItem>
             {
                 EnvelopeItem.FromEvent(@event)
             };
+
+            if (attachments is not null)
+            {
+                items.AddRange(attachments.Select(EnvelopeItem.FromAttachment));
+            }
 
             return new Envelope(header, items);
         }

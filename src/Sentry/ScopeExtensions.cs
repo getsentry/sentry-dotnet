@@ -278,14 +278,14 @@ namespace Sentry
         /// <summary>
         /// Adds an attachment.
         /// </summary>
-        public static void AddAttachment(this Scope scope, Stream stream, string fileName) =>
-            scope.AddAttachment(new Attachment(stream, fileName));
+        public static void AddAttachment(this Scope scope, Stream stream, string fileName, long? length = null) =>
+            scope.AddAttachment(new Attachment(stream, fileName, length));
 
         /// <summary>
         /// Adds an attachment.
         /// </summary>
         public static void AddAttachment(this Scope scope, byte[] data, string fileName) =>
-            scope.AddAttachment(new MemoryStream(data), fileName);
+            scope.AddAttachment(new MemoryStream(data), fileName, data.Length);
 
         /// <summary>
         /// Adds an attachment.
@@ -294,7 +294,8 @@ namespace Sentry
         {
             var stream = File.OpenRead(filePath);
             var fileName = Path.GetFileName(filePath);
-            scope.AddAttachment(stream, fileName);
+
+            scope.AddAttachment(stream, fileName, stream.Length);
         }
     }
 }

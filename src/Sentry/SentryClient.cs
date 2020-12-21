@@ -211,8 +211,9 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent)) ?
-                processedEvent.EventId : SentryId.Empty;
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments))
+                ? processedEvent.EventId
+                : SentryId.Empty;
         }
 
         /// <summary>
