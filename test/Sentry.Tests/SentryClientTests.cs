@@ -349,7 +349,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance, null)
+            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
             {
                 Name = "test name",
                 Operation = "test operation"
@@ -366,7 +366,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance, null)
+            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
             {
                 Name = null!
             });
@@ -382,7 +382,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance, null)
+            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
             {
                 Operation = null!
             });

@@ -159,14 +159,13 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
-        private Dictionary<string, object?>? _internalExtra;
+        private Dictionary<string, object?>? _extra;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _internalExtra ??= new Dictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
         private Dictionary<string, string>? _tags;
 
-        /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
         /// <summary>
@@ -195,6 +194,18 @@ namespace Sentry
             EventId = eventId != default ? eventId : SentryId.Create();
             Platform = Constants.Platform;
         }
+
+        /// <inheritdoc />
+        public void AddBreadcrumb(Breadcrumb breadcrumb) =>
+            (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
+
+        /// <inheritdoc />
+        public void SetExtra(string key, object? value) =>
+            (_extra ??= new Dictionary<string, object?>())[key] = value;
+
+        /// <inheritdoc />
+        public void SetTag(string key, string value) =>
+            (_tags ??= new Dictionary<string, string>())[key] = value;
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
@@ -322,7 +333,7 @@ namespace Sentry
             }
 
             // Extra
-            if (_internalExtra is {} extra && extra.Any())
+            if (_extra is {} extra && extra.Any())
             {
                 writer.WriteStartObject("extra");
 
@@ -396,7 +407,7 @@ namespace Sentry
                 Sdk = sdk,
                 _fingerprint = fingerprint!,
                 _breadcrumbs = breadcrumbs,
-                _internalExtra = extra?.ToDictionary(),
+                _extra = extra?.ToDictionary(),
                 _tags = tags?.ToDictionary()!
             };
         }

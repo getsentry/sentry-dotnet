@@ -13,7 +13,7 @@ namespace Sentry.Tests.Protocol
         {
             public SentryOptions ScopeOptions { get; set; } = new();
 
-            public IScope GetSut() => new Scope(ScopeOptions);
+            public Scope GetSut() => new Scope(ScopeOptions);
         }
 
         private readonly Fixture _fixture = new();
@@ -504,7 +504,7 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void Apply_Null_Source_DoesNotThrow()
         {
-            IScope sut = null;
+            Scope sut = null;
             sut.Apply(null);
         }
 

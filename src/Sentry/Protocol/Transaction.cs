@@ -144,6 +144,18 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
+        public void AddBreadcrumb(Breadcrumb breadcrumb) =>
+            (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
+
+        /// <inheritdoc />
+        public void SetExtra(string key, object? value) =>
+            (_extra ??= new Dictionary<string, object?>())[key] = value;
+
+        /// <inheritdoc />
+        public void SetTag(string key, string value) =>
+            (_tags ??= new Dictionary<string, string>())[key] = value;
+
+        /// <inheritdoc />
         public ISpan StartChild(string operation)
         {
             var span = new Span(_spanRecorder, null, SpanId, operation);

@@ -83,5 +83,20 @@ namespace Sentry.Protocol
         /// Arbitrary key-value for this event
         /// </summary>
         IReadOnlyDictionary<string, string> Tags { get; }
+
+        /// <summary>
+        /// Adds a breadcrumb.
+        /// </summary>
+        void AddBreadcrumb(Breadcrumb breadcrumb);
+
+        /// <summary>
+        /// Sets an extra.
+        /// </summary>
+        void SetExtra(string key, object? value);
+
+        /// <summary>
+        /// Sets a tag.
+        /// </summary>
+        void SetTag(string key, string value);
     }
 }

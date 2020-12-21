@@ -162,6 +162,7 @@ namespace Sentry
         {
         }
 
+        /// <inheritdoc />
         public void AddBreadcrumb(Breadcrumb breadcrumb)
         {
             if (Options.BeforeBreadcrumb is { } beforeBreadcrumb)
@@ -187,8 +188,10 @@ namespace Sentry
             _breadcrumbs.Enqueue(breadcrumb);
         }
 
+        /// <inheritdoc />
         public void SetExtra(string key, object? value) => _extra[key] = value;
 
+        /// <inheritdoc />
         public void SetTag(string key, string value) => _tags[key] = value;
 
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);

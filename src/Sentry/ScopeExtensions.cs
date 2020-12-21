@@ -20,7 +20,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope"></param>
         /// <returns>True if a User was set to the scope. Otherwise, false.</returns>
-        public static bool HasUser(this Scope scope)
+        public static bool HasUser(this IEventLike scope)
             => scope.User.Email is not null
                || scope.User.Id is not null
                || scope.User.Username is not null
@@ -38,7 +38,7 @@ namespace Sentry
         /// <param name="dataPair">The data key-value pair.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-            this Scope scope,
+            this IEventLike scope,
             string message,
             string? category,
             string? type,
@@ -82,7 +82,7 @@ namespace Sentry
         /// <param name="data">The data.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-            this Scope scope,
+            this IEventLike scope,
             string message,
             string? category = null,
             string? type = null,
@@ -120,7 +120,7 @@ namespace Sentry
         /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
-            this Scope scope,
+            this IEventLike scope,
             DateTimeOffset? timestamp,
             string message,
             string? category = null,
@@ -149,29 +149,15 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
-        public static void SetFingerprint(this Scope scope, IEnumerable<string> fingerprint)
+        public static void SetFingerprint(this IEventLike scope, IEnumerable<string> fingerprint)
             => scope.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
-
-        /// <summary>
-        /// Sets the extra key-value to the <see cref="Scope"/>.
-        /// </summary>
-        /// <param name="scope">The scope.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The value.</param>
-        public static void SetExtra(this Scope scope, string key, object? value)
-        {
-            if (scope.Extra is IDictionary<string, object?> extra)
-            {
-                extra[key] = value;
-            }
-        }
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="Scope"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="values">The values.</param>
-        public static void SetExtras(this Scope scope, IEnumerable<KeyValuePair<string, object?>> values)
+        public static void SetExtras(this IEventLike scope, IEnumerable<KeyValuePair<string, object?>> values)
         {
             foreach (var (key, value) in values)
             {
@@ -180,25 +166,11 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Sets the tag to the <see cref="Scope"/>.
-        /// </summary>
-        /// <param name="scope">The scope.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="value">The value.</param>
-        public static void SetTag(this Scope scope, string key, string value)
-        {
-            if (scope.Tags is IDictionary<string, string> tags)
-            {
-                tags[key] = value;
-            }
-        }
-
-        /// <summary>
         /// Set all items as tags.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="tags"></param>
-        public static void SetTags(this Scope scope, IEnumerable<KeyValuePair<string, string>> tags)
+        public static void SetTags(this IEventLike scope, IEnumerable<KeyValuePair<string, string>> tags)
         {
             foreach (var (key, value) in tags)
             {
@@ -211,7 +183,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
-        public static void UnsetTag(this Scope scope, string key)
+        public static void UnsetTag(this IEventLike scope, string key)
         {
             if (scope.Tags is IDictionary<string, string> tags)
             {
