@@ -411,7 +411,9 @@ namespace Sentry.NLog
                         foreach (var contextProp in contextProps)
                         {
                             if (contextProp.Value?.ToString() is {} value)
+                            {
                                 data.Add(contextProp.Key, value);
+                            }
                         }
                     }
                 }
