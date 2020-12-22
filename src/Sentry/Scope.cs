@@ -200,7 +200,7 @@ namespace Sentry
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
 
         /// <summary>
-        /// Applies the data from this scope to the other.
+        /// Applies the data from this scope to another event-like object.
         /// </summary>
         /// <param name="other">The scope to copy data to.</param>
         /// <remarks>
@@ -209,7 +209,7 @@ namespace Sentry
         /// Conflicting keys are not overriden.
         /// This is a shallow copy.
         /// </remarks>
-        public void Apply(Scope other)
+        public void Apply(IEventLike other)
         {
             // Not to throw on code that ignores nullability warnings.
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -252,7 +252,6 @@ namespace Sentry
             User.CopyTo(other.User);
 
             other.Environment ??= Environment;
-            other.Transaction ??= Transaction;
             other.TransactionName ??= TransactionName;
             other.Level ??= Level;
 
@@ -266,6 +265,15 @@ namespace Sentry
             {
                 other.Sdk.AddPackage(package);
             }
+        }
+
+        /// <summary>
+        /// Applies data from one scope to another.
+        /// </summary>
+        public void Apply(Scope other)
+        {
+            Apply((IEventLike)other);
+            other.Transaction ??= Transaction;
         }
 
         /// <summary>
