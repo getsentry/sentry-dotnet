@@ -502,13 +502,6 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Apply_Null_Source_DoesNotThrow()
-        {
-            Scope sut = null;
-            sut.Apply(null);
-        }
-
-        [Fact]
         public void Apply_Fingerprint_NotOnTarget_SetFromSource()
         {
             const string expected = "fingerprint";

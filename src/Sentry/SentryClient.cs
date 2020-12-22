@@ -113,7 +113,7 @@ namespace Sentry
                 throw new ObjectDisposedException(nameof(SentryClient));
             }
 
-            if (transaction.SpanId.Equals(SentryId.Empty))
+            if (transaction.SpanId.Equals(SpanId.Empty))
             {
                 _options.DiagnosticLogger?.LogWarning("Transaction dropped due to empty id.");
                 return;
