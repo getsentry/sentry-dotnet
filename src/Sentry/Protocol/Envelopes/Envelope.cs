@@ -74,7 +74,6 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates an envelope that contains a single event.
         /// </summary>
-        // TODO: use builders for this?
         public static Envelope FromEvent(SentryEvent @event, IReadOnlyCollection<Attachment>? attachments = null)
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
