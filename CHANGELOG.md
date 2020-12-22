@@ -4,6 +4,7 @@
 
 - Make all fields on UserFeedback optional. (#660) @Tyrrrz
 - Align transaction names with Java. (#659) @Tyrrrz
+- Add support for attachments. (#670) @Tyrrrz
 
 ## 3.0.0-alpha.7
 
