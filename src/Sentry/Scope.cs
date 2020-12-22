@@ -272,6 +272,13 @@ namespace Sentry
         /// </summary>
         public void Apply(Scope other)
         {
+            // Not to throw on code that ignores nullability warnings.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (other is null)
+            {
+                return;
+            }
+
             Apply((IEventLike)other);
             other.Transaction ??= Transaction;
         }
