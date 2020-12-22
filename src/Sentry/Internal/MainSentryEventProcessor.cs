@@ -83,21 +83,17 @@ namespace Sentry.Internal
                 @event.Contexts.Device.Timezone = timeZoneInfo;
             }
 
-            IDictionary<string, string> cultureInfoMapped;
+            IDictionary<string, string>? cultureInfoMapped = null;
             if (!@event.Contexts.ContainsKey(CultureInfoKey)
                 && CultureInfoToDictionary(CultureInfo.CurrentCulture) is { } currentCultureMap)
             {
                 cultureInfoMapped = currentCultureMap;
                 @event.Contexts[CultureInfoKey] = currentCultureMap;
             }
-            else
-            {
-                cultureInfoMapped = new Dictionary<string, string>();
-            }
 
             if (!@event.Contexts.ContainsKey(CurrentUiCultureKey)
                 && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is { } currentUiCultureMap
-                && currentUiCultureMap.Any(p => !cultureInfoMapped.Contains(p)))
+                && (cultureInfoMapped is null || currentUiCultureMap.Any(p => !cultureInfoMapped.Contains(p))))
             {
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
