@@ -11,7 +11,7 @@ namespace Sentry.Tests.Helpers.Reflection
         {
             return asm
                 .GetTypes()
-                .Where(t => t.Namespace.StartsWith(namespacePrefix));
+                .Where(t => t?.Namespace.StartsWith(namespacePrefix, StringComparison.Ordinal) == true);
         }
     }
 }
