@@ -1,5 +1,5 @@
+using System;
 using System.Linq;
-using Sentry.Tests.Helpers.Reflection;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -11,7 +11,10 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void TypesInInternalsNamespace_AreNotPublic()
         {
-            var types = typeof(ISentryClient).Assembly.GetTypes(InternalsNamespace).ToArray();
+            var types = typeof(ISentryClient).Assembly
+                .GetTypes()
+                .Where(t => t.Namespace?.StartsWith(InternalsNamespace, StringComparison.Ordinal) == true)
+                .ToArray();
 
             Assert.All(types, type =>
             {
