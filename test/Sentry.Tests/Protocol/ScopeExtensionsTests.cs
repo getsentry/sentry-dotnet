@@ -518,7 +518,7 @@ namespace Sentry.Tests.Protocol
             );
 
             // Assert
-            var attachment = Assert.Single(scope.Attachments);
+            using var attachment = Assert.Single(scope.Attachments);
 
             Assert.Equal(expectedStream, attachment?.Stream);
             Assert.Equal(expectedFileName, attachment?.FileName);
@@ -541,7 +541,7 @@ namespace Sentry.Tests.Protocol
             scope.AddAttachment(filePath);
 
             // Assert
-            var attachment = Assert.Single(scope.Attachments);
+            using var attachment = Assert.Single(scope.Attachments);
 
             Assert.Equal("MyFile.txt", attachment?.FileName);
             Assert.Equal(12, attachment?.Length);
