@@ -3,6 +3,9 @@
 ## vNext
 
 * Include full method signature in stack frames. [#662](https://github.com/getsentry/sentry-dotnet/pull/662)
+- Remove CultureUIInfo if value is even with CultureInfo. (#671) @lucas-zimerman
+- Make all fields on UserFeedback optional. (#660) @Tyrrrz
+- Align transaction names with Java. (#659) @Tyrrrz
 
 ## 3.0.0-alpha.7
 

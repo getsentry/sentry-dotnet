@@ -102,14 +102,6 @@ namespace Sentry
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(userFeedback.Email) ||
-                string.IsNullOrWhiteSpace(userFeedback.Comments))
-            {
-                // Ignore the user feedback if a required field is null or empty.
-                _options.DiagnosticLogger?.LogWarning("User feedback discarded due to one or more required fields missing.");
-                return;
-            }
-
             CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
         }
 

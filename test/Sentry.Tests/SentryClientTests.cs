@@ -297,7 +297,9 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             //Act
-            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", "comment"));
+            sut.CaptureUserFeedback(
+                new UserFeedback(SentryId.Empty, "name", "email", "comment")
+            );
 
             //Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -310,38 +312,12 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             //Act
-            sut.CaptureUserFeedback(new UserFeedback(Guid.Parse("4eb98e5f861a41019f270a7a27e84f02"), "email", "comment"));
+            sut.CaptureUserFeedback(
+                new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment")
+            );
 
             //Assert
             _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureUserFeedback_CommentsNullOrEmpty_FeedbackIgnored()
-        {
-            //Arrange
-            var sut = _fixture.GetSut();
-
-            //Act
-            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", null));
-            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", ""));
-
-            //Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureUserFeedback_EmailNullOrEmpty_FeedbackIgnored()
-        {
-            //Arrange
-            var sut = _fixture.GetSut();
-
-            //Act
-            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, null, "comment"));
-            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "", "comment"));
-
-            //Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
@@ -352,7 +328,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             //Act
-            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "email", "comment"));
+            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
 
             //Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());

@@ -57,7 +57,7 @@ namespace Sentry
         {
             if (client.IsEnabled)
             {
-                client.CaptureUserFeedback(new UserFeedback(eventId, email, comments, name));
+                client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
             }
         }
     }

@@ -277,10 +277,11 @@ namespace Sentry.AspNetCore.Tests
             var features = new FeatureCollection();
             features.Set<IRoutingFeature>(routeFeature);
             _ = _httpContext.Features.Returns(features);
+            _ = _httpContext.Request.Method.Returns("GET");
 
             _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-            Assert.Equal($"{controller}.{action}", _sut.TransactionName);
+            Assert.Equal($"GET {controller}.{action}", _sut.TransactionName);
         }
 
         public static IEnumerable<object[]> InvalidRequestBodies()
