@@ -1245,7 +1245,7 @@ namespace Sentry.Tests.Protocol
             source.Apply(target);
 
             // Assert
-            Assert.Equal(2, target.Breadcrumbs.Count);
+            Assert.Equal(2, target.Attachments.Count);
         }
 
         [Fact]
@@ -1261,7 +1261,7 @@ namespace Sentry.Tests.Protocol
             source.Apply(target);
 
             // Assert
-            Assert.Equal(1, target.Breadcrumbs.Count);
+            Assert.Equal(1, target.Attachments.Count);
         }
 
         [Fact]
@@ -1277,7 +1277,7 @@ namespace Sentry.Tests.Protocol
             source.Apply(target);
 
             // Assert
-            Assert.Equal(1, target.Breadcrumbs.Count);
+            Assert.Equal(1, target.Attachments.Count);
         }
     }
 }
