@@ -142,6 +142,9 @@ internal static class Program
                 s.TransactionName = "main";
                 s.Environment = "SpecialEnvironment";
 
+                // Add a file attachment for upload
+                s.AddAttachment(typeof(Program).Assembly.Location);
+
                 SentrySdk.CaptureMessage("Fatal message!");
             });
 

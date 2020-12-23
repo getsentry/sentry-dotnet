@@ -20,7 +20,6 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueAttachment = "attachment";
         private const string LengthKey = "length";
-        private const string FileNameKey = "file_name";
 
         /// <summary>
         /// Header associated with this envelope item.
@@ -157,11 +156,22 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromAttachment(Attachment attachment)
         {
+            var attachmentType = attachment.Type switch
+            {
+                AttachmentType.MiniDump => "event.minidump",
+                AttachmentType.AppleCrashReport => "event.applecrashreport",
+                AttachmentType.UnrealContext => "unreal.context",
+                AttachmentType.UnrealLogs => "unreal.logs",
+                _ => "event.attachment"
+            };
+
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueAttachment,
-                [FileNameKey] = attachment.FileName,
-                [LengthKey] = attachment.Length
+                [LengthKey] = attachment.Length,
+                ["filename"] = attachment.FileName,
+                ["attachment_type"] = attachmentType,
+                ["content_type"] = attachment.ContentType
             };
 
             return new EnvelopeItem(header, new StreamSerializable(attachment.Stream));

@@ -278,24 +278,39 @@ namespace Sentry
         /// <summary>
         /// Adds an attachment.
         /// </summary>
-        public static void AddAttachment(this Scope scope, Stream stream, string fileName, long? length = null) =>
-            scope.AddAttachment(new Attachment(stream, fileName, length));
+        public static void AddAttachment(
+            this Scope scope,
+            Stream stream,
+            string fileName,
+            AttachmentType type = AttachmentType.Default,
+            long? length = null,
+            string? contentType = null) =>
+            scope.AddAttachment(new Attachment(type, stream, fileName, length, contentType));
 
         /// <summary>
         /// Adds an attachment.
         /// </summary>
-        public static void AddAttachment(this Scope scope, byte[] data, string fileName) =>
-            scope.AddAttachment(new MemoryStream(data), fileName, data.Length);
+        public static void AddAttachment(
+            this Scope scope,
+            byte[] data,
+            string fileName,
+            AttachmentType type = AttachmentType.Default,
+            string? contentType = null) =>
+            scope.AddAttachment(new MemoryStream(data), fileName, type, data.Length, contentType);
 
         /// <summary>
         /// Adds an attachment.
         /// </summary>
-        public static void AddAttachment(this Scope scope, string filePath)
+        public static void AddAttachment(
+            this Scope scope,
+            string filePath,
+            AttachmentType type = AttachmentType.Default,
+            string? contentType = null)
         {
             var stream = File.OpenRead(filePath);
             var fileName = Path.GetFileName(filePath);
 
-            scope.AddAttachment(stream, fileName, stream.Length);
+            scope.AddAttachment(stream, fileName, type, stream.Length, contentType);
         }
     }
 }
