@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Sentry;
 using Sentry.Extensibility;
@@ -166,6 +167,7 @@ namespace Other.Tests.Internals
             Assert.Null(stackFrame.Module);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut) =>
             throw new Exception();
     }
