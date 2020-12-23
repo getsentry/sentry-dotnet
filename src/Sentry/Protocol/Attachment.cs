@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -42,7 +41,7 @@ namespace Sentry.Protocol
     /// Sentry attachment.
     /// </summary>
     [DebuggerDisplay("{" + nameof(FileName) + "}")]
-    public class Attachment : IDisposable
+    public class Attachment
     {
         /// <summary>
         /// Attachment type.
@@ -85,8 +84,5 @@ namespace Sentry.Protocol
             Length = length;
             ContentType = contentType;
         }
-
-        /// <inheritdoc />
-        public void Dispose() => Stream.Dispose();
     }
 }

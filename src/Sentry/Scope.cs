@@ -280,7 +280,13 @@ namespace Sentry
             }
 
             Apply((IEventLike)other);
+
             other.Transaction ??= Transaction;
+
+            foreach (var attachment in Attachments)
+            {
+                other.AddAttachment(attachment);
+            }
         }
 
         /// <summary>
