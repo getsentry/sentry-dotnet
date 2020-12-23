@@ -61,7 +61,7 @@ namespace Sentry
             var id = json.GetString();
 
             return !string.IsNullOrWhiteSpace(id)
-                ? new SentryId(Guid.Parse(id))
+                ? Parse(id)
                 : Empty;
         }
 
