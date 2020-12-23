@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using FluentAssertions;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Protocol;
@@ -37,8 +39,18 @@ namespace Other.Tests.Internals
             var stackTrace = sut.Create();
 
             Assert.NotNull(stackTrace);
-            Assert.Equal(nameof(Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace), stackTrace.Frames.Last().Function);
-            Assert.DoesNotContain(stackTrace.Frames, p => p.Function == nameof(SentryStackTraceFactory.CreateFrame));
+
+            Assert.Equal(
+                nameof(Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace) + "()",
+                stackTrace.Frames.Last().Function
+            );
+
+            Assert.DoesNotContain(stackTrace.Frames, p =>
+                p.Function?.StartsWith(
+                    nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                    StringComparison.Ordinal
+                ) == true
+            );
         }
 
         [Fact]
@@ -73,7 +85,25 @@ namespace Other.Tests.Internals
 
             var stackTrace = sut.Create(exception);
 
-            Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace.Frames.Count);
+            Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace?.Frames.Count);
+        }
+
+        [Fact]
+        public void Create_ByRefFields_IncludesAmpersandAfterParameterType()
+        {
+            // Arrange
+            var i = 5;
+            var exception = Record.Exception(() => ByRefMethodThatThrows(i, in i, ref i, out i));
+
+            _fixture.SentryOptions.AttachStacktrace = true;
+            var factory = _fixture.GetSut();
+
+            // Act
+            var stackTrace = factory.Create(exception);
+
+            // Assert
+            var frame = stackTrace!.Frames.Last();
+            frame.Function.Should().Be("ByRefMethodThatThrows(Int32 value, Int32& valueIn, Int32& valueRef, Int32& valueOut)");
         }
 
         [Fact]
@@ -136,5 +166,9 @@ namespace Other.Tests.Internals
             SentryStackTraceFactory.DemangleAnonymousFunction(stackFrame);
             Assert.Null(stackFrame.Module);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut) =>
+            throw new Exception();
     }
 }
