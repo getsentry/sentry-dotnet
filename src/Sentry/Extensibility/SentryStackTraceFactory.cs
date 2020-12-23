@@ -133,11 +133,12 @@ namespace Sentry.Extensibility
                 frame.Package = method.DeclaringType?.Assembly.FullName;
 
                 // Include parameters in the function name
-                frame.Function =
-                    method.Name +
-                    '(' +
-                    string.Join(", ", method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}")) +
-                    ')';
+                var parameterListFormatted = string.Join(
+                    ", ",
+                    method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}")
+                );
+
+                frame.Function = $"{method.Name}({parameterListFormatted})";
             }
 
             frame.InApp = !IsSystemModuleName(frame.Module);
