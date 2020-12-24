@@ -7,6 +7,8 @@
 - Make all fields on UserFeedback optional. (#660) @Tyrrrz
 - Align transaction names with Java. (#659) @Tyrrrz
 - Include assembly name in default release. (#682) @Tyrrrz
+- Improve logging for relay errors. (#683) @Tyrrrz
+- Report sentry.dotnet.aspnet on the new Sentry.AspNet package. (#681) @Tyrrrz
 
 ## 3.0.0-alpha.7
 
