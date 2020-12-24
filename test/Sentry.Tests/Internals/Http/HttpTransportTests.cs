@@ -57,11 +57,13 @@ namespace Sentry.Tests.Internals.Http
             // Arrange
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             const string expectedMessage = "Bad Gateway!";
+            var expectedCauses = new[] {"invalid file", "wrong arguments"};
+            var expectedCausesFormatted = string.Join(", ", expectedCauses);
 
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
             httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage));
+                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage, expectedCauses));
 
             var logger = new AccumulativeDiagnosticLogger();
 
@@ -83,11 +85,12 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             logger.Entries.Any(e =>
                 e.Level == SentryLevel.Error &&
-                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}" &&
+                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}." &&
                 e.Exception == null &&
                 e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
                 e.Args[1].ToString() == expectedCode.ToString() &&
-                e.Args[2].ToString() == expectedMessage
+                e.Args[2].ToString() == expectedMessage &&
+                e.Args[3].ToString() == expectedCausesFormatted
             ).Should().BeTrue();
         }
 
@@ -122,11 +125,12 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             logger.Entries.Any(e =>
                 e.Level == SentryLevel.Error &&
-                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}" &&
+                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}." &&
                 e.Exception == null &&
                 e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
                 e.Args[1].ToString() == expectedCode.ToString() &&
-                e.Args[2].ToString() == HttpTransport.DefaultErrorMessage
+                e.Args[2].ToString() == HttpTransport.DefaultErrorMessage &&
+                e.Args[3].ToString() == string.Empty
             ).Should().BeTrue();
         }
 

@@ -20,9 +20,12 @@ namespace Sentry.Testing
                 Content = GetOkContent()
             };
 
-        public static HttpResponseMessage GetErrorResponse(HttpStatusCode code, string errorMessage)
+        public static HttpResponseMessage GetErrorResponse(HttpStatusCode code, string detail, string[] causes = null)
         {
-            var responseContent = JsonSerializer.Serialize(new {detail = errorMessage});
+            var responseContent = causes != null
+                ? JsonSerializer.Serialize(new {detail, causes})
+                : JsonSerializer.Serialize(new {detail});
+
             return new HttpResponseMessage(code) {Content = new StringContent(responseContent)};
         }
 
