@@ -17,9 +17,10 @@ namespace Sentry.Tests.Internals
         [InlineData("2.1.0.0-preview1")]
         public void GetCurrent_ValidVersion_ReturnsVersion(string expectedVersion)
         {
-            var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion);
+            var name = "dynamic-assembly";
+            var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, new AssemblyName(name));
             var actual = ApplicationVersionLocator.GetCurrent(asm);
-            Assert.Equal(expectedVersion, actual);
+            Assert.Equal($"{name}@{actual}", actual);
         }
 
         [Theory]
