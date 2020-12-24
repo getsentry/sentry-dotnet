@@ -6,6 +6,7 @@
 - Remove CultureUIInfo if value is even with CultureInfo. (#671) @lucas-zimerman
 - Make all fields on UserFeedback optional. (#660) @Tyrrrz
 - Align transaction names with Java. (#659) @Tyrrrz
+- Improve logging for relay errors. (#683) @Tyrrrz
 
 ## 3.0.0-alpha.7
 
