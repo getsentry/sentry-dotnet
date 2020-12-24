@@ -6,6 +6,7 @@
 - Remove CultureUIInfo if value is even with CultureInfo. (#671) @lucas-zimerman
 - Make all fields on UserFeedback optional. (#660) @Tyrrrz
 - Align transaction names with Java. (#659) @Tyrrrz
+- Include assembly name in default release. (#682) @Tyrrrz
 
 ## 3.0.0-alpha.7
 
