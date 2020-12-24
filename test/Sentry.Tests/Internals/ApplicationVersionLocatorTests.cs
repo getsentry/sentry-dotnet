@@ -20,7 +20,7 @@ namespace Sentry.Tests.Internals
             var name = "dynamic-assembly";
             var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, new AssemblyName(name));
             var actual = ApplicationVersionLocator.GetCurrent(asm);
-            Assert.Equal($"{name}@{actual}", actual);
+            Assert.Equal($"{name}@{expectedVersion}", actual);
         }
 
         [Theory]
