@@ -112,15 +112,23 @@ namespace Sentry.Internal.Http
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
                 var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
-                var errorMessage = responseJson.GetPropertyOrNull("detail")?.GetString() ?? DefaultErrorMessage;
+
+                var errorMessage =
+                    responseJson.GetPropertyOrNull("detail")?.GetString()
+                    ?? DefaultErrorMessage;
+
+                var errorCauses =
+                    responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
+                    ?? Array.Empty<string>();
 
                 _options.DiagnosticLogger?.Log(
                     SentryLevel.Error,
-                    "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}",
+                    "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}.",
                     null,
                     processedEnvelope.TryGetEventId(),
                     response.StatusCode,
-                    errorMessage
+                    errorMessage,
+                    string.Join(", ", errorCauses)
                 );
             }
         }
