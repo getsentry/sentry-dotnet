@@ -18,7 +18,7 @@ namespace Sentry.Protocol
         /// Minidump file that creates an error event and is symbolicated.
         /// The file should start with the <code>MDMP</code> magic bytes.
         /// </summary>
-        MiniDump,
+        Minidump,
 
         /// <summary>
         /// Apple crash report file that creates an error event and is symbolicated.
