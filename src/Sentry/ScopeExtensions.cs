@@ -179,7 +179,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Removes a tag from the <see cref="Scope"/>.
+        /// Removes a tag from the <see cref="IEventLike"/>.
         /// </summary>
         /// <param name="scope">The scope.</param>
         /// <param name="key"></param>
