@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Sentry.Protocol;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests.Protocol
@@ -13,7 +15,7 @@ namespace Sentry.Tests.Protocol
         {
             public SentryOptions ScopeOptions { get; set; } = new();
 
-            public IScope GetSut() => new Scope(ScopeOptions);
+            public Scope GetSut() => new Scope(ScopeOptions);
         }
 
         private readonly Fixture _fixture = new();
@@ -353,7 +355,7 @@ namespace Sentry.Tests.Protocol
                 sut.AddBreadcrumb(i.ToString());
             }
 
-            Assert.Equal(Constants.DefaultMaxBreadcrumbs, sut.Breadcrumbs.Count());
+            Assert.Equal(Constants.DefaultMaxBreadcrumbs, sut.Breadcrumbs.Count);
         }
 
         [Theory]
@@ -370,7 +372,7 @@ namespace Sentry.Tests.Protocol
                 sut.AddBreadcrumb(i.ToString());
             }
 
-            Assert.Equal(limit, sut.Breadcrumbs.Count());
+            Assert.Equal(limit, sut.Breadcrumbs.Count);
         }
 
         [Fact]
@@ -495,16 +497,60 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Apply_Null_Target_DoesNotThrow()
+        public void AddAttachment_AllArgumentsMatch()
         {
-            var sut = _fixture.GetSut();
-            sut.Apply(null);
+            // Arrange
+            var expectedStream = Stream.Null;
+            var expectedFileName = "file.txt";
+            var expectedType = AttachmentType.Minidump;
+            var expectedLength = 1024L;
+            var expectedContentType = "application/octet-stream";
+
+            var scope = _fixture.GetSut();
+
+            // Act
+            scope.AddAttachment(
+                expectedStream,
+                expectedFileName,
+                expectedType,
+                expectedLength,
+                expectedContentType
+            );
+
+            // Assert
+            using var attachment = Assert.Single(scope.Attachments);
+
+            Assert.Equal(expectedStream, attachment?.Stream);
+            Assert.Equal(expectedFileName, attachment?.FileName);
+            Assert.Equal(expectedType, attachment?.Type);
+            Assert.Equal(expectedLength, attachment?.Length);
+            Assert.Equal(expectedContentType, attachment?.ContentType);
         }
 
         [Fact]
-        public void Apply_Null_Source_DoesNotThrow()
+        public void AddAttachment_FromFile_ArgumentsResolvedCorrectly()
         {
-            IScope sut = null;
+            // Arrange
+            using var tempDir = new TempDirectory();
+            var filePath = Path.Combine(tempDir.Path, "MyFile.txt");
+            File.WriteAllText(filePath, "Hello world!");
+
+            var scope = _fixture.GetSut();
+
+            // Act
+            scope.AddAttachment(filePath);
+
+            // Assert
+            using var attachment = Assert.Single(scope.Attachments);
+
+            Assert.Equal("MyFile.txt", attachment?.FileName);
+            Assert.Equal(12, attachment?.Length);
+        }
+
+        [Fact]
+        public void Apply_Null_Target_DoesNotThrow()
+        {
+            var sut = _fixture.GetSut();
             sut.Apply(null);
         }
 
@@ -533,7 +579,7 @@ namespace Sentry.Tests.Protocol
             sut.SetFingerprint(new[] { "new fingerprint" });
             sut.Apply(target);
 
-            Assert.Equal(expected.Count(), target.Fingerprint.Count());
+            Assert.Equal(expected.Count, target.Fingerprint.Count);
         }
 
         [Fact]
@@ -546,7 +592,7 @@ namespace Sentry.Tests.Protocol
 
             sut.Apply(target);
 
-            Assert.Equal(2, target.Breadcrumbs.Count());
+            Assert.Equal(2, target.Breadcrumbs.Count);
         }
 
         [Fact]
@@ -571,7 +617,7 @@ namespace Sentry.Tests.Protocol
             var target = _fixture.GetSut();
             sut.Apply(target);
 
-            Assert.Equal(expected.Count(), target.Breadcrumbs.Count());
+            Assert.Equal(expected.Count, target.Breadcrumbs.Count);
         }
 
         [Fact]
@@ -1183,6 +1229,55 @@ namespace Sentry.Tests.Protocol
             Assert.Equal(targetData, target.Request.Data);
             Assert.Equal("query", target.Request.QueryString);
             Assert.Equal("method", target.Request.Method);
+        }
+
+        [Fact]
+        public void Apply_Attachments_OnTarget_MergedWithSource()
+        {
+            // Arrange
+            var source = _fixture.GetSut();
+            source.AddAttachment(Stream.Null, "file1");
+
+            var target = _fixture.GetSut();
+            target.AddAttachment(Stream.Null, "file2");
+
+            // Act
+            source.Apply(target);
+
+            // Assert
+            Assert.Equal(2, target.Attachments.Count);
+        }
+
+        [Fact]
+        public void Apply_Attachments_NotOnTarget_SetFromSource()
+        {
+            // Arrange
+            var source = _fixture.GetSut();
+            source.AddAttachment(Stream.Null, "file1");
+
+            var target = _fixture.GetSut();
+
+            // Act
+            source.Apply(target);
+
+            // Assert
+            Assert.Equal(1, target.Attachments.Count);
+        }
+
+        [Fact]
+        public void Apply_Attachments_NotOnSource_TargetUnmodified()
+        {
+            // Arrange
+            var source = _fixture.GetSut();
+
+            var target = _fixture.GetSut();
+            target.AddAttachment(Stream.Null, "file1");
+
+            // Act
+            source.Apply(target);
+
+            // Assert
+            Assert.Equal(1, target.Attachments.Count);
         }
     }
 }

@@ -15,11 +15,8 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public sealed class SentryEvent : IScope, IJsonSerializable
+    public sealed class SentryEvent : IEventLike, IJsonSerializable
     {
-        /// <inheritdoc />
-        public IScopeOptions? ScopeOptions { get; }
-
         private IDictionary<string, string>? _modules;
 
         /// <summary>
@@ -115,6 +112,7 @@ namespace Sentry
         public string? TransactionName { get; set; }
 
         private Request? _request;
+
         /// <inheritdoc />
         public Request Request
         {
@@ -146,12 +144,12 @@ namespace Sentry
         /// <inheritdoc />
         public SdkVersion Sdk { get; internal set; } = new();
 
-        private IEnumerable<string>? _fingerprint;
+        private IReadOnlyList<string>? _fingerprint;
 
         /// <inheritdoc />
-        public IEnumerable<string> Fingerprint
+        public IReadOnlyList<string> Fingerprint
         {
-            get => _fingerprint ?? Enumerable.Empty<string>();
+            get => _fingerprint ?? Array.Empty<string>();
             set => _fingerprint = value;
         }
 
@@ -159,22 +157,17 @@ namespace Sentry
         private List<Breadcrumb>? _breadcrumbs;
 
         /// <inheritdoc />
-        public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
+        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
-        private Dictionary<string, object?>? _internalExtra;
+        private Dictionary<string, object?>? _extra;
+
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _internalExtra ??= new Dictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
         private Dictionary<string, string>? _tags;
+
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
-
-        // TODO: this is a workaround, ideally Event should not inherit from IScope
-        Transaction? IScope.Transaction
-        {
-            get => null;
-            set {}
-        }
 
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
@@ -195,15 +188,25 @@ namespace Sentry
         internal SentryEvent(
             Exception? exception = null,
             DateTimeOffset? timestamp = null,
-            SentryId eventId = default,
-            IScopeOptions? options = null)
+            SentryId eventId = default)
         {
             Exception = exception;
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             EventId = eventId != default ? eventId : SentryId.Create();
-            ScopeOptions = options;
             Platform = Constants.Platform;
         }
+
+        /// <inheritdoc />
+        public void AddBreadcrumb(Breadcrumb breadcrumb) =>
+            (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
+
+        /// <inheritdoc />
+        public void SetExtra(string key, object? value) =>
+            (_extra ??= new Dictionary<string, object?>())[key] = value;
+
+        /// <inheritdoc />
+        public void SetTag(string key, string value) =>
+            (_tags ??= new Dictionary<string, string>())[key] = value;
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
@@ -331,7 +334,7 @@ namespace Sentry
             }
 
             // Extra
-            if (_internalExtra is {} extra && extra.Any())
+            if (_extra is {} extra && extra.Any())
             {
                 writer.WriteStartObject("extra");
 
@@ -405,7 +408,7 @@ namespace Sentry
                 Sdk = sdk,
                 _fingerprint = fingerprint!,
                 _breadcrumbs = breadcrumbs,
-                _internalExtra = extra?.ToDictionary(),
+                _extra = extra?.ToDictionary(),
                 _tags = tags?.ToDictionary()!
             };
         }

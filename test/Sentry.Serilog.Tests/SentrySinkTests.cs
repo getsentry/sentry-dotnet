@@ -300,7 +300,7 @@ namespace Sentry.Serilog.Tests
 
             sut.Emit(evt);
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]
@@ -314,7 +314,7 @@ namespace Sentry.Serilog.Tests
 
             sut.Emit(evt);
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]

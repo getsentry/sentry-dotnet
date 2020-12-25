@@ -142,6 +142,9 @@ internal static class Program
                 s.TransactionName = "main";
                 s.Environment = "SpecialEnvironment";
 
+                // Add a file attachment for upload
+                s.AddAttachment(typeof(Program).Assembly.Location);
+
                 SentrySdk.CaptureMessage("Fatal message!");
             });
 
@@ -273,7 +276,7 @@ internal static class Program
     {
         private readonly ISentryScopeStateProcessor _fallback = new DefaultSentryScopeStateProcessor();
 
-        public void Apply(IScope scope, object state)
+        public void Apply(Scope scope, object state)
         {
             if (state is SpecialContextObject specialState)
             {

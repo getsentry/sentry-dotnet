@@ -12,7 +12,7 @@ namespace Sentry.Tests.Protocol
         public void Serialization_Roundtrip_Success()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance, null)
+            var transaction = new Transaction(DisabledHub.Instance)
             {
                 Name = "my transaction",
                 Operation = "some op",

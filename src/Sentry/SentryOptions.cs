@@ -19,7 +19,7 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
-    public class SentryOptions : IScopeOptions
+    public class SentryOptions
     {
         private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
         private Dictionary<string, string>? _defaultTags;
@@ -61,7 +61,9 @@ namespace Sentry
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Scope state processor.
+        /// </summary>
         public ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; } = new DefaultSentryScopeStateProcessor();
 
         /// <summary>
@@ -369,7 +371,7 @@ namespace Sentry
 
         /// <summary>
         /// Path to the root directory used for storing events locally for resilience.
-        /// If set to <code>null</code>, caching will not be used.
+        /// If set to <i>null</i>, caching will not be used.
         /// </summary>
         public string? CacheDirectoryPath { get; set; }
 
