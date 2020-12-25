@@ -502,7 +502,7 @@ namespace Sentry.Tests.Protocol
             // Arrange
             var expectedStream = Stream.Null;
             var expectedFileName = "file.txt";
-            var expectedType = AttachmentType.MiniDump;
+            var expectedType = AttachmentType.Minidump;
             var expectedLength = 1024L;
             var expectedContentType = "application/octet-stream";
 
