@@ -19,7 +19,7 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
-    public class SentryOptions : IScopeOptions
+    public class SentryOptions
     {
         private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
         private Dictionary<string, string>? _defaultTags;
@@ -61,7 +61,9 @@ namespace Sentry
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Scope state processor.
+        /// </summary>
         public ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; } = new DefaultSentryScopeStateProcessor();
 
         /// <summary>

@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Sentry.Tests.Helpers.Reflection;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -10,14 +8,18 @@ namespace Sentry.Tests.Internals
     {
         private const string InternalsNamespace = "Sentry.Internal";
 
-        [Theory]
-        [MemberData(nameof(GetTypesInInternalsNamespace))]
-        public void TypesInInternalsNamespace_AreNotPublic(Type typeInNamespace)
-            => Assert.True(!typeInNamespace.IsPublic,
-                $"Expected type {typeInNamespace.Name} to be internal.");
+        [Fact]
+        public void TypesInInternalsNamespace_AreNotPublic()
+        {
+            var types = typeof(ISentryClient).Assembly
+                .GetTypes()
+                .Where(t => t.Namespace?.StartsWith(InternalsNamespace, StringComparison.Ordinal) == true)
+                .ToArray();
 
-        public static IEnumerable<object[]> GetTypesInInternalsNamespace()
-            => typeof(ISentryClient).Assembly.GetTypes(InternalsNamespace)
-                .Select(t => new[] { t });
+            Assert.All(types, type =>
+            {
+                Assert.False(type.IsPublic, $"Expected type {type.Name} to be internal.");
+            });
+        }
     }
 }

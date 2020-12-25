@@ -57,7 +57,7 @@ namespace Sentry.Protocol
             var value = json.GetString();
 
             return !string.IsNullOrWhiteSpace(value)
-                ? new SpanId(value)
+                ? Parse(value)
                 : Empty;
         }
 

@@ -8,6 +8,6 @@ namespace Sentry.Protocol
         /// <summary>
         /// Applies state onto a scope.
         /// </summary>
-        void Apply(IScope scope, object state);
+        void Apply(Scope scope, object state);
     }
 }

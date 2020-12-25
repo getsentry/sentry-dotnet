@@ -11,13 +11,10 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ISpan, IScope, IJsonSerializable
+    public class Transaction : ISpan, IEventLike, IJsonSerializable
     {
         private readonly IHub _hub;
         private readonly SpanRecorder _spanRecorder = new();
-
-        /// <inheritdoc />
-        public IScopeOptions? ScopeOptions { get; }
 
         /// <summary>
         /// Transaction name.
@@ -101,22 +98,29 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public string? Environment { get; set; }
 
+        // TODO: merge SentryEvent and Transaction, there is no reason to treat them as separate entities
+        string? IEventLike.TransactionName
+        {
+            get => Name;
+            set => Name = value ?? "<unnamed>";
+        }
+
         /// <inheritdoc />
         public SdkVersion Sdk { get; internal set; } = new();
 
-        private IEnumerable<string>? _fingerprint;
+        private IReadOnlyList<string>? _fingerprint;
 
         /// <inheritdoc />
-        public IEnumerable<string> Fingerprint
+        public IReadOnlyList<string> Fingerprint
         {
-            get => _fingerprint ?? Enumerable.Empty<string>();
+            get => _fingerprint ?? Array.Empty<string>();
             set => _fingerprint = value;
         }
 
         private List<Breadcrumb>? _breadcrumbs;
 
         /// <inheritdoc />
-        public IEnumerable<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
+        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
         private Dictionary<string, object?>? _extra;
 
@@ -131,27 +135,25 @@ namespace Sentry.Protocol
         // Transaction never has a parent
         SpanId? ISpanContext.ParentSpanId => null;
 
-        string? IScope.TransactionName
-        {
-            get => Name;
-            set => Name = value ?? "unnamed";
-        }
-
-        // TODO: this is a workaround, ideally Transaction should not inherit from IScope
-        Transaction? IScope.Transaction
-        {
-            get => null;
-            set {}
-        }
-
-        internal Transaction(IHub hub, IScopeOptions? scopeOptions)
+        internal Transaction(IHub hub)
         {
             _hub = hub;
-            ScopeOptions = scopeOptions;
 
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
         }
+
+        /// <inheritdoc />
+        public void AddBreadcrumb(Breadcrumb breadcrumb) =>
+            (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
+
+        /// <inheritdoc />
+        public void SetExtra(string key, object? value) =>
+            (_extra ??= new Dictionary<string, object?>())[key] = value;
+
+        /// <inheritdoc />
+        public void SetTag(string key, string value) =>
+            (_tags ??= new Dictionary<string, string>())[key] = value;
 
         /// <inheritdoc />
         public ISpan StartChild(string operation)
@@ -305,7 +307,7 @@ namespace Sentry.Protocol
             var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
 
-            return new Transaction(hub, null)
+            return new Transaction(hub)
             {
                 Name = name,
                 Description = description,

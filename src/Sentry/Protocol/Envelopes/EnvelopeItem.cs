@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,8 +18,8 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
         private const string TypeValueTransaction = "transaction";
+        private const string TypeValueAttachment = "attachment";
         private const string LengthKey = "length";
-        private const string FileNameKey = "file_name";
 
         /// <summary>
         /// Header associated with this envelope item.
@@ -114,44 +113,6 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() => (Payload as IDisposable)?.Dispose();
 
         /// <summary>
-        /// Creates an envelope item from file.
-        /// </summary>
-        public static EnvelopeItem FromFile(string filePath)
-        {
-            var file = File.OpenRead(filePath);
-            var payload = new StreamSerializable(file);
-
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
-            {
-                [TypeKey] = "attachment",
-                [FileNameKey] = Path.GetFileName(filePath),
-                [LengthKey] = file.Length
-            };
-
-            return new EnvelopeItem(header, payload);
-        }
-
-        /// <summary>
-        /// Creates an envelope item from text.
-        /// </summary>
-        public static EnvelopeItem FromString(string text)
-        {
-            using var buffer = new MemoryStream(
-                Encoding.UTF8.GetBytes(text)
-            );
-
-            var payload = new StreamSerializable(buffer);
-
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
-            {
-                [TypeKey] = "attachment",
-                [LengthKey] = buffer.Length
-            };
-
-            return new EnvelopeItem(header, payload);
-        }
-
-        /// <summary>
         /// Creates an envelope item from an event.
         /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
@@ -188,6 +149,32 @@ namespace Sentry.Protocol.Envelopes
             };
 
             return new EnvelopeItem(header, new JsonSerializable(transaction));
+        }
+
+        /// <summary>
+        /// Creates an envelope item from attachment.
+        /// </summary>
+        public static EnvelopeItem FromAttachment(Attachment attachment)
+        {
+            var attachmentType = attachment.Type switch
+            {
+                AttachmentType.Minidump => "event.minidump",
+                AttachmentType.AppleCrashReport => "event.applecrashreport",
+                AttachmentType.UnrealContext => "unreal.context",
+                AttachmentType.UnrealLogs => "unreal.logs",
+                _ => "event.attachment"
+            };
+
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                [TypeKey] = TypeValueAttachment,
+                [LengthKey] = attachment.Length,
+                ["filename"] = attachment.FileName,
+                ["attachment_type"] = attachmentType,
+                ["content_type"] = attachment.ContentType
+            };
+
+            return new EnvelopeItem(header, new StreamSerializable(attachment.Stream));
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
