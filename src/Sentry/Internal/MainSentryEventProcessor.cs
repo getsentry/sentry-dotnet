@@ -16,6 +16,9 @@ namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
+        internal const string CultureInfoKey = "Current Culture";
+        internal const string CurrentUiCultureKey = "Current UI Culture";
+
         private readonly Lazy<string?> _release = new(ReleaseLocator.GetCurrent);
 
         private readonly Lazy<Runtime?> _runtime = new(() =>
@@ -80,18 +83,19 @@ namespace Sentry.Internal
                 @event.Contexts.Device.Timezone = timeZoneInfo;
             }
 
-            const string currentUiCultureKey = "CurrentUICulture";
-            if (!@event.Contexts.ContainsKey(currentUiCultureKey)
-                && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is { } currentUiCultureMap)
-            {
-                @event.Contexts[currentUiCultureKey] = currentUiCultureMap;
-            }
-
-            const string cultureInfoKey = "CurrentCulture";
-            if (!@event.Contexts.ContainsKey(cultureInfoKey)
+            IDictionary<string, string>? cultureInfoMapped = null;
+            if (!@event.Contexts.ContainsKey(CultureInfoKey)
                 && CultureInfoToDictionary(CultureInfo.CurrentCulture) is { } currentCultureMap)
             {
-                @event.Contexts[cultureInfoKey] = currentCultureMap;
+                cultureInfoMapped = currentCultureMap;
+                @event.Contexts[CultureInfoKey] = currentCultureMap;
+            }
+
+            if (!@event.Contexts.ContainsKey(CurrentUiCultureKey)
+                && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is { } currentUiCultureMap
+                && (cultureInfoMapped is null || currentUiCultureMap.Any(p => !cultureInfoMapped.Contains(p))))
+            {
+                @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
             @event.Platform = Protocol.Constants.Platform;
