@@ -18,27 +18,27 @@ namespace Sentry
         /// <summary>
         /// Whether a <see cref="Protocol.User"/> has been set to the scope with any of its fields non null.
         /// </summary>
-        /// <param name="scope"></param>
+        /// <param name="eventLike"></param>
         /// <returns>True if a User was set to the scope. Otherwise, false.</returns>
-        public static bool HasUser(this IEventLike scope)
-            => scope.User.Email is not null
-               || scope.User.Id is not null
-               || scope.User.Username is not null
-               || scope.User.InternalOther?.Count > 0
-               || scope.User.IpAddress is not null;
+        public static bool HasUser(this IEventLike eventLike)
+            => eventLike.User.Email is not null
+               || eventLike.User.Id is not null
+               || eventLike.User.Username is not null
+               || eventLike.User.InternalOther?.Count > 0
+               || eventLike.User.IpAddress is not null;
 
 #if HAS_VALUE_TUPLE
         /// <summary>
         /// Adds a breadcrumb to the scope.
         /// </summary>
-        /// <param name="scope">The scope.</param>
+        /// <param name="eventLike">The scope.</param>
         /// <param name="message">The message.</param>
         /// <param name="category">The category.</param>
         /// <param name="type">The type.</param>
         /// <param name="dataPair">The data key-value pair.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-            this IEventLike scope,
+            this IEventLike eventLike,
             string message,
             string? category,
             string? type,
@@ -47,7 +47,7 @@ namespace Sentry
         {
             // Not to throw on code that ignores nullability warnings.
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (scope is null)
+            if (eventLike is null)
             {
                 return;
             }
@@ -62,7 +62,7 @@ namespace Sentry
                 };
             }
 
-            scope.AddBreadcrumb(
+            eventLike.AddBreadcrumb(
                 null,
                 message,
                 category,
@@ -75,14 +75,14 @@ namespace Sentry
         /// <summary>
         /// Adds a breadcrumb to the scope.
         /// </summary>
-        /// <param name="scope">The scope.</param>
+        /// <param name="eventLike">The scope.</param>
         /// <param name="message">The message.</param>
         /// <param name="category">The category.</param>
         /// <param name="type">The type.</param>
         /// <param name="data">The data.</param>
         /// <param name="level">The level.</param>
         public static void AddBreadcrumb(
-            this IEventLike scope,
+            this IEventLike eventLike,
             string message,
             string? category = null,
             string? type = null,
@@ -91,12 +91,12 @@ namespace Sentry
         {
             // Not to throw on code that ignores nullability warnings.
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (scope is null)
+            if (eventLike is null)
             {
                 return;
             }
 
-            scope.AddBreadcrumb(
+            eventLike.AddBreadcrumb(
                 null,
                 message,
                 category,
@@ -111,7 +111,7 @@ namespace Sentry
         /// <remarks>
         /// This overload is used for testing.
         /// </remarks>
-        /// <param name="scope">The scope.</param>
+        /// <param name="eventLike">The scope.</param>
         /// <param name="timestamp">The timestamp</param>
         /// <param name="message">The message.</param>
         /// <param name="category">The category.</param>
@@ -120,7 +120,7 @@ namespace Sentry
         /// <param name="level">The level.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void AddBreadcrumb(
-            this IEventLike scope,
+            this IEventLike eventLike,
             DateTimeOffset? timestamp,
             string message,
             string? category = null,
@@ -130,12 +130,12 @@ namespace Sentry
         {
             // Not to throw on code that ignores nullability warnings.
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (scope is null)
+            if (eventLike is null)
             {
                 return;
             }
 
-            scope.AddBreadcrumb(new Breadcrumb(
+            eventLike.AddBreadcrumb(new Breadcrumb(
                 timestamp,
                 message,
                 type,
@@ -147,45 +147,45 @@ namespace Sentry
         /// <summary>
         /// Sets the fingerprint to the <see cref="Scope"/>.
         /// </summary>
-        /// <param name="scope">The scope.</param>
+        /// <param name="eventLike">The scope.</param>
         /// <param name="fingerprint">The fingerprint.</param>
-        public static void SetFingerprint(this IEventLike scope, IEnumerable<string> fingerprint)
-            => scope.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
+        public static void SetFingerprint(this IEventLike eventLike, IEnumerable<string> fingerprint)
+            => eventLike.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
 
         /// <summary>
         /// Sets the extra key-value pairs to the <see cref="Scope"/>.
         /// </summary>
-        /// <param name="scope">The scope.</param>
+        /// <param name="eventLike">The scope.</param>
         /// <param name="values">The values.</param>
-        public static void SetExtras(this IEventLike scope, IEnumerable<KeyValuePair<string, object?>> values)
+        public static void SetExtras(this IEventLike eventLike, IEnumerable<KeyValuePair<string, object?>> values)
         {
             foreach (var (key, value) in values)
             {
-                scope.SetExtra(key, value);
+                eventLike.SetExtra(key, value);
             }
         }
 
         /// <summary>
         /// Set all items as tags.
         /// </summary>
-        /// <param name="scope">The scope.</param>
+        /// <param name="eventLike">The scope.</param>
         /// <param name="tags"></param>
-        public static void SetTags(this IEventLike scope, IEnumerable<KeyValuePair<string, string>> tags)
+        public static void SetTags(this IEventLike eventLike, IEnumerable<KeyValuePair<string, string>> tags)
         {
             foreach (var (key, value) in tags)
             {
-                scope.SetTag(key, value);
+                eventLike.SetTag(key, value);
             }
         }
 
         /// <summary>
-        /// Removes a tag from the <see cref="IEventLike"/>.
+        /// Removes a tag from the <see cref="Scope"/>.
         /// </summary>
-        /// <param name="scope">The scope.</param>
+        /// <param name="eventLike">The scope.</param>
         /// <param name="key"></param>
-        public static void UnsetTag(this IEventLike scope, string key)
+        public static void UnsetTag(this IEventLike eventLike, string key)
         {
-            if (scope.Tags is IDictionary<string, string> tags)
+            if (eventLike.Tags is IDictionary<string, string> tags)
             {
                 tags.Remove(key);
             }
