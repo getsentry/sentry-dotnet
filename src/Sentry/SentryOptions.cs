@@ -371,7 +371,7 @@ namespace Sentry
 
         /// <summary>
         /// Path to the root directory used for storing events locally for resilience.
-        /// If set to <code>null</code>, caching will not be used.
+        /// If set to <i>null</i>, caching will not be used.
         /// </summary>
         public string? CacheDirectoryPath { get; set; }
 
