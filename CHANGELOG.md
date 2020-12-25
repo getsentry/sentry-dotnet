@@ -1,6 +1,6 @@
 # Changelog
 
-## vNext
+## 3.0.0-alpha.8
 
 - Include parameters in stack frames. (#662) @Tyrrrz
 - Remove CultureUIInfo if value is even with CultureInfo. (#671) @lucas-zimerman

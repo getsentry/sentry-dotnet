@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageTags>$(PackageTags);Blazor;WebAssembly;Wasm;AspNetCore</PackageTags>
+    <PackageId>Sentry.AspNetCore.Blazor</PackageId>
+    <AssemblyName>Sentry.AspNetCore.Blazor</AssemblyName>
+    <RootNamespace>Sentry.AspNetCore.Blazor</RootNamespace>
+    <Description>Official Blazor integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+  </PropertyGroup>
+
+
+<!--  Taking all from the Blazor project for now-->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
+<!--    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0" PrivateAssets="all" />-->
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
+  </ItemGroup>
+
+<!--  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">-->
+<!--    <FrameworkReference Include="Microsoft.AspNetCore.App" />-->
+<!--  </ItemGroup>-->
+
+</Project>
