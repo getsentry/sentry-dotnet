@@ -158,7 +158,7 @@ namespace Sentry.Protocol.Envelopes
         {
             var attachmentType = attachment.Type switch
             {
-                AttachmentType.MiniDump => "event.minidump",
+                AttachmentType.Minidump => "event.minidump",
                 AttachmentType.AppleCrashReport => "event.applecrashreport",
                 AttachmentType.UnrealContext => "unreal.context",
                 AttachmentType.UnrealLogs => "unreal.logs",
