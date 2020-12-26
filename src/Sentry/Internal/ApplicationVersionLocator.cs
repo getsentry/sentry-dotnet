@@ -9,7 +9,12 @@ namespace Sentry.Internal
 
         internal static string? GetCurrent(Assembly? asm)
         {
-            var version = asm?.GetNameAndVersion().Version;
+            if (asm is null)
+            {
+                return null;
+            }
+
+            var version = asm.GetNameAndVersion().Version;
 
             return !string.IsNullOrEmpty(version)
                    // If it really was on of the following, app would need to be set explicitly since these are defaults.
@@ -17,7 +22,7 @@ namespace Sentry.Internal
                    && version != "1.0.0"
                    && version != "0.0.0.0"
                    && version != "1.0.0.0"
-                ? version
+                ? $"{asm.GetName().Name}@{version}"
                 : null;
         }
     }

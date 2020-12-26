@@ -24,12 +24,17 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void GetCurrent_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
+            var ass = Assembly.GetEntryAssembly();
+
             EnvironmentVariableGuard.WithVariable(
                 Constants.ReleaseEnvironmentVariable,
                 null,
                 () =>
                 {
-                    Assert.Equal(Assembly.GetEntryAssembly()?.GetNameAndVersion().Version, ReleaseLocator.GetCurrent());
+                    Assert.Equal(
+                        $"{ass?.GetName().Name}@{ass?.GetNameAndVersion().Version}",
+                        ReleaseLocator.GetCurrent()
+                    );
                 });
         }
     }
