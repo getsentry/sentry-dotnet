@@ -12,7 +12,8 @@ namespace Sentry.Internal
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            if (options.Dsn is null) throw new ArgumentException("No DSN defined in the SentryOptions");
+            if (options.Dsn is null)
+                throw new ArgumentException("No DSN defined in the SentryOptions");
         }
 
         private ITransport CreateTransport()
@@ -36,39 +37,47 @@ namespace Sentry.Internal
                 return httpTransport;
             }
 
-            // Caching transport
-            var cachingTransport = new CachingTransport(httpTransport, _options);
-
+            _options.InitCacheFlushTimeout = TimeSpan.FromSeconds(5);
             // If configured, flush existing cache
-            if (_options.InitCacheFlushTimeout > TimeSpan.Zero)
+            _options.DiagnosticLogger?.LogDebug(
+                "Flushing existing cache during transport activation up to {0}.",
+                _options.InitCacheFlushTimeout
+            );
+
+            // Use a timeout to avoid waiting for too long
+            using var timeout = new CancellationTokenSource(_options.InitCacheFlushTimeout);
+            var cachingTransport = new CachingTransport(httpTransport, _options);
+            SynchronizationContext? context = null;
+            try
             {
-                _options.DiagnosticLogger?.LogDebug(
-                    "Flushing existing cache during transport activation up to {0}.",
-                    _options.InitCacheFlushTimeout
-                );
+                context = SynchronizationContext.Current;
+                SynchronizationContext.SetSynchronizationContext(null);
+              
+                // Caching transport
 
-                // Use a timeout to avoid waiting for too long
-                using var timeout = new CancellationTokenSource(_options.InitCacheFlushTimeout);
-
-                try
-                {
-                    cachingTransport.FlushAsync(timeout.Token).GetAwaiter().GetResult();
-                }
-                catch (OperationCanceledException)
-                {
-                    _options.DiagnosticLogger?.LogError(
-                        "Flushing timed out."
-                    );
-                }
-                catch (Exception ex)
-                {
-                    _options.DiagnosticLogger?.LogFatal(
-                        "Flushing failed.",
-                        ex
-                    );
-                }
+                cachingTransport.FlushAsync(timeout.Token).GetAwaiter().GetResult();
+                return cachingTransport;
             }
-
+            catch (OperationCanceledException)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Flushing timed out."
+                );
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogFatal(
+                    "Flushing failed.",
+                    ex
+                );
+            }
+            finally
+            {
+                if (context != null)
+                {
+                    SynchronizationContext.SetSynchronizationContext(context);
+                }                
+            }
             return cachingTransport;
         }
 

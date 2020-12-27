@@ -75,7 +75,9 @@ namespace Sentry.Internal.Http
             _worker = Task.Run(CachedTransportBackgroundTask);
         }
 
+#pragma warning disable IDE1006 // Naming Styles
         private async Task CachedTransportBackgroundTask()
+#pragma warning restore IDE1006 // Naming Styles
         {
             try
             {
@@ -257,7 +259,7 @@ namespace Sentry.Internal.Http
 
             EnsureFreeSpaceInCache();
 
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
+            _ = Directory.CreateDirectory(_isolatedCacheDirectoryPath);
 
             using (var stream = File.Create(envelopeFilePath))
             {

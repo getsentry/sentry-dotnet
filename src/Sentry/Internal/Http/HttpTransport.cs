@@ -97,7 +97,9 @@ namespace Sentry.Internal.Http
 
             // Send envelope to ingress
             using var request = CreateRequest(processedEnvelope);
+            System.Diagnostics.Debug.WriteLine("Sending Request");
             using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            System.Diagnostics.Debug.WriteLine("Sent");
 
             // Read & set rate limits for future requests
             ExtractRateLimits(response, instant);
