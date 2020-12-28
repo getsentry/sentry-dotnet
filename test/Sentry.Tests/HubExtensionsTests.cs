@@ -24,24 +24,21 @@ namespace Sentry.Tests
         public void CaptureEvent_WithScope_PushesNewScope()
         {
             Sut.CaptureEvent(new SentryEvent(), scope => scope.TransactionName = "test");
-
-            _ = Sut.Received(1).PushScope();
+            Sut.ReceivedWithAnyArgs(1).WithScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]
         public void CaptureMessage_WithScope_PushesNewScope()
         {
             Sut.CaptureMessage("test", scope => scope.TransactionName = "test");
-
-            _ = Sut.Received(1).PushScope();
+            Sut.ReceivedWithAnyArgs(1).WithScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]
         public void CaptureException_WithScope_PushesNewScope()
         {
             Sut.CaptureException(new Exception("test"), scope => scope.TransactionName = "test");
-
-            _ = Sut.Received(1).PushScope();
+            Sut.ReceivedWithAnyArgs(1).WithScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]
