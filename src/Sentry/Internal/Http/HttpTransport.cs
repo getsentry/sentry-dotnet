@@ -123,7 +123,8 @@ namespace Sentry.Internal.Http
                         responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
                         ?? Array.Empty<string>();
 
-                    _options.DiagnosticLogger?.LogError(
+                    _options.DiagnosticLogger?.Log(
+                        SentryLevel.Error,
                         "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}.",
                         null,
                         processedEnvelope.TryGetEventId(),
@@ -136,7 +137,8 @@ namespace Sentry.Internal.Http
                 {
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    _options.DiagnosticLogger?.LogError(
+                    _options.DiagnosticLogger?.Log(
+                        SentryLevel.Error,
                         "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}.",
                         null,
                         processedEnvelope.TryGetEventId(),
