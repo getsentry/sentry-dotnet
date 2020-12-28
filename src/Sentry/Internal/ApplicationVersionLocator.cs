@@ -14,16 +14,15 @@ namespace Sentry.Internal
                 return null;
             }
 
-            var version = asm.GetNameAndVersion().Version;
+            var nameAndVersion = asm.GetNameAndVersion();
 
-            return !string.IsNullOrEmpty(version)
-                   // If it really was on of the following, app would need to be set explicitly since these are defaults.
-                   && version != "0.0.0"
-                   && version != "1.0.0"
-                   && version != "0.0.0.0"
-                   && version != "1.0.0.0"
-                ? $"{asm.GetName().Name}@{version}"
-                : null;
+            if (string.IsNullOrWhiteSpace(nameAndVersion.Name) ||
+                string.IsNullOrWhiteSpace(nameAndVersion.Version))
+            {
+                return null;
+            }
+
+            return $"{nameAndVersion.Name}@{nameAndVersion.Version}";
         }
     }
 }
