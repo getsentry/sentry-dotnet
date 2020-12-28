@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Handle non-json error response messages on HttpTransport. (#690) @lucas-zimerman
+- Fix deadlock on missing ConfigureAwait into foreach loops. (#694) @lucas-zimerman
 
 ## 3.0.0-alpha.8
 
@@ -14,6 +15,7 @@
 - Add support for attachments. (#670) @Tyrrrz
 - Improve logging for relay errors. (#683) @Tyrrrz
 - Report sentry.dotnet.aspnet on the new Sentry.AspNet package. (#681) @Tyrrrz
+- Always send a default release. (#695) @Tyrrrz
 
 ## 3.0.0-alpha.7
 

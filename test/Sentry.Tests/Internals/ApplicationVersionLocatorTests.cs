@@ -25,10 +25,6 @@ namespace Sentry.Tests.Internals
 
         [Theory]
         [InlineData("")]
-        [InlineData("0.0.0")]
-        [InlineData("1.0.0")]
-        [InlineData("0.0.0.0")]
-        [InlineData("1.0.0.0")]
         public void GetCurrent_InvalidCases_ReturnsNull(string version)
         {
             var asm = AssemblyCreationHelper.CreateWithInformationalVersion(version);

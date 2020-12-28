@@ -137,7 +137,7 @@ namespace Sentry.Protocol.Envelopes
             var buffer = new List<byte>();
 
             var prevByte = default(int);
-            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken))
+            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false))
             {
                 // Break if found an unescaped newline
                 if (curByte == '\n' && prevByte != '\\')

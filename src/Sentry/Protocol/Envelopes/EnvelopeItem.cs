@@ -184,7 +184,7 @@ namespace Sentry.Protocol.Envelopes
             var buffer = new List<byte>();
 
             var prevByte = default(int);
-            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken))
+            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false))
             {
                 // Break if found an unescaped newline
                 if (curByte == '\n' && prevByte != '\\')
@@ -270,7 +270,7 @@ namespace Sentry.Protocol.Envelopes
             var payload = await DeserializePayloadAsync(stream, header, cancellationToken).ConfigureAwait(false);
 
             // Swallow trailing newlines (some envelopes may have them after payloads)
-            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken))
+            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (curByte != '\n')
                 {
