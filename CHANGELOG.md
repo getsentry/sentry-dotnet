@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Fix deadlock on missing ConfigureAwait into foreach loops. (#694) @lucas-zimerman
+
 ## 3.0.0-alpha.8
 
 - Include parameters in stack frames. (#662) @Tyrrrz
