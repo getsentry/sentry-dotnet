@@ -13,6 +13,58 @@ namespace Sentry
     public static class HubExtensions
     {
         /// <summary>
+        /// Configures the scope and captures an event.
+        /// </summary>
+        public static SentryId CaptureEvent(this IHub hub, SentryEvent @event, Action<Scope> configureScope)
+        {
+            var id = SentryId.Empty;
+
+            // The callback is executed immediately, so the ID is set before returning
+            hub.WithScope(scope =>
+            {
+                configureScope(scope);
+                id = hub.CaptureEvent(@event, scope);
+            });
+
+            return id;
+        }
+
+        /// <summary>
+        /// Configures the scope and captures a message.
+        /// </summary>
+        public static SentryId CaptureMessage(this IHub hub, string message, Action<Scope> configureScope,
+            SentryLevel level = SentryLevel.Info)
+        {
+            var id = SentryId.Empty;
+
+            // The callback is executed immediately, so the ID is set before returning
+            hub.WithScope(scope =>
+            {
+                configureScope(scope);
+                id = hub.CaptureMessage(message, level);
+            });
+
+            return id;
+        }
+
+        /// <summary>
+        /// Configures the scope and captures an exception.
+        /// </summary>
+        public static SentryId CaptureException(this IHub hub, Exception exception, Action<Scope> configureScope)
+        {
+            var id = SentryId.Empty;
+
+            // The callback is executed immediately, so the ID is set before returning
+            hub.WithScope(scope =>
+            {
+                configureScope(scope);
+                id = hub.CaptureException(exception);
+            });
+
+            return id;
+        }
+
+        /// <summary>
         /// Adds a breadcrumb to the current scope.
         /// </summary>
         /// <param name="hub">The Hub which holds the scope stack.</param>
