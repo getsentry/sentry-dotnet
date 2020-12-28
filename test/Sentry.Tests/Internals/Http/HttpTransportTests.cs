@@ -52,7 +52,7 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
-        public async Task SendEnvelopeAsync_ResponseNotOkWithMessage_LogsError()
+        public async Task SendEnvelopeAsync_ResponseNotOkWithJsonMessage_LogsError()
         {
             // Arrange
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
@@ -63,7 +63,7 @@ namespace Sentry.Tests.Internals.Http
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
             httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage, expectedCauses));
+                .Returns(_ => SentryResponses.GetJsonErrorResponse(expectedCode, expectedMessage, expectedCauses));
 
             var logger = new AccumulativeDiagnosticLogger();
 
@@ -95,6 +95,46 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
+        public async Task SendEnvelopeAsync_ResponseNotOkWithStringMessage_LogsError()
+        {
+            // Arrange
+            const HttpStatusCode expectedCode = HttpStatusCode.RequestEntityTooLarge;
+            const string expectedMessage = "413 Request Entity Too Large";
+
+            var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+            _ = httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                  .Returns(_ => SentryResponses.GetTextErrorResponse(expectedCode, expectedMessage));
+
+            var logger = new AccumulativeDiagnosticLogger();
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    Debug = true,
+                    DiagnosticLogger = logger
+                },
+                new HttpClient(httpHandler)
+            );
+
+            var envelope = Envelope.FromEvent(new SentryEvent());
+
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            _ = logger.Entries.Any(e =>
+                    e.Level == SentryLevel.Error &&
+                    e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}." &&
+                    e.Exception == null &&
+                    e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
+                    e.Args[1].ToString() == expectedCode.ToString() &&
+                    e.Args[2].ToString() == expectedMessage
+            ).Should().BeTrue();
+        }
+
+        [Fact]
         public async Task SendEnvelopeAsync_ResponseNotOkNoMessage_LogsError()
         {
             // Arrange
@@ -103,7 +143,7 @@ namespace Sentry.Tests.Internals.Http
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
             httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, null));
+                .Returns(_ => SentryResponses.GetJsonErrorResponse(expectedCode, null));
 
             var logger = new AccumulativeDiagnosticLogger();
 

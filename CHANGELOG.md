@@ -1,7 +1,8 @@
 # Changelog
 
-## vNext
+## Unreleased
 
+- Handle non-json error response messages on HttpTransport. (#690) @lucas-zimerman
 - Fix deadlock on missing ConfigureAwait into foreach loops. (#694) @lucas-zimerman
 
 ## 3.0.0-alpha.8
