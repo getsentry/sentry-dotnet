@@ -10,6 +10,7 @@
 - Add support for attachments. (#670) @Tyrrrz
 - Improve logging for relay errors. (#683) @Tyrrrz
 - Report sentry.dotnet.aspnet on the new Sentry.AspNet package. (#681) @Tyrrrz
+- Add IHub extensions `CaptureEvent`, `CaptureMessage`, `CaptureException` that take scope delegate. (#697) @Tyrrrz
 
 ## 3.0.0-alpha.7
 
