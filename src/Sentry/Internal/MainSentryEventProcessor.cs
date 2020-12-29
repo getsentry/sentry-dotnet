@@ -18,7 +18,7 @@ namespace Sentry.Internal
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
 
-        private readonly Lazy<string?> _release = new(ReleaseLocator.GetCurrent);
+        private readonly Lazy<string?> _release;
 
         private readonly Lazy<Runtime> _runtime = new(() =>
         {
@@ -49,10 +49,12 @@ namespace Sentry.Internal
 
         public MainSentryEventProcessor(
             SentryOptions options,
-            Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
+            Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor,
+            Lazy<string?>? lazyRelease = null)
         {
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
+            _release = lazyRelease ?? new Lazy<string?>(ReleaseLocator.GetCurrent);
         }
 
         public SentryEvent Process(SentryEvent @event)
