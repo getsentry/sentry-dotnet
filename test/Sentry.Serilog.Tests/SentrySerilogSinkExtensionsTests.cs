@@ -41,7 +41,7 @@ namespace Sentry.Serilog.Tests
             public SentrySerilogOptions GetSut() => new();
         }
 
-        private readonly SentrySerilogSinkExtensionsTests.Fixture _fixture = new();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void ConfigureSentrySerilogOptions_WithNoParameters_MakesNoChangesToObject()
@@ -117,7 +117,7 @@ namespace Sentry.Serilog.Tests
             Assert.Equal(_fixture.SampleRate, sut.SampleRate);
             Assert.Equal(_fixture.Release, sut.Release);
             Assert.Equal(_fixture.Environment, sut.Environment);
-            Assert.Equal(_fixture.Dsn, sut.Dsn.ToString());
+            Assert.Equal(_fixture.Dsn, sut.Dsn!);
             Assert.Equal(_fixture.MaxQueueItems, sut.MaxQueueItems);
             Assert.Equal(_fixture.ShutdownTimeout, sut.ShutdownTimeout);
             Assert.Equal(_fixture.DecompressionMethods, sut.DecompressionMethods);

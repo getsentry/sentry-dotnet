@@ -21,7 +21,6 @@ namespace Sentry
     /// </summary>
     public class SentryOptions
     {
-        private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
         private Dictionary<string, string>? _defaultTags;
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
@@ -442,16 +441,16 @@ namespace Sentry
                 ? new MonoSentryStackTraceFactory(this)
                 : new SentryStackTraceFactory(this);
 
-            _sentryStackTraceFactoryAccessor = () => SentryStackTraceFactory;
+            ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
                     // de-dupe to be the first to run
                     new DuplicateEventDetectionEventProcessor(this),
-                    new MainSentryEventProcessor(this, _sentryStackTraceFactoryAccessor),
+                    new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor),
             };
 
             ExceptionProcessors = new ISentryEventExceptionProcessor[] {
-                new MainExceptionProcessor(this, _sentryStackTraceFactoryAccessor)
+                new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)
             };
 
             Integrations = new ISdkIntegration[] {

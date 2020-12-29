@@ -65,14 +65,18 @@ namespace Sentry.Tests
         public void Init_ValidDsnWithSecret_EnablesSdk()
         {
             using (SentrySdk.Init(ValidDsnWithSecret))
+            {
                 Assert.True(SentrySdk.IsEnabled);
+            }
         }
 
         [Fact]
         public void Init_ValidDsnWithoutSecret_EnablesSdk()
         {
             using (SentrySdk.Init(ValidDsnWithoutSecret))
+            {
                 Assert.True(SentrySdk.IsEnabled);
+            }
         }
 
         [Fact]
@@ -83,8 +87,10 @@ namespace Sentry.Tests
                 ValidDsnWithSecret,
                 () =>
                 {
-                    using (SentrySdk.Init(c => { }))
+                    using (SentrySdk.Init(_ => { }))
+                    {
                         Assert.True(SentrySdk.IsEnabled);
+                    }
                 });
         }
 
@@ -96,8 +102,10 @@ namespace Sentry.Tests
                 InvalidDsn,
                 () =>
                 {
-                    using (SentrySdk.Init(c => { }))
+                    using (SentrySdk.Init(_ => { }))
+                    {
                         Assert.False(SentrySdk.IsEnabled);
+                    }
                 });
         }
 
@@ -110,7 +118,9 @@ namespace Sentry.Tests
                 () =>
                 {
                     using (SentrySdk.Init())
+                    {
                         Assert.True(SentrySdk.IsEnabled);
+                    }
                 });
         }
 
@@ -137,7 +147,9 @@ namespace Sentry.Tests
                 () =>
                 {
                     using (SentrySdk.Init())
+                    {
                         Assert.False(SentrySdk.IsEnabled);
+                    }
                 });
         }
 
@@ -145,7 +157,9 @@ namespace Sentry.Tests
         public void Init_EmptyDsn_DisabledSdk()
         {
             using (SentrySdk.Init(string.Empty))
+            {
                 Assert.False(SentrySdk.IsEnabled);
+            }
         }
 
         [Fact]

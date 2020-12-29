@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using Sentry.Extensibility;
 
-namespace Sentry.Internal.Web
+namespace Sentry.AspNet.Internal
 {
     internal class SystemWebHttpRequest : IHttpRequest
     {

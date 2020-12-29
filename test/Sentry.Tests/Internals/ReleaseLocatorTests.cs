@@ -1,5 +1,8 @@
 using System.Reflection;
 using Sentry.Internal;
+#if NET461
+using Sentry.PlatformAbstractions;
+#endif
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;
@@ -21,9 +24,17 @@ namespace Sentry.Tests.Internals
                 });
         }
 
+
+#if NET461
+        [SkippableFact]
+#else
         [Fact]
+#endif
         public void GetCurrent_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
+#if NET461
+            Skip.If(Runtime.Current.IsMono(), "GetEntryAssembly returning null on Mono.");
+#endif
             var ass = Assembly.GetEntryAssembly();
 
             EnvironmentVariableGuard.WithVariable(
@@ -32,7 +43,7 @@ namespace Sentry.Tests.Internals
                 () =>
                 {
                     Assert.Equal(
-                        $"{ass?.GetName().Name}@{ass?.GetNameAndVersion().Version}",
+                        $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
                         ReleaseLocator.GetCurrent()
                     );
                 });

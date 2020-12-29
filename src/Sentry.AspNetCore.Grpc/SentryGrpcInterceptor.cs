@@ -3,12 +3,8 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
-using Sentry.Protocol;
-using Sentry.Reflection;
 
 namespace Sentry.AspNetCore.Grpc
 {
@@ -19,19 +15,12 @@ namespace Sentry.AspNetCore.Grpc
     {
         private readonly Func<IHub> _hubAccessor;
         private readonly SentryAspNetCoreOptions _options;
-        private readonly IWebHostEnvironment _hostingEnvironment;
-
-        internal static readonly SdkVersion NameAndVersion
-            = typeof(SentryGrpcInterceptor).Assembly.GetNameAndVersion();
-
-        private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentryGrpcInterceptor"/> class.
         /// </summary>
         /// <param name="hubAccessor">The sentry Hub accessor.</param>
         /// <param name="options">The options for this integration</param>
-        /// <param name="hostingEnvironment">The hosting environment.</param>
         /// <exception cref="ArgumentNullException">
         /// continuation
         /// or
@@ -39,8 +28,7 @@ namespace Sentry.AspNetCore.Grpc
         /// </exception>
         public SentryGrpcInterceptor(
             Func<IHub> hubAccessor,
-            IOptions<SentryAspNetCoreOptions> options,
-            IWebHostEnvironment hostingEnvironment)
+            IOptions<SentryAspNetCoreOptions> options)
         {
             _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
             _options = options.Value;
@@ -49,8 +37,6 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(callback);
             }
-
-            _hostingEnvironment = hostingEnvironment;
         }
 
         /// <summary>
@@ -77,7 +63,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate(context, request, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate(context, request, _options);
                 });
 
                 try
@@ -121,7 +107,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate(context, request, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate(context, request, _options);
                 });
 
                 try
@@ -159,7 +145,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate<TRequest>(context, null, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate<TRequest>(context, null, _options);
                 });
 
                 try
@@ -203,7 +189,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate<TRequest>(context, null, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate<TRequest>(context, null, _options);
                 });
 
                 try

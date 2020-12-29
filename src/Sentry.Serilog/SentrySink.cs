@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
@@ -45,10 +44,6 @@ namespace Sentry.Serilog
             IDisposable? sdkDisposable,
             ISystemClock clock)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(hubAccessor != null);
-            Debug.Assert(clock != null);
-
             _options = options;
             _hubAccessor = hubAccessor;
             _clock = clock;

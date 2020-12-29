@@ -87,7 +87,7 @@ namespace Sentry.Tests.Internals
         public void Create_DefaultHeaders_AcceptJson()
         {
             var configureHandlerInvoked = false;
-            _fixture.HttpOptions.ConfigureClient = (client) =>
+            _fixture.HttpOptions.ConfigureClient = client =>
             {
                 Assert.Equal("application/json", client.DefaultRequestHeaders.Accept.ToString());
                 configureHandlerInvoked = true;

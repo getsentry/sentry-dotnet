@@ -6,7 +6,7 @@ using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
 
-namespace Sentry.Internal.Web
+namespace Sentry.AspNet.Internal
 {
     internal class SystemWebRequestEventProcessor : ISentryEventProcessor
     {

@@ -89,7 +89,7 @@ namespace Other.Tests.Internals
             try
             {
                 Throw();
-                void Throw() => throw null;
+                static void Throw() => throw null!;
             }
             catch (Exception e) { exception = e; }
 
@@ -106,13 +106,13 @@ namespace Other.Tests.Internals
             try
             {
                 Throw();
-                void Throw() => throw null;
+                static void Throw() => throw null!;
             }
             catch (Exception e) { exception = e; }
 
             var stackTrace = sut.Create(exception);
 
-            Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace.Frames.Count);
+            Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace!.Frames.Count);
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace Other.Tests.Internals
         [Fact]
         public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
         {
-            _fixture.SentryOptions.AddInAppExclude(GetType().Namespace);
+            _fixture.SentryOptions.AddInAppExclude(GetType().Namespace!);
             var sut = _fixture.GetSut();
             var frame = new StackFrame();
 
@@ -141,8 +141,8 @@ namespace Other.Tests.Internals
         [Fact]
         public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
         {
-            _fixture.SentryOptions.AddInAppExclude(GetType().Namespace);
-            _fixture.SentryOptions.AddInAppInclude(GetType().Namespace);
+            _fixture.SentryOptions.AddInAppExclude(GetType().Namespace!);
+            _fixture.SentryOptions.AddInAppInclude(GetType().Namespace!);
             var sut = _fixture.GetSut();
             var frame = new StackFrame();
 

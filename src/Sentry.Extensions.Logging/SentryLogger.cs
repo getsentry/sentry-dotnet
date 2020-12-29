@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
@@ -22,10 +21,6 @@ namespace Sentry.Extensions.Logging
             ISystemClock clock,
             IHub hub)
         {
-            Debug.Assert(categoryName != null);
-            Debug.Assert(options != null);
-            Debug.Assert(clock != null);
-            Debug.Assert(hub != null);
             CategoryName = categoryName;
             _options = options;
             _clock = clock;

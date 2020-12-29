@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Sentry.Internal;
 
 namespace Sentry.Integrations
@@ -16,7 +15,6 @@ namespace Sentry.Integrations
 
         public void Register(IHub hub, SentryOptions options)
         {
-            Debug.Assert(hub != null);
             _hub = hub;
             _appDomain.ProcessExit += HandleProcessExit;
         }

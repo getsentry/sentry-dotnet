@@ -1,7 +1,8 @@
 #if !NETFX
+using Sentry.PlatformAbstractions;
 using Xunit;
 
-namespace Sentry.PlatformAbstractions
+namespace Sentry.Tests.PlatformAbstractions
 {
     public class FrameworkInfoNetStandardTests
     {

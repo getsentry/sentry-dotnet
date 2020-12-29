@@ -1,4 +1,6 @@
+#if HAS_VALUE_TUPLE
 using System;
+#endif
 using System.Collections.Generic;
 using System.Linq;
 

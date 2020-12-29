@@ -24,7 +24,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             new GrpcRequestHandler<TestRequest, TestResponse>
             {
                 Method = TestService.Descriptor.FindMethodByName("TestThrow"),
-                Handler = (req, ctx) => throw new Exception("test error")
+                Handler = (_, _) => throw new Exception("test error")
             }
         };
 
@@ -38,7 +38,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
                 sentryBuilder.AddSentryOptions(options =>
                 {
                     options.Dsn = DsnSamples.ValidDsnWithSecret;
-                    options.SentryHttpClientFactory = new DelegateHttpClientFactory(o => sentryHttpClient);
+                    options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
 
                     Configure?.Invoke(options);
                 });

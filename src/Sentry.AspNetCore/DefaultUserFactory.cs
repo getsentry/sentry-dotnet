@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Sentry.Protocol;
@@ -9,8 +8,6 @@ namespace Sentry.AspNetCore
     {
         public User? Create(HttpContext context)
         {
-            Debug.Assert(context != null);
-
             var principal = context.User;
             if (principal == null)
             {

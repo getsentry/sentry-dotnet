@@ -56,7 +56,7 @@ namespace Sentry.NLog.Tests
                     Clock)
                 {
                     Name = "sentry",
-                    Dsn = Options.Dsn?.ToString() ?? Options.DsnLayout,
+                    Dsn = Options.Dsn ?? Options.DsnLayout,
                 };
 
                 if (asyncTarget)
@@ -112,7 +112,11 @@ namespace Sentry.NLog.Tests
 
             var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
             Assert.NotNull(t);
-            Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn.ToString());
+            if (t.Options.Dsn != null)
+            {
+                Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn);
+            }
+
             Assert.Equal("test", t.Options.Environment);
             Assert.Equal("1.2.3", t.Options.Release);
             Assert.True(t.Options.AttachStacktrace);
@@ -142,7 +146,7 @@ namespace Sentry.NLog.Tests
 
             var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
             Assert.NotNull(t);
-            Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn.ToString());
+            Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn);
             Assert.Equal("'myUser'", t.User.Username.ToString());
             Assert.NotEmpty(t.User.Other);
             Assert.Equal("mood", t.User.Other[0].Name);
@@ -473,13 +477,14 @@ namespace Sentry.NLog.Tests
             var testDisposable = Substitute.For<IDisposable>();
 
             var evt = new ManualResetEventSlim();
-            AsyncContinuation continuation = e =>
+
+            void Continuation(Exception _)
             {
                 testDisposable.Dispose();
                 evt.Set();
-            };
+            }
 
-            factory.Flush(continuation, timeout);
+            factory.Flush(Continuation, timeout);
 
             Assert.True(evt.Wait(timeout));
 
@@ -527,7 +532,7 @@ namespace Sentry.NLog.Tests
             var expectedDsn = "https://a@sentry.io/1";
             _fixture.Options.Dsn = expectedDsn;
             var target = (SentryTarget)_fixture.GetTarget();
-            Assert.Equal(expectedDsn.ToString(), target.Options.Dsn.ToString());
+            Assert.Equal(expectedDsn, target.Options.Dsn);
         }
 
         [Fact]
@@ -538,10 +543,10 @@ namespace Sentry.NLog.Tests
             target.Dsn = "${var:mydsn}";
             var logFactory = new LogFactory();
             var logConfig = new LoggingConfiguration(logFactory);
-            logConfig.Variables["mydsn"] = expectedDsn.ToString();
+            logConfig.Variables["mydsn"] = expectedDsn;
             logConfig.AddRuleForAllLevels(target);
             logFactory.Configuration = logConfig;
-            Assert.Equal(expectedDsn.ToString(), target.Options.Dsn.ToString());
+            Assert.Equal(expectedDsn, target.Options.Dsn);
         }
 
         [Fact]

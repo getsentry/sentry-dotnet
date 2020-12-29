@@ -312,7 +312,7 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void AddBreadcrumb_BeforeBreadcrumbDropsCrumb_NoBreadcrumbInEvent()
         {
-            _fixture.ScopeOptions.BeforeBreadcrumb = c => null;
+            _fixture.ScopeOptions.BeforeBreadcrumb = _ => null;
             var sut = _fixture.GetSut();
 
             sut.AddBreadcrumb("no expected");

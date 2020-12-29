@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,17 +20,15 @@ namespace Sentry.Internal
 
         private readonly Lazy<string?> _release = new(ReleaseLocator.GetCurrent);
 
-        private readonly Lazy<Runtime?> _runtime = new(() =>
+        private readonly Lazy<Runtime> _runtime = new(() =>
         {
             var current = PlatformAbstractions.Runtime.Current;
-            return current != null
-                   ? new Runtime
-                   {
-                       Name = current.Name,
-                       Version = current.Version,
-                       RawDescription = current.Raw
-                   }
-                   : null;
+            return new Runtime
+            {
+                Name = current.Name,
+                Version = current.Version,
+                RawDescription = current.Raw
+            };
         });
 
         internal static readonly SdkVersion NameAndVersion
@@ -43,7 +40,7 @@ namespace Sentry.Internal
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
         internal string? Release => _release.Value;
-        internal Runtime? Runtime => _runtime.Value;
+        internal Runtime Runtime => _runtime.Value;
 
         /// <summary>
         /// A flag that tells the endpoint to figure out the user ip.
@@ -54,8 +51,6 @@ namespace Sentry.Internal
             SentryOptions options,
             Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(sentryStackTraceFactoryAccessor != null);
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
         }
@@ -64,7 +59,7 @@ namespace Sentry.Internal
         {
             _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
 
-            if (!@event.Contexts.ContainsKey(Runtime.Type) && Runtime != null)
+            if (!@event.Contexts.ContainsKey(Runtime.Type))
             {
                 @event.Contexts[Runtime.Type] = Runtime;
             }

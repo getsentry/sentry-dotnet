@@ -12,15 +12,15 @@ namespace Sentry.Tests.Integrations
         {
             Skip.If(!Runtime.Current.IsMono());
 
-            //Arrance
+            //Arrange
             var options = new SentryOptions();
             var integration = new NetFxInstallationsIntegration();
 
             //Act
-            integration.Register(null, options);
+            integration.Register(null!, options);
 
             //Assert
-            Assert.DoesNotContain(options.EventProcessors, p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
+            Assert.DoesNotContain(options.EventProcessors!, p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
         }
 
         [SkippableFact]
@@ -28,15 +28,15 @@ namespace Sentry.Tests.Integrations
         {
             Skip.If(Runtime.Current.IsMono());
 
-            //Arrance
+            //Arrange
             var options = new SentryOptions();
             var integration = new NetFxInstallationsIntegration();
 
             //Act
-            integration.Register(null, options);
+            integration.Register(null!, options);
 
             //Assert
-            Assert.Contains(options.EventProcessors, p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
+            Assert.Contains(options.EventProcessors!, p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
         }
     }
 }
