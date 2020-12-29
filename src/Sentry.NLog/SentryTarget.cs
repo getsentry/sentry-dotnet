@@ -305,7 +305,7 @@ namespace Sentry.NLog
 
             var hub = HubAccessor();
 
-            if (hub.IsEnabled != true)
+            if (!hub.IsEnabled)
             {
                 return;
             }
