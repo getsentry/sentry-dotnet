@@ -49,9 +49,6 @@ namespace Sentry.Log4Net
             Func<string, IDisposable> initAction,
             IHub hubGetter)
         {
-            Debug.Assert(initAction != null);
-            Debug.Assert(hubGetter != null);
-
             _initAction = initAction;
             Hub = hubGetter;
         }
@@ -78,11 +75,8 @@ namespace Sentry.Log4Net
 
                 lock (_initSync)
                 {
-                    if (_sdkHandle == null)
-                    {
-                        _sdkHandle = _initAction(Dsn);
-                        Debug.Assert(_sdkHandle != null);
-                    }
+                    // ReSharper disable once NonAtomicCompoundOperator Double init guarded by the lock
+                    _sdkHandle ??= _initAction(Dsn);
                 }
             }
 

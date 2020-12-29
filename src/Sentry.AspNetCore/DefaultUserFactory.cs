@@ -9,8 +9,6 @@ namespace Sentry.AspNetCore
     {
         public User? Create(HttpContext context)
         {
-            Debug.Assert(context != null);
-
             var principal = context.User;
             if (principal == null)
             {

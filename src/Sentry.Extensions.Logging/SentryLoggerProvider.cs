@@ -42,10 +42,6 @@ namespace Sentry.Extensions.Logging
             ISystemClock clock,
             SentryLoggingOptions options)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(clock != null);
-            Debug.Assert(hub != null);
-
             _disposableHub = hub as IDisposable;
 
             Hub = hub;

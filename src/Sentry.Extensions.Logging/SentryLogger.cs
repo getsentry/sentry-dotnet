@@ -22,10 +22,6 @@ namespace Sentry.Extensions.Logging
             ISystemClock clock,
             IHub hub)
         {
-            Debug.Assert(categoryName != null);
-            Debug.Assert(options != null);
-            Debug.Assert(clock != null);
-            Debug.Assert(hub != null);
             CategoryName = categoryName;
             _options = options;
             _clock = clock;

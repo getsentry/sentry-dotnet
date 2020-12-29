@@ -55,10 +55,6 @@ namespace Sentry.NLog
 
         internal SentryTarget(SentryNLogOptions options, Func<IHub> hubAccessor, IDisposable? sdkInstance, ISystemClock clock)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(hubAccessor != null);
-            Debug.Assert(clock != null);
-
             Options = options;
             HubAccessor = hubAccessor;
             _clock = clock;

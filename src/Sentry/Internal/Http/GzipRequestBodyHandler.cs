@@ -64,7 +64,6 @@ namespace Sentry.Internal.Http
 
             public GzipContent(HttpContent content, CompressionLevel compressionLevel)
             {
-                Debug.Assert(content != null);
                 _content = content;
                 _compressionLevel = compressionLevel;
 

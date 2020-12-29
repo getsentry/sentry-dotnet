@@ -21,7 +21,6 @@ namespace Sentry.Internal
 
         public Hub(SentryOptions options)
         {
-            Debug.Assert(options != null);
             _options = options;
 
             if (options.Dsn is null)

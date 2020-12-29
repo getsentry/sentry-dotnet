@@ -45,10 +45,6 @@ namespace Sentry.Serilog
             IDisposable? sdkDisposable,
             ISystemClock clock)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(hubAccessor != null);
-            Debug.Assert(clock != null);
-
             _options = options;
             _hubAccessor = hubAccessor;
             _clock = clock;

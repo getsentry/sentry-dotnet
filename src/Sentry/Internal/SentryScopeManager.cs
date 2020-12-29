@@ -24,7 +24,6 @@ namespace Sentry.Internal
             SentryOptions options,
             ISentryClient rootClient)
         {
-            Debug.Assert(rootClient != null);
             _options = options;
             NewStack = () => new [] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
@@ -120,8 +119,6 @@ namespace Sentry.Internal
                 KeyValuePair<Scope, ISentryClient>[] snapshot,
                 SentryScopeManager scopeManager)
             {
-                Debug.Assert(snapshot != null);
-                Debug.Assert(scopeManager != null);
                 _options = options;
                 _snapshot = snapshot;
                 _scopeManager = scopeManager;

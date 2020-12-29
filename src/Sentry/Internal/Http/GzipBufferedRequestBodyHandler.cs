@@ -74,9 +74,6 @@ namespace Sentry.Internal.Http
             public BufferedStreamContent(Stream stream, long contentLength, HttpContentHeaders headers)
                 : base(stream)
             {
-                Debug.Assert(stream != null);
-                Debug.Assert(headers != null);
-
                 ContentLength = contentLength;
 
                 foreach (var header in headers)

@@ -54,8 +54,6 @@ namespace Sentry.Internal
             SentryOptions options,
             Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(sentryStackTraceFactoryAccessor != null);
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
         }

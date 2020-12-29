@@ -17,7 +17,6 @@ namespace Sentry.Integrations
 
         public void Register(IHub hub, SentryOptions _)
         {
-            Debug.Assert(hub != null);
             _hub = hub;
             _appDomain.UnhandledException += Handle;
         }
