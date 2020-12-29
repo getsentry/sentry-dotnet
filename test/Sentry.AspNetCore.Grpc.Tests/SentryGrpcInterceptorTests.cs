@@ -38,8 +38,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             public SentryGrpcInterceptor GetSut()
                 => new(
                     HubAccessor,
-                    Microsoft.Extensions.Options.Options.Create(Options),
-                    HostingEnvironment);
+                    Microsoft.Extensions.Options.Options.Create(Options));
         }
 
         private readonly Fixture _fixture = new();

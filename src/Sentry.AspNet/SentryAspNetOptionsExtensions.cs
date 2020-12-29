@@ -1,5 +1,5 @@
+using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
-using Sentry.Internal.Web;
 
 namespace Sentry.AspNet
 {

@@ -1,5 +1,6 @@
 using System.Reflection;
 using Sentry.Internal;
+using Sentry.PlatformAbstractions;
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;
@@ -24,6 +25,8 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void GetCurrent_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
+            Skip.If(Runtime.Current.IsMono(), "GetEntryAssembly returning null on Mono.");
+
             var ass = Assembly.GetEntryAssembly();
 
             EnvironmentVariableGuard.WithVariable(
@@ -32,7 +35,7 @@ namespace Sentry.Tests.Internals
                 () =>
                 {
                     Assert.Equal(
-                        $"{ass?.GetName().Name}@{ass?.GetNameAndVersion().Version}",
+                        $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
                         ReleaseLocator.GetCurrent()
                     );
                 });

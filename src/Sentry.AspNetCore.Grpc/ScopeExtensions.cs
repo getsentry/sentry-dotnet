@@ -3,7 +3,6 @@ using System.ComponentModel;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.DependencyInjection;
-using Sentry.Protocol;
 
 namespace Sentry.AspNetCore.Grpc
 {
