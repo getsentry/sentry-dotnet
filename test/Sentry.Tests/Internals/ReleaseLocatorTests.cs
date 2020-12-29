@@ -1,6 +1,8 @@
 using System.Reflection;
 using Sentry.Internal;
+#if NET461
 using Sentry.PlatformAbstractions;
+#endif
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;

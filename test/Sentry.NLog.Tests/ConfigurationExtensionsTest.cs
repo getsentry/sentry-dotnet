@@ -8,7 +8,7 @@ namespace Sentry.NLog.Tests
 {
     public class ConfigurationExtensionsTest
     {
-        private LoggingConfiguration _sut = new();
+        private readonly LoggingConfiguration _sut = new();
 
         [Fact]
         public void AddSentry_Parameterless_DefaultTargetName()
@@ -34,7 +34,7 @@ namespace Sentry.NLog.Tests
             var actual = _sut.AddSentry(expectedDsn, o => o.FlushTimeout = expectedTimeout);
             var sentryTarget = Assert.IsType<SentryTarget>(actual.AllTargets[0]);
             Assert.Equal(expectedTimeout.TotalSeconds, sentryTarget.FlushTimeoutSeconds);
-            Assert.Equal(expectedDsn, sentryTarget.Options.Dsn.ToString());
+            Assert.Equal(expectedDsn, sentryTarget.Options.Dsn);
         }
 
         [Fact]

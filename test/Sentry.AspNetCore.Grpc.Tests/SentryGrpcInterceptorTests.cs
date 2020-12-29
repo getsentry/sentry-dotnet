@@ -1,9 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Grpc.Core;
-using Grpc.Core.Interceptors;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -16,18 +13,11 @@ namespace Sentry.AspNetCore.Grpc.Tests
             public IHub Hub { get; set; } = Substitute.For<IHub>();
             public Func<IHub> HubAccessor { get; set; }
             public SentryAspNetCoreOptions Options { get; set; } = new();
-            public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
-
-            public ILogger<SentryGrpcInterceptor> Logger { get; set; } =
-                Substitute.For<ILogger<SentryGrpcInterceptor>>();
 
             public ServerCallContext Context { get; set; } = Substitute.For<ServerCallContext>();
 
-            public ClientInterceptorContext<TestRequest, TestResponse> InterceptorContext { get; set; } =
-                new();
-
             public UnaryServerMethod<TestRequest, TestResponse> Continuation { get; set; } =
-                (request, context) => Task.FromResult(new TestResponse());
+                (_, _) => Task.FromResult(new TestResponse());
 
             public Fixture()
             {
@@ -78,7 +68,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             var request = new TestRequest();
 
             var expected = new Exception("test");
-            _fixture.Continuation = (req, context) => throw expected;
+            _fixture.Continuation = (_, _) => throw expected;
 
             var sut = _fixture.GetSut();
 
@@ -95,7 +85,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             var request = new TestRequest();
 
             var expected = new Exception("test");
-            _fixture.Continuation = (req, context) => throw expected;
+            _fixture.Continuation = (_, _) => throw expected;
             var disposable = Substitute.For<IDisposable>();
             _ = _fixture.Hub.PushScope().Returns(disposable);
 

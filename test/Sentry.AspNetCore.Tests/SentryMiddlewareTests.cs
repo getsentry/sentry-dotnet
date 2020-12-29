@@ -108,7 +108,7 @@ namespace Sentry.AspNetCore.Tests
             var scopePushed = false;
             _fixture.Hub.When(h => h.PushScope()).Do(_ => scopePushed = true);
             _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(c => Assert.True(scopePushed));
+                .Do(_ => Assert.True(scopePushed));
 
             var sut = _fixture.GetSut();
 
@@ -126,7 +126,7 @@ namespace Sentry.AspNetCore.Tests
                 .When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(Callback
                     .First(c => c.ArgAt<Action<Scope>>(0)(scope))
-                    .Then(c =>
+                    .Then(_ =>
                     {
                         Assert.True(scope.Locked);
                         verified = true;

@@ -124,12 +124,12 @@ namespace Sentry.Protocol
 
         private Dictionary<string, object?>? _extra;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IEventLike.Extra" />
         public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
         private Dictionary<string, string>? _tags;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IEventLike.Extra" />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
         // Transaction never has a parent

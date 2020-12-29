@@ -70,7 +70,7 @@ namespace Sentry.Tests
 
             _ = sut.CaptureEvent(evt);
 
-            exceptionProcessor.Received(1).Process(evt.Exception, evt);
+            exceptionProcessor.Received(1).Process(evt.Exception!, evt);
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Sentry.Tests
 
             _ = sut.CaptureEvent(evt, scope);
 
-            exceptionProcessor.Received(1).Process(evt.Exception, evt);
+            exceptionProcessor.Received(1).Process(evt.Exception!, evt);
         }
 
         [Fact]
@@ -443,7 +443,7 @@ namespace Sentry.Tests
             var invoked = false;
             _fixture.BackgroundWorker = null;
             _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
-            _fixture.SentryOptions.ConfigureClient = (client) => invoked = true;
+            _fixture.SentryOptions.ConfigureClient = _ => invoked = true;
 
             using (_fixture.GetSut())
             {

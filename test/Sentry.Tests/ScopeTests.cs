@@ -12,7 +12,7 @@ namespace Sentry.Tests
         public void OnEvaluate_FiresOnlyOnce()
         {
             var counter = 0;
-            _sut.OnEvaluating += (sender, args) => counter++;
+            _sut.OnEvaluating += (_, _) => counter++;
 
             _sut.Evaluate();
             _sut.Evaluate();
@@ -26,7 +26,7 @@ namespace Sentry.Tests
             var counter = 0;
             _sut.Evaluate();
 
-            _sut.OnEvaluating += (sender, args) => counter++;
+            _sut.OnEvaluating += (_, _) => counter++;
 
             _sut.Evaluate();
 
@@ -38,12 +38,12 @@ namespace Sentry.Tests
         {
             var expected = new InvalidOperationException("test");
 
-            _sut.OnEvaluating += (sender, args) => throw expected;
+            _sut.OnEvaluating += (_, _) => throw expected;
             _sut.Evaluate();
 
             var crumb = Assert.Single(_sut.Breadcrumbs);
 
-            Assert.Equal(BreadcrumbLevel.Error, crumb.Level);
+            Assert.Equal(BreadcrumbLevel.Error, crumb!.Level);
 
             Assert.Equal(
                 "Failed invoking event handler: " + expected,
@@ -55,7 +55,7 @@ namespace Sentry.Tests
         {
             var counter = 0;
 
-            _sut.OnEvaluating += (sender, args) =>
+            _sut.OnEvaluating += (_, _) =>
             {
                 counter++;
                 throw new InvalidOperationException("test");
