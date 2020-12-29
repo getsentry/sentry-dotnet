@@ -20,7 +20,8 @@ namespace Sentry.Tests.Internals
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
             public SentryOptions SentryOptions { get; set; } = new();
-            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
+            public Lazy<string> LazyRelease { get; set; } = new(() => "release-123");
+            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory, LazyRelease);
         }
 
         private readonly Fixture _fixture = new();
@@ -527,7 +528,7 @@ namespace Sentry.Tests.Internals
                     }
                 },
 
-                // 3x event tags, 3x default tag but _we have a mix of both_ 
+                // 3x event tags, 3x default tag but _we have a mix of both_
                 // Expected: the unique event tags and the unique default tags. no duplicates.
                 {
                     new Dictionary<string, string>{
@@ -570,7 +571,7 @@ namespace Sentry.Tests.Internals
             {
                 _fixture.SentryOptions.DefaultTags[defaultTag.Key] = defaultTag.Value;
             }
-            
+
             var sut = _fixture.GetSut();
 
             //Act
