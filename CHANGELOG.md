@@ -4,7 +4,7 @@
 
 - Handle non-json error response messages on HttpTransport. (#690) @lucas-zimerman
 - Fix deadlock on missing ConfigureAwait into foreach loops. (#694) @lucas-zimerman
-- Report gRPC sdk name (#700)
+- Report gRPC sdk name (#700) @bruno-garcia
 
 ## 3.0.0-alpha.8
 
