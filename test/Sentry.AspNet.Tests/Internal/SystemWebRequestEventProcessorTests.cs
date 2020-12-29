@@ -6,7 +6,7 @@ using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
 using Xunit;
 
-namespace Sentry.Tests.Internals.Web
+namespace Sentry.AspNet.Tests.Internal
 {
     public class SystemWebRequestEventProcessorTests
     {

@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {
@@ -45,7 +44,7 @@ namespace Sentry.AspNetCore
 
             if (options.SendDefaultPii && !scope.HasUser())
             {
-                var userFactory = context.RequestServices?.GetService<IUserFactory>();
+                var userFactory = context.RequestServices.GetService<IUserFactory>();
                 var user = userFactory?.Create(context);
 
                 if (user != null)

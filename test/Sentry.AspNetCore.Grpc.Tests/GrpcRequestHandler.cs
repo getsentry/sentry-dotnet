@@ -15,7 +15,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
 
         public Func<TRequest, ServerCallContext, Task<TResponse>> Handler
         {
-            get => _handler ?? ((r, c) => Task.FromResult<TResponse>(null));
+            get => _handler ?? ((_, _) => Task.FromResult<TResponse>(null));
             set => _handler = value;
         }
 

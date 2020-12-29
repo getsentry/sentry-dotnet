@@ -6,7 +6,9 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
 using Sentry.Internal;
+#if NETFX
 using Sentry.PlatformAbstractions;
+#endif
 
 namespace Sentry
 {

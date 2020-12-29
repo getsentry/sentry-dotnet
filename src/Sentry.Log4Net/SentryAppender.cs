@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using log4net.Appender;
 using log4net.Core;
 using Sentry.Extensibility;

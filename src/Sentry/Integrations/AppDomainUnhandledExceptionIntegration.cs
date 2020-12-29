@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Sentry.Internal;
 using System.Runtime.ExceptionServices;
 using System.Security;

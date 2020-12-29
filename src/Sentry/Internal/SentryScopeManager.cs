@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -57,7 +56,7 @@ namespace Sentry.Internal
 
             if (scope.Key.Locked)
             {
-                _options?.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
+                _options.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
 
                 // Apply to current scope
                 if (state != null)

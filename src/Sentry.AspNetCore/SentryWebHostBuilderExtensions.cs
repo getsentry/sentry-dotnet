@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Hosting
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
             Action<SentryAspNetCoreOptions>? configureOptions)
-            => builder.UseSentry((context, options) => configureOptions?.Invoke(options));
+            => builder.UseSentry((_, options) => configureOptions?.Invoke(options));
 
         /// <summary>
         /// Uses Sentry integration.
@@ -64,7 +64,7 @@ namespace Microsoft.AspNetCore.Hosting
         public static IWebHostBuilder UseSentry(
             this IWebHostBuilder builder,
             Action<ISentryBuilder>? configureSentry) =>
-            builder.UseSentry((context, sentryBuilder) => configureSentry?.Invoke(sentryBuilder));
+            builder.UseSentry((_, sentryBuilder) => configureSentry?.Invoke(sentryBuilder));
 
         /// <summary>
         /// Uses Sentry integration.

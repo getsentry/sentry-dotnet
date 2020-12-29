@@ -1,7 +1,9 @@
 using System.IO.Compression;
 using System.Net;
+#if NETFX
 using Sentry.Internal;
 using Sentry.PlatformAbstractions;
+#endif
 using Xunit;
 
 namespace Sentry.Tests

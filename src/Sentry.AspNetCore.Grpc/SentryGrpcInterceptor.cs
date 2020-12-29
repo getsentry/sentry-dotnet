@@ -63,7 +63,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate(context, request, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate(context, request, _options);
                 });
 
                 try
@@ -107,7 +107,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate(context, request, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate(context, request, _options);
                 });
 
                 try
@@ -145,7 +145,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate<TRequest>(context, null, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate<TRequest>(context, null, _options);
                 });
 
                 try
@@ -189,7 +189,7 @@ namespace Sentry.AspNetCore.Grpc
             {
                 hub.ConfigureScope(scope =>
                 {
-                    scope.OnEvaluating += (_, __) => scope.Populate<TRequest>(context, null, _options);
+                    scope.OnEvaluating += (_, _) => scope.Populate<TRequest>(context, null, _options);
                 });
 
                 try

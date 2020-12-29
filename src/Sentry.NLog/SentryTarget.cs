@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 using NLog;
@@ -268,7 +267,7 @@ namespace Sentry.NLog
                 _sdkDisposable = SentrySdk.Init(Options);
             }
 
-            if (HubAccessor()?.IsEnabled != true)
+            if (!HubAccessor().IsEnabled)
             {
                 InternalLogger.Info("Sentry(Name={0}): Hub not enabled", Name);
             }
@@ -306,7 +305,7 @@ namespace Sentry.NLog
 
             var hub = HubAccessor();
 
-            if (hub?.IsEnabled != true)
+            if (hub.IsEnabled != true)
             {
                 return;
             }

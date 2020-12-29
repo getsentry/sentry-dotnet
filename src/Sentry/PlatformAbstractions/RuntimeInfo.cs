@@ -79,7 +79,7 @@ namespace Sentry.PlatformAbstractions
         // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
         internal static void SetNetCoreVersion(Runtime runtime)
         {
-            if (runtime?.IsNetCore() == true)
+            if (runtime.IsNetCore())
             {
                 // https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-308424100
                 var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;

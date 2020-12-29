@@ -16,7 +16,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             var handler = new GrpcRequestHandler<TestRequest, TestResponse>
             {
                 Method = TestService.Descriptor.FindMethodByName("TestThrow"),
-                Handler = (req, ctx) => throw expectedException
+                Handler = (_, _) => throw expectedException
             };
 
             GrpcHandlers = new[] { handler };

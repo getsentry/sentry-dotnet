@@ -9,7 +9,6 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
@@ -106,7 +105,7 @@ namespace Sentry.AspNetCore
                     // In case of event, all data made available through the HTTP Context at the time of the
                     // event creation will be sent to Sentry
 
-                    scope.OnEvaluating += (_, __) => PopulateScope(context, scope);
+                    scope.OnEvaluating += (_, _) => PopulateScope(context, scope);
                 });
 
                 var transaction = hub.CreateTransaction(
@@ -153,15 +152,12 @@ namespace Sentry.AspNetCore
 
         internal void PopulateScope(HttpContext context, Scope scope)
         {
-            if (scope.Sdk is { })
-            {
-                scope.Sdk.Name = Constants.SdkName;
-                scope.Sdk.Version = NameAndVersion.Version;
+            scope.Sdk.Name = Constants.SdkName;
+            scope.Sdk.Version = NameAndVersion.Version;
 
-                if (NameAndVersion.Version is { } version)
-                {
-                    scope.Sdk.AddPackage(ProtocolPackageName, version);
-                }
+            if (NameAndVersion.Version is { } version)
+            {
+                scope.Sdk.AddPackage(ProtocolPackageName, version);
             }
 
             if (_hostingEnvironment.WebRootPath is { } webRootPath)

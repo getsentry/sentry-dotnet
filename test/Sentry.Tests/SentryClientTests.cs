@@ -137,7 +137,7 @@ namespace Sentry.Tests
 
             var evaluated = false;
             object actualSender = null;
-            scope.OnEvaluating += (sender, args) =>
+            scope.OnEvaluating += (sender, _) =>
             {
                 actualSender = sender;
                 evaluated = true;
@@ -166,7 +166,7 @@ namespace Sentry.Tests
         [Fact]
         public void CaptureEvent_BeforeEvent_RejectEvent()
         {
-            _fixture.SentryOptions.BeforeSend = @event => null;
+            _fixture.SentryOptions.BeforeSend = _ => null;
             var expectedEvent = new SentryEvent();
 
             var sut = _fixture.GetSut();
@@ -258,7 +258,7 @@ namespace Sentry.Tests
         public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
         {
             var error = new Exception("Exception message!");
-            _fixture.SentryOptions.BeforeSend = e => throw error;
+            _fixture.SentryOptions.BeforeSend = _ => throw error;
 
             var @event = new SentryEvent();
 
