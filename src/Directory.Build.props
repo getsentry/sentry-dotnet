@@ -23,7 +23,7 @@
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet/releases</PackageReleaseNotes>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../CHANGELOG.md"))</PackageReleaseNotes>
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
