@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Sentry.Protocol;
@@ -526,6 +527,30 @@ namespace Sentry.Tests.Protocol
             Assert.Equal(expectedFileName, attachment?.FileName);
             Assert.Equal(expectedType, attachment?.Type);
             Assert.Equal(expectedContentType, attachment?.ContentType);
+        }
+
+        [Fact]
+        public async Task AddAttachment_FromStream_UnknownLength_IsDropped()
+        {
+            // Arrange
+            var logger = new AccumulativeDiagnosticLogger();
+            _fixture.ScopeOptions.DiagnosticLogger = logger;
+            _fixture.ScopeOptions.Debug = true;
+
+            // HTTP streams don't have length
+            using var stream = await new HttpClient().GetStreamAsync("https://example.com");
+
+            var scope = _fixture.GetSut();
+
+            // Act
+            scope.AddAttachment(stream, "example.html");
+
+            // Assert
+            Assert.Empty(scope.Attachments);
+            Assert.Contains(logger.Entries, e =>
+                e.Message == "Cannot evaluate the size of attachment '{0}' because the stream is not seekable." &&
+                e.Args[0].ToString() == "example.html"
+            );
         }
 
         [Fact]
