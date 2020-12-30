@@ -430,7 +430,7 @@ namespace Sentry
         /// <remarks>
         /// Regardless of this setting, attachments are also limited to 20mb on Relay.
         /// </remarks>
-        public long MaxAttachmentSize { get; set; } = 20 * 1000 * 1000;
+        public long MaxAttachmentSize { get; set; } = 20 * 1024 * 1024;
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
