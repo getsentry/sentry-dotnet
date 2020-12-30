@@ -207,6 +207,9 @@ namespace Sentry
                     attachment.FileName
                 );
 
+                // Dispose attachment immediately so that it doesn't lock the file
+                attachment.Dispose();
+
                 return;
             }
 

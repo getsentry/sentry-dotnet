@@ -554,6 +554,7 @@ namespace Sentry.Tests.Protocol
             // Arrange
             var logger = new AccumulativeDiagnosticLogger();
             _fixture.ScopeOptions.DiagnosticLogger = logger;
+            _fixture.ScopeOptions.Debug = true;
             _fixture.ScopeOptions.MaxAttachmentSize = 1000; // 1kb
 
             using var tempDir = new TempDirectory();
