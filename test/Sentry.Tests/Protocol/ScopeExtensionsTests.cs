@@ -605,6 +605,26 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public void AddAttachment_FromFile_FileDoesNotExist_Drops()
+        {
+            // Arrange
+            var logger = new AccumulativeDiagnosticLogger();
+            _fixture.ScopeOptions.DiagnosticLogger = logger;
+            _fixture.ScopeOptions.Debug = true;
+
+            var scope = _fixture.GetSut();
+
+            // Act
+            scope.AddAttachment("hopefully-this-file-does-not-exist.txt");
+
+            // Assert
+            Assert.Empty(scope.Attachments);
+            Assert.Contains(logger.Entries, e =>
+                e.Message == "Error reading file '{0}' when adding attachment"
+            );
+        }
+
+        [Fact]
         public void Apply_Null_Target_DoesNotThrow()
         {
             var sut = _fixture.GetSut();

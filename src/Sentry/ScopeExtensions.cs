@@ -332,10 +332,21 @@ namespace Sentry
             AttachmentType type = AttachmentType.Default,
             string? contentType = null)
         {
-            var stream = File.OpenRead(filePath);
-            var fileName = Path.GetFileName(filePath);
+            try
+            {
+                var stream = File.OpenRead(filePath);
+                var fileName = Path.GetFileName(filePath);
 
-            scope.AddAttachment(stream, fileName, type, contentType);
+                scope.AddAttachment(stream, fileName, type, contentType);
+            }
+            catch (IOException ex)
+            {
+                scope.Options.DiagnosticLogger?.LogError(
+                    "Error reading file '{0}' when adding attachment",
+                    ex,
+                    filePath
+                );
+            }
         }
     }
 }
