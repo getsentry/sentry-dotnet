@@ -55,14 +55,14 @@ namespace Sentry.Protocol
         public Stream Stream { get; }
 
         /// <summary>
-        /// Attachment file name.
-        /// </summary>
-        public string FileName { get; }
-
-        /// <summary>
         /// Attachment size.
         /// </summary>
         public long Length { get; }
+
+        /// <summary>
+        /// Attachment file name.
+        /// </summary>
+        public string FileName { get; }
 
         /// <summary>
         /// Attachment content type.
@@ -72,17 +72,16 @@ namespace Sentry.Protocol
         /// <summary>
         /// Initializes an instance of <see cref="Attachment"/>.
         /// </summary>
-        public Attachment(
-            AttachmentType type,
+        public Attachment(AttachmentType type,
             Stream stream,
-            string fileName,
             long length,
+            string fileName,
             string? contentType)
         {
             Type = type;
             Stream = stream;
-            FileName = fileName;
             Length = length;
+            FileName = fileName;
             ContentType = contentType;
         }
 

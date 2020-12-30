@@ -413,8 +413,8 @@ namespace Sentry.Tests.Protocol.Envelopes
             using var attachment = new Attachment(
                 AttachmentType.Default,
                 Stream.Null,
+                0,
                 "file.txt",
-                null,
                 null
             );
 
