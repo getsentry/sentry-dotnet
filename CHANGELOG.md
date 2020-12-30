@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Limit attachment size (#705)
+
 ## 3.0.0-alpha.9
 
 - Handle non-json error response messages on HttpTransport. (#690) @lucas-zimerman
