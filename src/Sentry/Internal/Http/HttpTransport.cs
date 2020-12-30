@@ -111,7 +111,7 @@ namespace Sentry.Internal.Http
             }
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
-                if (response.Content.Headers.ContentType?.MediaType is "application/json")
+                if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
                 {
                     var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
 
@@ -135,7 +135,7 @@ namespace Sentry.Internal.Http
                 }
                 else
                 {
-                    var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var responseString = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
                     _options.DiagnosticLogger?.Log(
                         SentryLevel.Error,
