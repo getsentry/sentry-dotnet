@@ -5,6 +5,7 @@ using System.IO;
 using Sentry.Extensibility;
 using System.Linq;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -281,11 +282,35 @@ namespace Sentry
         public static void AddAttachment(
             this Scope scope,
             Stream stream,
+            long length,
             string fileName,
             AttachmentType type = AttachmentType.Default,
-            long? length = null,
             string? contentType = null) =>
             scope.AddAttachment(new Attachment(type, stream, fileName, length, contentType));
+
+        /// <summary>
+        /// Adds an attachment.
+        /// </summary>
+        public static void AddAttachment(
+            this Scope scope,
+            Stream stream,
+            string fileName,
+            AttachmentType type = AttachmentType.Default,
+            string? contentType = null)
+        {
+            var length = stream.TryGetLength();
+            if (length is null)
+            {
+                scope.Options.DiagnosticLogger?.LogWarning(
+                    "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
+                    fileName
+                );
+
+                return;
+            }
+
+            scope.AddAttachment(stream, length.Value, fileName, type, contentType);
+        }
 
         /// <summary>
         /// Adds an attachment.
@@ -296,7 +321,7 @@ namespace Sentry
             string fileName,
             AttachmentType type = AttachmentType.Default,
             string? contentType = null) =>
-            scope.AddAttachment(new MemoryStream(data), fileName, type, data.Length, contentType);
+            scope.AddAttachment(new MemoryStream(data), fileName, type, contentType);
 
         /// <summary>
         /// Adds an attachment.
@@ -310,7 +335,7 @@ namespace Sentry
             var stream = File.OpenRead(filePath);
             var fileName = Path.GetFileName(filePath);
 
-            scope.AddAttachment(stream, fileName, type, stream.Length, contentType);
+            scope.AddAttachment(stream, fileName, type, contentType);
         }
     }
 }

@@ -197,7 +197,21 @@ namespace Sentry
         /// <summary>
         /// Adds an attachment.
         /// </summary>
-        public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
+        public void AddAttachment(Attachment attachment)
+        {
+            // Limit file size
+            if (attachment.Length > Options.MaxAttachmentSize)
+            {
+                Options.DiagnosticLogger?.LogWarning(
+                    "Attachment '{0}' dropped because it's too large.",
+                    attachment.FileName
+                );
+
+                return;
+            }
+
+            _attachments.Add(attachment);
+        }
 
         /// <summary>
         /// Applies the data from this scope to another event-like object.

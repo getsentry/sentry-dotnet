@@ -62,7 +62,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Attachment size.
         /// </summary>
-        public long? Length { get; }
+        public long Length { get; }
 
         /// <summary>
         /// Attachment content type.
@@ -76,7 +76,7 @@ namespace Sentry.Protocol
             AttachmentType type,
             Stream stream,
             string fileName,
-            long? length,
+            long length,
             string? contentType)
         {
             Type = type;

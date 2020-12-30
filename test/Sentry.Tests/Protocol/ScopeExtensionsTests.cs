@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Sentry.Protocol;
 using Sentry.Testing;
@@ -501,9 +502,9 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var expectedStream = Stream.Null;
+            var expectedLength = 1024L;
             var expectedFileName = "file.txt";
             var expectedType = AttachmentType.Minidump;
-            var expectedLength = 1024L;
             var expectedContentType = "application/octet-stream";
 
             var scope = _fixture.GetSut();
@@ -511,9 +512,9 @@ namespace Sentry.Tests.Protocol
             // Act
             scope.AddAttachment(
                 expectedStream,
+                expectedLength,
                 expectedFileName,
                 expectedType,
-                expectedLength,
                 expectedContentType
             );
 
@@ -521,9 +522,9 @@ namespace Sentry.Tests.Protocol
             using var attachment = Assert.Single(scope.Attachments);
 
             Assert.Equal(expectedStream, attachment?.Stream);
+            Assert.Equal(expectedLength, attachment?.Length);
             Assert.Equal(expectedFileName, attachment?.FileName);
             Assert.Equal(expectedType, attachment?.Type);
-            Assert.Equal(expectedLength, attachment?.Length);
             Assert.Equal(expectedContentType, attachment?.ContentType);
         }
 
@@ -545,6 +546,36 @@ namespace Sentry.Tests.Protocol
 
             Assert.Equal("MyFile.txt", attachment?.FileName);
             Assert.Equal(12, attachment?.Length);
+        }
+
+        [Fact]
+        public async Task AddAttachment_FromFile_RespectsLimits()
+        {
+            // Arrange
+            var logger = new AccumulativeDiagnosticLogger();
+            _fixture.ScopeOptions.DiagnosticLogger = logger;
+            _fixture.ScopeOptions.MaxAttachmentSize = 1000; // 1kb
+
+            using var tempDir = new TempDirectory();
+            var filePath = Path.Combine(tempDir.Path, "MyFile.bin");
+
+            using (var fileStream = File.Create(filePath))
+            {
+                var random = new Random();
+                await random.WriteToStreamAsync(fileStream, 1005);
+            }
+
+            var scope = _fixture.GetSut();
+
+            // Act
+            scope.AddAttachment(filePath);
+
+            // Assert
+            Assert.Empty(scope.Attachments);
+            Assert.Contains(logger.Entries, e =>
+                e.Message == "Attachment '{0}' dropped because it's too large." &&
+                e.Args[0].ToString() == "MyFile.bin"
+            );
         }
 
         [Fact]
