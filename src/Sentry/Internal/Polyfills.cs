@@ -1,4 +1,5 @@
 // ReSharper disable CheckNamespace
+// ReSharper disable RedundantUsingDirective
 
 // Polyfills to bridge the missing APIs in older versions of the framework/standard.
 // In some cases, these just proxy calls to existing methods but also provide a signature that matches .netstd2.1

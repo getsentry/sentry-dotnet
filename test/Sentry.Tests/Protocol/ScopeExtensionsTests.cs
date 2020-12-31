@@ -599,8 +599,9 @@ namespace Sentry.Tests.Protocol
             // Assert
             Assert.Empty(scope.Attachments);
             Assert.Contains(logger.Entries, e =>
-                e.Message == "Attachment '{0}' dropped because it's too large." &&
-                e.Args[0].ToString() == "MyFile.bin"
+                e.Message == "Attachment '{0}' dropped because it's too large ({1} bytes)." &&
+                e.Args[0].ToString() == "MyFile.bin" &&
+                e.Args[1].ToString() == "1005"
             );
         }
 

@@ -203,8 +203,8 @@ namespace Sentry
             if (attachment.Length > Options.MaxAttachmentSize)
             {
                 Options.DiagnosticLogger?.LogWarning(
-                    "Attachment '{0}' dropped because it's too large.",
-                    attachment.FileName
+                    "Attachment '{0}' dropped because it's too large ({1} bytes).",
+                    attachment.FileName, attachment.Length
                 );
 
                 // Dispose attachment immediately so that it doesn't lock the file

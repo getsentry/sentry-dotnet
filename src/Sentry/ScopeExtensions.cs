@@ -291,6 +291,9 @@ namespace Sentry
         /// <summary>
         /// Adds an attachment.
         /// </summary>
+        /// <remarks>
+        /// Note: the stream must be seekable.
+        /// </remarks>
         public static void AddAttachment(
             this Scope scope,
             Stream stream,
@@ -305,6 +308,9 @@ namespace Sentry
                     "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
                     fileName
                 );
+
+                // Dispose the stream because we're not going to use it
+                stream.Dispose();
 
                 return;
             }
