@@ -13,7 +13,7 @@ Sentry SDK for .NET
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/wu055n0n4u8p20p2/branch/main?svg=true)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/main)
 [![Tests](https://img.shields.io/appveyor/tests/sentry/sentry-dotnet/main?compact_message)](https://ci.appveyor.com/project/sentry/sentry-dotnet/branch/main/tests)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
-[![Discord Chat](https://img.shields.io/discord/621778831602221064.svg)](https://discord.gg/Ww9hbqr)  
+[![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)  
 
 
 |      Integrations             |    Downloads     |    NuGet Stable     |    NuGet Preview     |
