@@ -45,18 +45,12 @@ namespace Sentry.AspNetCore.Extensions
             return null;
         }
 
-        public static string GetTransactionName(this HttpContext context, out bool routeTemplateExists)
+        public static string GetTransactionName(this HttpContext context)
         {
             // Try to get the route template or fallback to the request path
 
             var method = context.Request.Method.ToUpperInvariant();
-            var route = context.TryGetRouteTemplate();
-            routeTemplateExists = true;
-            if (route == null)
-            {
-                routeTemplateExists = false;
-                route = context.Request.Path;
-            }
+            var route = context.TryGetRouteTemplate() ?? context.Request.Path;
 
             return $"{method} {route}";
         }

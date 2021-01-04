@@ -132,13 +132,11 @@ namespace Sentry.AspNetCore
                 }
                 finally
                 {
-                    transaction.Name = context.GetTransactionName(out var routeTemplateExists);
-                    if (routeTemplateExists || _options.TraceRequestsWithoutRouting)
-                    {
-                        transaction.Finish(
-                            GetSpanStatusFromCode(context.Response.StatusCode)
-                        );
-                    }
+                    // TODO: Once the middleware is injected after routing, this line can be moved back into hub.CreateTransaction()
+                    transaction.Name = context.GetTransactionName();
+                    transaction.Finish(
+                        GetSpanStatusFromCode(context.Response.StatusCode)
+                    );
                 }
 
                 void CaptureException(Exception e)
