@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Diagnostics;
 using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing.Patterns;
 #endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -408,6 +410,82 @@ namespace Sentry.AspNetCore.Tests
 
             await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
         }
+
+#if !NETCOREAPP2_1 && !NETCOREAPP2_0 && !NET461
+        [Fact]
+        public async Task InvokeAsync_Performance_ExtractsEndpointName()
+        {
+            var sut = _fixture.GetSut();
+            var response = Substitute.For<HttpResponse>();
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Request.Method.Returns("GET");
+            _ = _fixture.HttpContext.Request.Path.Returns(new PathString("/users/details/1"));
+            //var request = Substitute.For<HttpRequest>();
+
+            var endpointFeature = Substitute.For<IEndpointFeature>();
+            var routePattern = RoutePatternFactory.Parse("Users/Details/{id}");
+            var endpoint = new Microsoft.AspNetCore.Routing.RouteEndpoint(_fixture.RequestDelegate, routePattern, 0, null, null);
+
+            _ = endpointFeature.Endpoint.Returns(endpoint);
+
+            _fixture.FeatureCollection.Get<IEndpointFeature>().Returns(endpointFeature);
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+            _ = _fixture.Hub.Received(1).CreateTransaction("GET Users/Details/{id}", Arg.Any<string>());
+        }
+#endif
+        [Fact]
+        public async Task InvokeAsync_Performance_ExtractsRouteName()
+        {
+            var sut = _fixture.GetSut();
+            var response = Substitute.For<HttpResponse>();
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Request.Method.Returns("GET");
+            _ = _fixture.HttpContext.Request.Path.Returns(new PathString("/users/details/1"));
+            //var request = Substitute.For<HttpRequest>();
+
+            var routingFeature = Substitute.For<IRoutingFeature>();
+            var routeValues = new RouteValueDictionary
+            {
+                ["controller"] = "Users",
+                ["action"] = "Details"
+            };
+            var routeData = new RouteData( );
+            routeData.PushState(null, routeValues, new RouteValueDictionary());
+            _ = routingFeature.RouteData.Returns(routeData);
+
+            _fixture.FeatureCollection.Get<IRoutingFeature>().Returns(routingFeature);
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+            _ = _fixture.Hub.Received(1).CreateTransaction("GET Users.Details", Arg.Any<string>());
+        }
+
+#if NETCOREAPP3_1 || NET5_0
+        [Fact]
+        public async Task InvokeAsync_Performance_ExtractsRouteNameFromLegacyRouting()
+        {
+            var sut = _fixture.GetSut();
+            var response = Substitute.For<HttpResponse>();
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
+            _ = _fixture.HttpContext.Request.Method.Returns("GET");
+            _ = _fixture.HttpContext.Request.Path.Returns(new PathString("/users/details/1"));
+            //var request = Substitute.For<HttpRequest>();
+
+            var routeValues = new RouteValueDictionary
+            {
+                ["controller"] = "Users",
+                ["action"] = "Details"
+            };
+
+            _fixture.HttpContext.Request.RouteValues.Returns(routeValues);
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+            _ = _fixture.Hub.Received(1).CreateTransaction("GET Users.Details", Arg.Any<string>());
+        }
+#endif
 
         [Fact]
         public async Task InvokeAsync_FlushOnCompletedRequestWhenFalse_DoesNotCallFlushAsync()
