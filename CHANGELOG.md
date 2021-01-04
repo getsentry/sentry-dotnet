@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Disabled Mono StackTrace Factory. (#709) @lucas-zimerman
+
 ## 3.0.0-alpha.9
 
 - Handle non-json error response messages on HttpTransport. (#690) @lucas-zimerman
