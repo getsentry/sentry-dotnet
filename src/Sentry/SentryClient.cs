@@ -126,12 +126,27 @@ namespace Sentry
                 return;
             }
 
-            if (_options.TraceSampleRate < 1)
+            if (_options.TraceSampler == null)
             {
-                if (Random.NextDouble() > _options.TraceSampleRate)
+                if (_options.TraceSampleRate < 1)
                 {
-                    _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
-                    return;
+                    if (Random.NextDouble() > _options.TraceSampleRate)
+                    {
+                        _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                var sampleRate = _options.TraceSampler.GetSampleRate(new TraceSamplingContext(transaction, null));
+                if (sampleRate < 1)
+                {
+                    if (Random.NextDouble() > _options.TraceSampleRate)
+                    {
+                        _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
+                        return;
+                    }
                 }
             }
 

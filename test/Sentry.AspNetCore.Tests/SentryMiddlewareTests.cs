@@ -425,14 +425,14 @@ namespace Sentry.AspNetCore.Tests
 
             var endpointFeature = Substitute.For<IEndpointFeature>();
             var routePattern = RoutePatternFactory.Parse("Users/Details/{id}");
-            var endpoint = new Microsoft.AspNetCore.Routing.RouteEndpoint(_fixture.RequestDelegate, routePattern, 0, null, null);
+            var endpoint = new RouteEndpoint(_fixture.RequestDelegate, routePattern, 0, null, null);
 
             _ = endpointFeature.Endpoint.Returns(endpoint);
 
             _fixture.FeatureCollection.Get<IEndpointFeature>().Returns(endpointFeature);
 
             await sut.InvokeAsync(_fixture.HttpContext);
-            _ = _fixture.Hub.Received(1).CreateTransaction("GET Users/Details/{id}", Arg.Any<string>());
+            _fixture.Hub.Received(1).CaptureTransaction(Arg.Is<Transaction>(t => t.Name == "GET Users/Details/{id}"));
         }
 #endif
         [Fact]
@@ -459,7 +459,7 @@ namespace Sentry.AspNetCore.Tests
             _fixture.FeatureCollection.Get<IRoutingFeature>().Returns(routingFeature);
 
             await sut.InvokeAsync(_fixture.HttpContext);
-            _ = _fixture.Hub.Received(1).CreateTransaction("GET Users.Details", Arg.Any<string>());
+            _fixture.Hub.Received(1).CaptureTransaction(Arg.Is<Transaction>(t => t.Name == "GET Users.Details"));
         }
 
 #if NETCOREAPP3_1 || NET5_0
@@ -483,7 +483,7 @@ namespace Sentry.AspNetCore.Tests
             _fixture.HttpContext.Request.RouteValues.Returns(routeValues);
 
             await sut.InvokeAsync(_fixture.HttpContext);
-            _ = _fixture.Hub.Received(1).CreateTransaction("GET Users.Details", Arg.Any<string>());
+            _fixture.Hub.Received(1).CaptureTransaction(Arg.Is<Transaction>(t => t.Name == "GET Users.Details"));
         }
 #endif
 
