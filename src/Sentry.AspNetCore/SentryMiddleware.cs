@@ -109,7 +109,7 @@ namespace Sentry.AspNetCore
                 });
 
                 var transaction = hub.CreateTransaction(
-                    context.GetTransactionName(),
+                    context.Request.Path,
                     "http.server"
                 );
 
@@ -132,6 +132,7 @@ namespace Sentry.AspNetCore
                 }
                 finally
                 {
+                    transaction.Name = context.GetTransactionName();
                     transaction.Finish(
                         GetSpanStatusFromCode(context.Response.StatusCode)
                     );
