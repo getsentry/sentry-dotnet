@@ -40,6 +40,11 @@ namespace Sentry.AspNetCore
         public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
+        /// When set to true, Sentry captures transactions from middlewares even if the request has no legacy or Endpoint Routing features
+        /// </summary>
+        public bool TraceRequestsWithoutRouting { get; set; } = false;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryAspNetCoreOptions"/>.
         /// </summary>
         public SentryAspNetCoreOptions()
