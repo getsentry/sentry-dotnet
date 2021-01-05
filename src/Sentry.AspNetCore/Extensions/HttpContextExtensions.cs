@@ -23,7 +23,12 @@ namespace Sentry.AspNetCore.Extensions
 #endif
 
             // Requires legacy .UseMvc()
+#if !NETSTANDARD2_0
+            // Use GetRouteData() because the routing info might be set as HttpRequest.RouteData rather than IRoutingFeature, but this API is not available on NETSTANDARD
+            var routeData = context.GetRouteData();
+#else
             var routeData = context.Features.Get<IRoutingFeature?>()?.RouteData;
+#endif
             var controller = routeData?.Values["controller"]?.ToString();
             var action = routeData?.Values["action"]?.ToString();
             var area = routeData?.Values["area"]?.ToString();

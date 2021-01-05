@@ -9,6 +9,10 @@
     <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' OR '$(TargetFramework)' == 'net5.0'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />

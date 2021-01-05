@@ -109,7 +109,7 @@ namespace Sentry.AspNetCore
                 });
 
                 var transaction = hub.CreateTransaction(
-                    context.GetTransactionName(),
+                    context.Request.Path,
                     "http.server"
                 );
 
@@ -132,6 +132,8 @@ namespace Sentry.AspNetCore
                 }
                 finally
                 {
+                    // TODO: Once the middleware is injected after routing, this line can be moved back into hub.CreateTransaction()
+                    transaction.Name = context.GetTransactionName();
                     transaction.Finish(
                         GetSpanStatusFromCode(context.Response.StatusCode)
                     );
