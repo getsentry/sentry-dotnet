@@ -82,11 +82,7 @@ namespace Sentry.AspNet.Internal
                 if (context.User.Identity is { } identity)
                 {
                     @event.User.Username = identity.Name;
-                    var other = new Dictionary<string, string>
-                    {
-                        { "IsAuthenticated", identity.IsAuthenticated.ToString() }
-                    };
-                    @event.User.Other = other;
+                    @event.User.Other.Add("IsAuthenticated", identity.IsAuthenticated.ToString());
                 }
                 if (context.User is ClaimsPrincipal claimsPrincipal)
                 {
