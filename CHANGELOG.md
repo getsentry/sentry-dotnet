@@ -4,6 +4,7 @@
 
 - Disabled Mono StackTrace Factory. (#709) @lucas-zimerman
 - Adds to the existing User Other dict rather than replacing (#729) @brettjenkins
+- Reproducible builds: lock file for nuget (#731) @bruno-garcia
 
 ## 3.0.0-alpha.9
 
