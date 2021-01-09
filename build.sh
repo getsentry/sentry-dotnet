@@ -8,7 +8,11 @@ if [ "$GITHUB_ACTIONS" == "true" ]
         testLogger="console"
 fi
 
-dotnet test -c Release -l $testLogger \
+dotnet restore --locked-mode
+
+dotnet test -c Release \
+    -l $testLogger \
+    --no-restore \
     /p:CollectCoverage=true \
     /p:CoverletOutputFormat=opencover \
     /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\" \

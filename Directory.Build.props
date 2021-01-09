@@ -8,6 +8,7 @@
     <SignAssembly>true</SignAssembly>
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">

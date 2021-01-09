@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETCoreApp,Version=v3.1": {
+      "Amazon.Lambda.AspNetCoreServer": {
+        "type": "Direct",
+        "requested": "[5.1.1, )",
+        "resolved": "5.1.1",
+        "contentHash": "65UHZAiIUMknrIQ5xm/WGbabVPbFvjWY3KK+4HiWhKzUVOiDjJxbFWAb1cLFjFZHBPVOPuL0HxjLFf/EH4s72w==",
+        "dependencies": {
+          "Amazon.Lambda.APIGatewayEvents": "2.1.0",
+          "Amazon.Lambda.ApplicationLoadBalancerEvents": "2.0.0",
+          "Amazon.Lambda.Core": "1.1.0",
+          "Amazon.Lambda.Logging.AspNetCore": "3.0.0",
+          "Amazon.Lambda.Serialization.SystemTextJson": "2.0.1"
+        }
+      },
+      "AWSSDK.Extensions.NETCore.Setup": {
+        "type": "Direct",
+        "requested": "[3.3.100.1, )",
+        "resolved": "3.3.100.1",
+        "contentHash": "KrMhRur0x5X8sSkRSVKt7iEwdsMqu8sa5zqTOhaxEw52r/YaqiiRgw0hNcNCObpm2gQAASewlIVfaBitGjHlUw==",
+        "dependencies": {
+          "AWSSDK.Core": "[3.3.100, 3.4.0)",
+          "Microsoft.Extensions.Configuration.Abstractions": "2.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "2.0.0"
+        }
+      },
+      "Microsoft.CodeAnalysis.BannedApiAnalyzers": {
+        "type": "Direct",
+        "requested": "[3.3.1, )",
+        "resolved": "3.3.1",
+        "contentHash": "UkoYLxQsyvwfoH1LgHWOm057dxsHTZQHSa7J0SwPhF65PUCau8R4MftoZkDU+ZJrDz+PyfQJBpaL+kdjisg9XA=="
+      },
+      "Microsoft.NETFramework.ReferenceAssemblies": {
+        "type": "Direct",
+        "requested": "[1.0.0, )",
+        "resolved": "1.0.0",
+        "contentHash": "7D2TMufjGiowmt0E941kVoTIS+GTNzaPopuzM1/1LSaJAdJdBrVP0SkZW7AgDd0a2U1DjsIeaKG1wxGVBNLDMw=="
+      },
+      "Nullable": {
+        "type": "Direct",
+        "requested": "[1.3.0, )",
+        "resolved": "1.3.0",
+        "contentHash": "xHAviTdTY3n+t1nEPN4JPRQR5lI124qRKVw+U9H7dO5sDNPpzoWeo/MQy7dSUmv9eD3k/CJVKokz1tFK+JOzRw=="
+      },
+      "Roslynator.Analyzers": {
+        "type": "Direct",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "UKaYNtbXGGkR83rMA42DbA43fIUebO+WfHvPk29WMZfXzzF9kTKEB0HL6dUmcukgeHwXyTBCj6946DSaoow02A=="
+      },
+      "Amazon.Lambda.APIGatewayEvents": {
+        "type": "Transitive",
+        "resolved": "2.1.0",
+        "contentHash": "R0qFP38vP7SKTmO/jDr9Gsv7V80nALQqukjTJHnwMzmmofs9HEf+zcW4at/lAND689A6rg9fbYfeWT99rLG3Qg=="
+      },
+      "Amazon.Lambda.ApplicationLoadBalancerEvents": {
+        "type": "Transitive",
+        "resolved": "2.0.0",
+        "contentHash": "faB8e3dvWhNsI5hABtiDvKJ5RjeQXlE3cIM3u4pMs0MtQiGbxbuzjiibEd58ojRzz0ijYImy36mxPSGWm1nVtQ=="
+      },
+      "Amazon.Lambda.Core": {
+        "type": "Transitive",
+        "resolved": "1.1.0",
+        "contentHash": "ueGId8b4DEHoVWkHDs3iAJH8IUSAUGu5AqkoI/Syl4RuByzik7lz9IjoImiGAlGhtsQV02MHNeTo04IFjS37gQ=="
+      },
+      "Amazon.Lambda.Logging.AspNetCore": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "WaPdszlLac3iQ4nkBzaCxw9FfofaxeDOK4zphc9iDG2wve+c2kQMA2P2GA6+G70iZhPbVJEaEBG+DpPmOQbaRw==",
+        "dependencies": {
+          "Amazon.Lambda.Core": "1.1.0",
+          "Microsoft.Extensions.Configuration.Abstractions": "2.1.0",
+          "Microsoft.Extensions.Logging": "2.1.0",
+          "Microsoft.Extensions.Logging.Abstractions": "2.1.0"
+        }
+      },
+      "Amazon.Lambda.Serialization.SystemTextJson": {
+        "type": "Transitive",
+        "resolved": "2.0.1",
+        "contentHash": "WPtMxw5jwEcVbe0Ro/bF0VDnict/zoCW0r6dfRIIOthjO+fVMgDyGYa4Pkz6ptgCCFcnhQuOq6iebYw1LRZeIQ==",
+        "dependencies": {
+          "Amazon.Lambda.Core": "1.1.0"
+        }
+      },
+      "AWSSDK.Core": {
+        "type": "Transitive",
+        "resolved": "3.3.100",
+        "contentHash": "1zJggHEvcrqLRrICUJFsmmqxlnbQimUihhTsSWSlErqEi2keTROPrShmnAzz5aMU0dGuMFI8jWbAL1On2QXpKg=="
+      },
+      "Microsoft.Extensions.Configuration": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "KECbOpM0EySVbKTQDN9o0swdnZpwpdhuYngnnJGzXdcAc+JR1mv7iF4lOyK00KSH8OZjobO0TUeo3mn7J2rdrA==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.Configuration.Abstractions": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "Lge/PbXC53jI1MF2J92X5EZOeKV8Q/rlB1aV3H9I/ZTDyQGOyBcL03IAvnviWpHKj43BDkNy6kU2KKoh8kAS0g==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.Configuration.Binder": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "iw3UL25Cw9GBILJOs8srwcId2UCz5+BxTu//EN5dO2dOFNtHcNJgnUiqIlmcGi0orIco0pDuDXuIDvhkrY/sGQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "yDsuNA/BT4j9qrcRs0NUNHQAJfywFWX18ZZ+shxXJL+/nIfz3vhuRTfnYgvFeQlNBlgmgdSjOcs4ajgoS6Q/Ng==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "ofQRroDlzJ0xKOtzNuaVt6QKNImFkhkG0lIMpGl7PtXnIf5SuLWBeiQZAP8DNSxDBJJdcsPkiJiMYK2WA5H8dQ=="
+      },
+      "Microsoft.Extensions.Logging": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "rxs1i2denq0Sv0XMvAeISK7AskV5x7aihvlIlepJKFfkbE6PgbeXfPOElD0kf3Wr2Roo57ASQa5xUL9LTHWChA==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Binder": "3.0.0",
+          "Microsoft.Extensions.DependencyInjection": "3.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "3.0.0",
+          "Microsoft.Extensions.Options": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "+PsosTYZn+omucI0ff9eywo9QcPLwcbIWf7dz7ZLM1zGR8gVZXJ3wo6+tkuIedUNW5iWENlVJPEvrGjiVeoNNQ=="
+      },
+      "Microsoft.Extensions.Logging.Configuration": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "Z+3mqptSt3pCo0Nl4pmwK+nTpBpRxNe2lFaBCCtsT0bb88GeFKvw6Mg+0IeEgDrfj7h4qzMYRbL5cSFMpENQZA==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "3.0.0",
+          "Microsoft.Extensions.Options.ConfigurationExtensions": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.Options": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "aZuVhN/TC872Yb55nrb7an82sfSAdNYxIyzu3zbYHOnhwal5hdkBUxzuoYj1khI2sw0tWq6i82i624zEFmiJhg==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.0.0",
+          "Microsoft.Extensions.Primitives": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.Options.ConfigurationExtensions": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "g4V1TXEKUDgOnp1ZKREKSvITYxcUsTqfxNlOaCG7/xlCurLLzFupm+ULkGqIBUIBK+q3kHmt42pVyHwGIcCBmg==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "3.0.0",
+          "Microsoft.Extensions.Configuration.Binder": "3.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.0.0",
+          "Microsoft.Extensions.Options": "3.0.0"
+        }
+      },
+      "Microsoft.Extensions.Primitives": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "6gwewTbmOh+ZVBicVkL1XRp79sx4O7BVY6Yy+7OYZdwn3pyOKe9lOam+3gXJ3TZMjhJZdV0Ub8hxHt2vkrmN5Q=="
+      },
+      "sentry": {
+        "type": "Project"
+      },
+      "sentry.aspnetcore": {
+        "type": "Project",
+        "dependencies": {
+          "Sentry.Extensions.Logging": "3.0.0-alpha.9"
+        }
+      },
+      "sentry.extensions.logging": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Configuration": "3.0.0",
+          "Sentry": "3.0.0-alpha.9"
+        }
+      }
+    }
+  }
+}
