@@ -8,8 +8,6 @@ if [ "$GITHUB_ACTIONS" == "true" ]
         testLogger="console"
 fi
 
-dotnet restore --locked-mode
-
 dotnet test -c Release \
     -l $testLogger \
     /p:CollectCoverage=true \
