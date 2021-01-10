@@ -14,7 +14,7 @@
   </PropertyGroup>
   <!-- Ben.Demystifier doesn't test Mono -->
   <ItemGroup Condition="!$(TargetFramework.StartsWith('net4')) and '$(OS)' != 'Windows_NT'">
-    <Compile Include="../../src/Ben.Demystifier/test/Ben.Demystifier.Test/**/*.cs">
+    <Compile Include="../../modules/Ben.Demystifier/test/Ben.Demystifier.Test/**/*.cs">
       <Link>Ben.Demystifier/%(RecursiveDir)/%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
