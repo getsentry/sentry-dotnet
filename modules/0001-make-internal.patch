@@ -1,0 +1,165 @@
+From ebd5ac9ca5abc53d2b91db708d23f812d96293f3 Mon Sep 17 00:00:00 2001
+From: Bruno Garcia <bruno@brunogarcia.com>
+Date: Sun, 10 Jan 2021 15:47:59 -0500
+Subject: [PATCH] make internal
+
+---
+ src/Ben.Demystifier/EnhancedStackFrame.cs          | 2 +-
+ src/Ben.Demystifier/EnhancedStackTrace.Frames.cs   | 2 +-
+ src/Ben.Demystifier/EnhancedStackTrace.cs          | 2 +-
+ src/Ben.Demystifier/Enumerable/EnumerableIList.cs  | 2 +-
+ src/Ben.Demystifier/ExceptionExtentions.cs         | 2 +-
+ src/Ben.Demystifier/Internal/ReflectionHelper.cs   | 2 +-
+ src/Ben.Demystifier/ResolvedMethod.cs              | 2 +-
+ src/Ben.Demystifier/ResolvedParameter.cs           | 2 +-
+ src/Ben.Demystifier/StringBuilderExtentions.cs     | 2 +-
+ src/Ben.Demystifier/TypeNameHelper.cs              | 2 +-
+ src/Ben.Demystifier/ValueTupleResolvedParameter.cs | 2 +-
+ 11 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/src/Ben.Demystifier/EnhancedStackFrame.cs b/src/Ben.Demystifier/EnhancedStackFrame.cs
+index 2fb8fc4..16fcf50 100644
+--- a/src/Ben.Demystifier/EnhancedStackFrame.cs
++++ b/src/Ben.Demystifier/EnhancedStackFrame.cs
+@@ -5,7 +5,7 @@ using System.Reflection;
+ 
+ namespace System.Diagnostics
+ {
+-    public class EnhancedStackFrame : StackFrame
++    internal class EnhancedStackFrame : StackFrame
+     {
+         private readonly string? _fileName;
+         private readonly int _lineNumber;
+diff --git a/src/Ben.Demystifier/EnhancedStackTrace.Frames.cs b/src/Ben.Demystifier/EnhancedStackTrace.Frames.cs
+index 692ff77..4257519 100644
+--- a/src/Ben.Demystifier/EnhancedStackTrace.Frames.cs
++++ b/src/Ben.Demystifier/EnhancedStackTrace.Frames.cs
+@@ -17,7 +17,7 @@ using System.Threading.Tasks;
+ 
+ namespace System.Diagnostics
+ {
+-    public partial class EnhancedStackTrace
++    internal partial class EnhancedStackTrace
+     {
+         private static readonly Type? StackTraceHiddenAttributeType = Type.GetType("System.Diagnostics.StackTraceHiddenAttribute", false);
+ 
+diff --git a/src/Ben.Demystifier/EnhancedStackTrace.cs b/src/Ben.Demystifier/EnhancedStackTrace.cs
+index d81a9c0..8a4e2b9 100644
+--- a/src/Ben.Demystifier/EnhancedStackTrace.cs
++++ b/src/Ben.Demystifier/EnhancedStackTrace.cs
+@@ -9,7 +9,7 @@ using System.Text;
+ 
+ namespace System.Diagnostics
+ {
+-    public partial class EnhancedStackTrace : StackTrace, IEnumerable<EnhancedStackFrame>
++    internal partial class EnhancedStackTrace : StackTrace, IEnumerable<EnhancedStackFrame>
+     {
+         public static EnhancedStackTrace Current() => new EnhancedStackTrace(new StackTrace(1 /* skip this one frame */, true));
+ 
+diff --git a/src/Ben.Demystifier/Enumerable/EnumerableIList.cs b/src/Ben.Demystifier/Enumerable/EnumerableIList.cs
+index ef883df..932c910 100644
+--- a/src/Ben.Demystifier/Enumerable/EnumerableIList.cs
++++ b/src/Ben.Demystifier/Enumerable/EnumerableIList.cs
+@@ -3,7 +3,7 @@
+ 
+ namespace System.Collections.Generic.Enumerable
+ {
+-    public static class EnumerableIList
++    internal static class EnumerableIList
+     {
+         public static EnumerableIList<T> Create<T>(IList<T> list) => new EnumerableIList<T>(list);
+     }
+diff --git a/src/Ben.Demystifier/ExceptionExtentions.cs b/src/Ben.Demystifier/ExceptionExtentions.cs
+index c16c15a..c909e5e 100644
+--- a/src/Ben.Demystifier/ExceptionExtentions.cs
++++ b/src/Ben.Demystifier/ExceptionExtentions.cs
+@@ -9,7 +9,7 @@ using System.Text;
+ namespace System.Diagnostics
+ {
+     /// <nodoc />
+-    public static class ExceptionExtentions
++    internal static class ExceptionExtentions
+     {
+         private static readonly FieldInfo? stackTraceString = typeof(Exception).GetField("_stackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+ 
+diff --git a/src/Ben.Demystifier/Internal/ReflectionHelper.cs b/src/Ben.Demystifier/Internal/ReflectionHelper.cs
+index 2cad2a0..810fa7d 100644
+--- a/src/Ben.Demystifier/Internal/ReflectionHelper.cs
++++ b/src/Ben.Demystifier/Internal/ReflectionHelper.cs
+@@ -10,7 +10,7 @@ namespace System.Diagnostics.Internal
+     /// <summary>
+     /// A helper class that contains utilities methods for dealing with reflection.
+     /// </summary>
+-    public static class ReflectionHelper
++    internal static class ReflectionHelper
+     {
+         private static PropertyInfo? tranformerNamesLazyPropertyInfo;
+ 
+diff --git a/src/Ben.Demystifier/ResolvedMethod.cs b/src/Ben.Demystifier/ResolvedMethod.cs
+index a674cb5..2daf861 100644
+--- a/src/Ben.Demystifier/ResolvedMethod.cs
++++ b/src/Ben.Demystifier/ResolvedMethod.cs
+@@ -7,7 +7,7 @@ using System.Text;
+ 
+ namespace System.Diagnostics
+ {
+-    public class ResolvedMethod
++    internal class ResolvedMethod
+     {
+         public MethodBase? MethodBase { get; set; }
+ 
+diff --git a/src/Ben.Demystifier/ResolvedParameter.cs b/src/Ben.Demystifier/ResolvedParameter.cs
+index 1457d92..027649b 100644
+--- a/src/Ben.Demystifier/ResolvedParameter.cs
++++ b/src/Ben.Demystifier/ResolvedParameter.cs
+@@ -5,7 +5,7 @@ using System.Text;
+ 
+ namespace System.Diagnostics
+ {
+-    public class ResolvedParameter
++    internal class ResolvedParameter
+     {
+         public string? Name { get; set; }
+ 
+diff --git a/src/Ben.Demystifier/StringBuilderExtentions.cs b/src/Ben.Demystifier/StringBuilderExtentions.cs
+index 5eeb8e0..fa5e418 100644
+--- a/src/Ben.Demystifier/StringBuilderExtentions.cs
++++ b/src/Ben.Demystifier/StringBuilderExtentions.cs
+@@ -6,7 +6,7 @@ using System.Text;
+ 
+ namespace System.Diagnostics 
+ {
+-    public static class StringBuilderExtentions
++    internal static class StringBuilderExtentions
+     {
+         public static StringBuilder AppendDemystified(this StringBuilder builder, Exception exception)
+         {
+diff --git a/src/Ben.Demystifier/TypeNameHelper.cs b/src/Ben.Demystifier/TypeNameHelper.cs
+index 95e59c0..4ed4b31 100644
+--- a/src/Ben.Demystifier/TypeNameHelper.cs
++++ b/src/Ben.Demystifier/TypeNameHelper.cs
+@@ -7,7 +7,7 @@ using System.Text;
+ namespace System.Diagnostics
+ {
+     // Adapted from https://github.com/aspnet/Common/blob/dev/shared/Microsoft.Extensions.TypeNameHelper.Sources/TypeNameHelper.cs
+-    public static class TypeNameHelper
++    internal static class TypeNameHelper
+     {
+         public static readonly Dictionary<Type, string> BuiltInTypeNames = new Dictionary<Type, string>
+         {
+diff --git a/src/Ben.Demystifier/ValueTupleResolvedParameter.cs b/src/Ben.Demystifier/ValueTupleResolvedParameter.cs
+index 7dacf13..9f18ba7 100644
+--- a/src/Ben.Demystifier/ValueTupleResolvedParameter.cs
++++ b/src/Ben.Demystifier/ValueTupleResolvedParameter.cs
+@@ -7,7 +7,7 @@ using System.Text;
+ 
+ namespace System.Diagnostics 
+ {
+-    public class ValueTupleResolvedParameter : ResolvedParameter
++    internal class ValueTupleResolvedParameter : ResolvedParameter
+     {
+         public IList<string> TupleNames { get; }
+ 
+-- 
+2.29.2
+
