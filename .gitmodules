@@ -1,0 +1,3 @@
+[submodule "src/Ben.Demystifier"]
+	path = src/Ben.Demystifier
+	url = ../../Ben.Demystifier.git
