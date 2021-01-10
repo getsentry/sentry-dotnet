@@ -79,8 +79,17 @@ namespace Sentry.Extensibility
         /// </summary>
         internal IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
         {
-            var frames = stackTrace.GetFrames();
-            if (frames == null)
+            var frames = _options.StackTraceMode switch
+            {
+                StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => p as StackFrame),
+                _ => stackTrace.GetFrames()
+// error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
+#if NETCOREAPP3_0
+                                            .Where(f => f is not null)
+#endif
+            };
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse - Backward compatibility
+            if (frames is null)
             {
                 _options.DiagnosticLogger?.LogDebug("No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
                     _options.AttachStacktrace, isCurrentStackTrace);
@@ -126,23 +135,37 @@ namespace Sentry.Extensibility
             const string unknownRequiredField = "(unknown)";
 
             var frame = new SentryStackFrame();
-            if (GetMethod(stackFrame) is { } method)
+            if (GetMethod(stackFrame) is { } method
+                // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
+                && (_options.StackTraceMode == StackTraceMode.Original || !method.Module.Assembly.IsDynamic))
             {
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
 
-                // Include parameters in the function name
-                var parameterListFormatted = string.Join(
-                    ", ",
-                    method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}")
-                );
+                if (_options.StackTraceMode == StackTraceMode.AddParameters)
+                {
+                    // Include parameters in the function name
+                    var parameterListFormatted = string.Join(
+                        ", ",
+                        method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}")
+                    );
 
-                frame.Function = $"{method.Name}({parameterListFormatted})";
+                    frame.Function = $"{method.Name}({parameterListFormatted})";
+                }
+                else if (_options.StackTraceMode == StackTraceMode.Enhanced)
+                {
+                    frame.Function = stackFrame.ToString();
+                }
+                else
+                {
+                    frame.Function = method.Name;
+                }
             }
 
             frame.InApp = !IsSystemModuleName(frame.Module);
-            frame.FileName = stackFrame.GetFileName();
+            // TODO: Uncomment before merging
+            // frame.FileName = stackFrame.GetFileName();
 
             // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
             var ilOffset = stackFrame.GetILOffset();
@@ -163,10 +186,18 @@ namespace Sentry.Extensibility
                 frame.ColumnNumber = colNo;
             }
 
-            if (demangle)
+            if (demangle && _options.StackTraceMode != StackTraceMode.Enhanced)
             {
                 DemangleAsyncFunctionName(frame);
                 DemangleAnonymousFunction(frame);
+            }
+
+            if (_options.StackTraceMode == StackTraceMode.Enhanced)
+            {
+                // In Enhanced mode, Module (which in this case is the Namespace)
+                // is already prepended to the function, after return type.
+                // Removing here at the end because this is used to resolve InApp=true/false
+                frame.Module = null;
             }
 
             return frame;

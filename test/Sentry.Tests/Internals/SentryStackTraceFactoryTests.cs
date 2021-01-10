@@ -31,9 +31,10 @@ namespace Other.Tests.Internals
         }
 
         [Fact]
-        public void Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace()
+        public void Create_NoExceptionAndAttachStackTraceOptionOnWithOriginalMode_CurrentStackTrace()
         {
             _fixture.SentryOptions.AttachStacktrace = true;
+            _fixture.SentryOptions.StackTraceMode = StackTraceMode.Original;
             var sut = _fixture.GetSut();
 
             var stackTrace = sut.Create();
@@ -41,7 +42,58 @@ namespace Other.Tests.Internals
             Assert.NotNull(stackTrace);
 
             Assert.Equal(
-                nameof(Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace) + "()",
+                nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithOriginalMode_CurrentStackTrace),
+                stackTrace.Frames.Last().Function
+            );
+
+            Assert.DoesNotContain(stackTrace.Frames, p =>
+                p.Function?.StartsWith(
+                    nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                    StringComparison.Ordinal
+                ) == true
+            );
+        }
+
+        [Fact]
+        public void Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace()
+        {
+            _fixture.SentryOptions.AttachStacktrace = true;
+            _fixture.SentryOptions.StackTraceMode = StackTraceMode.Enhanced;
+            var sut = _fixture.GetSut();
+
+            var stackTrace = sut.Create();
+
+            Assert.NotNull(stackTrace);
+
+            Assert.Equal(
+                $"void {GetType().Namespace}" +
+                $".{GetType().Name}" +
+                $".{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}" +
+                "()",
+                stackTrace.Frames.Last().Function
+            );
+
+            Assert.DoesNotContain(stackTrace.Frames, p =>
+                p.Function?.StartsWith(
+                    nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                    StringComparison.Ordinal
+                ) == true
+            );
+        }
+
+        [Fact]
+        public void Create_NoExceptionAndAttachStackTraceOptionOnWithAddParameterMode_CurrentStackTrace()
+        {
+            _fixture.SentryOptions.AttachStacktrace = true;
+            _fixture.SentryOptions.StackTraceMode = StackTraceMode.AddParameters;
+            var sut = _fixture.GetSut();
+
+            var stackTrace = sut.Create();
+
+            Assert.NotNull(stackTrace);
+
+            Assert.Equal(
+                nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithAddParameterMode_CurrentStackTrace) + "()",
                 stackTrace.Frames.Last().Function
             );
 
@@ -88,9 +140,14 @@ namespace Other.Tests.Internals
             Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace?.Frames.Count);
         }
 
-        [Fact]
-        public void Create_ByRefFields_IncludesAmpersandAfterParameterType()
+        [Theory]
+        [InlineData(StackTraceMode.AddParameters, "ByRefMethodThatThrows(Int32 value, Int32& valueIn, Int32& valueRef, Int32& valueOut)")]
+        [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
+        [InlineData(StackTraceMode.Enhanced, "void Other.Tests.Internals.SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
+        public void Create_InlineCase_IncludesAmpersandAfterParameterType(StackTraceMode mode, string method)
         {
+            _fixture.SentryOptions.StackTraceMode = mode;
+
             // Arrange
             var i = 5;
             var exception = Record.Exception(() => ByRefMethodThatThrows(i, in i, ref i, out i));
@@ -103,7 +160,7 @@ namespace Other.Tests.Internals
 
             // Assert
             var frame = stackTrace!.Frames.Last();
-            frame.Function.Should().Be("ByRefMethodThatThrows(Int32 value, Int32& valueIn, Int32& valueRef, Int32& valueOut)");
+            frame.Function.Should().Be(method);
         }
 
         [Fact]

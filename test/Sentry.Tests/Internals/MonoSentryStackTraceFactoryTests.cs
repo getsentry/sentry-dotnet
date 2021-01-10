@@ -61,6 +61,7 @@ namespace Other.Tests.Internals
         public void Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace()
         {
             _fixture.SentryOptions.AttachStacktrace = true;
+            _fixture.SentryOptions.StackTraceMode = StackTraceMode.AddParameters;
             var sut = _fixture.GetSut();
 
             var stackTrace = sut.Create();
