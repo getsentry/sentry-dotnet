@@ -3,6 +3,10 @@
 ## vNext
 
 - Limit attachment size (#705)
+## 3.0.0-alpha.10
+
+- Disabled Mono StackTrace Factory. (#709) @lucas-zimerman
+- Adds to the existing User Other dict rather than replacing (#729) @brettjenkins
 
 ## 3.0.0-alpha.9
 

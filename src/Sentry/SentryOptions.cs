@@ -445,10 +445,7 @@ namespace Sentry
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
-            SentryStackTraceFactory = Runtime.Current.IsMono()
-                // Also true for IL2CPP
-                ? new MonoSentryStackTraceFactory(this)
-                : new SentryStackTraceFactory(this);
+            SentryStackTraceFactory = new SentryStackTraceFactory(this);
 
             ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 

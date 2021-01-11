@@ -7,3 +7,6 @@ coverage:
     patch: off
   ignore:
     - "test/**/*"
+  range: 0..100
+  round: down
+  precision: 2
