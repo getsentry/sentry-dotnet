@@ -315,6 +315,8 @@ namespace Sentry
                 return;
             }
 
+            // TODO: Envelope spec allows the last item to not have a length.
+            // So if we make sure there's only 1 item without length, we can support it.
             scope.AddAttachment(stream, length.Value, fileName, type, contentType);
         }
 
