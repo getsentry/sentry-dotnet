@@ -135,9 +135,7 @@ namespace Sentry.Extensibility
             const string unknownRequiredField = "(unknown)";
 
             var frame = new SentryStackFrame();
-            if (GetMethod(stackFrame) is { } method
-                // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
-                && (_options.StackTraceMode == StackTraceMode.Original || !method.Module.Assembly.IsDynamic))
+            if (GetMethod(stackFrame) is { } method)
             {
                 // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
@@ -161,9 +159,16 @@ namespace Sentry.Extensibility
                 {
                     frame.Function = method.Name;
                 }
+
+                // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
+                if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)
+                {
+                    frame.InApp = false;
+                }
             }
 
-            frame.InApp = !IsSystemModuleName(frame.Module);
+            frame.InApp ??= !IsSystemModuleName(frame.Module);
+
             // TODO: Uncomment before merging
             // frame.FileName = stackFrame.GetFileName();
 
