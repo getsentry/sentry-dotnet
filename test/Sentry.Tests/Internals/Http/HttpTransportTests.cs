@@ -247,11 +247,15 @@ namespace Sentry.Tests.Internals.Http
                 _ => SentryResponses.GetOkResponse()
             );
 
+            var logger = new AccumulativeDiagnosticLogger();
+
             var httpTransport = new HttpTransport(
                 new SentryOptions
                 {
                     Dsn = DsnSamples.ValidDsnWithSecret,
-                    MaxAttachmentSize = 1
+                    MaxAttachmentSize = 1,
+                    DiagnosticLogger = logger,
+                    Debug = true
                 },
                 new HttpClient(httpHandler)
             );
@@ -283,6 +287,12 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             // (the envelope should have only one item)
+
+            logger.Entries.Should().Contain(e =>
+                e.Message == "Cannot evaluate the size of attachment '{0}' because the stream is not seekable." &&
+                e.Args[0].ToString() == "test2.txt"
+            );
+
             actualEnvelopeSerialized.Should().NotContain("test2.txt");
         }
 
