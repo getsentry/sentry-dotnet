@@ -571,58 +571,6 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public async Task AddAttachment_FromFile_RespectsLimits()
-        {
-            // Arrange
-            var logger = new AccumulativeDiagnosticLogger();
-            _fixture.ScopeOptions.DiagnosticLogger = logger;
-            _fixture.ScopeOptions.Debug = true;
-            _fixture.ScopeOptions.MaxAttachmentSize = 1000; // 1kb
-
-            using var tempDir = new TempDirectory();
-            var filePath = Path.Combine(tempDir.Path, "MyFile.bin");
-
-            using (var fileStream = File.Create(filePath))
-            {
-                var random = new Random();
-                await random.WriteToStreamAsync(fileStream, 1005);
-            }
-
-            var scope = _fixture.GetSut();
-
-            // Act
-            scope.AddAttachment(filePath);
-
-            // Assert
-            Assert.Empty(scope.Attachments);
-            Assert.Contains(logger.Entries, e =>
-                e.Message == "Attachment '{0}' dropped because it's too large ({1} bytes)." &&
-                e.Args[0].ToString() == "MyFile.bin" &&
-                e.Args[1].ToString() == "1005"
-            );
-        }
-
-        [Fact]
-        public void AddAttachment_FromFile_FileDoesNotExist_Drops()
-        {
-            // Arrange
-            var logger = new AccumulativeDiagnosticLogger();
-            _fixture.ScopeOptions.DiagnosticLogger = logger;
-            _fixture.ScopeOptions.Debug = true;
-
-            var scope = _fixture.GetSut();
-
-            // Act
-            scope.AddAttachment("hopefully-this-file-does-not-exist.txt");
-
-            // Assert
-            Assert.Empty(scope.Attachments);
-            Assert.Contains(logger.Entries, e =>
-                e.Message == "Error reading file '{0}' when adding attachment"
-            );
-        }
-
-        [Fact]
         public void Apply_Null_Target_DoesNotThrow()
         {
             var sut = _fixture.GetSut();
