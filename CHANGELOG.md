@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Limit attachment size (#705)
+
 ## 3.0.0-alpha.10
 
 - Disabled Mono StackTrace Factory. (#709) @lucas-zimerman

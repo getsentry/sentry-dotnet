@@ -410,11 +410,10 @@ namespace Sentry.Tests.Protocol.Envelopes
                 Sdk = new SdkVersion {Name = "SDK-test", Version = "1.0.0"}
             };
 
-            using var attachment = new Attachment(
+            var attachment = new Attachment(
                 AttachmentType.Default,
-                Stream.Null,
+                new StreamAttachmentContent(Stream.Null),
                 "file.txt",
-                null,
                 null
             );
 

@@ -424,6 +424,15 @@ namespace Sentry
         public ISentryTraceSampler? TraceSampler { get; set; }
 
         /// <summary>
+        /// Maximum allowed file size of attachments, in bytes.
+        /// Attachments above this size will be discarded.
+        /// </summary>
+        /// <remarks>
+        /// Regardless of this setting, attachments are also limited to 20mb (compressed) on Relay.
+        /// </remarks>
+        public long MaxAttachmentSize { get; set; } = 20 * 1024 * 1024;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()

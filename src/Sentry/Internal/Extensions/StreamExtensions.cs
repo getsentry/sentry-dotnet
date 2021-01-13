@@ -48,5 +48,17 @@ namespace Sentry.Internal.Extensions
 
             await stream.WriteAsync(buffer.Array, 0, 1, cancellationToken).ConfigureAwait(false);
         }
+
+        public static long? TryGetLength(this Stream stream)
+        {
+            try
+            {
+                return stream.Length;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

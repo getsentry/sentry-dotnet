@@ -5,6 +5,7 @@ using System.IO;
 using Sentry.Extensibility;
 using System.Linq;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -278,14 +279,37 @@ namespace Sentry
         /// <summary>
         /// Adds an attachment.
         /// </summary>
+        /// <remarks>
+        /// Note: the stream must be seekable.
+        /// </remarks>
         public static void AddAttachment(
             this Scope scope,
             Stream stream,
             string fileName,
             AttachmentType type = AttachmentType.Default,
-            long? length = null,
-            string? contentType = null) =>
-            scope.AddAttachment(new Attachment(type, stream, fileName, length, contentType));
+            string? contentType = null)
+        {
+            var length = stream.TryGetLength();
+            if (length is null)
+            {
+                scope.Options.DiagnosticLogger?.LogWarning(
+                    "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
+                    fileName
+                );
+
+                return;
+            }
+
+            // TODO: Envelope spec allows the last item to not have a length.
+            // So if we make sure there's only 1 item without length, we can support it.
+            scope.AddAttachment(
+                new Attachment(
+                    type,
+                    new StreamAttachmentContent(stream),
+                    fileName,
+                    contentType)
+            );
+        }
 
         /// <summary>
         /// Adds an attachment.
@@ -296,7 +320,7 @@ namespace Sentry
             string fileName,
             AttachmentType type = AttachmentType.Default,
             string? contentType = null) =>
-            scope.AddAttachment(new MemoryStream(data), fileName, type, data.Length, contentType);
+            scope.AddAttachment(new MemoryStream(data), fileName, type, contentType);
 
         /// <summary>
         /// Adds an attachment.
@@ -305,12 +329,13 @@ namespace Sentry
             this Scope scope,
             string filePath,
             AttachmentType type = AttachmentType.Default,
-            string? contentType = null)
-        {
-            var stream = File.OpenRead(filePath);
-            var fileName = Path.GetFileName(filePath);
-
-            scope.AddAttachment(stream, fileName, type, stream.Length, contentType);
-        }
+            string? contentType = null) =>
+            scope.AddAttachment(
+                new Attachment(
+                    type,
+                    new FileAttachmentContent(filePath),
+                    Path.GetFileName(filePath),
+                    contentType)
+            );
     }
 }
