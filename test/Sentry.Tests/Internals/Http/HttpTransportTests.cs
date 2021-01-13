@@ -289,8 +289,9 @@ namespace Sentry.Tests.Internals.Http
             // (the envelope should have only one item)
 
             logger.Entries.Should().Contain(e =>
-                e.Message == "Cannot evaluate the size of attachment '{0}' because the stream is not seekable." &&
-                e.Args[0].ToString() == "test2.txt"
+                e.Message == "Attachment '{0}' dropped because it's too large ({1} bytes)." &&
+                e.Args[0].ToString() == "test2.txt" &&
+                e.Args[1].ToString() == "5"
             );
 
             actualEnvelopeSerialized.Should().NotContain("test2.txt");
