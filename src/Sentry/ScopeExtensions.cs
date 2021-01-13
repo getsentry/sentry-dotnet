@@ -279,18 +279,6 @@ namespace Sentry
         /// <summary>
         /// Adds an attachment.
         /// </summary>
-        public static void AddAttachment(
-            this Scope scope,
-            Stream stream,
-            long length,
-            string fileName,
-            AttachmentType type = AttachmentType.Default,
-            string? contentType = null) =>
-            scope.AddAttachment(new Attachment(type, stream, length, fileName, contentType));
-
-        /// <summary>
-        /// Adds an attachment.
-        /// </summary>
         /// <remarks>
         /// Note: the stream must be seekable.
         /// </remarks>
@@ -309,15 +297,18 @@ namespace Sentry
                     fileName
                 );
 
-                // Dispose the stream because we're not going to use it
-                stream.Dispose();
-
                 return;
             }
 
             // TODO: Envelope spec allows the last item to not have a length.
             // So if we make sure there's only 1 item without length, we can support it.
-            scope.AddAttachment(stream, length.Value, fileName, type, contentType);
+            scope.AddAttachment(
+                new Attachment(
+                    type,
+                    new StreamAttachmentContent(stream),
+                    fileName,
+                    contentType)
+            );
         }
 
         /// <summary>
@@ -338,23 +329,13 @@ namespace Sentry
             this Scope scope,
             string filePath,
             AttachmentType type = AttachmentType.Default,
-            string? contentType = null)
-        {
-            try
-            {
-                var stream = File.OpenRead(filePath);
-                var fileName = Path.GetFileName(filePath);
-
-                scope.AddAttachment(stream, fileName, type, contentType);
-            }
-            catch (IOException ex)
-            {
-                scope.Options.DiagnosticLogger?.LogError(
-                    "Error reading file '{0}' when adding attachment",
-                    ex,
-                    filePath
-                );
-            }
-        }
+            string? contentType = null) =>
+            scope.AddAttachment(
+                new Attachment(
+                    type,
+                    new FileAttachmentContent(filePath),
+                    Path.GetFileName(filePath),
+                    contentType)
+            );
     }
 }

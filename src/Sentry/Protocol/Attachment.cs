@@ -1,6 +1,4 @@
-using System;
 using System.Diagnostics;
-using System.IO;
 
 namespace Sentry.Protocol
 {
@@ -42,7 +40,7 @@ namespace Sentry.Protocol
     /// Sentry attachment.
     /// </summary>
     [DebuggerDisplay("{" + nameof(FileName) + "}")]
-    public class Attachment : IDisposable
+    public class Attachment
     {
         /// <summary>
         /// Attachment type.
@@ -50,14 +48,9 @@ namespace Sentry.Protocol
         public AttachmentType Type { get; }
 
         /// <summary>
-        /// Attachment stream.
+        /// Attachment content.
         /// </summary>
-        public Stream Stream { get; }
-
-        /// <summary>
-        /// Attachment size.
-        /// </summary>
-        public long Length { get; }
+        public IAttachmentContent Content { get; }
 
         /// <summary>
         /// Attachment file name.
@@ -72,20 +65,16 @@ namespace Sentry.Protocol
         /// <summary>
         /// Initializes an instance of <see cref="Attachment"/>.
         /// </summary>
-        public Attachment(AttachmentType type,
-            Stream stream,
-            long length,
+        public Attachment(
+            AttachmentType type,
+            IAttachmentContent content,
             string fileName,
             string? contentType)
         {
             Type = type;
-            Stream = stream;
-            Length = length;
+            Content = content;
             FileName = fileName;
             ContentType = contentType;
         }
-
-        /// <inheritdoc />
-        public void Dispose() => Stream.Dispose();
     }
 }

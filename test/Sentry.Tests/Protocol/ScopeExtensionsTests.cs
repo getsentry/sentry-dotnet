@@ -503,7 +503,6 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var expectedStream = Stream.Null;
-            var expectedLength = 1024L;
             var expectedFileName = "file.txt";
             var expectedType = AttachmentType.Minidump;
             var expectedContentType = "application/octet-stream";
@@ -513,17 +512,15 @@ namespace Sentry.Tests.Protocol
             // Act
             scope.AddAttachment(
                 expectedStream,
-                expectedLength,
                 expectedFileName,
                 expectedType,
                 expectedContentType
             );
 
             // Assert
-            using var attachment = Assert.Single(scope.Attachments);
+            var attachment = Assert.Single(scope.Attachments);
 
-            Assert.Equal(expectedStream, attachment?.Stream);
-            Assert.Equal(expectedLength, attachment?.Length);
+            Assert.Equal(expectedStream, attachment?.Content.GetStream());
             Assert.Equal(expectedFileName, attachment?.FileName);
             Assert.Equal(expectedType, attachment?.Type);
             Assert.Equal(expectedContentType, attachment?.ContentType);
@@ -567,10 +564,10 @@ namespace Sentry.Tests.Protocol
             scope.AddAttachment(filePath);
 
             // Assert
-            using var attachment = Assert.Single(scope.Attachments);
+            var attachment = Assert.Single(scope.Attachments);
 
             Assert.Equal("MyFile.txt", attachment?.FileName);
-            Assert.Equal(12, attachment?.Length);
+            Assert.Equal(12, attachment?.Content.GetStream().Length);
         }
 
         [Fact]
