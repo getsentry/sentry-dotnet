@@ -11,7 +11,6 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Reflection;
@@ -108,11 +107,6 @@ namespace Sentry.AspNetCore
                     scope.OnEvaluating += (_, _) => PopulateScope(context, scope);
                 });
 
-                var transaction = hub.CreateTransaction(
-                    context.GetTransactionName(),
-                    "http.server"
-                );
-
                 try
                 {
                     await _next(context).ConfigureAwait(false);
@@ -129,12 +123,6 @@ namespace Sentry.AspNetCore
                     CaptureException(e);
 
                     ExceptionDispatchInfo.Capture(e).Throw();
-                }
-                finally
-                {
-                    transaction.Finish(
-                        GetSpanStatusFromCode(context.Response.StatusCode)
-                    );
                 }
 
                 void CaptureException(Exception e)
@@ -172,24 +160,5 @@ namespace Sentry.AspNetCore
                 scope.Populate(Activity.Current);
             }
         }
-
-        private static SpanStatus GetSpanStatusFromCode(int statusCode) => statusCode switch
-        {
-            < 400 => SpanStatus.Ok,
-            400 => SpanStatus.InvalidArgument,
-            401 => SpanStatus.Unauthenticated,
-            403 => SpanStatus.PermissionDenied,
-            404 => SpanStatus.NotFound,
-            409 => SpanStatus.AlreadyExists,
-            429 => SpanStatus.ResourceExhausted,
-            499 => SpanStatus.Cancelled,
-            < 500 => SpanStatus.InvalidArgument,
-            500 => SpanStatus.InternalError,
-            501 => SpanStatus.Unimplemented,
-            503 => SpanStatus.Unavailable,
-            504 => SpanStatus.DeadlineExceeded,
-            < 600 => SpanStatus.InternalError,
-            _ => SpanStatus.UnknownError
-        };
     }
 }

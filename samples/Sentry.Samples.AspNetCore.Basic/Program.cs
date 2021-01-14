@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Sentry.AspNetCore;
 
 namespace Sentry.Samples.AspNetCore.Basic
 {
@@ -32,6 +33,10 @@ namespace Sentry.Samples.AspNetCore.Basic
                     // An example ASP.NET Core middleware that throws an
                     // exception when serving a request to path: /throw
                     app.UseRouting();
+
+                    // Enable Sentry performance monitoring
+                    app.UseSentryTracing();
+
                     app.UseEndpoints(endpoints =>
                     {
                         // Reported events will be grouped by route pattern
