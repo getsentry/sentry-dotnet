@@ -10,7 +10,7 @@ namespace Sentry.AspNetCore
     /// <summary>
     /// Sentry tracing middleware for ASP.NET Core
     /// </summary>
-    public class SentryTracingMiddleware
+    internal class SentryTracingMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _hubAccessor;
