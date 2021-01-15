@@ -179,6 +179,7 @@ namespace Sentry.Protocol
             EndTimestamp = DateTimeOffset.UtcNow;
             Status = status;
 
+            // Hub may discard this transaction if `IsSampled = false`
             _hub.CaptureTransaction(this);
         }
 

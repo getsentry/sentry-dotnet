@@ -126,10 +126,17 @@ namespace Sentry
                 return;
             }
 
+            if (transaction.IsSampled)
+            {
+                _options.DiagnosticLogger?.LogDebug("Transaction dropped due to sampling.");
+                return;
+            }
+
             if (_options.TracesSampleRate < 1)
             {
                 if (Random.NextDouble() > _options.TracesSampleRate)
                 {
+                    transaction.IsSampled = true;
                     _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
                     return;
                 }
