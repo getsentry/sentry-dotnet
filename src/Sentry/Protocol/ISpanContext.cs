@@ -26,12 +26,12 @@ namespace Sentry.Protocol
         /// <summary>
         /// Operation.
         /// </summary>
-        string Operation { get; }
+        string Operation { get; set; }
 
         /// <summary>
         /// Status.
         /// </summary>
-        SpanStatus? Status { get; }
+        SpanStatus? Status { get; set; }
 
         /// <summary>
         /// Is sampled.

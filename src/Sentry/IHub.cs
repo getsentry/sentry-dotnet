@@ -22,9 +22,9 @@ namespace Sentry
         SentryId LastEventId { get; }
 
         /// <summary>
-        /// Creates a transaction.
+        /// Starts a transaction.
         /// </summary>
-        Transaction CreateTransaction(string name, string operation);
+        Transaction StartTransaction();
 
         /// <summary>
         /// Gets the sentry trace header.

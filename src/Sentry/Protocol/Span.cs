@@ -31,13 +31,13 @@ namespace Sentry.Protocol
         public DateTimeOffset? EndTimestamp { get; private set; }
 
         /// <inheritdoc />
-        public string Operation { get; }
+        public string Operation { get; set; } = "unknown";
 
         /// <inheritdoc />
         public string? Description { get; set; }
 
         /// <inheritdoc />
-        public SpanStatus? Status { get; private set; }
+        public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
         public bool IsSampled { get; set; }
@@ -52,19 +52,18 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
 
-        internal Span(SpanRecorder parentSpanRecorder, SpanId? spanId = null, SpanId? parentSpanId = null, string operation = "unknown")
+        internal Span(SpanRecorder parentSpanRecorder, SpanId? spanId = null, SpanId? parentSpanId = null)
         {
             _parentSpanRecorder = parentSpanRecorder;
             SpanId = spanId ?? SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
-            Operation = operation;
         }
 
         /// <inheritdoc />
-        public ISpan StartChild(string operation)
+        public ISpan StartChild()
         {
-            var span = new Span(_parentSpanRecorder, null, SpanId, operation);
+            var span = new Span(_parentSpanRecorder, null, SpanId);
             _parentSpanRecorder.Add(span);
 
             return span;
@@ -148,11 +147,12 @@ namespace Sentry.Protocol
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
 
-            return new Span(parentSpanRecorder, spanId, parentSpanId, operation)
+            return new Span(parentSpanRecorder, spanId, parentSpanId)
             {
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
+                Operation = operation,
                 Description = description,
                 Status = status,
                 IsSampled = isSampled,

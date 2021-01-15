@@ -36,11 +36,39 @@ namespace Sentry.Protocol
         /// <summary>
         /// Starts a child span.
         /// </summary>
-        ISpan StartChild(string operation);
+        ISpan StartChild();
 
         /// <summary>
         /// Finishes the span.
         /// </summary>
         void Finish(SpanStatus status = SpanStatus.Ok);
+    }
+
+    /// <summary>
+    /// Extensions for <see cref="ISpan"/>.
+    /// </summary>
+    public static class SpanExtensions
+    {
+        /// <summary>
+        /// Starts a child span.
+        /// </summary>
+        public static ISpan StartChild(this ISpan span, string operation)
+        {
+            var child = span.StartChild();
+            child.Operation = operation;
+
+            return child;
+        }
+
+        /// <summary>
+        /// Starts a child span.
+        /// </summary>
+        public static ISpan StartChild(this ISpan span, string operation, string description)
+        {
+            var child = span.StartChild(operation);
+            child.Description = description;
+
+            return child;
+        }
     }
 }

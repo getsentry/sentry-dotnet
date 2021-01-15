@@ -45,7 +45,7 @@ namespace Sentry.Protocol
         public string Operation
         {
             get => Contexts.Trace.Operation;
-            internal set => Contexts.Trace.Operation = value;
+            set => Contexts.Trace.Operation = value;
         }
 
         /// <inheritdoc />
@@ -55,7 +55,7 @@ namespace Sentry.Protocol
         public SpanStatus? Status
         {
             get => Contexts.Trace.Status;
-            private set => Contexts.Trace.Status = value;
+            set => Contexts.Trace.Status = value;
         }
 
         /// <inheritdoc />
@@ -143,6 +143,11 @@ namespace Sentry.Protocol
             TraceId = SentryId.Create();
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="Transaction"/>.
+        /// </summary>
+        public Transaction() : this(HubAdapter.Instance) {}
+
         /// <inheritdoc />
         public void AddBreadcrumb(Breadcrumb breadcrumb) =>
             (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
@@ -156,9 +161,9 @@ namespace Sentry.Protocol
             (_tags ??= new Dictionary<string, string>())[key] = value;
 
         /// <inheritdoc />
-        public ISpan StartChild(string operation)
+        public ISpan StartChild()
         {
-            var span = new Span(_spanRecorder, null, SpanId, operation);
+            var span = new Span(_spanRecorder, null, SpanId);
             _spanRecorder.Add(span);
 
             return span;

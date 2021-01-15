@@ -33,7 +33,7 @@ namespace Sentry.AspNetCore
                 return;
             }
 
-            var transaction = hub.CreateTransaction(
+            var transaction = hub.StartTransaction(
                 context.GetTransactionName(),
                 "http.server"
             );
