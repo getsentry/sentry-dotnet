@@ -63,7 +63,11 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public ISpan StartChild()
         {
-            var span = new Span(_parentSpanRecorder, null, SpanId);
+            var span = new Span(_parentSpanRecorder, null, SpanId)
+            {
+                IsSampled = IsSampled
+            };
+
             _parentSpanRecorder.Add(span);
 
             return span;
