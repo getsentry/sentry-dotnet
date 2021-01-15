@@ -394,7 +394,7 @@ namespace Sentry
         /// </remarks>
         public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
-        private double _traceSampleRate = 1.0;
+        private double _tracesSampleRate = 1.0;
 
         /// <summary>
         /// Indicates the percentage of the tracing data that is collected.
@@ -402,9 +402,9 @@ namespace Sentry
         /// Setting this to <code>1.0</code> collects all trace data.
         /// Values outside of this range are invalid.
         /// </summary>
-        public double TraceSampleRate
+        public double TracesSampleRate
         {
-            get => _traceSampleRate;
+            get => _tracesSampleRate;
             set
             {
                 if (value < 0 || value > 1)
@@ -414,14 +414,14 @@ namespace Sentry
                     );
                 }
 
-                _traceSampleRate = value;
+                _tracesSampleRate = value;
             }
         }
 
         /// <summary>
         /// Custom logic that determines trace sample rate depending on the context.
         /// </summary>
-        public ISentryTraceSampler? TraceSampler { get; set; }
+        public ISentryTraceSampler? TracesSampler { get; set; }
 
         /// <summary>
         /// Maximum allowed file size of attachments, in bytes.
