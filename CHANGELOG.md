@@ -1,6 +1,6 @@
 # Changelog
 
-## vNext
+## 3.0.0-alpha.11
 
 - Limit attachment size (#705)
 - Separate tracing middleware (#737)
