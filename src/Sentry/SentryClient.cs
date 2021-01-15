@@ -126,7 +126,7 @@ namespace Sentry
                 return;
             }
 
-            if (transaction.IsSampled)
+            if (!transaction.IsSampled)
             {
                 _options.DiagnosticLogger?.LogDebug("Transaction dropped due to sampling.");
                 return;
