@@ -112,8 +112,33 @@ namespace Sentry
         /// <inheritdoc />
         public string? Environment { get; set; }
 
+        // TransactionName and Transaction need to coexist because
+        // SentryEvent still tracks the transaction as a string.
+        // If a started Transaction exists and the user sets TransactionName,
+        // it should update the name of that transaction.
+        // Otherwise, it should just keep track of the name separately, so that
+        // it can be used in an event, in case a transaction doesn't exist.
+        // More context in this discussion:
+        // https://github.com/getsentry/develop/issues/246#issuecomment-760997974
+
+        private string? _fallbackTransactionName;
+
         /// <inheritdoc />
-        public string? TransactionName { get; set; }
+        public string? TransactionName
+        {
+            get => Transaction?.Name ?? _fallbackTransactionName;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value) && Transaction is { } transaction)
+                {
+                    transaction.Name = value;
+                }
+                else
+                {
+                    _fallbackTransactionName = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Transaction.
