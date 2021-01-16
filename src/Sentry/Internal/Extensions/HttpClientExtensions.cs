@@ -11,7 +11,7 @@ namespace Sentry.Internal.Extensions
             this HttpContent content,
             CancellationToken cancellationToken = default)
         {
-            using var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+            using var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
             using var jsonDocument = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
             return jsonDocument.RootElement.Clone();

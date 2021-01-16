@@ -20,6 +20,7 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueAttachment = "attachment";
         private const string LengthKey = "length";
+        private const string FileNameKey = "filename";
 
         /// <summary>
         /// Header associated with this envelope item.
@@ -54,6 +55,8 @@ namespace Sentry.Protocol.Envelopes
                 null => null,
                 var value => Convert.ToInt64(value) // can be int, long, or another numeric type
             };
+
+        public string? TryGetFileName() => Header.GetValueOrDefault(FileNameKey) as string;
 
         private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
         {
@@ -156,6 +159,8 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromAttachment(Attachment attachment)
         {
+            var stream = attachment.Content.GetStream();
+
             var attachmentType = attachment.Type switch
             {
                 AttachmentType.Minidump => "event.minidump",
@@ -168,13 +173,13 @@ namespace Sentry.Protocol.Envelopes
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueAttachment,
-                [LengthKey] = attachment.Length,
-                ["filename"] = attachment.FileName,
+                [LengthKey] = stream.TryGetLength(),
+                [FileNameKey] = attachment.FileName,
                 ["attachment_type"] = attachmentType,
                 ["content_type"] = attachment.ContentType
             };
 
-            return new EnvelopeItem(header, new StreamSerializable(attachment.Stream));
+            return new EnvelopeItem(header, new StreamSerializable(stream));
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(

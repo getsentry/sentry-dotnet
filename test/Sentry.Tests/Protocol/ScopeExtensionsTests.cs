@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Sentry.Protocol;
 using Sentry.Testing;
@@ -503,7 +505,6 @@ namespace Sentry.Tests.Protocol
             var expectedStream = Stream.Null;
             var expectedFileName = "file.txt";
             var expectedType = AttachmentType.Minidump;
-            var expectedLength = 1024L;
             var expectedContentType = "application/octet-stream";
 
             var scope = _fixture.GetSut();
@@ -513,18 +514,40 @@ namespace Sentry.Tests.Protocol
                 expectedStream,
                 expectedFileName,
                 expectedType,
-                expectedLength,
                 expectedContentType
             );
 
             // Assert
-            using var attachment = Assert.Single(scope.Attachments);
+            var attachment = Assert.Single(scope.Attachments);
 
-            Assert.Equal(expectedStream, attachment?.Stream);
+            Assert.Equal(expectedStream, attachment?.Content.GetStream());
             Assert.Equal(expectedFileName, attachment?.FileName);
             Assert.Equal(expectedType, attachment?.Type);
-            Assert.Equal(expectedLength, attachment?.Length);
             Assert.Equal(expectedContentType, attachment?.ContentType);
+        }
+
+        [Fact]
+        public async Task AddAttachment_FromStream_UnknownLength_IsDropped()
+        {
+            // Arrange
+            var logger = new AccumulativeDiagnosticLogger();
+            _fixture.ScopeOptions.DiagnosticLogger = logger;
+            _fixture.ScopeOptions.Debug = true;
+
+            // HTTP streams don't have length
+            using var stream = await new HttpClient().GetStreamAsync("https://example.com");
+
+            var scope = _fixture.GetSut();
+
+            // Act
+            scope.AddAttachment(stream, "example.html");
+
+            // Assert
+            Assert.Empty(scope.Attachments);
+            Assert.Contains(logger.Entries, e =>
+                e.Message == "Cannot evaluate the size of attachment '{0}' because the stream is not seekable." &&
+                e.Args[0].ToString() == "example.html"
+            );
         }
 
         [Fact]
@@ -541,10 +564,11 @@ namespace Sentry.Tests.Protocol
             scope.AddAttachment(filePath);
 
             // Assert
-            using var attachment = Assert.Single(scope.Attachments);
+            var attachment = Assert.Single(scope.Attachments);
+            using var stream = attachment?.Content.GetStream();
 
             Assert.Equal("MyFile.txt", attachment?.FileName);
-            Assert.Equal(12, attachment?.Length);
+            Assert.Equal(12, stream.Length);
         }
 
         [Fact]

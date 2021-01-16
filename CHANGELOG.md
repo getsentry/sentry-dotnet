@@ -4,6 +4,11 @@
 
 - Default stack trace format: Ben.Demystifier (#732) @bruno-garcia
 
+## 3.0.0-alpha.11
+
+- Limit attachment size (#705)
+- Separate tracing middleware (#737)
+
 ## 3.0.0-alpha.10
 
 - Disabled Mono StackTrace Factory. (#709) @lucas-zimerman

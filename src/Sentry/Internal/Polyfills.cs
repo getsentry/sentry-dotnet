@@ -1,16 +1,18 @@
 // ReSharper disable CheckNamespace
+// ReSharper disable RedundantUsingDirective
 
 // Polyfills to bridge the missing APIs in older versions of the framework/standard.
 // In some cases, these just proxy calls to existing methods but also provide a signature that matches .netstd2.1
-#if NET461 || NETSTANDARD2_0
 
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
-internal static class PolyfillExtensions
+#if NET461 || NETSTANDARD2_0
+internal static partial class PolyfillExtensions
 {
     public static string[] Split(this string str, char c, StringSplitOptions options = StringSplitOptions.None) =>
         str.Split(new[] {c}, options);
@@ -49,5 +51,20 @@ namespace System.Collections.Generic
         public static IEnumerable<T> SkipLast<T>(this IEnumerable<T> source, int count) =>
             source.Reverse().Skip(count).Reverse();
     }
+}
+#endif
+
+#if !NET5_0
+internal static partial class PolyfillExtensions
+{
+    public static Task<string> ReadAsStringAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
+        !cancellationToken.IsCancellationRequested
+            ? content.ReadAsStringAsync()
+            : Task.FromCanceled<string>(cancellationToken);
+
+    public static Task<Stream> ReadAsStreamAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
+        !cancellationToken.IsCancellationRequested
+            ? content.ReadAsStreamAsync()
+            : Task.FromCanceled<Stream>(cancellationToken);
 }
 #endif

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Internal.Http;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
@@ -235,6 +237,64 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
+        }
+
+        [Fact]
+        public async Task SendEnvelopeAsync_AttachmentTooLarge_DropsItem()
+        {
+            // Arrange
+            using var httpHandler = new FakeHttpClientHandler(
+                _ => SentryResponses.GetOkResponse()
+            );
+
+            var logger = new AccumulativeDiagnosticLogger();
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    MaxAttachmentSize = 1,
+                    DiagnosticLogger = logger,
+                    Debug = true
+                },
+                new HttpClient(httpHandler)
+            );
+
+            var attachmentNormal = new Attachment(
+                AttachmentType.Default,
+                new StreamAttachmentContent(new MemoryStream(new byte[] {1})),
+                "test1.txt",
+                null
+            );
+
+            var attachmentTooBig = new Attachment(
+                AttachmentType.Default,
+                new StreamAttachmentContent(new MemoryStream(new byte[] {1, 2, 3, 4, 5})),
+                "test2.txt",
+                null
+            );
+
+            using var envelope = Envelope.FromEvent(
+                new SentryEvent(),
+                new[] {attachmentNormal, attachmentTooBig}
+            );
+
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            var lastRequest = httpHandler.GetRequests().Last();
+            var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+            // Assert
+            // (the envelope should have only one item)
+
+            logger.Entries.Should().Contain(e =>
+                e.Message == "Attachment '{0}' dropped because it's too large ({1} bytes)." &&
+                e.Args[0].ToString() == "test2.txt" &&
+                e.Args[1].ToString() == "5"
+            );
+
+            actualEnvelopeSerialized.Should().NotContain("test2.txt");
         }
 
         [Fact]
