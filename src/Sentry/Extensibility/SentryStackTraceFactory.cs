@@ -142,7 +142,8 @@ namespace Sentry.Extensibility
                 frame.Package = method.DeclaringType?.Assembly.FullName;
 
                 frame.Function = _options.StackTraceMode == StackTraceMode.Enhanced
-                    ? stackFrame.ToString()
+                    // TODO: Extend ExtendedStackTrace with a `ToString("f")` which doesn't include namespace, class name
+                    ? RemoveNamespaceAndClass(stackFrame.ToString(), frame.Module)
                     : method.Name;
 
                 // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
@@ -265,6 +266,13 @@ namespace Sentry.Extensibility
             {
                 frame.Function = match.Groups[1].Value + " { <lambda> }";
             }
+        }
+
+        internal static string RemoveNamespaceAndClass(string method, string @namespace)
+        {
+            return string.IsNullOrWhiteSpace(@namespace)
+                ? method
+                : method.Replace(@namespace + ".", null);
         }
     }
 }

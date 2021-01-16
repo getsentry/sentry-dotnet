@@ -66,9 +66,8 @@ namespace Other.Tests.Internals
             Assert.NotNull(stackTrace);
 
             Assert.Equal(
-                $"void {GetType().Namespace}" +
-                $".{GetType().Name}" +
-                $".{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}" +
+                $"void " +
+                $"{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}" +
                 "()",
                 stackTrace.Frames.Last().Function
             );
@@ -118,7 +117,7 @@ namespace Other.Tests.Internals
 
         [Theory]
         [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
-        [InlineData(StackTraceMode.Enhanced, "void Other.Tests.Internals.SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
+        [InlineData(StackTraceMode.Enhanced, "(Fixture f, int b) ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
         public void Create_InlineCase_IncludesAmpersandAfterParameterType(StackTraceMode mode, string method)
         {
             _fixture.SentryOptions.StackTraceMode = mode;
@@ -199,8 +198,28 @@ namespace Other.Tests.Internals
             Assert.Null(stackFrame.Module);
         }
 
+        [Theory]
+        [InlineData(
+            "(int a, int b) Other.Tests.Internals.SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)",
+            "Other.Tests.Internals.SentryStackTraceFactoryTests",
+            "(int a, int b) ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
+        [InlineData(
+            "async Task Sentry.SentrySdk.InitAsync()",
+            "Sentry",
+            "async Task SentrySdk.InitAsync()")]
+        [InlineData(
+            // No namespace defined
+            "void SentrySdk.Init()",
+            "",
+            "void SentrySdk.Init()")]
+        public void RemoveNamespace_TestCases(string original, string @namespace, string expected)
+        {
+            var actual = SentryStackTraceFactory.RemoveNamespaceAndClass(original, @namespace);
+            Assert.Equal(expected, actual);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut) =>
+        private static (Fixture f, int b) ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut) =>
             throw new Exception();
     }
 }

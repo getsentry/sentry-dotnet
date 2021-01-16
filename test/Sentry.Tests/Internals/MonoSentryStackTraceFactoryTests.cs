@@ -45,7 +45,6 @@ namespace Other.Tests.Internals
                 Assert.Null(actual!.Frames[i].ContextLine);
                 Assert.Null(actual!.Frames[i].FileName);
                 Assert.Equal(0, actual!.Frames[i].ImageAddress);
-
             }
         }
 
