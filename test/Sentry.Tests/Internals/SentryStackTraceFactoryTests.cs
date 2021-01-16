@@ -141,7 +141,6 @@ namespace Other.Tests.Internals
         }
 
         [Theory]
-        [InlineData(StackTraceMode.AddParameters, "ByRefMethodThatThrows(Int32 value, Int32& valueIn, Int32& valueRef, Int32& valueOut)")]
         [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
         [InlineData(StackTraceMode.Enhanced, "void Other.Tests.Internals.SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
         public void Create_InlineCase_IncludesAmpersandAfterParameterType(StackTraceMode mode, string method)

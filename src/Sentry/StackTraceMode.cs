@@ -16,10 +16,6 @@ namespace Sentry
         /// </remarks>
         Original,
         /// <summary>
-        /// The SDK only adds the parameter type and name.
-        /// </summary>
-        AddParameters,
-        /// <summary>
         /// Includes return type, arguments ref modifiers and more.
         /// </summary>
         /// <remarks>

@@ -141,24 +141,9 @@ namespace Sentry.Extensibility
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
 
-                if (_options.StackTraceMode == StackTraceMode.AddParameters)
-                {
-                    // Include parameters in the function name
-                    var parameterListFormatted = string.Join(
-                        ", ",
-                        method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}")
-                    );
-
-                    frame.Function = $"{method.Name}({parameterListFormatted})";
-                }
-                else if (_options.StackTraceMode == StackTraceMode.Enhanced)
-                {
-                    frame.Function = stackFrame.ToString();
-                }
-                else
-                {
-                    frame.Function = method.Name;
-                }
+                frame.Function = _options.StackTraceMode == StackTraceMode.Enhanced
+                    ? stackFrame.ToString()
+                    : method.Name;
 
                 // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
                 if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)
@@ -169,8 +154,7 @@ namespace Sentry.Extensibility
 
             frame.InApp ??= !IsSystemModuleName(frame.Module);
 
-            // TODO: Uncomment before merging
-            // frame.FileName = stackFrame.GetFileName();
+            frame.FileName = stackFrame.GetFileName();
 
             // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
             var ilOffset = stackFrame.GetILOffset();
