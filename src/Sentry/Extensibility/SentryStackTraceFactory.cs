@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using Sentry.Protocol;
 
@@ -137,14 +138,25 @@ namespace Sentry.Extensibility
             var frame = new SentryStackFrame();
             if (GetMethod(stackFrame) is { } method)
             {
-                // TODO: SentryStackFrame.TryParse and skip frame instead of these unknown values:
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
 
-                frame.Function = _options.StackTraceMode == StackTraceMode.Enhanced
-                    // TODO: Extend ExtendedStackTrace with a `ToString("f")` which doesn't include namespace, class name
-                    ? RemoveNamespaceAndClass(stackFrame.ToString(), frame.Module)
-                    : method.Name;
+                if (_options.StackTraceMode == StackTraceMode.Enhanced && stackFrame is EnhancedStackFrame enhancedStackFrame)
+                {
+                    var sb = new StringBuilder();
+                    frame.Function = enhancedStackFrame.MethodInfo.Append(sb, false).ToString();
+
+                    if (enhancedStackFrame.MethodInfo.DeclaringType is { } declaringType)
+                    {
+                        sb.Clear();
+                        sb.AppendTypeDisplayName(declaringType);
+                        frame.Module = sb.ToString();
+                    }
+                }
+                else
+                {
+                    frame.Function = method.Name;
+                }
 
                 // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
                 if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)
@@ -266,13 +278,6 @@ namespace Sentry.Extensibility
             {
                 frame.Function = match.Groups[1].Value + " { <lambda> }";
             }
-        }
-
-        internal static string RemoveNamespaceAndClass(string method, string @namespace)
-        {
-            return string.IsNullOrWhiteSpace(@namespace)
-                ? method
-                : method.Replace(@namespace + ".", null);
         }
     }
 }
