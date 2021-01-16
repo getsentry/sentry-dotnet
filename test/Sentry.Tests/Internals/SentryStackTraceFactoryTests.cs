@@ -82,30 +82,6 @@ namespace Other.Tests.Internals
         }
 
         [Fact]
-        public void Create_NoExceptionAndAttachStackTraceOptionOnWithAddParameterMode_CurrentStackTrace()
-        {
-            _fixture.SentryOptions.AttachStacktrace = true;
-            _fixture.SentryOptions.StackTraceMode = StackTraceMode.AddParameters;
-            var sut = _fixture.GetSut();
-
-            var stackTrace = sut.Create();
-
-            Assert.NotNull(stackTrace);
-
-            Assert.Equal(
-                nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithAddParameterMode_CurrentStackTrace) + "()",
-                stackTrace.Frames.Last().Function
-            );
-
-            Assert.DoesNotContain(stackTrace.Frames, p =>
-                p.Function?.StartsWith(
-                    nameof(SentryStackTraceFactory.CreateFrame) + '(',
-                    StringComparison.Ordinal
-                ) == true
-            );
-        }
-
-        [Fact]
         public void Create_WithExceptionAndDefaultAttachStackTraceOption_HasStackTrace()
         {
             var sut = _fixture.GetSut();
