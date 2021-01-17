@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add instruction_addr to SentryStackFrame. (#744) @lucas-zimerman
+
 ## 3.0.0-alpha.11
 
 - Limit attachment size (#705)
