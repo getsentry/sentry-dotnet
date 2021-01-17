@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -116,6 +118,13 @@ namespace Sentry.Protocol
         /// We actually use the instruction address for symbolication but this can be used to calculate an instruction offset automatically.
         /// </summary>
         public long? SymbolAddress { get; set; }
+
+        /// <summary>
+        /// An optional instruction address for symbolication.<br/>
+        /// This should be a string with a hexadecimal number that includes a <b>0x</b> prefix.<br/>
+        /// If this is set and a known image is defined in the <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta/">Debug Meta Interface</see>, then symbolication can take place.<br/>
+        /// </summary>
+        public string? InstructionAddress { get; set; }
 
         /// <summary>
         /// The instruction offset.
@@ -248,6 +257,13 @@ namespace Sentry.Protocol
                 writer.WriteNumber("symbol_addr", symbolAddress);
             }
 
+            // Instruction address
+            if (InstructionAddress is { } instructionAddress &&
+                Regex.IsMatch(instructionAddress, @"\A\b0[xX][0-9a-fA-F]+\b\Z"))
+            {
+                writer.WriteString("instruction_addr", instructionAddress.ToLower());
+            }
+
             // Instruction offset
             if (InstructionOffset is {} instructionOffset)
             {
@@ -278,6 +294,7 @@ namespace Sentry.Protocol
             var platform = json.GetPropertyOrNull("platform")?.GetString();
             var imageAddress = json.GetPropertyOrNull("image_addr")?.GetInt64() ?? 0;
             var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetInt64();
+            var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetString();
             var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
 
             return new SentryStackFrame
@@ -298,6 +315,7 @@ namespace Sentry.Protocol
                 Platform = platform,
                 ImageAddress = imageAddress,
                 SymbolAddress = symbolAddress,
+                InstructionAddress = instructionAddress,
                 InstructionOffset = instructionOffset
             };
         }
