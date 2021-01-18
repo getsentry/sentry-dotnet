@@ -136,7 +136,7 @@ namespace Sentry
             {
                 if (Random.NextDouble() > _options.TracesSampleRate)
                 {
-                    transaction.IsSampled = true;
+                    transaction.IsSampled = false;
                     _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
                     return;
                 }
