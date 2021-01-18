@@ -40,7 +40,7 @@ namespace Sentry.Protocol
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
-        public bool IsSampled { get; set; }
+        public bool IsSampled { get; internal set; }
 
         private ConcurrentDictionary<string, string>? _tags;
 

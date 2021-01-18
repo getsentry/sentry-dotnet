@@ -33,9 +33,12 @@ namespace Sentry.Protocol
         /// </summary>
         SpanStatus? Status { get; set; }
 
+        // Note: this may need to be mutated internally,
+        // but the user should never be able to change it
+        // on their own.
         /// <summary>
         /// Is sampled.
         /// </summary>
-        bool IsSampled { get; set; }
+        bool IsSampled { get; }
     }
 }
