@@ -11,6 +11,7 @@ branches:
     - /^release\/.*$/
 
 install:
+  - cmd: git submodule update --init --recursive
   - ps: New-Item -Path '.tmp' -ItemType Directory
   - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
   - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
