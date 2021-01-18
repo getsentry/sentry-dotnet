@@ -154,28 +154,28 @@ namespace Sentry
             => eventLike.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
 
         /// <summary>
-        /// Sets the extra key-value pairs to the <see cref="Scope"/>.
+        /// Sets the extra key-value pairs to the object.
         /// </summary>
-        /// <param name="eventLike">The scope.</param>
+        /// <param name="hasExtra">The scope.</param>
         /// <param name="values">The values.</param>
-        public static void SetExtras(this IEventLike eventLike, IEnumerable<KeyValuePair<string, object?>> values)
+        public static void SetExtras(this IHasExtra hasExtra, IEnumerable<KeyValuePair<string, object?>> values)
         {
             foreach (var (key, value) in values)
             {
-                eventLike.SetExtra(key, value);
+                hasExtra.SetExtra(key, value);
             }
         }
 
         /// <summary>
         /// Set all items as tags.
         /// </summary>
-        /// <param name="eventLike">The scope.</param>
+        /// <param name="hasTags">The scope.</param>
         /// <param name="tags"></param>
-        public static void SetTags(this IEventLike eventLike, IEnumerable<KeyValuePair<string, string>> tags)
+        public static void SetTags(this IHasTags hasTags, IEnumerable<KeyValuePair<string, string>> tags)
         {
             foreach (var (key, value) in tags)
             {
-                eventLike.SetTag(key, value);
+                hasTags.SetTag(key, value);
             }
         }
 

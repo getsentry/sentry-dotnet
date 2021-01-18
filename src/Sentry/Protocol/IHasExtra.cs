@@ -11,5 +11,10 @@ namespace Sentry.Protocol
         /// An arbitrary mapping of additional metadata to store with the event.
         /// </summary>
         IReadOnlyDictionary<string, object?> Extra { get; }
+
+        /// <summary>
+        /// Sets an extra.
+        /// </summary>
+        void SetExtra(string key, object? value);
     }
 }

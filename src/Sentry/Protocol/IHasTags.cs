@@ -11,5 +11,10 @@ namespace Sentry.Protocol
         /// Arbitrary key-value for this event.
         /// </summary>
         IReadOnlyDictionary<string, string> Tags { get; }
+
+        /// <summary>
+        /// Sets a tag.
+        /// </summary>
+        void SetTag(string key, string value);
     }
 }
