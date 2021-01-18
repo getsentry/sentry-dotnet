@@ -258,10 +258,9 @@ namespace Sentry.Protocol
             }
 
             // Instruction address
-            if (InstructionAddress is { } instructionAddress &&
-                Regex.IsMatch(instructionAddress, @"\A\b0[xX][0-9a-fA-F]+\b\Z"))
+            if (InstructionAddress is { } instructionAddress)
             {
-                writer.WriteString("instruction_addr", instructionAddress.ToLower());
+                writer.WriteString("instruction_addr", instructionAddress);
             }
 
             // Instruction offset

@@ -27,7 +27,7 @@ namespace Sentry.Tests.Protocol.Exceptions
                 ImageAddress = 3,
                 SymbolAddress = 4,
                 InstructionOffset = 5,
-                InstructionAddress = "0xFFFFFFFF"
+                InstructionAddress = "0xffffffff"
             };
 
             var actual = sut.ToJsonString();
@@ -56,19 +56,6 @@ namespace Sentry.Tests.Protocol.Exceptions
                 "}",
                 actual
             );
-        }
-
-        [Fact]
-        public void SerializeObject_InvalidInstructionAddressSet_SerializesValidObjectWithoutInstructionAddress()
-        {
-            var sut = new SentryStackFrame
-            {
-                InstructionAddress = "0xFFFFFFFGG"
-            };
-
-            var actual = sut.ToJsonString();
-
-            Assert.Equal("{}", actual);
         }
 
         [Fact]
