@@ -29,7 +29,7 @@ namespace Sentry.Protocol
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
-        public bool IsSampled { get; set; }
+        public bool IsSampled { get; internal set; }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)

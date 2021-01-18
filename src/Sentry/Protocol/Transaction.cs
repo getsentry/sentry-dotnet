@@ -14,7 +14,6 @@ namespace Sentry.Protocol
     public class Transaction : ITransaction, IJsonSerializable
     {
         private readonly IHub _hub;
-        private readonly SpanRecorder _spanRecorder = new();
 
         /// <inheritdoc />
         public SentryId EventId { get; private set; }
@@ -125,13 +124,18 @@ namespace Sentry.Protocol
 
         private Dictionary<string, object?>? _extra;
 
-        /// <inheritdoc cref="IEventLike.Extra" />
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
         private Dictionary<string, string>? _tags;
 
-        /// <inheritdoc cref="IEventLike.Extra" />
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
+
+        private List<Span>? _spans;
+
+        /// <inheritdoc />
+        public IReadOnlyList<Span> Spans => _spans ??= new List<Span>();
 
         // Transaction never has a parent
         SpanId? ISpanContext.ParentSpanId => null;
@@ -174,12 +178,12 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public ISpan StartChild(string operation)
         {
-            var span = new Span(_spanRecorder, SpanId, operation)
+            var span = new Span(this, SpanId, operation)
             {
                 IsSampled = IsSampled
             };
 
-            _spanRecorder.Add(span);
+            (_spans ??= new List<Span>()).Add(span);
 
             return span;
         }
@@ -194,9 +198,7 @@ namespace Sentry.Protocol
             _hub.CaptureTransaction(this);
         }
 
-        /// <summary>
-        /// Get Sentry trace header.
-        /// </summary>
+        /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
@@ -303,6 +305,18 @@ namespace Sentry.Protocol
                 writer.WriteEndObject();
             }
 
+            if (_spans is {} spans)
+            {
+                writer.WriteStartArray("spans");
+
+                foreach (var span in spans)
+                {
+                    writer.WriteSerializableValue(span);
+                }
+
+                writer.WriteEndArray();
+            }
+
             writer.WriteEndObject();
         }
 
@@ -329,7 +343,7 @@ namespace Sentry.Protocol
             var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
 
-            return new Transaction(hub, name)
+            var transaction = new Transaction(hub, name)
             {
                 EventId = eventId,
                 Description = description,
@@ -346,6 +360,14 @@ namespace Sentry.Protocol
                 _extra = extra!,
                 _tags = tags!
             };
+
+            // Spans need to be attached after the transaction instance was created because they
+            // have a reference to it.
+            transaction._spans = json.GetPropertyOrNull("spans")?.EnumerateArray()
+                .Select(j => Span.FromJson(transaction, j))
+                .ToList();
+
+            return transaction;
         }
     }
 }

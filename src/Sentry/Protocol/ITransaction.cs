@@ -1,4 +1,6 @@
-﻿namespace Sentry.Protocol
+﻿using System.Collections.Generic;
+
+namespace Sentry.Protocol
 {
     /// <summary>
     /// Transaction.
@@ -14,5 +16,15 @@
         /// Transaction name.
         /// </summary>
         string Name { get; set; }
+
+        /// <summary>
+        /// Flat list of spans within this transaction.
+        /// </summary>
+        IReadOnlyList<Span> Spans { get; }
+
+        /// <summary>
+        /// Get Sentry trace header.
+        /// </summary>
+        SentryTraceHeader GetTraceHeader();
     }
 }

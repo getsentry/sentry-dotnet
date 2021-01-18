@@ -121,8 +121,6 @@ namespace Sentry.Internal
                 transaction.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
             }
 
-            ConfigureScope(scope => scope.Transaction = transaction);
-
             return transaction;
         }
 
