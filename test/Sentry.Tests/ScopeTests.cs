@@ -140,7 +140,7 @@ namespace Sentry.Tests
             scope.TransactionName = null;
 
             // Assert
-            scope.TransactionName.Should().BeEmpty();
+            scope.TransactionName.Should().BeNullOrEmpty();
             scope.TransactionName.Should().Be(scope.Transaction?.Name);
         }
 
