@@ -11,14 +11,12 @@ namespace Sentry.Protocol
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ISpan, IEventLike, IJsonSerializable
+    public class Transaction : ITransaction, IJsonSerializable
     {
         private readonly IHub _hub;
         private readonly SpanRecorder _spanRecorder = new();
 
-        /// <summary>
-        /// Transaction event ID.
-        /// </summary>
+        /// <inheritdoc />
         public SentryId EventId { get; private set; }
 
         /// <inheritdoc />
@@ -35,9 +33,7 @@ namespace Sentry.Protocol
             private set => Contexts.Trace.TraceId = value;
         }
 
-        /// <summary>
-        /// Transaction name.
-        /// </summary>
+        /// <inheritdoc />
         public string Name { get; set; }
 
         /// <inheritdoc />
@@ -143,20 +139,23 @@ namespace Sentry.Protocol
         // This constructor is used for deserialization purposes.
         // It's required because some of the fields are mapped on 'contexts.trace'.
         // When deserializing, we don't parse those fields explicitly, but
-        // instead just parse the trace context.
-        // Hence why we need a constructor that doesn't take name and operation.
-        private Transaction(IHub hub) => _hub = hub;
+        // instead just parse the trace context and resolve them later.
+        // Hence why we need a constructor that doesn't take the operation.
+        private Transaction(IHub hub, string name)
+        {
+            _hub = hub;
+            EventId = SentryId.Create();
+            SpanId = SpanId.Create();
+            TraceId = SentryId.Create();
+            Name = name;
+        }
 
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(IHub hub, string name, string operation)
-            : this(hub)
+            : this(hub, name)
         {
-            EventId = SentryId.Create();
-            SpanId = SpanId.Create();
-            TraceId = SentryId.Create();
-            Name = name;
             Operation = operation;
         }
 
@@ -330,10 +329,9 @@ namespace Sentry.Protocol
             var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
 
-            return new Transaction(hub)
+            return new Transaction(hub, name)
             {
                 EventId = eventId,
-                Name = name,
                 Description = description,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,

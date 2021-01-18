@@ -103,7 +103,7 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public Transaction StartTransaction(string name, string operation)
+        public ITransaction StartTransaction(string name, string operation)
         {
             var transaction = new Transaction(this, name, operation);
 

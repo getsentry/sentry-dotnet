@@ -15,7 +15,7 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        public static Transaction StartTransaction(
+        public static ITransaction StartTransaction(
             this IHub hub,
             string name,
             string operation,

@@ -319,7 +319,7 @@ namespace Sentry
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static Transaction StartTransaction(string name, string operation)
+        public static ITransaction StartTransaction(string name, string operation)
             => _hub.StartTransaction(name, operation);
 
         /// <summary>

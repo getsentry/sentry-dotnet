@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Span.
     /// </summary>
-    public interface ISpan : ISpanContext
+    public interface ISpan : ISpanContext, IHasTags, IHasExtra
     {
         /// <summary>
         /// Description.
@@ -22,16 +21,6 @@ namespace Sentry.Protocol
         /// End timestamp.
         /// </summary>
         DateTimeOffset? EndTimestamp { get; }
-
-        /// <summary>
-        /// Tags.
-        /// </summary>
-        IReadOnlyDictionary<string, string> Tags { get; }
-
-        /// <summary>
-        /// Data.
-        /// </summary>
-        IReadOnlyDictionary<string, object?> Extra { get; }
 
         /// <summary>
         /// Starts a child span.
