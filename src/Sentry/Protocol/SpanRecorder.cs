@@ -10,12 +10,12 @@ namespace Sentry.Protocol
         private const int MaxSpans = 1000;
 
         private readonly object _lock = new();
-        private readonly List<Span> _spans = new();
+        private readonly List<ISpan> _spans = new();
 
         /// <summary>
         /// Records a span.
         /// </summary>
-        public void Add(Span span)
+        public void Add(ISpan span)
         {
             lock (_lock)
             {
@@ -29,7 +29,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Gets all recorded spans.
         /// </summary>
-        public IReadOnlyList<Span> GetAll()
+        public IReadOnlyList<ISpan> GetAll()
         {
             lock (_lock)
             {

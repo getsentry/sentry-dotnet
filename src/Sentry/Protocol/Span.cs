@@ -47,10 +47,18 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
 
+        /// <inheritdoc />
+        public void SetTag(string key, string value) =>
+            (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
+
         private ConcurrentDictionary<string, object?>? _data;
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
+
+        /// <inheritdoc />
+        public void SetExtra(string key, object? value) =>
+            (_data ??= new ConcurrentDictionary<string, object?>())[key] = value;
 
         /// <summary>
         /// Initializes an instance of <see cref="Span"/>.
