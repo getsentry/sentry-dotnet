@@ -112,8 +112,38 @@ namespace Sentry
         /// <inheritdoc />
         public string? Environment { get; set; }
 
+        // TransactionName is kept for legacy purposes because
+        // SentryEvent still makes use of it.
+        // It should be possible to set the transaction name
+        // without starting a fully fledged transaction.
+        // Consequently, Transaction.Name and TransactionName must
+        // be kept in sync as much as possible.
+
+        private string? _fallbackTransactionName;
+
         /// <inheritdoc />
-        public string? TransactionName { get; set; }
+        public string? TransactionName
+        {
+            get => Transaction?.Name ?? _fallbackTransactionName;
+            set
+            {
+                // Set the fallback regardless, so that the variable is always kept up to date
+                _fallbackTransactionName = value;
+
+                // If a transaction has been started, overwrite its name
+                if (Transaction is { } transaction)
+                {
+                    // Null name is not allowed in a transaction, but
+                    // allowed on `scope.TransactionName` because it's optional.
+                    // As a workaround, we coerce null into empty string.
+                    // Context: https://github.com/getsentry/develop/issues/246#issuecomment-762274438
+
+                    transaction.Name = !string.IsNullOrWhiteSpace(value)
+                        ? value
+                        : string.Empty;
+                }
+            }
+        }
 
         /// <summary>
         /// Transaction.
