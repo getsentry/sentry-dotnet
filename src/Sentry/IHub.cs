@@ -24,7 +24,7 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        Transaction StartTransaction();
+        Transaction StartTransaction(string name, string operation);
 
         /// <summary>
         /// Gets the sentry trace header.

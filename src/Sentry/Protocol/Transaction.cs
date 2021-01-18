@@ -17,9 +17,9 @@ namespace Sentry.Protocol
         private readonly SpanRecorder _spanRecorder = new();
 
         /// <summary>
-        /// Transaction name.
+        /// Transaction event ID.
         /// </summary>
-        public string Name { get; set; } = "unnamed";
+        public SentryId EventId { get; private set; }
 
         /// <inheritdoc />
         public SpanId SpanId
@@ -34,6 +34,11 @@ namespace Sentry.Protocol
             get => Contexts.Trace.TraceId;
             private set => Contexts.Trace.TraceId = value;
         }
+
+        /// <summary>
+        /// Transaction name.
+        /// </summary>
+        public string Name { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
@@ -98,11 +103,11 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public string? Environment { get; set; }
 
-        // TODO: merge SentryEvent and Transaction, there is no reason to treat them as separate entities
+        // This field exists on SentryEvent and Scope, but not on Transaction
         string? IEventLike.TransactionName
         {
             get => Name;
-            set => Name = value ?? "<unnamed>";
+            set => Name = value ?? "";
         }
 
         /// <inheritdoc />
@@ -135,18 +140,25 @@ namespace Sentry.Protocol
         // Transaction never has a parent
         SpanId? ISpanContext.ParentSpanId => null;
 
-        internal Transaction(IHub hub)
-        {
-            _hub = hub;
-
-            SpanId = SpanId.Create();
-            TraceId = SentryId.Create();
-        }
+        // This constructor is used for deserialization purposes.
+        // It's required because some of the fields are mapped on 'contexts.trace'.
+        // When deserializing, we don't parse those fields explicitly, but
+        // instead just parse the trace context.
+        // Hence why we need a constructor that doesn't take name and operation.
+        private Transaction(IHub hub) => _hub = hub;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Transaction"/>.
+        /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public Transaction() : this(HubAdapter.Instance) {}
+        public Transaction(IHub hub, string name, string operation)
+            : this(hub)
+        {
+            EventId = SentryId.Create();
+            SpanId = SpanId.Create();
+            TraceId = SentryId.Create();
+            Name = name;
+            Operation = operation;
+        }
 
         /// <inheritdoc />
         public void AddBreadcrumb(Breadcrumb breadcrumb) =>
@@ -161,9 +173,9 @@ namespace Sentry.Protocol
             (_tags ??= new Dictionary<string, string>())[key] = value;
 
         /// <inheritdoc />
-        public ISpan StartChild()
+        public ISpan StartChild(string operation)
         {
-            var span = new Span(_spanRecorder, null, SpanId)
+            var span = new Span(_spanRecorder, SpanId, operation)
             {
                 IsSampled = IsSampled
             };
@@ -198,7 +210,7 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", "transaction");
-            writer.WriteSerializable("event_id", SentryId.Create());
+            writer.WriteSerializable("event_id", EventId);
 
             if (Level is {} level)
             {
@@ -302,6 +314,7 @@ namespace Sentry.Protocol
         {
             var hub = HubAdapter.Instance;
 
+            var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var name = json.GetProperty("transaction").GetStringOrThrow();
             var description = json.GetPropertyOrNull("description")?.GetString();
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
@@ -319,6 +332,7 @@ namespace Sentry.Protocol
 
             return new Transaction(hub)
             {
+                EventId = eventId,
                 Name = name,
                 Description = description,
                 StartTimestamp = startTimestamp,

@@ -15,21 +15,14 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        public static Transaction StartTransaction(this IHub hub, string name)
+        public static Transaction StartTransaction(
+            this IHub hub,
+            string name,
+            string operation,
+            string description)
         {
-            var transaction = hub.StartTransaction();
-            transaction.Name = name;
-
-            return transaction;
-        }
-
-        /// <summary>
-        /// Starts a transaction.
-        /// </summary>
-        public static Transaction StartTransaction(this IHub hub, string name, string operation)
-        {
-            var transaction = hub.StartTransaction(name);
-            transaction.Operation = operation;
+            var transaction = hub.StartTransaction(name, operation);
+            transaction.Description = description;
 
             return transaction;
         }

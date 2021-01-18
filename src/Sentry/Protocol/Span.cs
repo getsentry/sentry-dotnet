@@ -16,10 +16,10 @@ namespace Sentry.Protocol
         private readonly SpanRecorder _parentSpanRecorder;
 
         /// <inheritdoc />
-        public SpanId SpanId { get; }
+        public SpanId SpanId { get; private set; }
 
         /// <inheritdoc />
-        public SpanId? ParentSpanId { get; }
+        public SpanId? ParentSpanId { get; private set; }
 
         /// <inheritdoc />
         public SentryId TraceId { get; private set; }
@@ -31,7 +31,7 @@ namespace Sentry.Protocol
         public DateTimeOffset? EndTimestamp { get; private set; }
 
         /// <inheritdoc />
-        public string Operation { get; set; } = "unknown";
+        public string Operation { get; set; }
 
         /// <inheritdoc />
         public string? Description { get; set; }
@@ -52,18 +52,22 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
 
-        internal Span(SpanRecorder parentSpanRecorder, SpanId? spanId = null, SpanId? parentSpanId = null)
+        /// <summary>
+        /// Initializes an instance of <see cref="Span"/>.
+        /// </summary>
+        public Span(SpanRecorder parentSpanRecorder, SpanId? parentSpanId, string operation)
         {
             _parentSpanRecorder = parentSpanRecorder;
-            SpanId = spanId ?? SpanId.Create();
+            SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
+            Operation = operation;
         }
 
         /// <inheritdoc />
-        public ISpan StartChild()
+        public ISpan StartChild(string operation)
         {
-            var span = new Span(_parentSpanRecorder, null, SpanId)
+            var span = new Span(_parentSpanRecorder, SpanId, operation)
             {
                 IsSampled = IsSampled
             };
@@ -136,7 +140,6 @@ namespace Sentry.Protocol
         /// </summary>
         public static Span FromJson(JsonElement json)
         {
-            // TODO
             var parentSpanRecorder = new SpanRecorder();
 
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
@@ -151,8 +154,9 @@ namespace Sentry.Protocol
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
 
-            return new Span(parentSpanRecorder, spanId, parentSpanId)
+            return new Span(parentSpanRecorder, parentSpanId, operation)
             {
+                SpanId = spanId,
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,

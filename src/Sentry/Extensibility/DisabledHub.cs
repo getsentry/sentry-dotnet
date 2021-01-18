@@ -55,7 +55,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns a dummy transaction.
         /// </summary>
-        public Transaction StartTransaction() => new(this);
+        public Transaction StartTransaction(string name, string operation) => new(this);
 
         /// <summary>
         /// Returns null.
