@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add instruction_addr to SentryStackFrame. (#744) @lucas-zimerman
+- Default stack trace format: Ben.Demystifier (#732) @bruno-garcia
+
 ## 3.0.0-alpha.11
 
 ### Changed
