@@ -112,14 +112,12 @@ namespace Sentry
         /// <inheritdoc />
         public string? Environment { get; set; }
 
-        // TransactionName and Transaction need to coexist because
-        // SentryEvent still tracks the transaction as a string.
-        // If a started Transaction exists and the user sets TransactionName,
-        // it should update the name of that transaction.
-        // Otherwise, it should just keep track of the name separately, so that
-        // it can be used in an event, in case a transaction doesn't exist.
-        // More context in this discussion:
-        // https://github.com/getsentry/develop/issues/246#issuecomment-760997974
+        // TransactionName is kept for legacy purposes because
+        // SentryEvent still makes use of it.
+        // It should be possible to set the transaction name
+        // without starting a fully fledged transaction.
+        // Consequently, Transaction.Name and TransactionName must
+        // be kept in sync as much as possible.
 
         private string? _fallbackTransactionName;
 
@@ -129,13 +127,20 @@ namespace Sentry
             get => Transaction?.Name ?? _fallbackTransactionName;
             set
             {
-                if (!string.IsNullOrWhiteSpace(value) && Transaction is { } transaction)
+                // Set the fallback regardless, so that the variable is always kept up to date
+                _fallbackTransactionName = value;
+
+                // If a transaction has been started, overwrite its name
+                if (Transaction is { } transaction)
                 {
-                    transaction.Name = value;
-                }
-                else
-                {
-                    _fallbackTransactionName = value;
+                    // Null name is not allowed in a transaction, but
+                    // allowed on `scope.TransactionName` because it's optional.
+                    // As a workaround, we coerce null into empty string.
+                    // Context: https://github.com/getsentry/develop/issues/246#issuecomment-762274438
+
+                    transaction.Name = !string.IsNullOrWhiteSpace(value)
+                        ? value
+                        : string.Empty;
                 }
             }
         }
