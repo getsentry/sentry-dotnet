@@ -258,9 +258,9 @@ namespace Sentry.Protocol
             }
 
             // Instruction address
-            if (InstructionAddress is { } instructionAddress)
+            if (!string.IsNullOrWhiteSpace(InstructionAddress))
             {
-                writer.WriteString("instruction_addr", instructionAddress);
+                writer.WriteString("instruction_addr", InstructionAddress);
             }
 
             // Instruction offset
