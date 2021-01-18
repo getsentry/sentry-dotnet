@@ -1,4 +1,6 @@
 using System;
+using FluentAssertions;
+using Sentry.Extensibility;
 using Sentry.Protocol;
 using Xunit;
 
@@ -94,6 +96,69 @@ namespace Sentry.Tests
             var clone = _sut.Clone();
 
             Assert.Equal(_sut.Environment, clone.Environment);
+        }
+
+        [Fact]
+        public void TransactionName_TransactionNotStarted_NameIsSet()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            // Act
+            scope.TransactionName = "foo";
+
+            // Assert
+            scope.TransactionName.Should().Be("foo");
+            scope.Transaction.Should().BeNull();
+        }
+
+        [Fact]
+        public void TransactionName_TransactionStarted_NameIsSetAndOverwritten()
+        {
+            // Arrange
+            var scope = new Scope();
+            scope.Transaction = new Transaction(DisabledHub.Instance);
+            scope.Transaction.Name = "bar";
+
+            // Act
+            scope.TransactionName = "foo";
+
+            // Assert
+            scope.TransactionName.Should().Be("foo");
+            scope.TransactionName.Should().Be(scope.Transaction?.Name);
+        }
+
+        [Fact]
+        public void TransactionName_TransactionStarted_NameIsSetToNullCoercedToEmpty()
+        {
+            // Arrange
+            var scope = new Scope();
+            scope.Transaction = new Transaction(DisabledHub.Instance);
+            scope.Transaction.Name = "bar";
+
+            // Act
+            scope.TransactionName = null;
+
+            // Assert
+            scope.TransactionName.Should().BeEmpty();
+            scope.TransactionName.Should().Be(scope.Transaction?.Name);
+        }
+
+        [Fact]
+        public void TransactionName_TransactionStarted_NameReturnsActualTransactionName()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            scope.TransactionName = "bar";
+
+            // Act
+            scope.Transaction = new Transaction(DisabledHub.Instance);
+            scope.Transaction.Name = "foo";
+
+            // Assert
+            scope.TransactionName.Should().Be("foo");
+            scope.TransactionName.Should().Be(scope.Transaction?.Name);
         }
     }
 }
