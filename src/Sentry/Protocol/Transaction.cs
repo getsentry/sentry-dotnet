@@ -369,7 +369,6 @@ namespace Sentry.Protocol
             var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
             var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
-            var spans = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(j => Span.FromJson(transaction, j)).Pipe(v => new ConcurrentBag<Span>(v));
 
             var transaction = new Transaction(hub, name)
             {
@@ -403,6 +402,12 @@ namespace Sentry.Protocol
             {
                 transaction._tagsLazy = new(() => tags!);
             }
+
+            var spans = json
+                .GetPropertyOrNull("spans")?
+                .EnumerateArray()
+                .Select(j => Span.FromJson(transaction, j))
+                .Pipe(v => new ConcurrentBag<Span>(v));
 
             if (spans is not null)
             {
