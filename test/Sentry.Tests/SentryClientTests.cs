@@ -54,7 +54,7 @@ namespace Sentry.Tests
 
             var actual = sut.CaptureEvent(evt);
 
-            var hasDashes = actual.ToString().Contains('-');
+            var hasDashes = actual.ToString().Contains("-");
             Assert.False(hasDashes);
         }
 
