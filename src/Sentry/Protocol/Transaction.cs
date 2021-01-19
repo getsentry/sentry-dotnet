@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -135,25 +136,29 @@ namespace Sentry.Protocol
             set => _fingerprint = value;
         }
 
-        private List<Breadcrumb>? _breadcrumbs;
+        // Not readonly because of deserialization
+        private Lazy<List<Breadcrumb>> _breadcrumbsLazy = new();
 
         /// <inheritdoc />
-        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
+        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbsLazy.Value;
 
-        private Dictionary<string, object?>? _extra;
-
-        /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
-
-        private Dictionary<string, string>? _tags;
+        // Not readonly because of deserialization
+        private Lazy<Dictionary<string, object?>> _extraLazy = new();
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
+        public IReadOnlyDictionary<string, object?> Extra => _extraLazy.Value;
 
-        private List<Span>? _spans;
+        // Not readonly because of deserialization
+        private Lazy<Dictionary<string, string>> _tagsLazy = new();
 
         /// <inheritdoc />
-        public IReadOnlyList<ISpan> Spans => _spans ??= new List<Span>();
+        public IReadOnlyDictionary<string, string> Tags => _tagsLazy.Value;
+
+        // Not readonly because of deserialization
+        private Lazy<ConcurrentBag<Span>> _spansLazy = new();
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<ISpan> Spans => _spansLazy.Value;
 
         // Transaction never has a parent
         SpanId? ISpanContext.ParentSpanId => null;
@@ -185,15 +190,15 @@ namespace Sentry.Protocol
 
         /// <inheritdoc />
         public void AddBreadcrumb(Breadcrumb breadcrumb) =>
-            (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
+            _breadcrumbsLazy.Value.Add(breadcrumb);
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value) =>
-            (_extra ??= new Dictionary<string, object?>())[key] = value;
+            _extraLazy.Value[key] = value;
 
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
-            (_tags ??= new Dictionary<string, string>())[key] = value;
+            _tagsLazy.Value[key] = value;
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
@@ -202,7 +207,7 @@ namespace Sentry.Protocol
                 IsSampled = IsSampled
             };
 
-            (_spans ??= new List<Span>()).Add(span);
+            _spansLazy.Value.Add(span);
 
             return span;
         }
@@ -291,11 +296,11 @@ namespace Sentry.Protocol
                 writer.WriteEndArray();
             }
 
-            if (_breadcrumbs is {} breadcrumbs && breadcrumbs.Any())
+            if (_breadcrumbsLazy.IsValueCreated && _breadcrumbsLazy.Value.Any())
             {
                 writer.WriteStartArray("breadcrumbs");
 
-                foreach (var i in breadcrumbs)
+                foreach (var i in _breadcrumbsLazy.Value)
                 {
                     writer.WriteSerializableValue(i);
                 }
@@ -303,11 +308,11 @@ namespace Sentry.Protocol
                 writer.WriteEndArray();
             }
 
-            if (_extra is {} extra && extra.Any())
+            if (_extraLazy.IsValueCreated && _extraLazy.Value.Any())
             {
                 writer.WriteStartObject("extra");
 
-                foreach (var (key, value) in extra)
+                foreach (var (key, value) in _extraLazy.Value)
                 {
                     writer.WriteDynamic(key, value);
                 }
@@ -315,11 +320,11 @@ namespace Sentry.Protocol
                 writer.WriteEndObject();
             }
 
-            if (_tags is {} tags && tags.Any())
+            if (_tagsLazy.IsValueCreated && _tagsLazy.Value.Any())
             {
                 writer.WriteStartObject("tags");
 
-                foreach (var (key, value) in tags)
+                foreach (var (key, value) in _tagsLazy.Value)
                 {
                     writer.WriteString(key, value);
                 }
@@ -327,11 +332,11 @@ namespace Sentry.Protocol
                 writer.WriteEndObject();
             }
 
-            if (_spans is {} spans)
+            if (_spansLazy.IsValueCreated && _spansLazy.Value.Any())
             {
                 writer.WriteStartArray("spans");
 
-                foreach (var span in spans)
+                foreach (var span in _spansLazy.Value)
                 {
                     writer.WriteSerializableValue(span);
                 }
@@ -378,16 +383,18 @@ namespace Sentry.Protocol
                 Environment = environment,
                 Sdk = sdk,
                 _fingerprint = fingerprint!,
-                _breadcrumbs = breadcrumbs!,
-                _extra = extra!,
-                _tags = tags!
+                _breadcrumbsLazy = new(() => breadcrumbs!),
+                _extraLazy = new(() =>extra)!,
+                _tagsLazy = new(() =>tags)!
             };
 
             // Spans need to be attached after the transaction instance was created because they
             // have a reference to it.
-            transaction._spans = json.GetPropertyOrNull("spans")?.EnumerateArray()
-                .Select(j => Span.FromJson(transaction, j))
-                .ToList();
+            transaction._spansLazy = new(
+                () => json.GetPropertyOrNull("spans")?.EnumerateArray()
+                    .Select(j => Span.FromJson(transaction, j))
+                    .Pipe(v => new ConcurrentBag<Span>(v))
+            );
 
             return transaction;
         }
