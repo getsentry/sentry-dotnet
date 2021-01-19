@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -349,11 +348,13 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
-            {
-                Name = "test name",
-                Operation = "test operation"
-            });
+            sut.CaptureTransaction(
+                new Transaction(
+                    DisabledHub.Instance,
+                    "test name",
+                    "test operation"
+                )
+            );
 
             // Assert
             _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
@@ -366,10 +367,13 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
-            {
-                Name = null!
-            });
+            sut.CaptureTransaction(
+                new Transaction(
+                    DisabledHub.Instance,
+                    null!,
+                    "test operation"
+                )
+            );
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -382,10 +386,13 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
-            {
-                Operation = null!
-            });
+            sut.CaptureTransaction(
+                new Transaction(
+                    DisabledHub.Instance,
+                    "test name",
+                    null!
+                )
+            );
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
