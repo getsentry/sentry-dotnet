@@ -156,8 +156,6 @@ namespace Sentry
         /// <summary>
         /// Sets the extra key-value pairs to the object.
         /// </summary>
-        /// <param name="hasExtra">The scope.</param>
-        /// <param name="values">The values.</param>
         public static void SetExtras(this IHasExtra hasExtra, IEnumerable<KeyValuePair<string, object?>> values)
         {
             foreach (var (key, value) in values)
@@ -169,8 +167,6 @@ namespace Sentry
         /// <summary>
         /// Set all items as tags.
         /// </summary>
-        /// <param name="hasTags">The scope.</param>
-        /// <param name="tags"></param>
         public static void SetTags(this IHasTags hasTags, IEnumerable<KeyValuePair<string, string>> tags)
         {
             foreach (var (key, value) in tags)
