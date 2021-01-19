@@ -416,7 +416,7 @@ namespace Sentry.Tests
                 "test operation"
             );
 
-            transaction.Contexts.Trace.SpanId = default;
+            transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
             // Act
             sut.CaptureTransaction(transaction);
