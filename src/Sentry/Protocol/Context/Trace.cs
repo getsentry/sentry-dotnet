@@ -23,13 +23,13 @@ namespace Sentry.Protocol
         public SentryId TraceId { get; set; }
 
         /// <inheritdoc />
-        public string Operation { get; set; } = "unknown";
+        public string Operation { get; set; } = "";
 
         /// <inheritdoc />
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
-        public bool IsSampled { get; internal set; }
+        public bool IsSampled { get; internal set; } = true;
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
