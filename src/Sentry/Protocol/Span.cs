@@ -13,7 +13,10 @@ namespace Sentry.Protocol
     /// </summary>
     public class Span : ISpan, IJsonSerializable
     {
-        private readonly ITransaction _parentTransaction;
+        // This needs to be Transaction and not ITransaction because
+        // ITransaction doesn't contain `StartChild(..., parentSpanId)`
+        // which we need here.
+        private readonly Transaction _parentTransaction;
 
         /// <inheritdoc />
         public SpanId SpanId { get; private set; }
@@ -63,7 +66,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Initializes an instance of <see cref="Span"/>.
         /// </summary>
-        public Span(ITransaction parentTransaction, SpanId? parentSpanId, string operation)
+        public Span(Transaction parentTransaction, SpanId? parentSpanId, string operation)
         {
             _parentTransaction = parentTransaction;
             SpanId = SpanId.Create();
@@ -73,7 +76,8 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public ISpan StartChild(string operation) => _parentTransaction.StartChild(operation);
+        public ISpan StartChild(string operation) =>
+            _parentTransaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
         public void Finish() => EndTimestamp = DateTimeOffset.UtcNow;

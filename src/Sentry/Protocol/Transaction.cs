@@ -176,10 +176,9 @@ namespace Sentry.Protocol
         public void SetTag(string key, string value) =>
             (_tags ??= new Dictionary<string, string>())[key] = value;
 
-        /// <inheritdoc />
-        public ISpan StartChild(string operation)
+        internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
-            var span = new Span(this, SpanId, operation)
+            var span = new Span(this, parentSpanId, operation)
             {
                 IsSampled = IsSampled
             };
@@ -188,6 +187,10 @@ namespace Sentry.Protocol
 
             return span;
         }
+
+        /// <inheritdoc />
+        public ISpan StartChild(string operation) =>
+            StartChild(SpanId, operation);
 
         /// <inheritdoc />
         public void Finish()
