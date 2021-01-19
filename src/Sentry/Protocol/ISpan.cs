@@ -54,8 +54,8 @@ namespace Sentry.Protocol
         /// </summary>
         public static void Finish(this ISpan span, SpanStatus status)
         {
-            span.Status = status;
             span.Finish();
+            span.Status = status;
         }
     }
 }

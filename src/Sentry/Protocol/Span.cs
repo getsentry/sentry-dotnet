@@ -156,7 +156,6 @@ namespace Sentry.Protocol
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
-                Operation = operation,
                 Description = description,
                 Status = status,
                 IsSampled = isSampled,
