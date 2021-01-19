@@ -424,6 +424,15 @@ namespace Sentry
         public ISentryTraceSampler? TracesSampler { get; set; }
 
         /// <summary>
+        /// ATTENTION: This option will change how issues are grouped in Sentry!
+        /// </summary>
+        /// <remarks>
+        /// Sentry groups events by stack traces. If you change this mode and you have thousands of groups,
+        /// you'll get thousands of new groups. So use this setting with care.
+        /// </remarks>
+        public StackTraceMode StackTraceMode { get; set; }
+
+        /// <summary>
         /// Maximum allowed file size of attachments, in bytes.
         /// Attachments above this size will be discarded.
         /// </summary>
@@ -437,6 +446,9 @@ namespace Sentry
         /// </summary>
         public SentryOptions()
         {
+            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change.
+            StackTraceMode = StackTraceMode.Enhanced;
+
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };

@@ -45,7 +45,6 @@ namespace Other.Tests.Internals
                 Assert.Null(actual!.Frames[i].ContextLine);
                 Assert.Null(actual!.Frames[i].FileName);
                 Assert.Equal(0, actual!.Frames[i].ImageAddress);
-
             }
         }
 
@@ -55,29 +54,6 @@ namespace Other.Tests.Internals
             var sut = _fixture.GetSut();
 
             Assert.Null(sut.Create());
-        }
-
-        [Fact]
-        public void Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace()
-        {
-            _fixture.SentryOptions.AttachStacktrace = true;
-            var sut = _fixture.GetSut();
-
-            var stackTrace = sut.Create();
-
-            Assert.NotNull(stackTrace);
-
-            Assert.Equal(
-                nameof(Create_NoExceptionAndAttachStackTraceOptionOn_CurrentStackTrace) + "()",
-                stackTrace.Frames.Last().Function
-            );
-
-            Assert.DoesNotContain(stackTrace.Frames, p =>
-                p.Function?.StartsWith(
-                    nameof(SentryStackTraceFactory.CreateFrame) + '(',
-                    StringComparison.Ordinal
-                ) == true
-            );
         }
 
         [Fact]
