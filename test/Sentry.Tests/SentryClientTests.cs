@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -55,7 +54,7 @@ namespace Sentry.Tests
 
             var actual = sut.CaptureEvent(evt);
 
-            var hasDashes = actual.ToString().Contains('-');
+            var hasDashes = actual.ToString().Contains("-");
             Assert.False(hasDashes);
         }
 
@@ -343,20 +342,108 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void CaptureTransaction_AlreadySampled_Drops()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            var transaction = new Transaction(
+                sut,
+                "test name",
+                "test operation"
+            );
+
+            transaction.Contexts.Trace.IsSampled = false;
+
+            // Act
+            sut.CaptureTransaction(transaction);
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_SamplingLowest_Drops()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Three decimal places longer than what Random returns. Should always drop
+            _fixture.SentryOptions.TracesSampleRate = 0.00000000000000000001;
+
+            // Act
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    "test operation"
+                )
+            );
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_SamplingHighest_Sends()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Three decimal places longer than what Random returns. Should always send
+            _fixture.SentryOptions.TracesSampleRate = 0.99999999999999999999;
+
+            // Act
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    "test operation"
+                )
+            );
+
+            // Assert
+            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
         public void CaptureTransaction_ValidTransaction_Sent()
         {
             // Arrange
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
-            {
-                Name = "test name",
-                Operation = "test operation"
-            });
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    "test operation"
+                )
+            );
 
             // Assert
             _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_NoSpanId_Ignored()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            var transaction = new Transaction(
+                sut,
+                "test name",
+                "test operation"
+            );
+
+            transaction.Contexts.Trace.SpanId = SpanId.Empty;
+
+            // Act
+            sut.CaptureTransaction(transaction);
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
@@ -366,10 +453,13 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
-            {
-                Name = null!
-            });
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    null!,
+                    "test operation"
+                )
+            );
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -382,10 +472,13 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            sut.CaptureTransaction(new Transaction(DisabledHub.Instance)
-            {
-                Operation = null!
-            });
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    null!
+                )
+            );
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -403,7 +496,7 @@ namespace Sentry.Tests
         public void Dispose_Worker_DisposeCalled()
         {
             _fixture.GetSut().Dispose();
-            (_fixture.BackgroundWorker as IDisposable).Received(1).Dispose();
+            (_fixture.BackgroundWorker as IDisposable)?.Received(1).Dispose();
         }
 
         [Fact]

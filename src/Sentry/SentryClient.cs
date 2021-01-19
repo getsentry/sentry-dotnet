@@ -126,10 +126,19 @@ namespace Sentry
                 return;
             }
 
-            if (_options.TraceSampleRate < 1)
+            // A transaction may have already been sampled somehow or the
+            // field may have been set directly. To be safe, we check that.
+            if (!transaction.IsSampled)
             {
-                if (Random.NextDouble() > _options.TraceSampleRate)
+                _options.DiagnosticLogger?.LogDebug("Transaction dropped due to sampling.");
+                return;
+            }
+
+            if (_options.TracesSampleRate < 1)
+            {
+                if (Random.NextDouble() > _options.TracesSampleRate)
                 {
+                    transaction.IsSampled = false;
                     _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
                     return;
                 }

@@ -119,7 +119,7 @@ namespace Sentry.Protocol.Envelopes
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
-                // TODO: this should include transaction's event id
+                [EventIdKey] = transaction.EventId.ToString()
             };
 
             var items = new[]

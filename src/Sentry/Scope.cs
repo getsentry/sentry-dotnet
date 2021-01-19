@@ -148,7 +148,7 @@ namespace Sentry
         /// <summary>
         /// Transaction.
         /// </summary>
-        public Transaction? Transaction { get; set; }
+        public ITransaction? Transaction { get; set; }
 
         /// <inheritdoc />
         public SdkVersion Sdk { get; } = new();

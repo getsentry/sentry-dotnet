@@ -142,5 +142,23 @@ namespace NotSentry.Tests
             Assert.NotEqual(default, actualId);
             Assert.Equal(actualId, hub.LastEventId);
         }
+
+        [Fact]
+        public void StartTransaction_Works()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation", "description");
+
+            // Assert
+            transaction.Name.Should().Be("name");
+            transaction.Operation.Should().Be("operation");
+            transaction.Description.Should().Be("description");
+        }
     }
 }

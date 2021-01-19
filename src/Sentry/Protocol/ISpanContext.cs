@@ -26,16 +26,19 @@ namespace Sentry.Protocol
         /// <summary>
         /// Operation.
         /// </summary>
-        string Operation { get; }
+        string Operation { get; set; }
 
         /// <summary>
         /// Status.
         /// </summary>
-        SpanStatus? Status { get; }
+        SpanStatus? Status { get; set; }
 
+        // Note: this may need to be mutated internally,
+        // but the user should never be able to change it
+        // on their own.
         /// <summary>
         /// Is sampled.
         /// </summary>
-        bool IsSampled { get; set; }
+        bool IsSampled { get; }
     }
 }

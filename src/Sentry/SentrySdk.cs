@@ -316,11 +316,18 @@ namespace Sentry
             => _hub.CaptureTransaction(transaction);
 
         /// <summary>
-        /// Creates a transaction.
+        /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static Transaction CreateTransaction(string name, string operation)
-            => _hub.CreateTransaction(name, operation);
+        public static ITransaction StartTransaction(string name, string operation)
+            => _hub.StartTransaction(name, operation);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ITransaction StartTransaction(string name, string operation, string description)
+            => _hub.StartTransaction(name, operation, description);
 
         /// <summary>
         /// Gets the Sentry trace header.

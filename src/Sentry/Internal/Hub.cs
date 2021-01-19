@@ -103,31 +103,25 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public Transaction CreateTransaction(string name, string operation)
+        public ITransaction StartTransaction(string name, string operation)
         {
-            var trans = new Transaction(this)
-            {
-                Name = name,
-                Operation = operation
-            };
+            var transaction = new Transaction(this, name, operation);
 
             var nameAndVersion = MainSentryEventProcessor.NameAndVersion;
             var protocolPackageName = MainSentryEventProcessor.ProtocolPackageName;
 
-            if (trans.Sdk.Version == null && trans.Sdk.Name == null)
+            if (transaction.Sdk.Version == null && transaction.Sdk.Name == null)
             {
-                trans.Sdk.Name = Constants.SdkName;
-                trans.Sdk.Version = nameAndVersion.Version;
+                transaction.Sdk.Name = Constants.SdkName;
+                transaction.Sdk.Version = nameAndVersion.Version;
             }
 
             if (nameAndVersion.Version != null)
             {
-                trans.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
+                transaction.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
             }
 
-            ConfigureScope(scope => scope.Transaction = trans);
-
-            return trans;
+            return transaction;
         }
 
         public SentryTraceHeader? GetSentryTrace()

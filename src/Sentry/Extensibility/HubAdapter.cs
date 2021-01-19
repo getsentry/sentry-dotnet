@@ -75,8 +75,8 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public Transaction CreateTransaction(string name, string operation)
-            => SentrySdk.CreateTransaction(name, operation);
+        public ITransaction StartTransaction(string name, string operation)
+            => SentrySdk.StartTransaction(name, operation);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.

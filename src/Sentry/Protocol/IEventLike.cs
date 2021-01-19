@@ -5,7 +5,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Models members common between types that represent event-like data.
     /// </summary>
-    public interface IEventLike
+    public interface IEventLike : IHasTags, IHasExtra
     {
         /// <summary>
         /// Sentry level.
@@ -78,28 +78,8 @@ namespace Sentry.Protocol
         IReadOnlyCollection<Breadcrumb> Breadcrumbs { get; }
 
         /// <summary>
-        /// An arbitrary mapping of additional metadata to store with the event.
-        /// </summary>
-        IReadOnlyDictionary<string, object?> Extra { get; }
-
-        /// <summary>
-        /// Arbitrary key-value for this event
-        /// </summary>
-        IReadOnlyDictionary<string, string> Tags { get; }
-
-        /// <summary>
         /// Adds a breadcrumb.
         /// </summary>
         void AddBreadcrumb(Breadcrumb breadcrumb);
-
-        /// <summary>
-        /// Sets an extra.
-        /// </summary>
-        void SetExtra(string key, object? value);
-
-        /// <summary>
-        /// Sets a tag.
-        /// </summary>
-        void SetTag(string key, string value);
     }
 }

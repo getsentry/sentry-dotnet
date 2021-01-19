@@ -13,6 +13,21 @@ namespace Sentry
     public static class HubExtensions
     {
         /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        public static ITransaction StartTransaction(
+            this IHub hub,
+            string name,
+            string operation,
+            string description)
+        {
+            var transaction = hub.StartTransaction(name, operation);
+            transaction.Description = description;
+
+            return transaction;
+        }
+
+        /// <summary>
         /// Adds a breadcrumb to the current scope.
         /// </summary>
         /// <param name="hub">The Hub which holds the scope stack.</param>

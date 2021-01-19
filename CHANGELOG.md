@@ -11,6 +11,7 @@
 
 - Limit attachment size (#705)
 - Separate tracing middleware (#737)
+- Bring Transaction a bit more inline with Java SDK (#741)
 - Sync transaction and transaction name on scope (#740)
 
 ## 3.0.0-alpha.10

@@ -13,13 +13,16 @@ namespace Sentry.Protocol
     /// </summary>
     public class Span : ISpan, IJsonSerializable
     {
-        private readonly SpanRecorder _parentSpanRecorder;
+        // This needs to be Transaction and not ITransaction because
+        // ITransaction doesn't contain `StartChild(..., parentSpanId)`
+        // which we need here.
+        private readonly Transaction _parentTransaction;
 
         /// <inheritdoc />
-        public SpanId SpanId { get; }
+        public SpanId SpanId { get; private set; }
 
         /// <inheritdoc />
-        public SpanId? ParentSpanId { get; }
+        public SpanId? ParentSpanId { get; private set; }
 
         /// <inheritdoc />
         public SentryId TraceId { get; private set; }
@@ -31,51 +34,53 @@ namespace Sentry.Protocol
         public DateTimeOffset? EndTimestamp { get; private set; }
 
         /// <inheritdoc />
-        public string Operation { get; }
+        public string Operation { get; set; }
 
         /// <inheritdoc />
         public string? Description { get; set; }
 
         /// <inheritdoc />
-        public SpanStatus? Status { get; private set; }
+        public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
-        public bool IsSampled { get; set; }
+        public bool IsSampled { get; internal set; }
 
         private ConcurrentDictionary<string, string>? _tags;
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
 
+        /// <inheritdoc />
+        public void SetTag(string key, string value) =>
+            (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
+
         private ConcurrentDictionary<string, object?>? _data;
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
 
-        internal Span(SpanRecorder parentSpanRecorder, SpanId? spanId = null, SpanId? parentSpanId = null, string operation = "unknown")
+        /// <inheritdoc />
+        public void SetExtra(string key, object? value) =>
+            (_data ??= new ConcurrentDictionary<string, object?>())[key] = value;
+
+        /// <summary>
+        /// Initializes an instance of <see cref="Span"/>.
+        /// </summary>
+        public Span(Transaction parentTransaction, SpanId? parentSpanId, string operation)
         {
-            _parentSpanRecorder = parentSpanRecorder;
-            SpanId = spanId ?? SpanId.Create();
+            _parentTransaction = parentTransaction;
+            SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
             Operation = operation;
         }
 
         /// <inheritdoc />
-        public ISpan StartChild(string operation)
-        {
-            var span = new Span(_parentSpanRecorder, null, SpanId, operation);
-            _parentSpanRecorder.Add(span);
-
-            return span;
-        }
+        public ISpan StartChild(string operation) =>
+            _parentTransaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish(SpanStatus status = SpanStatus.Ok)
-        {
-            EndTimestamp = DateTimeOffset.UtcNow;
-            Status = status;
-        }
+        public void Finish() => EndTimestamp = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
@@ -131,11 +136,8 @@ namespace Sentry.Protocol
         /// <summary>
         /// Parses a span from JSON.
         /// </summary>
-        public static Span FromJson(JsonElement json)
+        public static Span FromJson(Transaction parentTransaction, JsonElement json)
         {
-            // TODO
-            var parentSpanRecorder = new SpanRecorder();
-
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
@@ -144,12 +146,13 @@ namespace Sentry.Protocol
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
-            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? false;
+            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? true;
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
 
-            return new Span(parentSpanRecorder, spanId, parentSpanId, operation)
+            return new Span(parentTransaction, parentSpanId, operation)
             {
+                SpanId = spanId,
                 TraceId = traceId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,

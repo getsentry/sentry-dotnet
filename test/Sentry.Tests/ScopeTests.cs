@@ -117,8 +117,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var scope = new Scope();
-            scope.Transaction = new Transaction(DisabledHub.Instance);
-            scope.Transaction.Name = "bar";
+            scope.Transaction = new Transaction(DisabledHub.Instance, "bar", "_");
 
             // Act
             scope.TransactionName = "foo";
@@ -133,8 +132,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var scope = new Scope();
-            scope.Transaction = new Transaction(DisabledHub.Instance);
-            scope.Transaction.Name = "bar";
+            scope.Transaction = new Transaction(DisabledHub.Instance, "bar", "_");
 
             // Act
             scope.TransactionName = null;
@@ -153,8 +151,7 @@ namespace Sentry.Tests
             scope.TransactionName = "bar";
 
             // Act
-            scope.Transaction = new Transaction(DisabledHub.Instance);
-            scope.Transaction.Name = "foo";
+            scope.Transaction = new Transaction(DisabledHub.Instance, "foo", "_");
 
             // Assert
             scope.TransactionName.Should().Be("foo");

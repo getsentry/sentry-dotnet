@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Span.
     /// </summary>
-    public interface ISpan : ISpanContext
+    public interface ISpan : ISpanContext, IHasTags, IHasExtra
     {
         /// <summary>
         /// Description.
@@ -24,16 +23,6 @@ namespace Sentry.Protocol
         DateTimeOffset? EndTimestamp { get; }
 
         /// <summary>
-        /// Tags.
-        /// </summary>
-        IReadOnlyDictionary<string, string> Tags { get; }
-
-        /// <summary>
-        /// Data.
-        /// </summary>
-        IReadOnlyDictionary<string, object?> Extra { get; }
-
-        /// <summary>
         /// Starts a child span.
         /// </summary>
         ISpan StartChild(string operation);
@@ -41,6 +30,32 @@ namespace Sentry.Protocol
         /// <summary>
         /// Finishes the span.
         /// </summary>
-        void Finish(SpanStatus status = SpanStatus.Ok);
+        void Finish();
+    }
+
+    /// <summary>
+    /// Extensions for <see cref="ISpan"/>.
+    /// </summary>
+    public static class SpanExtensions
+    {
+        /// <summary>
+        /// Starts a child span.
+        /// </summary>
+        public static ISpan StartChild(this ISpan span, string operation, string description)
+        {
+            var child = span.StartChild(operation);
+            child.Description = description;
+
+            return child;
+        }
+
+        /// <summary>
+        /// Finishes the span.
+        /// </summary>
+        public static void Finish(this ISpan span, SpanStatus status)
+        {
+            span.Finish();
+            span.Status = status;
+        }
     }
 }

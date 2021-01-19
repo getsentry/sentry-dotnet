@@ -23,13 +23,26 @@ namespace Sentry.Protocol
         public SentryId TraceId { get; set; }
 
         /// <inheritdoc />
-        public string Operation { get; set; } = "unknown";
+        public string Operation { get; set; } = "";
 
         /// <inheritdoc />
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
-        public bool IsSampled { get; set; }
+        public bool IsSampled { get; internal set; } = true;
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        internal Trace Clone() => new()
+        {
+            SpanId = SpanId,
+            ParentSpanId = ParentSpanId,
+            TraceId = TraceId,
+            Operation = Operation,
+            Status = Status,
+            IsSampled = IsSampled
+        };
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
@@ -37,14 +50,21 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-            writer.WriteSerializable("span_id", SpanId);
 
-            if (ParentSpanId is {} parentSpanId)
+            if (SpanId != SpanId.Empty)
+            {
+                writer.WriteSerializable("span_id", SpanId);
+            }
+
+            if (ParentSpanId is {} parentSpanId && parentSpanId != SpanId.Empty)
             {
                 writer.WriteSerializable("parent_span_id", parentSpanId);
             }
 
-            writer.WriteSerializable("trace_id", TraceId);
+            if (TraceId != SentryId.Empty)
+            {
+                writer.WriteSerializable("trace_id", TraceId);
+            }
 
             if (!string.IsNullOrWhiteSpace(Operation))
             {
@@ -69,8 +89,9 @@ namespace Sentry.Protocol
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
+            var operation = json.GetPropertyOrNull("op")?.GetString() ?? "";
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
+            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? true;
 
             return new Trace
             {
@@ -78,7 +99,8 @@ namespace Sentry.Protocol
                 ParentSpanId = parentSpanId,
                 TraceId = traceId,
                 Operation = operation,
-                Status = status
+                Status = status,
+                IsSampled = isSampled
             };
         }
     }
