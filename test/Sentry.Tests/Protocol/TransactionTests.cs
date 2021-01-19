@@ -12,10 +12,8 @@ namespace Sentry.Tests.Protocol
         public void Serialization_Roundtrip_Success()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance)
+            var transaction = new Transaction(DisabledHub.Instance, "name123", "op123")
             {
-                Name = "my transaction",
-                Operation = "some op",
                 Description = "description",
                 Request = new Request {Method = "GET", Url = "https://example.com"},
                 User = new User {Email = "test@sentry.example", Username = "john"},
