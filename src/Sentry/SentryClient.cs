@@ -126,6 +126,8 @@ namespace Sentry
                 return;
             }
 
+            // A transaction may have already been sampled somehow or the
+            // field may have been set directly. To be safe, we check that.
             if (!transaction.IsSampled)
             {
                 _options.DiagnosticLogger?.LogDebug("Transaction dropped due to sampling.");

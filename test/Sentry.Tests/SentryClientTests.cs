@@ -342,6 +342,27 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void CaptureTransaction_AlreadySampled_Drops()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            var transaction = new Transaction(
+                sut,
+                "test name",
+                "test operation"
+            );
+
+            transaction.Contexts.Trace.IsSampled = false;
+
+            // Act
+            sut.CaptureTransaction(transaction);
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
         public void CaptureTransaction_SamplingLowest_Drops()
         {
             // Arrange
