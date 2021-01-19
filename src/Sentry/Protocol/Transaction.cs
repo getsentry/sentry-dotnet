@@ -162,7 +162,8 @@ namespace Sentry.Protocol
         // It's required because some of the fields are mapped on 'contexts.trace'.
         // When deserializing, we don't parse those fields explicitly, but
         // instead just parse the trace context and resolve them later.
-        // Hence why we need a constructor that doesn't take the operation.
+        // Hence why we need a constructor that doesn't take the operation to avoid
+        // overwriting it.
         private Transaction(ISentryClient client, string name)
         {
             _client = client;
