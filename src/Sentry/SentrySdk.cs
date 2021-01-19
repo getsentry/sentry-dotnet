@@ -323,6 +323,13 @@ namespace Sentry
             => _hub.StartTransaction(name, operation);
 
         /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ITransaction StartTransaction(string name, string operation, string description)
+            => _hub.StartTransaction(name, operation, description);
+
+        /// <summary>
         /// Gets the Sentry trace header.
         /// </summary>
         [DebuggerStepThrough]
