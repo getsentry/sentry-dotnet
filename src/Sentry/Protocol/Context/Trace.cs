@@ -89,7 +89,7 @@ namespace Sentry.Protocol
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
+            var operation = json.GetPropertyOrNull("op")?.GetString() ?? "";
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? true;
 

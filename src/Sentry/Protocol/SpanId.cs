@@ -94,9 +94,20 @@ namespace Sentry.Protocol
         /// </summary>
         public static implicit operator string(SpanId id) => id.ToString();
 
+        // Note: no implicit conversion from `string` to `SpanId` as that leads to serious bugs.
+        // For example, given a method:
+        // transaction.StartChild(SpanId parentSpanId, string operation)
+        // And an *extension* method:
+        // transaction.StartChild(string operation, string description)
+        // The following code:
+        // transaction.StartChild("foo", "bar")
+        // Will resolve to the first method and not the second, which is incorrect.
+
+        /*
         /// <summary>
         /// A <see cref="SentryId"/> from a <see cref="Guid"/>.
         /// </summary>
         public static implicit operator SpanId(string value) => new(value);
+        */
     }
 }
