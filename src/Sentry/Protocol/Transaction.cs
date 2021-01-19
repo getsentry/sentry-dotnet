@@ -365,10 +365,11 @@ namespace Sentry.Protocol
             var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
             var environment = json.GetPropertyOrNull("environment")?.GetString();
             var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
-            var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
+            var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()!).ToArray();
             var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
             var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
+            var spans = json.GetPropertyOrNull("spans")?.EnumerateArray().Select(j => Span.FromJson(transaction, j)).Pipe(v => new ConcurrentBag<Span>(v));
 
             var transaction = new Transaction(hub, name)
             {
@@ -382,19 +383,31 @@ namespace Sentry.Protocol
                 _user = user,
                 Environment = environment,
                 Sdk = sdk,
-                _fingerprint = fingerprint!,
+                _fingerprint = fingerprint,
                 _breadcrumbsLazy = new(() => breadcrumbs!),
-                _extraLazy = new(() => extra)!,
-                _tagsLazy = new(() => tags)!
+                _extraLazy = new(() => extra!),
+                _tagsLazy = new(() => tags!)
             };
 
-            // Spans need to be attached after the transaction instance was created because they
-            // have a reference to it.
-            transaction._spansLazy = new(() =>
-                json.GetPropertyOrNull("spans")?.EnumerateArray()
-                    .Select(j => Span.FromJson(transaction, j))
-                    .Pipe(v => new ConcurrentBag<Span>(v))
-            );
+            if (breadcrumbs is not null)
+            {
+                transaction._breadcrumbsLazy = new(() => breadcrumbs);
+            }
+
+            if (extra is not null)
+            {
+                transaction._extraLazy = new(() => extra);
+            }
+
+            if (tags is not null)
+            {
+                transaction._tagsLazy = new(() => tags!);
+            }
+
+            if (spans is not null)
+            {
+                transaction._spansLazy = new(() => spans);
+            }
 
             return transaction;
         }
