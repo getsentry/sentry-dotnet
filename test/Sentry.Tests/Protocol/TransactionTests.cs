@@ -68,7 +68,7 @@ namespace Sentry.Tests.Protocol
 
             // Act
             var actualString = transaction.ToJsonString();
-            var actual = SentryEvent.FromJson(Json.Parse(actualString));
+            var actual = Transaction.FromJson(Json.Parse(actualString));
 
             // Assert
             actual.Should().BeEquivalentTo(transaction, o =>
