@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
+using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -86,6 +88,70 @@ namespace Sentry.Tests.Protocol
             {
                 sutBreadcrumb.Timestamp.Should().BeCloseTo(actual.Breadcrumbs.ElementAt(counter++).Timestamp);
             }
+        }
+
+        [Fact]
+        public void StartChild_LevelOne_Works()
+        {
+            // Arrange
+            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op");
+
+            // Act
+            var child = transaction.StartChild("child op", "child desc");
+
+            // Assert
+            transaction.Spans.Should().HaveCount(1);
+            transaction.Spans.Should().Contain(child);
+            child.Operation.Should().Be("child op");
+            child.Description.Should().Be("child desc");
+            child.ParentSpanId.Should().Be(transaction.SpanId);
+        }
+
+        [Fact]
+        public void StartChild_LevelTwo_Works()
+        {
+            // Arrange
+            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op");
+
+            // Act
+            var child = transaction.StartChild("child op", "child desc");
+            var grandChild = child.StartChild("grandchild op", "grandchild desc");
+
+            // Assert
+            transaction.Spans.Should().HaveCount(2);
+            transaction.Spans.Should().Contain(child);
+            transaction.Spans.Should().Contain(grandChild);
+            grandChild.Operation.Should().Be("grandchild op");
+            grandChild.Description.Should().Be("grandchild desc");
+            grandChild.ParentSpanId.Should().Be(child.SpanId);
+        }
+
+        [Fact]
+        public void Finish_RecordsTime()
+        {
+            // Arrange
+            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op");
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            transaction.EndTimestamp.Should().NotBeNull();
+            (transaction.EndTimestamp - transaction.StartTimestamp).Should().BeGreaterOrEqualTo(TimeSpan.Zero);
+        }
+
+        [Fact]
+        public void Finish_CapturesTransaction()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var transaction = new Transaction(client, "my name", "my op");
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            client.Received(1).CaptureTransaction(transaction);
         }
     }
 }

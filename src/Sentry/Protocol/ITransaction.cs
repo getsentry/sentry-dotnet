@@ -20,7 +20,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Flat list of spans within this transaction.
         /// </summary>
-        IReadOnlyList<Span> Spans { get; }
+        IReadOnlyList<ISpan> Spans { get; }
 
         /// <summary>
         /// Get Sentry trace header.

@@ -153,7 +153,7 @@ namespace Sentry.Protocol
         private List<Span>? _spans;
 
         /// <inheritdoc />
-        public IReadOnlyList<Span> Spans => _spans ??= new List<Span>();
+        public IReadOnlyList<ISpan> Spans => _spans ??= new List<Span>();
 
         // Transaction never has a parent
         SpanId? ISpanContext.ParentSpanId => null;
