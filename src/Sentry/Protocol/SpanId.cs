@@ -39,7 +39,7 @@ namespace Sentry.Protocol
         public bool Equals(SpanId other) => StringComparer.Ordinal.Equals(
             GetNormalizedValue(),
             other.GetNormalizedValue()
-            );
+        );
 
         /// <inheritdoc />
         public override bool Equals(object? obj) => obj is SpanId other && Equals(other);
