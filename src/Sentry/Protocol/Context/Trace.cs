@@ -31,6 +31,19 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public bool IsSampled { get; internal set; } = true;
 
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        internal Trace Clone() => new()
+        {
+            SpanId = SpanId,
+            ParentSpanId = ParentSpanId,
+            TraceId = TraceId,
+            Operation = Operation,
+            Status = Status,
+            IsSampled = IsSampled
+        };
+
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
