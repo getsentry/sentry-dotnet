@@ -136,7 +136,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Parses a span from JSON.
         /// </summary>
-        public static Span FromJson(ITransaction parentTransaction, JsonElement json)
+        public static Span FromJson(Transaction parentTransaction, JsonElement json)
         {
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
