@@ -348,7 +348,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Three decimal places longer than what Random returns. Should always drop
-            _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
+            _fixture.SentryOptions.TracesSampleRate = 0.00000000000000000001;
 
             // Act
             sut.CaptureTransaction(
@@ -370,7 +370,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Three decimal places longer than what Random returns. Should always send
-            _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
+            _fixture.SentryOptions.TracesSampleRate = 0.99999999999999999999;
 
             // Act
             sut.CaptureTransaction(
