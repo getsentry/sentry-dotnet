@@ -15,7 +15,7 @@ namespace Sentry.Tests.Protocol.Context
             var actual = trace.ToJsonString();
 
             // Assert
-            Assert.Equal("{\"type\":\"trace\"}", actual);
+            Assert.Equal("{\"type\":\"trace\",\"sampled\":true}", actual);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Sentry.Tests.Protocol.Context
                 IsSampled = false,
                 ParentSpanId = SpanId.Parse("1000000000000000"),
                 SpanId = SpanId.Parse("2000000000000000"),
-                TraceId = SentryId.Parse("75302ac4-8a02-4bde-9a3b-3734a82e36c8")
+                TraceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8")
             };
 
             // Act
@@ -39,12 +39,12 @@ namespace Sentry.Tests.Protocol.Context
             Assert.Equal(
                 "{" +
                 "\"type\":\"trace\"," +
-                "\"op\":\"op123\"," +
-                "\"status\":\"aborted\"" +
-                "\"sampled\":false," +
-                "\"parent_span_id\":\"1000000000000000\"," +
                 "\"span_id\":\"2000000000000000\"," +
-                "\"trace_id\":\"75302ac4-8a02-4bde-9a3b-3734a82e36c8\"" +
+                "\"parent_span_id\":\"1000000000000000\"," +
+                "\"trace_id\":\"75302ac48a024bde9a3b3734a82e36c8\"," +
+                "\"op\":\"op123\"," +
+                "\"status\":\"aborted\"," +
+                "\"sampled\":false" +
                 "}",
                 actual
             );
@@ -61,7 +61,7 @@ namespace Sentry.Tests.Protocol.Context
                 IsSampled = false,
                 ParentSpanId = SpanId.Parse("1000000000000000"),
                 SpanId = SpanId.Parse("2000000000000000"),
-                TraceId = SentryId.Parse("75302ac4-8a02-4bde-9a3b-3734a82e36c8")
+                TraceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8")
             };
 
             // Act

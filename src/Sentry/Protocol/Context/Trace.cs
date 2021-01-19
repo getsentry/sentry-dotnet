@@ -50,14 +50,21 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-            writer.WriteSerializable("span_id", SpanId);
 
-            if (ParentSpanId is {} parentSpanId)
+            if (SpanId != SpanId.Empty)
+            {
+                writer.WriteSerializable("span_id", SpanId);
+            }
+
+            if (ParentSpanId is {} parentSpanId && parentSpanId != SpanId.Empty)
             {
                 writer.WriteSerializable("parent_span_id", parentSpanId);
             }
 
-            writer.WriteSerializable("trace_id", TraceId);
+            if (TraceId != SentryId.Empty)
+            {
+                writer.WriteSerializable("trace_id", TraceId);
+            }
 
             if (!string.IsNullOrWhiteSpace(Operation))
             {
