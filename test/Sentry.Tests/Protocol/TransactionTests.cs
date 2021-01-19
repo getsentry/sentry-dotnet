@@ -22,17 +22,19 @@ namespace Sentry.Tests.Protocol
                 Status = SpanStatus.Aborted,
                 User = new User { Id = "user-id" },
                 Request = new Request { Method = "POST" },
-                Contexts = new Contexts {
-                    ["context_key"] = "context_value",
-                    [".NET Framework"] = new Dictionary<string, string> {
-                        [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",
-                        [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
-                        [".NET Framework Full"] = "\"v4.8\""
-                    }
-                },
                 Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
+            };
+
+            // Don't overwrite the contexts object as it contains trace data.
+            // See https://github.com/getsentry/sentry-dotnet/issues/752
+            transaction.Contexts["context_key"] = "context_value";
+            transaction.Contexts[".NET Framework"] = new Dictionary<string, string>
+            {
+                [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",
+                [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
+                [".NET Framework Full"] = "\"v4.8\""
             };
 
             transaction.Sdk.AddPackage(new Package("name", "version"));

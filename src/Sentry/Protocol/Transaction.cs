@@ -18,6 +18,24 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public SentryId EventId { get; private set; }
 
+        // This and many other properties in this object are mere
+        // wrappers around 'contexts.trace'.
+        // It poses danger as the raw contexts object is also exposed
+        // to the user.
+        //
+        // As an example, the user can do something seemingly innocuous like this:
+        //
+        // var t = new Transaction(hub, "my transaction", "my op")
+        // {
+        //     Contexts = new Contexts
+        //     {
+        //         ["my ctx"] = myObj
+        //     }
+        // }
+        //
+        // The above code overwrites the contexts and, as a result, the "my op" value
+        // is lost completely.
+
         /// <inheritdoc />
         public SpanId SpanId
         {
