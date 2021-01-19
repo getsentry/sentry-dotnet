@@ -384,14 +384,14 @@ namespace Sentry.Protocol
                 Sdk = sdk,
                 _fingerprint = fingerprint!,
                 _breadcrumbsLazy = new(() => breadcrumbs!),
-                _extraLazy = new(() =>extra)!,
-                _tagsLazy = new(() =>tags)!
+                _extraLazy = new(() => extra)!,
+                _tagsLazy = new(() => tags)!
             };
 
             // Spans need to be attached after the transaction instance was created because they
             // have a reference to it.
-            transaction._spansLazy = new(
-                () => json.GetPropertyOrNull("spans")?.EnumerateArray()
+            transaction._spansLazy = new(() =>
+                json.GetPropertyOrNull("spans")?.EnumerateArray()
                     .Select(j => Span.FromJson(transaction, j))
                     .Pipe(v => new ConcurrentBag<Span>(v))
             );
