@@ -13,7 +13,7 @@ namespace Sentry.Protocol
     /// </summary>
     public class Transaction : ITransaction, IJsonSerializable
     {
-        private readonly IHub _hub;
+        private readonly ISentryClient _client;
 
         /// <inheritdoc />
         public SentryId EventId { get; private set; }
@@ -145,20 +145,21 @@ namespace Sentry.Protocol
         // When deserializing, we don't parse those fields explicitly, but
         // instead just parse the trace context and resolve them later.
         // Hence why we need a constructor that doesn't take the operation.
-        private Transaction(IHub hub, string name)
+        private Transaction(ISentryClient client, string name)
         {
-            _hub = hub;
+            _client = client;
             EventId = SentryId.Create();
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
             Name = name;
+            IsSampled = true;
         }
 
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public Transaction(IHub hub, string name, string operation)
-            : this(hub, name)
+        public Transaction(ISentryClient client, string name, string operation)
+            : this(client, name)
         {
             Operation = operation;
         }
@@ -195,7 +196,7 @@ namespace Sentry.Protocol
             Status = status;
 
             // Hub may discard this transaction if `IsSampled = false`
-            _hub.CaptureTransaction(this);
+            _client.CaptureTransaction(this);
         }
 
         /// <inheritdoc />

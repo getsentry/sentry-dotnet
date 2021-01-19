@@ -350,7 +350,7 @@ namespace Sentry.Tests
             // Act
             sut.CaptureTransaction(
                 new Transaction(
-                    DisabledHub.Instance,
+                    sut,
                     "test name",
                     "test operation"
                 )
@@ -369,7 +369,7 @@ namespace Sentry.Tests
             // Act
             sut.CaptureTransaction(
                 new Transaction(
-                    DisabledHub.Instance,
+                    sut,
                     null!,
                     "test operation"
                 )
@@ -388,7 +388,7 @@ namespace Sentry.Tests
             // Act
             sut.CaptureTransaction(
                 new Transaction(
-                    DisabledHub.Instance,
+                    sut,
                     "test name",
                     null!
                 )
@@ -410,7 +410,7 @@ namespace Sentry.Tests
         public void Dispose_Worker_DisposeCalled()
         {
             _fixture.GetSut().Dispose();
-            (_fixture.BackgroundWorker as IDisposable).Received(1).Dispose();
+            (_fixture.BackgroundWorker as IDisposable)?.Received(1).Dispose();
         }
 
         [Fact]
