@@ -342,6 +342,50 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void CaptureTransaction_SamplingLowest_Drops()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Three decimal places longer than what Random returns. Should always drop
+            _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
+
+            // Act
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    "test operation"
+                )
+            );
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_SamplingHighest_Sends()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Three decimal places longer than what Random returns. Should always send
+            _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
+
+            // Act
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    "test operation"
+                )
+            );
+
+            // Assert
+            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
         public void CaptureTransaction_ValidTransaction_Sent()
         {
             // Arrange
@@ -358,6 +402,27 @@ namespace Sentry.Tests
 
             // Assert
             _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_NoSpanId_Ignored()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            var transaction = new Transaction(
+                sut,
+                "test name",
+                "test operation"
+            );
+
+            transaction.Contexts.Trace.SpanId = default;
+
+            // Act
+            sut.CaptureTransaction(transaction);
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
