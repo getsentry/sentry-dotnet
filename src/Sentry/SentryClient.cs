@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -122,24 +123,39 @@ namespace Sentry
             if (string.IsNullOrWhiteSpace(transaction.Name) ||
                 string.IsNullOrWhiteSpace(transaction.Operation))
             {
-                _options.DiagnosticLogger?.LogWarning("Transaction discarded due to one or more required fields missing.");
+                _options.DiagnosticLogger?.LogWarning(
+                    "Transaction discarded due to one or more required fields missing."
+                );
+
                 return;
             }
 
-            // A transaction may have already been sampled somehow or the
-            // field may have been set directly. To be safe, we check that.
-            if (!transaction.IsSampled)
+            // If a transaction has been already sampled out (by adaptive sampling, at the time
+            // the transaction was created), then we just drop it here.
+            if (transaction.IsSampled == false)
             {
-                _options.DiagnosticLogger?.LogDebug("Transaction dropped due to sampling.");
+                _options.DiagnosticLogger?.LogDebug(
+                    "Transaction dropped due to adaptive sampling."
+                );
+
                 return;
             }
 
-            if (_options.TracesSampleRate < 1)
+            // If the sampling decision has not been made yet, we apply random sampling here.
+            if (transaction.IsSampled is null)
             {
-                if (Random.NextDouble() > _options.TracesSampleRate)
+                transaction.IsSampled =
+                    // If sample rate is 1, transaction is always sampled in
+                    _options.TracesSampleRate >= 1 ||
+                    // Otherwise roll the dice
+                    Random.NextDouble() > _options.TracesSampleRate;
+
+                if (transaction.IsSampled == false)
                 {
-                    transaction.IsSampled = false;
-                    _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Transaction dropped due to random sampling."
+                    );
+
                     return;
                 }
             }
