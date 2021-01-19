@@ -30,7 +30,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Finishes the span.
         /// </summary>
-        void Finish(SpanStatus status = SpanStatus.Ok);
+        void Finish();
     }
 
     /// <summary>
@@ -47,6 +47,15 @@ namespace Sentry.Protocol
             child.Description = description;
 
             return child;
+        }
+
+        /// <summary>
+        /// Finishes the span.
+        /// </summary>
+        public static void Finish(this ISpan span, SpanStatus status)
+        {
+            span.Status = status;
+            span.Finish();
         }
     }
 }

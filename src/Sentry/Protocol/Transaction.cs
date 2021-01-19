@@ -190,12 +190,11 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public void Finish(SpanStatus status = SpanStatus.Ok)
+        public void Finish()
         {
             EndTimestamp = DateTimeOffset.UtcNow;
-            Status = status;
 
-            // Hub may discard this transaction if `IsSampled = false`
+            // Client decides whether to discard this transaction based on sampling
             _client.CaptureTransaction(this);
         }
 

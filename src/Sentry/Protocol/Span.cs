@@ -76,11 +76,7 @@ namespace Sentry.Protocol
         public ISpan StartChild(string operation) => _parentTransaction.StartChild(operation);
 
         /// <inheritdoc />
-        public void Finish(SpanStatus status = SpanStatus.Ok)
-        {
-            EndTimestamp = DateTimeOffset.UtcNow;
-            Status = status;
-        }
+        public void Finish() => EndTimestamp = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
