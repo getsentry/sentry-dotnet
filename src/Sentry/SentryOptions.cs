@@ -419,9 +419,9 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Custom logic that determines trace sample rate depending on the context.
+        /// Custom delegate that returns sample rate adaptively for a specific trace.
         /// </summary>
-        public ISentryTraceSampler? TracesSampler { get; set; }
+        public Func<TraceSamplingContext, double>? TracesSampler { get; set; }
 
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!

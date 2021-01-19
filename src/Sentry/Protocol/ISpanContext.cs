@@ -36,9 +36,10 @@ namespace Sentry.Protocol
         // Note: this may need to be mutated internally,
         // but the user should never be able to change it
         // on their own.
+
         /// <summary>
-        /// Is sampled.
+        /// Whether the span or transaction is sampled in (i.e. eligible for sending to Sentry).
         /// </summary>
-        bool IsSampled { get; }
+        bool? IsSampled { get; }
     }
 }

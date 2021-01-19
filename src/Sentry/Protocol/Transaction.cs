@@ -78,7 +78,7 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public bool IsSampled
+        public bool? IsSampled
         {
             get => Contexts.Trace.IsSampled;
             internal set => Contexts.Trace.IsSampled = value;
