@@ -8,9 +8,22 @@ namespace Sentry.Protocol
     public interface ISpan : ISpanContext, IHasTags, IHasExtra
     {
         /// <summary>
-        /// Description.
+        /// Span description.
         /// </summary>
-        string? Description { get; set; }
+        // 'new' because it adds a setter.
+        new string? Description { get; set; }
+
+        /// <summary>
+        /// Span operation.
+        /// </summary>
+        // 'new' because it adds a setter.
+        new string Operation { get; set; }
+
+        /// <summary>
+        /// Span status.
+        /// </summary>
+        // 'new' because it adds a setter.
+        new SpanStatus? Status { get; set; }
 
         /// <summary>
         /// Start timestamp.

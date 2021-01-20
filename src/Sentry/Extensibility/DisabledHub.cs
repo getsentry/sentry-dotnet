@@ -55,10 +55,9 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns a dummy transaction.
         /// </summary>
-        public ITransaction StartTransaction(string name, string operation) => new Transaction(this, name, operation)
-        {
-            IsSampled = false
-        };
+        public ITransaction StartTransaction(ITransactionContext context) =>
+            // Transactions from DisabledHub are always sampled out
+            new Transaction(this, context) {IsSampled = false};
 
         /// <summary>
         /// Returns null.

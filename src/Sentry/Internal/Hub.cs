@@ -103,9 +103,9 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public ITransaction StartTransaction(string name, string operation)
+        public ITransaction StartTransaction(ITransactionContext context)
         {
-            var transaction = new Transaction(this, name, operation);
+            var transaction = new Transaction(this, context);
 
             var nameAndVersion = MainSentryEventProcessor.NameAndVersion;
             var protocolPackageName = MainSentryEventProcessor.ProtocolPackageName;

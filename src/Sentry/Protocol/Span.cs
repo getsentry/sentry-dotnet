@@ -33,13 +33,13 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Operation" />
         public string Operation { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Description" />
         public string? Description { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Status" />
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />

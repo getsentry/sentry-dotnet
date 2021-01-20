@@ -1,12 +1,13 @@
 using System.Text.Json;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol.Context;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Trace context data.
     /// </summary>
-    public class Trace : ISpanContext, IJsonSerializable
+    public class Trace : ITraceContext, IJsonSerializable
     {
         /// <summary>
         /// Tells Sentry which type of context this is.

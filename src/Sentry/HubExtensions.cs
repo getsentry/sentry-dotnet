@@ -18,6 +18,15 @@ namespace Sentry
         public static ITransaction StartTransaction(
             this IHub hub,
             string name,
+            string operation) =>
+            hub.StartTransaction(new TransactionContext(name, operation));
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        public static ITransaction StartTransaction(
+            this IHub hub,
+            string name,
             string operation,
             string description)
         {
