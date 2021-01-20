@@ -134,7 +134,7 @@ namespace Sentry
             if (transaction.IsSampled == false)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Transaction dropped due to adaptive sampling."
+                    "Transaction dropped due to being marked as unsampled."
                 );
 
                 return;
