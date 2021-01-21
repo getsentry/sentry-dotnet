@@ -319,6 +319,15 @@ namespace Sentry
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
+        public static ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext)
+            => _hub.StartTransaction(context, customSamplingContext);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
         public static ITransaction StartTransaction(ITransactionContext context)
             => _hub.StartTransaction(context);
 

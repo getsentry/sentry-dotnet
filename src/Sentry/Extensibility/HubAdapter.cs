@@ -75,8 +75,10 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public ITransaction StartTransaction(ITransactionContext context)
-            => SentrySdk.StartTransaction(context);
+        public ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext)
+            => SentrySdk.StartTransaction(context, customSamplingContext);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.

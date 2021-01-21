@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
@@ -103,7 +105,9 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public ITransaction StartTransaction(ITransactionContext context)
+        public ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext)
         {
             var transaction = new Transaction(this, context);
 
@@ -120,6 +124,34 @@ namespace Sentry.Internal
             {
                 transaction.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
             }
+
+            // Make a sampling decision
+            var samplingContext = new TransactionSamplingContext(
+                context,
+                customSamplingContext
+            );
+
+            var sampleRate =
+                // Custom sampler may not exist or may return null, in which case we fallback
+                // to the static sample rate.
+                _options.TracesSampler?.Invoke(samplingContext)
+                ?? _options.TracesSampleRate;
+
+            transaction.IsSampled = sampleRate switch
+            {
+                // Sample rate >= 1 means always sampled *in*
+                >= 1 => true,
+                // Sample rate <= 0 means always sampled *out*
+                <= 0 => false,
+                // Otherwise roll the dice
+                _ => ThreadSafeRandom.NextDouble() > sampleRate
+            };
+
+            // A sampled out transaction still appears fully functional to the user
+            // but will be dropped by the client and won't reach Sentry's servers.
+
+            // Sampling decision must have been made at this point
+            Debug.Assert(transaction.IsSampled != null, "Started transaction without a sampling decision.");
 
             return transaction;
         }

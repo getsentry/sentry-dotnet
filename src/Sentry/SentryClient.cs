@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -23,9 +23,6 @@ namespace Sentry
     {
         private volatile bool _disposed;
         private readonly SentryOptions _options;
-
-        private readonly Lazy<Random> _random = new(() => new Random(), LazyThreadSafetyMode.PublicationOnly);
-        internal Random Random => _random.Value;
 
         // Internal for testing.
         internal IBackgroundWorker Worker { get; }
@@ -115,7 +112,10 @@ namespace Sentry
 
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
-                _options.DiagnosticLogger?.LogWarning("Transaction dropped due to empty id.");
+                _options.DiagnosticLogger?.LogWarning(
+                    "Transaction dropped due to empty id."
+                );
+
                 return;
             }
 
@@ -129,34 +129,16 @@ namespace Sentry
                 return;
             }
 
-            // If a transaction has been already sampled out (by adaptive sampling, at the time
-            // the transaction was created), then we just drop it here.
-            if (transaction.IsSampled == false)
+            // Sampling decision MUST have been made at this point
+            Debug.Assert(transaction.IsSampled != null, "Attempt to capture transaction without sampling decision.");
+
+            if (transaction.IsSampled != true)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Transaction dropped due to being marked as unsampled."
+                    "Transaction dropped by sampling."
                 );
 
                 return;
-            }
-
-            // If the sampling decision has not been made yet, we apply random sampling here.
-            if (transaction.IsSampled is null)
-            {
-                transaction.IsSampled =
-                    // If sample rate is 1, transaction is always sampled in
-                    _options.TracesSampleRate >= 1 ||
-                    // Otherwise roll the dice
-                    Random.NextDouble() > _options.TracesSampleRate;
-
-                if (transaction.IsSampled == false)
-                {
-                    _options.DiagnosticLogger?.LogDebug(
-                        "Transaction dropped due to random sampling."
-                    );
-
-                    return;
-                }
             }
 
             CaptureEnvelope(Envelope.FromTransaction(transaction));
@@ -174,7 +156,7 @@ namespace Sentry
         {
             if (_options.SampleRate != null)
             {
-                if (Random.NextDouble() > _options.SampleRate.Value)
+                if (ThreadSafeRandom.NextDouble() > _options.SampleRate.Value)
                 {
                     _options.DiagnosticLogger?.LogDebug("Event sampled.");
                     return SentryId.Empty;

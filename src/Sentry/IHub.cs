@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -24,7 +25,10 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        ITransaction StartTransaction(ITransactionContext context);
+        ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext
+        );
 
         /// <summary>
         /// Gets the sentry trace header.
