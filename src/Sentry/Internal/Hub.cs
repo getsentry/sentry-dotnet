@@ -144,7 +144,7 @@ namespace Sentry.Internal
                 // Sample rate <= 0 means always sampled *out*
                 <= 0 => false,
                 // Otherwise roll the dice
-                _ => ThreadSafeRandom.NextDouble() > sampleRate
+                _ => SynchronizedRandom.NextDouble() > sampleRate
             };
 
             // A sampled out transaction still appears fully functional to the user

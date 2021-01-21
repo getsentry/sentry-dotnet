@@ -2,16 +2,15 @@
 
 namespace Sentry.Internal
 {
-    internal static class ThreadSafeRandom
+    internal static class SynchronizedRandom
     {
-        private static readonly object Lock = new();
         private static readonly Lazy<Random> RandomLazy = new();
 
         private static Random Random => RandomLazy.Value;
 
         public static double NextDouble()
         {
-            lock (Lock)
+            lock (RandomLazy)
             {
                 return Random.NextDouble();
             }
