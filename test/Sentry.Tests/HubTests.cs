@@ -271,5 +271,41 @@ namespace NotSentry.Tests
             // Assert
             transaction.IsSampled.Should().BeFalse();
         }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_FallbackToStatic_SampledIn()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = _ => null,
+                TracesSampleRate = 1
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Assert
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_FallbackToStatic_SampledOut()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = _ => null,
+                TracesSampleRate = 0
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Assert
+            transaction.IsSampled.Should().BeFalse();
+        }
     }
 }
