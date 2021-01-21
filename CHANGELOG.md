@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Add support for dynamic transaction sampling. (#753) @Tyrrrz
+
 ## 3.0.0-beta.0
 
 - Add instruction_addr to SentryStackFrame. (#744) @lucas-zimerman
