@@ -347,63 +347,15 @@ namespace Sentry.Tests
             // Arrange
             var sut = _fixture.GetSut();
 
-            var transaction = new Transaction(
+            // Act
+            sut.CaptureTransaction(new Transaction(
                 sut,
                 "test name",
                 "test operation"
-            );
-
-            transaction.Contexts.Trace.IsSampled = false;
-
-            // Act
-            sut.CaptureTransaction(transaction);
+            ) {IsSampled = false});
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureTransaction_SamplingLowest_Drops()
-        {
-            // Arrange
-            var sut = _fixture.GetSut();
-
-            // Three decimal places longer than what Random returns. Should always drop
-            _fixture.SentryOptions.TracesSampleRate = 0.00000000000000000001;
-
-            // Act
-            sut.CaptureTransaction(
-                new Transaction(
-                    sut,
-                    "test name",
-                    "test operation"
-                )
-            );
-
-            // Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureTransaction_SamplingHighest_Sends()
-        {
-            // Arrange
-            var sut = _fixture.GetSut();
-
-            // Three decimal places longer than what Random returns. Should always send
-            _fixture.SentryOptions.TracesSampleRate = 0.99999999999999999999;
-
-            // Act
-            sut.CaptureTransaction(
-                new Transaction(
-                    sut,
-                    "test name",
-                    "test operation"
-                )
-            );
-
-            // Assert
-            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
@@ -418,7 +370,7 @@ namespace Sentry.Tests
                     sut,
                     "test name",
                     "test operation"
-                )
+                ) {IsSampled = true}
             );
 
             // Assert
@@ -435,7 +387,7 @@ namespace Sentry.Tests
                 sut,
                 "test name",
                 "test operation"
-            );
+            ) {IsSampled = true};
 
             transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
@@ -458,7 +410,7 @@ namespace Sentry.Tests
                     sut,
                     null!,
                     "test operation"
-                )
+                ) {IsSampled = true}
             );
 
             // Assert
@@ -477,7 +429,7 @@ namespace Sentry.Tests
                     sut,
                     "test name",
                     null!
-                )
+                ) {IsSampled = true}
             );
 
             // Assert
