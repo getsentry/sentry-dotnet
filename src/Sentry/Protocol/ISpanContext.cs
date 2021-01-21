@@ -3,7 +3,7 @@ using Sentry.Protocol.Context;
 namespace Sentry.Protocol
 {
     /// <summary>
-    /// Span context.
+    /// Span metadata.
     /// </summary>
     public interface ISpanContext : ITraceContext
     {
