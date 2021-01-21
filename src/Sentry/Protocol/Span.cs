@@ -54,6 +54,10 @@ namespace Sentry.Protocol
         public void SetTag(string key, string value) =>
             (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
 
+        /// <inheritdoc />
+        public void UnsetTag(string key) =>
+            (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
+
         private ConcurrentDictionary<string, object?>? _data;
 
         /// <inheritdoc />

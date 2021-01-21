@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Models members common between types that represent event-like data.
     /// </summary>
-    public interface IEventLike : IHasTags, IHasExtra
+    public interface IEventLike : IHasBreadcrumbs, IHasTags, IHasExtra
     {
         /// <summary>
         /// Sentry level.
@@ -70,16 +71,31 @@ namespace Sentry.Protocol
         /// <example> { "fingerprint": ["myrpc", "POST", "/foo.bar"] } </example>
         /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
         IReadOnlyList<string> Fingerprint { get; set; }
+    }
+
+    /// <summary>
+    /// Extensions for <see cref="IEventLike"/>.
+    /// </summary>
+    public static class EventLikeExtensions
+    {
+        /// <summary>
+        /// Whether a <see cref="Protocol.User"/> has been set to the scope with any of its fields non null.
+        /// </summary>
+        /// <param name="eventLike"></param>
+        /// <returns>True if a User was set to the scope. Otherwise, false.</returns>
+        public static bool HasUser(this IEventLike eventLike)
+            => eventLike.User.Email is not null
+               || eventLike.User.Id is not null
+               || eventLike.User.Username is not null
+               || eventLike.User.InternalOther?.Count > 0
+               || eventLike.User.IpAddress is not null;
 
         /// <summary>
-        /// A trail of events which happened prior to an issue.
+        /// Sets the fingerprint to the <see cref="Scope"/>.
         /// </summary>
-        /// <seealso href="https://docs.sentry.io/platforms/dotnet/enriching-events/breadcrumbs/"/>
-        IReadOnlyCollection<Breadcrumb> Breadcrumbs { get; }
-
-        /// <summary>
-        /// Adds a breadcrumb.
-        /// </summary>
-        void AddBreadcrumb(Breadcrumb breadcrumb);
+        /// <param name="eventLike">The scope.</param>
+        /// <param name="fingerprint">The fingerprint.</param>
+        public static void SetFingerprint(this IEventLike eventLike, IEnumerable<string> fingerprint)
+            => eventLike.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
     }
 }

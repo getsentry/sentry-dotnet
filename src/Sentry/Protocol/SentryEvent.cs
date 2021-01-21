@@ -209,6 +209,10 @@ namespace Sentry
             (_tags ??= new Dictionary<string, string>())[key] = value;
 
         /// <inheritdoc />
+        public void UnsetTag(string key) =>
+            (_tags ??= new Dictionary<string, string>()).Remove(key);
+
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
