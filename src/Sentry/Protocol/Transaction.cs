@@ -222,6 +222,10 @@ namespace Sentry.Protocol
         public void SetTag(string key, string value) =>
             _tagsLazy.Value[key] = value;
 
+        /// <inheritdoc />
+        public void UnsetTag(string key) =>
+            _tagsLazy.Value.TryRemove(key, out _);
+
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
             var span = new Span(this, parentSpanId, operation)
