@@ -342,7 +342,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void CaptureTransaction_AlreadySampled_Drops()
+        public void CaptureTransaction_SampledOut_Dropped()
         {
             // Arrange
             var sut = _fixture.GetSut();
