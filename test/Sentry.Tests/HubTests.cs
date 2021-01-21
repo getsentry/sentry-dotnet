@@ -169,8 +169,7 @@ namespace NotSentry.Tests
             var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
-                // Enough to pass
-                TracesSampleRate = 0.99999999999999999999
+                TracesSampleRate = 1
             });
 
             // Act
@@ -187,8 +186,7 @@ namespace NotSentry.Tests
             var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
-                // Enough to not pass
-                TracesSampleRate = 0.00000000000000000001
+                TracesSampleRate = 0
             });
 
             // Act
