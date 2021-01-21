@@ -4,13 +4,11 @@ namespace Sentry.Internal
 {
     internal static class SynchronizedRandom
     {
-        private static readonly Lazy<Random> RandomLazy = new();
-
-        private static Random Random => RandomLazy.Value;
+        private static readonly Random Random = new();
 
         public static double NextDouble()
         {
-            lock (RandomLazy)
+            lock (Random)
             {
                 return Random.NextDouble();
             }
