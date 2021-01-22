@@ -38,26 +38,27 @@ namespace Sentry.Protocol
         }
 
         /// <summary>
-        /// Injects trace information into the headers of the specified HTTP request.
+        /// Injects trace information into HTTP headers.
         /// </summary>
-        public void Inject(HttpRequestMessage request)
+        public void Inject(HttpHeaders headers)
         {
             var headerValue = ToString();
 
-            request.Headers.Remove(HeaderName);
-            request.Headers.Add(HeaderName, headerValue);
+            headers.Remove(HeaderName);
+            headers.Add(HeaderName, headerValue);
         }
+
+        /// <summary>
+        /// Injects trace information into the headers of the specified HTTP request.
+        /// </summary>
+        public void Inject(HttpRequestMessage request) =>
+            Inject(request.Headers);
 
         /// <summary>
         /// Injects trace information into the default headers of the specified HTTP client.
         /// </summary>
-        public void Inject(HttpClient client)
-        {
-            var headerValue = ToString();
-
-            client.DefaultRequestHeaders.Remove(HeaderName);
-            client.DefaultRequestHeaders.Add(HeaderName, headerValue);
-        }
+        public void Inject(HttpClient client) =>
+            Inject(client.DefaultRequestHeaders);
 
         /// <inheritdoc />
         public override string ToString() => IsSampled is {} isSampled
