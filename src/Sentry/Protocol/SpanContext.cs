@@ -18,13 +18,13 @@
         public string Operation { get; }
 
         /// <inheritdoc />
-        public SpanStatus? Status { get; set; }
+        public string? Description { get; }
+
+        /// <inheritdoc />
+        public SpanStatus? Status { get; }
 
         /// <inheritdoc />
         public bool? IsSampled { get; }
-
-        /// <inheritdoc />
-        public string? Description { get; set; }
 
         /// <summary>
         /// Initializes an instance of <see cref="SpanContext"/>.
@@ -34,12 +34,16 @@
             SpanId? parentSpanId,
             SentryId traceId,
             string operation,
+            string description,
+            SpanStatus? status,
             bool? isSampled)
         {
             SpanId = spanId;
             ParentSpanId = parentSpanId;
             TraceId = traceId;
             Operation = operation;
+            Description = description;
+            Status = status;
             IsSampled = isSampled;
         }
     }

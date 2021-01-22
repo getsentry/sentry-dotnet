@@ -17,8 +17,10 @@
             SentryId traceId,
             string name,
             string operation,
+            string description,
+            SpanStatus? status,
             bool? isSampled)
-            : base(spanId, parentSpanId, traceId, operation, isSampled)
+            : base(spanId, parentSpanId, traceId, operation, description, status, isSampled)
         {
             Name = name;
         }
@@ -29,8 +31,20 @@
         public TransactionContext(
             string name,
             string operation,
+            string description,
             bool? isSampled)
-            : this(SpanId.Create(), null, SentryId.Create(), name, operation, isSampled)
+            : this(SpanId.Create(), null, SentryId.Create(), name, operation, description, null, isSampled)
+        {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="TransactionContext"/>.
+        /// </summary>
+        public TransactionContext(
+            string name,
+            string operation,
+            bool? isSampled)
+            : this(name, operation, "", isSampled)
         {
         }
 
