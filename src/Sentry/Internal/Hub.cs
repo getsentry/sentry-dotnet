@@ -156,11 +156,10 @@ namespace Sentry.Internal
             return transaction;
         }
 
-        public SentryTraceHeader? GetSentryTrace()
+        public SentryTraceHeader? GetTraceHeader()
         {
-            // TODO:
             var (currentScope, _) = ScopeManager.GetCurrent();
-            return currentScope.Transaction?.GetTraceHeader();
+            return currentScope.GetSpan()?.GetTraceHeader();
         }
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)

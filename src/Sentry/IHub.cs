@@ -31,8 +31,8 @@ namespace Sentry
         );
 
         /// <summary>
-        /// Gets the sentry trace header.
+        /// Gets the Sentry trace header for the last active span.
         /// </summary>
-        SentryTraceHeader? GetSentryTrace();
+        SentryTraceHeader? GetTraceHeader();
     }
 }

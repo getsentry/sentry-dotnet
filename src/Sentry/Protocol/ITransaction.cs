@@ -24,8 +24,8 @@ namespace Sentry.Protocol
         IReadOnlyCollection<ISpan> Spans { get; }
 
         /// <summary>
-        /// Get Sentry trace header.
+        /// Gets the last active (not finished) span in this transaction.
         /// </summary>
-        SentryTraceHeader GetTraceHeader();
+        ISpan? GetLastActiveSpan();
     }
 }

@@ -329,5 +329,31 @@ namespace NotSentry.Tests
             // Assert
             transaction.IsSampled.Should().BeFalse();
         }
+
+        [Fact]
+        public void GetTraceHeader_ReturnsHeaderForActiveSpan()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Act
+            hub.WithScope(scope =>
+            {
+                scope.Transaction = transaction;
+
+                var header = hub.GetTraceHeader();
+
+                // Assert
+                header.Should().NotBeNull();
+                header?.SpanId.Should().Be(transaction.SpanId);
+                header?.TraceId.Should().Be(transaction.TraceId);
+                header?.IsSampled.Should().Be(transaction.IsSampled);
+            });
+        }
     }
 }

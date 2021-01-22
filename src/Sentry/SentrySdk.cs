@@ -357,6 +357,6 @@ namespace Sentry
         /// </summary>
         [DebuggerStepThrough]
         public static SentryTraceHeader? GetTraceHeader()
-            => _hub.GetSentryTrace();
+            => _hub.GetTraceHeader();
     }
 }
