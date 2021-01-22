@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Sentry.Protocol
 {
@@ -82,5 +84,26 @@ namespace Sentry.Protocol
 
             return new SentryTraceHeader(traceId, spanId, isSampled);
         }
+
+        /// <summary>
+        /// Parses <see cref="SentryTraceHeader"/> from HTTP headers.
+        /// </summary>
+        public static SentryTraceHeader Parse(HttpHeaders headers)
+        {
+            if (!headers.TryGetValues(HeaderName, out var values) ||
+                !(values?.FirstOrDefault() is { } headerValue))
+            {
+                // TODO: we probably need a TryParse for this as it's gonna be common
+                throw new InvalidOperationException("Sentry trace header is not set.");
+            }
+
+            return Parse(headerValue);
+        }
+
+        /// <summary>
+        /// Parses <see cref="SentryTraceHeader"/> from an HTTP response.
+        /// </summary>
+        public static SentryTraceHeader Parse(HttpResponseMessage response) =>
+            Parse(response.Headers);
     }
 }

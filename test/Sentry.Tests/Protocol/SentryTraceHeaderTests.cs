@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -48,6 +49,22 @@ namespace Sentry.Tests.Protocol
 
             // Act
             var header = SentryTraceHeader.Parse(headerValue);
+
+            // Assert
+            header.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
+            header.SpanId.Should().Be(SpanId.Parse("1000000000000000"));
+            header.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Parse_FromResponse_Works()
+        {
+            // Arrange
+            using var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Headers.Add("sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0");
+
+            // Act
+            var header = SentryTraceHeader.Parse(response);
 
             // Assert
             header.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
