@@ -163,6 +163,30 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void StartTransaction_FromTraceHeader_Works()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var traceHeader = new SentryTraceHeader(
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+                SpanId.Parse("2000000000000000"),
+                true
+            );
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation", traceHeader);
+
+            // Assert
+            transaction.TraceId.Should().Be("75302ac48a024bde9a3b3734a82e36c8");
+            transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
         public void StartTransaction_StaticSampling_SampledIn()
         {
             // Arrange

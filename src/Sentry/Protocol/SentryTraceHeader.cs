@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 
 namespace Sentry.Protocol
 {
@@ -7,24 +8,59 @@ namespace Sentry.Protocol
     /// </summary>
     public class SentryTraceHeader
     {
-        private readonly SentryId _traceId;
-        private readonly SpanId _spanId;
-        private readonly bool? _isSampled;
+        private const string HeaderName = "sentry-trace";
+
+        /// <summary>
+        /// Trace ID.
+        /// </summary>
+        public SentryId TraceId { get; }
+
+        /// <summary>
+        /// Span ID.
+        /// </summary>
+        public SpanId SpanId { get; }
+
+        /// <summary>
+        /// Whether the trace is sampled.
+        /// </summary>
+        public bool? IsSampled { get; }
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryTraceHeader"/>.
         /// </summary>
-        public SentryTraceHeader(SentryId traceId, SpanId spanId, bool? isSampled)
+        public SentryTraceHeader(SentryId traceId, SpanId spanSpanId, bool? isSampled)
         {
-            _traceId = traceId;
-            _spanId = spanId;
-            _isSampled = isSampled;
+            TraceId = traceId;
+            SpanId = spanSpanId;
+            IsSampled = isSampled;
+        }
+
+        /// <summary>
+        /// Injects trace information into the headers of the specified HTTP request.
+        /// </summary>
+        public void Inject(HttpRequestMessage request)
+        {
+            var headerValue = ToString();
+
+            request.Headers.Remove(HeaderName);
+            request.Headers.Add(HeaderName, headerValue);
+        }
+
+        /// <summary>
+        /// Injects trace information into the default headers of the specified HTTP client.
+        /// </summary>
+        public void Inject(HttpClient client)
+        {
+            var headerValue = ToString();
+
+            client.DefaultRequestHeaders.Remove(HeaderName);
+            client.DefaultRequestHeaders.Add(HeaderName, headerValue);
         }
 
         /// <inheritdoc />
-        public override string ToString() => _isSampled is {} isSampled
-            ? $"{_traceId}-{_spanId}-{(isSampled ? 1 : 0)}"
-            : $"{_traceId}-{_spanId}";
+        public override string ToString() => IsSampled is {} isSampled
+            ? $"{TraceId}-{SpanId}-{(isSampled ? 1 : 0)}"
+            : $"{TraceId}-{SpanId}";
 
         /// <summary>
         /// Parses <see cref="SentryTraceHeader"/> from string.

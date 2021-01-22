@@ -43,6 +43,27 @@ namespace Sentry
         }
 
         /// <summary>
+        /// Starts a transaction from the specified trace header.
+        /// </summary>
+        public static ITransaction StartTransaction(
+            this IHub hub,
+            string name,
+            string operation,
+            SentryTraceHeader traceHeader)
+        {
+            var context = new TransactionContext(
+                // SpanId from the header becomes ParentSpanId on this transaction
+                traceHeader.SpanId,
+                traceHeader.TraceId,
+                name,
+                operation,
+                traceHeader.IsSampled
+            );
+
+            return hub.StartTransaction(context);
+        }
+
+        /// <summary>
         /// Adds a breadcrumb to the current scope.
         /// </summary>
         /// <param name="hub">The Hub which holds the scope stack.</param>

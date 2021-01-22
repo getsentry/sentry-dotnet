@@ -29,11 +29,12 @@
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>
         public TransactionContext(
+            SpanId? parentSpanId,
+            SentryId traceId,
             string name,
             string operation,
-            string description,
             bool? isSampled)
-            : this(SpanId.Create(), null, SentryId.Create(), name, operation, description, null, isSampled)
+            : this(SpanId.Create(), parentSpanId, traceId, name, operation, "", null, isSampled)
         {
         }
 
@@ -44,7 +45,7 @@
             string name,
             string operation,
             bool? isSampled)
-            : this(name, operation, "", isSampled)
+            : this(null, SentryId.Create(), name, operation, isSampled)
         {
         }
 
