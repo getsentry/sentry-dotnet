@@ -181,7 +181,7 @@ namespace NotSentry.Tests
             var transaction = hub.StartTransaction("name", "operation", traceHeader);
 
             // Assert
-            transaction.TraceId.Should().Be("75302ac48a024bde9a3b3734a82e36c8");
+            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
             transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
             transaction.IsSampled.Should().BeTrue();
         }
