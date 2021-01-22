@@ -79,10 +79,8 @@ namespace Sentry.Protocol
     public static class EventLikeExtensions
     {
         /// <summary>
-        /// Whether a <see cref="Protocol.User"/> has been set to the scope with any of its fields non null.
+        /// Whether a <see cref="Protocol.User"/> has been set to the object with any of its fields non null.
         /// </summary>
-        /// <param name="eventLike"></param>
-        /// <returns>True if a User was set to the scope. Otherwise, false.</returns>
         public static bool HasUser(this IEventLike eventLike)
             => eventLike.User.Email is not null
                || eventLike.User.Id is not null
@@ -91,10 +89,8 @@ namespace Sentry.Protocol
                || eventLike.User.IpAddress is not null;
 
         /// <summary>
-        /// Sets the fingerprint to the <see cref="Scope"/>.
+        /// Sets the fingerprint to the object.
         /// </summary>
-        /// <param name="eventLike">The scope.</param>
-        /// <param name="fingerprint">The fingerprint.</param>
         public static void SetFingerprint(this IEventLike eventLike, IEnumerable<string> fingerprint)
             => eventLike.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
     }
