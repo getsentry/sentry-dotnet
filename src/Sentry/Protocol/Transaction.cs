@@ -44,6 +44,16 @@ namespace Sentry.Protocol
             private set => Contexts.Trace.SpanId = value;
         }
 
+        // A transaction normally does not have a parent because it represents
+        // the top node in the span hierarchy.
+        // However, a transaction may also be continued from a trace header
+        // (i.e. when another service sends a request to this service),
+        // in which case the newly created transaction refers to the incoming
+        // transaction as the parent.
+
+        /// <inheritdoc />
+        public SpanId? ParentSpanId { get; }
+
         /// <inheritdoc />
         public SentryId TraceId
         {
@@ -51,7 +61,7 @@ namespace Sentry.Protocol
             private set => Contexts.Trace.TraceId = value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ITransaction.Name" />
         public string Name { get; set; }
 
         /// <inheritdoc />
@@ -60,17 +70,17 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Operation" />
         public string Operation
         {
             get => Contexts.Trace.Operation;
             set => Contexts.Trace.Operation = value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Description" />
         public string? Description { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Status" />
         public SpanStatus? Status
         {
             get => Contexts.Trace.Status;
@@ -78,7 +88,7 @@ namespace Sentry.Protocol
         }
 
         /// <inheritdoc />
-        public bool IsSampled
+        public bool? IsSampled
         {
             get => Contexts.Trace.IsSampled;
             internal set => Contexts.Trace.IsSampled = value;
@@ -137,19 +147,19 @@ namespace Sentry.Protocol
         }
 
         // Not readonly because of deserialization
-        private Lazy<List<Breadcrumb>> _breadcrumbsLazy = new();
+        private Lazy<ConcurrentBag<Breadcrumb>> _breadcrumbsLazy = new();
 
         /// <inheritdoc />
         public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbsLazy.Value;
 
         // Not readonly because of deserialization
-        private Lazy<Dictionary<string, object?>> _extraLazy = new();
+        private Lazy<ConcurrentDictionary<string, object?>> _extraLazy = new();
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _extraLazy.Value;
 
         // Not readonly because of deserialization
-        private Lazy<Dictionary<string, string>> _tagsLazy = new();
+        private Lazy<ConcurrentDictionary<string, string>> _tagsLazy = new();
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tagsLazy.Value;
@@ -160,23 +170,19 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyCollection<ISpan> Spans => _spansLazy.Value;
 
-        // Transaction never has a parent
-        SpanId? ISpanContext.ParentSpanId => null;
-
         // This constructor is used for deserialization purposes.
         // It's required because some of the fields are mapped on 'contexts.trace'.
         // When deserializing, we don't parse those fields explicitly, but
         // instead just parse the trace context and resolve them later.
         // Hence why we need a constructor that doesn't take the operation to avoid
         // overwriting it.
-        private Transaction(ISentryClient client, string name)
+        private Transaction(
+            ISentryClient client,
+            string name)
         {
             _client = client;
             EventId = SentryId.Create();
-            SpanId = SpanId.Create();
-            TraceId = SentryId.Create();
             Name = name;
-            IsSampled = true;
         }
 
         /// <summary>
@@ -185,7 +191,23 @@ namespace Sentry.Protocol
         public Transaction(ISentryClient client, string name, string operation)
             : this(client, name)
         {
+            SpanId = SpanId.Create();
+            TraceId = SentryId.Create();
             Operation = operation;
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="Transaction"/>.
+        /// </summary>
+        public Transaction(ISentryClient client, ITransactionContext context)
+            : this(client, context.Name)
+        {
+            SpanId = context.SpanId;
+            ParentSpanId = context.ParentSpanId;
+            TraceId = context.TraceId;
+            Operation = context.Operation;
+            Description = context.Description;
+            Status = context.Status;
         }
 
         /// <inheritdoc />
@@ -199,6 +221,10 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
             _tagsLazy.Value[key] = value;
+
+        /// <inheritdoc />
+        public void UnsetTag(string key) =>
+            _tagsLazy.Value.TryRemove(key, out _);
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
@@ -366,9 +392,9 @@ namespace Sentry.Protocol
             var environment = json.GetPropertyOrNull("environment")?.GetString();
             var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
             var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()!).ToArray();
-            var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
-            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.ToDictionary();
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
+            var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).Pipe(v => new ConcurrentBag<Breadcrumb>(v));
+            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v));
+            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
 
             var transaction = new Transaction(hub, name)
             {
@@ -382,10 +408,7 @@ namespace Sentry.Protocol
                 _user = user,
                 Environment = environment,
                 Sdk = sdk,
-                _fingerprint = fingerprint,
-                _breadcrumbsLazy = new(() => breadcrumbs!),
-                _extraLazy = new(() => extra!),
-                _tagsLazy = new(() => tags!)
+                _fingerprint = fingerprint
             };
 
             if (breadcrumbs is not null)
@@ -400,7 +423,7 @@ namespace Sentry.Protocol
 
             if (tags is not null)
             {
-                transaction._tagsLazy = new(() => tags!);
+                transaction._tagsLazy = new(() => tags);
             }
 
             var spans = json

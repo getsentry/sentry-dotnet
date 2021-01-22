@@ -7,6 +7,7 @@ using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using Xunit;
 
@@ -144,7 +145,7 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void StartTransaction_Works()
+        public void StartTransaction_NameOpDescription_Works()
         {
             // Arrange
             var hub = new Hub(new SentryOptions
@@ -159,6 +160,150 @@ namespace NotSentry.Tests
             transaction.Name.Should().Be("name");
             transaction.Operation.Should().Be("operation");
             transaction.Description.Should().Be("description");
+        }
+
+        [Fact]
+        public void StartTransaction_StaticSampling_SampledIn()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation");
+
+            // Assert
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartTransaction_StaticSampling_SampledOut()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 0
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation");
+
+            // Assert
+            transaction.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_SampledIn()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("foo", "op");
+
+            // Assert
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_SampledOut()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("bar", "op");
+
+            // Assert
+            transaction.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_WithCustomContext_SampledIn()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
+            });
+
+            // Act
+            var transaction = hub.StartTransaction(
+                new TransactionContext("foo", "op"),
+                new Dictionary<string, object> {["xxx"] = "zzz"}
+            );
+
+            // Assert
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_WithCustomContext_SampledOut()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
+            });
+
+            // Act
+            var transaction = hub.StartTransaction(
+                new TransactionContext("foo", "op"),
+                new Dictionary<string, object> {["xxx"] = "yyy"}
+            );
+
+            // Assert
+            transaction.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_FallbackToStatic_SampledIn()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = _ => null,
+                TracesSampleRate = 1
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Assert
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartTransaction_DynamicSampling_FallbackToStatic_SampledOut()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = _ => null,
+                TracesSampleRate = 0
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Assert
+            transaction.IsSampled.Should().BeFalse();
         }
     }
 }

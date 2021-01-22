@@ -33,17 +33,17 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Operation" />
         public string Operation { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Description" />
         public string? Description { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ISpan.Status" />
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
-        public bool IsSampled { get; internal set; }
+        public bool? IsSampled { get; internal set; }
 
         private ConcurrentDictionary<string, string>? _tags;
 
@@ -53,6 +53,10 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
             (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
+
+        /// <inheritdoc />
+        public void UnsetTag(string key) =>
+            (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
         private ConcurrentDictionary<string, object?>? _data;
 
@@ -111,7 +115,10 @@ namespace Sentry.Protocol
                 writer.WriteString("status", status.ToString().ToSnakeCase());
             }
 
-            writer.WriteBoolean("sampled", IsSampled);
+            if (IsSampled is {} isSampled)
+            {
+                writer.WriteBoolean("sampled", isSampled);
+            }
 
             writer.WriteString("start_timestamp", StartTimestamp);
 
@@ -146,7 +153,7 @@ namespace Sentry.Protocol
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
-            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? true;
+            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
 

@@ -15,6 +15,21 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
+        public static ITransaction StartTransaction(this IHub hub, ITransactionContext context) =>
+            hub.StartTransaction(context, new Dictionary<string, object?>());
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        public static ITransaction StartTransaction(
+            this IHub hub,
+            string name,
+            string operation) =>
+            hub.StartTransaction(new TransactionContext(name, operation));
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
         public static ITransaction StartTransaction(
             this IHub hub,
             string name,

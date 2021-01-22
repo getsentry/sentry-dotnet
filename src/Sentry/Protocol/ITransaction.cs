@@ -5,7 +5,7 @@ namespace Sentry.Protocol
     /// <summary>
     /// Transaction.
     /// </summary>
-    public interface ITransaction : ISpan, IEventLike
+    public interface ITransaction : ISpan, ITransactionContext, IEventLike
     {
         /// <summary>
         /// Transaction event ID.
@@ -15,7 +15,8 @@ namespace Sentry.Protocol
         /// <summary>
         /// Transaction name.
         /// </summary>
-        string Name { get; set; }
+        // 'new' because it adds a setter
+        new string Name { get; set; }
 
         /// <summary>
         /// Flat list of spans within this transaction.

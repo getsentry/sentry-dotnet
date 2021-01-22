@@ -15,7 +15,7 @@ namespace Sentry.Tests.Protocol.Context
             var actual = trace.ToJsonString();
 
             // Assert
-            Assert.Equal("{\"type\":\"trace\",\"sampled\":true}", actual);
+            Assert.Equal("{\"type\":\"trace\"}", actual);
         }
 
         [Fact]

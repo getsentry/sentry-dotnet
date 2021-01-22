@@ -1,12 +1,13 @@
 using System.Text.Json;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol.Context;
 
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Trace context data.
     /// </summary>
-    public class Trace : ISpanContext, IJsonSerializable
+    public class Trace : ITraceContext, IJsonSerializable
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -29,7 +30,7 @@ namespace Sentry.Protocol
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
-        public bool IsSampled { get; internal set; } = true;
+        public bool? IsSampled { get; internal set; }
 
         /// <summary>
         /// Clones this instance.
@@ -76,7 +77,10 @@ namespace Sentry.Protocol
                 writer.WriteString("status", status.ToString().ToSnakeCase());
             }
 
-            writer.WriteBoolean("sampled", IsSampled);
+            if (IsSampled is {} isSampled)
+            {
+                writer.WriteBoolean("sampled", isSampled);
+            }
 
             writer.WriteEndObject();
         }
@@ -91,7 +95,7 @@ namespace Sentry.Protocol
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "";
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
-            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean() ?? true;
+            var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
 
             return new Trace
             {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 
@@ -55,10 +56,11 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns a dummy transaction.
         /// </summary>
-        public ITransaction StartTransaction(string name, string operation) => new Transaction(this, name, operation)
-        {
-            IsSampled = false
-        };
+        public ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext) =>
+            // Transactions from DisabledHub are always sampled out
+            new Transaction(this, context) {IsSampled = false};
 
         /// <summary>
         /// Returns null.

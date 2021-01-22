@@ -17,4 +17,21 @@ namespace Sentry.Protocol
         /// </summary>
         void SetExtra(string key, object? value);
     }
+
+    /// <summary>
+    /// Extensions for <see cref="IHasExtra"/>.
+    /// </summary>
+    public static class HasExtraExtensions
+    {
+        /// <summary>
+        /// Sets the extra key-value pairs to the object.
+        /// </summary>
+        public static void SetExtras(this IHasExtra hasExtra, IEnumerable<KeyValuePair<string, object?>> values)
+        {
+            foreach (var (key, value) in values)
+            {
+                hasExtra.SetExtra(key, value);
+            }
+        }
+    }
 }

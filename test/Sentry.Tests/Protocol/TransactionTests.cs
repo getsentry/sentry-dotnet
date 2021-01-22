@@ -127,6 +127,45 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public void StartChild_SamplingInherited_Null()
+        {
+            // Arrange
+            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op") {IsSampled = null};
+
+            // Act
+            var child = transaction.StartChild("child op", "child desc");
+
+            // Assert
+            child.IsSampled.Should().BeNull();
+        }
+
+        [Fact]
+        public void StartChild_SamplingInherited_True()
+        {
+            // Arrange
+            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op") {IsSampled = true};
+
+            // Act
+            var child = transaction.StartChild("child op", "child desc");
+
+            // Assert
+            child.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartChild_SamplingInherited_False()
+        {
+            // Arrange
+            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op") {IsSampled = false};
+
+            // Act
+            var child = transaction.StartChild("child op", "child desc");
+
+            // Assert
+            child.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
         public void Finish_RecordsTime()
         {
             // Arrange

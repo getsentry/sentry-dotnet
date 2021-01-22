@@ -224,6 +224,9 @@ namespace Sentry
         /// <inheritdoc />
         public void SetTag(string key, string value) => _tags[key] = value;
 
+        /// <inheritdoc />
+        public void UnsetTag(string key) => _tags.TryRemove(key, out _);
+
         /// <summary>
         /// Adds an attachment.
         /// </summary>

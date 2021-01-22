@@ -419,9 +419,11 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Custom logic that determines trace sample rate depending on the context.
+        /// Custom delegate that returns sample rate dynamically for a specific transaction context.
+        /// The delegate may also return <code>null</code> to fallback to default sample rate as
+        /// defined by the <see cref="TracesSampleRate"/> property.
         /// </summary>
-        public ISentryTraceSampler? TracesSampler { get; set; }
+        public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!
