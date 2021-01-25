@@ -355,5 +355,27 @@ namespace NotSentry.Tests
                 header?.IsSampled.Should().Be(transaction.IsSampled);
             });
         }
+
+        [Fact]
+        public void CaptureTransaction_AfterTransactionFinishes_ResetsTransactionOnScope()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            hub.WithScope(scope => scope.Transaction = transaction);
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            hub.WithScope(scope => scope.Transaction.Should().BeNull());
+        }
     }
 }
