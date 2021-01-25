@@ -193,7 +193,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void GetSpan_ActiveSpans_ReturnsTransaction()
+        public void GetSpan_ActiveSpans_ReturnsSpan()
         {
             // Arrange
             var scope = new Scope();
