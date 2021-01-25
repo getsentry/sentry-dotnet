@@ -15,7 +15,7 @@ internal class Program
                 // Set to true to SDK debugging to see the internal messages through the logging library.
                 o.Debug = false;
                 // Configure the level of Sentry internal logging
-                o.DiagnosticsLevel = SentryLevel.Debug;
+                o.DiagnosticLevel = SentryLevel.Debug;
 
                 o.Dsn = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537";
                 o.MaxBreadcrumbs = 150; // Increasing from default 100

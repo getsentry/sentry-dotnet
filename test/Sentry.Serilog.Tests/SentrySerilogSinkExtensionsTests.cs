@@ -31,7 +31,7 @@ namespace Sentry.Serilog.Tests
             public CompressionLevel RequestBodyCompressionLevel { get; } = CompressionLevel.NoCompression;
             public bool RequestBodyCompressionBuffered { get; } = false;
             public bool Debug { get; } = true;
-            public SentryLevel DiagnosticsLevel { get; } = SentryLevel.Warning;
+            public SentryLevel DiagnosticLevel { get; } = SentryLevel.Warning;
             public bool ReportAssemblies { get; } = false;
             public DeduplicateMode DeduplicateMode { get; } = DeduplicateMode.SameExceptionInstance;
             public bool InitializeSdk { get; } = false;
@@ -102,7 +102,7 @@ namespace Sentry.Serilog.Tests
                 _fixture.IsEnvironmentUser, _fixture.ServerName, _fixture.AttachStackTrace, _fixture.MaxBreadcrumbs,
                 _fixture.SampleRate, _fixture.Release, _fixture.Environment,  _fixture.MaxQueueItems,
                 _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
-                _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticsLevel,
+                _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticLevel,
                 _fixture.ReportAssemblies, _fixture.DeduplicateMode, _fixture.InitializeSdk);
 
             // Fail early
@@ -124,7 +124,7 @@ namespace Sentry.Serilog.Tests
             Assert.Equal(_fixture.RequestBodyCompressionLevel, sut.RequestBodyCompressionLevel);
             Assert.Equal(_fixture.RequestBodyCompressionBuffered, sut.RequestBodyCompressionBuffered);
             Assert.Equal(_fixture.Debug, sut.Debug);
-            Assert.Equal(_fixture.DiagnosticsLevel, sut.DiagnosticsLevel);
+            Assert.Equal(_fixture.DiagnosticLevel, sut.DiagnosticLevel);
             Assert.Equal(_fixture.ReportAssemblies, sut.ReportAssemblies);
             Assert.Equal(_fixture.DeduplicateMode, sut.DeduplicateMode);
             Assert.Equal(_fixture.InitializeSdk, sut.InitializeSdk);

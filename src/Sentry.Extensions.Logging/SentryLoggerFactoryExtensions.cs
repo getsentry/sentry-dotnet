@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.Logging
             if (options.DiagnosticLogger == null)
             {
                 var logger = factory.CreateLogger<ISentryClient>();
-                options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticsLevel);
+                options.DiagnosticLogger = new MelDiagnosticLogger(logger, options.DiagnosticLevel);
             }
 
             IHub hub;

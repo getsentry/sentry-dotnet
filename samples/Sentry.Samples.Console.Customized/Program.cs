@@ -88,7 +88,7 @@ internal static class Program
             // Enable SDK logging with Debug level
             o.Debug = true;
             // To change the verbosity, use:
-            // o.DiagnosticsLevel = SentryLevel.Info;
+            // o.DiagnosticLevel = SentryLevel.Info;
             // To use a custom logger:
             // o.DiagnosticLogger = ...
 

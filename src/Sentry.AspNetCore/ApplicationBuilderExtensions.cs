@@ -38,7 +38,7 @@ namespace Microsoft.AspNetCore.Builder
                 if (o.Debug && (o.DiagnosticLogger == null || o.DiagnosticLogger.GetType() == typeof(ConsoleDiagnosticLogger)))
                 {
                     var logger = app.ApplicationServices.GetRequiredService<ILogger<ISentryClient>>();
-                    o.DiagnosticLogger = new MelDiagnosticLogger(logger, o.DiagnosticsLevel);
+                    o.DiagnosticLogger = new MelDiagnosticLogger(logger, o.DiagnosticLevel);
                 }
 
                 var stackTraceFactory = app.ApplicationServices.GetService<ISentryStackTraceFactory>();

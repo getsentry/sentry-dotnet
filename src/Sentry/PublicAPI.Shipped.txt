@@ -134,8 +134,8 @@ Sentry.SentryOptions.DecompressionMethods.get -> System.Net.DecompressionMethods
 Sentry.SentryOptions.DecompressionMethods.set -> void
 Sentry.SentryOptions.DiagnosticLogger.get -> Sentry.Extensibility.IDiagnosticLogger
 Sentry.SentryOptions.DiagnosticLogger.set -> void
-Sentry.SentryOptions.DiagnosticsLevel.get -> Sentry.Protocol.SentryLevel
-Sentry.SentryOptions.DiagnosticsLevel.set -> void
+Sentry.SentryOptions.DiagnosticLevel.get -> Sentry.Protocol.SentryLevel
+Sentry.SentryOptions.DiagnosticLevel.set -> void
 Sentry.SentryOptions.Dsn.get -> Sentry.Dsn
 Sentry.SentryOptions.Dsn.set -> void
 Sentry.SentryOptions.Environment.get -> string
