@@ -312,7 +312,7 @@ namespace Sentry
         /// Captures a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static void CaptureTransaction(Transaction transaction)
+        public static void CaptureTransaction(ITransaction transaction)
             => _hub.CaptureTransaction(transaction);
 
         /// <summary>

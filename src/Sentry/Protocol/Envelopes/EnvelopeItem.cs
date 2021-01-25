@@ -144,14 +144,14 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates an envelope item from transaction.
         /// </summary>
-        public static EnvelopeItem FromTransaction(Transaction transaction)
+        public static EnvelopeItem FromTransaction(ITransaction transaction)
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueTransaction
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(transaction));
+            return new EnvelopeItem(header, new JsonSerializable((IJsonSerializable)transaction));
         }
 
         /// <summary>

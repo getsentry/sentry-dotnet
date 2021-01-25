@@ -103,7 +103,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
         {
             if (_disposed)
             {

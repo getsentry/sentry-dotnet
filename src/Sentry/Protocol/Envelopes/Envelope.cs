@@ -115,7 +115,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates an envelope that contains a single transaction.
         /// </summary>
-        public static Envelope FromTransaction(Transaction transaction)
+        public static Envelope FromTransaction(ITransaction transaction)
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {

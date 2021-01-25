@@ -82,7 +82,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
         {
         }
 

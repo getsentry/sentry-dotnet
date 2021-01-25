@@ -191,11 +191,20 @@ namespace Sentry.Internal
             }
         }
 
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
         {
             try
             {
                 _ownedClient.CaptureTransaction(transaction);
+
+                // Clear the transaction from the scope
+                ScopeManager.WithScope(scope =>
+                {
+                    if (scope.Transaction == transaction)
+                    {
+                        scope.Transaction = null;
+                    }
+                });
             }
             catch (Exception e)
             {

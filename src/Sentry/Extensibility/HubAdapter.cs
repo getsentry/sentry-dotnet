@@ -153,7 +153,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
             => SentrySdk.CaptureTransaction(transaction);
 
         /// <summary>
