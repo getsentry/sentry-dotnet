@@ -352,7 +352,11 @@ namespace Sentry.Tests
                 sut,
                 "test name",
                 "test operation"
-            ) {IsSampled = false});
+            )
+            {
+                IsSampled = false,
+                EndTimestamp = DateTimeOffset.Now
+            });
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -370,7 +374,11 @@ namespace Sentry.Tests
                     sut,
                     "test name",
                     "test operation"
-                ) {IsSampled = true}
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = DateTimeOffset.Now
+                }
             );
 
             // Assert
@@ -387,7 +395,11 @@ namespace Sentry.Tests
                 sut,
                 "test name",
                 "test operation"
-            ) {IsSampled = true};
+            )
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now
+            };
 
             transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
@@ -410,7 +422,11 @@ namespace Sentry.Tests
                     sut,
                     null!,
                     "test operation"
-                ) {IsSampled = true}
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = DateTimeOffset.Now
+                }
             );
 
             // Assert
@@ -429,7 +445,34 @@ namespace Sentry.Tests
                     sut,
                     "test name",
                     null!
-                ) {IsSampled = true}
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = DateTimeOffset.Now
+                }
+            );
+
+            // Assert
+            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_NotFinished_Ignored()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Act
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    null!
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = null // not finished
+                }
             );
 
             // Assert

@@ -129,6 +129,17 @@ namespace Sentry
                 return;
             }
 
+            if (!transaction.IsFinished)
+            {
+                _options.DiagnosticLogger?.LogWarning(
+                    "Transaction dropped because it's not finished. " +
+                    "Don't call hub.CaptureTransaction(...) directly. " +
+                    "Instead call transaction.Finish() to finalize and send the transaction to Sentry."
+                );
+
+                return;
+            }
+
             // Sampling decision MUST have been made at this point
             Debug.Assert(transaction.IsSampled != null, "Attempt to capture transaction without sampling decision.");
 

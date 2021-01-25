@@ -1,7 +1,4 @@
 using System;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 
 namespace Sentry.Protocol
 {
@@ -10,7 +7,7 @@ namespace Sentry.Protocol
     /// </summary>
     public class SentryTraceHeader
     {
-        private const string HeaderName = "sentry-trace";
+        internal const string HttpHeaderName = "sentry-trace";
 
         /// <summary>
         /// Trace ID.
@@ -36,29 +33,6 @@ namespace Sentry.Protocol
             SpanId = spanSpanId;
             IsSampled = isSampled;
         }
-
-        /// <summary>
-        /// Injects trace information into HTTP headers.
-        /// </summary>
-        public void Inject(HttpHeaders headers)
-        {
-            var headerValue = ToString();
-
-            headers.Remove(HeaderName);
-            headers.Add(HeaderName, headerValue);
-        }
-
-        /// <summary>
-        /// Injects trace information into the headers of the specified HTTP request.
-        /// </summary>
-        public void Inject(HttpRequestMessage request) =>
-            Inject(request.Headers);
-
-        /// <summary>
-        /// Injects trace information into the default headers of the specified HTTP client.
-        /// </summary>
-        public void Inject(HttpClient client) =>
-            Inject(client.DefaultRequestHeaders);
 
         /// <inheritdoc />
         public override string ToString() => IsSampled is {} isSampled

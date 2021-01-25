@@ -65,10 +65,10 @@ namespace Sentry.Protocol
         public string Name { get; set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
-        public DateTimeOffset? EndTimestamp { get; private set; }
+        public DateTimeOffset? EndTimestamp { get; internal set; }
 
         /// <inheritdoc cref="ISpan.Operation" />
         public string Operation

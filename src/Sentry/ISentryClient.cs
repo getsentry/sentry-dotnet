@@ -32,8 +32,8 @@ namespace Sentry
         /// Captures a transaction.
         /// </summary>
         /// <remarks>
-        /// Note: this method is not meant to be called from user code!
-        /// Instead, call <see cref="ISpan.Finish"/> on the transaction reference.
+        /// Note: this method is NOT meant to be called from user code!
+        /// Instead, call <see cref="ISpan.Finish"/> on the transaction.
         /// </remarks>
         /// <param name="transaction">The transaction.</param>
         void CaptureTransaction(ITransaction transaction);
