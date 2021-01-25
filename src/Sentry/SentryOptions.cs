@@ -311,7 +311,7 @@ namespace Sentry
         /// Whether to log diagnostics messages
         /// </summary>
         /// <remarks>
-        /// The verbosity can be controlled through <see cref="DiagnosticsLevel"/>
+        /// The verbosity can be controlled through <see cref="DiagnosticLevel"/>
         /// and the implementation via <see cref="DiagnosticLogger"/>.
         /// </remarks>
         public bool Debug
@@ -326,7 +326,7 @@ namespace Sentry
         /// <remarks>
         /// The <see cref="Debug"/> flag has to be switched on for this setting to take effect.
         /// </remarks>
-        public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Debug;
+        public SentryLevel DiagnosticLevel { get; set; } = SentryLevel.Debug;
 
         private volatile IDiagnosticLogger? _diagnosticLogger;
 

@@ -3,6 +3,7 @@
 ## vNext
 
 - Add support for dynamic transaction sampling. (#753) @Tyrrrz
+- Renamed Option `DiagnosticsLevel` to `DiagnosticLevel` (#759) @bruno-garcia
 
 ## 3.0.0-beta.0
 
