@@ -111,6 +111,12 @@ namespace Sentry.Internal
         {
             var transaction = new Transaction(this, context);
 
+            // Transactions are not handled by event processors, so some things need to be added manually
+
+            // Apply scope
+            ScopeManager.GetCurrent().Key.Apply(transaction);
+
+            // SDK information
             var nameAndVersion = MainSentryEventProcessor.NameAndVersion;
             var protocolPackageName = MainSentryEventProcessor.ProtocolPackageName;
 
@@ -124,6 +130,17 @@ namespace Sentry.Internal
             {
                 transaction.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
             }
+
+            // Release information
+            transaction.Release ??= _options.Release ?? ReleaseLocator.GetCurrent();
+
+            // Environment information
+            var foundEnvironment = EnvironmentLocator.Locate();
+            transaction.Environment ??= (string.IsNullOrWhiteSpace(foundEnvironment)
+                ? string.IsNullOrWhiteSpace(_options.Environment)
+                    ? Constants.ProductionEnvironmentSetting
+                    : _options.Environment
+                : foundEnvironment);
 
             // Make a sampling decision
             var samplingContext = new TransactionSamplingContext(

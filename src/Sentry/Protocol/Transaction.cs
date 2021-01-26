@@ -65,6 +65,9 @@ namespace Sentry.Protocol
         public string Name { get; set; }
 
         /// <inheritdoc />
+        public string? Release { get; set; }
+
+        /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
@@ -277,6 +280,11 @@ namespace Sentry.Protocol
                 writer.WriteString("level", level.ToString().ToLowerInvariant());
             }
 
+            if (!string.IsNullOrWhiteSpace(Release))
+            {
+                writer.WriteString("release", Release);
+            }
+
             if (!string.IsNullOrWhiteSpace(Name))
             {
                 writer.WriteString("transaction", Name);
@@ -392,6 +400,7 @@ namespace Sentry.Protocol
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
+            var release = json.GetPropertyOrNull("release")?.GetString();
             var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
             var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
             var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
@@ -409,6 +418,7 @@ namespace Sentry.Protocol
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
                 Level = level,
+                Release = release,
                 _request = request,
                 _contexts = contexts,
                 _user = user,

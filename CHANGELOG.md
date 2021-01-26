@@ -5,6 +5,7 @@
 - Add support for dynamic transaction sampling. (#753) @Tyrrrz
 - Integrate trace headers. (#758) @Tyrrrz
 - Renamed Option `DiagnosticsLevel` to `DiagnosticLevel` (#759) @bruno-garcia
+- Add additional data to transactions (#763) @Tyrrrz
 
 ## 3.0.0-beta.0
 

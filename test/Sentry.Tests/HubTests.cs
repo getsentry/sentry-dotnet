@@ -331,6 +331,76 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void StartTransaction_ContainsSdk()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation");
+
+            // Assert
+            transaction.Sdk.Name.Should().NotBeNullOrWhiteSpace();
+            transaction.Sdk.Version.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public void StartTransaction_ContainsRelease()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation");
+
+            // Assert
+            transaction.Release.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public void StartTransaction_ContainsEnvironment()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation");
+
+            // Assert
+            transaction.Environment.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public void StartTransaction_ContainsTagsFromScope()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            hub.ConfigureScope(scope =>
+            {
+                scope.SetTag("foo", "bar");
+
+                // Act
+                var transaction = hub.StartTransaction("name", "operation");
+
+                // Assert
+                transaction.Tags.Should().Contain(tag => tag.Key == "foo" && tag.Value == "bar");
+            });
+        }
+
+        [Fact]
         public void GetTraceHeader_ReturnsHeaderForActiveSpan()
         {
             // Arrange
