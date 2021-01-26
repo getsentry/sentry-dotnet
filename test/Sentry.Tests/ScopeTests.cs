@@ -157,5 +157,58 @@ namespace Sentry.Tests
             scope.TransactionName.Should().Be("foo");
             scope.TransactionName.Should().Be(scope.Transaction?.Name);
         }
+
+        [Fact]
+        public void GetSpan_NoSpans_ReturnsTransaction()
+        {
+            // Arrange
+            var scope = new Scope();
+            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            scope.Transaction = transaction;
+
+            // Act
+            var span = scope.GetSpan();
+
+            // Assert
+            span.Should().Be(transaction);
+        }
+
+        [Fact]
+        public void GetSpan_FinishedSpans_ReturnsTransaction()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            transaction.StartChild("123").Finish();
+            transaction.StartChild("456").Finish();
+
+            scope.Transaction = transaction;
+
+            // Act
+            var span = scope.GetSpan();
+
+            // Assert
+            span.Should().Be(transaction);
+        }
+
+        [Fact]
+        public void GetSpan_ActiveSpans_ReturnsSpan()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            var activeSpan = transaction.StartChild("123");
+            transaction.StartChild("456").Finish();
+
+            scope.Transaction = transaction;
+
+            // Act
+            var span = scope.GetSpan();
+
+            // Assert
+            span.Should().Be(activeSpan);
+        }
     }
 }

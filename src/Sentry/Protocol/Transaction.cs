@@ -65,10 +65,10 @@ namespace Sentry.Protocol
         public string Name { get; set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
-        public DateTimeOffset? EndTimestamp { get; private set; }
+        public DateTimeOffset? EndTimestamp { get; internal set; }
 
         /// <inheritdoc cref="ISpan.Operation" />
         public string Operation
@@ -170,6 +170,9 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public IReadOnlyCollection<ISpan> Spans => _spansLazy.Value;
 
+        /// <inheritdoc />
+        public bool IsFinished => EndTimestamp is not null;
+
         // This constructor is used for deserialization purposes.
         // It's required because some of the fields are mapped on 'contexts.trace'.
         // When deserializing, we don't parse those fields explicitly, but
@@ -250,6 +253,9 @@ namespace Sentry.Protocol
             // Client decides whether to discard this transaction based on sampling
             _client.CaptureTransaction(this);
         }
+
+        /// <inheritdoc />
+        public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(

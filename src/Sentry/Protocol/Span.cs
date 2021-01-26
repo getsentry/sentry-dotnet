@@ -33,6 +33,9 @@ namespace Sentry.Protocol
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
 
+        /// <inheritdoc />
+        public bool IsFinished => EndTimestamp is not null;
+
         /// <inheritdoc cref="ISpan.Operation" />
         public string Operation { get; set; }
 
@@ -85,6 +88,13 @@ namespace Sentry.Protocol
 
         /// <inheritdoc />
         public void Finish() => EndTimestamp = DateTimeOffset.UtcNow;
+
+        /// <inheritdoc />
+        public SentryTraceHeader GetTraceHeader() => new(
+            TraceId,
+            SpanId,
+            IsSampled
+        );
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)

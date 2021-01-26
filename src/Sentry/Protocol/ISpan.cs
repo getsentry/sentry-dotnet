@@ -36,6 +36,11 @@ namespace Sentry.Protocol
         DateTimeOffset? EndTimestamp { get; }
 
         /// <summary>
+        /// Whether the span is finished.
+        /// </summary>
+        bool IsFinished { get; }
+
+        /// <summary>
         /// Starts a child span.
         /// </summary>
         ISpan StartChild(string operation);
@@ -44,6 +49,11 @@ namespace Sentry.Protocol
         /// Finishes the span.
         /// </summary>
         void Finish();
+
+        /// <summary>
+        /// Get Sentry trace header.
+        /// </summary>
+        SentryTraceHeader GetTraceHeader();
     }
 
     /// <summary>

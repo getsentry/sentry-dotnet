@@ -382,5 +382,11 @@ namespace Sentry
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
+        /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
+        /// </summary>
+        public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
     }
 }

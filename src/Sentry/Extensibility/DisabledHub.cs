@@ -65,7 +65,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns null.
         /// </summary>
-        public SentryTraceHeader? GetSentryTrace() => null;
+        public SentryTraceHeader? GetTraceHeader() => null;
 
         /// <summary>
         /// No-Op.
@@ -82,7 +82,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
         {
         }
 

@@ -7,24 +7,37 @@ namespace Sentry.Protocol
     /// </summary>
     public class SentryTraceHeader
     {
-        private readonly SentryId _traceId;
-        private readonly SpanId _spanId;
-        private readonly bool? _isSampled;
+        internal const string HttpHeaderName = "sentry-trace";
+
+        /// <summary>
+        /// Trace ID.
+        /// </summary>
+        public SentryId TraceId { get; }
+
+        /// <summary>
+        /// Span ID.
+        /// </summary>
+        public SpanId SpanId { get; }
+
+        /// <summary>
+        /// Whether the trace is sampled.
+        /// </summary>
+        public bool? IsSampled { get; }
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryTraceHeader"/>.
         /// </summary>
-        public SentryTraceHeader(SentryId traceId, SpanId spanId, bool? isSampled)
+        public SentryTraceHeader(SentryId traceId, SpanId spanSpanId, bool? isSampled)
         {
-            _traceId = traceId;
-            _spanId = spanId;
-            _isSampled = isSampled;
+            TraceId = traceId;
+            SpanId = spanSpanId;
+            IsSampled = isSampled;
         }
 
         /// <inheritdoc />
-        public override string ToString() => _isSampled is {} isSampled
-            ? $"{_traceId}-{_spanId}-{(isSampled ? 1 : 0)}"
-            : $"{_traceId}-{_spanId}";
+        public override string ToString() => IsSampled is {} isSampled
+            ? $"{TraceId}-{SpanId}-{(isSampled ? 1 : 0)}"
+            : $"{TraceId}-{SpanId}";
 
         /// <summary>
         /// Parses <see cref="SentryTraceHeader"/> from string.

@@ -103,7 +103,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
         {
             if (_disposed)
             {
@@ -129,8 +129,23 @@ namespace Sentry
                 return;
             }
 
+            // Unfinished transaction can only happen if the user calls this method instead of
+            // transaction.Finish().
+            // We still send these transactions over, but warn the user not to do it.
+            if (!transaction.IsFinished)
+            {
+                _options.DiagnosticLogger?.LogWarning(
+                    "Capturing a transaction which has not been finished. " +
+                    "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
+                    "to properly finalize the transaction and send it to Sentry."
+                );
+            }
+
             // Sampling decision MUST have been made at this point
-            Debug.Assert(transaction.IsSampled != null, "Attempt to capture transaction without sampling decision.");
+            Debug.Assert(
+                transaction.IsSampled != null,
+                "Attempt to capture transaction without sampling decision."
+            );
 
             if (transaction.IsSampled != true)
             {

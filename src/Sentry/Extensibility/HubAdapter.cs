@@ -84,7 +84,7 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public SentryTraceHeader? GetSentryTrace()
+        public SentryTraceHeader? GetTraceHeader()
             => SentrySdk.GetTraceHeader();
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
             => SentrySdk.CaptureTransaction(transaction);
 
         /// <summary>

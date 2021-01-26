@@ -352,7 +352,11 @@ namespace Sentry.Tests
                 sut,
                 "test name",
                 "test operation"
-            ) {IsSampled = false});
+            )
+            {
+                IsSampled = false,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -370,7 +374,11 @@ namespace Sentry.Tests
                     sut,
                     "test name",
                     "test operation"
-                ) {IsSampled = true}
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = DateTimeOffset.Now // finished
+                }
             );
 
             // Assert
@@ -387,7 +395,11 @@ namespace Sentry.Tests
                 sut,
                 "test name",
                 "test operation"
-            ) {IsSampled = true};
+            )
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            };
 
             transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
@@ -410,7 +422,11 @@ namespace Sentry.Tests
                     sut,
                     null!,
                     "test operation"
-                ) {IsSampled = true}
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = DateTimeOffset.Now // finished
+                }
             );
 
             // Assert
@@ -429,11 +445,38 @@ namespace Sentry.Tests
                     sut,
                     "test name",
                     null!
-                ) {IsSampled = true}
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = DateTimeOffset.Now // finished
+                }
             );
 
             // Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        }
+
+        [Fact]
+        public void CaptureTransaction_NotFinished_Sent()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+
+            // Act
+            sut.CaptureTransaction(
+                new Transaction(
+                    sut,
+                    "test name",
+                    "test operation"
+                )
+                {
+                    IsSampled = true,
+                    EndTimestamp = null // not finished
+                }
+            );
+
+            // Assert
+            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]

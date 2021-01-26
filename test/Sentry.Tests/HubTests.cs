@@ -163,6 +163,30 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void StartTransaction_FromTraceHeader_Works()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var traceHeader = new SentryTraceHeader(
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+                SpanId.Parse("2000000000000000"),
+                true
+            );
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation", traceHeader);
+
+            // Assert
+            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
+            transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
         public void StartTransaction_StaticSampling_SampledIn()
         {
             // Arrange
@@ -304,6 +328,54 @@ namespace NotSentry.Tests
 
             // Assert
             transaction.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
+        public void GetTraceHeader_ReturnsHeaderForActiveSpan()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Act
+            hub.WithScope(scope =>
+            {
+                scope.Transaction = transaction;
+
+                var header = hub.GetTraceHeader();
+
+                // Assert
+                header.Should().NotBeNull();
+                header?.SpanId.Should().Be(transaction.SpanId);
+                header?.TraceId.Should().Be(transaction.TraceId);
+                header?.IsSampled.Should().Be(transaction.IsSampled);
+            });
+        }
+
+        [Fact]
+        public void CaptureTransaction_AfterTransactionFinishes_ResetsTransactionOnScope()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            hub.WithScope(scope => scope.Transaction = transaction);
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            hub.WithScope(scope => scope.Transaction.Should().BeNull());
         }
     }
 }
