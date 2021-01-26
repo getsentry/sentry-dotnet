@@ -132,15 +132,15 @@ namespace Sentry.Internal
             }
 
             // Release information
-            transaction.Release = _options.Release ?? ReleaseLocator.GetCurrent();
+            transaction.Release ??= _options.Release ?? ReleaseLocator.GetCurrent();
 
             // Environment information
             var foundEnvironment = EnvironmentLocator.Locate();
-            transaction.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
+            transaction.Environment ??= (string.IsNullOrWhiteSpace(foundEnvironment)
                 ? string.IsNullOrWhiteSpace(_options.Environment)
                     ? Constants.ProductionEnvironmentSetting
                     : _options.Environment
-                : foundEnvironment;
+                : foundEnvironment);
 
             // Make a sampling decision
             var samplingContext = new TransactionSamplingContext(
