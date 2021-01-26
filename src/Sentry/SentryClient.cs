@@ -133,7 +133,7 @@ namespace Sentry
             {
                 _options.DiagnosticLogger?.LogWarning(
                     "Transaction dropped because it's not finished. " +
-                    "Don't call hub.CaptureTransaction(...) directly. " +
+                    "You don't need to call hub.CaptureTransaction(...) directly. " +
                     "Instead call transaction.Finish() to finalize and send the transaction to Sentry."
                 );
 
