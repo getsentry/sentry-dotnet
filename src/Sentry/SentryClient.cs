@@ -135,7 +135,7 @@ namespace Sentry
             if (!transaction.IsFinished)
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Sending a transaction which was not finished. " +
+                    "Capturing a transaction which has not been finished. " +
                     "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
                     "to properly finalize the transaction and send it to Sentry."
                 );

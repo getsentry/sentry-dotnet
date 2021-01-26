@@ -467,7 +467,7 @@ namespace Sentry.Tests
                 new Transaction(
                     sut,
                     "test name",
-                    null!
+                    "test operation"
                 )
                 {
                     IsSampled = true,
