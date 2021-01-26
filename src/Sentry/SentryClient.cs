@@ -129,19 +129,23 @@ namespace Sentry
                 return;
             }
 
+            // Unfinished transaction can only happen if the user calls this method instead of
+            // transaction.Finish().
+            // We still send these transactions over, but warn the user not to do it.
             if (!transaction.IsFinished)
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Transaction dropped because it's not finished. " +
-                    "You don't need to call hub.CaptureTransaction(...) directly. " +
-                    "Instead call transaction.Finish() to finalize and send the transaction to Sentry."
+                    "Sending a transaction which was not finished. " +
+                    "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
+                    "to properly finalize the transaction and send it to Sentry."
                 );
-
-                return;
             }
 
             // Sampling decision MUST have been made at this point
-            Debug.Assert(transaction.IsSampled != null, "Attempt to capture transaction without sampling decision.");
+            Debug.Assert(
+                transaction.IsSampled != null,
+                "Attempt to capture transaction without sampling decision."
+            );
 
             if (transaction.IsSampled != true)
             {

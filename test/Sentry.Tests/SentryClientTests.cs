@@ -355,7 +355,7 @@ namespace Sentry.Tests
             )
             {
                 IsSampled = false,
-                EndTimestamp = DateTimeOffset.Now
+                EndTimestamp = DateTimeOffset.Now // finished
             });
 
             // Assert
@@ -377,7 +377,7 @@ namespace Sentry.Tests
                 )
                 {
                     IsSampled = true,
-                    EndTimestamp = DateTimeOffset.Now
+                    EndTimestamp = DateTimeOffset.Now // finished
                 }
             );
 
@@ -398,7 +398,7 @@ namespace Sentry.Tests
             )
             {
                 IsSampled = true,
-                EndTimestamp = DateTimeOffset.Now
+                EndTimestamp = DateTimeOffset.Now // finished
             };
 
             transaction.Contexts.Trace.SpanId = SpanId.Empty;
@@ -425,7 +425,7 @@ namespace Sentry.Tests
                 )
                 {
                     IsSampled = true,
-                    EndTimestamp = DateTimeOffset.Now
+                    EndTimestamp = DateTimeOffset.Now // finished
                 }
             );
 
@@ -448,7 +448,7 @@ namespace Sentry.Tests
                 )
                 {
                     IsSampled = true,
-                    EndTimestamp = DateTimeOffset.Now
+                    EndTimestamp = DateTimeOffset.Now // finished
                 }
             );
 
@@ -457,7 +457,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void CaptureTransaction_NotFinished_Ignored()
+        public void CaptureTransaction_NotFinished_Sent()
         {
             // Arrange
             var sut = _fixture.GetSut();
@@ -476,7 +476,7 @@ namespace Sentry.Tests
             );
 
             // Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
