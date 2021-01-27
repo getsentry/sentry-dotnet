@@ -33,21 +33,27 @@ namespace Sentry.AspNetCore
                 return;
             }
 
-            var transaction = hub.StartTransaction(
-                context.GetTransactionName(),
-                "http.server"
-            );
-
-            try
+            await hub.ConfigureScopeAsync(async scope =>
             {
-                await _next(context).ConfigureAwait(false);
-            }
-            finally
-            {
-                transaction.Finish(
-                    GetSpanStatusFromCode(context.Response.StatusCode)
+                var transaction = hub.StartTransaction(
+                    context.GetTransactionName(),
+                    "http.server"
                 );
-            }
+
+                // Put the transaction on the scope
+                scope.Transaction = transaction;
+
+                try
+                {
+                    await _next(context).ConfigureAwait(false);
+                }
+                finally
+                {
+                    transaction.Finish(
+                        GetSpanStatusFromCode(context.Response.StatusCode)
+                    );
+                }
+            }).ConfigureAwait(false);
         }
 
         private static SpanStatus GetSpanStatusFromCode(int statusCode) => statusCode switch
