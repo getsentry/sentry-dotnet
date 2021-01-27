@@ -18,12 +18,6 @@ namespace Sentry.Protocol
         // 'new' because it adds a setter
         new string Name { get; set; }
 
-        // Should this be on IEventLike?
-        /// <summary>
-        /// The release version of the application.
-        /// </summary>
-        string? Release { get; set; }
-
         /// <summary>
         /// Flat list of spans within this transaction.
         /// </summary>

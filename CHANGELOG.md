@@ -7,6 +7,7 @@
 - Renamed Option `DiagnosticsLevel` to `DiagnosticLevel` (#759) @bruno-garcia
 - Add additional data to transactions (#763) @Tyrrrz
 - Improve transaction instrumentation on ASP.NET Core (#766) @Tyrrrz
+- Add `Release` to `Scope` (#765) @Tyrrrz
 
 ## 3.0.0-beta.0
 
