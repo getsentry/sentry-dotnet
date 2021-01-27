@@ -34,7 +34,7 @@ namespace Sentry.AspNetCore
             }
 
             var transaction = hub.StartTransaction(
-                context.GetTransactionName(out var usesPathName),
+                "Unknown Route",
                 "http.server"
             );
 
@@ -44,11 +44,8 @@ namespace Sentry.AspNetCore
             }
             finally
             {
-                // TODO: Add a config flag to optionally also include 401 and 403 in case those take precedence over routing. Maybe a list?
-                if (context.Response.StatusCode == 404 && usesPathName)
-                {
-                    transaction.Name = "Unknown Route";
-                }
+                transaction.Name = context.GetTransactionName();
+
                 transaction.Finish(
                     GetSpanStatusFromCode(context.Response.StatusCode)
                 );
