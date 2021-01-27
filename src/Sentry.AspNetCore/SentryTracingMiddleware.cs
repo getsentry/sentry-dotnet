@@ -44,6 +44,7 @@ namespace Sentry.AspNetCore
             }
             finally
             {
+                // We get the transaction name here since the MVC middleware might modify the route
                 transaction.Name = context.GetTransactionName();
 
                 transaction.Finish(
