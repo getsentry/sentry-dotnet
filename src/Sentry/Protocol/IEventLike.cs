@@ -38,6 +38,11 @@ namespace Sentry.Protocol
         User User { get; set; }
 
         /// <summary>
+        /// The release version of the application.
+        /// </summary>
+        string? Release { get; set; }
+
+        /// <summary>
         /// The environment name, such as 'production' or 'staging'.
         /// </summary>
         /// <remarks>Requires Sentry 8.0 or higher.</remarks>

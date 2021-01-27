@@ -178,16 +178,10 @@ namespace Sentry
         /// 14.1.16.32451
         /// </example>
         /// <remarks>
-        /// <para>
         /// This value will generally be something along the lines of the git SHA for the given project.
         /// If not explicitly defined via configuration or environment variable (SENTRY_RELEASE).
         /// It will attempt o read it from:
         /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
-        /// </para>
-        /// <para>
-        /// Don't rely on discovery if your release is: '1.0.0' or '0.0.0'. Since those are
-        /// default values for new projects, they are not considered valid by the discovery process.
-        /// </para>
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
         public string? Release { get; set; }
