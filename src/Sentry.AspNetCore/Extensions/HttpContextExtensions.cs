@@ -11,7 +11,7 @@ namespace Sentry.AspNetCore.Extensions
     {
         public static string? TryGetRouteTemplate(this HttpContext context)
         {
-#if !NETSTANDARD2_0
+#if !NETSTANDARD2_0 // endpoint routing is only supported after ASP.NET Core 3.0
             // Requires .UseRouting()/.UseEndpoints()
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
             var routePattern = endpoint?.RoutePattern.RawText;
@@ -22,8 +22,11 @@ namespace Sentry.AspNetCore.Extensions
             }
 #endif
 
-            // Requires legacy .UseMvc()
-            var routeData = context.Features.Get<IRoutingFeature?>()?.RouteData;
+            // Fallback for legacy .UseMvc().
+            // Uses context.Features.Get<IRoutingFeature?>() under the hood and CAN be null,
+            // despite the annotations claiming otherwise.
+            var routeData = context.GetRouteData();
+
             var controller = routeData?.Values["controller"]?.ToString();
             var action = routeData?.Values["action"]?.ToString();
             var area = routeData?.Values["area"]?.ToString();

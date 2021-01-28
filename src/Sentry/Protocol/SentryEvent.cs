@@ -72,9 +72,7 @@ namespace Sentry
         /// </summary>
         public string? ServerName { get; set; }
 
-        /// <summary>
-        /// The release version of the application.
-        /// </summary>
+        /// <inheritdoc />
         public string? Release { get; set; }
 
         internal SentryValues<SentryException>? SentryExceptionValues { get; set; }

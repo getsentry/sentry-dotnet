@@ -110,6 +110,9 @@ namespace Sentry
         }
 
         /// <inheritdoc />
+        public string? Release { get; set; }
+
+        /// <inheritdoc />
         public string? Environment { get; set; }
 
         // TransactionName is kept for legacy purposes because
@@ -284,6 +287,7 @@ namespace Sentry
             Request.CopyTo(other.Request);
             User.CopyTo(other.User);
 
+            other.Release ??= Release;
             other.Environment ??= Environment;
             other.TransactionName ??= TransactionName;
             other.Level ??= Level;

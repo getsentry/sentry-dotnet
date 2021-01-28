@@ -33,24 +33,30 @@ namespace Sentry.AspNetCore
                 return;
             }
 
-            var transaction = hub.StartTransaction(
-                "Unknown Route",
-                "http.server"
-            );
-
-            try
+            await hub.ConfigureScopeAsync(async scope =>
             {
-                await _next(context).ConfigureAwait(false);
-            }
-            finally
-            {
-                // We get the transaction name here since the MVC middleware might modify the route
-                transaction.Name = context.GetTransactionName();
-
-                transaction.Finish(
-                    GetSpanStatusFromCode(context.Response.StatusCode)
+                var transaction = hub.StartTransaction(
+                    "Unknown Route",
+                    "http.server"
                 );
-            }
+
+                // Put the transaction on the scope
+                scope.Transaction = transaction;
+
+                try
+                {
+                    await _next(context).ConfigureAwait(false);
+                }
+                finally
+                {
+                    // We get the transaction name here since the MVC middleware might modify the route
+                    transaction.Name = context.GetTransactionName();
+                  
+                    transaction.Finish(
+                        GetSpanStatusFromCode(context.Response.StatusCode)
+                    );
+                }
+            }).ConfigureAwait(false);
         }
 
         private static SpanStatus GetSpanStatusFromCode(int statusCode) => statusCode switch
