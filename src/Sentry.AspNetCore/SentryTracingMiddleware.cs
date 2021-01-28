@@ -36,7 +36,7 @@ namespace Sentry.AspNetCore
             await hub.ConfigureScopeAsync(async scope =>
             {
                 var transaction = hub.StartTransaction(
-                    context.GetTransactionName(),
+                    "Unknown Route",
                     "http.server"
                 );
 
@@ -49,6 +49,9 @@ namespace Sentry.AspNetCore
                 }
                 finally
                 {
+                    // We get the transaction name here since the MVC middleware might modify the route
+                    transaction.Name = context.GetTransactionName();
+                  
                     transaction.Finish(
                         GetSpanStatusFromCode(context.Response.StatusCode)
                     );

@@ -43,12 +43,17 @@ namespace Sentry.AspNetCore.Extensions
             return null;
         }
 
+        /// <summary>
+        /// Get the route template of the current path, or the path string itself if there is no route template
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetTransactionName(this HttpContext context)
         {
             // Try to get the route template or fallback to the request path
 
             var method = context.Request.Method.ToUpperInvariant();
-            var route = context.TryGetRouteTemplate() ?? context.Request.Path;
+            var route = context.TryGetRouteTemplate() ?? "Unknown Route";
 
             return $"{method} {route}";
         }
