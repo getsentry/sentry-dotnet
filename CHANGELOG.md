@@ -1,6 +1,6 @@
 # Changelog
 
-## vNext
+## 3.0.0
 
 - Add support for dynamic transaction sampling. (#753) @Tyrrrz
 - Integrate trace headers. (#758) @Tyrrrz
