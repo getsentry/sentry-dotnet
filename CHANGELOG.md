@@ -8,7 +8,7 @@
 - Add additional data to transactions (#763) @Tyrrrz
 - Improve transaction instrumentation on ASP.NET Core (#766) @Tyrrrz
 - Add `Release` to `Scope` (#765) @Tyrrrz
-- Don't fallback to `HttpContext.RequestPath` if a route is unknown (#767 #768) @kanadaj @Tyrrrz
+- Don't fallback to `HttpContext.RequestPath` if a route is unknown (#767 #769) @kanadaj @Tyrrrz
 
 ## 3.0.0-beta.0
 
