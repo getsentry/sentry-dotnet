@@ -2,6 +2,7 @@
 
 ## 3.0.1
 
+- bump log4net 2.0.12 (#781) @bruno-garcia
 - Fix Serilog version (#780) @bruno-garcia
 - Move main Protocol types to Sentry namespace (#779) @bruno-garcia
 
