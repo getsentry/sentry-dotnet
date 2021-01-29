@@ -3,6 +3,7 @@
 ## 3.0.1
 
 - Fix Serilog version (#780) @bruno-garcia
+- Move main Protocol types to Sentry namespace (#779) @bruno-garcia
 
 ## 3.0.0
 

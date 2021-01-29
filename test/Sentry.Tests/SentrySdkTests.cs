@@ -12,7 +12,6 @@ using Sentry.Testing;
 using Xunit;
 using Xunit.Abstractions;
 using static Sentry.Internal.Constants;
-using static Sentry.Protocol.Constants;
 using static Sentry.DsnSamples;
 
 namespace Sentry.Tests
@@ -143,7 +142,7 @@ namespace Sentry.Tests
         {
             EnvironmentVariableGuard.WithVariable(
                 DsnEnvironmentVariable,
-                DisableSdkDsnValue,
+                Constants.DisableSdkDsnValue,
                 () =>
                 {
                     using (SentrySdk.Init())

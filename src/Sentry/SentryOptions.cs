@@ -11,7 +11,7 @@ using Sentry.Internal;
 using Sentry.PlatformAbstractions;
 using Sentry.Protocol;
 using static Sentry.Internal.Constants;
-using static Sentry.Protocol.Constants;
+using static Sentry.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry
