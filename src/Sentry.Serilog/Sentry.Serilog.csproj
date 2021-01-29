@@ -13,7 +13,7 @@
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework) != 'netstandard2.1'">
+  <ItemGroup Condition="$(TargetFramework) != 'netstandard2.1' and $(TargetFramework) != 'net5.0'">
     <PackageReference Include="Serilog" Version="2.7.1" />
   </ItemGroup>
 
