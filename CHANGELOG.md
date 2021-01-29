@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+- Move main Protocol types to Sentry namespace (#779) @bruno-garcia
+
 ## 3.0.0
 
 - Add support for dynamic transaction sampling. (#753) @Tyrrrz
