@@ -2,7 +2,7 @@
 
 ## 3.0.1
 
-- bump log4net 2.0.10 (#781) @bruno-garcia
+- bump log4net 2.0.12 (#781) @bruno-garcia
 
 ## 3.0.0
 
