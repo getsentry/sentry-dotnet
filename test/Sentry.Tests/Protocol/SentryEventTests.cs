@@ -5,7 +5,6 @@ using FluentAssertions;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Xunit;
-using Constants = Sentry.Protocol.Constants;
 
 namespace Sentry.Tests.Protocol
 {

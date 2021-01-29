@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sentry.Protocol;
 
 namespace Sentry
 {
