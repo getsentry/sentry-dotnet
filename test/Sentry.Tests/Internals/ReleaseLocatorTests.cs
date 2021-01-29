@@ -16,7 +16,7 @@ namespace Sentry.Tests.Internals
         {
             const string expectedVersion = "the version";
             EnvironmentVariableGuard.WithVariable(
-                Constants.ReleaseEnvironmentVariable,
+                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
                 expectedVersion,
                 () =>
                 {
@@ -38,7 +38,7 @@ namespace Sentry.Tests.Internals
             var ass = Assembly.GetEntryAssembly();
 
             EnvironmentVariableGuard.WithVariable(
-                Constants.ReleaseEnvironmentVariable,
+                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
                 null,
                 () =>
                 {

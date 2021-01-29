@@ -12,7 +12,7 @@ namespace Sentry.Tests.Internals
         {
             const string expectedVersion = "the environment name";
             EnvironmentVariableGuard.WithVariable(
-                Constants.EnvironmentEnvironmentVariable,
+                Sentry.Internal.Constants.EnvironmentEnvironmentVariable,
                 expectedVersion,
                 () =>
                 {
@@ -24,7 +24,7 @@ namespace Sentry.Tests.Internals
         public void Locate_WithoutEnvironmentVariable_ReturnsNull()
         {
             EnvironmentVariableGuard.WithVariable(
-                Constants.ReleaseEnvironmentVariable,
+                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
                 null,
                 () =>
                 {
@@ -37,7 +37,7 @@ namespace Sentry.Tests.Internals
         {
             var expected = EnvironmentLocator.Current;
             EnvironmentVariableGuard.WithVariable(
-                Constants.ReleaseEnvironmentVariable,
+                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
                 Guid.NewGuid().ToString(),
                 () =>
                 {

@@ -95,7 +95,7 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
-            @event.Platform = Protocol.Constants.Platform;
+            @event.Platform = Sentry.Constants.Platform;
 
             // SDK Name/Version might have be already set by an outer package
             // e.g: ASP.NET Core can set itself as the SDK
