@@ -96,7 +96,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ =>
                         {
-                            transaction = hub.ScopeManager.GetCurrent().Key.Transaction;
+                            transaction = hub.GetSpan() as ITransaction;
                             return Task.CompletedTask;
                         });
                     });

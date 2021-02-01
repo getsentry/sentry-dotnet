@@ -31,6 +31,11 @@ namespace Sentry
         );
 
         /// <summary>
+        /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
+        /// </summary>
+        ISpan? GetSpan();
+
+        /// <summary>
         /// Gets the Sentry trace header for the last active span.
         /// </summary>
         SentryTraceHeader? GetTraceHeader();
