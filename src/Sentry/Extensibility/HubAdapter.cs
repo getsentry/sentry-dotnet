@@ -84,6 +84,13 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
+        public ISpan? GetSpan()
+            => SentrySdk.GetSpan();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
         public SentryTraceHeader? GetTraceHeader()
             => SentrySdk.GetTraceHeader();
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Add GetSpan() to IHub and SentrySdk (#782) @Tyrrrz
+
 ## 3.0.1
 
 - bump log4net 2.0.12 (#781) @bruno-garcia
