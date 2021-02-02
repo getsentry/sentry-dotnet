@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 
@@ -19,11 +20,11 @@ namespace Sentry.AspNetCore
         public SentryTracingMiddleware(
             RequestDelegate next,
             Func<IHub> hubAccessor,
-            SentryAspNetCoreOptions options)
+            IOptions<SentryAspNetCoreOptions> options)
         {
             _next = next;
             _hubAccessor = hubAccessor;
-            _options = options;
+            _options = options.Value;
         }
 
         private SentryTraceHeader? TryGetSentryTraceHeader(HttpContext context)
