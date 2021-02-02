@@ -3,6 +3,7 @@
 ## vNext
 
 - Add GetSpan() to IHub and SentrySdk (#782) @Tyrrrz
+- Automatically start transactions from incoming trace in ASP.NET Core (#783) @Tyrrrz
 
 ## 3.0.1
 
