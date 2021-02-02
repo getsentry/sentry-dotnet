@@ -56,6 +56,10 @@ namespace Sentry
                 );
             }
 
+            // Prevent null reference exception in the following call
+            // in case the user didn't set an inner handler.
+            InnerHandler ??= new HttpClientHandler();
+
             return base.SendAsync(request, cancellationToken);
         }
     }
