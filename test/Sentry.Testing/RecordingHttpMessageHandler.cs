@@ -19,7 +19,8 @@ namespace Sentry.Testing
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            _requests.Add(request);
+            // Clone the request to avoid ObjectDisposedException
+            _requests.Add(await request.CloneAsync());
 
             InnerHandler ??= new HttpClientHandler();
 
