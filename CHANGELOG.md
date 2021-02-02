@@ -3,7 +3,7 @@
 ## vNext
 
 - Add GetSpan() to IHub and SentrySdk (#782) @Tyrrrz
-- - Automatically inject 'sentry-trace' on outgoing requests in ASP.NET Core (#784) @Tyrrrz
+- Automatically inject 'sentry-trace' on outgoing requests in ASP.NET Core (#784) @Tyrrrz
 
 ## 3.0.1
 
