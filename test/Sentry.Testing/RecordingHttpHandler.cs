@@ -28,6 +28,8 @@ namespace Sentry.Testing
                 return _getFakeResponse();
             }
 
+            InnerHandler ??= new HttpClientHandler();
+
             return await base.SendAsync(request, cancellationToken);
         }
 
