@@ -35,12 +35,20 @@ namespace Sentry.AspNetCore
 
             await hub.ConfigureScopeAsync(async scope =>
             {
-                var transaction = hub.StartTransaction(
-                    // The route is likely not known at this point yet.
-                    // We can resolve it later, once all other middlewares have finished.
-                    "Unknown Route",
-                    "http.server"
-                );
+                // Attempt to start a transaction from the trace header if it exists
+                var traceHeader = context.TryGetSentryTraceHeader();
+
+                // Defer setting name until other middlewares have finished
+                var transaction = traceHeader is not null
+                    ? hub.StartTransaction(
+                        "Unknown Route",
+                        "http.server",
+                        traceHeader
+                    )
+                    : hub.StartTransaction(
+                        "Unknown Route",
+                        "http.server"
+                    );
 
                 // Put the transaction on the scope
                 scope.Transaction = transaction;

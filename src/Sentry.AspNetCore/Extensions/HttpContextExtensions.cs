@@ -56,5 +56,23 @@ namespace Sentry.AspNetCore.Extensions
             // e.g. "GET /pets/1"
             return $"{method} {route}";
         }
+
+        public static SentryTraceHeader? TryGetSentryTraceHeader(this HttpContext context)
+        {
+            try
+            {
+                if (!context.Request.Headers.TryGetValue(SentryTraceHeader.HttpHeaderName, out var value))
+                {
+                    return null;
+                }
+
+                return SentryTraceHeader.Parse(value.ToString());
+            }
+            catch
+            {
+                // Parsing can fail
+                return null;
+            }
+        }
     }
 }
