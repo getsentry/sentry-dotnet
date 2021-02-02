@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,26 +6,20 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Testing
 {
-    public class RecordingHttpHandler : DelegatingHandler
+    public class RecordingHttpMessageHandler : DelegatingHandler
     {
         private readonly List<HttpRequestMessage> _requests = new();
-        private readonly Func<HttpResponseMessage> _getFakeResponse;
 
-        public RecordingHttpHandler(Func<HttpResponseMessage> getFakeResponse = null)
-        {
-            _getFakeResponse = getFakeResponse;
-        }
+        public RecordingHttpMessageHandler() {}
+
+        public RecordingHttpMessageHandler(HttpMessageHandler innerHandler) =>
+            InnerHandler = innerHandler;
 
         protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             _requests.Add(request);
-
-            if (_getFakeResponse is not null)
-            {
-                return _getFakeResponse();
-            }
 
             InnerHandler ??= new HttpClientHandler();
 

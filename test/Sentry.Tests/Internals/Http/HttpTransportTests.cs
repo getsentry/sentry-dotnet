@@ -180,8 +180,10 @@ namespace Sentry.Tests.Internals.Http
         public async Task SendEnvelopeAsync_ItemRateLimit_DropsItem()
         {
             // Arrange
-            using var httpHandler = new RecordingHttpHandler(
-                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            using var httpHandler = new RecordingHttpMessageHandler(
+                new FakeHttpMessageHandler(
+                    () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+                )
             );
 
             var httpTransport = new HttpTransport(
@@ -243,8 +245,8 @@ namespace Sentry.Tests.Internals.Http
         public async Task SendEnvelopeAsync_AttachmentTooLarge_DropsItem()
         {
             // Arrange
-            using var httpHandler = new RecordingHttpHandler(
-                SentryResponses.GetOkResponse
+            using var httpHandler = new RecordingHttpMessageHandler(
+                new FakeHttpMessageHandler()
             );
 
             var logger = new AccumulativeDiagnosticLogger();

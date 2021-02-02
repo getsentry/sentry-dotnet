@@ -22,9 +22,9 @@ namespace Sentry.AspNetCore.Tests
         // Inserts a recorder into pipeline
         private class RecordingHandlerBuilderFilter : IHttpMessageHandlerBuilderFilter
         {
-            private readonly RecordingHttpHandler _handler;
+            private readonly RecordingHttpMessageHandler _handler;
 
-            public RecordingHandlerBuilderFilter(RecordingHttpHandler handler) => _handler = handler;
+            public RecordingHandlerBuilderFilter(RecordingHttpMessageHandler handler) => _handler = handler;
 
             public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next) =>
                 handlerBuilder =>
@@ -40,7 +40,7 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
 
             // Will use this to record outgoing requests
-            using var recorder = new RecordingHttpHandler();
+            using var recorder = new RecordingHttpMessageHandler();
 
             var hub = new Internal.Hub(new SentryOptions
             {
