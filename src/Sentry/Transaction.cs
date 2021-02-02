@@ -214,6 +214,7 @@ namespace Sentry
             Operation = context.Operation;
             Description = context.Description;
             Status = context.Status;
+            IsSampled = context.IsSampled;
         }
 
         /// <inheritdoc />
