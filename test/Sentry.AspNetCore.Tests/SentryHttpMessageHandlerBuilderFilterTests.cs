@@ -12,47 +12,24 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
-using Sentry.Internal.Extensions;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
     public class SentryHttpMessageHandlerBuilderFilterTests
     {
-        // Records requests
-        private class RecorderHandler : DelegatingHandler
-        {
-            private readonly List<HttpRequestMessage> _requests = new();
-
-            protected override Task<HttpResponseMessage> SendAsync(
-                HttpRequestMessage request,
-                CancellationToken cancellationToken)
-            {
-                _requests.Add(request);
-
-                return base.SendAsync(request, cancellationToken);
-            }
-
-            public IReadOnlyList<HttpRequestMessage> GetRequests() => _requests.ToArray();
-
-            protected override void Dispose(bool disposing)
-            {
-                _requests.DisposeAll();
-                base.Dispose(disposing);
-            }
-        }
-
         // Inserts a recorder into pipeline
-        private class RecorderHandlerBuilderFilter : IHttpMessageHandlerBuilderFilter
+        private class RecordingHandlerBuilderFilter : IHttpMessageHandlerBuilderFilter
         {
-            private readonly RecorderHandler _recorder;
+            private readonly RecordingHttpHandler _handler;
 
-            public RecorderHandlerBuilderFilter(RecorderHandler recorder) => _recorder = recorder;
+            public RecordingHandlerBuilderFilter(RecordingHttpHandler handler) => _handler = handler;
 
             public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next) =>
                 handlerBuilder =>
                 {
-                    handlerBuilder.AdditionalHandlers.Add(_recorder);
+                    handlerBuilder.AdditionalHandlers.Add(_handler);
                     next(handlerBuilder);
                 };
         }
@@ -63,7 +40,7 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
 
             // Will use this to record outgoing requests
-            using var recorder = new RecorderHandler();
+            using var recorder = new RecordingHttpHandler();
 
             var hub = new Internal.Hub(new SentryOptions
             {
@@ -75,8 +52,9 @@ namespace Sentry.AspNetCore.Tests
                 .ConfigureServices(services =>
                 {
                     services.AddRouting();
-                    services.AddSingleton<IHttpMessageHandlerBuilderFilter>(new RecorderHandlerBuilderFilter(recorder));
                     services.AddHttpClient();
+
+                    services.AddSingleton<IHttpMessageHandlerBuilderFilter>(new RecordingHandlerBuilderFilter(recorder));
 
                     services.RemoveAll(typeof(Func<IHub>));
                     services.AddSingleton<Func<IHub>>(() => hub);
