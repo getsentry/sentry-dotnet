@@ -2,21 +2,21 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry
 {
     /// <summary>
     /// Special HTTP message handler that can be used to propagate Sentry headers and other contextual information.
     /// </summary>
-    public class SentryHttpMessageHandler : HttpMessageHandler
+    public class SentryHttpMessageHandler : DelegatingHandler
     {
-        private readonly HttpMessageInvoker _httpMessageInvoker;
         private readonly IHub _hub;
 
-        private SentryHttpMessageHandler(HttpMessageInvoker httpMessageInvoker, IHub hub)
+        /// <summary>
+        /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
+        /// </summary>
+        public SentryHttpMessageHandler(IHub hub)
         {
-            _httpMessageInvoker = httpMessageInvoker;
             _hub = hub;
         }
 
@@ -24,19 +24,16 @@ namespace Sentry
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
         /// </summary>
         public SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub)
-            : this(new HttpMessageInvoker(innerHandler, false), hub) {}
+            : this(hub)
+        {
+            InnerHandler = innerHandler;
+        }
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
         /// </summary>
         public SentryHttpMessageHandler(HttpMessageHandler innerHandler)
             : this(innerHandler, HubAdapter.Instance) {}
-
-        /// <summary>
-        /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
-        /// </summary>
-        public SentryHttpMessageHandler(IHub hub)
-            : this(new HttpMessageInvoker(new HttpClientHandler(), true), hub) {}
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
@@ -59,14 +56,11 @@ namespace Sentry
                 );
             }
 
-            return _httpMessageInvoker.SendAsync(request, cancellationToken);
-        }
+            // Prevent null reference exception in the following call
+            // in case the user didn't set an inner handler.
+            InnerHandler ??= new HttpClientHandler();
 
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            _httpMessageInvoker.Dispose();
-            base.Dispose(disposing);
+            return base.SendAsync(request, cancellationToken);
         }
     }
 }

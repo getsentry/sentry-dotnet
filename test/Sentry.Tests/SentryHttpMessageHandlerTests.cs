@@ -21,7 +21,7 @@ namespace Sentry.Tests
                 SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0")
             );
 
-            using var innerHandler = new FakeHttpClientHandler();
+            using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
             using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
             using var client = new HttpClient(sentryHandler);
 
@@ -47,7 +47,7 @@ namespace Sentry.Tests
                 SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0")
             );
 
-            using var innerHandler = new FakeHttpClientHandler();
+            using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
             using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
             using var client = new HttpClient(sentryHandler);
 

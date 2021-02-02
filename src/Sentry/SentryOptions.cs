@@ -23,6 +23,9 @@ namespace Sentry
     {
         private Dictionary<string, string>? _defaultTags;
 
+        // Override for tests
+        internal ITransport? Transport { get; set; }
+
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal string ClientVersion { get; } = SdkName;
