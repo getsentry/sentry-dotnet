@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Fix DI issues in ASP.NET Core + SentryHttpMessageHandlerBuilderFilter (#789) @Tyrrrz
+
 ## 3.0.2
 
 ### Changes
