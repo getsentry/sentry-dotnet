@@ -52,7 +52,7 @@ namespace Sentry.Tests
             scope.OnEvaluating += (_, _) => throw exception;
 
             // Act
-            _sut.Evaluate();
+            scope.Evaluate();
 
             // Assert
             logger.Entries.Should().Contain(entry =>
