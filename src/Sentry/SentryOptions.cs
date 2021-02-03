@@ -391,13 +391,14 @@ namespace Sentry
         /// </remarks>
         public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
-        private double _tracesSampleRate = 1.0;
+        private double _tracesSampleRate = 0.0;
 
         /// <summary>
         /// Indicates the percentage of the tracing data that is collected.
         /// Setting this to <code>0</code> discards all trace data.
         /// Setting this to <code>1.0</code> collects all trace data.
         /// Values outside of this range are invalid.
+        /// Default value is <code>0</code>, which means tracing is disabled.
         /// </summary>
         public double TracesSampleRate
         {
