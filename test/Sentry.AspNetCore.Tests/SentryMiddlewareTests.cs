@@ -264,7 +264,7 @@ namespace Sentry.AspNetCore.Tests
         {
             _fixture.HubAccessor = null;
             var ex = Assert.Throws<ArgumentNullException>(() => _fixture.GetSut());
-            Assert.Equal("hubAccessor", ex.ParamName);
+            Assert.Equal("getHub", ex.ParamName);
         }
 
         [Fact]

@@ -48,6 +48,7 @@ namespace Sentry.AspNetCore.Tests
             });
 
             var server = new TestServer(new WebHostBuilder()
+                .UseDefaultServiceProvider(di => di.ValidateScopes = true)
                 .UseSentry()
                 .ConfigureServices(services =>
                 {
