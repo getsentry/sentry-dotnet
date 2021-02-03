@@ -4,7 +4,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Testing
 {
-    public class AccumulativeDiagnosticLogger : IDiagnosticLogger
+    public class InMemoryDiagnosticLogger : IDiagnosticLogger
     {
         public List<Entry> Entries { get; } = new();
 

@@ -67,7 +67,7 @@ namespace Sentry.Tests.Internals.Http
             httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetJsonErrorResponse(expectedCode, expectedMessage, expectedCauses));
 
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = new InMemoryDiagnosticLogger();
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
@@ -108,7 +108,7 @@ namespace Sentry.Tests.Internals.Http
             _ = httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                   .Returns(_ => SentryResponses.GetTextErrorResponse(expectedCode, expectedMessage));
 
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = new InMemoryDiagnosticLogger();
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
@@ -147,7 +147,7 @@ namespace Sentry.Tests.Internals.Http
             httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
                 .Returns(_ => SentryResponses.GetJsonErrorResponse(expectedCode, null));
 
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = new InMemoryDiagnosticLogger();
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
@@ -249,7 +249,7 @@ namespace Sentry.Tests.Internals.Http
                 new FakeHttpMessageHandler()
             );
 
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = new InMemoryDiagnosticLogger();
 
             var httpTransport = new HttpTransport(
                 new SentryOptions

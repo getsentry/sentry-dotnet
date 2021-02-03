@@ -2,6 +2,7 @@ using System;
 using FluentAssertions;
 using Sentry.Extensibility;
 using Sentry.Protocol;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests
@@ -36,20 +37,28 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void OnEvaluate_EventHandlerThrows_ExceptionAsBreadcrumb()
+        public void OnEvaluate_EventHandlerThrows_LogsException()
         {
-            var expected = new InvalidOperationException("test");
+            // Arrange
+            var logger = new InMemoryDiagnosticLogger();
 
-            _sut.OnEvaluating += (_, _) => throw expected;
-            _sut.Evaluate();
+            var scope = new Scope(new SentryOptions
+            {
+                DiagnosticLogger = logger,
+                Debug = true
+            });
 
-            var crumb = Assert.Single(_sut.Breadcrumbs);
+            var exception = new InvalidOperationException("test");
+            scope.OnEvaluating += (_, _) => throw exception;
 
-            Assert.Equal(BreadcrumbLevel.Error, crumb!.Level);
+            // Act
+            scope.Evaluate();
 
-            Assert.Equal(
-                "Failed invoking event handler: " + expected,
-                crumb.Message);
+            // Assert
+            logger.Entries.Should().Contain(entry =>
+                entry.Message == "Failed invoking event handler." &&
+                entry.Exception == exception
+            );
         }
 
         [Fact]
