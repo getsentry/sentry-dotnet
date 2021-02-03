@@ -1,5 +1,9 @@
 # Changelog
 
+## vNext
+
+- Fix incorrect NRT on SpanContext.ctor (#788) @Tyrrrz
+
 ## 3.0.2
 
 ### Changes
