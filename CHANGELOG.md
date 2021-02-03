@@ -4,6 +4,7 @@
 
 - Fix DI issues in ASP.NET Core + SentryHttpMessageHandlerBuilderFilter (#789) @Tyrrrz
 - Fix incorrect NRT on SpanContext.ctor (#788) @Tyrrrz
+- Remove the `Evaluate` error from the breadcrumb list (#790) @Tyrrrz
 
 ## 3.0.2
 
