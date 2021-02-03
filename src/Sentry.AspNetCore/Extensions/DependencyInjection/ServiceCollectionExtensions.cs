@@ -35,8 +35,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSentry<SentryAspNetCoreOptions>();
 
 #if !NETSTANDARD2_0
-            // Custom handler for HttpClientFactory
-            services.AddScoped<IHttpMessageHandlerBuilderFilter, SentryHttpMessageHandlerBuilderFilter>();
+            // Custom handler for HttpClientFactory.
+            // Must be singleton: https://github.com/getsentry/sentry-dotnet/issues/785
+            services.AddSingleton<IHttpMessageHandlerBuilderFilter, SentryHttpMessageHandlerBuilderFilter>();
 #endif
 
             return new SentryAspNetCoreBuilder(services);
