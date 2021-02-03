@@ -1,6 +1,8 @@
 # Changelog
 
-## vNext
+## Unreleased
+
+### Changes
 
 - Fix DI issues in ASP.NET Core + SentryHttpMessageHandlerBuilderFilter (#789) @Tyrrrz
 - Fix incorrect NRT on SpanContext.ctor (#788) @Tyrrrz
