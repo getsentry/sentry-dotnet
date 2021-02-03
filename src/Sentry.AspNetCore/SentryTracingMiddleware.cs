@@ -14,16 +14,16 @@ namespace Sentry.AspNetCore
     internal class SentryTracingMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly Func<IHub> _hubAccessor;
+        private readonly Func<IHub> _getHub;
         private readonly SentryAspNetCoreOptions _options;
 
         public SentryTracingMiddleware(
             RequestDelegate next,
-            Func<IHub> hubAccessor,
+            Func<IHub> getHub,
             IOptions<SentryAspNetCoreOptions> options)
         {
             _next = next;
-            _hubAccessor = hubAccessor;
+            _getHub = getHub;
             _options = options.Value;
         }
 
@@ -53,7 +53,7 @@ namespace Sentry.AspNetCore
         /// </summary>
         public async Task InvokeAsync(HttpContext context)
         {
-            var hub = _hubAccessor();
+            var hub = _getHub();
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);

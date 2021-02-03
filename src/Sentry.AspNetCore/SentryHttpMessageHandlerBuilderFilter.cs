@@ -7,14 +7,16 @@ namespace Sentry.AspNetCore
     // Injects Sentry's HTTP handler into HttpClientFactory
     internal class SentryHttpMessageHandlerBuilderFilter : IHttpMessageHandlerBuilderFilter
     {
-        private readonly IHub _hub;
+        private readonly Func<IHub> _getHub;
 
-        public SentryHttpMessageHandlerBuilderFilter(IHub hub) => _hub = hub;
+        public SentryHttpMessageHandlerBuilderFilter(Func<IHub> hubAccessor) =>
+            _getHub = hubAccessor;
 
         public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next) =>
             handlerBuilder =>
             {
-                handlerBuilder.AdditionalHandlers.Add(new SentryHttpMessageHandler(_hub));
+                var hub = _getHub();
+                handlerBuilder.AdditionalHandlers.Add(new SentryHttpMessageHandler(hub));
                 next(handlerBuilder);
             };
     }

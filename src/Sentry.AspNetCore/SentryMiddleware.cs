@@ -23,7 +23,7 @@ namespace Sentry.AspNetCore
     internal class SentryMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly Func<IHub> _hubAccessor;
+        private readonly Func<IHub> _getHub;
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
@@ -54,9 +54,9 @@ namespace Sentry.AspNetCore
             ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
-            _hubAccessor = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
+            _getHub = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
             _options = options.Value;
-            var hub = _hubAccessor();
+            var hub = _getHub();
             foreach (var callback in _options.ConfigureScopeCallbacks)
             {
                 hub.ConfigureScope(callback);
@@ -72,7 +72,7 @@ namespace Sentry.AspNetCore
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context)
         {
-            var hub = _hubAccessor();
+            var hub = _getHub();
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);
