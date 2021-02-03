@@ -2,7 +2,7 @@ minVersion: '0.13.2'
 github:
   owner: getsentry
   repo: sentry-dotnet
-changelogPolicy: simple
+changelogPolicy: auto
 statusProvider:
   name: github
 artifactProvider:
