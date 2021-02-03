@@ -9,8 +9,8 @@ namespace Sentry.AspNetCore
     {
         private readonly Func<IHub> _getHub;
 
-        public SentryHttpMessageHandlerBuilderFilter(Func<IHub> hubAccessor) =>
-            _getHub = hubAccessor;
+        public SentryHttpMessageHandlerBuilderFilter(Func<IHub> getHub) =>
+            _getHub = getHub;
 
         public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next) =>
             handlerBuilder =>

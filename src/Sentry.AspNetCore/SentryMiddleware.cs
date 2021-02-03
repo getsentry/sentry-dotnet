@@ -37,7 +37,7 @@ namespace Sentry.AspNetCore
         /// Initializes a new instance of the <see cref="SentryMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next.</param>
-        /// <param name="hubAccessor">The sentry Hub accessor.</param>
+        /// <param name="getHub">The sentry Hub accessor.</param>
         /// <param name="options">The options for this integration</param>
         /// <param name="hostingEnvironment">The hosting environment.</param>
         /// <param name="logger">Sentry logger.</param>
@@ -48,13 +48,13 @@ namespace Sentry.AspNetCore
         /// </exception>
         public SentryMiddleware(
             RequestDelegate next,
-            Func<IHub> hubAccessor,
+            Func<IHub> getHub,
             IOptions<SentryAspNetCoreOptions> options,
             IHostingEnvironment hostingEnvironment,
             ILogger<SentryMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
-            _getHub = hubAccessor ?? throw new ArgumentNullException(nameof(hubAccessor));
+            _getHub = getHub ?? throw new ArgumentNullException(nameof(getHub));
             _options = options.Value;
             var hub = _getHub();
             foreach (var callback in _options.ConfigureScopeCallbacks)
