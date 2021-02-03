@@ -34,7 +34,7 @@
             SpanId? parentSpanId,
             SentryId traceId,
             string operation,
-            string description,
+            string? description,
             SpanStatus? status,
             bool? isSampled)
         {
