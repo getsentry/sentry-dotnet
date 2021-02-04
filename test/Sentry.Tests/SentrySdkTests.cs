@@ -224,7 +224,7 @@ namespace Sentry.Tests
             second.Dispose();
         }
 
-        [Fact(Skip = "Flaky")]
+        [Fact(Timeout = 5000)]
         public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
         {
             // Arrange
@@ -257,7 +257,7 @@ namespace Sentry.Tests
                 o.Dsn = ValidDsnWithoutSecret;
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cacheDirectory.Path;
-                o.InitCacheFlushTimeout = TimeSpan.FromSeconds(30);
+                o.InitCacheFlushTimeout = TimeSpan.FromSeconds(5);
                 o.Transport = transport;
             });
 
