@@ -2,8 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
-using Sentry.Protocol;
+using Sentry.Extensibility;
 
 namespace Sentry.AspNetCore
 {
@@ -13,12 +14,38 @@ namespace Sentry.AspNetCore
     internal class SentryTracingMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly Func<IHub> _hubAccessor;
+        private readonly Func<IHub> _getHub;
+        private readonly SentryAspNetCoreOptions _options;
 
-        public SentryTracingMiddleware(RequestDelegate next, Func<IHub> hubAccessor)
+        public SentryTracingMiddleware(
+            RequestDelegate next,
+            Func<IHub> getHub,
+            IOptions<SentryAspNetCoreOptions> options)
         {
             _next = next;
-            _hubAccessor = hubAccessor;
+            _getHub = getHub;
+            _options = options.Value;
+        }
+
+        private SentryTraceHeader? TryGetSentryTraceHeader(HttpContext context)
+        {
+            var value = context.Request.Headers.GetValueOrDefault(SentryTraceHeader.HttpHeaderName);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            _options.DiagnosticLogger?.LogInfo("Received Sentry trace header: {0}", value);
+
+            try
+            {
+                return SentryTraceHeader.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError("Invalid Sentry trace header: {0}", ex, value);
+                return null;
+            }
         }
 
         /// <summary>
@@ -26,7 +53,7 @@ namespace Sentry.AspNetCore
         /// </summary>
         public async Task InvokeAsync(HttpContext context)
         {
-            var hub = _hubAccessor();
+            var hub = _getHub();
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);
@@ -35,11 +62,25 @@ namespace Sentry.AspNetCore
 
             await hub.ConfigureScopeAsync(async scope =>
             {
-                var transaction = hub.StartTransaction(
-                    // The route is likely not known at this point yet.
-                    // We can resolve it later, once all other middlewares have finished.
-                    "Unknown Route",
-                    "http.server"
+                // Attempt to start a transaction from the trace header if it exists
+                var traceHeader = TryGetSentryTraceHeader(context);
+
+                // Defer setting name until other middlewares have finished
+                var transaction = traceHeader is not null
+                    ? hub.StartTransaction(
+                        "Unknown Route",
+                        "http.server",
+                        traceHeader
+                    )
+                    : hub.StartTransaction(
+                        "Unknown Route",
+                        "http.server"
+                    );
+
+                _options.DiagnosticLogger?.LogInfo(
+                    "Started transaction: Span ID: {0}, Trace ID: {1}",
+                    transaction.SpanId,
+                    transaction.TraceId
                 );
 
                 // Put the transaction on the scope

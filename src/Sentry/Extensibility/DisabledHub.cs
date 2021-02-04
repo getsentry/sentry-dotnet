@@ -65,6 +65,11 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns null.
         /// </summary>
+        public ISpan? GetSpan() => null;
+
+        /// <summary>
+        /// Returns null.
+        /// </summary>
         public SentryTraceHeader? GetTraceHeader() => null;
 
         /// <summary>

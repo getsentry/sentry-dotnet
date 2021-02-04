@@ -17,6 +17,12 @@ namespace Sentry.Internal
 
         private ITransport CreateTransport()
         {
+            // Override for tests
+            if (_options.Transport is not null)
+            {
+                return _options.Transport;
+            }
+
             if (_options.SentryHttpClientFactory is { })
             {
                 _options.DiagnosticLogger?.LogDebug(

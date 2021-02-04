@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -257,7 +258,7 @@ namespace Sentry.Tests
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cacheDirectory.Path;
                 o.InitCacheFlushTimeout = TimeSpan.FromSeconds(30);
-                o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
+                o.Transport = transport;
             });
 
             // Assert

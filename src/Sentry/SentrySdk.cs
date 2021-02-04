@@ -353,6 +353,13 @@ namespace Sentry
             => _hub.StartTransaction(name, operation, traceHeader);
 
         /// <summary>
+        /// Gets the last active span.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ISpan? GetSpan()
+            => _hub.GetSpan();
+
+        /// <summary>
         /// Gets the Sentry trace header.
         /// </summary>
         [DebuggerStepThrough]

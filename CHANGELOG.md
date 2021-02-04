@@ -1,12 +1,33 @@
 # Changelog
 
+## 3.0.3
+
+### Changes
+
+- Fix DI issues in ASP.NET Core + SentryHttpMessageHandlerBuilderFilter (#789) @Tyrrrz
+- Fix incorrect NRT on SpanContext.ctor (#788) @Tyrrrz
+- Remove the `Evaluate` error from the breadcrumb list (#790) @Tyrrrz
+- Set default tracing sample rate to 0.0 (#791) @Tyrrrz
+
+## 3.0.2
+
+### Changes
+
+- Add GetSpan() to IHub and SentrySdk (#782) @Tyrrrz
+- Automatically start transactions from incoming trace in ASP.NET Core (#783) @Tyrrrz
+- Automatically inject 'sentry-trace' on outgoing requests in ASP.NET Core (#784) @Tyrrrz
+
 ## 3.0.1
+
+### Changes
 
 - bump log4net 2.0.12 (#781) @bruno-garcia
 - Fix Serilog version (#780) @bruno-garcia
 - Move main Protocol types to Sentry namespace (#779) @bruno-garcia
 
 ## 3.0.0
+
+### Changes
 
 - Add support for dynamic transaction sampling. (#753) @Tyrrrz
 - Integrate trace headers. (#758) @Tyrrrz
@@ -17,6 +38,8 @@
 - Don't fallback to `HttpContext.RequestPath` if a route is unknown (#767 #769) @kanadaj @Tyrrrz
 
 ## 3.0.0-beta.0
+
+### Changes
 
 - Add instruction_addr to SentryStackFrame. (#744) @lucas-zimerman
 - Default stack trace format: Ben.Demystifier (#732) @bruno-garcia

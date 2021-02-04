@@ -142,27 +142,32 @@ namespace Sentry.Internal
                     : _options.Environment
                 : foundEnvironment);
 
-            // Make a sampling decision
-            var samplingContext = new TransactionSamplingContext(
-                context,
-                customSamplingContext
-            );
-
-            var sampleRate =
-                // Custom sampler may not exist or may return null, in which case we fallback
-                // to the static sample rate.
-                _options.TracesSampler?.Invoke(samplingContext)
-                ?? _options.TracesSampleRate;
-
-            transaction.IsSampled = sampleRate switch
+            // Make a sampling decision if it hasn't been made already.
+            // It could have been made by this point if the transaction was started
+            // from a trace header which contains a sampling decision.
+            if (transaction.IsSampled is null)
             {
-                // Sample rate >= 1 means always sampled *in*
-                >= 1 => true,
-                // Sample rate <= 0 means always sampled *out*
-                <= 0 => false,
-                // Otherwise roll the dice
-                _ => SynchronizedRandom.NextDouble() > sampleRate
-            };
+                var samplingContext = new TransactionSamplingContext(
+                    context,
+                    customSamplingContext
+                );
+
+                var sampleRate =
+                    // Custom sampler may not exist or may return null, in which case we fallback
+                    // to the static sample rate.
+                    _options.TracesSampler?.Invoke(samplingContext)
+                    ?? _options.TracesSampleRate;
+
+                transaction.IsSampled = sampleRate switch
+                {
+                    // Sample rate >= 1 means always sampled *in*
+                    >= 1 => true,
+                    // Sample rate <= 0 means always sampled *out*
+                    <= 0 => false,
+                    // Otherwise roll the dice
+                    _ => SynchronizedRandom.NextDouble() > sampleRate
+                };
+            }
 
             // A sampled out transaction still appears fully functional to the user
             // but will be dropped by the client and won't reach Sentry's servers.
@@ -173,11 +178,13 @@ namespace Sentry.Internal
             return transaction;
         }
 
-        public SentryTraceHeader? GetTraceHeader()
+        public ISpan? GetSpan()
         {
             var (currentScope, _) = ScopeManager.GetCurrent();
-            return currentScope.GetSpan()?.GetTraceHeader();
+            return currentScope.GetSpan();
         }
+
+        public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {

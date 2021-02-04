@@ -371,13 +371,11 @@ namespace Sentry
                 {
                     OnEvaluating?.Invoke(this, EventArgs.Empty);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    AddBreadcrumb(
-                        new Breadcrumb(
-                            message: "Failed invoking event handler: " + e,
-                            level: BreadcrumbLevel.Error
-                        )
+                    Options.DiagnosticLogger?.LogError(
+                        "Failed invoking event handler.",
+                        ex
                     );
                 }
                 finally

@@ -530,7 +530,7 @@ namespace Sentry.Tests.Protocol
         public async Task AddAttachment_FromStream_UnknownLength_IsDropped()
         {
             // Arrange
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = new InMemoryDiagnosticLogger();
             _fixture.ScopeOptions.DiagnosticLogger = logger;
             _fixture.ScopeOptions.Debug = true;
 
