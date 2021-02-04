@@ -1,5 +1,11 @@
 # Changelog
 
+## vNext
+
+### Changes
+
+- Add SetFingerprint overload that takes `params string[]` (#796) @Tyrrrz
+
 ## 3.0.3
 
 ### Changes
