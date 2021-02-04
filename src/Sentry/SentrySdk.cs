@@ -33,23 +33,23 @@ namespace Sentry
             // Side-effects in a factory function 🤮
             options.SetupLogging();
 
-            if (options.Dsn is null)
-            {
-                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
+            // If DSN is null (i.e. not explicitly disabled, just unset), then
+            // try to resolve the value from environment.
+            var dsn = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
 
-                if (dsn is null)
-                {
-                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    return DisabledHub.Instance;
-                }
-
-                options.Dsn = dsn.Source;
-            }
-            else
+            // If it's either explicitly disabled or we couldn't resolve the DSN
+            // from anywhere else, return a disabled hub.
+            if (Dsn.IsDisabled(dsn))
             {
-                // Validate DSN for early exception
-                _ = Dsn.Parse(options.Dsn);
+                options.DiagnosticLogger?.LogWarning(
+                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled."
+                );
+
+                return DisabledHub.Instance;
             }
+
+            // Validate DSN for an early exception in case it's malformed
+            _ = Dsn.Parse(options.Dsn);
 
             return new Hub(options);
         }
