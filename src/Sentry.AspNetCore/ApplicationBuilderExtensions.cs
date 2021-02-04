@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Builder
                 var stackTraceFactory = app.ApplicationServices.GetService<ISentryStackTraceFactory>();
                 if (stackTraceFactory != null)
                 {
-                    _ = o.UseStackTraceFactory(stackTraceFactory);
+                    o.UseStackTraceFactory(stackTraceFactory);
                 }
 
                 if (app.ApplicationServices.GetService<IEnumerable<ISentryEventProcessor>>()?.Any() == true)
@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             var lifetime = app.ApplicationServices.GetService<IHostApplicationLifetime>();
-            _ = lifetime?.ApplicationStopped.Register(SentrySdk.Close);
+            lifetime?.ApplicationStopped.Register(SentrySdk.Close);
 
             return app.UseMiddleware<SentryMiddleware>();
         }

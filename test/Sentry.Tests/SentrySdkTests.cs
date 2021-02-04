@@ -470,5 +470,20 @@ namespace Sentry.Tests
 
             Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(sentrySdk.Select(m => m.ToString())));
         }
+
+        // Issue: https://github.com/getsentry/sentry-dotnet/issues/123
+        [Fact]
+        public void InitHub_NoDsn_DisposeDoesNotThrow()
+        {
+            var sut = SentrySdk.InitHub(new SentryOptions()) as IDisposable;
+            sut?.Dispose();
+        }
+
+        [Fact]
+        public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
+        {
+            var sut = SentrySdk.InitHub(new SentryOptions());
+            await sut.FlushAsync(TimeSpan.FromDays(1));
+        }
     }
 }

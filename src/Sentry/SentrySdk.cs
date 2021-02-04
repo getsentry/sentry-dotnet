@@ -28,6 +28,32 @@ namespace Sentry
         /// </summary>
         public static SentryId LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
 
+        internal static IHub InitHub(SentryOptions options)
+        {
+            // Side-effects in a factory function 🤮
+            options.SetupLogging();
+
+            if (options.Dsn is null)
+            {
+                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
+
+                if (dsn is null)
+                {
+                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+                    return DisabledHub.Instance;
+                }
+
+                options.Dsn = dsn.Source;
+            }
+            else
+            {
+                // Validate DSN for early exception
+                _ = Dsn.Parse(options.Dsn);
+            }
+
+            return new Hub(options);
+        }
+
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN.
         /// </summary>
@@ -69,28 +95,7 @@ namespace Sentry
         /// </remarks>
         /// <returns>A disposable to close the SDK.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static IDisposable Init(SentryOptions options)
-        {
-            if (options.Dsn == null)
-            {
-                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
-
-                if (dsn is null)
-                {
-                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    return DisabledHub.Instance;
-                }
-
-                options.Dsn = dsn.Source;
-            }
-            else
-            {
-                // Validate DSN for early exception
-                _ = Dsn.Parse(options.Dsn);
-            }
-
-            return UseHub(new Hub(options));
-        }
+        public static IDisposable Init(SentryOptions options) => UseHub(InitHub(options));
 
         internal static IDisposable UseHub(IHub hub)
         {
