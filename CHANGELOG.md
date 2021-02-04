@@ -1,5 +1,11 @@
 # Changelog
 
+## vNext
+
+### Changes
+
+- Consolidate logic for resolving hub (fixes bug "SENTRY_DSN is not defined") (#795) @Tyrrrz
+
 ## 3.0.3
 
 ### Changes
