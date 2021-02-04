@@ -60,7 +60,7 @@ namespace Sentry
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
-        public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable());
+        public static IDisposable Init() => Init((string?)null);
 
         /// <summary>
         /// Initializes the SDK with the specified DSN.
