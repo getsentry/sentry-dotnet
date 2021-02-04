@@ -49,7 +49,7 @@ namespace Sentry
             }
 
             // Validate DSN for an early exception in case it's malformed
-            _ = Dsn.Parse(options.Dsn);
+            _ = Dsn.Parse(dsn);
 
             return new Hub(options);
         }
