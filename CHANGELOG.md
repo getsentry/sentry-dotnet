@@ -1,5 +1,11 @@
 # Changelog
 
+## vNext
+
+### Changes
+
+- Don't add logs coming from Sentry as breadcrumbs (fixes stack overflow exception) (#797) @Tyrrrz
+
 ## 3.0.3
 
 ### Changes
