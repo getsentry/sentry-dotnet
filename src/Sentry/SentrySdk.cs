@@ -70,7 +70,7 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn.</param>
-        public static IDisposable Init(string? dsn) => !string.IsNullOrWhiteSpace(dsn)
+        public static IDisposable Init(string? dsn) => !Dsn.IsDisabled(dsn)
             ? Init(c => c.Dsn = dsn)
             : DisabledHub.Instance;
 

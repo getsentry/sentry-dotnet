@@ -95,17 +95,19 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariable_DisabledSdk()
+        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariable_Throws()
         {
             EnvironmentVariableGuard.WithVariable(
                 DsnEnvironmentVariable,
                 InvalidDsn,
                 () =>
                 {
-                    using (SentrySdk.Init(_ => { }))
+                    Assert.Throws<ArgumentException>(() =>
                     {
-                        Assert.False(SentrySdk.IsEnabled);
-                    }
+                        using (SentrySdk.Init(_ => { }))
+                        {
+                        }
+                    });
                 });
         }
 
