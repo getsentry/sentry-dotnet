@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
-using Sentry.Protocol;
 using Sentry.Testing;
 using Xunit;
 
@@ -62,6 +61,35 @@ namespace Sentry.Tests
             request.Headers.Should().Contain(h =>
                 h.Key == "sentry-trace" &&
                 string.Concat(h.Value) == "foobar"
+            );
+        }
+
+        [Fact]
+        public async Task SendAsync_TransactionOnScope_StartsNewSpan()
+        {
+            // Arrange
+            var hub = Substitute.For<IHub>();
+
+            var transaction = new Transaction(
+                Substitute.For<ISentryClient>(),
+                "foo",
+                "bar"
+            );
+
+            hub.GetSpan().ReturnsForAnyArgs(transaction);
+
+            using var innerHandler = new FakeHttpMessageHandler();
+            using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+            using var client = new HttpClient(sentryHandler);
+
+            // Act
+            await client.GetAsync("https://example.com");
+
+            // Assert
+            transaction.Spans.Should().Contain(span =>
+                span.Operation == "http.client" &&
+                span.Description == "GET https://example.com" &&
+                span.IsFinished
             );
         }
     }
