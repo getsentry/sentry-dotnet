@@ -1,5 +1,11 @@
 # Changelog
 
+## vNext
+
+### Changes
+
+- Create spans for outgoing HTTP requests (#802) @Tyrrrz
+
 ## 3.0.3
 
 ### Changes
