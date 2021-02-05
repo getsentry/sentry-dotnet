@@ -25,7 +25,7 @@ namespace Sentry.Tests
             using var client = new HttpClient(sentryHandler);
 
             // Act
-            await client.GetAsync("https://example.com");
+            await client.GetAsync("https://example.com/");
 
             using var request = innerHandler.GetRequests().Single();
 
@@ -53,7 +53,7 @@ namespace Sentry.Tests
             client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
 
             // Act
-            await client.GetAsync("https://example.com");
+            await client.GetAsync("https://example.com/");
 
             using var request = innerHandler.GetRequests().Single();
 
@@ -83,12 +83,12 @@ namespace Sentry.Tests
             using var client = new HttpClient(sentryHandler);
 
             // Act
-            await client.GetAsync("https://example.com");
+            await client.GetAsync("https://example.com/");
 
             // Assert
             transaction.Spans.Should().Contain(span =>
                 span.Operation == "http.client" &&
-                span.Description == "GET https://example.com" &&
+                span.Description == "GET https://example.com/" &&
                 span.IsFinished
             );
         }
