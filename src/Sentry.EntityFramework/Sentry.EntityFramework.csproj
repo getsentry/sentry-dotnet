@@ -29,11 +29,11 @@
 
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.0.0" />
-    <PackageReference Include="Sentry" Version="2.1.6" />
+    <PackageReference Include="Sentry" Version="3.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="../../.assets/sentry-nuget.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

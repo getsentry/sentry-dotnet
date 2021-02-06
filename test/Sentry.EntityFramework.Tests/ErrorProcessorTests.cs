@@ -4,13 +4,8 @@ using System.Data;
 using System.Data.Common;
 using System.Data.Entity.Validation;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using NSubstitute;
 using Sentry.EntityFramework.ErrorProcessors;
-using Sentry.Extensibility;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.EntityFramework.Tests

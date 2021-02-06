@@ -4,7 +4,6 @@ using System.Data.Entity.Infrastructure.Interception;
 using System.Linq;
 using Effort.Provider;
 using NSubstitute;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.EntityFramework.Tests
