@@ -64,5 +64,5 @@ if ($lastexitcode -ne 0) { Write-Error "Build failed!" }
 if ($lastexitcode -ne 0) { Write-Error "Pack failed!" }
 
 Set-Variable -name runner -value (GetTestRunner)
-& $runner  "test\Sentry.EntityFramework.Tests\bin\Release\net462\Sentry.EntityFramework.Tests.dll"
+& $runner  "test\Sentry.EntityFramework.Tests\bin\Release\net461\Sentry.EntityFramework.Tests.dll"
 if ($lastexitcode -ne 0) { Set-Variable -name fail -value true }

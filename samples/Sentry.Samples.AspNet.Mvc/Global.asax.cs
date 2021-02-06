@@ -25,7 +25,7 @@ namespace Sentry.Samples.AspNet.Mvc
             _sentrySdk = SentrySdk.Init(o =>
             {
                 // We store the DSN inside Web.config; make sure to use your own DSN!
-                o.Dsn = new Dsn(ConfigurationManager.AppSettings["SentryDsn"]);
+                o.Dsn = ConfigurationManager.AppSettings["SentryDsn"];
          
                 // Add the EntityFramework integration
                 o.AddEntityFramework();

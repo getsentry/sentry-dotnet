@@ -19,6 +19,6 @@ namespace Sentry
         /// <summary>
         /// Valid DSN instance
         /// </summary>
-        public static Dsn Valid = new Dsn(ValidDsnWithSecret);
+        public static string Valid => ValidDsnWithSecret;
     }
 }

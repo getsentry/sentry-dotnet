@@ -1,6 +1,5 @@
 using System.Linq;
 using NSubstitute;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.EntityFramework.Tests

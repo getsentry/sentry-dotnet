@@ -1,6 +1,5 @@
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
-using Sentry.Protocol;
 
 namespace Sentry.EntityFramework
 {
