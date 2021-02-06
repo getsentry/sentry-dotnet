@@ -5,6 +5,7 @@
 ### Changes
 
 - Add SetFingerprint overload that takes `params string[]` (#796) @Tyrrrz
+- Create spans for outgoing HTTP requests (#802) @Tyrrrz
 
 ## 3.0.3
 

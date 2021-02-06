@@ -99,30 +99,11 @@ namespace Sentry.AspNetCore
                     }
 
                     transaction.Finish(
-                        GetSpanStatusFromCode(context.Response.StatusCode)
+                        SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
                     );
                 }
             }).ConfigureAwait(false);
         }
-
-        private static SpanStatus GetSpanStatusFromCode(int statusCode) => statusCode switch
-        {
-            < 400 => SpanStatus.Ok,
-            400 => SpanStatus.InvalidArgument,
-            401 => SpanStatus.Unauthenticated,
-            403 => SpanStatus.PermissionDenied,
-            404 => SpanStatus.NotFound,
-            409 => SpanStatus.AlreadyExists,
-            429 => SpanStatus.ResourceExhausted,
-            499 => SpanStatus.Cancelled,
-            < 500 => SpanStatus.InvalidArgument,
-            500 => SpanStatus.InternalError,
-            501 => SpanStatus.Unimplemented,
-            503 => SpanStatus.Unavailable,
-            504 => SpanStatus.DeadlineExceeded,
-            < 600 => SpanStatus.InternalError,
-            _ => SpanStatus.UnknownError
-        };
     }
 
     /// <summary>

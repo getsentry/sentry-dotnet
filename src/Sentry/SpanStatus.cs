@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace Sentry
 {
     /// <summary>
@@ -55,5 +57,31 @@ namespace Sentry
 
         /// <summary>Unrecoverable data loss or corruption</summary>
         DataLoss,
+    }
+
+    // Can't add static methods to enums unfortunately
+    internal static class SpanStatusConverter
+    {
+        public static SpanStatus FromHttpStatusCode(int code) => code switch
+        {
+            < 400 => SpanStatus.Ok,
+            400 => SpanStatus.InvalidArgument,
+            401 => SpanStatus.Unauthenticated,
+            403 => SpanStatus.PermissionDenied,
+            404 => SpanStatus.NotFound,
+            409 => SpanStatus.AlreadyExists,
+            429 => SpanStatus.ResourceExhausted,
+            499 => SpanStatus.Cancelled,
+            < 500 => SpanStatus.InvalidArgument,
+            500 => SpanStatus.InternalError,
+            501 => SpanStatus.Unimplemented,
+            503 => SpanStatus.Unavailable,
+            504 => SpanStatus.DeadlineExceeded,
+            < 600 => SpanStatus.InternalError,
+            _ => SpanStatus.UnknownError
+        };
+
+        public static SpanStatus FromHttpStatusCode(HttpStatusCode code) =>
+            FromHttpStatusCode((int)code);
     }
 }
