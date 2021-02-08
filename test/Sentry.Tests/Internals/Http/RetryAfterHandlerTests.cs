@@ -227,8 +227,17 @@ namespace Sentry.Tests.Internals.Http
             Assert.NotSame(first, second);
             Assert.NotSame(second, third);
 
-            Assert.NotSame(first.Content, second.Content);
-            Assert.NotSame(second.Content, third.Content);
+            // On older frameworks the default content is null
+            if (first.Content is not null)
+            {
+                Assert.NotSame(first.Content, second.Content);
+            }
+
+            // On older frameworks the default content is null
+            if (second.Content is not null)
+            {
+                Assert.NotSame(second.Content, third.Content);
+            }
         }
 
         [Fact]
