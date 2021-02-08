@@ -68,13 +68,25 @@ namespace Sentry
                 $"{request.Method.Method.ToUpperInvariant()} {request.RequestUri}"
             );
 
-            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-            span?.Finish(
-                SpanStatusConverter.FromHttpStatusCode(response.StatusCode)
-            );
+                // This will handle unsuccessful status codes as well
+                span?.Finish(
+                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode)
+                );
 
-            return response;
+                return response;
+            }
+            catch
+            {
+                // TODO: attach the exception to the span, once
+                // that API is available.
+                span?.Finish(SpanStatus.UnknownError);
+
+                throw;
+            }
         }
     }
 }
