@@ -23,8 +23,6 @@ namespace Sentry.Internal.Http
         private long _retryAfterUtcTicks;
         internal long RetryAfterUtcTicks => _retryAfterUtcTicks;
 
-        private readonly HttpResponseMessage _tooManyRequestsResponse = new(TooManyRequests);
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RetryAfterHandler"/> class.
         /// </summary>
@@ -55,7 +53,9 @@ namespace Sentry.Internal.Http
             {
                 if (retryAfter > _clock.GetUtcNow().Ticks)
                 {
-                    return _tooManyRequestsResponse;
+                    // Important: don't reuse the same HttpResponseMessage in multiple requests!
+                    // https://github.com/getsentry/sentry-dotnet/issues/800
+                    return new HttpResponseMessage(TooManyRequests);
                 }
 
                 _ = Interlocked.Exchange(ref _retryAfterUtcTicks, 0);
