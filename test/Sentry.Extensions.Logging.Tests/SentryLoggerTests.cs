@@ -240,17 +240,6 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
-        public void LogCritical_SentryCategory_RecordsBreadcrumbs()
-        {
-            _fixture.CategoryName = "Sentry.Some.Class";
-            var sut = _fixture.GetSut();
-
-            sut.LogCritical("message");
-
-            Assert.NotEmpty(_fixture.Scope.Breadcrumbs);
-        }
-
-        [Fact]
         public void LogCritical_DefaultOptions_RecordsBreadcrumbs()
         {
             const string expectedMessage = "message";

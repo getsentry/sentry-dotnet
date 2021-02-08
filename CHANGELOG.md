@@ -4,6 +4,7 @@
 
 ### Changes
 
+- Don't add logs coming from Sentry as breadcrumbs (fixes stack overflow exception) (#797) @Tyrrrz
 - Consolidate logic for resolving hub (fixes bug "SENTRY_DSN is not defined") (#795) @Tyrrrz
 - Add SetFingerprint overload that takes `params string[]` (#796) @Tyrrrz
 - Create spans for outgoing HTTP requests (#802) @Tyrrrz

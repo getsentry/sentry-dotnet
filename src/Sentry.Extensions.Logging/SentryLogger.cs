@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Extensions.Logging
 {
@@ -122,7 +121,7 @@ namespace Sentry.Extensions.Logging
                    // A type from the main SDK could be used to resolve a logger
                    // hence 'Sentry' and also 'Sentry.', won't block SentrySomething
                    // often used by users experimenting with Sentry
-                   && !CategoryName.StartsWith("Sentry.")
+                   && !CategoryName.StartsWith("Sentry.", StringComparison.Ordinal)
                    && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal)
                    && _options.Filters.All(
                        f => !f.Filter(
@@ -142,6 +141,8 @@ namespace Sentry.Extensions.Logging
                        CategoryName,
                        logLevel,
                        eventId,
-                       exception));
+                       exception))
+               && !CategoryName.StartsWith("Sentry.", StringComparison.Ordinal)
+               && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal);
     }
 }
