@@ -99,5 +99,11 @@ namespace Sentry
         /// </summary>
         public static void SetFingerprint(this IEventLike eventLike, IEnumerable<string> fingerprint)
             => eventLike.Fingerprint = fingerprint as IReadOnlyList<string> ?? fingerprint.ToArray();
+
+        /// <summary>
+        /// Sets the fingerprint to the object.
+        /// </summary>
+        public static void SetFingerprint(this IEventLike eventLike, params string[] fingerprint)
+            => eventLike.Fingerprint = fingerprint;
     }
 }
