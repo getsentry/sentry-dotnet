@@ -222,9 +222,13 @@ namespace Sentry.Tests.Internals.Http
 
             using var first = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
             using var second = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            using var third = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
 
             Assert.NotSame(first, second);
+            Assert.NotSame(second, third);
+
             Assert.NotSame(first.Content, second.Content);
+            Assert.NotSame(second.Content, third.Content);
         }
 
         [Fact]
