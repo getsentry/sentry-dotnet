@@ -6,6 +6,7 @@
 
 - Add SetFingerprint overload that takes `params string[]` (#796) @Tyrrrz
 - Create spans for outgoing HTTP requests (#802) @Tyrrrz
+- Finish span on exception in SentryHttpMessageHandler (#806) @Tyrrrz
 
 ## 3.0.3
 
