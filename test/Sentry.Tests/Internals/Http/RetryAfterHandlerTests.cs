@@ -211,6 +211,23 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
+        public async Task SendAsync_TooManyRequestsWithRetryAfterHeader_ResponseIsNotReused()
+        {
+            var expected = new HttpResponseMessage(TooManyRequests);
+            var date = DateTimeOffset.MaxValue;
+            expected.Headers.RetryAfter = new RetryConditionHeaderValue(date);
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
+
+            var invoker = _fixture.GetInvoker();
+
+            using var first = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            using var second = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+
+            Assert.NotSame(first, second);
+            Assert.NotSame(first.Content, second.Content);
+        }
+
+        [Fact]
         public void Ctor_NullDateTimeOffsetFunc_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
