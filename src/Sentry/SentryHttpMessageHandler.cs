@@ -42,7 +42,7 @@ namespace Sentry
             : this(HubAdapter.Instance) {}
 
         /// <inheritdoc />
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
@@ -60,7 +60,33 @@ namespace Sentry
             // in case the user didn't set an inner handler.
             InnerHandler ??= new HttpClientHandler();
 
-            return base.SendAsync(request, cancellationToken);
+            // Start a span that tracks this request
+            // (may be null if transaction is not set on the scope)
+            var span = _hub.GetSpan()?.StartChild(
+                "http.client",
+                // e.g. "GET https://example.com"
+                $"{request.Method.Method.ToUpperInvariant()} {request.RequestUri}"
+            );
+
+            try
+            {
+                var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                // This will handle unsuccessful status codes as well
+                span?.Finish(
+                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode)
+                );
+
+                return response;
+            }
+            catch
+            {
+                // TODO: attach the exception to the span, once
+                // that API is available.
+                span?.Finish(SpanStatus.UnknownError);
+
+                throw;
+            }
         }
     }
 }
