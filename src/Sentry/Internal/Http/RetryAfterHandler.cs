@@ -55,7 +55,7 @@ namespace Sentry.Internal.Http
                 {
                     // Important: don't reuse the same HttpResponseMessage in multiple requests!
                     // https://github.com/getsentry/sentry-dotnet/issues/800
-                    return new HttpResponseMessage((HttpStatusCode)429);
+                    return new HttpResponseMessage(TooManyRequests);
                 }
 
                 _ = Interlocked.Exchange(ref _retryAfterUtcTicks, 0);
