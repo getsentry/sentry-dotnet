@@ -34,8 +34,8 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
 
                 if (options.InitializeSdk)
                 {
-                    var hub = OptionalHub.FromOptions(options);
-                    _ = SentrySdk.UseHub(hub);
+                    var hub = SentrySdk.InitHub(options);
+                    SentrySdk.UseHub(hub);
                 }
 
                 return () => HubAdapter.Instance;
