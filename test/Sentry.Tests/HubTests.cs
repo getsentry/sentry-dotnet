@@ -235,7 +235,7 @@ namespace NotSentry.Tests
 
             // Act
             var transactions = Enumerable
-                .Range(0, 1_000_000)
+                .Range(0, 1_00_000)
                 .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
                 .ToArray();
 
@@ -269,7 +269,7 @@ namespace NotSentry.Tests
 
             // Act
             var transactions = Enumerable
-                .Range(0, 1_000_000)
+                .Range(0, 1_00_000)
                 .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
                 .ToArray();
 
@@ -303,7 +303,7 @@ namespace NotSentry.Tests
 
             // Act
             var transactions = Enumerable
-                .Range(0, 10_000)
+                .Range(0, 1_00_000)
                 .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
                 .ToArray();
 
