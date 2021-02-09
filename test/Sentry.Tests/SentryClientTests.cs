@@ -1,10 +1,11 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using VerifyXunit;
 using Xunit;
@@ -238,7 +239,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void CaptureEvent_SamplingNull_DropEvent()
+        public void CaptureEvent_SamplingNull_DropsEvent()
         {
             _fixture.SentryOptions.SampleRate = null;
             SentryEvent received = null;
@@ -251,6 +252,111 @@ namespace Sentry.Tests
             _ = sut.CaptureEvent(@event);
 
             Assert.Same(@event, received);
+        }
+
+        [Fact]
+        public void CaptureEvent_Sampling50Percent_EqualDistribution()
+        {
+            // 15% deviation is ok
+            const double allowedRelativeDeviation = 0.15;
+
+            // Arrange
+            var client = new SentryClient(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                SampleRate = 0.5f,
+                MaxQueueItems = int.MaxValue
+            });
+
+            // Act
+            var eventIds = Enumerable
+                .Range(0, 1_000)
+                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
+                .ToArray();
+
+            var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
+            var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
+
+            // Assert
+            sampledInEventsCount.Should().BeCloseTo(
+                (int)(0.5 * eventIds.Length),
+                (uint)(allowedRelativeDeviation * eventIds.Length)
+            );
+
+            sampledOutEventsCount.Should().BeCloseTo(
+                (int)(0.5 * eventIds.Length),
+                (uint)(allowedRelativeDeviation * eventIds.Length)
+            );
+        }
+
+        [Fact]
+        public void CaptureEvent_Sampling25Percent_AppropriateDistribution()
+        {
+            // 15% deviation is ok
+            const double allowedRelativeDeviation = 0.15;
+
+            // Arrange
+            var client = new SentryClient(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                SampleRate = 0.25f,
+                MaxQueueItems = int.MaxValue
+            });
+
+            // Act
+            var eventIds = Enumerable
+                .Range(0, 1_000)
+                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
+                .ToArray();
+
+            var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
+            var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
+
+            // Assert
+            sampledInEventsCount.Should().BeCloseTo(
+                (int)(0.25 * eventIds.Length),
+                (uint)(allowedRelativeDeviation * eventIds.Length)
+            );
+
+            sampledOutEventsCount.Should().BeCloseTo(
+                (int)(0.75 * eventIds.Length),
+                (uint)(allowedRelativeDeviation * eventIds.Length)
+            );
+        }
+
+        [Fact]
+        public void CaptureEvent_Sampling75Percent_AppropriateDistribution()
+        {
+            // 15% deviation is ok
+            const double allowedRelativeDeviation = 0.15;
+
+            // Arrange
+            var client = new SentryClient(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                SampleRate = 0.75f,
+                MaxQueueItems = int.MaxValue
+            });
+
+            // Act
+            var eventIds = Enumerable
+                .Range(0, 1_000)
+                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
+                .ToArray();
+
+            var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
+            var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
+
+            // Assert
+            sampledInEventsCount.Should().BeCloseTo(
+                (int)(0.75 * eventIds.Length),
+                (uint)(allowedRelativeDeviation * eventIds.Length)
+            );
+
+            sampledOutEventsCount.Should().BeCloseTo(
+                (int)(0.25 * eventIds.Length),
+                (uint)(allowedRelativeDeviation * eventIds.Length)
+            );
         }
 
         [Fact]
