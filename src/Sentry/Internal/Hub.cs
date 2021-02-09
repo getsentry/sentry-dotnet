@@ -128,11 +128,11 @@ namespace Sentry.Internal
 
             // Environment information
             var foundEnvironment = EnvironmentLocator.Locate();
-            transaction.Environment ??= (string.IsNullOrWhiteSpace(foundEnvironment)
+            transaction.Environment ??= string.IsNullOrWhiteSpace(foundEnvironment)
                 ? string.IsNullOrWhiteSpace(_options.Environment)
                     ? Constants.ProductionEnvironmentSetting
                     : _options.Environment
-                : foundEnvironment);
+                : foundEnvironment;
 
             // Make a sampling decision if it hasn't been made already.
             // It could have been made by this point if the transaction was started
@@ -157,7 +157,7 @@ namespace Sentry.Internal
                     // Sample rate <= 0 means always sampled *out*
                     <= 0 => false,
                     // Otherwise roll the dice
-                    _ => SynchronizedRandom.NextDouble() > sampleRate
+                    _ => SynchronizedRandom.NextDouble() < sampleRate
                 };
             }
 

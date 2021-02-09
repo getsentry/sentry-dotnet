@@ -221,6 +221,74 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void StartTransaction_StaticSampling_50PercentDistribution()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret, TracesSampleRate = 0.5});
+
+            // Act
+            var transactions = Enumerable
+                .Range(0, 10_000)
+                .Select(i => hub.StartTransaction($"name[{i}]", "operation[{i}]"))
+                .ToArray();
+
+            var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
+            var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
+
+            // Assert
+            transactionsSampledIn.Length.Should().BeCloseTo((int)(0.5 * transactions.Length), 100);
+            transactionsSampledOut.Length.Should().BeCloseTo((int)(0.5 * transactions.Length), 100);
+        }
+
+        [Fact]
+        public void StartTransaction_StaticSampling_25PercentDistribution()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 0.25
+            });
+
+            // Act
+            var transactions = Enumerable
+                .Range(0, 10_000)
+                .Select(i => hub.StartTransaction($"name[{i}]", "operation[{i}]"))
+                .ToArray();
+
+            var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
+            var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
+
+            // Assert
+            transactionsSampledIn.Length.Should().BeCloseTo((int)(0.25 * transactions.Length), 100);
+            transactionsSampledOut.Length.Should().BeCloseTo((int)(0.75 * transactions.Length), 100);
+        }
+
+        [Fact]
+        public void StartTransaction_StaticSampling_75PercentDistribution()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 0.75
+            });
+
+            // Act
+            var transactions = Enumerable
+                .Range(0, 10_000)
+                .Select(i => hub.StartTransaction($"name[{i}]", "operation[{i}]"))
+                .ToArray();
+
+            var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
+            var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
+
+            // Assert
+            transactionsSampledIn.Length.Should().BeCloseTo((int)(0.75 * transactions.Length), 100);
+            transactionsSampledOut.Length.Should().BeCloseTo((int)(0.25 * transactions.Length), 100);
+        }
+
+        [Fact]
         public void StartTransaction_DynamicSampling_SampledIn()
         {
             // Arrange
