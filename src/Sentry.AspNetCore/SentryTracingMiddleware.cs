@@ -13,6 +13,8 @@ namespace Sentry.AspNetCore
     /// </summary>
     internal class SentryTracingMiddleware
     {
+        private const string UnknownRouteTransactionName = "Unknown route";
+
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _getHub;
         private readonly SentryAspNetCoreOptions _options;
@@ -35,7 +37,7 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogInfo("Received Sentry trace header: {0}", value);
+            _options.DiagnosticLogger?.LogInfo("Received Sentry trace header '{0}'.", value);
 
             try
             {
@@ -43,7 +45,52 @@ namespace Sentry.AspNetCore
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Invalid Sentry trace header: {0}", ex, value);
+                _options.DiagnosticLogger?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+                return null;
+            }
+        }
+
+        private ITransaction? TryStartTransaction(HttpContext context)
+        {
+            try
+            {
+                var hub = _getHub();
+
+                // Attempt to start a transaction from the trace header if it exists
+                var traceHeader = TryGetSentryTraceHeader(context);
+
+                // It's important to try and set the transaction name
+                // to some value here so that it's available for use
+                // in sampling.
+                // At a later stage, we will try to get the transaction name
+                // again, to account for the other middlewares that may have
+                // ran after ours.
+                var transactionName =
+                    context.TryGetTransactionName() ??
+                    UnknownRouteTransactionName;
+
+                var transaction = traceHeader is not null
+                    ? hub.StartTransaction(
+                        transactionName,
+                        "http.server",
+                        traceHeader
+                    )
+                    : hub.StartTransaction(
+                        transactionName,
+                        "http.server"
+                    );
+
+                _options.DiagnosticLogger?.LogInfo(
+                    "Started transaction with span ID '{0}' and trace ID '{1}'.",
+                    transaction.SpanId,
+                    transaction.TraceId
+                );
+
+                return transaction;
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError("Failed to start transaction.", ex);
                 return null;
             }
         }
@@ -54,37 +101,16 @@ namespace Sentry.AspNetCore
         public async Task InvokeAsync(HttpContext context)
         {
             var hub = _getHub();
+
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);
                 return;
             }
 
-            await hub.ConfigureScopeAsync(async scope =>
+            using (hub.PushAndLockScope())
             {
-                // Attempt to start a transaction from the trace header if it exists
-                var traceHeader = TryGetSentryTraceHeader(context);
-
-                // Defer setting name until other middlewares have finished
-                var transaction = traceHeader is not null
-                    ? hub.StartTransaction(
-                        "Unknown Route",
-                        "http.server",
-                        traceHeader
-                    )
-                    : hub.StartTransaction(
-                        "Unknown Route",
-                        "http.server"
-                    );
-
-                _options.DiagnosticLogger?.LogInfo(
-                    "Started transaction: Span ID: {0}, Trace ID: {1}",
-                    transaction.SpanId,
-                    transaction.TraceId
-                );
-
-                // Put the transaction on the scope
-                scope.Transaction = transaction;
+                var transaction = TryStartTransaction(context);
 
                 try
                 {
@@ -92,17 +118,21 @@ namespace Sentry.AspNetCore
                 }
                 finally
                 {
-                    // Try to resolve the route
-                    if (context.TryGetTransactionName() is { } transactionName)
+                    if (transaction is not null)
                     {
-                        transaction.Name = transactionName;
-                    }
+                        // The routing middleware may have ran after ours, so
+                        // try to get the transaction name again.
+                        if (context.TryGetTransactionName() is { } transactionName)
+                        {
+                            transaction.Name = transactionName;
+                        }
 
-                    transaction.Finish(
-                        SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
-                    );
+                        transaction.Finish(
+                            SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
+                        );
+                    }
                 }
-            }).ConfigureAwait(false);
+            }
         }
     }
 
