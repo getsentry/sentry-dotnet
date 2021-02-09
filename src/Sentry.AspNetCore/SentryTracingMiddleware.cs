@@ -14,6 +14,7 @@ namespace Sentry.AspNetCore
     internal class SentryTracingMiddleware
     {
         private const string UnknownRouteTransactionName = "Unknown Route";
+        private const string OperationName = "http.server";
 
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _getHub;
@@ -72,12 +73,12 @@ namespace Sentry.AspNetCore
                 var transaction = traceHeader is not null
                     ? hub.StartTransaction(
                         transactionName,
-                        "http.server",
+                        OperationName,
                         traceHeader
                     )
                     : hub.StartTransaction(
                         transactionName,
-                        "http.server"
+                        OperationName
                     );
 
                 _options.DiagnosticLogger?.LogInfo(
