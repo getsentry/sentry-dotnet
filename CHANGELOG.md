@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.0.5
 
 ### Changes
 
