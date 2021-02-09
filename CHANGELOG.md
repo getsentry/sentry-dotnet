@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Fix transaction sampling (#810) @Tyrrrz
+
 ## 3.0.4
 
 ### Changes
