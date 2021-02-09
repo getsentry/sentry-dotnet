@@ -223,6 +223,9 @@ namespace NotSentry.Tests
         [Fact]
         public void StartTransaction_StaticSampling_50PercentDistribution()
         {
+            // 15% deviation is ok
+            const double allowedRelativeDeviation = 0.15;
+
             // Arrange
             var hub = new Hub(new SentryOptions
             {
@@ -232,7 +235,7 @@ namespace NotSentry.Tests
 
             // Act
             var transactions = Enumerable
-                .Range(0, 10_000)
+                .Range(0, 1_000_000)
                 .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
                 .ToArray();
 
@@ -240,13 +243,23 @@ namespace NotSentry.Tests
             var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
 
             // Assert
-            transactionsSampledIn.Length.Should().BeCloseTo((int)(0.5 * transactions.Length), 100);
-            transactionsSampledOut.Length.Should().BeCloseTo((int)(0.5 * transactions.Length), 100);
+            transactionsSampledIn.Length.Should().BeCloseTo(
+                (int)(0.5 * transactions.Length),
+                (uint)(allowedRelativeDeviation * transactions.Length)
+            );
+
+            transactionsSampledOut.Length.Should().BeCloseTo(
+                (int)(0.5 * transactions.Length),
+                (uint)(allowedRelativeDeviation * transactions.Length)
+            );
         }
 
         [Fact]
         public void StartTransaction_StaticSampling_25PercentDistribution()
         {
+            // 15% deviation is ok
+            const double allowedRelativeDeviation = 0.15;
+
             // Arrange
             var hub = new Hub(new SentryOptions
             {
@@ -256,7 +269,7 @@ namespace NotSentry.Tests
 
             // Act
             var transactions = Enumerable
-                .Range(0, 10_000)
+                .Range(0, 1_000_000)
                 .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
                 .ToArray();
 
@@ -264,13 +277,23 @@ namespace NotSentry.Tests
             var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
 
             // Assert
-            transactionsSampledIn.Length.Should().BeCloseTo((int)(0.25 * transactions.Length), 100);
-            transactionsSampledOut.Length.Should().BeCloseTo((int)(0.75 * transactions.Length), 100);
+            transactionsSampledIn.Length.Should().BeCloseTo(
+                (int)(0.25 * transactions.Length),
+                (uint)(allowedRelativeDeviation * transactions.Length)
+            );
+
+            transactionsSampledOut.Length.Should().BeCloseTo(
+                (int)(0.75 * transactions.Length),
+                (uint)(allowedRelativeDeviation * transactions.Length)
+            );
         }
 
         [Fact]
         public void StartTransaction_StaticSampling_75PercentDistribution()
         {
+            // 15% deviation is ok
+            const double allowedRelativeDeviation = 0.15;
+
             // Arrange
             var hub = new Hub(new SentryOptions
             {
@@ -288,8 +311,15 @@ namespace NotSentry.Tests
             var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
 
             // Assert
-            transactionsSampledIn.Length.Should().BeCloseTo((int)(0.75 * transactions.Length), 100);
-            transactionsSampledOut.Length.Should().BeCloseTo((int)(0.25 * transactions.Length), 100);
+            transactionsSampledIn.Length.Should().BeCloseTo(
+                (int)(0.75 * transactions.Length),
+                (uint)(allowedRelativeDeviation * transactions.Length)
+            );
+
+            transactionsSampledOut.Length.Should().BeCloseTo(
+                (int)(0.25 * transactions.Length),
+                (uint)(allowedRelativeDeviation * transactions.Length)
+            );
         }
 
         [Fact]
