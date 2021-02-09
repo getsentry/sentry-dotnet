@@ -224,7 +224,11 @@ namespace NotSentry.Tests
         public void StartTransaction_StaticSampling_50PercentDistribution()
         {
             // Arrange
-            var hub = new Hub(new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret, TracesSampleRate = 0.5});
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 0.5
+            });
 
             // Act
             var transactions = Enumerable
