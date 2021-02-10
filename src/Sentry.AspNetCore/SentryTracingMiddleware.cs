@@ -125,6 +125,7 @@ namespace Sentry.AspNetCore
                         // try to get the transaction name again.
                         if (context.TryGetTransactionName() is { } transactionName)
                         {
+                            _options.DiagnosticLogger?.LogDebug("Found transaction name after request pipeline executed: {0}.", transactionName);
                             transaction.Name = transactionName;
                         }
 
