@@ -130,7 +130,7 @@ namespace Sentry.AspNetCore
                         if (!string.Equals(transaction.Name, transactionName, StringComparison.Ordinal))
                         {
                             _options.DiagnosticLogger?.LogDebug(
-                                "Updated transaction name from '{0}' to '{1}' after request pipeline executed.",
+                                "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
                                 transaction.Name,
                                 transactionName
                             );
