@@ -26,7 +26,7 @@ namespace Sentry.Tests.Protocol
                 Request = new Request { Method = "POST" },
                 Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
                 Environment = "environment",
-                Level = SentryLevel.Fatal,
+                Level = SentryLevel.Fatal
             };
 
             // Don't overwrite the contexts object as it contains trace data.
@@ -75,19 +75,13 @@ namespace Sentry.Tests.Protocol
             // Assert
             actual.Should().BeEquivalentTo(transaction, o =>
             {
-                // Due to timestamp precision
-                o.Excluding(e => e.Breadcrumbs);
+                // Timestamps lose some precision when writing to JSON
+                o.Using<DateTimeOffset>(ctx =>
+                    ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMilliseconds(1))
+                ).WhenTypeIs<DateTimeOffset>();
 
                 return o;
             });
-
-            // Expected item[0].Timestamp to be <9999-12-31 23:59:59.9999999>, but found <9999-12-31 23:59:59.999>.
-            actual.Breadcrumbs.Should().BeEquivalentTo(transaction.Breadcrumbs, o => o.Excluding(b => b.Timestamp));
-            var counter = 0;
-            foreach (var sutBreadcrumb in transaction.Breadcrumbs)
-            {
-                sutBreadcrumb.Timestamp.Should().BeCloseTo(actual.Breadcrumbs.ElementAt(counter++).Timestamp);
-            }
         }
 
         [Fact]
