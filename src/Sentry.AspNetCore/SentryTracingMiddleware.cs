@@ -125,6 +125,15 @@ namespace Sentry.AspNetCore
                     // try to get the transaction name again.
                     if (context.TryGetTransactionName() is { } transactionName)
                     {
+                        if (!string.Equals(transaction.Name, transactionName, StringComparison.Ordinal))
+                        {
+                            _options.DiagnosticLogger?.LogDebug(
+                                "Updated transaction name from '{0}' to '{1}' after request pipeline executed.",
+                                transaction.Name,
+                                transactionName
+                            );
+                        }
+
                         transaction.Name = transactionName;
                     }
 
