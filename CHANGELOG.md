@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Fix tracing middleware (#813) @Tyrrrz
+
 ## 3.0.5
 
 ### Changes
