@@ -38,7 +38,7 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogInfo("Received Sentry trace header '{0}'.", value);
+            _options.DiagnosticLogger?.LogDebug("Received Sentry trace header '{0}'.", value);
 
             try
             {
