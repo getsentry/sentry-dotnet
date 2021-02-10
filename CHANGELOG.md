@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix caching issues (#815) @Tyrrrz
+
 ## 3.0.5
 
 ### Changes
