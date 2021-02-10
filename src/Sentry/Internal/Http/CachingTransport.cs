@@ -187,6 +187,12 @@ namespace Sentry.Internal.Http
                 }
                 catch (Exception ex) when (IsRetryable(ex))
                 {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to send cached envelope: {0}, retrying after a delay.",
+                        ex,
+                        envelopeFilePath
+                    );
+
                     // Let the worker catch, log, wait a bit and retry.
                     throw;
                 }
@@ -195,7 +201,8 @@ namespace Sentry.Internal.Http
                     _options.DiagnosticLogger?.LogError(
                         "Failed to send cached envelope: {0}, discarding cached envelope.",
                         ex,
-                        envelopeFilePath);
+                        envelopeFilePath
+                    );
                 }
 
                 // Envelope & file stream must be disposed prior to reaching this point
