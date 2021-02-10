@@ -229,8 +229,15 @@ namespace Sentry.Internal.Http
 
             var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
 
+            // Ensure that the processing directory exists
             Directory.CreateDirectory(_processingDirectoryPath);
-            File.Move(filePath, targetFilePath);
+
+            // Move the file to processing.
+            // We move with overwrite just in case a file with the same name
+            // already exists in the output directory.
+            // That should never happen under normal workflows because the filenames
+            // have high variance.
+            File.Move(filePath, targetFilePath, true);
 
             return targetFilePath;
         }
@@ -240,14 +247,15 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken = default)
         {
             // Envelope file name can be either:
-            // 1604679692_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
-            // 1604679692__17754019.envelope
+            // 1604679692_2035_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
+            // 1604679692_2035__17754019_2035660868.envelope
             // (depending on whether event ID is present or not)
             var envelopeFilePath = Path.Combine(
                 _isolatedCacheDirectoryPath,
-                $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" +
-                $"{envelope.TryGetEventId()}_" +
-                $"{envelope.GetHashCode()}" +
+                $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}_" + // timestamp for variance & sorting
+                $"{Guid.NewGuid().GetHashCode() % 1_0000}_" + // random 1-4 digits for extra variance
+                $"{envelope.TryGetEventId()}_" + // event ID (may be empty)
+                $"{envelope.GetHashCode()}" + // envelope hash code
                 $".{EnvelopeFileExt}"
             );
 
