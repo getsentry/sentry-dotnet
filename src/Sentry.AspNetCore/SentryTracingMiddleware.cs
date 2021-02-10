@@ -38,7 +38,7 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogDebug("Received Sentry trace header '{0}'.", value);
+            _options.DiagnosticLogger?.LogInfo("Received Sentry trace header '{0}'.", value);
 
             try
             {
@@ -109,30 +109,28 @@ namespace Sentry.AspNetCore
                 return;
             }
 
-            using (hub.PushAndLockScope())
+            var transaction = TryStartTransaction(context);
+
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+            try
             {
-                var transaction = TryStartTransaction(context);
-
-                try
+                await _next(context).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (transaction is not null)
                 {
-                    await _next(context).ConfigureAwait(false);
-                }
-                finally
-                {
-                    if (transaction is not null)
+                    // The routing middleware may have ran after ours, so
+                    // try to get the transaction name again.
+                    if (context.TryGetTransactionName() is { } transactionName)
                     {
-                        // The routing middleware may have ran after ours, so
-                        // try to get the transaction name again.
-                        if (context.TryGetTransactionName() is { } transactionName)
-                        {
-                            _options.DiagnosticLogger?.LogDebug("Found transaction name after request pipeline executed: {0}.", transactionName);
-                            transaction.Name = transactionName;
-                        }
-
-                        transaction.Finish(
-                            SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
-                        );
+                        transaction.Name = transactionName;
                     }
+
+                    transaction.Finish(
+                        SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
+                    );
                 }
             }
         }
