@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix caching issues (#815) @Tyrrrz
+- Fix tracing middleware (#813) @Tyrrrz
 
 ## 3.0.5
 
