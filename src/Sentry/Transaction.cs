@@ -150,28 +150,28 @@ namespace Sentry
         }
 
         // Not readonly because of deserialization
-        private Lazy<ConcurrentBag<Breadcrumb>> _breadcrumbsLazy = new();
+        private ConcurrentBag<Breadcrumb> _breadcrumbs = new();
 
         /// <inheritdoc />
-        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbsLazy.Value;
+        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
         // Not readonly because of deserialization
-        private Lazy<ConcurrentDictionary<string, object?>> _extraLazy = new();
+        private ConcurrentDictionary<string, object?> _extra = new();
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _extraLazy.Value;
+        public IReadOnlyDictionary<string, object?> Extra => _extra;
 
         // Not readonly because of deserialization
-        private Lazy<ConcurrentDictionary<string, string>> _tagsLazy = new();
+        private ConcurrentDictionary<string, string> _tags = new();
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> Tags => _tagsLazy.Value;
+        public IReadOnlyDictionary<string, string> Tags => _tags;
 
         // Not readonly because of deserialization
-        private Lazy<ConcurrentBag<Span>> _spansLazy = new();
+        private ConcurrentBag<Span> _spans = new();
 
         /// <inheritdoc />
-        public IReadOnlyCollection<ISpan> Spans => _spansLazy.Value;
+        public IReadOnlyCollection<ISpan> Spans => _spans;
 
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
@@ -219,19 +219,19 @@ namespace Sentry
 
         /// <inheritdoc />
         public void AddBreadcrumb(Breadcrumb breadcrumb) =>
-            _breadcrumbsLazy.Value.Add(breadcrumb);
+            _breadcrumbs.Add(breadcrumb);
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value) =>
-            _extraLazy.Value[key] = value;
+            _extra[key] = value;
 
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
-            _tagsLazy.Value[key] = value;
+            _tags[key] = value;
 
         /// <inheritdoc />
         public void UnsetTag(string key) =>
-            _tagsLazy.Value.TryRemove(key, out _);
+            _tags.TryRemove(key, out _);
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
@@ -240,7 +240,7 @@ namespace Sentry
                 IsSampled = IsSampled
             };
 
-            _spansLazy.Value.Add(span);
+            _spans.Add(span);
 
             return span;
         }
@@ -337,11 +337,11 @@ namespace Sentry
                 writer.WriteEndArray();
             }
 
-            if (_breadcrumbsLazy.IsValueCreated && _breadcrumbsLazy.Value.Any())
+            if (_breadcrumbs.Any())
             {
                 writer.WriteStartArray("breadcrumbs");
 
-                foreach (var i in _breadcrumbsLazy.Value)
+                foreach (var i in _breadcrumbs)
                 {
                     writer.WriteSerializableValue(i);
                 }
@@ -349,11 +349,11 @@ namespace Sentry
                 writer.WriteEndArray();
             }
 
-            if (_extraLazy.IsValueCreated && _extraLazy.Value.Any())
+            if (_extra.Any())
             {
                 writer.WriteStartObject("extra");
 
-                foreach (var (key, value) in _extraLazy.Value)
+                foreach (var (key, value) in _extra)
                 {
                     writer.WriteDynamic(key, value);
                 }
@@ -361,11 +361,11 @@ namespace Sentry
                 writer.WriteEndObject();
             }
 
-            if (_tagsLazy.IsValueCreated && _tagsLazy.Value.Any())
+            if (_tags.Any())
             {
                 writer.WriteStartObject("tags");
 
-                foreach (var (key, value) in _tagsLazy.Value)
+                foreach (var (key, value) in _tags)
                 {
                     writer.WriteString(key, value);
                 }
@@ -373,11 +373,11 @@ namespace Sentry
                 writer.WriteEndObject();
             }
 
-            if (_spansLazy.IsValueCreated && _spansLazy.Value.Any())
+            if (_spans.Any())
             {
                 writer.WriteStartArray("spans");
 
-                foreach (var span in _spansLazy.Value)
+                foreach (var span in _spans)
                 {
                     writer.WriteSerializableValue(span);
                 }
@@ -407,10 +407,14 @@ namespace Sentry
             var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
             var environment = json.GetPropertyOrNull("environment")?.GetString();
             var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
-            var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()!).ToArray();
-            var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).Pipe(v => new ConcurrentBag<Breadcrumb>(v));
-            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v));
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
+            var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()!)
+                .ToArray();
+            var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson)
+                .Pipe(v => new ConcurrentBag<Breadcrumb>(v));
+            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()
+                ?.Pipe(v => new ConcurrentDictionary<string, object?>(v));
+            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()
+                ?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
 
             var transaction = new Transaction(hub, name)
             {
@@ -425,34 +429,17 @@ namespace Sentry
                 _user = user,
                 Environment = environment,
                 Sdk = sdk,
-                _fingerprint = fingerprint
+                _fingerprint = fingerprint,
+                _breadcrumbs = breadcrumbs ?? new(),
+                _extra = extra ?? new(),
+                _tags = tags ?? new()
             };
 
-            if (breadcrumbs is not null)
-            {
-                transaction._breadcrumbsLazy = new(() => breadcrumbs);
-            }
-
-            if (extra is not null)
-            {
-                transaction._extraLazy = new(() => extra);
-            }
-
-            if (tags is not null)
-            {
-                transaction._tagsLazy = new(() => tags);
-            }
-
-            var spans = json
+            transaction._spans = json
                 .GetPropertyOrNull("spans")?
                 .EnumerateArray()
                 .Select(j => Span.FromJson(transaction, j))
-                .Pipe(v => new ConcurrentBag<Span>(v));
-
-            if (spans is not null)
-            {
-                transaction._spansLazy = new(() => spans);
-            }
+                .Pipe(v => new ConcurrentBag<Span>(v)) ?? new();
 
             return transaction;
         }
