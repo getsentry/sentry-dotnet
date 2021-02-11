@@ -4,22 +4,25 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Sentry.AspNetCore.Tests.Utils.Extensions;
+using Sentry.Testing;
 
-namespace Sentry.Testing
+namespace Sentry.AspNetCore.Tests.Utils
 {
-    public static class FakeSentryServer
+    internal static class FakeSentryServer
     {
         public static TestServer CreateServer(IReadOnlyCollection<RequestHandler> handlers)
         {
             var builder = new WebHostBuilder()
+                .UseDefaultServiceProvider(di => di.EnableValidation())
                 .Configure(app =>
                 {
-                    _ = app.Use(async (context, next) =>
-                        {
-                            var handler = handlers.FirstOrDefault(p => p.Path == context.Request.Path);
+                    app.Use(async (context, next) =>
+                    {
+                        var handler = handlers.FirstOrDefault(p => p.Path == context.Request.Path);
 
-                            await (handler?.Handler(context) ?? next());
-                        });
+                        await (handler?.Handler(context) ?? next());
+                    });
                 });
 
             return new TestServer(builder);

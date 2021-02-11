@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
-using Sentry.Protocol;
+using Sentry.AspNetCore.Tests.Utils.Extensions;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -30,7 +30,7 @@ namespace Sentry.AspNetCore.Tests
             });
 
             var server = new TestServer(new WebHostBuilder()
-                .UseDefaultServiceProvider(di => di.ValidateScopes = true)
+                .UseDefaultServiceProvider(di => di.EnableValidation())
                 .UseSentry()
                 .ConfigureServices(services =>
                 {
@@ -81,7 +81,7 @@ namespace Sentry.AspNetCore.Tests
             });
 
             var server = new TestServer(new WebHostBuilder()
-                .UseDefaultServiceProvider(di => di.ValidateScopes = true)
+                .UseDefaultServiceProvider(di => di.EnableValidation())
                 .UseSentry()
                 .ConfigureServices(services =>
                 {
@@ -130,7 +130,7 @@ namespace Sentry.AspNetCore.Tests
             });
 
             var server = new TestServer(new WebHostBuilder()
-                .UseDefaultServiceProvider(di => di.ValidateScopes = true)
+                .UseDefaultServiceProvider(di => di.EnableValidation())
                 .UseSentry()
                 .ConfigureServices(services =>
                 {

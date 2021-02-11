@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
+using Sentry.AspNetCore.Tests.Utils.Extensions;
 using Sentry.Testing;
 using Xunit;
 
@@ -48,7 +49,7 @@ namespace Sentry.AspNetCore.Tests
             });
 
             var server = new TestServer(new WebHostBuilder()
-                .UseDefaultServiceProvider(di => di.ValidateScopes = true)
+                .UseDefaultServiceProvider(di => di.EnableValidation())
                 .UseSentry()
                 .ConfigureServices(services =>
                 {
