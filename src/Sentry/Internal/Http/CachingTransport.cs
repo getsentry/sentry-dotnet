@@ -244,7 +244,17 @@ namespace Sentry.Internal.Http
             // already exists in the output directory.
             // That should never happen under normal workflows because the filenames
             // have high variance.
+#if NETCOREAPP3_0 || NET5_0
             File.Move(filePath, targetFilePath, true);
+#else
+            // Not atomic
+            if (File.Exists(targetFilePath))
+            {
+                File.Delete(targetFilePath);
+            }
+
+            File.Move(filePath, targetFilePath);
+#endif
 
             return targetFilePath;
         }
