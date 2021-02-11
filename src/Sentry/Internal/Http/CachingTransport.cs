@@ -247,13 +247,8 @@ namespace Sentry.Internal.Http
 #if NETCOREAPP3_0 || NET5_0
             File.Move(filePath, targetFilePath, true);
 #else
-            // Not atomic
-            if (File.Exists(targetFilePath))
-            {
-                File.Delete(targetFilePath);
-            }
-
-            File.Move(filePath, targetFilePath);
+            File.Copy(filePath, targetFilePath, true);
+            File.Delete(filePath);
 #endif
 
             return targetFilePath;
