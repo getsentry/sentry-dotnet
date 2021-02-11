@@ -264,7 +264,7 @@ namespace Sentry.Internal.Http
             // (depending on whether event ID is present or not)
             var envelopeFilePath = Path.Combine(
                 _isolatedCacheDirectoryPath,
-                $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}_" + // timestamp for variance & sorting
+                $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" + // timestamp for variance & sorting
                 $"{Guid.NewGuid().GetHashCode() % 1_0000}_" + // random 1-4 digits for extra variance
                 $"{envelope.TryGetEventId()}_" + // event ID (may be empty)
                 $"{envelope.GetHashCode()}" + // envelope hash code
