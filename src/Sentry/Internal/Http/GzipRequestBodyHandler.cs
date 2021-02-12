@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -64,7 +63,6 @@ namespace Sentry.Internal.Http
 
             public GzipContent(HttpContent content, CompressionLevel compressionLevel)
             {
-                Debug.Assert(content != null);
                 _content = content;
                 _compressionLevel = compressionLevel;
 

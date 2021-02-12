@@ -3,7 +3,6 @@ namespace Sentry.PlatformAbstractions
     /// <summary>
     /// Details of the runtime
     /// </summary>
-    /// <inheritdoc />
     public class Runtime
     {
         private static Runtime? _runtime;
@@ -20,7 +19,7 @@ namespace Sentry.PlatformAbstractions
         /// <example>
         /// .NET Framework, .NET Native, Mono
         /// </example>
-        public string? Name { get; internal set; }
+        public string? Name { get; }
         /// <summary>
         /// The version of the runtime
         /// </summary>
@@ -44,7 +43,7 @@ namespace Sentry.PlatformAbstractions
         /// This property will contain a value when the underlying API
         /// returned Name and Version as a single string which required parsing.
         /// </remarks>
-        public string? Raw { get; internal set; }
+        public string? Raw { get; }
 
         /// <summary>
         /// Creates a new Runtime instance

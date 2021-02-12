@@ -1,5 +1,8 @@
 using System;
+using FluentAssertions;
+using Sentry.Extensibility;
 using Sentry.Protocol;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests
@@ -12,7 +15,7 @@ namespace Sentry.Tests
         public void OnEvaluate_FiresOnlyOnce()
         {
             var counter = 0;
-            _sut.OnEvaluating += (sender, args) => counter++;
+            _sut.OnEvaluating += (_, _) => counter++;
 
             _sut.Evaluate();
             _sut.Evaluate();
@@ -26,7 +29,7 @@ namespace Sentry.Tests
             var counter = 0;
             _sut.Evaluate();
 
-            _sut.OnEvaluating += (sender, args) => counter++;
+            _sut.OnEvaluating += (_, _) => counter++;
 
             _sut.Evaluate();
 
@@ -34,20 +37,28 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void OnEvaluate_EventHandlerThrows_ExceptionAsBreadcrumb()
+        public void OnEvaluate_EventHandlerThrows_LogsException()
         {
-            var expected = new InvalidOperationException("test");
+            // Arrange
+            var logger = new InMemoryDiagnosticLogger();
 
-            _sut.OnEvaluating += (sender, args) => throw expected;
-            _sut.Evaluate();
+            var scope = new Scope(new SentryOptions
+            {
+                DiagnosticLogger = logger,
+                Debug = true
+            });
 
-            var crumb = Assert.Single(_sut.Breadcrumbs);
+            var exception = new InvalidOperationException("test");
+            scope.OnEvaluating += (_, _) => throw exception;
 
-            Assert.Equal(BreadcrumbLevel.Error, crumb.Level);
+            // Act
+            scope.Evaluate();
 
-            Assert.Equal(
-                "Failed invoking event handler: " + expected,
-                crumb.Message);
+            // Assert
+            logger.Entries.Should().Contain(entry =>
+                entry.Message == "Failed invoking event handler." &&
+                entry.Exception == exception
+            );
         }
 
         [Fact]
@@ -55,7 +66,7 @@ namespace Sentry.Tests
         {
             var counter = 0;
 
-            _sut.OnEvaluating += (sender, args) =>
+            _sut.OnEvaluating += (_, _) =>
             {
                 counter++;
                 throw new InvalidOperationException("test");
@@ -94,6 +105,119 @@ namespace Sentry.Tests
             var clone = _sut.Clone();
 
             Assert.Equal(_sut.Environment, clone.Environment);
+        }
+
+        [Fact]
+        public void TransactionName_TransactionNotStarted_NameIsSet()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            // Act
+            scope.TransactionName = "foo";
+
+            // Assert
+            scope.TransactionName.Should().Be("foo");
+            scope.Transaction.Should().BeNull();
+        }
+
+        [Fact]
+        public void TransactionName_TransactionStarted_NameIsSetAndOverwritten()
+        {
+            // Arrange
+            var scope = new Scope();
+            scope.Transaction = new Transaction(DisabledHub.Instance, "bar", "_");
+
+            // Act
+            scope.TransactionName = "foo";
+
+            // Assert
+            scope.TransactionName.Should().Be("foo");
+            scope.TransactionName.Should().Be(scope.Transaction?.Name);
+        }
+
+        [Fact]
+        public void TransactionName_TransactionStarted_NameIsSetToNullCoercedToEmpty()
+        {
+            // Arrange
+            var scope = new Scope();
+            scope.Transaction = new Transaction(DisabledHub.Instance, "bar", "_");
+
+            // Act
+            scope.TransactionName = null;
+
+            // Assert
+            scope.TransactionName.Should().BeNullOrEmpty();
+            scope.TransactionName.Should().Be(scope.Transaction?.Name);
+        }
+
+        [Fact]
+        public void TransactionName_TransactionStarted_NameReturnsActualTransactionName()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            scope.TransactionName = "bar";
+
+            // Act
+            scope.Transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+
+            // Assert
+            scope.TransactionName.Should().Be("foo");
+            scope.TransactionName.Should().Be(scope.Transaction?.Name);
+        }
+
+        [Fact]
+        public void GetSpan_NoSpans_ReturnsTransaction()
+        {
+            // Arrange
+            var scope = new Scope();
+            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            scope.Transaction = transaction;
+
+            // Act
+            var span = scope.GetSpan();
+
+            // Assert
+            span.Should().Be(transaction);
+        }
+
+        [Fact]
+        public void GetSpan_FinishedSpans_ReturnsTransaction()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            transaction.StartChild("123").Finish();
+            transaction.StartChild("456").Finish();
+
+            scope.Transaction = transaction;
+
+            // Act
+            var span = scope.GetSpan();
+
+            // Assert
+            span.Should().Be(transaction);
+        }
+
+        [Fact]
+        public void GetSpan_ActiveSpans_ReturnsSpan()
+        {
+            // Arrange
+            var scope = new Scope();
+
+            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            var activeSpan = transaction.StartChild("123");
+            transaction.StartChild("456").Finish();
+
+            scope.Transaction = transaction;
+
+            // Act
+            var span = scope.GetSpan();
+
+            // Assert
+            span.Should().Be(activeSpan);
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -74,9 +73,6 @@ namespace Sentry.Internal.Http
             public BufferedStreamContent(Stream stream, long contentLength, HttpContentHeaders headers)
                 : base(stream)
             {
-                Debug.Assert(stream != null);
-                Debug.Assert(headers != null);
-
                 ContentLength = contentLength;
 
                 foreach (var header in headers)

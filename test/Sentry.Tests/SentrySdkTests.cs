@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -12,7 +13,6 @@ using Sentry.Testing;
 using Xunit;
 using Xunit.Abstractions;
 using static Sentry.Internal.Constants;
-using static Sentry.Protocol.Constants;
 using static Sentry.DsnSamples;
 
 namespace Sentry.Tests
@@ -65,14 +65,18 @@ namespace Sentry.Tests
         public void Init_ValidDsnWithSecret_EnablesSdk()
         {
             using (SentrySdk.Init(ValidDsnWithSecret))
+            {
                 Assert.True(SentrySdk.IsEnabled);
+            }
         }
 
         [Fact]
         public void Init_ValidDsnWithoutSecret_EnablesSdk()
         {
             using (SentrySdk.Init(ValidDsnWithoutSecret))
+            {
                 Assert.True(SentrySdk.IsEnabled);
+            }
         }
 
         [Fact]
@@ -83,21 +87,27 @@ namespace Sentry.Tests
                 ValidDsnWithSecret,
                 () =>
                 {
-                    using (SentrySdk.Init(c => { }))
+                    using (SentrySdk.Init(_ => { }))
+                    {
                         Assert.True(SentrySdk.IsEnabled);
+                    }
                 });
         }
 
         [Fact]
-        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariable_DisabledSdk()
+        public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariable_Throws()
         {
             EnvironmentVariableGuard.WithVariable(
                 DsnEnvironmentVariable,
                 InvalidDsn,
                 () =>
                 {
-                    using (SentrySdk.Init(c => { }))
-                        Assert.False(SentrySdk.IsEnabled);
+                    Assert.Throws<ArgumentException>(() =>
+                    {
+                        using (SentrySdk.Init(_ => { }))
+                        {
+                        }
+                    });
                 });
         }
 
@@ -110,7 +120,9 @@ namespace Sentry.Tests
                 () =>
                 {
                     using (SentrySdk.Init())
+                    {
                         Assert.True(SentrySdk.IsEnabled);
+                    }
                 });
         }
 
@@ -133,11 +145,13 @@ namespace Sentry.Tests
         {
             EnvironmentVariableGuard.WithVariable(
                 DsnEnvironmentVariable,
-                DisableSdkDsnValue,
+                Constants.DisableSdkDsnValue,
                 () =>
                 {
                     using (SentrySdk.Init())
+                    {
                         Assert.False(SentrySdk.IsEnabled);
+                    }
                 });
         }
 
@@ -145,7 +159,9 @@ namespace Sentry.Tests
         public void Init_EmptyDsn_DisabledSdk()
         {
             using (SentrySdk.Init(string.Empty))
+            {
                 Assert.False(SentrySdk.IsEnabled);
+            }
         }
 
         [Fact]
@@ -244,7 +260,7 @@ namespace Sentry.Tests
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cacheDirectory.Path;
                 o.InitCacheFlushTimeout = TimeSpan.FromSeconds(30);
-                o.CreateHttpClientHandler = () => new FakeHttpClientHandler();
+                o.Transport = transport;
             });
 
             // Assert
@@ -455,6 +471,21 @@ namespace Sentry.Tests
             var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
             Assert.Empty(scopeManagement.Select(m => m.ToString()).Except(sentrySdk.Select(m => m.ToString())));
+        }
+
+        // Issue: https://github.com/getsentry/sentry-dotnet/issues/123
+        [Fact]
+        public void InitHub_NoDsn_DisposeDoesNotThrow()
+        {
+            var sut = SentrySdk.InitHub(new SentryOptions()) as IDisposable;
+            sut?.Dispose();
+        }
+
+        [Fact]
+        public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
+        {
+            var sut = SentrySdk.InitHub(new SentryOptions());
+            await sut.FlushAsync(TimeSpan.FromDays(1));
         }
     }
 }

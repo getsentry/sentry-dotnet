@@ -1,7 +1,11 @@
+using System;
 using System.IO.Compression;
 using System.Net;
+#if NETFX
 using Sentry.Internal;
 using Sentry.PlatformAbstractions;
+using Xunit.Sdk;
+#endif
 using Xunit;
 
 namespace Sentry.Tests
@@ -14,16 +18,14 @@ namespace Sentry.Tests
             var sut = new SentryOptions();
             Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
         }
-
         [Fact]
         public void RequestBodyCompressionLevel_ByDefault_Optimal()
         {
             var sut = new SentryOptions();
             Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
         }
-
 #if NETFX
-        [SkippableFact]
+        [SkippableFact(typeof(IsTypeException))]
         public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
         {
             Skip.If(!RuntimeInfo.GetRuntime().IsMono());
@@ -32,7 +34,7 @@ namespace Sentry.Tests
             Assert.IsType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
         }
 
-        [SkippableFact]
+        [SkippableFact(typeof(IsNotTypeException))]
         public void StackTraceFactory_NotRunningOnMono_NotMonoStackTraceFactory()
         {
             Skip.If(RuntimeInfo.GetRuntime().IsMono());

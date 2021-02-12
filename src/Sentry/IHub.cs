@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sentry.Protocol;
 
 namespace Sentry
@@ -22,13 +23,21 @@ namespace Sentry
         SentryId LastEventId { get; }
 
         /// <summary>
-        /// Creates a transaction.
+        /// Starts a transaction.
         /// </summary>
-        Transaction CreateTransaction(string name, string operation);
+        ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext
+        );
 
         /// <summary>
-        /// Gets the sentry trace header.
+        /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
         /// </summary>
-        SentryTraceHeader? GetSentryTrace();
+        ISpan? GetSpan();
+
+        /// <summary>
+        /// Gets the Sentry trace header for the last active span.
+        /// </summary>
+        SentryTraceHeader? GetTraceHeader();
     }
 }

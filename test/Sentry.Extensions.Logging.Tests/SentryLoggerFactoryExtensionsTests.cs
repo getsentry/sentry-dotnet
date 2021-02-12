@@ -97,7 +97,7 @@ namespace Sentry.Extensions.Logging.Tests
         {
             var callbackInvoked = false;
             var expected = Substitute.For<ILoggerFactory>();
-            _ = expected.AddSentry(o => { callbackInvoked = true; });
+            _ = expected.AddSentry(_ => callbackInvoked = true);
 
             Assert.True(callbackInvoked);
         }

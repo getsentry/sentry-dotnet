@@ -4,8 +4,9 @@ coverage:
     project:
       default:
         threshold: 5%
-    patch:
-      default:
-        threshold: 5%
+    patch: off
   ignore:
     - "test/**/*"
+  range: 0..100
+  round: down
+  precision: 2

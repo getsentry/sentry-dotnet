@@ -20,7 +20,8 @@ namespace Sentry.Tests.Internals
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
             public SentryOptions SentryOptions { get; set; } = new();
-            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
+            public Lazy<string> LazyRelease { get; set; } = new(() => "release-123");
+            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory, LazyRelease);
         }
 
         private readonly Fixture _fixture = new();
@@ -215,9 +216,9 @@ namespace Sentry.Tests.Internals
         }
 
         [Theory]
-        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(null, Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
         [InlineData("a", "a")] // Provided: nothing will change.
         [InlineData("production", "production")] // Provided: nothing will change. (value has a lower case 'p', different to default value)
         [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
@@ -233,9 +234,9 @@ namespace Sentry.Tests.Internals
         }
 
         [Theory]
-        [InlineData(null, Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-        [InlineData("", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-        [InlineData(" ", Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(null, Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData("", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+        [InlineData(" ", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
         [InlineData("a", "a")] // Provided: nothing will change.
         [InlineData("Production", "Production")] // Provided: nothing will change. (value has a upper case 'p', different to default value)
         [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
@@ -245,7 +246,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
 
             EnvironmentVariableGuard.WithVariable(
-                Constants.EnvironmentEnvironmentVariable,
+                Sentry.Internal.Constants.EnvironmentEnvironmentVariable,
                 environment,
                 () =>
                 {
@@ -294,7 +295,7 @@ namespace Sentry.Tests.Internals
             var evt = new SentryEvent();
             _ = sut.Process(evt);
 
-            Assert.Equal(Sentry.Protocol.Constants.Platform, evt.Platform);
+            Assert.Equal(Constants.Platform, evt.Platform);
         }
 
         [Fact]
@@ -326,7 +327,7 @@ namespace Sentry.Tests.Internals
 
             _ = sut.Process(evt);
 
-            Assert.Equal(Constants.SdkName, evt.Sdk.Name);
+            Assert.Equal(Sentry.Internal.Constants.SdkName, evt.Sdk.Name);
             Assert.Equal(typeof(ISentryClient).Assembly.GetNameAndVersion().Version, evt.Sdk.Version);
         }
 
@@ -391,6 +392,39 @@ namespace Sentry.Tests.Internals
             _ = sut.Process(evt);
 
             _ = _fixture.SentryStackTraceFactory.DidNotReceive().Create();
+        }
+
+        [Fact]
+        public void Process_CultureInfoAndCultureInfoAreEqual_OnlyCultureInfoSet()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent(new Exception());
+            CultureInfo.CurrentCulture = new CultureInfo(1042);
+            CultureInfo.CurrentUICulture = new CultureInfo(1042);
+
+            //Act
+            evt = sut.Process(evt);
+
+            //Assert
+            Assert.False(evt.Contexts.ContainsKey(MainSentryEventProcessor.CurrentUiCultureKey));
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));        }
+
+        [Fact]
+        public void Process_DiffentCultureInfoAndCultureUiInfo_CultureInfoAndCultureUiInfoSet()
+        {
+            //Arrange
+            var sut = _fixture.GetSut();
+            var evt = new SentryEvent(new Exception());
+            CultureInfo.CurrentCulture = new CultureInfo(1041);
+            CultureInfo.CurrentUICulture = new CultureInfo(1033);
+
+            //Act
+            evt = sut.Process(evt);
+
+            //Assert
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CurrentUiCultureKey));
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));
         }
 
         [Fact]
@@ -494,7 +528,7 @@ namespace Sentry.Tests.Internals
                     }
                 },
 
-                // 3x event tags, 3x default tag but _we have a mix of both_ 
+                // 3x event tags, 3x default tag but _we have a mix of both_
                 // Expected: the unique event tags and the unique default tags. no duplicates.
                 {
                     new Dictionary<string, string>{
@@ -537,7 +571,7 @@ namespace Sentry.Tests.Internals
             {
                 _fixture.SentryOptions.DefaultTags[defaultTag.Key] = defaultTag.Value;
             }
-            
+
             var sut = _fixture.GetSut();
 
             //Act
@@ -556,13 +590,13 @@ namespace Sentry.Tests.Internals
             {
                 new Action<CultureInfo>(c => CultureInfo.CurrentUICulture = c),
                 new Func<CultureInfo>(() => CultureInfo.CurrentUICulture),
-                nameof(CultureInfo.CurrentUICulture)
+                MainSentryEventProcessor.CurrentUiCultureKey
             };
             yield return new object[]
             {
                 new Action<CultureInfo>(c => CultureInfo.CurrentCulture = c),
                 new Func<CultureInfo>(() => CultureInfo.CurrentCulture),
-                nameof(CultureInfo.CurrentCulture)
+                MainSentryEventProcessor.CultureInfoKey
             };
         }
     }

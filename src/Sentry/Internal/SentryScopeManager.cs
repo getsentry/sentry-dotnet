@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -24,7 +23,6 @@ namespace Sentry.Internal
             SentryOptions options,
             ISentryClient rootClient)
         {
-            Debug.Assert(rootClient != null);
             _options = options;
             NewStack = () => new [] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
@@ -58,7 +56,7 @@ namespace Sentry.Internal
 
             if (scope.Key.Locked)
             {
-                _options?.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
+                _options.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
 
                 // Apply to current scope
                 if (state != null)
@@ -120,8 +118,6 @@ namespace Sentry.Internal
                 KeyValuePair<Scope, ISentryClient>[] snapshot,
                 SentryScopeManager scopeManager)
             {
-                Debug.Assert(snapshot != null);
-                Debug.Assert(scopeManager != null);
                 _options = options;
                 _snapshot = snapshot;
                 _scopeManager = scopeManager;

@@ -16,7 +16,7 @@ namespace Sentry.Tests.Integrations
             if (!Runtime.Current.IsMono())
             {
                 var evt = new ManualResetEventSlim(false);
-                AppDomainAdapter.Instance.UnhandledException += (sender, args) =>
+                AppDomainAdapter.Instance.UnhandledException += (_, _) =>
                 {
                     evt.Set();
                 };

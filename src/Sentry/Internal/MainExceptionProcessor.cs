@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
@@ -15,16 +14,12 @@ namespace Sentry.Internal
 
         public MainExceptionProcessor(SentryOptions options, Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(sentryStackTraceFactoryAccessor != null);
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
         }
 
         public void Process(Exception exception, SentryEvent sentryEvent)
         {
-            Debug.Assert(sentryEvent != null);
-
             _options.DiagnosticLogger?.LogDebug("Running processor on exception: {0}", exception.Message);
 
             var sentryExceptions = CreateSentryException(exception)
@@ -103,8 +98,6 @@ namespace Sentry.Internal
 
         internal static Mechanism GetMechanism(Exception exception)
         {
-            Debug.Assert(exception != null);
-
             var mechanism = new Mechanism();
 
             if (exception.HelpLink != null)

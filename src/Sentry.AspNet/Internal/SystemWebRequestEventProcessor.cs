@@ -4,11 +4,15 @@ using System.Security.Claims;
 using System.Web;
 using Sentry.Extensibility;
 using Sentry.Protocol;
+using Sentry.Reflection;
 
-namespace Sentry.Internal.Web
+namespace Sentry.AspNet.Internal
 {
     internal class SystemWebRequestEventProcessor : ISentryEventProcessor
     {
+        private static readonly SdkVersion SdkVersion =
+            typeof(SystemWebRequestEventProcessor).Assembly.GetNameAndVersion();
+
         private readonly SentryOptions _options;
         internal IRequestPayloadExtractor PayloadExtractor { get; }
 
@@ -78,11 +82,7 @@ namespace Sentry.Internal.Web
                 if (context.User.Identity is { } identity)
                 {
                     @event.User.Username = identity.Name;
-                    var other = new Dictionary<string, string>
-                    {
-                        { "IsAuthenticated", identity.IsAuthenticated.ToString() }
-                    };
-                    @event.User.Other = other;
+                    @event.User.Other.Add("IsAuthenticated", identity.IsAuthenticated.ToString());
                 }
                 if (context.User is ClaimsPrincipal claimsPrincipal)
                 {
@@ -112,6 +112,21 @@ namespace Sentry.Internal.Web
             {
                 @event.Request.Data = body;
             }
+
+            if (@event.Sdk.Version is null && @event.Sdk.Name is null)
+            {
+                @event.Sdk.Name = "sentry.dotnet.aspnet";
+                @event.Sdk.Version = SdkVersion.Version;
+            }
+
+            if (SdkVersion.Version != null)
+            {
+                @event.Sdk.AddPackage(
+                    $"nuget:{SdkVersion.Name}",
+                    SdkVersion.Version
+                );
+            }
+
             return @event;
         }
     }

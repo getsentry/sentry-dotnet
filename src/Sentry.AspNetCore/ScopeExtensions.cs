@@ -45,7 +45,7 @@ namespace Sentry.AspNetCore
 
             if (options.SendDefaultPii && !scope.HasUser())
             {
-                var userFactory = context.RequestServices?.GetService<IUserFactory>();
+                var userFactory = context.RequestServices.GetService<IUserFactory>();
                 var user = userFactory?.Create(context);
 
                 if (user != null)
@@ -88,7 +88,7 @@ namespace Sentry.AspNetCore
                     scope.SetTag("route.area", area);
                 }
 
-                scope.TransactionName = context.GetTransactionName();
+                scope.TransactionName = context.TryGetTransactionName();
             }
             catch(Exception e)
             {
@@ -148,7 +148,7 @@ namespace Sentry.AspNetCore
             }
         }
 
-        private static void SetBody(IScope scope, HttpContext context, SentryAspNetCoreOptions options)
+        private static void SetBody(Scope scope, HttpContext context, SentryAspNetCoreOptions options)
         {
             var extractors = context.RequestServices.GetService<IEnumerable<IRequestPayloadExtractor>>();
             if (extractors == null)

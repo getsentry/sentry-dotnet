@@ -1,5 +1,8 @@
 using System.Reflection;
 using Sentry.Internal;
+#if NET461
+using Sentry.PlatformAbstractions;
+#endif
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;
@@ -13,7 +16,7 @@ namespace Sentry.Tests.Internals
         {
             const string expectedVersion = "the version";
             EnvironmentVariableGuard.WithVariable(
-                Constants.ReleaseEnvironmentVariable,
+                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
                 expectedVersion,
                 () =>
                 {
@@ -21,15 +24,28 @@ namespace Sentry.Tests.Internals
                 });
         }
 
+
+#if NET461
+        [SkippableFact]
+#else
         [Fact]
+#endif
         public void GetCurrent_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
+#if NET461
+            Skip.If(Runtime.Current.IsMono(), "GetEntryAssembly returning null on Mono.");
+#endif
+            var ass = Assembly.GetEntryAssembly();
+
             EnvironmentVariableGuard.WithVariable(
-                Constants.ReleaseEnvironmentVariable,
+                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
                 null,
                 () =>
                 {
-                    Assert.Equal(Assembly.GetEntryAssembly()?.GetNameAndVersion().Version, ReleaseLocator.GetCurrent());
+                    Assert.Equal(
+                        $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
+                        ReleaseLocator.GetCurrent()
+                    );
                 });
         }
     }

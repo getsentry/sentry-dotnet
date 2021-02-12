@@ -401,6 +401,42 @@ namespace Sentry.Tests.Protocol.Envelopes
         }
 
         [Fact]
+        public async Task Roundtrip_WithEvent_WithAttachment_Success()
+        {
+            // Arrange
+            var @event = new SentryEvent
+            {
+                Message = "Test",
+                Sdk = new SdkVersion {Name = "SDK-test", Version = "1.0.0"}
+            };
+
+            var attachment = new Attachment(
+                AttachmentType.Default,
+                new StreamAttachmentContent(Stream.Null),
+                "file.txt",
+                null
+            );
+
+            using var envelope = Envelope.FromEvent(@event, new[] {attachment});
+
+            using var stream = new MemoryStream();
+
+            // Act
+            await envelope.SerializeAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
+
+            // Assert
+            envelopeRoundtrip.Items.Should().HaveCount(2);
+
+            envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(@event);
+
+            envelopeRoundtrip.Items[1].Payload.Should().BeOfType<StreamSerializable>();
+        }
+
+        [Fact]
         public async Task Roundtrip_WithUserFeedback_Success()
         {
             // Arrange

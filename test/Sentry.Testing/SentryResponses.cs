@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 
 namespace Sentry.Testing
@@ -20,11 +21,20 @@ namespace Sentry.Testing
                 Content = GetOkContent()
             };
 
-        public static HttpResponseMessage GetErrorResponse(HttpStatusCode code, string errorMessage)
+        public static HttpResponseMessage GetJsonErrorResponse(HttpStatusCode code, string detail, string[] causes = null)
         {
-            var responseContent = JsonSerializer.Serialize(new {detail = errorMessage});
-            return new HttpResponseMessage(code) {Content = new StringContent(responseContent)};
+            var responseContent = causes != null
+                ? JsonSerializer.Serialize(new {detail, causes})
+                : JsonSerializer.Serialize(new {detail});
+
+            return new HttpResponseMessage(code) {Content = new StringContent(responseContent, Encoding.UTF8, "application/json") };
         }
+
+        public static HttpResponseMessage GetTextErrorResponse(HttpStatusCode code, string detail)
+            => new HttpResponseMessage(code)
+            {
+                Content = new StringContent(detail)
+            };
 
         public static HttpResponseMessage GetRateLimitResponse(string rateLimitHeaderValue)
         {

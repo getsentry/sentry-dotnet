@@ -11,7 +11,7 @@ using Sentry.Internal;
 using Sentry.PlatformAbstractions;
 using Sentry.Protocol;
 using static Sentry.Internal.Constants;
-using static Sentry.Protocol.Constants;
+using static Sentry.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry
@@ -19,10 +19,12 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
-    public class SentryOptions : IScopeOptions
+    public class SentryOptions
     {
-        private readonly Func<ISentryStackTraceFactory> _sentryStackTraceFactoryAccessor;
         private Dictionary<string, string>? _defaultTags;
+
+        // Override for tests
+        internal ITransport? Transport { get; set; }
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
@@ -61,7 +63,9 @@ namespace Sentry
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Scope state processor.
+        /// </summary>
         public ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; } = new DefaultSentryScopeStateProcessor();
 
         /// <summary>
@@ -177,16 +181,10 @@ namespace Sentry
         /// 14.1.16.32451
         /// </example>
         /// <remarks>
-        /// <para>
         /// This value will generally be something along the lines of the git SHA for the given project.
         /// If not explicitly defined via configuration or environment variable (SENTRY_RELEASE).
         /// It will attempt o read it from:
         /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
-        /// </para>
-        /// <para>
-        /// Don't rely on discovery if your release is: '1.0.0' or '0.0.0'. Since those are
-        /// default values for new projects, they are not considered valid by the discovery process.
-        /// </para>
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
         public string? Release { get; set; }
@@ -310,7 +308,7 @@ namespace Sentry
         /// Whether to log diagnostics messages
         /// </summary>
         /// <remarks>
-        /// The verbosity can be controlled through <see cref="DiagnosticsLevel"/>
+        /// The verbosity can be controlled through <see cref="DiagnosticLevel"/>
         /// and the implementation via <see cref="DiagnosticLogger"/>.
         /// </remarks>
         public bool Debug
@@ -325,7 +323,7 @@ namespace Sentry
         /// <remarks>
         /// The <see cref="Debug"/> flag has to be switched on for this setting to take effect.
         /// </remarks>
-        public SentryLevel DiagnosticsLevel { get; set; } = SentryLevel.Debug;
+        public SentryLevel DiagnosticLevel { get; set; } = SentryLevel.Debug;
 
         private volatile IDiagnosticLogger? _diagnosticLogger;
 
@@ -369,7 +367,7 @@ namespace Sentry
 
         /// <summary>
         /// Path to the root directory used for storing events locally for resilience.
-        /// If set to <code>null</code>, caching will not be used.
+        /// If set to <i>null</i>, caching will not be used.
         /// </summary>
         public string? CacheDirectoryPath { get; set; }
 
@@ -393,17 +391,18 @@ namespace Sentry
         /// </remarks>
         public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
-        private double _traceSampleRate = 1.0;
+        private double _tracesSampleRate = 0.0;
 
         /// <summary>
         /// Indicates the percentage of the tracing data that is collected.
         /// Setting this to <code>0</code> discards all trace data.
         /// Setting this to <code>1.0</code> collects all trace data.
         /// Values outside of this range are invalid.
+        /// Default value is <code>0</code>, which means tracing is disabled.
         /// </summary>
-        public double TraceSampleRate
+        public double TracesSampleRate
         {
-            get => _traceSampleRate;
+            get => _tracesSampleRate;
             set
             {
                 if (value < 0 || value > 1)
@@ -413,20 +412,43 @@ namespace Sentry
                     );
                 }
 
-                _traceSampleRate = value;
+                _tracesSampleRate = value;
             }
         }
 
         /// <summary>
-        /// Custom logic that determines trace sample rate depending on the context.
+        /// Custom delegate that returns sample rate dynamically for a specific transaction context.
+        /// The delegate may also return <code>null</code> to fallback to default sample rate as
+        /// defined by the <see cref="TracesSampleRate"/> property.
         /// </summary>
-        public ISentryTraceSampler? TraceSampler { get; set; }
+        public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
+
+        /// <summary>
+        /// ATTENTION: This option will change how issues are grouped in Sentry!
+        /// </summary>
+        /// <remarks>
+        /// Sentry groups events by stack traces. If you change this mode and you have thousands of groups,
+        /// you'll get thousands of new groups. So use this setting with care.
+        /// </remarks>
+        public StackTraceMode StackTraceMode { get; set; }
+
+        /// <summary>
+        /// Maximum allowed file size of attachments, in bytes.
+        /// Attachments above this size will be discarded.
+        /// </summary>
+        /// <remarks>
+        /// Regardless of this setting, attachments are also limited to 20mb (compressed) on Relay.
+        /// </remarks>
+        public long MaxAttachmentSize { get; set; } = 20 * 1024 * 1024;
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
+            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change.
+            StackTraceMode = StackTraceMode.Enhanced;
+
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
@@ -435,21 +457,18 @@ namespace Sentry
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
-            SentryStackTraceFactory = Runtime.Current.IsMono()
-                // Also true for IL2CPP
-                ? new MonoSentryStackTraceFactory(this)
-                : new SentryStackTraceFactory(this);
+            SentryStackTraceFactory = new SentryStackTraceFactory(this);
 
-            _sentryStackTraceFactoryAccessor = () => SentryStackTraceFactory;
+            ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
                     // de-dupe to be the first to run
                     new DuplicateEventDetectionEventProcessor(this),
-                    new MainSentryEventProcessor(this, _sentryStackTraceFactoryAccessor),
+                    new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor),
             };
 
             ExceptionProcessors = new ISentryEventExceptionProcessor[] {
-                new MainExceptionProcessor(this, _sentryStackTraceFactoryAccessor)
+                new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)
             };
 
             Integrations = new ISdkIntegration[] {

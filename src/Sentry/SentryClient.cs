@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -23,9 +23,6 @@ namespace Sentry
     {
         private volatile bool _disposed;
         private readonly SentryOptions _options;
-
-        private readonly Lazy<Random> _random = new(() => new Random(), LazyThreadSafetyMode.PublicationOnly);
-        internal Random Random => _random.Value;
 
         // Internal for testing.
         internal IBackgroundWorker Worker { get; }
@@ -106,33 +103,57 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
         {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(SentryClient));
             }
 
-            if (transaction.SpanId.Equals(SentryId.Empty))
+            if (transaction.SpanId.Equals(SpanId.Empty))
             {
-                _options.DiagnosticLogger?.LogWarning("Transaction dropped due to empty id.");
+                _options.DiagnosticLogger?.LogWarning(
+                    "Transaction dropped due to empty id."
+                );
+
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(transaction.Name) ||
                 string.IsNullOrWhiteSpace(transaction.Operation))
             {
-                _options.DiagnosticLogger?.LogWarning("Transaction discarded due to one or more required fields missing.");
+                _options.DiagnosticLogger?.LogWarning(
+                    "Transaction discarded due to one or more required fields missing."
+                );
+
                 return;
             }
 
-            if (_options.TraceSampleRate < 1)
+            // Unfinished transaction can only happen if the user calls this method instead of
+            // transaction.Finish().
+            // We still send these transactions over, but warn the user not to do it.
+            if (!transaction.IsFinished)
             {
-                if (Random.NextDouble() > _options.TraceSampleRate)
-                {
-                    _options.DiagnosticLogger?.LogDebug("Transaction dropped due to random sampling.");
-                    return;
-                }
+                _options.DiagnosticLogger?.LogWarning(
+                    "Capturing a transaction which has not been finished. " +
+                    "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
+                    "to properly finalize the transaction and send it to Sentry."
+                );
+            }
+
+            // Sampling decision MUST have been made at this point
+            Debug.Assert(
+                transaction.IsSampled != null,
+                "Attempt to capture transaction without sampling decision."
+            );
+
+            if (transaction.IsSampled != true)
+            {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Transaction dropped by sampling."
+                );
+
+                return;
             }
 
             CaptureEnvelope(Envelope.FromTransaction(transaction));
@@ -150,7 +171,7 @@ namespace Sentry
         {
             if (_options.SampleRate != null)
             {
-                if (Random.NextDouble() > _options.SampleRate.Value)
+                if (SynchronizedRandom.NextDouble() > _options.SampleRate.Value)
                 {
                     _options.DiagnosticLogger?.LogDebug("Event sampled.");
                     return SentryId.Empty;
@@ -211,8 +232,9 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent)) ?
-                processedEvent.EventId : SentryId.Empty;
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments))
+                ? processedEvent.EventId
+                : SentryId.Empty;
         }
 
         /// <summary>

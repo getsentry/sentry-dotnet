@@ -1,4 +1,6 @@
+#if NETCOREAPP2_1 || NET461
 using System;
+#endif
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -57,7 +59,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             sut.Log(expectedLevel, expectedMessage, expectedException);
 
-            _fixture.MelLogger.Received(1).Log<object>(
+            _fixture.MelLogger.Received(1).Log(
                 expectedLevel.ToMicrosoft(),
                 0,
                 Arg.Is<object>(e => e.ToString() == expectedMessage),

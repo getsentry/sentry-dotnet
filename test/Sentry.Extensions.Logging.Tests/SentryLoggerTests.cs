@@ -101,7 +101,7 @@ namespace Sentry.Extensions.Logging.Tests
             sut.Log<object>(LogLevel.Critical, expectedEventId, null, null, null);
 
             var b = _fixture.Scope.Breadcrumbs.First();
-            Assert.Equal(b.Data[EventIdExtensions.DataKey], expectedEventId.ToString());
+            Assert.Equal(b.Data![EventIdExtensions.DataKey], expectedEventId.ToString());
             Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
             Assert.Equal(b.Category, _fixture.CategoryName);
             Assert.Equal(b.Level, expectedLevel);
@@ -113,8 +113,8 @@ namespace Sentry.Extensions.Logging.Tests
         public void LogCritical_MatchingFilter_DoesNotCapturesEvent()
         {
             const string expected = "message";
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => true);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => true);
 
             var sut = _fixture.GetSut();
 
@@ -128,8 +128,8 @@ namespace Sentry.Extensions.Logging.Tests
         public void LogCritical_MatchingFilter_DoesNotAddBreadcrumb()
         {
             const string expected = "message";
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => true);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => true);
 
             var sut = _fixture.GetSut();
 
@@ -144,8 +144,8 @@ namespace Sentry.Extensions.Logging.Tests
         public void LogCritical_NotMatchingFilter_CapturesEvent()
         {
             const string expected = "message";
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
 
             var sut = _fixture.GetSut();
 
@@ -162,8 +162,8 @@ namespace Sentry.Extensions.Logging.Tests
             _fixture.Hub.ConfigureScope(Arg.Invoke(scope));
 
             const string expected = "message";
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
-            _fixture.Options.AddLogEntryFilter((_, __, ___, ____) => false);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
+            _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
 
             var sut = _fixture.GetSut();
 
@@ -237,17 +237,6 @@ namespace Sentry.Extensions.Logging.Tests
 
             _ = _fixture.Hub.Received(1)
                     .CaptureEvent(Arg.Any<SentryEvent>());
-        }
-
-        [Fact]
-        public void LogCritical_SentryCategory_RecordsBreadcrumbs()
-        {
-            _fixture.CategoryName = "Sentry.Some.Class";
-            var sut = _fixture.GetSut();
-
-            sut.LogCritical("message");
-
-            Assert.NotEmpty(_fixture.Scope.Breadcrumbs);
         }
 
         [Fact]

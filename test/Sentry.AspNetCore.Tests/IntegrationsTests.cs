@@ -18,7 +18,7 @@ namespace Sentry.AspNetCore.Tests
             var handler = new RequestHandler
             {
                 Path = "/throw",
-                Handler = context => throw expectedException
+                Handler = _ => throw expectedException
             };
 
             Handlers = new[] { handler };

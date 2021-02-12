@@ -36,7 +36,7 @@ namespace Sentry.AspNetCore.Tests
             {
                 HubAccessor = () => Hub;
                 _ = Hub.IsEnabled.Returns(true);
-                _ = Hub.CreateTransaction(default, default).ReturnsForAnyArgs(new Transaction(Hub, Options));
+                _ = Hub.StartTransaction("", "").ReturnsForAnyArgs(new Transaction(Hub, "test", "test"));
                 _ = HttpContext.Features.Returns(FeatureCollection);
             }
 
@@ -108,7 +108,7 @@ namespace Sentry.AspNetCore.Tests
             var scopePushed = false;
             _fixture.Hub.When(h => h.PushScope()).Do(_ => scopePushed = true);
             _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(c => Assert.True(scopePushed));
+                .Do(_ => Assert.True(scopePushed));
 
             var sut = _fixture.GetSut();
 
@@ -126,7 +126,7 @@ namespace Sentry.AspNetCore.Tests
                 .When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(Callback
                     .First(c => c.ArgAt<Action<Scope>>(0)(scope))
-                    .Then(c =>
+                    .Then(_ =>
                     {
                         Assert.True(scope.Locked);
                         verified = true;
@@ -264,7 +264,7 @@ namespace Sentry.AspNetCore.Tests
         {
             _fixture.HubAccessor = null;
             var ex = Assert.Throws<ArgumentNullException>(() => _fixture.GetSut());
-            Assert.Equal("hubAccessor", ex.ParamName);
+            Assert.Equal("getHub", ex.ParamName);
         }
 
         [Fact]

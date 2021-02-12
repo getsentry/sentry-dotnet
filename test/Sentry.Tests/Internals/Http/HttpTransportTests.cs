@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Internal.Http;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
@@ -52,18 +54,20 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
-        public async Task SendEnvelopeAsync_ResponseNotOkWithMessage_LogsError()
+        public async Task SendEnvelopeAsync_ResponseNotOkWithJsonMessage_LogsError()
         {
             // Arrange
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             const string expectedMessage = "Bad Gateway!";
+            var expectedCauses = new[] {"invalid file", "wrong arguments"};
+            var expectedCausesFormatted = string.Join(", ", expectedCauses);
 
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
             httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, expectedMessage));
+                .Returns(_ => SentryResponses.GetJsonErrorResponse(expectedCode, expectedMessage, expectedCauses));
 
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = new InMemoryDiagnosticLogger();
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
@@ -83,11 +87,52 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             logger.Entries.Any(e =>
                 e.Level == SentryLevel.Error &&
-                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}" &&
+                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}." &&
                 e.Exception == null &&
                 e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
                 e.Args[1].ToString() == expectedCode.ToString() &&
-                e.Args[2].ToString() == expectedMessage
+                e.Args[2].ToString() == expectedMessage &&
+                e.Args[3].ToString() == expectedCausesFormatted
+            ).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task SendEnvelopeAsync_ResponseNotOkWithStringMessage_LogsError()
+        {
+            // Arrange
+            const HttpStatusCode expectedCode = HttpStatusCode.RequestEntityTooLarge;
+            const string expectedMessage = "413 Request Entity Too Large";
+
+            var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+            _ = httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                  .Returns(_ => SentryResponses.GetTextErrorResponse(expectedCode, expectedMessage));
+
+            var logger = new InMemoryDiagnosticLogger();
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    Debug = true,
+                    DiagnosticLogger = logger
+                },
+                new HttpClient(httpHandler)
+            );
+
+            var envelope = Envelope.FromEvent(new SentryEvent());
+
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            _ = logger.Entries.Any(e =>
+                    e.Level == SentryLevel.Error &&
+                    e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}." &&
+                    e.Exception == null &&
+                    e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
+                    e.Args[1].ToString() == expectedCode.ToString() &&
+                    e.Args[2].ToString() == expectedMessage
             ).Should().BeTrue();
         }
 
@@ -100,9 +145,9 @@ namespace Sentry.Tests.Internals.Http
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
 
             httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
-                .Returns(_ => SentryResponses.GetErrorResponse(expectedCode, null));
+                .Returns(_ => SentryResponses.GetJsonErrorResponse(expectedCode, null));
 
-            var logger = new AccumulativeDiagnosticLogger();
+            var logger = new InMemoryDiagnosticLogger();
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
@@ -122,11 +167,12 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             logger.Entries.Any(e =>
                 e.Level == SentryLevel.Error &&
-                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}" &&
+                e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}." &&
                 e.Exception == null &&
                 e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
                 e.Args[1].ToString() == expectedCode.ToString() &&
-                e.Args[2].ToString() == HttpTransport.DefaultErrorMessage
+                e.Args[2].ToString() == HttpTransport.DefaultErrorMessage &&
+                e.Args[3].ToString() == string.Empty
             ).Should().BeTrue();
         }
 
@@ -134,8 +180,10 @@ namespace Sentry.Tests.Internals.Http
         public async Task SendEnvelopeAsync_ItemRateLimit_DropsItem()
         {
             // Arrange
-            using var httpHandler = new FakeHttpClientHandler(
-                _ => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            using var httpHandler = new RecordingHttpMessageHandler(
+                new FakeHttpMessageHandler(
+                    () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+                )
             );
 
             var httpTransport = new HttpTransport(
@@ -191,6 +239,64 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
+        }
+
+        [Fact]
+        public async Task SendEnvelopeAsync_AttachmentTooLarge_DropsItem()
+        {
+            // Arrange
+            using var httpHandler = new RecordingHttpMessageHandler(
+                new FakeHttpMessageHandler()
+            );
+
+            var logger = new InMemoryDiagnosticLogger();
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    MaxAttachmentSize = 1,
+                    DiagnosticLogger = logger,
+                    Debug = true
+                },
+                new HttpClient(httpHandler)
+            );
+
+            var attachmentNormal = new Attachment(
+                AttachmentType.Default,
+                new StreamAttachmentContent(new MemoryStream(new byte[] {1})),
+                "test1.txt",
+                null
+            );
+
+            var attachmentTooBig = new Attachment(
+                AttachmentType.Default,
+                new StreamAttachmentContent(new MemoryStream(new byte[] {1, 2, 3, 4, 5})),
+                "test2.txt",
+                null
+            );
+
+            using var envelope = Envelope.FromEvent(
+                new SentryEvent(),
+                new[] {attachmentNormal, attachmentTooBig}
+            );
+
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            var lastRequest = httpHandler.GetRequests().Last();
+            var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+            // Assert
+            // (the envelope should have only one item)
+
+            logger.Entries.Should().Contain(e =>
+                e.Message == "Attachment '{0}' dropped because it's too large ({1} bytes)." &&
+                e.Args[0].ToString() == "test2.txt" &&
+                e.Args[1].ToString() == "5"
+            );
+
+            actualEnvelopeSerialized.Should().NotContain("test2.txt");
         }
 
         [Fact]

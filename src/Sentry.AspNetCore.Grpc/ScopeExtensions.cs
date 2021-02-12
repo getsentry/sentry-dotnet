@@ -3,7 +3,6 @@ using System.ComponentModel;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.DependencyInjection;
-using Sentry.Protocol;
 
 namespace Sentry.AspNetCore.Grpc
 {
@@ -35,7 +34,7 @@ namespace Sentry.AspNetCore.Grpc
             }
         }
 
-        private static void SetBody<TRequest>(IScope scope, ServerCallContext context, TRequest request,
+        private static void SetBody<TRequest>(Scope scope, ServerCallContext context, TRequest request,
             SentryAspNetCoreOptions options) where TRequest : class, IMessage
         {
             var httpContext = context.GetHttpContext();

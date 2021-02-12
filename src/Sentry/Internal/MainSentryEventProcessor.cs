@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,19 +15,20 @@ namespace Sentry.Internal
 {
     internal class MainSentryEventProcessor : ISentryEventProcessor
     {
-        private readonly Lazy<string?> _release = new(ReleaseLocator.GetCurrent);
+        internal const string CultureInfoKey = "Current Culture";
+        internal const string CurrentUiCultureKey = "Current UI Culture";
 
-        private readonly Lazy<Runtime?> _runtime = new(() =>
+        private readonly Lazy<string?> _release;
+
+        private readonly Lazy<Runtime> _runtime = new(() =>
         {
             var current = PlatformAbstractions.Runtime.Current;
-            return current != null
-                   ? new Runtime
-                   {
-                       Name = current.Name,
-                       Version = current.Version,
-                       RawDescription = current.Raw
-                   }
-                   : null;
+            return new Runtime
+            {
+                Name = current.Name,
+                Version = current.Version,
+                RawDescription = current.Raw
+            };
         });
 
         internal static readonly SdkVersion NameAndVersion
@@ -40,7 +40,7 @@ namespace Sentry.Internal
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
         internal string? Release => _release.Value;
-        internal Runtime? Runtime => _runtime.Value;
+        internal Runtime Runtime => _runtime.Value;
 
         /// <summary>
         /// A flag that tells the endpoint to figure out the user ip.
@@ -49,19 +49,19 @@ namespace Sentry.Internal
 
         public MainSentryEventProcessor(
             SentryOptions options,
-            Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
+            Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor,
+            Lazy<string?>? lazyRelease = null)
         {
-            Debug.Assert(options != null);
-            Debug.Assert(sentryStackTraceFactoryAccessor != null);
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
+            _release = lazyRelease ?? new Lazy<string?>(ReleaseLocator.GetCurrent);
         }
 
         public SentryEvent Process(SentryEvent @event)
         {
             _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
 
-            if (!@event.Contexts.ContainsKey(Runtime.Type) && Runtime != null)
+            if (!@event.Contexts.ContainsKey(Runtime.Type))
             {
                 @event.Contexts[Runtime.Type] = Runtime;
             }
@@ -80,21 +80,22 @@ namespace Sentry.Internal
                 @event.Contexts.Device.Timezone = timeZoneInfo;
             }
 
-            const string currentUiCultureKey = "CurrentUICulture";
-            if (!@event.Contexts.ContainsKey(currentUiCultureKey)
-                && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is { } currentUiCultureMap)
-            {
-                @event.Contexts[currentUiCultureKey] = currentUiCultureMap;
-            }
-
-            const string cultureInfoKey = "CurrentCulture";
-            if (!@event.Contexts.ContainsKey(cultureInfoKey)
+            IDictionary<string, string>? cultureInfoMapped = null;
+            if (!@event.Contexts.ContainsKey(CultureInfoKey)
                 && CultureInfoToDictionary(CultureInfo.CurrentCulture) is { } currentCultureMap)
             {
-                @event.Contexts[cultureInfoKey] = currentCultureMap;
+                cultureInfoMapped = currentCultureMap;
+                @event.Contexts[CultureInfoKey] = currentCultureMap;
             }
 
-            @event.Platform = Protocol.Constants.Platform;
+            if (!@event.Contexts.ContainsKey(CurrentUiCultureKey)
+                && CultureInfoToDictionary(CultureInfo.CurrentUICulture) is { } currentUiCultureMap
+                && (cultureInfoMapped is null || currentUiCultureMap.Any(p => !cultureInfoMapped.Contains(p))))
+            {
+                @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
+            }
+
+            @event.Platform = Sentry.Constants.Platform;
 
             // SDK Name/Version might have be already set by an outer package
             // e.g: ASP.NET Core can set itself as the SDK

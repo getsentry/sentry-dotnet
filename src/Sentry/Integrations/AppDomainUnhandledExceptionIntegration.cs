@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Sentry.Internal;
 using System.Runtime.ExceptionServices;
 using System.Security;
@@ -17,7 +16,6 @@ namespace Sentry.Integrations
 
         public void Register(IHub hub, SentryOptions _)
         {
-            Debug.Assert(hub != null);
             _hub = hub;
             _appDomain.UnhandledException += Handle;
         }

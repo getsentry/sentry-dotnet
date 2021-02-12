@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Extensions.Logging
 {
@@ -22,10 +20,6 @@ namespace Sentry.Extensions.Logging
             ISystemClock clock,
             IHub hub)
         {
-            Debug.Assert(categoryName != null);
-            Debug.Assert(options != null);
-            Debug.Assert(clock != null);
-            Debug.Assert(hub != null);
             CategoryName = categoryName;
             _options = options;
             _clock = clock;
@@ -127,7 +121,7 @@ namespace Sentry.Extensions.Logging
                    // A type from the main SDK could be used to resolve a logger
                    // hence 'Sentry' and also 'Sentry.', won't block SentrySomething
                    // often used by users experimenting with Sentry
-                   && !CategoryName.StartsWith("Sentry.")
+                   && !CategoryName.StartsWith("Sentry.", StringComparison.Ordinal)
                    && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal)
                    && _options.Filters.All(
                        f => !f.Filter(
@@ -147,6 +141,8 @@ namespace Sentry.Extensions.Logging
                        CategoryName,
                        logLevel,
                        eventId,
-                       exception));
+                       exception))
+               && !CategoryName.StartsWith("Sentry.", StringComparison.Ordinal)
+               && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal);
     }
 }

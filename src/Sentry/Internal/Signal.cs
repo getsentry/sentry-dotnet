@@ -32,6 +32,8 @@ namespace Sentry.Internal
         }
 
         public async Task WaitAsync(CancellationToken cancellationToken = default) =>
+            // It's synchronized only on Release, not to go above 1. The type itself is thread-safe.
+            // ReSharper disable once InconsistentlySynchronizedField
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         public void Dispose() => _semaphore.Dispose();

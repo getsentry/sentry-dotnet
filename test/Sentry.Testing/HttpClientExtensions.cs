@@ -38,17 +38,20 @@ namespace Sentry
             }
 
             // Content
-            var cloneContentStream = new MemoryStream();
-
-            await source.Content.CopyToAsync(cloneContentStream).ConfigureAwait(false);
-            cloneContentStream.Position = 0;
-
-            clone.Content = new StreamContent(cloneContentStream);
-
-            // Content headers
-            foreach (var (key, value) in source.Content.Headers)
+            if (source.Content != null)
             {
-                clone.Content.Headers.Add(key, value);
+                var cloneContentStream = new MemoryStream();
+
+                await source.Content.CopyToAsync(cloneContentStream).ConfigureAwait(false);
+                cloneContentStream.Position = 0;
+
+                clone.Content = new StreamContent(cloneContentStream);
+
+                // Content headers
+                foreach (var (key, value) in source.Content.Headers)
+                {
+                    clone.Content.Headers.Add(key, value);
+                }
             }
 
             return clone;

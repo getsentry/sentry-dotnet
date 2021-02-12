@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.Web;
 using NSubstitute;
+using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
-using Sentry.Internal.Web;
 using Xunit;
 
-namespace Sentry.Tests.Internals.Web
+namespace Sentry.AspNet.Tests.Internal
 {
     public class SystemWebRequestEventProcessorTests
     {

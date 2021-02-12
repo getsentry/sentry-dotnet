@@ -1,7 +1,7 @@
 <Project>
   <!--Automatic upward search ends when first file found. From here we need to manually import parent props/targets
         https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
-  <Import Project="..\Directory.Build.props" />
+  <Import Project="..\Directory.Build.props"/>
 
   <PropertyGroup>
     <!--Generate xml docs for all projects under 'src'-->
@@ -23,16 +23,13 @@
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <PackageReleaseNotes>Can be found at: https://github.com/getsentry/sentry-dotnet/releases</PackageReleaseNotes>
-
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
-    <!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- Embed PDB inside the assembly -->
+    <DebugType>embedded</DebugType>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <Nullable>annotations</Nullable>
@@ -43,23 +40,33 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ChangelogFile>$(SolutionDir)/CHANGELOG.md</ChangelogFile>
+    <AppendToReleaseNotesProperty>
+      <![CDATA[-->
+      See full changelog at https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md]]>
+    </AppendToReleaseNotesProperty>
+    <VersionRegex>^## (.+)</VersionRegex>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="../../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="4.0.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Release'" />
+    <PackageReference Include="SIL.ReleaseTasks" Version="2.3.4" PrivateAssets="All"/>
+    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="4.0.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Release'"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-<!--    To uncomment when Sentry.Protocol is added in-->
-<!--    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />-->
+    <!--    To uncomment when Sentry.Protocol is added in-->
+    <!--    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />-->
 
     <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to PublicAPI.Shipped.txt -->
-    <None Remove="PublicAPI.Shipped.txt" />
+    <None Remove="PublicAPI.Shipped.txt"/>
     <None Remove="PublicAPI.Unshipped.txt"/>
-    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
-    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt"/>
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt"/>
   </ItemGroup>
 </Project>

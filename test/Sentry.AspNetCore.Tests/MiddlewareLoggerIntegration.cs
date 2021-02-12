@@ -71,7 +71,7 @@ namespace Sentry.AspNetCore.Tests
         public async Task InvokeAsync_LoggerMessage_AsBreadcrumb()
         {
             const string expectedCrumb = "expect this";
-            _fixture.RequestDelegate = context =>
+            _fixture.RequestDelegate = _ =>
             {
                 _fixture.SentryLogger.LogInformation(expectedCrumb);
                 throw new Exception();
@@ -89,7 +89,7 @@ namespace Sentry.AspNetCore.Tests
         public async Task InvokeAsync_LoggerPushesScope_LoggerMessage_AsBreadcrumb()
         {
             const string expectedCrumb = "expect this";
-            _fixture.RequestDelegate = context =>
+            _fixture.RequestDelegate = _ =>
             {
                 using (_fixture.SentryLogger.BeginScope("scope"))
                 {
@@ -111,7 +111,7 @@ namespace Sentry.AspNetCore.Tests
         {
             const SentryLevel expected = SentryLevel.Debug;
             _fixture.Options.ConfigureScope(s => s.Level = expected);
-            _fixture.RequestDelegate = context => throw new Exception();
+            _fixture.RequestDelegate = _ => throw new Exception();
             var sut = _fixture.GetSut();
 
             _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));

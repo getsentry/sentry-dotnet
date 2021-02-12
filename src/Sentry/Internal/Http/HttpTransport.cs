@@ -30,7 +30,7 @@ namespace Sentry.Internal.Http
             _httpClient = httpClient;
         }
 
-        private Envelope ApplyRateLimitsOnEnvelope(Envelope envelope, DateTimeOffset instant)
+        private Envelope ProcessEnvelope(Envelope envelope, DateTimeOffset instant)
         {
             // Re-package envelope, discarding items that don't fit the rate limit
             var envelopeItems = new List<EnvelopeItem>();
@@ -40,17 +40,30 @@ namespace Sentry.Internal.Http
                 var isRateLimited = _categoryLimitResets
                     .Any(kvp => kvp.Value > instant && kvp.Key.Matches(envelopeItem));
 
-                if (!isRateLimited)
-                {
-                    envelopeItems.Add(envelopeItem);
-                }
-                else
+                if (isRateLimited)
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "Envelope item of type {0} was discarded because it's rate-limited.",
                         envelopeItem.TryGetType()
                     );
+
+                    continue;
                 }
+
+                // If attachment, needs to respect attachment size limit
+                if (string.Equals(envelopeItem.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
+                    envelopeItem.TryGetLength() > _options.MaxAttachmentSize)
+                {
+                    _options.DiagnosticLogger?.LogWarning(
+                        "Attachment '{0}' dropped because it's too large ({1} bytes).",
+                        envelopeItem.TryGetFileName(),
+                        envelopeItem.TryGetLength()
+                    );
+
+                    continue;
+                }
+
+                envelopeItems.Add(envelopeItem);
             }
 
             return new Envelope(envelope.Header, envelopeItems);
@@ -84,7 +97,7 @@ namespace Sentry.Internal.Http
             var instant = DateTimeOffset.Now;
 
             // Apply rate limiting and re-package envelope items
-            using var processedEnvelope = ApplyRateLimitsOnEnvelope(envelope, instant);
+            using var processedEnvelope = ProcessEnvelope(envelope, instant);
             if (processedEnvelope.Items.Count == 0)
             {
                 _options.DiagnosticLogger?.LogInfo(
@@ -111,17 +124,41 @@ namespace Sentry.Internal.Http
             }
             else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
-                var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
-                var errorMessage = responseJson.GetPropertyOrNull("detail")?.GetString() ?? DefaultErrorMessage;
+                if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
+                {
+                    var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
 
-                _options.DiagnosticLogger?.Log(
-                    SentryLevel.Error,
-                    "Sentry rejected the envelope {0}. Status code: {1}. Sentry response: {2}",
-                    null,
-                    processedEnvelope.TryGetEventId(),
-                    response.StatusCode,
-                    errorMessage
-                );
+                    var errorMessage =
+                        responseJson.GetPropertyOrNull("detail")?.GetString()
+                        ?? DefaultErrorMessage;
+
+                    var errorCauses =
+                        responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
+                        ?? Array.Empty<string>();
+
+                    _options.DiagnosticLogger?.Log(
+                        SentryLevel.Error,
+                        "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}.",
+                        null,
+                        processedEnvelope.TryGetEventId(),
+                        response.StatusCode,
+                        errorMessage,
+                        string.Join(", ", errorCauses)
+                    );
+                }
+                else
+                {
+                    var responseString = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                    _options.DiagnosticLogger?.Log(
+                        SentryLevel.Error,
+                        "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}.",
+                        null,
+                        processedEnvelope.TryGetEventId(),
+                        response.StatusCode,
+                        responseString
+                    );
+                }
             }
         }
 

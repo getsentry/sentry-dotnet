@@ -39,7 +39,7 @@ namespace Sentry.Tests.Internals.Http
         public async Task SendAsync_BadRequest_NoRetryAfterSet()
         {
             var expected = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
             var invoker = _fixture.GetInvoker();
             var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
@@ -53,7 +53,7 @@ namespace Sentry.Tests.Internals.Http
         public async Task SendAsync_TooManyRequestsWithoutRetryAfterHeader_RetryAfterNotSet()
         {
             var expected = new HttpResponseMessage(TooManyRequests);
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
             var invoker = _fixture.GetInvoker();
             var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
@@ -69,7 +69,7 @@ namespace Sentry.Tests.Internals.Http
             var expected = new HttpResponseMessage(TooManyRequests);
             var date = DateTimeOffset.MaxValue;
             expected.Headers.RetryAfter = new RetryConditionHeaderValue(date);
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
             var invoker = _fixture.GetInvoker();
             var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
@@ -86,7 +86,7 @@ namespace Sentry.Tests.Internals.Http
             var delta = TimeSpan.FromSeconds(300);
             expected.Headers.RetryAfter = new RetryConditionHeaderValue(delta);
 
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
             var invoker = _fixture.GetInvoker();
             var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
@@ -103,7 +103,7 @@ namespace Sentry.Tests.Internals.Http
             const double floating = 292.052427053D; // Just under 5 minutes, taken from a Sentry response
             _ = expected.Headers.TryAddWithoutValidation("Retry-After", new[] { floating.ToString(CultureInfo.InvariantCulture) });
 
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
             var invoker = _fixture.GetInvoker();
             var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
@@ -120,7 +120,7 @@ namespace Sentry.Tests.Internals.Http
             const double floating = 4138.97064495D; // Taken from a Sentry response
             _ = expected.Headers.TryAddWithoutValidation("Retry-After", new[] { floating.ToString(CultureInfo.InvariantCulture) });
 
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
             var invoker = _fixture.GetInvoker();
 
@@ -143,7 +143,7 @@ namespace Sentry.Tests.Internals.Http
             var delta = TimeSpan.FromSeconds(300);
             expected.Headers.RetryAfter = new RetryConditionHeaderValue(delta);
 
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
             var invoker = _fixture.GetInvoker();
 
@@ -166,7 +166,7 @@ namespace Sentry.Tests.Internals.Http
             var date = DateTimeOffset.MaxValue;
             response.Headers.RetryAfter = new RetryConditionHeaderValue(date);
 
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => response;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => response;
 
             var invoker = _fixture.GetInvoker();
 
@@ -189,7 +189,7 @@ namespace Sentry.Tests.Internals.Http
             var date = DateTimeOffset.Now - TimeSpan.FromDays(1);
             response.Headers.RetryAfter = new RetryConditionHeaderValue(date);
 
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => response;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => response;
 
             var invoker = _fixture.GetInvoker();
 
@@ -200,7 +200,7 @@ namespace Sentry.Tests.Internals.Http
 
             // Change the response: OK
             var expected = new HttpResponseMessage(HttpStatusCode.OK);
-            _fixture.StubHandler.SendAsyncFunc = (message, token) => expected;
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
             _fixture.StubHandler.SendAsyncCalled = false;
 
             var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
@@ -211,10 +211,40 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
+        public async Task SendAsync_TooManyRequestsWithRetryAfterHeader_ResponseIsNotReused()
+        {
+            var expected = new HttpResponseMessage(TooManyRequests);
+            var date = DateTimeOffset.MaxValue;
+            expected.Headers.RetryAfter = new RetryConditionHeaderValue(date);
+            _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
+
+            var invoker = _fixture.GetInvoker();
+
+            using var first = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            using var second = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+            using var third = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+
+            Assert.NotSame(first, second);
+            Assert.NotSame(second, third);
+
+            // On older frameworks the default content is null
+            if (first.Content is not null)
+            {
+                Assert.NotSame(first.Content, second.Content);
+            }
+
+            // On older frameworks the default content is null
+            if (second.Content is not null)
+            {
+                Assert.NotSame(second.Content, third.Content);
+            }
+        }
+
+        [Fact]
         public void Ctor_NullDateTimeOffsetFunc_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new RetryAfterHandler(Substitute.For<HttpMessageHandler>(), null));
+                new RetryAfterHandler(Substitute.For<HttpMessageHandler>(), null!));
 
             Assert.Equal("clock", ex.ParamName);
         }

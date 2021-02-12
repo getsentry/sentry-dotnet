@@ -13,6 +13,57 @@ namespace Sentry
     public static class HubExtensions
     {
         /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        public static ITransaction StartTransaction(this IHub hub, ITransactionContext context) =>
+            hub.StartTransaction(context, new Dictionary<string, object?>());
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        public static ITransaction StartTransaction(
+            this IHub hub,
+            string name,
+            string operation) =>
+            hub.StartTransaction(new TransactionContext(name, operation));
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        public static ITransaction StartTransaction(
+            this IHub hub,
+            string name,
+            string operation,
+            string description)
+        {
+            var transaction = hub.StartTransaction(name, operation);
+            transaction.Description = description;
+
+            return transaction;
+        }
+
+        /// <summary>
+        /// Starts a transaction from the specified trace header.
+        /// </summary>
+        public static ITransaction StartTransaction(
+            this IHub hub,
+            string name,
+            string operation,
+            SentryTraceHeader traceHeader)
+        {
+            var context = new TransactionContext(
+                // SpanId from the header becomes ParentSpanId on this transaction
+                traceHeader.SpanId,
+                traceHeader.TraceId,
+                name,
+                operation,
+                traceHeader.IsSampled
+            );
+
+            return hub.StartTransaction(context);
+        }
+
+        /// <summary>
         /// Adds a breadcrumb to the current scope.
         /// </summary>
         /// <param name="hub">The Hub which holds the scope stack.</param>

@@ -17,17 +17,14 @@ namespace Sentry.Tests.Internals
         [InlineData("2.1.0.0-preview1")]
         public void GetCurrent_ValidVersion_ReturnsVersion(string expectedVersion)
         {
-            var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion);
+            var name = "dynamic-assembly";
+            var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, new AssemblyName(name));
             var actual = ApplicationVersionLocator.GetCurrent(asm);
-            Assert.Equal(expectedVersion, actual);
+            Assert.Equal($"{name}@{expectedVersion}", actual);
         }
 
         [Theory]
         [InlineData("")]
-        [InlineData("0.0.0")]
-        [InlineData("1.0.0")]
-        [InlineData("0.0.0.0")]
-        [InlineData("1.0.0.0")]
         public void GetCurrent_InvalidCases_ReturnsNull(string version)
         {
             var asm = AssemblyCreationHelper.CreateWithInformationalVersion(version);
@@ -38,8 +35,9 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void GetCurrent_NoAsmInformationalVersion_ReturnsAsmVersion()
         {
+            const string expectedName = "foo";
             const string expectedVersion = "2.1.0.0";
-            var asmName = new AssemblyName(Guid.NewGuid().ToString())
+            var asmName = new AssemblyName(expectedName)
             {
                 Version = Version.Parse(expectedVersion)
             };
@@ -47,7 +45,7 @@ namespace Sentry.Tests.Internals
             var asm = AssemblyCreationHelper.CreateAssembly(asmName);
             var actual = ApplicationVersionLocator.GetCurrent(asm);
 
-            Assert.Equal(expectedVersion, actual);
+            Assert.Equal(expectedName + '@' + expectedVersion, actual);
         }
     }
 }

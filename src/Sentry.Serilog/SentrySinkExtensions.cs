@@ -38,7 +38,7 @@ namespace Serilog
         /// <param name="requestBodyCompressionLevel">The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry. <seealso cref="SentryOptions.RequestBodyCompressionLevel"/></param>
         /// <param name="requestBodyCompressionBuffered">Whether the body compression is buffered and the request 'Content-Length' known in advance. <seealso cref="SentryOptions.RequestBodyCompressionBuffered"/></param>
         /// <param name="debug">Whether to log diagnostics messages. <seealso cref="SentryOptions.Debug"/></param>
-        /// <param name="diagnosticsLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticsLevel"/></param>
+        /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
         /// <param name="reportAssemblies">Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>. <seealso cref="SentryOptions.ReportAssemblies"/></param>
         /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
         /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
@@ -73,7 +73,7 @@ namespace Serilog
         ///                     "requestBodyCompressionLevel": "NoCompression",
         ///                     "requestBodyCompressionBuffered": false,
         ///                     "debug": false,
-        ///                     "diagnosticsLevel": "Debug",
+        ///                     "diagnosticLevel": "Debug",
         ///                     "reportAssemblies": false,
         ///                     "deduplicateMode": "All",
         ///                     "initializeSdk": true,
@@ -108,7 +108,7 @@ namespace Serilog
             CompressionLevel? requestBodyCompressionLevel = null,
             bool? requestBodyCompressionBuffered = null,
             bool? debug = null,
-            SentryLevel? diagnosticsLevel = null,
+            SentryLevel? diagnosticLevel = null,
             bool? reportAssemblies = null,
             DeduplicateMode? deduplicateMode = null,
             bool? initializeSdk = null,
@@ -133,7 +133,7 @@ namespace Serilog
                 requestBodyCompressionLevel,
                 requestBodyCompressionBuffered,
                 debug,
-                diagnosticsLevel,
+                diagnosticLevel,
                 reportAssemblies,
                 deduplicateMode,
                 initializeSdk,
@@ -162,7 +162,7 @@ namespace Serilog
         /// <param name="requestBodyCompressionLevel">The level of which to compress the <see cref="SentryEvent"/> before sending to Sentry. <seealso cref="SentryOptions.RequestBodyCompressionLevel"/></param>
         /// <param name="requestBodyCompressionBuffered">Whether the body compression is buffered and the request 'Content-Length' known in advance. <seealso cref="SentryOptions.RequestBodyCompressionBuffered"/></param>
         /// <param name="debug">Whether to log diagnostics messages. <seealso cref="SentryOptions.Debug"/></param>
-        /// <param name="diagnosticsLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticsLevel"/></param>
+        /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
         /// <param name="reportAssemblies">Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>. <seealso cref="SentryOptions.ReportAssemblies"/></param>
         /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
         /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
@@ -187,7 +187,7 @@ namespace Serilog
             CompressionLevel? requestBodyCompressionLevel = null,
             bool? requestBodyCompressionBuffered = null,
             bool? debug = null,
-            SentryLevel? diagnosticsLevel = null,
+            SentryLevel? diagnosticLevel = null,
             bool? reportAssemblies = null,
             DeduplicateMode? deduplicateMode = null,
             bool? initializeSdk = null,
@@ -283,9 +283,9 @@ namespace Serilog
                 sentrySerilogOptions.Debug = debug.Value;
             }
 
-            if (diagnosticsLevel.HasValue)
+            if (diagnosticLevel.HasValue)
             {
-                sentrySerilogOptions.DiagnosticsLevel = diagnosticsLevel.Value;
+                sentrySerilogOptions.DiagnosticLevel = diagnosticLevel.Value;
             }
 
             if (reportAssemblies.HasValue)

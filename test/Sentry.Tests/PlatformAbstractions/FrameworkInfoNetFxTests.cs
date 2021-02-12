@@ -1,6 +1,6 @@
+#if NETFX
 using Sentry.PlatformAbstractions;
 using Xunit;
-#if NETFX
 using System;
 
 namespace Sentry.Tests.PlatformAbstractions

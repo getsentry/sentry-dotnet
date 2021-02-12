@@ -1,9 +1,103 @@
 # Changelog
 
-## vNext
+## Unreleased
 
+### Changes
+
+- Fix tracing middleware (#813) @Tyrrrz
+
+## 3.0.5
+
+### Changes
+
+- Fix transaction sampling (#810) @Tyrrrz
+
+## 3.0.4
+
+### Changes
+
+- Don't add logs coming from Sentry as breadcrumbs (fixes stack overflow exception) (#797) @Tyrrrz
+- Consolidate logic for resolving hub (fixes bug "SENTRY_DSN is not defined") (#795) @Tyrrrz
+- Add SetFingerprint overload that takes `params string[]` (#796) @Tyrrrz
+- Create spans for outgoing HTTP requests (#802) @Tyrrrz
+- Finish span on exception in SentryHttpMessageHandler (#806) @Tyrrrz
+- Fix ObjectDisposedException caused by object reuse in RetryAfterHandler (#807) @Tyrrrz
+
+## 3.0.3
+
+### Changes
+
+- Fix DI issues in ASP.NET Core + SentryHttpMessageHandlerBuilderFilter (#789) @Tyrrrz
+- Fix incorrect NRT on SpanContext.ctor (#788) @Tyrrrz
+- Remove the `Evaluate` error from the breadcrumb list (#790) @Tyrrrz
+- Set default tracing sample rate to 0.0 (#791) @Tyrrrz
+
+## 3.0.2
+
+### Changes
+
+- Add GetSpan() to IHub and SentrySdk (#782) @Tyrrrz
+- Automatically start transactions from incoming trace in ASP.NET Core (#783) @Tyrrrz
+- Automatically inject 'sentry-trace' on outgoing requests in ASP.NET Core (#784) @Tyrrrz
+
+## 3.0.1
+
+### Changes
+
+- bump log4net 2.0.12 (#781) @bruno-garcia
+- Fix Serilog version (#780) @bruno-garcia
+- Move main Protocol types to Sentry namespace (#779) @bruno-garcia
+
+## 3.0.0
+
+### Changes
+
+- Add support for dynamic transaction sampling. (#753) @Tyrrrz
+- Integrate trace headers. (#758) @Tyrrrz
+- Renamed Option `DiagnosticsLevel` to `DiagnosticLevel` (#759) @bruno-garcia
+- Add additional data to transactions (#763) @Tyrrrz
+- Improve transaction instrumentation on ASP.NET Core (#766) @Tyrrrz
+- Add `Release` to `Scope` (#765) @Tyrrrz
+- Don't fallback to `HttpContext.RequestPath` if a route is unknown (#767 #769) @kanadaj @Tyrrrz
+
+## 3.0.0-beta.0
+
+### Changes
+
+- Add instruction_addr to SentryStackFrame. (#744) @lucas-zimerman
+- Default stack trace format: Ben.Demystifier (#732) @bruno-garcia
+
+## 3.0.0-alpha.11
+
+### Changed
+
+- Limit attachment size (#705)
+- Separate tracing middleware (#737)
+- Bring Transaction a bit more inline with Java SDK (#741)
+- Sync transaction and transaction name on scope (#740)
+
+## 3.0.0-alpha.10
+
+- Disabled Mono StackTrace Factory. (#709) @lucas-zimerman
+- Adds to the existing User Other dict rather than replacing (#729) @brettjenkins
+
+## 3.0.0-alpha.9
+
+- Handle non-json error response messages on HttpTransport. (#690) @lucas-zimerman
+- Fix deadlock on missing ConfigureAwait into foreach loops. (#694) @lucas-zimerman
+- Report gRPC sdk name (#700) @bruno-garcia
+
+## 3.0.0-alpha.8
+
+- Include parameters in stack frames. (#662) @Tyrrrz
+- Remove CultureUIInfo if value is even with CultureInfo. (#671) @lucas-zimerman
 - Make all fields on UserFeedback optional. (#660) @Tyrrrz
 - Align transaction names with Java. (#659) @Tyrrrz
+- Include assembly name in default release. (#682) @Tyrrrz
+- Add support for attachments. (#670) @Tyrrrz
+- Improve logging for relay errors. (#683) @Tyrrrz
+- Report sentry.dotnet.aspnet on the new Sentry.AspNet package. (#681) @Tyrrrz
+- Always send a default release. (#695) @Tyrrrz
 
 ## 3.0.0-alpha.7
 

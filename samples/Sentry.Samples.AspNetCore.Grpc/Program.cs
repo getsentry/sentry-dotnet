@@ -2,6 +2,8 @@ using System;
 using System.Net;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Grpc;
 
@@ -17,6 +19,13 @@ namespace Sentry.Samples.AspNetCore.Grpc
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseShutdownTimeout(TimeSpan.FromSeconds(10))
+                .ConfigureKestrel(options =>
+                {
+                    // Setup a HTTP/2 endpoint without TLS due to macOS limitation.
+                    // https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-5.0#unable-to-start-aspnet-core-grpc-app-on-macos
+                    options.ListenLocalhost(5000, o => o.Protocols =
+                        HttpProtocols.Http2);
+                })
                 .UseStartup<Startup>()
 
                 // Example integration with advanced configuration scenarios:

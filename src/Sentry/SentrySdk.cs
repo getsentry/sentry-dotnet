@@ -28,13 +28,39 @@ namespace Sentry
         /// </summary>
         public static SentryId LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
 
+        internal static IHub InitHub(SentryOptions options)
+        {
+            // Side-effects in a factory function 🤮
+            options.SetupLogging();
+
+            // If DSN is null (i.e. not explicitly disabled, just unset), then
+            // try to resolve the value from environment.
+            var dsn = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
+
+            // If it's either explicitly disabled or we couldn't resolve the DSN
+            // from anywhere else, return a disabled hub.
+            if (Dsn.IsDisabled(dsn))
+            {
+                options.DiagnosticLogger?.LogWarning(
+                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled."
+                );
+
+                return DisabledHub.Instance;
+            }
+
+            // Validate DSN for an early exception in case it's malformed
+            _ = Dsn.Parse(dsn);
+
+            return new Hub(options);
+        }
+
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN.
         /// </summary>
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
-        public static IDisposable Init() => Init(DsnLocator.FindDsnStringOrDisable());
+        public static IDisposable Init() => Init((string?)null);
 
         /// <summary>
         /// Initializes the SDK with the specified DSN.
@@ -44,7 +70,7 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn.</param>
-        public static IDisposable Init(string? dsn) => !string.IsNullOrWhiteSpace(dsn)
+        public static IDisposable Init(string? dsn) => !Dsn.IsDisabled(dsn)
             ? Init(c => c.Dsn = dsn)
             : DisabledHub.Instance;
 
@@ -69,28 +95,7 @@ namespace Sentry
         /// </remarks>
         /// <returns>A disposable to close the SDK.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static IDisposable Init(SentryOptions options)
-        {
-            if (options.Dsn == null)
-            {
-                var dsn = Dsn.TryParse(DsnLocator.FindDsnStringOrDisable());
-
-                if (dsn is null)
-                {
-                    options.DiagnosticLogger?.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-                    return DisabledHub.Instance;
-                }
-
-                options.Dsn = dsn.Source;
-            }
-            else
-            {
-                // Validate DSN for early exception
-                _ = Dsn.Parse(options.Dsn);
-            }
-
-            return UseHub(new Hub(options));
-        }
+        public static IDisposable Init(SentryOptions options) => UseHub(InitHub(options));
 
         internal static IDisposable UseHub(IHub hub)
         {
@@ -312,21 +317,58 @@ namespace Sentry
         /// Captures a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static void CaptureTransaction(Transaction transaction)
+        public static void CaptureTransaction(ITransaction transaction)
             => _hub.CaptureTransaction(transaction);
 
         /// <summary>
-        /// Creates a transaction.
+        /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static Transaction CreateTransaction(string name, string operation)
-            => _hub.CreateTransaction(name, operation);
+        public static ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext)
+            => _hub.StartTransaction(context, customSamplingContext);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ITransaction StartTransaction(ITransactionContext context)
+            => _hub.StartTransaction(context);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ITransaction StartTransaction(string name, string operation)
+            => _hub.StartTransaction(name, operation);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ITransaction StartTransaction(string name, string operation, string description)
+            => _hub.StartTransaction(name, operation, description);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
+            => _hub.StartTransaction(name, operation, traceHeader);
+
+        /// <summary>
+        /// Gets the last active span.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static ISpan? GetSpan()
+            => _hub.GetSpan();
 
         /// <summary>
         /// Gets the Sentry trace header.
         /// </summary>
         [DebuggerStepThrough]
         public static SentryTraceHeader? GetTraceHeader()
-            => _hub.GetSentryTrace();
+            => _hub.GetTraceHeader();
     }
 }

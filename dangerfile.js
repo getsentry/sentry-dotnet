@@ -1,13 +1,8 @@
 const PR_NUMBER = danger.github.pr.number;
-const PR_AUTHOR   = danger.github.pr.user.login;
-const PR_URL = danger.github.pr.html_url;
-const PR_LINK = `. (#${PR_NUMBER}) @${PR_AUTHOR}`;
+const PR_LINK = `(#${PR_NUMBER})`;
 
 const CHANGELOG_SUMMARY_TITLE = `Instructions and example for changelog`;
 const CHANGELOG_BODY = `Please add an entry to \`CHANGELOG.md\` to the "Unreleased" section under the following heading:
- 1. **Feat**: For new user-visible functionality.
- 2. **Fix**: For user-visible bug fixes.
- 3. **Ref**: For features, refactors and bug fixes in internal operation.
 
 To the changelog entry, please add a link to this PR (consider a more descriptive message):`;
 
@@ -59,9 +54,9 @@ async function checkChangelog() {
 
   const hasChangelog = await containsChangelog("CHANGELOG.md");
 
-  if (!hasChangelog) 
+  if (!hasChangelog)
   {
-	if(HasPermissionToComment())
+	if (HasPermissionToComment())
 	{
 		fail("Please consider adding a changelog entry for the next release.");
 		markdown(getChangelogDetailsHtml());
@@ -70,7 +65,7 @@ async function checkChangelog() {
 	{
 		//Fallback
 		console.log("Please consider adding a changelog entry for the next release.");
-		console.log(getChangelogDetailsTxt());			
+		console.log(getChangelogDetailsTxt());
 		process.exitCode = 1;
 	}
   }
@@ -78,15 +73,15 @@ async function checkChangelog() {
 
 async function checkIfFeature() {
    const title = danger.github.pr.title;
-   if(title.startsWith('feat:') && HasPermissionToComment()){
+   if (title.startsWith('feat:') && HasPermissionToComment()){
 	 message('Do not forget to update <a href="https://github.com/getsentry/sentry-docs">Sentry-docs</a> with your feature once the pull request gets approved.');
-   }  
+   }
 }
 
 async function checkAll() {
   // See: https://spectrum.chat/danger/javascript/support-for-github-draft-prs~82948576-ce84-40e7-a043-7675e5bf5690
   const isDraft = danger.github.pr.mergeable_state === "draft";
-  
+
   if (isDraft) {
     return;
   }

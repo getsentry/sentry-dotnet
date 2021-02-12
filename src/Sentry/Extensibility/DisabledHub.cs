@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sentry.Protocol;
 
@@ -55,13 +56,21 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns a dummy transaction.
         /// </summary>
-        public Transaction CreateTransaction(string name, string operation) =>
-            new(this, null);
+        public ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext) =>
+            // Transactions from DisabledHub are always sampled out
+            new Transaction(this, context) {IsSampled = false};
 
         /// <summary>
         /// Returns null.
         /// </summary>
-        public SentryTraceHeader? GetSentryTrace() => null;
+        public ISpan? GetSpan() => null;
+
+        /// <summary>
+        /// Returns null.
+        /// </summary>
+        public SentryTraceHeader? GetTraceHeader() => null;
 
         /// <summary>
         /// No-Op.
@@ -78,7 +87,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void CaptureTransaction(Transaction transaction)
+        public void CaptureTransaction(ITransaction transaction)
         {
         }
 

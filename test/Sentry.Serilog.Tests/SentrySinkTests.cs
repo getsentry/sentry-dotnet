@@ -112,7 +112,7 @@ namespace Sentry.Serilog.Tests
 
             Assert.NotNull(actual);
             var package = Assert.Single(actual.Sdk.Packages);
-            Assert.Equal("nuget:" + expected.Name, package.Name);
+            Assert.Equal("nuget:" + expected.Name, package!.Name);
             Assert.Equal(expected.Version, package.Version);
         }
 
@@ -300,7 +300,7 @@ namespace Sentry.Serilog.Tests
 
             sut.Emit(evt);
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]
@@ -314,7 +314,7 @@ namespace Sentry.Serilog.Tests
 
             sut.Emit(evt);
 
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<IScope>>());
+            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]
