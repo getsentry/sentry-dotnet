@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix caching issues (#815) @Tyrrrz
+- Fix UWP not registering exceptions (#821) @lucas-zimerman
 - Fix tracing middleware (#813) @Tyrrrz
 
 ## 3.0.5
