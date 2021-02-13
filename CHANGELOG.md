@@ -4,6 +4,7 @@
 
 ### Changes
 
+- Fix UWP not registering exceptions (#???) @lucas-zimerman
 - Fix tracing middleware (#813) @Tyrrrz
 
 ## 3.0.5
