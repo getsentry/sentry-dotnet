@@ -24,7 +24,6 @@ namespace Sentry.Extensions.Logging
             _level = level;
         }
 
-
         /// <summary>
         /// Whether this logger is enabled for the provided level
         /// </summary>

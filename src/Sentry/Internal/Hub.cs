@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
-using Sentry.Protocol;
 
 namespace Sentry.Internal
 {
@@ -25,18 +24,11 @@ namespace Sentry.Internal
 
             _options = options;
 
-            if (options.Dsn is null)
+            if (Dsn.TryParse(options.Dsn) is null)
             {
-                var dsn = DsnLocator.FindDsnStringOrDisable();
-
-                if (Dsn.TryParse(dsn) is null)
-                {
-                    const string msg = "Attempt to instantiate a Hub without a DSN.";
-                    options.DiagnosticLogger?.LogFatal(msg);
-                    throw new InvalidOperationException(msg);
-                }
-
-                options.Dsn = dsn;
+                const string msg = "Attempt to instantiate a Hub without a DSN.";
+                options.DiagnosticLogger?.LogFatal(msg);
+                throw new InvalidOperationException(msg);
             }
 
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
@@ -136,11 +128,11 @@ namespace Sentry.Internal
 
             // Environment information
             var foundEnvironment = EnvironmentLocator.Locate();
-            transaction.Environment ??= (string.IsNullOrWhiteSpace(foundEnvironment)
+            transaction.Environment ??= string.IsNullOrWhiteSpace(foundEnvironment)
                 ? string.IsNullOrWhiteSpace(_options.Environment)
                     ? Constants.ProductionEnvironmentSetting
                     : _options.Environment
-                : foundEnvironment);
+                : foundEnvironment;
 
             // Make a sampling decision if it hasn't been made already.
             // It could have been made by this point if the transaction was started
@@ -165,7 +157,7 @@ namespace Sentry.Internal
                     // Sample rate <= 0 means always sampled *out*
                     <= 0 => false,
                     // Otherwise roll the dice
-                    _ => SynchronizedRandom.NextDouble() > sampleRate
+                    _ => SynchronizedRandom.NextDouble() < sampleRate
                 };
             }
 

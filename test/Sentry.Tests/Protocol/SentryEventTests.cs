@@ -63,22 +63,19 @@ namespace Sentry.Tests.Protocol
 
             var actual = SentryEvent.FromJson(Json.Parse(actualString));
 
+            // Assert
             actual.Should().BeEquivalentTo(sut, o =>
             {
-                // Due to timestamp precision
-                o.Excluding(e => e.Breadcrumbs);
-                o.Excluding(e => e.Exception);
+                // Exceptions are not deserialized
+                o.Excluding(x => x.Exception);
+
+                // Timestamps lose some precision when writing to JSON
+                o.Using<DateTimeOffset>(ctx =>
+                    ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMilliseconds(1))
+                ).WhenTypeIs<DateTimeOffset>();
 
                 return o;
             });
-
-            // Expected item[0].Timestamp to be <9999-12-31 23:59:59.9999999>, but found <9999-12-31 23:59:59.999>.
-            actual.Breadcrumbs.Should().BeEquivalentTo(sut.Breadcrumbs, o => o.Excluding(b => b.Timestamp));
-            var counter = 0;
-            foreach (var sutBreadcrumb in sut.Breadcrumbs)
-            {
-                sutBreadcrumb.Timestamp.Should().BeCloseTo(actual.Breadcrumbs.ElementAt(counter++).Timestamp);
-            }
         }
 
         [Fact]

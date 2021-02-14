@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix serialization of transactions when filesystem caching is enabled. (#815) @Tyrrrz
+- Fix UWP not registering exceptions (#821) @lucas-zimerman
+- Fix tracing middleware (#813) @Tyrrrz
+
+## 3.0.5
+
+### Changes
+
+- Fix transaction sampling (#810) @Tyrrrz
+
+## 3.0.4
+
+### Changes
+
+- Don't add logs coming from Sentry as breadcrumbs (fixes stack overflow exception) (#797) @Tyrrrz
+- Consolidate logic for resolving hub (fixes bug "SENTRY_DSN is not defined") (#795) @Tyrrrz
+- Add SetFingerprint overload that takes `params string[]` (#796) @Tyrrrz
+- Create spans for outgoing HTTP requests (#802) @Tyrrrz
+- Finish span on exception in SentryHttpMessageHandler (#806) @Tyrrrz
+- Fix ObjectDisposedException caused by object reuse in RetryAfterHandler (#807) @Tyrrrz
+
 ## 3.0.3
 
 ### Changes

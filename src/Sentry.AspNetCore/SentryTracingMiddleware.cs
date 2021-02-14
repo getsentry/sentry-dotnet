@@ -13,6 +13,9 @@ namespace Sentry.AspNetCore
     /// </summary>
     internal class SentryTracingMiddleware
     {
+        private const string UnknownRouteTransactionName = "Unknown Route";
+        private const string OperationName = "http.server";
+
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _getHub;
         private readonly SentryAspNetCoreOptions _options;
@@ -35,7 +38,7 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogInfo("Received Sentry trace header: {0}", value);
+            _options.DiagnosticLogger?.LogDebug("Received Sentry trace header '{0}'.", value);
 
             try
             {
@@ -43,7 +46,52 @@ namespace Sentry.AspNetCore
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Invalid Sentry trace header: {0}", ex, value);
+                _options.DiagnosticLogger?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+                return null;
+            }
+        }
+
+        private ITransaction? TryStartTransaction(HttpContext context)
+        {
+            try
+            {
+                var hub = _getHub();
+
+                // Attempt to start a transaction from the trace header if it exists
+                var traceHeader = TryGetSentryTraceHeader(context);
+
+                // It's important to try and set the transaction name
+                // to some value here so that it's available for use
+                // in sampling.
+                // At a later stage, we will try to get the transaction name
+                // again, to account for the other middlewares that may have
+                // ran after ours.
+                var transactionName =
+                    context.TryGetTransactionName() ??
+                    UnknownRouteTransactionName;
+
+                var transaction = traceHeader is not null
+                    ? hub.StartTransaction(
+                        transactionName,
+                        OperationName,
+                        traceHeader
+                    )
+                    : hub.StartTransaction(
+                        transactionName,
+                        OperationName
+                    );
+
+                _options.DiagnosticLogger?.LogInfo(
+                    "Started transaction with span ID '{0}' and trace ID '{1}'.",
+                    transaction.SpanId,
+                    transaction.TraceId
+                );
+
+                return transaction;
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError("Failed to start transaction.", ex);
                 return null;
             }
         }
@@ -54,75 +102,49 @@ namespace Sentry.AspNetCore
         public async Task InvokeAsync(HttpContext context)
         {
             var hub = _getHub();
+
             if (!hub.IsEnabled)
             {
                 await _next(context).ConfigureAwait(false);
                 return;
             }
 
-            await hub.ConfigureScopeAsync(async scope =>
+            var transaction = TryStartTransaction(context);
+
+            // Expose the transaction on the scope so that the user
+            // can retrieve it and start child spans off of it.
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+            try
             {
-                // Attempt to start a transaction from the trace header if it exists
-                var traceHeader = TryGetSentryTraceHeader(context);
-
-                // Defer setting name until other middlewares have finished
-                var transaction = traceHeader is not null
-                    ? hub.StartTransaction(
-                        "Unknown Route",
-                        "http.server",
-                        traceHeader
-                    )
-                    : hub.StartTransaction(
-                        "Unknown Route",
-                        "http.server"
-                    );
-
-                _options.DiagnosticLogger?.LogInfo(
-                    "Started transaction: Span ID: {0}, Trace ID: {1}",
-                    transaction.SpanId,
-                    transaction.TraceId
-                );
-
-                // Put the transaction on the scope
-                scope.Transaction = transaction;
-
-                try
+                await _next(context).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (transaction is not null)
                 {
-                    await _next(context).ConfigureAwait(false);
-                }
-                finally
-                {
-                    // Try to resolve the route
+                    // The routing middleware may have ran after ours, so
+                    // try to get the transaction name again.
                     if (context.TryGetTransactionName() is { } transactionName)
                     {
+                        if (!string.Equals(transaction.Name, transactionName, StringComparison.Ordinal))
+                        {
+                            _options.DiagnosticLogger?.LogDebug(
+                                "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
+                                transaction.Name,
+                                transactionName
+                            );
+                        }
+
                         transaction.Name = transactionName;
                     }
 
                     transaction.Finish(
-                        GetSpanStatusFromCode(context.Response.StatusCode)
+                        SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
                     );
                 }
-            }).ConfigureAwait(false);
+            }
         }
-
-        private static SpanStatus GetSpanStatusFromCode(int statusCode) => statusCode switch
-        {
-            < 400 => SpanStatus.Ok,
-            400 => SpanStatus.InvalidArgument,
-            401 => SpanStatus.Unauthenticated,
-            403 => SpanStatus.PermissionDenied,
-            404 => SpanStatus.NotFound,
-            409 => SpanStatus.AlreadyExists,
-            429 => SpanStatus.ResourceExhausted,
-            499 => SpanStatus.Cancelled,
-            < 500 => SpanStatus.InvalidArgument,
-            500 => SpanStatus.InternalError,
-            501 => SpanStatus.Unimplemented,
-            503 => SpanStatus.Unavailable,
-            504 => SpanStatus.DeadlineExceeded,
-            < 600 => SpanStatus.InternalError,
-            _ => SpanStatus.UnknownError
-        };
     }
 
     /// <summary>

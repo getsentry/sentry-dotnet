@@ -33,7 +33,7 @@ Sentry offers other integrations that are not part of this reposistory:
 
 * [Sentry.EntityFramework](https://github.com/getsentry/sentry-dotnet-ef): EF 6 for validation errors and query as breadcrumbs.
 * [Sentry.Minidump](https://github.com/getsentry/sentry-dotnet-minidump): Capture Minidumps on Windows, macOS and Linux.
-* [Sentry.Xamarin.Forms](https://github.com/getsentry/sentry-dotnet-xamarin): `Xamarin.Forms` integration to get device data, breadcrumbs, and more.
+* [Sentry.Xamarin](https://github.com/getsentry/sentry-xamarin): `Xamarin` native and `Xamarin.Forms` integration to get device data, breadcrumbs, and more.
 
 Looking for something else? Let us know by [raising an issue](https://github.com/getsentry/sentry-dotnet/issues/new).
 
