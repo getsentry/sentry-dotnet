@@ -36,7 +36,7 @@
   </PropertyGroup>
 
   <!-- Use nullability analysis only on frameworks that have annotated BCL -->
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net5')) or $(TargetFramework.StartsWith('netcoreapp3')) or $(TargetFramework.StartsWith('netstandard2.1'))">
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4')) and !$(TargetFramework.StartsWith('netcoreapp2')) and !$(TargetFramework.StartsWith('netstandard2.0'))">
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
