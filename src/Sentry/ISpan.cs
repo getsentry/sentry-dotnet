@@ -77,8 +77,8 @@ namespace Sentry
         /// </summary>
         public static void Finish(this ISpan span, SpanStatus status)
         {
-            span.Finish();
             span.Status = status;
+            span.Finish();
         }
     }
 }
