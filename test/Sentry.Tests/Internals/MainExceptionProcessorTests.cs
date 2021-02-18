@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using Sentry.Extensibility;
@@ -152,6 +153,106 @@ namespace Sentry.Tests.Internals
             var actual = sut.CreateSentryException(ex);
 
             Assert.Empty(actual.Single().Data);
+        }
+
+        [Fact]
+        public void CreateSentryException_HasTagsOnExceptionData_TagsSetted()
+        {
+            //Assert
+            var sut = _fixture.GetSut();
+            var ex = new Exception();
+            var evt = new SentryEvent();
+            var tag1 = new KeyValuePair<string, string>("Tag1", "1234");
+            var tag2 = new KeyValuePair<string, string>("Tag2", "4321");
+            ex.Data.Add(MainExceptionProcessor.ExceptionDataTagKey + tag1.Key, tag1.Value);
+            ex.Data.Add(MainExceptionProcessor.ExceptionDataTagKey + tag2.Key, tag2.Value);
+
+            //Act
+            sut.Process(ex, evt);
+
+            //Assert
+            Assert.Single(evt.Tags, tag1);
+            Assert.Single(evt.Tags, tag2);
+        }
+
+        [Fact]
+        public void CreateSentryException_HasInvalidTagsOnExceptionData_TagsAsExtra()
+        {
+            //Assert
+            var sut = _fixture.GetSut();
+            var ex = new Exception();
+            var evt = new SentryEvent();
+
+            var tag1 = new KeyValuePair<string, object>(MainExceptionProcessor.ExceptionDataTagKey + "Tag1", new { a = 1, b = 2 });
+            var expectedTag1Extra = new KeyValuePair<string, object>($"Exception[0][{tag1.Key}]", tag1.Value);
+
+            var tag2 = new KeyValuePair<string, string>(MainExceptionProcessor.ExceptionDataTagKey, "4321");
+            var expectedTag2Extra = new KeyValuePair<string, object>($"Exception[0][{tag2.Key}]", tag2.Value);
+
+            ex.Data.Add(tag1.Key, tag1.Value);
+            ex.Data.Add(tag2.Key, tag2.Value);
+
+            //Act
+            sut.Process(ex, evt);
+
+            //Assert
+            Assert.Empty(evt.Tags);
+            Assert.Single(evt.Extra, expectedTag1Extra);
+            Assert.Single(evt.Extra, expectedTag2Extra);
+        }
+
+        [Fact]
+        public void CreateSentryException_HasContextOnExceptionData_ContextSetted()
+        {
+            //Assert
+            var sut = _fixture.GetSut();
+            var ex = new Exception();
+            var evt = new SentryEvent();
+            var context1 = new KeyValuePair<string, Dictionary<string, object>>("Context 1",
+                new Dictionary<string, object>
+                {
+                    { "Data1", new { a = 1, b = 2, c = "12345"} },
+                    { "Data2", "Something broke." }
+                });
+            var context2 = new KeyValuePair<string, Dictionary<string, object>>("Context 2",
+                new Dictionary<string, object>
+                {
+                    { "Data1", new { c = 1, d = 2, e = "12345"} },
+                    { "Data2", "Something broke again." }
+                });
+            ex.Data.Add(MainExceptionProcessor.ExceptionDataContextKey + context1.Key, context1.Value);
+            ex.Data.Add(MainExceptionProcessor.ExceptionDataContextKey + context2.Key, context2.Value);
+
+            //Act
+            sut.Process(ex, evt);
+
+            //Assert
+            Assert.Equal(evt.Contexts[context1.Key], context1.Value);
+            Assert.Equal(evt.Contexts[context2.Key], context2.Value);
+        }
+
+        [Fact]
+        public void CreateSentryException_HasInvalidContextOnExceptionData_ContextAsExtra()
+        {
+            //Assert
+            var sut = _fixture.GetSut();
+            var ex = new Exception();
+            var evt = new SentryEvent();
+            var context1 = new KeyValuePair<string, Dictionary<string, object>>("_",
+                new Dictionary<string, object>
+                {
+                    { "Data1", new { a = 1, b = 2, c = "12345"} },
+                    { "Data2", "Something broke." }
+                });
+            var expectedContentExtra = new KeyValuePair<string, object>($"Exception[0][{MainExceptionProcessor.ExceptionDataContextKey}]", context1.Value);
+            ex.Data.Add(MainExceptionProcessor.ExceptionDataContextKey, context1.Value);
+
+            //Act
+            sut.Process(ex, evt);
+
+            //Assert
+            Assert.Empty(evt.Contexts);
+            Assert.Single(evt.Extra, expectedContentExtra);
         }
 
         // TODO: Test when the approach for parsing is finalized

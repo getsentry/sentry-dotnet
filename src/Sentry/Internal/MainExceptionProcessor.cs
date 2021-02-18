@@ -9,6 +9,13 @@ namespace Sentry.Internal
 {
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
+
+        /// <summary>
+        /// Ideally a public string
+        /// </summary>
+        internal static readonly string ExceptionDataTagKey = "sentry:tag:";
+        internal static readonly string ExceptionDataContextKey = "sentry:context:";
+
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
@@ -49,7 +56,23 @@ namespace Sentry.Internal
 
                 foreach (var key in sentryException.Data.Keys)
                 {
-                    sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
+                    if (key.StartsWith(ExceptionDataTagKey) &&
+                        sentryException.Data[key] is string value &&
+                        key.Length > ExceptionDataTagKey.Length)
+                    {
+                        sentryEvent.SetTag(key.Substring(ExceptionDataTagKey.Length), value);
+                    }
+                    else if (key.StartsWith(ExceptionDataContextKey) &&
+                        sentryException.Data[key] is object contextData &&
+                        key.Length > ExceptionDataContextKey.Length)
+                    {
+                        var keyName = key.Substring(ExceptionDataContextKey.Length);
+                        _ = sentryEvent.Contexts.AddOrUpdate(keyName, contextData, (_, value) => value);
+                    }
+                    else
+                    {
+                        sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
+                    }
                 }
             }
         }
