@@ -1,3 +1,4 @@
 [submodule "modules/Ben.Demystifier"]
 	path = modules/Ben.Demystifier
 	url = ../Ben.Demystifier.git
+    ignore = dirty
