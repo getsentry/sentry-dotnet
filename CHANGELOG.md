@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Serialize arbitrary objects in contexts (#838) @Tyrrrz
+
 ## 3.0.6
 
 ### Fixes
