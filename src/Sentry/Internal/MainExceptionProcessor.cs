@@ -56,18 +56,25 @@ namespace Sentry.Internal
 
                 foreach (var key in sentryException.Data.Keys)
                 {
-                    if (key.StartsWith(ExceptionDataTagKey) &&
-                        sentryException.Data[key] is string value &&
-                        key.Length > ExceptionDataTagKey.Length)
+                    if (key.StartsWith("sentry", StringComparison.OrdinalIgnoreCase))
                     {
-                        sentryEvent.SetTag(key.Substring(ExceptionDataTagKey.Length), value);
-                    }
-                    else if (key.StartsWith(ExceptionDataContextKey) &&
-                        sentryException.Data[key] is object contextData &&
-                        key.Length > ExceptionDataContextKey.Length)
-                    {
-                        var keyName = key.Substring(ExceptionDataContextKey.Length);
-                        _ = sentryEvent.Contexts.AddOrUpdate(keyName, contextData, (_, value) => value);
+                        if (key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var data = sentryException.Data[key] as string ?? "<invalid>";
+                            //Set the key after the ExceptionDataTagKey string.
+                            sentryEvent.SetTag(key.Substring(ExceptionDataTagKey.Length), data);
+                        }
+                        else if (key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase))
+                        {
+                            //Set the key after the ExceptionDataTagKey string.
+                            _ = sentryEvent.Contexts.AddOrUpdate(key.Substring(ExceptionDataContextKey.Length),
+                                sentryException.Data[key] ?? "<empty>",
+                                (_, value) => value);
+                        }
+                        else
+                        {
+                            sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
+                        }
                     }
                     else
                     {
