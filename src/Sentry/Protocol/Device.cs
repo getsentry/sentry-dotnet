@@ -202,7 +202,12 @@ namespace Sentry.Protocol
             if (Timezone is {} timezone)
             {
                 writer.WriteString("timezone", timezone.Id);
-                writer.WriteString("timezone_display_name", timezone.DisplayName);
+
+                // Write display name, but only if it's different from the ID
+                if (!string.Equals(timezone.Id, timezone.DisplayName, StringComparison.OrdinalIgnoreCase))
+                {
+                    writer.WriteString("timezone_display_name", timezone.DisplayName);
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(Name))
