@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using FluentAssertions;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -22,7 +21,8 @@ namespace Sentry.Tests.Protocol
                 Request = new Request { Method = "POST" },
                 Contexts = new Contexts {
                     ["context_key"] = "context_value",
-                    [".NET Framework"] = new Dictionary<string, string> {
+                    [".NET Framework"] = new Dictionary<string, string>
+                    {
                         [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",
                         [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
                         [".NET Framework Full"] = "\"v4.8\""

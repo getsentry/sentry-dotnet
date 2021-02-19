@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FluentAssertions;
 using Sentry.Internal;
 using Xunit;
@@ -92,6 +93,29 @@ namespace Sentry.Protocol.Tests.Context
             actual.Should().BeEquivalentTo(sut);
 
             Assert.Equal("{\"runtime\":{\"type\":\"runtime\",\"version\":\"2.1.1.100\"}}", actualString);
+        }
+
+        [Fact]
+        public void SerializeObject_AnonymousObject_SerializedCorrectly()
+        {
+            // Arrange
+            var contexts = new Contexts
+            {
+                ["foo"] = new {Bar = 42, Baz = "kek"}
+            };
+
+            // Act
+            var json = contexts.ToJsonString();
+            var roundtrip = Contexts.FromJson(Json.Parse(json));
+
+            // Assert
+            json.Should().Be("{\"foo\":{\"Bar\":42,\"Baz\":\"kek\"}}");
+
+            roundtrip["foo"].Should().BeEquivalentTo(new Dictionary<string, object>
+            {
+                ["Bar"] = 42,
+                ["Baz"] = "kek"
+            });
         }
 
         [Fact]
