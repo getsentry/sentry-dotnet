@@ -103,7 +103,7 @@ namespace Sentry
             }
             else
             {
-                writer.WriteStringValue(value.ToString());
+                JsonSerializer.Serialize(writer, value);
             }
         }
 

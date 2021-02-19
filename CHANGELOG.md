@@ -5,6 +5,7 @@
 ### Changes
 
 - Don't write timezone_display_name if it's the same as the ID (#837) @Tyrrrz
+- Serialize arbitrary objects in contexts (#838) @Tyrrrz
 
 ## 3.0.6
 
