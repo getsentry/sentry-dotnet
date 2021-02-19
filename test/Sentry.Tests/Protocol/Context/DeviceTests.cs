@@ -177,8 +177,8 @@ namespace Sentry.Protocol.Tests.Context
             yield return new object[] { (new Device { ScreenDensity = 1 }, "{\"type\":\"device\",\"screen_density\":1}") };
             yield return new object[] { (new Device { ScreenDpi = 1 }, "{\"type\":\"device\",\"screen_dpi\":1}") };
             yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, "{\"type\":\"device\",\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
-            yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_name", "tz_name") }, "{{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}}") };
-            yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_id", "tz_id") }, "{{\"type\":\"device\",\"timezone\":\"tz_id\"}}") };
+            yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_name", "tz_name") }, "{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}") };
+            yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_id", "tz_id") }, "{\"type\":\"device\",\"timezone\":\"tz_id\"}") };
         }
     }
 }
