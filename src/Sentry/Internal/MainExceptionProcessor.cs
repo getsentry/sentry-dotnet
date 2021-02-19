@@ -56,7 +56,7 @@ namespace Sentry.Internal
 
                 foreach (var key in sentryException.Data.Keys)
                 {
-                    if (key.StartsWith("sentry", StringComparison.OrdinalIgnoreCase))
+                    if (key.StartsWith("sentry:", StringComparison.OrdinalIgnoreCase))
                     {
                         if (key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase))
                         {

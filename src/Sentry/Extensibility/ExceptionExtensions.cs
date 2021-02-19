@@ -5,25 +5,25 @@ using Sentry.Internal;
 namespace Sentry.Extensibility
 {
     /// <summary>
-    /// TODO
+    /// Extends Exception with formatted data that can be used by Sentry SDK.
     /// </summary>
     public static class ExceptionExtensions
     {
         /// <summary>
-        /// TODO
+        /// Set a Sentry's Tag to the Exception.
         /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
+        /// <param name="ex">The exception.</param>
+        /// <param name="name">The name of the tag.</param>
+        /// <param name="value">The value of the key.</param>
         public static void AddSentryTag(this Exception ex, string name, string value)
             => ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{name}", value);
 
         /// <summary>
-        /// TODO
+        /// Set a Sentry's structured Context to the Exception.
         /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="name"></param>
-        /// <param name="data"></param>
+        /// <param name="ex">The exception.</param>
+        /// <param name="name">The context name.</param>
+        /// <param name="data">The context data.</param>
         public static void AddSentryContext(this Exception ex, string name, Dictionary<string, object> data)
             => ex.Data.Add($"{MainExceptionProcessor.ExceptionDataContextKey}{name}", data);
     }
