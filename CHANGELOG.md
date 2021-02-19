@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Don't write timezone_display_name if it's the same as the ID (#837) @Tyrrrz
+
 ## 3.0.6
 
 ### Fixes
