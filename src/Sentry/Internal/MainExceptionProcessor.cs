@@ -57,17 +57,17 @@ namespace Sentry.Internal
                         keyValue.Value != null)
                     {
                         if (keyValue.Key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase) &&
-                            keyValue.Value is string tagValue)
+                            keyValue.Value is string tagValue &&
+                            ExceptionDataTagKey.Length < keyValue.Key.Length)
                         {
-                            //Set the key after the ExceptionDataTagKey string.
+                            // Set the key after the ExceptionDataTagKey string.
                             sentryEvent.SetTag(keyValue.Key.Substring(ExceptionDataTagKey.Length), tagValue);
                         }
-                        else if (keyValue.Key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase))
+                        else if (keyValue.Key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase) &&
+                            ExceptionDataContextKey.Length < keyValue.Key.Length)
                         {
-                            //Set the key after the ExceptionDataTagKey string.
-                            _ = sentryEvent.Contexts.AddOrUpdate(keyValue.Key.Substring(ExceptionDataContextKey.Length),
-                                keyValue.Value,
-                                (_, value) => value);
+                            // Set the key after the ExceptionDataTagKey string.
+                            _ = sentryEvent.Contexts[keyValue.Key.Substring(ExceptionDataContextKey.Length)] = keyValue.Value;
                         }
                         else
                         {
