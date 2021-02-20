@@ -162,6 +162,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var expectedTag1 = new KeyValuePair<string, string>("Tag1", "1234");
             var expectedTag2 = new KeyValuePair<string, string>("Tag2", "4321");
+            var expectedTag3 = new KeyValuePair<string, string>("", "abcd");
 
             var ex = new Exception();
             var evt = new SentryEvent();
@@ -169,11 +170,13 @@ namespace Sentry.Tests.Internals
             //Act
             ex.AddSentryTag(expectedTag1.Key, expectedTag1.Value);
             ex.AddSentryTag(expectedTag2.Key, expectedTag2.Value);
+            ex.AddSentryTag(expectedTag3.Key, expectedTag3.Value);
             sut.Process(ex, evt);
 
             //Assert
             Assert.Single(evt.Tags, expectedTag1);
             Assert.Single(evt.Tags, expectedTag2);
+            Assert.Single(evt.Tags, expectedTag3);
         }
 
         [Fact]
@@ -182,17 +185,22 @@ namespace Sentry.Tests.Internals
             //Assert
             var sut = _fixture.GetSut();
             var InvalidTag = new KeyValuePair<string, int>("Tag1", 1234);
-            var expectedTag = new KeyValuePair<string, string>("Tag1", "<invalid>");
+            var InvalidTag2 = new KeyValuePair<string, int?>("Tag2", null);
+
+            var expectedTag = new KeyValuePair<string, object>("Exception[0][sentry:tag:Tag1]", 1234);
+            var expectedTag2 = new KeyValuePair<string, object>("Exception[0][sentry:tag:Tag2]", null);
 
             var ex = new Exception();
             var evt = new SentryEvent();
 
             //Act
             ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{InvalidTag.Key}", InvalidTag.Value);
+            ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{InvalidTag2.Key}", InvalidTag2.Value);
             sut.Process(ex, evt);
 
             //Assert
-            Assert.Single(evt.Tags, expectedTag);
+            Assert.Single(evt.Extra, expectedTag);
+            Assert.Single(evt.Extra, expectedTag2);
         }
 
         [Fact]
@@ -214,15 +222,23 @@ namespace Sentry.Tests.Internals
                     { "Data1", new { c = 1, d = 2, e = "12345"} },
                     { "Data2", "Something broke again." }
                 });
+            var expectedContext3 = new KeyValuePair<string, Dictionary<string, object>>("",
+                new Dictionary<string, object>
+                {
+                    { "Data3", new { c = 1, d = 2, e = "12345"} },
+                    { "Data4", "Something broke again." }
+                });
 
             //Act
             ex.AddSentryContext(expectedContext1.Key, expectedContext1.Value);
             ex.AddSentryContext(expectedContext2.Key, expectedContext2.Value);
+            ex.AddSentryContext(expectedContext3.Key, expectedContext3.Value);
             sut.Process(ex, evt);
 
             //Assert
             Assert.Equal(evt.Contexts[expectedContext1.Key], expectedContext1.Value);
             Assert.Equal(evt.Contexts[expectedContext2.Key], expectedContext2.Value);
+            Assert.Equal(evt.Contexts[expectedContext3.Key], expectedContext3.Value);
         }
 
         [Fact]
@@ -233,14 +249,14 @@ namespace Sentry.Tests.Internals
             var ex = new Exception();
             var evt = new SentryEvent();
             var invalidContext = new KeyValuePair<string, Dictionary<string, object>>("Context 1", null);
-            var expectedContext = new KeyValuePair<string, string>("Context 1", "<empty>");
+            var expectedContext = new KeyValuePair<string, object>("Exception[0][sentry:context:Context 1]", null);
 
             //Act
             ex.AddSentryContext(invalidContext.Key, invalidContext.Value);
             sut.Process(ex, evt);
 
             //Assert
-            Assert.Equal(evt.Contexts[expectedContext.Key], expectedContext.Value);
+            Assert.Single(evt.Extra, expectedContext);
         }
 
         // TODO: Test when the approach for parsing is finalized

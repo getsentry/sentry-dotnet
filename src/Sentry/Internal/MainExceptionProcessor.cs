@@ -10,9 +10,6 @@ namespace Sentry.Internal
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
 
-        /// <summary>
-        /// Ideally a public string
-        /// </summary>
         internal static readonly string ExceptionDataTagKey = "sentry:tag:";
         internal static readonly string ExceptionDataContextKey = "sentry:context:";
 
@@ -54,31 +51,32 @@ namespace Sentry.Internal
                     continue;
                 }
 
-                foreach (var key in sentryException.Data.Keys)
+                foreach (var keyValue in sentryException.Data)
                 {
-                    if (key.StartsWith("sentry:", StringComparison.OrdinalIgnoreCase))
+                    if (keyValue.Key.StartsWith("sentry:", StringComparison.OrdinalIgnoreCase) &&
+                        keyValue.Value != null)
                     {
-                        if (key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase))
+                        if (keyValue.Key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase) &&
+                            keyValue.Value is string tagValue)
                         {
-                            var data = sentryException.Data[key] as string ?? "<invalid>";
                             //Set the key after the ExceptionDataTagKey string.
-                            sentryEvent.SetTag(key.Substring(ExceptionDataTagKey.Length), data);
+                            sentryEvent.SetTag(keyValue.Key.Substring(ExceptionDataTagKey.Length), tagValue);
                         }
-                        else if (key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase))
+                        else if (keyValue.Key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase))
                         {
                             //Set the key after the ExceptionDataTagKey string.
-                            _ = sentryEvent.Contexts.AddOrUpdate(key.Substring(ExceptionDataContextKey.Length),
-                                sentryException.Data[key] ?? "<empty>",
+                            _ = sentryEvent.Contexts.AddOrUpdate(keyValue.Key.Substring(ExceptionDataContextKey.Length),
+                                keyValue.Value,
                                 (_, value) => value);
                         }
                         else
                         {
-                            sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
+                            sentryEvent.SetExtra($"Exception[{i}][{keyValue.Key}]", sentryException.Data[keyValue.Key]);
                         }
                     }
                     else
                     {
-                        sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
+                        sentryEvent.SetExtra($"Exception[{i}][{keyValue.Key}]", sentryException.Data[keyValue.Key]);
                     }
                 }
             }

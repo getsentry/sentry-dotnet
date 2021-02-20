@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sentry.Internal;
 
-namespace Sentry.Extensibility
+namespace Sentry
 {
     /// <summary>
     /// Extends Exception with formatted data that can be used by Sentry SDK.
@@ -24,7 +24,7 @@ namespace Sentry.Extensibility
         /// <param name="ex">The exception.</param>
         /// <param name="name">The context name.</param>
         /// <param name="data">The context data.</param>
-        public static void AddSentryContext(this Exception ex, string name, Dictionary<string, object> data)
+        public static void AddSentryContext(this Exception ex, string name, IReadOnlyDictionary<string, object> data)
             => ex.Data.Add($"{MainExceptionProcessor.ExceptionDataContextKey}{name}", data);
     }
 }
