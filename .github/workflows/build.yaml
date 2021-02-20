@@ -58,3 +58,4 @@ jobs:
             path: |
               ${{ github.workspace }}/src/**/Release/*.snupkg
               ${{ github.workspace }}/src/**/Release/*.nupkg
+
