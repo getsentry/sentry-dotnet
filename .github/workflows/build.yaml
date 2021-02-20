@@ -50,6 +50,8 @@ jobs:
 
         - name: Publish coverage report
           uses: codecov/codecov-action@v1
+          with:
+            verbose: true # report is missing at times on codecov
 
         - name: Archive Artifacts
           uses: actions/upload-artifact@v2
@@ -58,3 +60,9 @@ jobs:
             path: |
               ${{ github.workspace }}/src/**/Release/*.snupkg
               ${{ github.workspace }}/src/**/Release/*.nupkg
+
+        - name: Archive Coverage Reports
+          uses: actions/upload-artifact@v2
+          with:
+            name: ${{ github.sha }}
+            path: ${{ github.workspace }}/test/**/*.opencover.xml
