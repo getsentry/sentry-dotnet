@@ -9,6 +9,10 @@ namespace Sentry.Internal
 {
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
+
+        internal static readonly string ExceptionDataTagKey = "sentry:tag:";
+        internal static readonly string ExceptionDataContextKey = "sentry:context:";
+
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
@@ -47,9 +51,33 @@ namespace Sentry.Internal
                     continue;
                 }
 
-                foreach (var key in sentryException.Data.Keys)
+                foreach (var keyValue in sentryException.Data)
                 {
-                    sentryEvent.SetExtra($"Exception[{i}][{key}]", sentryException.Data[key]);
+                    if (keyValue.Key.StartsWith("sentry:", StringComparison.OrdinalIgnoreCase) &&
+                        keyValue.Value != null)
+                    {
+                        if (keyValue.Key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase) &&
+                            keyValue.Value is string tagValue &&
+                            ExceptionDataTagKey.Length < keyValue.Key.Length)
+                        {
+                            // Set the key after the ExceptionDataTagKey string.
+                            sentryEvent.SetTag(keyValue.Key.Substring(ExceptionDataTagKey.Length), tagValue);
+                        }
+                        else if (keyValue.Key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase) &&
+                            ExceptionDataContextKey.Length < keyValue.Key.Length)
+                        {
+                            // Set the key after the ExceptionDataTagKey string.
+                            _ = sentryEvent.Contexts[keyValue.Key.Substring(ExceptionDataContextKey.Length)] = keyValue.Value;
+                        }
+                        else
+                        {
+                            sentryEvent.SetExtra($"Exception[{i}][{keyValue.Key}]", sentryException.Data[keyValue.Key]);
+                        }
+                    }
+                    else
+                    {
+                        sentryEvent.SetExtra($"Exception[{i}][{keyValue.Key}]", sentryException.Data[keyValue.Key]);
+                    }
                 }
             }
         }
