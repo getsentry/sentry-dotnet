@@ -2,12 +2,7 @@ using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
-using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
-
-#if !NETSTANDARD
-using Microsoft.Extensions.Http;
-#endif
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.Extensions.DependencyInjection
@@ -34,12 +29,6 @@ namespace Microsoft.Extensions.DependencyInjection
                     .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
 
             services.AddSentry<SentryAspNetCoreOptions>();
-
-#if !NETSTANDARD2_0
-            // Custom handler for HttpClientFactory.
-            // Must be singleton: https://github.com/getsentry/sentry-dotnet/issues/785
-            services.AddSingleton<IHttpMessageHandlerBuilderFilter, SentryHttpMessageHandlerBuilderFilter>();
-#endif
 
             return new SentryAspNetCoreBuilder(services);
         }
