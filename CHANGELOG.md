@@ -6,6 +6,10 @@
 
 - Add AddSentryTag and AddSentryContext Extensions for exception class (#834) @lucas-zimerman
 
+### Changes
+
+- Move SentryHttpMessageHandlerBuilderFilter to Sentry.Extensions.Logging (#845) @Tyrrrz
+
 ## 3.0.7
 
 ### Changes
