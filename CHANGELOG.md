@@ -6,6 +6,10 @@
 
 - Add AddSentryTag and AddSentryContext Extensions for exception class (#834) @lucas-zimerman
 
+### Added
+
+- Add MaxCacheItems option (#846) @Tyrrrz
+
 ## 3.0.7
 
 ### Changes
