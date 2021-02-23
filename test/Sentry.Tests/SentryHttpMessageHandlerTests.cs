@@ -71,7 +71,7 @@ namespace Sentry.Tests
             var hub = Substitute.For<IHub>();
 
             var transaction = new Transaction(
-                Substitute.For<ISentryClient>(),
+                Substitute.For<IHub>(),
                 "foo",
                 "bar"
             );

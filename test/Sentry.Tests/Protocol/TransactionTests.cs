@@ -178,7 +178,8 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
-            var transaction = new Transaction(client, "my name", "my op");
+            var hub = new Hub(client, new SentryOptions());
+            var transaction = new Transaction(hub, "my name", "my op");
 
             // Act
             transaction.Finish();
