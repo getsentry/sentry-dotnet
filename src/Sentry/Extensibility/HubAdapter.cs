@@ -84,6 +84,13 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
+        public void BindException(Exception exception, ISpan span) =>
+            SentrySdk.BindException(exception, span);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
         public ISpan? GetSpan()
             => SentrySdk.GetSpan();
 
