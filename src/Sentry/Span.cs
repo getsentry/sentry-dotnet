@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -13,6 +14,8 @@ namespace Sentry
     /// </summary>
     public class Span : ISpan, IJsonSerializable
     {
+        private readonly IHub _hub;
+
         // This needs to be Transaction and not ITransaction because
         // ITransaction doesn't contain `StartChild(..., parentSpanId)`
         // which we need here.
@@ -26,6 +29,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public SentryId TraceId { get; private set; }
+
+        /// <inheritdoc />
+        public Exception? Exception { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
@@ -73,9 +79,11 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Span"/>.
         /// </summary>
-        public Span(Transaction parentTransaction, SpanId? parentSpanId, string operation)
+        public Span(IHub hub, Transaction parentTransaction, SpanId? parentSpanId, string operation)
         {
+            _hub = hub;
             _parentTransaction = parentTransaction;
+
             SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
@@ -87,7 +95,15 @@ namespace Sentry
             _parentTransaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish() => EndTimestamp = DateTimeOffset.UtcNow;
+        public void Finish()
+        {
+            EndTimestamp = DateTimeOffset.UtcNow;
+
+            if (Exception is {} exception)
+            {
+                _hub.BindException(exception, this);
+            }
+        }
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
@@ -155,6 +171,8 @@ namespace Sentry
         /// </summary>
         public static Span FromJson(Transaction parentTransaction, JsonElement json)
         {
+            var hub = HubAdapter.Instance;
+
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
@@ -167,7 +185,7 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
 
-            return new Span(parentTransaction, parentSpanId, operation)
+            return new Span(hub, parentTransaction, parentSpanId, operation)
             {
                 SpanId = spanId,
                 TraceId = traceId,

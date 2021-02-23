@@ -26,6 +26,11 @@ namespace Sentry
         new SpanStatus? Status { get; set; }
 
         /// <summary>
+        /// Exception associated with this span.
+        /// </summary>
+        Exception? Exception { get; set; }
+
+        /// <summary>
         /// Start timestamp.
         /// </summary>
         DateTimeOffset StartTimestamp { get; }
