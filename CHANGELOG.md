@@ -5,6 +5,7 @@
 ### Features
 
 - Add AddSentryTag and AddSentryContext Extensions for exception class (#834) @lucas-zimerman
+- Associate span exceptions with event exceptions (#848) @Tyrrrz
 
 ## 3.0.7
 
