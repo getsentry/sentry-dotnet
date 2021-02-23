@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 #if NET461 || NETSTANDARD2_0
 internal static partial class PolyfillExtensions
@@ -33,6 +34,17 @@ internal static partial class PolyfillExtensions
     {
         key = pair.Key;
         value = pair.Value;
+    }
+
+    public static void AddOrUpdate<TKey, TValue>(
+        this ConditionalWeakTable<TKey, TValue> table,
+        TKey key,
+        TValue value)
+        where TKey : class
+        where TValue : class
+    {
+        table.Remove(key);
+        table.Add(key, value);
     }
 }
 
