@@ -452,7 +452,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions());
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(new Transaction(
@@ -474,7 +474,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions());
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(
@@ -498,7 +498,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions());
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             var transaction = new Transaction(
                 hub,
@@ -524,7 +524,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions());
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(
@@ -548,7 +548,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions());
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(
@@ -572,7 +572,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions());
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(

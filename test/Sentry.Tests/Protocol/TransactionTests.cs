@@ -178,7 +178,8 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
-            var hub = new Hub(client, new SentryOptions());
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
+
             var transaction = new Transaction(hub, "my name", "my op");
 
             // Act
