@@ -188,5 +188,31 @@ namespace Sentry.Tests.Protocol
             // Assert
             client.Received(1).CaptureTransaction(transaction);
         }
+
+        [Fact]
+        public void Finish_LinksExceptionToEvent()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
+
+            var exception = new InvalidOperationException();
+            var transaction = new Transaction(hub, "my name", "my op");
+
+            // Act
+            transaction.Finish(exception);
+
+            var @event = new SentryEvent(exception);
+            hub.CaptureEvent(@event);
+
+            // Assert
+            transaction.Status.Should().Be(SpanStatus.InternalError);
+
+            client.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e =>
+                e.Contexts.Trace.TraceId == transaction.TraceId &&
+                e.Contexts.Trace.SpanId == transaction.SpanId &&
+                e.Contexts.Trace.ParentSpanId == transaction.ParentSpanId
+            ), Arg.Any<Scope>());
+        }
     }
 }

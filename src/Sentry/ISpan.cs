@@ -85,5 +85,14 @@ namespace Sentry
             span.Status = status;
             span.Finish();
         }
+
+        /// <summary>
+        /// Finishes the span.
+        /// </summary>
+        public static void Finish(this ISpan span, Exception exception)
+        {
+            span.Exception = exception;
+            span.Finish(SpanStatusConverter.FromException(exception));
+        }
     }
 }

@@ -1,4 +1,7 @@
+using System;
+using System.IO;
 using System.Net;
+using System.Security.Authentication;
 
 namespace Sentry
 {
@@ -46,7 +49,7 @@ namespace Sentry
         /// <summary>Already exists (409).</summary>
         AlreadyExists,
 
-        /// <summary>Operation was rejected because the system is not in a state required for the operation's</summary>
+        /// <summary>Operation was rejected because the system is not in a state required for the operation.</summary>
         FailedPrecondition,
 
         /// <summary>The operation was aborted, typically due to a concurrency issue.</summary>
@@ -56,12 +59,26 @@ namespace Sentry
         OutOfRange,
 
         /// <summary>Unrecoverable data loss or corruption</summary>
-        DataLoss,
+        DataLoss
     }
 
     // Can't add static methods to enums unfortunately
     internal static class SpanStatusConverter
     {
+        public static SpanStatus FromException(Exception exception) => exception switch
+        {
+            TimeoutException => SpanStatus.DeadlineExceeded,
+            InvalidCredentialException => SpanStatus.PermissionDenied,
+            UnauthorizedAccessException => SpanStatus.PermissionDenied,
+            FileNotFoundException => SpanStatus.NotFound,
+            DirectoryNotFoundException => SpanStatus.NotFound,
+            DriveNotFoundException => SpanStatus.NotFound,
+            ArgumentException => SpanStatus.InvalidArgument,
+            NotImplementedException => SpanStatus.Unimplemented,
+            OperationCanceledException => SpanStatus.Cancelled,
+            _ => SpanStatus.InternalError
+        };
+
         public static SpanStatus FromHttpStatusCode(int code) => code switch
         {
             < 400 => SpanStatus.Ok,
