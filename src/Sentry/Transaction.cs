@@ -68,9 +68,6 @@ namespace Sentry
         public string? Release { get; set; }
 
         /// <inheritdoc />
-        public Exception? Exception { get; set; }
-
-        /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
@@ -253,18 +250,25 @@ namespace Sentry
             StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish()
+        public void Finish(SpanStatus status = SpanStatus.Ok)
         {
             EndTimestamp = DateTimeOffset.UtcNow;
-
-            if (Exception is {} exception)
-            {
-                _hub.BindException(exception, this);
-            }
+            Status = status;
 
             // Client decides whether to discard this transaction based on sampling
             _hub.CaptureTransaction(this);
         }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception, SpanStatus status)
+        {
+            _hub.BindException(exception, this);
+            Finish(status);
+        }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception) =>
+            Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
         public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
@@ -401,7 +405,7 @@ namespace Sentry
         /// </summary>
         public static Transaction FromJson(JsonElement json)
         {
-            var hub = HubAdapter.Instance;
+            var hub = DisabledHub.Instance;
 
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var name = json.GetProperty("transaction").GetStringOrThrow();

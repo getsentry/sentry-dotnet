@@ -31,9 +31,6 @@ namespace Sentry
         public SentryId TraceId { get; private set; }
 
         /// <inheritdoc />
-        public Exception? Exception { get; set; }
-
-        /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
@@ -95,15 +92,22 @@ namespace Sentry
             _parentTransaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish()
+        public void Finish(SpanStatus status = SpanStatus.Ok)
         {
             EndTimestamp = DateTimeOffset.UtcNow;
-
-            if (Exception is {} exception)
-            {
-                _hub.BindException(exception, this);
-            }
+            Status = status;
         }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception, SpanStatus status)
+        {
+            _hub.BindException(exception, this);
+            Finish(status);
+        }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception) =>
+            Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
@@ -171,7 +175,7 @@ namespace Sentry
         /// </summary>
         public static Span FromJson(Transaction parentTransaction, JsonElement json)
         {
-            var hub = HubAdapter.Instance;
+            var hub = DisabledHub.Instance;
 
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);

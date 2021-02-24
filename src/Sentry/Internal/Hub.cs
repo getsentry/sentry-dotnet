@@ -173,8 +173,11 @@ namespace Sentry.Internal
             return transaction;
         }
 
-        public void BindException(Exception exception, ISpan span) =>
-            _exceptionToSpanMap.AddOrUpdate(exception, span);
+        public void BindException(Exception exception, ISpan span)
+        {
+            // Don't overwrite existing pair in the unlikely event that it already exists
+            _ = _exceptionToSpanMap.GetValue(exception, _ => span);
+        }
 
         public ISpan? GetSpan()
         {
