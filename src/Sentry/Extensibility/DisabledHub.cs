@@ -63,6 +63,13 @@ namespace Sentry.Extensibility
             new Transaction(this, context) {IsSampled = false};
 
         /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void BindException(Exception exception, ISpan span)
+        {
+        }
+
+        /// <summary>
         /// Returns null.
         /// </summary>
         public ISpan? GetSpan() => null;

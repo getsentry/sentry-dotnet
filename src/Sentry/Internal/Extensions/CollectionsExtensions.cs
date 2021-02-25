@@ -6,14 +6,6 @@ namespace Sentry.Internal.Extensions
 {
     internal static class CollectionsExtensions
     {
-        public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> items)
-        {
-            foreach (var i in items)
-            {
-                collection.Add(i);
-            }
-        }
-
         public static TValue GetOrCreate<TValue>(
             this ConcurrentDictionary<string, object> dictionary,
             string key)

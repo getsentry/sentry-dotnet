@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
@@ -13,6 +14,8 @@ namespace Sentry.Internal
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
+
+        private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
 
         internal SentryScopeManager ScopeManager { get; }
 
@@ -170,6 +173,12 @@ namespace Sentry.Internal
             return transaction;
         }
 
+        public void BindException(Exception exception, ISpan span)
+        {
+            // Don't overwrite existing pair in the unlikely event that it already exists
+            _ = _exceptionToSpanMap.GetValue(exception, _ => span);
+        }
+
         public ISpan? GetSpan()
         {
             var (currentScope, _) = ScopeManager.GetCurrent();
@@ -184,8 +193,19 @@ namespace Sentry.Internal
             {
                 var currentScope = ScopeManager.GetCurrent();
                 var actualScope = scope ?? currentScope.Key;
+
+                // Inject trace information from a linked span
+                if (evt.Exception is { } exception &&
+                    _exceptionToSpanMap.TryGetValue(exception, out var linkedSpan))
+                {
+                    evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
+                    evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
+                    evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                }
+
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
+
                 return id;
             }
             catch (Exception e)

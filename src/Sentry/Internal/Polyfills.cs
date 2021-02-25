@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 #if NET461 || NETSTANDARD2_0
 internal static partial class PolyfillExtensions

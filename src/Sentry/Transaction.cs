@@ -14,7 +14,7 @@ namespace Sentry
     /// </summary>
     public class Transaction : ITransaction, IJsonSerializable
     {
-        private readonly ISentryClient _client;
+        private readonly IHub _hub;
 
         /// <inheritdoc />
         public SentryId EventId { get; private set; }
@@ -183,10 +183,10 @@ namespace Sentry
         // Hence why we need a constructor that doesn't take the operation to avoid
         // overwriting it.
         private Transaction(
-            ISentryClient client,
+            IHub hub,
             string name)
         {
-            _client = client;
+            _hub = hub;
             EventId = SentryId.Create();
             Name = name;
         }
@@ -194,8 +194,8 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public Transaction(ISentryClient client, string name, string operation)
-            : this(client, name)
+        public Transaction(IHub hub, string name, string operation)
+            : this(hub, name)
         {
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
@@ -205,8 +205,8 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public Transaction(ISentryClient client, ITransactionContext context)
-            : this(client, context.Name)
+        public Transaction(IHub hub, ITransactionContext context)
+            : this(hub, context.Name)
         {
             SpanId = context.SpanId;
             ParentSpanId = context.ParentSpanId;
@@ -235,7 +235,7 @@ namespace Sentry
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
-            var span = new Span(this, parentSpanId, operation)
+            var span = new Span(_hub, this, parentSpanId, operation)
             {
                 IsSampled = IsSampled
             };
@@ -250,13 +250,25 @@ namespace Sentry
             StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish()
+        public void Finish(SpanStatus status = SpanStatus.Ok)
         {
             EndTimestamp = DateTimeOffset.UtcNow;
+            Status = status;
 
             // Client decides whether to discard this transaction based on sampling
-            _client.CaptureTransaction(this);
+            _hub.CaptureTransaction(this);
         }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception, SpanStatus status)
+        {
+            _hub.BindException(exception, this);
+            Finish(status);
+        }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception) =>
+            Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
         public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
@@ -393,7 +405,7 @@ namespace Sentry
         /// </summary>
         public static Transaction FromJson(JsonElement json)
         {
-            var hub = HubAdapter.Instance;
+            var hub = DisabledHub.Instance;
 
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var name = json.GetProperty("transaction").GetStringOrThrow();

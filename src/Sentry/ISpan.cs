@@ -46,9 +46,19 @@ namespace Sentry
         ISpan StartChild(string operation);
 
         /// <summary>
-        /// Finishes the span.
+        /// Finishes the span with the specified status.
         /// </summary>
-        void Finish();
+        void Finish(SpanStatus status = SpanStatus.Ok);
+
+        /// <summary>
+        /// Finishes the span with the specified exception and status.
+        /// </summary>
+        void Finish(Exception exception, SpanStatus status);
+
+        /// <summary>
+        /// Finishes the span with the specified exception and automatically inferred status.
+        /// </summary>
+        void Finish(Exception exception);
 
         /// <summary>
         /// Get Sentry trace header.
@@ -70,15 +80,6 @@ namespace Sentry
             child.Description = description;
 
             return child;
-        }
-
-        /// <summary>
-        /// Finishes the span.
-        /// </summary>
-        public static void Finish(this ISpan span, SpanStatus status)
-        {
-            span.Status = status;
-            span.Finish();
         }
     }
 }

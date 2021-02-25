@@ -358,6 +358,16 @@ namespace Sentry
             => _hub.StartTransaction(name, operation, traceHeader);
 
         /// <summary>
+        /// Binds specified exception the specified span.
+        /// </summary>
+        /// <remarks>
+        /// This method is used internally and is not meant for public use.
+        /// </remarks>
+        [DebuggerStepThrough]
+        public static void BindException(Exception exception, ISpan span)
+            => _hub.BindException(exception, span);
+
+        /// <summary>
         /// Gets the last active span.
         /// </summary>
         [DebuggerStepThrough]

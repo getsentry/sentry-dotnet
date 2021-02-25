@@ -451,11 +451,12 @@ namespace Sentry.Tests
         public void CaptureTransaction_SampledOut_Dropped()
         {
             // Arrange
-            var sut = _fixture.GetSut();
+            var client = _fixture.GetSut();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
-            sut.CaptureTransaction(new Transaction(
-                sut,
+            client.CaptureTransaction(new Transaction(
+                hub,
                 "test name",
                 "test operation"
             )
@@ -465,19 +466,20 @@ namespace Sentry.Tests
             });
 
             // Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
         public void CaptureTransaction_ValidTransaction_Sent()
         {
             // Arrange
-            var sut = _fixture.GetSut();
+            var client = _fixture.GetSut();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
-            sut.CaptureTransaction(
+            client.CaptureTransaction(
                 new Transaction(
-                    sut,
+                    hub,
                     "test name",
                     "test operation"
                 )
@@ -488,17 +490,18 @@ namespace Sentry.Tests
             );
 
             // Assert
-            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+            _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
         public void CaptureTransaction_NoSpanId_Ignored()
         {
             // Arrange
-            var sut = _fixture.GetSut();
+            var client = _fixture.GetSut();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             var transaction = new Transaction(
-                sut,
+                hub,
                 "test name",
                 "test operation"
             )
@@ -510,22 +513,23 @@ namespace Sentry.Tests
             transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
             // Act
-            sut.CaptureTransaction(transaction);
+            client.CaptureTransaction(transaction);
 
             // Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
         public void CaptureTransaction_NoName_Ignored()
         {
             // Arrange
-            var sut = _fixture.GetSut();
+            var client = _fixture.GetSut();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
-            sut.CaptureTransaction(
+            client.CaptureTransaction(
                 new Transaction(
-                    sut,
+                    hub,
                     null!,
                     "test operation"
                 )
@@ -536,19 +540,20 @@ namespace Sentry.Tests
             );
 
             // Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
         public void CaptureTransaction_NoOperation_Ignored()
         {
             // Arrange
-            var sut = _fixture.GetSut();
+            var client = _fixture.GetSut();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
-            sut.CaptureTransaction(
+            client.CaptureTransaction(
                 new Transaction(
-                    sut,
+                    hub,
                     "test name",
                     null!
                 )
@@ -559,19 +564,20 @@ namespace Sentry.Tests
             );
 
             // Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]
         public void CaptureTransaction_NotFinished_Sent()
         {
             // Arrange
-            var sut = _fixture.GetSut();
+            var client = _fixture.GetSut();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
-            sut.CaptureTransaction(
+            client.CaptureTransaction(
                 new Transaction(
-                    sut,
+                    hub,
                     "test name",
                     "test operation"
                 )
@@ -582,7 +588,7 @@ namespace Sentry.Tests
             );
 
             // Assert
-            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+            _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         }
 
         [Fact]

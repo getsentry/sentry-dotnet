@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -13,6 +14,8 @@ namespace Sentry
     /// </summary>
     public class Span : ISpan, IJsonSerializable
     {
+        private readonly IHub _hub;
+
         // This needs to be Transaction and not ITransaction because
         // ITransaction doesn't contain `StartChild(..., parentSpanId)`
         // which we need here.
@@ -73,9 +76,11 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Span"/>.
         /// </summary>
-        public Span(Transaction parentTransaction, SpanId? parentSpanId, string operation)
+        public Span(IHub hub, Transaction parentTransaction, SpanId? parentSpanId, string operation)
         {
+            _hub = hub;
             _parentTransaction = parentTransaction;
+
             SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
@@ -87,7 +92,22 @@ namespace Sentry
             _parentTransaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish() => EndTimestamp = DateTimeOffset.UtcNow;
+        public void Finish(SpanStatus status = SpanStatus.Ok)
+        {
+            EndTimestamp = DateTimeOffset.UtcNow;
+            Status = status;
+        }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception, SpanStatus status)
+        {
+            _hub.BindException(exception, this);
+            Finish(status);
+        }
+
+        /// <inheritdoc />
+        public void Finish(Exception exception) =>
+            Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
@@ -155,6 +175,9 @@ namespace Sentry
         /// </summary>
         public static Span FromJson(Transaction parentTransaction, JsonElement json)
         {
+            // A Span deserialized is just used as wire-protocol and doesn't need a Hub
+            var hub = DisabledHub.Instance;
+
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
@@ -167,7 +190,7 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
 
-            return new Span(parentTransaction, parentSpanId, operation)
+            return new Span(hub, parentTransaction, parentSpanId, operation)
             {
                 SpanId = spanId,
                 TraceId = traceId,
