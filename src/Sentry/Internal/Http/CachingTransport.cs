@@ -44,9 +44,9 @@ namespace Sentry.Internal.Http
             _innerTransport = innerTransport;
             _options = options;
 
-            _keepCount = _options.MaxQueueItems >= 1
-                ? _options.MaxQueueItems - 1
-                : 0; // just in case MaxQueueItems is set to an invalid value somehow (shouldn't happen)
+            _keepCount = _options.MaxCacheItems >= 1
+                ? _options.MaxCacheItems - 1
+                : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
 
             _isolatedCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
                 ? _isolatedCacheDirectoryPath = Path.Combine(
