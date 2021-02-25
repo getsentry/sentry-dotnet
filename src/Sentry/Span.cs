@@ -175,6 +175,7 @@ namespace Sentry
         /// </summary>
         public static Span FromJson(Transaction parentTransaction, JsonElement json)
         {
+            // A Span deserialized is just used as wire-protocol and doesn't need a Hub
             var hub = DisabledHub.Instance;
 
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
