@@ -1,8 +1,7 @@
-﻿#if !NETSTANDARD2_0
-using System;
+﻿using System;
 using Microsoft.Extensions.Http;
 
-namespace Sentry.AspNetCore
+namespace Sentry.Extensions.Logging
 {
     // Injects Sentry's HTTP handler into HttpClientFactory
     internal class SentryHttpMessageHandlerBuilderFilter : IHttpMessageHandlerBuilderFilter
@@ -21,4 +20,3 @@ namespace Sentry.AspNetCore
             };
     }
 }
-#endif

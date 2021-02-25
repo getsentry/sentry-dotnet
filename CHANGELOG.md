@@ -7,6 +7,10 @@
 - Add AddSentryTag and AddSentryContext Extensions for exception class (#834) @lucas-zimerman
 - Associate span exceptions with event exceptions (#848) @Tyrrrz
 
+### Features
+
+- Move SentryHttpMessageHandlerBuilderFilter to Sentry.Extensions.Logging (#845) @Tyrrrz
+
 ## 3.0.7
 
 ### Changes
