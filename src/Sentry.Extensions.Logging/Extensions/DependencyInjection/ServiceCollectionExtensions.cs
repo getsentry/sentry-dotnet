@@ -2,9 +2,9 @@ using System;
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
-using Sentry.Internal;
 
 namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
 {
@@ -40,6 +40,10 @@ namespace Sentry.Extensions.Logging.Extensions.DependencyInjection
 
                 return () => HubAdapter.Instance;
             });
+
+            // Custom handler for HttpClientFactory.
+            // Must be singleton: https://github.com/getsentry/sentry-dotnet/issues/785
+            services.TryAddSingleton<IHttpMessageHandlerBuilderFilter, SentryHttpMessageHandlerBuilderFilter>();
 
             return services;
         }
