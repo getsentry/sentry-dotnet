@@ -229,7 +229,7 @@ namespace Sentry
         private int _maxQueueItems = 30;
 
         /// <summary>
-        /// The maximum number of events to keep while the worker attempts to send them
+        /// The maximum number of events to keep while the worker attempts to send them.
         /// </summary>
         public int MaxQueueItems
         {
@@ -241,6 +241,26 @@ namespace Sentry
                     throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the queue.");
                 }
                 _maxQueueItems = value;
+            }
+        }
+
+        private int _maxCacheItems = 30;
+
+        /// <summary>
+        /// The maximum number of events to keep in cache.
+        /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
+        /// </summary>
+        public int MaxCacheItems
+        {
+            get => _maxCacheItems;
+            set
+            {
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the cache.");
+                }
+
+                _maxCacheItems = value;
             }
         }
 

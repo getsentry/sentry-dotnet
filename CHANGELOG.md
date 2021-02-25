@@ -5,9 +5,7 @@
 ### Features
 
 - Add AddSentryTag and AddSentryContext Extensions for exception class (#834) @lucas-zimerman
-
-### Features
-
+- MaxCacheItems option to control files on disk (#846) @Tyrrrz
 - Move SentryHttpMessageHandlerBuilderFilter to Sentry.Extensions.Logging (#845) @Tyrrrz
 
 ## 3.0.7

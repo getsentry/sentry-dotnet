@@ -93,7 +93,7 @@ namespace Sentry.Tests.Internals.Http
             {
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path,
-                MaxQueueItems = 2
+                MaxCacheItems = 2
             };
 
             var innerTransport = Substitute.For<ITransport>();
@@ -107,12 +107,12 @@ namespace Sentry.Tests.Internals.Http
             await using var transport = new CachingTransport(innerTransport, options);
 
             // Act & assert
-            for (var i = 0; i < options.MaxQueueItems + 2; i++)
+            for (var i = 0; i < options.MaxCacheItems + 2; i++)
             {
                 using var envelope = Envelope.FromEvent(new SentryEvent());
                 await transport.SendEnvelopeAsync(envelope);
 
-                transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxQueueItems);
+                transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxCacheItems);
             }
             evt.Set();
         }
