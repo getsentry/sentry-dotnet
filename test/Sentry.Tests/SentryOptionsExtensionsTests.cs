@@ -44,6 +44,14 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void DisableTaskUnobservedTaskExceptionCapture_TaskUnobservedTaskExceptionIntegration()
+        {
+            Sut.DisableTaskUnobservedTaskExceptionCapture();
+            Assert.DoesNotContain(Sut.Integrations!,
+                p => p.GetType() == typeof(TaskUnobservedTaskExceptionIntegration));
+        }
+
+        [Fact]
         public void AddIntegration_StoredInOptions()
         {
             var expected = Substitute.For<ISdkIntegration>();
