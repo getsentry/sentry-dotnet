@@ -261,6 +261,18 @@ namespace Sentry.Tests
             Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
         }
 
+        [Fact]
+        public void Integrations_Includes_AppDomainProcessExitIntegration()
+        {
+            Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(AppDomainProcessExitIntegration));
+        }
+
+        [Fact]
+        public void Integrations_Includes_TaskUnobservedTaskExceptionIntegration()
+        {
+            Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(TaskUnobservedTaskExceptionIntegration));
+        }
+
         [Theory]
         [InlineData("Microsoft.")]
         [InlineData("System.")]
