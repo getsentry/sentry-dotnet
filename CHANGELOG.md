@@ -9,6 +9,10 @@
 - MaxCacheItems option to control files on disk (#846) @Tyrrrz
 - Move SentryHttpMessageHandlerBuilderFilter to Sentry.Extensions.Logging (#845) @Tyrrrz
 
+### Fixes
+
+- Fix CachingTransport throwing an exception when it can't move the files from the previous session (#871) @Tyrrrz
+
 ## 3.0.7
 
 ### Changes
