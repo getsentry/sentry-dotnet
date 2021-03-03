@@ -58,20 +58,6 @@ namespace Sentry.Internal.Http
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
 
-            // Processing directory may already contain some files left from previous session
-            // if the worker has been terminated unexpectedly.
-            // Move everything from that directory back to cache directory.
-            if (Directory.Exists(_processingDirectoryPath))
-            {
-                foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
-                {
-                    File.Move(
-                        filePath,
-                        Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
-                    );
-                }
-            }
-
             _worker = Task.Run(CachedTransportBackgroundTask);
         }
 
@@ -79,6 +65,20 @@ namespace Sentry.Internal.Http
         {
             try
             {
+                // Processing directory may already contain some files left from previous session
+                // if the worker has been terminated unexpectedly.
+                // Move everything from that directory back to cache directory.
+                if (Directory.Exists(_processingDirectoryPath))
+                {
+                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+                    {
+                        File.Move(
+                            filePath,
+                            Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
+                        );
+                    }
+                }
+
                 while (!_workerCts.IsCancellationRequested)
                 {
                     try
