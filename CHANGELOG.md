@@ -5,6 +5,7 @@
 ### Features
 
 - Adding TaskUnobservedTaskExceptionIntegration to default integrations and method to remove it (#870) @FilipNemec
+- Enrich transactions with more data (#875) @Tyrrrz
 
 ## 3.0.8
 
