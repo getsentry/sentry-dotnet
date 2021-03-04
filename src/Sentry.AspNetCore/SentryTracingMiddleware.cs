@@ -116,7 +116,7 @@ namespace Sentry.AspNetCore
             hub.ConfigureScope(scope =>
             {
                 scope.Transaction = transaction;
-                scope.Populate(context, _options);
+                scope.OnEvaluating += (_, _) => scope.Populate(context, _options);
             });
 
             try

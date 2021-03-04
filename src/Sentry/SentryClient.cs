@@ -156,8 +156,6 @@ namespace Sentry
                 return;
             }
 
-            // Extend transaction with additional data
-
             CaptureEnvelope(Envelope.FromTransaction(transaction));
         }
 

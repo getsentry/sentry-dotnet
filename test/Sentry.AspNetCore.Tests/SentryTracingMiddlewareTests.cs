@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -27,7 +28,8 @@ namespace Sentry.AspNetCore.Tests
 
             var hub = new Internal.Hub(sentryClient, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
             });
 
             var server = new TestServer(new WebHostBuilder()
@@ -127,7 +129,8 @@ namespace Sentry.AspNetCore.Tests
 
             var hub = new Internal.Hub(sentryClient, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
             });
 
             var server = new TestServer(new WebHostBuilder()
@@ -184,7 +187,8 @@ namespace Sentry.AspNetCore.Tests
 
             var hub = new Internal.Hub(sentryClient, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
             });
 
             var server = new TestServer(new WebHostBuilder()
@@ -225,8 +229,8 @@ namespace Sentry.AspNetCore.Tests
 
             // Assert
             transaction.Should().NotBeNull();
-            transaction?.Request.Method?.Should().Be("GET");
-            transaction?.Request.Url?.Should().Be("/person/13");
+            transaction?.Request.Method.Should().Be("GET");
+            transaction?.Request.Url.Should().Be("http://localhost/person/13");
             transaction?.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
         }
     }

@@ -108,12 +108,6 @@ namespace Sentry.Internal
 
             // Transactions are not handled by event processors, so some things need to be added manually
 
-            // Apply scope
-            ScopeManager.GetCurrent().Key.Apply(transaction);
-
-            // Apply enricher
-            new Enricher(_options).Apply(transaction);
-
             // Make a sampling decision if it hasn't been made already.
             // It could have been made by this point if the transaction was started
             // from a trace header which contains a sampling decision.
@@ -208,7 +202,15 @@ namespace Sentry.Internal
         {
             try
             {
-                _ownedClient.CaptureTransaction(transaction);
+                // Apply scope data
+                var currentScope = ScopeManager.GetCurrent();
+                currentScope.Key.Evaluate();
+                currentScope.Key.Apply(transaction);
+
+                // Apply enricher
+                new Enricher(_options).Apply(transaction);
+
+                currentScope.Value.CaptureTransaction(transaction);
 
                 // Clear the transaction from the scope
                 ScopeManager.WithScope(scope =>
