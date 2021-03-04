@@ -44,6 +44,14 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void DisableTaskUnobservedTaskExceptionCapture_TaskUnobservedTaskExceptionIntegration()
+        {
+            Sut.DisableTaskUnobservedTaskExceptionCapture();
+            Assert.DoesNotContain(Sut.Integrations!,
+                p => p.GetType() == typeof(TaskUnobservedTaskExceptionIntegration));
+        }
+
+        [Fact]
         public void AddIntegration_StoredInOptions()
         {
             var expected = Substitute.For<ISdkIntegration>();
@@ -251,6 +259,18 @@ namespace Sentry.Tests
         public void Integrations_Includes_AppDomainUnhandledExceptionIntegration()
         {
             Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
+        }
+
+        [Fact]
+        public void Integrations_Includes_AppDomainProcessExitIntegration()
+        {
+            Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(AppDomainProcessExitIntegration));
+        }
+
+        [Fact]
+        public void Integrations_Includes_TaskUnobservedTaskExceptionIntegration()
+        {
+            Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(TaskUnobservedTaskExceptionIntegration));
         }
 
         [Theory]

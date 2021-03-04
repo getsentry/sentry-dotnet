@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
@@ -37,6 +38,13 @@ namespace Sentry
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) =>
             options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
+
+        /// <summary>
+        /// Disables the capture of errors through <see cref="TaskScheduler.UnobservedTaskException"/>.
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableTaskUnobservedTaskExceptionCapture(this SentryOptions options) =>
+            options.RemoveIntegration<TaskUnobservedTaskExceptionIntegration>();
 
 #if NETFX
         /// <summary>
