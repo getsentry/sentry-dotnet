@@ -14,6 +14,7 @@ namespace Sentry.Internal
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
+        private readonly Enricher _enricher;
 
         private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
 
@@ -51,6 +52,8 @@ namespace Sentry.Internal
 
             // Push the first scope so the async local starts from here
             _rootScope = PushScope();
+
+            _enricher = new Enricher(options);
         }
 
         public Hub(SentryOptions options)
@@ -208,7 +211,7 @@ namespace Sentry.Internal
                 currentScope.Key.Apply(transaction);
 
                 // Apply enricher
-                new Enricher(_options).Apply(transaction);
+                _enricher.Apply(transaction);
 
                 currentScope.Value.CaptureTransaction(transaction);
 

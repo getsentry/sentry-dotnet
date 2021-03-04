@@ -65,10 +65,7 @@ namespace Sentry.Internal
             }
 
             // Release
-            if (eventLike.Release is null)
-            {
-                eventLike.Release = _options.Release ?? _releaseLazy.Value;
-            }
+            eventLike.Release ??= _options.Release ?? _releaseLazy.Value;
 
             // Environment
             if (string.IsNullOrWhiteSpace(eventLike.Environment))
