@@ -70,7 +70,7 @@ namespace Sentry.Internal
             // Environment
             if (string.IsNullOrWhiteSpace(eventLike.Environment))
             {
-                var foundEnvironment = EnvironmentLocator.Locate();
+                var foundEnvironment = EnvironmentLocator.Current;
                 eventLike.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
                     ? string.IsNullOrWhiteSpace(_options.Environment)
                         ? Constants.ProductionEnvironmentSetting
