@@ -1,10 +1,15 @@
 # Changelog
 
-## 3.0.8
+## Unpublished
 
 ### Features
 
 - Adding TaskUnobservedTaskExceptionIntegration to default integrations and method to remove it (#870) @FilipNemec
+
+## 3.0.8
+
+### Features
+
 - Add AddSentryTag and AddSentryContext Extensions for exception class (#834) @lucas-zimerman
 - Associate span exceptions with event exceptions (#848) @Tyrrrz
 - MaxCacheItems option to control files on disk (#846) @Tyrrrz
