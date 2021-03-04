@@ -432,76 +432,6 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void StartTransaction_ContainsSdk()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
-
-            // Act
-            var transaction = hub.StartTransaction("name", "operation");
-
-            // Assert
-            transaction.Sdk.Name.Should().NotBeNullOrWhiteSpace();
-            transaction.Sdk.Version.Should().NotBeNullOrWhiteSpace();
-        }
-
-        [Fact]
-        public void StartTransaction_ContainsRelease()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
-
-            // Act
-            var transaction = hub.StartTransaction("name", "operation");
-
-            // Assert
-            transaction.Release.Should().NotBeNullOrWhiteSpace();
-        }
-
-        [Fact]
-        public void StartTransaction_ContainsEnvironment()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
-
-            // Act
-            var transaction = hub.StartTransaction("name", "operation");
-
-            // Assert
-            transaction.Environment.Should().NotBeNullOrWhiteSpace();
-        }
-
-        [Fact]
-        public void StartTransaction_ContainsTagsFromScope()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
-
-            hub.ConfigureScope(scope =>
-            {
-                scope.SetTag("foo", "bar");
-
-                // Act
-                var transaction = hub.StartTransaction("name", "operation");
-
-                // Assert
-                transaction.Tags.Should().Contain(tag => tag.Key == "foo" && tag.Value == "bar");
-            });
-        }
-
-        [Fact]
         public void GetTraceHeader_ReturnsHeaderForActiveSpan()
         {
             // Arrange
@@ -547,6 +477,89 @@ namespace NotSentry.Tests
 
             // Assert
             hub.WithScope(scope => scope.Transaction.Should().BeNull());
+        }
+
+        [Fact]
+        public void CaptureTransaction_ContainsSdk()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            transaction.Sdk.Name.Should().NotBeNullOrWhiteSpace();
+            transaction.Sdk.Version.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public void StartTransaction_ContainsRelease()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            transaction.Release.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public void StartTransaction_ContainsEnvironment()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            transaction.Environment.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public void StartTransaction_ContainsTagsFromScope()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            hub.ConfigureScope(scope => scope.SetTag("foo", "bar"));
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            transaction.Tags.Should().Contain(tag => tag.Key == "foo" && tag.Value == "bar");
         }
     }
 }
