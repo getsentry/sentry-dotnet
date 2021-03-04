@@ -111,31 +111,8 @@ namespace Sentry.Internal
             // Apply scope
             ScopeManager.GetCurrent().Key.Apply(transaction);
 
-            // SDK information
-            var nameAndVersion = MainSentryEventProcessor.NameAndVersion;
-            var protocolPackageName = MainSentryEventProcessor.ProtocolPackageName;
-
-            if (transaction.Sdk.Version == null && transaction.Sdk.Name == null)
-            {
-                transaction.Sdk.Name = Constants.SdkName;
-                transaction.Sdk.Version = nameAndVersion.Version;
-            }
-
-            if (nameAndVersion.Version != null)
-            {
-                transaction.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
-            }
-
-            // Release information
-            transaction.Release ??= _options.Release ?? ReleaseLocator.GetCurrent();
-
-            // Environment information
-            var foundEnvironment = EnvironmentLocator.Locate();
-            transaction.Environment ??= string.IsNullOrWhiteSpace(foundEnvironment)
-                ? string.IsNullOrWhiteSpace(_options.Environment)
-                    ? Constants.ProductionEnvironmentSetting
-                    : _options.Environment
-                : foundEnvironment;
+            // Apply enricher
+            new Enricher(_options).Apply(transaction);
 
             // Make a sampling decision if it hasn't been made already.
             // It could have been made by this point if the transaction was started
