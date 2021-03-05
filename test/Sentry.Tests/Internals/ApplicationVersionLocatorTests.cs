@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using FluentAssertions;
 using Sentry.Internal;
 using Sentry.Tests.Helpers.Reflection;
 using Xunit;
@@ -21,6 +22,22 @@ namespace Sentry.Tests.Internals
             var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, new AssemblyName(name));
             var actual = ApplicationVersionLocator.GetCurrent(asm);
             Assert.Equal($"{name}@{expectedVersion}", actual);
+        }
+
+        [Fact]
+        public void GetCurrent_VersionWithPrefix_ReturnsVersionAsIs()
+        {
+            // Arrange
+            var asm = AssemblyCreationHelper.CreateWithInformationalVersion(
+                "app@1.0.0",
+                new AssemblyName("dynamic-assembly")
+            );
+
+            // Act
+            var version = ApplicationVersionLocator.GetCurrent(asm);
+
+            // Assert
+            version.Should().Be("app@1.0.0");
         }
 
         [Theory]
