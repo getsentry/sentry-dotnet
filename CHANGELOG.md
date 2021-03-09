@@ -6,6 +6,9 @@
 
 - Adding TaskUnobservedTaskExceptionIntegration to default integrations and method to remove it (#870) @FilipNemec
 
+### Fixes
+  - Don't add version prefix in release if it's already set (#877) @Tyrrrz
+
 ## 3.0.8
 
 ### Features
