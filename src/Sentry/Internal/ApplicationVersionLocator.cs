@@ -22,7 +22,10 @@ namespace Sentry.Internal
                 return null;
             }
 
-            return $"{nameAndVersion.Name}@{nameAndVersion.Version}";
+            // Don't add name prefix if it's already set by the user
+            return !nameAndVersion.Version.Contains('@')
+                ? $"{nameAndVersion.Name}@{nameAndVersion.Version}"
+                : nameAndVersion.Version;
         }
     }
 }
