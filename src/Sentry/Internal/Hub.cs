@@ -14,6 +14,7 @@ namespace Sentry.Internal
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
+        private readonly Enricher _enricher;
 
         private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
 
@@ -51,6 +52,8 @@ namespace Sentry.Internal
 
             // Push the first scope so the async local starts from here
             _rootScope = PushScope();
+
+            _enricher = new Enricher(options);
         }
 
         public Hub(SentryOptions options)
@@ -107,35 +110,6 @@ namespace Sentry.Internal
             var transaction = new Transaction(this, context);
 
             // Transactions are not handled by event processors, so some things need to be added manually
-
-            // Apply scope
-            ScopeManager.GetCurrent().Key.Apply(transaction);
-
-            // SDK information
-            var nameAndVersion = MainSentryEventProcessor.NameAndVersion;
-            var protocolPackageName = MainSentryEventProcessor.ProtocolPackageName;
-
-            if (transaction.Sdk.Version == null && transaction.Sdk.Name == null)
-            {
-                transaction.Sdk.Name = Constants.SdkName;
-                transaction.Sdk.Version = nameAndVersion.Version;
-            }
-
-            if (nameAndVersion.Version != null)
-            {
-                transaction.Sdk.AddPackage(protocolPackageName, nameAndVersion.Version);
-            }
-
-            // Release information
-            transaction.Release ??= _options.Release ?? ReleaseLocator.GetCurrent();
-
-            // Environment information
-            var foundEnvironment = EnvironmentLocator.Locate();
-            transaction.Environment ??= string.IsNullOrWhiteSpace(foundEnvironment)
-                ? string.IsNullOrWhiteSpace(_options.Environment)
-                    ? Constants.ProductionEnvironmentSetting
-                    : _options.Environment
-                : foundEnvironment;
 
             // Make a sampling decision if it hasn't been made already.
             // It could have been made by this point if the transaction was started
@@ -231,7 +205,15 @@ namespace Sentry.Internal
         {
             try
             {
-                _ownedClient.CaptureTransaction(transaction);
+                // Apply scope data
+                var currentScope = ScopeManager.GetCurrent();
+                currentScope.Key.Evaluate();
+                currentScope.Key.Apply(transaction);
+
+                // Apply enricher
+                _enricher.Apply(transaction);
+
+                currentScope.Value.CaptureTransaction(transaction);
 
                 // Clear the transaction from the scope
                 ScopeManager.WithScope(scope =>

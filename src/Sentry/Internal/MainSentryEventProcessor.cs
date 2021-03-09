@@ -2,14 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Sentry.Extensibility;
-using Sentry.PlatformAbstractions;
-using Sentry.Protocol;
-using Sentry.Reflection;
-using OperatingSystem = Sentry.Protocol.OperatingSystem;
-using Runtime = Sentry.Protocol.Runtime;
 
 namespace Sentry.Internal
 {
@@ -18,34 +12,14 @@ namespace Sentry.Internal
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
 
+        private readonly Enricher _enricher;
+
         private readonly Lazy<string?> _release;
-
-        private readonly Lazy<Runtime> _runtime = new(() =>
-        {
-            var current = PlatformAbstractions.Runtime.Current;
-            return new Runtime
-            {
-                Name = current.Name,
-                Version = current.Version,
-                RawDescription = current.Raw
-            };
-        });
-
-        internal static readonly SdkVersion NameAndVersion
-            = typeof(ISentryClient).Assembly.GetNameAndVersion();
-
-        internal static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
         internal string? Release => _release.Value;
-        internal Runtime Runtime => _runtime.Value;
-
-        /// <summary>
-        /// A flag that tells the endpoint to figure out the user ip.
-        /// </summary>
-        internal string UserIpServerInferred = "{{auto}}";
 
         public MainSentryEventProcessor(
             SentryOptions options,
@@ -55,25 +29,13 @@ namespace Sentry.Internal
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
             _release = lazyRelease ?? new Lazy<string?>(ReleaseLocator.GetCurrent);
+
+            _enricher = new Enricher(options);
         }
 
         public SentryEvent Process(SentryEvent @event)
         {
             _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
-
-            if (!@event.Contexts.ContainsKey(Runtime.Type))
-            {
-                @event.Contexts[Runtime.Type] = Runtime;
-            }
-
-            if (!@event.Contexts.ContainsKey(OperatingSystem.Type))
-            {
-                // RuntimeInformation.OSDescription is throwing on Mono 5.12
-                if (!PlatformAbstractions.Runtime.Current.IsMono())
-                {
-                    @event.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
-                }
-            }
 
             if (TimeZoneInfo.Local is { } timeZoneInfo)
             {
@@ -97,29 +59,6 @@ namespace Sentry.Internal
 
             @event.Platform = Sentry.Constants.Platform;
 
-            // SDK Name/Version might have be already set by an outer package
-            // e.g: ASP.NET Core can set itself as the SDK
-            if (@event.Sdk.Version == null && @event.Sdk.Name == null)
-            {
-                @event.Sdk.Name = Constants.SdkName;
-                @event.Sdk.Version = NameAndVersion.Version;
-            }
-
-            if (NameAndVersion.Version != null)
-            {
-                @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
-            }
-
-            // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-            if (_options.SendDefaultPii)
-            {
-                if (_options.IsEnvironmentUser && !@event.HasUser())
-                {
-                    @event.User.Username = Environment.UserName;
-                }
-                @event.User.IpAddress ??= UserIpServerInferred;
-            }
-
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -141,18 +80,6 @@ namespace Sentry.Internal
             if (@event.Release == null)
             {
                 @event.Release = _options.Release ?? Release;
-            }
-
-            // Recommendation: The 'Environment' setting should always be set
-            //                 with a default fallback.
-            if (string.IsNullOrWhiteSpace(@event.Environment))
-            {
-                var foundEnvironment = EnvironmentLocator.Locate();
-                @event.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
-                    ? string.IsNullOrWhiteSpace(_options.Environment)
-                        ? Constants.ProductionEnvironmentSetting
-                        : _options.Environment
-                    : foundEnvironment;
             }
 
             if (@event.Exception == null)
@@ -192,7 +119,8 @@ namespace Sentry.Internal
                 }
             }
 
-            _options.ApplyDefaultTags(@event);
+            // Run enricher to fill in the gaps
+            _enricher.Apply(@event);
 
             return @event;
         }

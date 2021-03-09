@@ -6,11 +6,9 @@ using System.Threading;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;
-using Constants = Sentry.Internal.Constants;
 
 namespace Sentry.Tests.Internals
 {
@@ -77,7 +75,7 @@ namespace Sentry.Tests.Internals
             _ = sut.Process(evt);
 
             //Assert
-            Assert.Equal(sut.UserIpServerInferred, evt.User.IpAddress);
+            Assert.Equal("{{auto}}", evt.User.IpAddress);
         }
 
         [Fact]

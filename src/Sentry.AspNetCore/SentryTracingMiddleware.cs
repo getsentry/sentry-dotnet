@@ -113,7 +113,11 @@ namespace Sentry.AspNetCore
 
             // Expose the transaction on the scope so that the user
             // can retrieve it and start child spans off of it.
-            hub.ConfigureScope(scope => scope.Transaction = transaction);
+            hub.ConfigureScope(scope =>
+            {
+                scope.Transaction = transaction;
+                scope.OnEvaluating += (_, _) => scope.Populate(context, _options);
+            });
 
             try
             {

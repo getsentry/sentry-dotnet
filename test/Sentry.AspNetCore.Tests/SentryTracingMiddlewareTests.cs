@@ -1,5 +1,6 @@
 ﻿#if !NETCOREAPP2_1
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
+using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -26,7 +28,8 @@ namespace Sentry.AspNetCore.Tests
 
             var hub = new Internal.Hub(sentryClient, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
             });
 
             var server = new TestServer(new WebHostBuilder()
@@ -126,7 +129,8 @@ namespace Sentry.AspNetCore.Tests
 
             var hub = new Internal.Hub(sentryClient, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
             });
 
             var server = new TestServer(new WebHostBuilder()
@@ -171,6 +175,63 @@ namespace Sentry.AspNetCore.Tests
             transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
             transaction.ParentSpanId.Should().Be(SpanId.Parse("1000000000000000"));
             transaction.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Transaction_is_automatically_populated_with_request_data()
+        {
+            // Arrange
+            ITransaction transaction = null;
+
+            var sentryClient = Substitute.For<ISentryClient>();
+
+            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
+            });
+
+            var server = new TestServer(new WebHostBuilder()
+                .UseDefaultServiceProvider(di => di.EnableValidation())
+                .UseSentry()
+                .ConfigureServices(services =>
+                {
+                    services.AddRouting();
+
+                    services.RemoveAll(typeof(Func<IHub>));
+                    services.AddSingleton<Func<IHub>>(() => hub);
+                })
+                .Configure(app =>
+                {
+                    app.UseRouting();
+                    app.UseSentryTracing();
+
+                    app.UseEndpoints(routes =>
+                    {
+                        routes.Map("/person/{id}", _ =>
+                        {
+                            transaction = hub.GetSpan() as ITransaction;
+                            return Task.CompletedTask;
+                        });
+                    });
+                })
+            );
+
+            var client = server.CreateClient();
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+            {
+                Headers = {{"foo", "bar"}}
+            };
+
+            await client.SendAsync(request);
+
+            // Assert
+            transaction.Should().NotBeNull();
+            transaction?.Request.Method.Should().Be("GET");
+            transaction?.Request.Url.Should().Be("http://localhost/person/13");
+            transaction?.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
         }
     }
 }
