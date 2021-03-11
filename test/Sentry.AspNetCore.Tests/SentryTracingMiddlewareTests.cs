@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
-using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests

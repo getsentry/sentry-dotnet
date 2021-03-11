@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -317,14 +316,14 @@ namespace Sentry
         /// Captures a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static void CaptureTransaction(ITransaction transaction)
+        public static void CaptureTransaction(Transaction transaction)
             => _hub.CaptureTransaction(transaction);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransaction StartTransaction(
+        public static ITransactionTracer StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
             => _hub.StartTransaction(context, customSamplingContext);
@@ -333,28 +332,28 @@ namespace Sentry
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransaction StartTransaction(ITransactionContext context)
+        public static ITransactionTracer StartTransaction(ITransactionContext context)
             => _hub.StartTransaction(context);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransaction StartTransaction(string name, string operation)
+        public static ITransactionTracer StartTransaction(string name, string operation)
             => _hub.StartTransaction(name, operation);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransaction StartTransaction(string name, string operation, string description)
+        public static ITransactionTracer StartTransaction(string name, string operation, string description)
             => _hub.StartTransaction(name, operation, description);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
+        public static ITransactionTracer StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
             => _hub.StartTransaction(name, operation, traceHeader);
 
         /// <summary>
@@ -371,7 +370,7 @@ namespace Sentry
         /// Gets the last active span.
         /// </summary>
         [DebuggerStepThrough]
-        public static ISpan? GetSpan()
+        public static ISpanTracer? GetSpan()
             => _hub.GetSpan();
 
         /// <summary>

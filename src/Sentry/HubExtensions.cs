@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -15,13 +14,13 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        public static ITransaction StartTransaction(this IHub hub, ITransactionContext context) =>
+        public static ITransactionTracer StartTransaction(this IHub hub, ITransactionContext context) =>
             hub.StartTransaction(context, new Dictionary<string, object?>());
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        public static ITransaction StartTransaction(
+        public static ITransactionTracer StartTransaction(
             this IHub hub,
             string name,
             string operation) =>
@@ -30,7 +29,7 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        public static ITransaction StartTransaction(
+        public static ITransactionTracer StartTransaction(
             this IHub hub,
             string name,
             string operation,
@@ -45,7 +44,7 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction from the specified trace header.
         /// </summary>
-        public static ITransaction StartTransaction(
+        public static ITransactionTracer StartTransaction(
             this IHub hub,
             string name,
             string operation,

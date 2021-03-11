@@ -51,7 +51,7 @@ namespace Sentry.AspNetCore
             }
         }
 
-        private ITransaction? TryStartTransaction(HttpContext context)
+        private ITransactionTracer? TryStartTransaction(HttpContext context)
         {
             try
             {

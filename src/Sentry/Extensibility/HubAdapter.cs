@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {
@@ -75,7 +74,7 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public ITransaction StartTransaction(
+        public ITransactionTracer StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
             => SentrySdk.StartTransaction(context, customSamplingContext);
@@ -91,7 +90,7 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public ISpan? GetSpan()
+        public ISpanTracer? GetSpan()
             => SentrySdk.GetSpan();
 
         /// <summary>
@@ -167,7 +166,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void CaptureTransaction(ITransaction transaction)
+        public void CaptureTransaction(Transaction transaction)
             => SentrySdk.CaptureTransaction(transaction);
 
         /// <summary>

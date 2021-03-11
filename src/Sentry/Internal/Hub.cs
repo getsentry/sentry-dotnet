@@ -103,11 +103,11 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public ITransaction StartTransaction(
+        public ITransactionTracer StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
         {
-            var transaction = new Transaction(this, context);
+            var transaction = new TransactionTracer(this, context);
 
             // Transactions are not handled by event processors, so some things need to be added manually
 
@@ -153,7 +153,7 @@ namespace Sentry.Internal
             _ = _exceptionToSpanMap.GetValue(exception, _ => span);
         }
 
-        public ISpan? GetSpan()
+        public ISpanTracer? GetSpan()
         {
             var (currentScope, _) = ScopeManager.GetCurrent();
             return currentScope.GetSpan();
@@ -201,7 +201,7 @@ namespace Sentry.Internal
             }
         }
 
-        public void CaptureTransaction(ITransaction transaction)
+        public void CaptureTransaction(Transaction transaction)
         {
             try
             {
@@ -214,15 +214,6 @@ namespace Sentry.Internal
                 _enricher.Apply(transaction);
 
                 currentScope.Value.CaptureTransaction(transaction);
-
-                // Clear the transaction from the scope
-                ScopeManager.WithScope(scope =>
-                {
-                    if (scope.Transaction == transaction)
-                    {
-                        scope.Transaction = null;
-                    }
-                });
             }
             catch (Exception e)
             {

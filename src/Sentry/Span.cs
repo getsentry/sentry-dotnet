@@ -1,26 +1,13 @@
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
-    // https://develop.sentry.dev/sdk/event-payloads/span
-    /// <summary>
-    /// Transaction span.
-    /// </summary>
     public class Span : ISpan, IJsonSerializable
     {
-        private readonly IHub _hub;
-
-        // This needs to be Transaction and not ITransaction because
-        // ITransaction doesn't contain `StartChild(..., parentSpanId)`
-        // which we need here.
-        private readonly Transaction _parentTransaction;
-
         /// <inheritdoc />
         public SpanId SpanId { get; private set; }
 
@@ -51,63 +38,56 @@ namespace Sentry
         /// <inheritdoc />
         public bool? IsSampled { get; internal set; }
 
-        private ConcurrentDictionary<string, string>? _tags;
+        private Dictionary<string, string>? _tags;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
-            (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
+            (_tags ??= new Dictionary<string, string>())[key] = value;
 
         /// <inheritdoc />
         public void UnsetTag(string key) =>
-            (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
+            (_tags ??= new Dictionary<string, string>()).Remove(key);
 
-        private ConcurrentDictionary<string, object?>? _data;
+        // Aka 'data'
+        private Dictionary<string, object?>? _extra;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value) =>
-            (_data ??= new ConcurrentDictionary<string, object?>())[key] = value;
+            (_extra ??= new Dictionary<string, object?>())[key] = value;
 
         /// <summary>
-        /// Initializes an instance of <see cref="Span"/>.
+        /// Initializes an instance of <see cref="SpanTracer"/>.
         /// </summary>
-        public Span(IHub hub, Transaction parentTransaction, SpanId? parentSpanId, string operation)
+        public Span(SpanId? parentSpanId, string operation)
         {
-            _hub = hub;
-            _parentTransaction = parentTransaction;
-
             SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = SentryId.Create();
             Operation = operation;
         }
 
-        /// <inheritdoc />
-        public ISpan StartChild(string operation) =>
-            _parentTransaction.StartChild(SpanId, operation);
-
-        /// <inheritdoc />
-        public void Finish(SpanStatus status = SpanStatus.Ok)
+        /// <summary>
+        /// Initializes an instance of <see cref="SpanTracer"/>.
+        /// </summary>
+        public Span(ISpanTracer tracer)
+            : this(tracer.ParentSpanId, tracer.Operation)
         {
-            EndTimestamp = DateTimeOffset.UtcNow;
-            Status = status;
+            SpanId = tracer.SpanId;
+            TraceId = tracer.TraceId;
+            StartTimestamp = tracer.StartTimestamp;
+            EndTimestamp = tracer.EndTimestamp;
+            Description = tracer.Description;
+            Status = tracer.Status;
+            IsSampled = tracer.IsSampled;
+            _extra = tracer.Extra.ToDictionary();
+            _tags = tracer.Tags.ToDictionary();
         }
-
-        /// <inheritdoc />
-        public void Finish(Exception exception, SpanStatus status)
-        {
-            _hub.BindException(exception, this);
-            Finish(status);
-        }
-
-        /// <inheritdoc />
-        public void Finish(Exception exception) =>
-            Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
@@ -162,7 +142,7 @@ namespace Sentry
                 writer.WriteDictionary("tags", tags!);
             }
 
-            if (_data is {} data && data.Any())
+            if (_extra is {} data && data.Any())
             {
                 writer.WriteDictionary("data", data!);
             }
@@ -173,11 +153,8 @@ namespace Sentry
         /// <summary>
         /// Parses a span from JSON.
         /// </summary>
-        public static Span FromJson(Transaction parentTransaction, JsonElement json)
+        public static Span FromJson(JsonElement json)
         {
-            // A Span deserialized is just used as wire-protocol and doesn't need a Hub
-            var hub = DisabledHub.Instance;
-
             var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
@@ -187,10 +164,10 @@ namespace Sentry
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.Pipe(v => new ConcurrentDictionary<string, object?>(v!));
+            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
 
-            return new Span(hub, parentTransaction, parentSpanId, operation)
+            return new Span(parentSpanId, operation)
             {
                 SpanId = spanId,
                 TraceId = traceId,
@@ -199,8 +176,8 @@ namespace Sentry
                 Description = description,
                 Status = status,
                 IsSampled = isSampled,
-                _tags = tags,
-                _data = data
+                _tags = tags!,
+                _extra = data!
             };
         }
     }

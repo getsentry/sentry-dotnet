@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests.Protocol
@@ -18,7 +15,7 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var timestamp = DateTimeOffset.MaxValue;
-            var transaction = new Transaction(DisabledHub.Instance, "name123", "op123")
+            var transaction = new TransactionTracer(DisabledHub.Instance, "name123", "op123")
             {
                 Description = "desc123",
                 Status = SpanStatus.Aborted,
@@ -69,7 +66,7 @@ namespace Sentry.Tests.Protocol
             transaction.Finish(SpanStatus.Aborted);
 
             // Act
-            var actualString = transaction.ToJsonString();
+            var actualString = new Transaction(transaction).ToJsonString();
             var actual = Transaction.FromJson(Json.Parse(actualString));
 
             // Assert
@@ -88,7 +85,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_LevelOne_Works()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op");
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
 
             // Act
             var child = transaction.StartChild("child op", "child desc");
@@ -105,7 +102,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_LevelTwo_Works()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op");
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
 
             // Act
             var child = transaction.StartChild("child op", "child desc");
@@ -124,7 +121,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_SamplingInherited_Null()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op") {IsSampled = null};
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op") {IsSampled = null};
 
             // Act
             var child = transaction.StartChild("child op", "child desc");
@@ -137,7 +134,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_SamplingInherited_True()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op") {IsSampled = true};
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op") {IsSampled = true};
 
             // Act
             var child = transaction.StartChild("child op", "child desc");
@@ -150,7 +147,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_SamplingInherited_False()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op") {IsSampled = false};
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op") {IsSampled = false};
 
             // Act
             var child = transaction.StartChild("child op", "child desc");
@@ -163,7 +160,7 @@ namespace Sentry.Tests.Protocol
         public void Finish_RecordsTime()
         {
             // Arrange
-            var transaction = new Transaction(DisabledHub.Instance, "my name", "my op");
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
 
             // Act
             transaction.Finish();
@@ -180,13 +177,13 @@ namespace Sentry.Tests.Protocol
             var client = Substitute.For<ISentryClient>();
             var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
-            var transaction = new Transaction(hub, "my name", "my op");
+            var transaction = new TransactionTracer(hub, "my name", "my op");
 
             // Act
             transaction.Finish();
 
             // Assert
-            client.Received(1).CaptureTransaction(transaction);
+            client.Received(1).CaptureTransaction(Arg.Any<Transaction>());
         }
 
         [Fact]
@@ -197,7 +194,7 @@ namespace Sentry.Tests.Protocol
             var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             var exception = new InvalidOperationException();
-            var transaction = new Transaction(hub, "my name", "my op");
+            var transaction = new TransactionTracer(hub, "my name", "my op");
 
             // Act
             transaction.Finish(exception);

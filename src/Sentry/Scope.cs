@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -151,7 +150,7 @@ namespace Sentry
         /// <summary>
         /// Transaction.
         /// </summary>
-        public ITransaction? Transaction { get; set; }
+        public ITransactionTracer? Transaction { get; set; }
 
         /// <inheritdoc />
         public SdkVersion Sdk { get; } = new();
@@ -389,6 +388,6 @@ namespace Sentry
         /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
         /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
         /// </summary>
-        public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
+        public ISpanTracer? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
     }
 }

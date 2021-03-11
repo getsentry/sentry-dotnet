@@ -25,7 +25,7 @@ namespace Sentry
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        ITransaction StartTransaction(
+        ITransactionTracer StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext
         );
@@ -41,7 +41,7 @@ namespace Sentry
         /// <summary>
         /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
         /// </summary>
-        ISpan? GetSpan();
+        ISpanTracer? GetSpan();
 
         /// <summary>
         /// Gets the Sentry trace header for the last active span.
