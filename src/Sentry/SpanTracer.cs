@@ -4,9 +4,8 @@ using System.Collections.Generic;
 
 namespace Sentry
 {
-    // https://develop.sentry.dev/sdk/event-payloads/span
     /// <summary>
-    /// Transaction span.
+    /// Transaction span tracer.
     /// </summary>
     public class SpanTracer : ISpanTracer
     {

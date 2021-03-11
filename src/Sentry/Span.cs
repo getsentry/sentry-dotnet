@@ -6,6 +6,10 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
+    // https://develop.sentry.dev/sdk/event-payloads/span
+    /// <summary>
+    /// Transaction span.
+    /// </summary>
     public class Span : ISpan, IJsonSerializable
     {
         /// <inheritdoc />

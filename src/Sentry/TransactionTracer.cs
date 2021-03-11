@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Sentry
 {
+    /// <summary>
+    /// Transaction tracer.
+    /// </summary>
     public class TransactionTracer : ITransactionTracer
     {
         private readonly IHub _hub;
@@ -51,7 +54,7 @@ namespace Sentry
             private set => Contexts.Trace.TraceId = value;
         }
 
-        /// <inheritdoc cref="ITransaction.Name" />
+        /// <inheritdoc cref="ITransactionTracer.Name" />
         public string Name { get; set; }
 
         /// <inheritdoc />
@@ -63,17 +66,17 @@ namespace Sentry
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; internal set; }
 
-        /// <inheritdoc cref="ISpan.Operation" />
+        /// <inheritdoc cref="ISpanTracer.Operation" />
         public string Operation
         {
             get => Contexts.Trace.Operation;
             set => Contexts.Trace.Operation = value;
         }
 
-        /// <inheritdoc cref="ISpan.Description" />
+        /// <inheritdoc cref="ISpanTracer.Description" />
         public string? Description { get; set; }
 
-        /// <inheritdoc cref="ISpan.Status" />
+        /// <inheritdoc cref="ISpanTracer.Status" />
         public SpanStatus? Status
         {
             get => Contexts.Trace.Status;
