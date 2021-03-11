@@ -2,6 +2,9 @@
 
 namespace Sentry
 {
+    /// <summary>
+    /// Transaction tracer.
+    /// </summary>
     public interface ITransactionTracer : ITransaction, ISpanTracer
     {
         /// <summary>
