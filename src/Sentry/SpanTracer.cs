@@ -30,13 +30,13 @@ namespace Sentry
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
 
-        /// <inheritdoc cref="ISpan.Operation" />
+        /// <inheritdoc cref="ISpanTracer.Operation" />
         public string Operation { get; set; }
 
-        /// <inheritdoc cref="ISpan.Description" />
+        /// <inheritdoc cref="ISpanTracer.Description" />
         public string? Description { get; set; }
 
-        /// <inheritdoc cref="ISpan.Status" />
+        /// <inheritdoc cref="ISpanTracer.Status" />
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
