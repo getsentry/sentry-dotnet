@@ -495,9 +495,11 @@ namespace NotSentry.Tests
             // Act
             transaction.Finish();
 
+            var finalTransaction = new Transaction(transaction);
+
             // Assert
-            transaction.Sdk.Name.Should().NotBeNullOrWhiteSpace();
-            transaction.Sdk.Version.Should().NotBeNullOrWhiteSpace();
+            finalTransaction.Sdk.Name.Should().NotBeNullOrWhiteSpace();
+            finalTransaction.Sdk.Version.Should().NotBeNullOrWhiteSpace();
         }
 
         [Fact]
@@ -517,7 +519,7 @@ namespace NotSentry.Tests
             transaction.Finish();
 
             // Assert
-            transaction.Release.Should().NotBeNullOrWhiteSpace();
+            new Transaction(transaction).Release.Should().NotBeNullOrWhiteSpace();
         }
 
         [Fact]
@@ -537,7 +539,7 @@ namespace NotSentry.Tests
             transaction.Finish();
 
             // Assert
-            transaction.Environment.Should().NotBeNullOrWhiteSpace();
+            new Transaction(transaction).Environment.Should().NotBeNullOrWhiteSpace();
         }
 
         [Fact]
@@ -559,7 +561,7 @@ namespace NotSentry.Tests
             transaction.Finish();
 
             // Assert
-            transaction.Tags.Should().Contain(tag => tag.Key == "foo" && tag.Value == "bar");
+            new Transaction(transaction).Tags.Should().Contain(tag => tag.Key == "foo" && tag.Value == "bar");
         }
     }
 }

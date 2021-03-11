@@ -66,11 +66,12 @@ namespace Sentry.Tests.Protocol
             transaction.Finish(SpanStatus.Aborted);
 
             // Act
-            var actualString = new Transaction(transaction).ToJsonString();
+            var finalTransaction = new Transaction(transaction);
+            var actualString = finalTransaction.ToJsonString();
             var actual = Transaction.FromJson(Json.Parse(actualString));
 
             // Assert
-            actual.Should().BeEquivalentTo(transaction, o =>
+            actual.Should().BeEquivalentTo(finalTransaction, o =>
             {
                 // Timestamps lose some precision when writing to JSON
                 o.Using<DateTimeOffset>(ctx =>
