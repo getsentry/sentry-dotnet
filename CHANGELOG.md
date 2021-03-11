@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Rework transactions (#880) @Tyrrrz
+
 ## 3.1.0
 
 ### Features
@@ -8,7 +14,7 @@
 - Enrich transactions with more data (#875) @Tyrrrz
 
 ### Fixes
-  - Don't add version prefix in release if it's already set (#877) @Tyrrrz
+- Don't add version prefix in release if it's already set (#877) @Tyrrrz
 
 ## 3.0.8
 
