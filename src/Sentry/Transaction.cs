@@ -59,7 +59,7 @@ namespace Sentry
             private set => Contexts.Trace.TraceId = value;
         }
 
-        /// <inheritdoc cref="ITransaction.Name" />
+        /// <inheritdoc />
         public string Name { get; private set; }
 
         /// <inheritdoc />
@@ -71,17 +71,17 @@ namespace Sentry
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; internal set; } // internal for testing
 
-        /// <inheritdoc cref="ISpan.Operation" />
+        /// <inheritdoc />
         public string Operation
         {
             get => Contexts.Trace.Operation;
             private set => Contexts.Trace.Operation = value;
         }
 
-        /// <inheritdoc cref="ISpan.Description" />
+        /// <inheritdoc />
         public string? Description { get; private set; }
 
-        /// <inheritdoc cref="ISpan.Status" />
+        /// <inheritdoc />
         public SpanStatus? Status
         {
             get => Contexts.Trace.Status;
