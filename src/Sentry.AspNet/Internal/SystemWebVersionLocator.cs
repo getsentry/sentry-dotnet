@@ -7,14 +7,16 @@ namespace Sentry.AspNet.Internal
 {
     internal static class SystemWebVersionLocator
     {
-        internal static string? GetCurrent()
+        public static string? GetCurrent() => GetCurrent(ReleaseLocator.GetCurrent());
+        internal static string? GetCurrent(string? release)
         {
-            if (ReleaseLocator.GetCurrent() is string release)
+            if (release != null)
             {
                 return release;
             }
             else if (HttpContext.Current?.ApplicationInstance?.GetType() is Type type)
             {
+                //Usually the type is ASP.global_asax and the BaseType is the Web Application.
                 while (type != null && type.Namespace == "ASP")
                 {
                     type = type.BaseType;
