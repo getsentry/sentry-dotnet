@@ -1,5 +1,11 @@
 # Changelog
 
+## Unchanged
+
+### Fixes
+
+- Retrieve CurrentVersion for Asp Net applications (#884) @lucas-zimerman
+
 ## 3.1.0
 
 ### Features
