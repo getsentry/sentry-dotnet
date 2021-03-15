@@ -432,6 +432,32 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void StartTransaction_DynamicSampling_CanRejectTransactionStartedFromHeader()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = _ => 0,
+                TracesSampleRate = 0
+            });
+
+            var traceHeader = new SentryTraceHeader(
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+                SpanId.Parse("2000000000000000"),
+                true
+            );
+
+            // Act
+            var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+
+            // Assert
+            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
+            transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
+            transaction.IsSampled.Should().BeFalse();
+        }
+
+        [Fact]
         public void GetTraceHeader_ReturnsHeaderForActiveSpan()
         {
             // Arrange

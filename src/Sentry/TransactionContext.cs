@@ -41,7 +41,7 @@
             string name,
             string operation,
             bool? isParentSampled)
-            : this(SpanId.Create(), parentSpanId, traceId, name, operation, "", null, null, isParentSampled)
+            : this(SpanId.Create(), parentSpanId, traceId, name, operation, "", null, isParentSampled, isParentSampled)
         {
         }
 
