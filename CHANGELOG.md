@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Add IsParentSampled to TransactionContext (#885) @Tyrrrz
+
 ## 3.1.0
 
 ### Features
