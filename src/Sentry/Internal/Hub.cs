@@ -109,34 +109,26 @@ namespace Sentry.Internal
         {
             var transaction = new Transaction(this, context);
 
-            // Transactions are not handled by event processors, so some things need to be added manually
+            var samplingContext = new TransactionSamplingContext(
+                context,
+                customSamplingContext
+            );
 
-            // Make a sampling decision if it hasn't been made already.
-            // It could have been made by this point if the transaction was started
-            // from a trace header which contains a sampling decision.
-            if (transaction.IsSampled is null)
+            var sampleRate =
+                // Custom sampler may not exist or may return null, in which case we fallback
+                // to the static sample rate.
+                _options.TracesSampler?.Invoke(samplingContext)
+                ?? _options.TracesSampleRate;
+
+            transaction.IsSampled = sampleRate switch
             {
-                var samplingContext = new TransactionSamplingContext(
-                    context,
-                    customSamplingContext
-                );
-
-                var sampleRate =
-                    // Custom sampler may not exist or may return null, in which case we fallback
-                    // to the static sample rate.
-                    _options.TracesSampler?.Invoke(samplingContext)
-                    ?? _options.TracesSampleRate;
-
-                transaction.IsSampled = sampleRate switch
-                {
-                    // Sample rate >= 1 means always sampled *in*
-                    >= 1 => true,
-                    // Sample rate <= 0 means always sampled *out*
-                    <= 0 => false,
-                    // Otherwise roll the dice
-                    _ => SynchronizedRandom.NextDouble() < sampleRate
-                };
-            }
+                // Sample rate >= 1 means always sampled *in*
+                >= 1 => true,
+                // Sample rate <= 0 means always sampled *out*
+                <= 0 => false,
+                // Otherwise roll the dice
+                _ => SynchronizedRandom.NextDouble() < sampleRate
+            };
 
             // A sampled out transaction still appears fully functional to the user
             // but will be dropped by the client and won't reach Sentry's servers.

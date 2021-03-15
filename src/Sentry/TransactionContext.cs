@@ -9,6 +9,11 @@
         public string Name { get; }
 
         /// <summary>
+        /// Whether the parent transaction of this transaction has been sampled.
+        /// </summary>
+        public bool? IsParentSampled { get; }
+
+        /// <summary>
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>
         public TransactionContext(
@@ -19,10 +24,12 @@
             string operation,
             string description,
             SpanStatus? status,
-            bool? isSampled)
+            bool? isSampled,
+            bool? isParentSampled)
             : base(spanId, parentSpanId, traceId, operation, description, status, isSampled)
         {
             Name = name;
+            IsParentSampled = isParentSampled;
         }
 
         /// <summary>
@@ -33,8 +40,8 @@
             SentryId traceId,
             string name,
             string operation,
-            bool? isSampled)
-            : this(SpanId.Create(), parentSpanId, traceId, name, operation, "", null, isSampled)
+            bool? isParentSampled)
+            : this(SpanId.Create(), parentSpanId, traceId, name, operation, "", null, null, isParentSampled)
         {
         }
 
@@ -45,7 +52,7 @@
             string name,
             string operation,
             bool? isSampled)
-            : this(null, SentryId.Create(), name, operation, isSampled)
+            : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, isSampled, null)
         {
         }
 
