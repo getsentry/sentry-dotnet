@@ -108,7 +108,7 @@ namespace Sentry.Internal
         {
             var transaction = new Transaction(this, context);
 
-            // Dynamic sampling is ran regardless of whether a decision
+            // Tracing sampler callback runs regardless of whether a decision
             // has already been made, as it can be used to override it.
             if (_options.TracesSampler is { } tracesSampler)
             {
