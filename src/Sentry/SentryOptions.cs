@@ -421,7 +421,7 @@ namespace Sentry
         /// Default value is <code>0</code>, which means tracing is disabled.
         /// </summary>
         /// <remarks>
-        /// Static sampling rate is only applied to transactions that don't already
+        /// Random sampling rate is only applied to transactions that don't already
         /// have a sampling decision set by other means, such as through <see cref="TracesSampler"/>,
         /// by inheriting it from an incoming trace header, or by copying it from <see cref="TransactionContext"/>.
         /// </remarks>
