@@ -123,7 +123,7 @@ namespace Sentry.Internal
                 }
             }
 
-            // Static sampling is ran only if the sampling decision hasn't
+            // Random sampling runs only if the sampling decision hasn't
             // been made already.
             transaction.IsSampled ??= SynchronizedRandom.NextBool(_options.TracesSampleRate);
 
