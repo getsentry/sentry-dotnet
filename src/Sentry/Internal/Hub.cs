@@ -117,7 +117,7 @@ namespace Sentry.Internal
                     customSamplingContext
                 );
 
-                if (tracesSampler(samplingContext) is {} sampleRate)
+                if (tracesSampler(samplingContext) is { } sampleRate)
                 {
                     transaction.IsSampled = SynchronizedRandom.NextBool(sampleRate);
                 }
