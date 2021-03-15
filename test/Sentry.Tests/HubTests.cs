@@ -162,12 +162,13 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void StartTransaction_FromTraceHeader_Works()
+        public void StartTransaction_FromTraceHeader_CopiesContext()
         {
             // Arrange
             var hub = new Hub(new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             });
 
             var traceHeader = new SentryTraceHeader(
@@ -183,6 +184,53 @@ namespace NotSentry.Tests
             transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
             transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
             transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartTransaction_FromTraceHeader_SampledInheritedFromParentRegardlessOfSampleRate()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 0
+            });
+
+            var traceHeader = new SentryTraceHeader(
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+                SpanId.Parse("2000000000000000"),
+                true
+            );
+
+            // Act
+            var transaction = hub.StartTransaction("name", "operation", traceHeader);
+
+            // Assert
+            transaction.IsSampled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartTransaction_FromTraceHeader_CustomSamplerCanSampleOutTransaction()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampler = _ => 0,
+                TracesSampleRate = 1
+            });
+
+            var traceHeader = new SentryTraceHeader(
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+                SpanId.Parse("2000000000000000"),
+                true
+            );
+
+            // Act
+            var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+
+            // Assert
+            transaction.IsSampled.Should().BeFalse();
         }
 
         [Fact]
@@ -428,32 +476,6 @@ namespace NotSentry.Tests
             var transaction = hub.StartTransaction("foo", "bar");
 
             // Assert
-            transaction.IsSampled.Should().BeFalse();
-        }
-
-        [Fact]
-        public void StartTransaction_DynamicSampling_CanRejectTransactionStartedFromHeader()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = _ => 0,
-                TracesSampleRate = 0
-            });
-
-            var traceHeader = new SentryTraceHeader(
-                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
-                SpanId.Parse("2000000000000000"),
-                true
-            );
-
-            // Act
-            var transaction = hub.StartTransaction("foo", "bar", traceHeader);
-
-            // Assert
-            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
-            transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
             transaction.IsSampled.Should().BeFalse();
         }
 
