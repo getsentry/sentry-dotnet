@@ -411,7 +411,7 @@ namespace Sentry
         /// </remarks>
         public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
-        private double _tracesSampleRate = 0.0;
+        private double _tracesSampleRate;
 
         /// <summary>
         /// Indicates the percentage of the tracing data that is collected.
@@ -420,6 +420,11 @@ namespace Sentry
         /// Values outside of this range are invalid.
         /// Default value is <code>0</code>, which means tracing is disabled.
         /// </summary>
+        /// <remarks>
+        /// Random sampling rate is only applied to transactions that don't already
+        /// have a sampling decision set by other means, such as through <see cref="TracesSampler"/>,
+        /// by inheriting it from an incoming trace header, or by copying it from <see cref="TransactionContext"/>.
+        /// </remarks>
         public double TracesSampleRate
         {
             get => _tracesSampleRate;
@@ -438,9 +443,14 @@ namespace Sentry
 
         /// <summary>
         /// Custom delegate that returns sample rate dynamically for a specific transaction context.
-        /// The delegate may also return <code>null</code> to fallback to default sample rate as
-        /// defined by the <see cref="TracesSampleRate"/> property.
         /// </summary>
+        /// <remarks>
+        /// Returning <code>null</code> signals that the sampler did not reach a sampling decision.
+        /// In such case, if the transaction already has a sampling decision (for example, if it's
+        /// started from a trace header) that decision is retained.
+        /// Otherwise sampling decision is determined by applying the static sampling rate
+        /// set in <see cref="TracesSampleRate"/>.
+        /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
         /// <summary>
