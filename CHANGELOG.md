@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Retrieve CurrentVersion for Asp Net applications (#884) @lucas-zimerman
+- Retrieve CurrentVersion for ASP.NET applications (#884) @lucas-zimerman
 
 ## 3.1.0
 
