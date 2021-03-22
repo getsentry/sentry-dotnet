@@ -147,10 +147,16 @@ namespace Sentry
             }
         }
 
+        private ITransactionTracer? _transaction;
+
         /// <summary>
         /// Transaction.
         /// </summary>
-        public ITransactionTracer? Transaction { get; set; }
+        public ITransactionTracer? Transaction
+        {
+            get => _transaction;
+            set => _transaction = value;
+        }
 
         /// <inheritdoc />
         public SdkVersion Sdk { get; } = new();
@@ -389,5 +395,8 @@ namespace Sentry
         /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
         /// </summary>
         public ISpanTracer? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
+
+        internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction) =>
+            Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
     }
 }
