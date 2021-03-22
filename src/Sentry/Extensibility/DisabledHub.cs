@@ -64,7 +64,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void BindException(Exception exception, ISpanData span)
+        public void BindException(Exception exception, ISpan span)
         {
         }
 

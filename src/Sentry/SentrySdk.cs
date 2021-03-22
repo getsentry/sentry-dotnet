@@ -363,7 +363,7 @@ namespace Sentry
         /// This method is used internally and is not meant for public use.
         /// </remarks>
         [DebuggerStepThrough]
-        public static void BindException(Exception exception, ISpanData span)
+        public static void BindException(Exception exception, ISpan span)
             => _hub.BindException(exception, span);
 
         /// <summary>
