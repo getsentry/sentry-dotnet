@@ -74,7 +74,7 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public ITransactionTracer StartTransaction(
+        public ITransaction StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
             => SentrySdk.StartTransaction(context, customSamplingContext);
@@ -83,14 +83,14 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public void BindException(Exception exception, ISpan span) =>
+        public void BindException(Exception exception, ISpanData span) =>
             SentrySdk.BindException(exception, span);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public ISpanTracer? GetSpan()
+        public ISpan? GetSpan()
             => SentrySdk.GetSpan();
 
         /// <summary>

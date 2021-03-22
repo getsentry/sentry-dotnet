@@ -10,7 +10,7 @@ namespace Sentry
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ITransaction, IJsonSerializable
+    public class Transaction : ITransactionData, IJsonSerializable
     {
         /// <summary>
         /// Transaction's event ID.
@@ -180,7 +180,7 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public Transaction(ITransactionTracer tracer)
+        public Transaction(ITransaction tracer)
         : this(tracer.Name, tracer.Operation)
         {
             ParentSpanId = tracer.ParentSpanId;

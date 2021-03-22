@@ -323,7 +323,7 @@ namespace Sentry
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransactionTracer StartTransaction(
+        public static ITransaction StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
             => _hub.StartTransaction(context, customSamplingContext);
@@ -332,28 +332,28 @@ namespace Sentry
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransactionTracer StartTransaction(ITransactionContext context)
+        public static ITransaction StartTransaction(ITransactionContext context)
             => _hub.StartTransaction(context);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransactionTracer StartTransaction(string name, string operation)
+        public static ITransaction StartTransaction(string name, string operation)
             => _hub.StartTransaction(name, operation);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransactionTracer StartTransaction(string name, string operation, string description)
+        public static ITransaction StartTransaction(string name, string operation, string description)
             => _hub.StartTransaction(name, operation, description);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransactionTracer StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
+        public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
             => _hub.StartTransaction(name, operation, traceHeader);
 
         /// <summary>
@@ -363,14 +363,14 @@ namespace Sentry
         /// This method is used internally and is not meant for public use.
         /// </remarks>
         [DebuggerStepThrough]
-        public static void BindException(Exception exception, ISpan span)
+        public static void BindException(Exception exception, ISpanData span)
             => _hub.BindException(exception, span);
 
         /// <summary>
         /// Gets the last active span.
         /// </summary>
         [DebuggerStepThrough]
-        public static ISpanTracer? GetSpan()
+        public static ISpan? GetSpan()
             => _hub.GetSpan();
 
         /// <summary>

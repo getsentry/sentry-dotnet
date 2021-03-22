@@ -8,7 +8,7 @@ namespace Sentry
     /// <summary>
     /// Transaction tracer.
     /// </summary>
-    public class TransactionTracer : ITransactionTracer
+    public class TransactionTracer : ITransaction
     {
         private readonly IHub _hub;
 
@@ -36,7 +36,7 @@ namespace Sentry
             private set => Contexts.Trace.TraceId = value;
         }
 
-        /// <inheritdoc cref="ITransactionTracer.Name" />
+        /// <inheritdoc cref="ITransaction.Name" />
         public string Name { get; set; }
 
         /// <inheritdoc />
@@ -48,17 +48,17 @@ namespace Sentry
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; internal set; }
 
-        /// <inheritdoc cref="ISpanTracer.Operation" />
+        /// <inheritdoc cref="ISpan.Operation" />
         public string Operation
         {
             get => Contexts.Trace.Operation;
             set => Contexts.Trace.Operation = value;
         }
 
-        /// <inheritdoc cref="ISpanTracer.Description" />
+        /// <inheritdoc cref="ISpan.Description" />
         public string? Description { get; set; }
 
-        /// <inheritdoc cref="ISpanTracer.Status" />
+        /// <inheritdoc cref="ISpan.Status" />
         public SpanStatus? Status
         {
             get => Contexts.Trace.Status;
@@ -142,7 +142,7 @@ namespace Sentry
         private readonly ConcurrentBag<SpanTracer> _spans = new();
 
         /// <inheritdoc />
-        public IReadOnlyCollection<ISpanTracer> Spans => _spans;
+        public IReadOnlyCollection<ISpan> Spans => _spans;
 
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
@@ -189,7 +189,7 @@ namespace Sentry
         public void UnsetTag(string key) =>
             _tags.TryRemove(key, out _);
 
-        internal ISpanTracer StartChild(SpanId parentSpanId, string operation)
+        internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
             var span = new SpanTracer(_hub, this, parentSpanId, operation)
             {
@@ -202,7 +202,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public ISpanTracer StartChild(string operation) =>
+        public ISpan StartChild(string operation) =>
             StartChild(SpanId, operation);
 
         /// <inheritdoc />
@@ -238,7 +238,7 @@ namespace Sentry
             Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
-        public ISpanTracer? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
+        public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(

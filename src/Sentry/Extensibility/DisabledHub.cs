@@ -55,7 +55,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Returns a dummy transaction.
         /// </summary>
-        public ITransactionTracer StartTransaction(
+        public ITransaction StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext) =>
             // Transactions from DisabledHub are always sampled out
@@ -64,14 +64,14 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void BindException(Exception exception, ISpan span)
+        public void BindException(Exception exception, ISpanData span)
         {
         }
 
         /// <summary>
         /// Returns null.
         /// </summary>
-        public ISpanTracer? GetSpan() => null;
+        public ISpan? GetSpan() => null;
 
         /// <summary>
         /// Returns null.

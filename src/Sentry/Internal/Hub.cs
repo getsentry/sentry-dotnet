@@ -16,7 +16,7 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
+        private readonly ConditionalWeakTable<Exception, ISpanData> _exceptionToSpanMap = new();
 
         internal SentryScopeManager ScopeManager { get; }
 
@@ -103,7 +103,7 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-        public ITransactionTracer StartTransaction(
+        public ITransaction StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
         {
@@ -147,13 +147,13 @@ namespace Sentry.Internal
             return transaction;
         }
 
-        public void BindException(Exception exception, ISpan span)
+        public void BindException(Exception exception, ISpanData span)
         {
             // Don't overwrite existing pair in the unlikely event that it already exists
             _ = _exceptionToSpanMap.GetValue(exception, _ => span);
         }
 
-        public ISpanTracer? GetSpan()
+        public ISpan? GetSpan()
         {
             var (currentScope, _) = ScopeManager.GetCurrent();
             return currentScope.GetSpan();

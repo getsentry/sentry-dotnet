@@ -7,7 +7,7 @@ namespace Sentry
     /// <summary>
     /// Transaction span tracer.
     /// </summary>
-    public class SpanTracer : ISpanTracer
+    public class SpanTracer : ISpan
     {
         private readonly IHub _hub;
         private readonly TransactionTracer _transaction;
@@ -30,13 +30,13 @@ namespace Sentry
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
 
-        /// <inheritdoc cref="ISpanTracer.Operation" />
+        /// <inheritdoc cref="ISpan.Operation" />
         public string Operation { get; set; }
 
-        /// <inheritdoc cref="ISpanTracer.Description" />
+        /// <inheritdoc cref="ISpan.Description" />
         public string? Description { get; set; }
 
-        /// <inheritdoc cref="ISpanTracer.Status" />
+        /// <inheritdoc cref="ISpan.Status" />
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
@@ -79,7 +79,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public ISpanTracer StartChild(string operation) =>
+        public ISpan StartChild(string operation) =>
             _transaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />

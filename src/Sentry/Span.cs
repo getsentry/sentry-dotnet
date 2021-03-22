@@ -10,7 +10,7 @@ namespace Sentry
     /// <summary>
     /// Transaction span.
     /// </summary>
-    public class Span : ISpan, IJsonSerializable
+    public class Span : ISpanData, IJsonSerializable
     {
         /// <inheritdoc />
         public SpanId SpanId { get; private set; }
@@ -79,7 +79,7 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="SpanTracer"/>.
         /// </summary>
-        public Span(ISpanTracer tracer)
+        public Span(ISpan tracer)
             : this(tracer.ParentSpanId, tracer.Operation)
         {
             SpanId = tracer.SpanId;

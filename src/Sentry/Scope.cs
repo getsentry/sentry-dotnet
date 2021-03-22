@@ -147,12 +147,12 @@ namespace Sentry
             }
         }
 
-        private ITransactionTracer? _transaction;
+        private ITransaction? _transaction;
 
         /// <summary>
         /// Transaction.
         /// </summary>
-        public ITransactionTracer? Transaction
+        public ITransaction? Transaction
         {
             get => _transaction;
             set => _transaction = value;
@@ -394,9 +394,9 @@ namespace Sentry
         /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
         /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
         /// </summary>
-        public ISpanTracer? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
+        public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
 
-        internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction) =>
+        internal void ResetTransaction(ITransaction? expectedCurrentTransaction) =>
             Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
     }
 }
