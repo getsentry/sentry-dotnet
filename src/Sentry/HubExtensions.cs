@@ -50,13 +50,15 @@ namespace Sentry
             string operation,
             SentryTraceHeader traceHeader)
         {
+            var parentSpanId = traceHeader.SpanId;
+            var isParentSampled = traceHeader.IsSampled;
+
             var context = new TransactionContext(
-                // SpanId from the header becomes ParentSpanId on this transaction
-                traceHeader.SpanId,
+                parentSpanId,
                 traceHeader.TraceId,
                 name,
                 operation,
-                traceHeader.IsSampled
+                isParentSampled
             );
 
             return hub.StartTransaction(context);

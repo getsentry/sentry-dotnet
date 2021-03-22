@@ -5,6 +5,8 @@
 ### Changes
 
 - Rework transactions (#880) @Tyrrrz
+- Add IsParentSampled to TransactionContext (#885) @Tyrrrz
+- Retrieve CurrentVersion for ASP.NET applications (#884) @lucas-zimerman
 
 ## 3.1.0
 

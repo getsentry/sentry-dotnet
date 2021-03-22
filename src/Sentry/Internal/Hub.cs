@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -109,40 +108,27 @@ namespace Sentry.Internal
         {
             var transaction = new TransactionTracer(this, context);
 
-            // Transactions are not handled by event processors, so some things need to be added manually
-
-            // Make a sampling decision if it hasn't been made already.
-            // It could have been made by this point if the transaction was started
-            // from a trace header which contains a sampling decision.
-            if (transaction.IsSampled is null)
+            // Tracing sampler callback runs regardless of whether a decision
+            // has already been made, as it can be used to override it.
+            if (_options.TracesSampler is { } tracesSampler)
             {
                 var samplingContext = new TransactionSamplingContext(
                     context,
                     customSamplingContext
                 );
 
-                var sampleRate =
-                    // Custom sampler may not exist or may return null, in which case we fallback
-                    // to the static sample rate.
-                    _options.TracesSampler?.Invoke(samplingContext)
-                    ?? _options.TracesSampleRate;
-
-                transaction.IsSampled = sampleRate switch
+                if (tracesSampler(samplingContext) is { } sampleRate)
                 {
-                    // Sample rate >= 1 means always sampled *in*
-                    >= 1 => true,
-                    // Sample rate <= 0 means always sampled *out*
-                    <= 0 => false,
-                    // Otherwise roll the dice
-                    _ => SynchronizedRandom.NextDouble() < sampleRate
-                };
+                    transaction.IsSampled = SynchronizedRandom.NextBool(sampleRate);
+                }
             }
+
+            // Random sampling runs only if the sampling decision hasn't
+            // been made already.
+            transaction.IsSampled ??= SynchronizedRandom.NextBool(_options.TracesSampleRate);
 
             // A sampled out transaction still appears fully functional to the user
             // but will be dropped by the client and won't reach Sentry's servers.
-
-            // Sampling decision must have been made at this point
-            Debug.Assert(transaction.IsSampled != null, "Started transaction without a sampling decision.");
 
             return transaction;
         }

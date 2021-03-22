@@ -170,7 +170,7 @@ namespace Sentry
         {
             if (_options.SampleRate != null)
             {
-                if (SynchronizedRandom.NextDouble() > _options.SampleRate.Value)
+                if (!SynchronizedRandom.NextBool(_options.SampleRate.Value))
                 {
                     _options.DiagnosticLogger?.LogDebug("Event sampled.");
                     return SentryId.Empty;
