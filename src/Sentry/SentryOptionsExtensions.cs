@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -235,6 +236,31 @@ namespace Sentry
             {
                 options.DiagnosticLogger = null;
             }
+        }
+
+        /// <summary>
+        /// By default, the StartupTime is set once SentryOptions is created.
+        /// That way is computationally cheap but not so precise.
+        /// You call this extension to give a better precision to the StartupTime at a cost of a small overhead to current
+        /// Thread.
+        /// </summary>
+        /// <param name="options"></param>
+        internal static void SetupStartupTime(this SentryOptions options)
+        {
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    using (var proc = Process.GetCurrentProcess())
+                    {
+                        options.StartupTime = proc.StartTime.ToUniversalTime();
+                    }
+                }
+                finally
+                {
+                    //Ignore any exception and stay with the fallback DateTime.UtcNow value.
+                }
+            }).ConfigureAwait(false);
         }
     }
 }

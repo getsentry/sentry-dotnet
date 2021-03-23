@@ -33,6 +33,8 @@ namespace Sentry
             // Side-effects in a factory function 🤮
             options.SetupLogging();
 
+            options.SetupStartupTime();
+
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.
             var dsn = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();

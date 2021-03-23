@@ -1,5 +1,11 @@
 # Changelog
 
+## Unchanged
+
+### Features
+
+- Add StartupTime and Device.BootTime
+
 ## 3.1.0
 
 ### Features

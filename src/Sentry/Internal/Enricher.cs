@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
 using Sentry.Reflection;
@@ -89,6 +90,12 @@ namespace Sentry.Internal
 
                 eventLike.User.IpAddress ??= "{{auto}}";
             }
+
+            //Apply App startup time
+            eventLike.Contexts.App.StartTime ??= _options.StartupTime;
+
+            eventLike.Contexts.Device.BootTime ??= new DateTimeOffset(DateTime.UtcNow - TimeSpan.FromTicks(Stopwatch.GetTimestamp()),
+                    TimeSpan.Zero);
 
             // Default tags
             _options.ApplyDefaultTags(eventLike);

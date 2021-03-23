@@ -8,8 +8,6 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
-using Sentry.PlatformAbstractions;
-using Sentry.Protocol;
 using static Sentry.Internal.Constants;
 using static Sentry.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
@@ -96,6 +94,11 @@ namespace Sentry
         internal string[]? InAppInclude { get; set; }
 
         /// <summary>
+        /// When the code was initialized/
+        /// </summary>
+        internal DateTime StartupTime { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
         /// Whether to include default Personal Identifiable information
         /// </summary>
         /// <remarks>
@@ -155,7 +158,7 @@ namespace Sentry
         /// </example>
         /// <see href="https://develop.sentry.dev/sdk/features/#event-sampling"/>
         private float? _sampleRate;
-
+       
         /// <summary>
         /// The optional sample rate.
         /// </summary>
