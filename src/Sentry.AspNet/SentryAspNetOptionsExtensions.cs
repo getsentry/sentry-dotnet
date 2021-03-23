@@ -21,6 +21,7 @@ namespace Sentry.AspNet
 
             var eventProcessor = new SystemWebRequestEventProcessor(payloadExtractor, options);
 
+            options.Release ??= SystemWebVersionLocator.GetCurrent();
             options.AddEventProcessor(eventProcessor);
         }
     }

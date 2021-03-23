@@ -1,10 +1,12 @@
 # Changelog
 
-## Unchanged
+## Unreleased
 
-### Features
+### Changes
 
-- Add StartupTime and Device.BootTime
+- Add StartupTime and Device.BootTime (#887) @lucas-zimerman
+- Add IsParentSampled to TransactionContext (#885) @Tyrrrz
+- Retrieve CurrentVersion for ASP.NET applications (#884) @lucas-zimerman
 
 ## 3.1.0
 
