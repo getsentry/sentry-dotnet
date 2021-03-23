@@ -49,7 +49,7 @@ namespace Sentry
     /// <summary>
     /// Extensions for <see cref="ISpan"/>.
     /// </summary>
-    public static class SpanTracerExtensions
+    public static class SpanExtensions
     {
         /// <summary>
         /// Starts a child span.
