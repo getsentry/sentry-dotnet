@@ -4,7 +4,7 @@
 
 ### Changes
 
-- Rework transactions (#880) @Tyrrrz
+- Changed the underlying implementation of `ITransaction` and `ISpan`. `IHub.CaptureTransaction` now takes a `Transaction` instead of `ITransaction`. (#880) @Tyrrrz
 - Add IsParentSampled to TransactionContext (#885) @Tyrrrz
 - Retrieve CurrentVersion for ASP.NET applications (#884) @lucas-zimerman
 
