@@ -181,7 +181,7 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(ITransaction tracer)
-        : this(tracer.Name, tracer.Operation)
+            : this(tracer.Name, tracer.Operation)
         {
             ParentSpanId = tracer.ParentSpanId;
             SpanId = tracer.SpanId;
