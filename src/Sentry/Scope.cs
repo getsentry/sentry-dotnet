@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -148,10 +147,16 @@ namespace Sentry
             }
         }
 
+        private ITransaction? _transaction;
+
         /// <summary>
         /// Transaction.
         /// </summary>
-        public ITransaction? Transaction { get; set; }
+        public ITransaction? Transaction
+        {
+            get => _transaction;
+            set => _transaction = value;
+        }
 
         /// <inheritdoc />
         public SdkVersion Sdk { get; } = new();
@@ -390,5 +395,8 @@ namespace Sentry
         /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
         /// </summary>
         public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
+
+        internal void ResetTransaction(ITransaction? expectedCurrentTransaction) =>
+            Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
     }
 }

@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Extensibility
 {
@@ -167,7 +166,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void CaptureTransaction(ITransaction transaction)
+        public void CaptureTransaction(Transaction transaction)
             => SentrySdk.CaptureTransaction(transaction);
 
         /// <summary>

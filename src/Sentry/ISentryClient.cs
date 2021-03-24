@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -36,7 +35,7 @@ namespace Sentry
         /// Instead, call <see cref="ISpan.Finish(Sentry.SpanStatus)"/> on the transaction.
         /// </remarks>
         /// <param name="transaction">The transaction.</param>
-        void CaptureTransaction(ITransaction transaction);
+        void CaptureTransaction(Transaction transaction);
 
         /// <summary>
         /// Flushes events queued up.

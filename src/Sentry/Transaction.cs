@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -12,30 +10,12 @@ namespace Sentry
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ITransaction, IJsonSerializable
+    public class Transaction : ITransactionData, IJsonSerializable
     {
-        private readonly IHub _hub;
-
-        /// <inheritdoc />
+        /// <summary>
+        /// Transaction's event ID.
+        /// </summary>
         public SentryId EventId { get; private set; }
-
-        // This and many other properties in this object are mere
-        // wrappers around 'contexts.trace'.
-        // It poses danger as the raw contexts object is also exposed
-        // to the user.
-        //
-        // As an example, the user can do something seemingly innocuous like this:
-        //
-        // var t = new Transaction(hub, "my transaction", "my op")
-        // {
-        //     Contexts = new Contexts
-        //     {
-        //         ["my ctx"] = myObj
-        //     }
-        // }
-        //
-        // The above code overwrites the contexts and, as a result, the "my op" value
-        // is lost completely.
 
         /// <inheritdoc />
         public SpanId SpanId
@@ -52,7 +32,7 @@ namespace Sentry
         // transaction as the parent.
 
         /// <inheritdoc />
-        public SpanId? ParentSpanId { get; }
+        public SpanId? ParentSpanId { get; private set; }
 
         /// <inheritdoc />
         public SentryId TraceId
@@ -61,39 +41,40 @@ namespace Sentry
             private set => Contexts.Trace.TraceId = value;
         }
 
-        /// <inheritdoc cref="ITransaction.Name" />
-        public string Name { get; set; }
+        /// <inheritdoc />
+        public string Name { get; private set; }
 
         /// <inheritdoc />
         public string? Release { get; set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
-        public DateTimeOffset? EndTimestamp { get; internal set; }
+        public DateTimeOffset? EndTimestamp { get; internal set; } // internal for testing
 
-        /// <inheritdoc cref="ISpan.Operation" />
+        /// <inheritdoc />
         public string Operation
         {
             get => Contexts.Trace.Operation;
-            set => Contexts.Trace.Operation = value;
+            private set => Contexts.Trace.Operation = value;
         }
 
-        /// <inheritdoc cref="ISpan.Description" />
-        public string? Description { get; set; }
+        /// <inheritdoc />
+        public string? Description { get; private set; }
 
-        /// <inheritdoc cref="ISpan.Status" />
+        /// <inheritdoc />
         public SpanStatus? Status
         {
             get => Contexts.Trace.Status;
-            set => Contexts.Trace.Status = value;
+            private set => Contexts.Trace.Status = value;
         }
 
         /// <inheritdoc />
         public bool? IsSampled
         {
             get => Contexts.Trace.IsSampled;
+            // Internal for unit tests
             internal set => Contexts.Trace.IsSampled = value;
         }
 
@@ -150,28 +131,25 @@ namespace Sentry
         }
 
         // Not readonly because of deserialization
-        private ConcurrentBag<Breadcrumb> _breadcrumbs = new();
+        private List<Breadcrumb> _breadcrumbs = new();
 
         /// <inheritdoc />
         public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
         // Not readonly because of deserialization
-        private ConcurrentDictionary<string, object?> _extra = new();
+        private Dictionary<string, object?> _extra = new();
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _extra;
 
         // Not readonly because of deserialization
-        private ConcurrentDictionary<string, string> _tags = new();
+        private Dictionary<string, string> _tags = new();
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags;
 
         // Not readonly because of deserialization
-        private ConcurrentBag<Span> _spans = new();
-
-        /// <inheritdoc />
-        public IReadOnlyCollection<ISpan> Spans => _spans;
+        private Span[] _spans = Array.Empty<Span>();
 
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
@@ -182,11 +160,8 @@ namespace Sentry
         // instead just parse the trace context and resolve them later.
         // Hence why we need a constructor that doesn't take the operation to avoid
         // overwriting it.
-        private Transaction(
-            IHub hub,
-            string name)
+        private Transaction(string name)
         {
-            _hub = hub;
             EventId = SentryId.Create();
             Name = name;
         }
@@ -194,8 +169,8 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public Transaction(IHub hub, string name, string operation)
-            : this(hub, name)
+        public Transaction(string name, string operation)
+            : this(name)
         {
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
@@ -205,16 +180,29 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public Transaction(IHub hub, ITransactionContext context)
-            : this(hub, context.Name)
+        public Transaction(ITransaction tracer)
+            : this(tracer.Name, tracer.Operation)
         {
-            SpanId = context.SpanId;
-            ParentSpanId = context.ParentSpanId;
-            TraceId = context.TraceId;
-            Operation = context.Operation;
-            Description = context.Description;
-            Status = context.Status;
-            IsSampled = context.IsSampled;
+            ParentSpanId = tracer.ParentSpanId;
+            SpanId = tracer.SpanId;
+            TraceId = tracer.TraceId;
+            Release = tracer.Release;
+            StartTimestamp = tracer.StartTimestamp;
+            EndTimestamp = tracer.EndTimestamp;
+            Description = tracer.Description;
+            Status = tracer.Status;
+            IsSampled = tracer.IsSampled;
+            Level = tracer.Level;
+            Request = tracer.Request;
+            Contexts = tracer.Contexts;
+            User = tracer.User;
+            Environment = tracer.Environment;
+            Sdk = tracer.Sdk;
+            Fingerprint = tracer.Fingerprint;
+            _breadcrumbs = tracer.Breadcrumbs.ToList();
+            _extra = tracer.Extra.ToDictionary();
+            _tags = tracer.Tags.ToDictionary();
+            _spans = tracer.Spans.Select(s => new Span(s)).ToArray();
         }
 
         /// <inheritdoc />
@@ -231,47 +219,7 @@ namespace Sentry
 
         /// <inheritdoc />
         public void UnsetTag(string key) =>
-            _tags.TryRemove(key, out _);
-
-        internal ISpan StartChild(SpanId parentSpanId, string operation)
-        {
-            var span = new Span(_hub, this, parentSpanId, operation)
-            {
-                IsSampled = IsSampled
-            };
-
-            _spans.Add(span);
-
-            return span;
-        }
-
-        /// <inheritdoc />
-        public ISpan StartChild(string operation) =>
-            StartChild(SpanId, operation);
-
-        /// <inheritdoc />
-        public void Finish(SpanStatus status = SpanStatus.Ok)
-        {
-            EndTimestamp = DateTimeOffset.UtcNow;
-            Status = status;
-
-            // Client decides whether to discard this transaction based on sampling
-            _hub.CaptureTransaction(this);
-        }
-
-        /// <inheritdoc />
-        public void Finish(Exception exception, SpanStatus status)
-        {
-            _hub.BindException(exception, this);
-            Finish(status);
-        }
-
-        /// <inheritdoc />
-        public void Finish(Exception exception) =>
-            Finish(exception, SpanStatusConverter.FromException(exception));
-
-        /// <inheritdoc />
-        public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
+            _tags.Remove(key);
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
@@ -287,6 +235,11 @@ namespace Sentry
 
             writer.WriteString("type", "transaction");
             writer.WriteSerializable("event_id", EventId);
+
+            if (ParentSpanId is { } parentSpanId)
+            {
+                writer.WriteString("parent_span_id", parentSpanId);
+            }
 
             if (Level is {} level)
             {
@@ -405,9 +358,8 @@ namespace Sentry
         /// </summary>
         public static Transaction FromJson(JsonElement json)
         {
-            var hub = DisabledHub.Instance;
-
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
+            var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var name = json.GetProperty("transaction").GetStringOrThrow();
             var description = json.GetPropertyOrNull("description")?.GetString();
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
@@ -422,15 +374,16 @@ namespace Sentry
             var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()!)
                 .ToArray();
             var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson)
-                .Pipe(v => new ConcurrentBag<Breadcrumb>(v));
+                .Pipe(v => new List<Breadcrumb>(v));
             var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()
-                ?.Pipe(v => new ConcurrentDictionary<string, object?>(v));
+                ?.ToDictionary();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()
-                ?.Pipe(v => new ConcurrentDictionary<string, string>(v!));
+                ?.ToDictionary();
 
-            var transaction = new Transaction(hub, name)
+            var transaction = new Transaction(name)
             {
                 EventId = eventId,
+                ParentSpanId = parentSpanId,
                 Description = description,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
@@ -444,14 +397,14 @@ namespace Sentry
                 _fingerprint = fingerprint,
                 _breadcrumbs = breadcrumbs ?? new(),
                 _extra = extra ?? new(),
-                _tags = tags ?? new()
+                _tags = (tags ?? new())!
             };
 
             transaction._spans = json
                 .GetPropertyOrNull("spans")?
                 .EnumerateArray()
-                .Select(j => Span.FromJson(transaction, j))
-                .Pipe(v => new ConcurrentBag<Span>(v)) ?? new();
+                .Select(Span.FromJson)
+                .ToArray() ?? Array.Empty<Span>();
 
             return transaction;
         }

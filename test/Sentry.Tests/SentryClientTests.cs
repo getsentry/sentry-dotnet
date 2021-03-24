@@ -452,11 +452,9 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(new Transaction(
-                hub,
                 "test name",
                 "test operation"
             )
@@ -474,12 +472,10 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(
                 new Transaction(
-                    hub,
                     "test name",
                     "test operation"
                 )
@@ -498,10 +494,8 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             var transaction = new Transaction(
-                hub,
                 "test name",
                 "test operation"
             )
@@ -524,12 +518,10 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(
                 new Transaction(
-                    hub,
                     null!,
                     "test operation"
                 )
@@ -548,12 +540,10 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(
                 new Transaction(
-                    hub,
                     "test name",
                     null!
                 )
@@ -572,12 +562,10 @@ namespace Sentry.Tests
         {
             // Arrange
             var client = _fixture.GetSut();
-            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
 
             // Act
             client.CaptureTransaction(
                 new Transaction(
-                    hub,
                     "test name",
                     "test operation"
                 )

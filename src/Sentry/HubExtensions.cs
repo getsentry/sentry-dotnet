@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry
 {
