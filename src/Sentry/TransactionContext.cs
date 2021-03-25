@@ -22,7 +22,7 @@
             SentryId traceId,
             string name,
             string operation,
-            string description,
+            string? description,
             SpanStatus? status,
             bool? isSampled,
             bool? isParentSampled)
