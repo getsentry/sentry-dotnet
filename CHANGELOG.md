@@ -7,6 +7,7 @@
 - Changed the underlying implementation of `ITransaction` and `ISpan`. `IHub.CaptureTransaction` now takes a `Transaction` instead of `ITransaction`. (#880) @Tyrrrz
 - Add IsParentSampled to TransactionContext (#885) @Tyrrrz
 - Retrieve CurrentVersion for ASP.NET applications (#884) @lucas-zimerman
+- Add Platform to Transaction, mimicking the same property on SentryEvent (#901) @Tyrrrz
 
 ## 3.1.0
 
