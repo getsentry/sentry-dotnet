@@ -61,9 +61,7 @@ namespace Sentry
         /// </summary>
         public string? Logger { get; set; }
 
-        /// <summary>
-        /// The name of the platform.
-        /// </summary>
+        /// <inheritdoc />
         public string? Platform { get; set; }
 
         /// <summary>

@@ -45,6 +45,9 @@ namespace Sentry
         public string Name { get; private set; }
 
         /// <inheritdoc />
+        public string? Platform { get; set; } = Constants.Platform;
+
+        /// <inheritdoc />
         public string? Release { get; set; }
 
         /// <inheritdoc />
@@ -186,6 +189,7 @@ namespace Sentry
             ParentSpanId = tracer.ParentSpanId;
             SpanId = tracer.SpanId;
             TraceId = tracer.TraceId;
+            Platform = tracer.Platform;
             Release = tracer.Release;
             StartTimestamp = tracer.StartTimestamp;
             EndTimestamp = tracer.EndTimestamp;
@@ -244,6 +248,11 @@ namespace Sentry
             if (Level is {} level)
             {
                 writer.WriteString("level", level.ToString().ToLowerInvariant());
+            }
+
+            if (!string.IsNullOrWhiteSpace(Platform))
+            {
+                writer.WriteString("platform", Platform);
             }
 
             if (!string.IsNullOrWhiteSpace(Release))
@@ -365,6 +374,7 @@ namespace Sentry
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
+            var platform = json.GetPropertyOrNull("platform")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
             var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
             var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
@@ -388,6 +398,7 @@ namespace Sentry
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
                 Level = level,
+                Platform = platform,
                 Release = release,
                 _request = request,
                 _contexts = contexts,
