@@ -8,6 +8,7 @@
 - Add IsParentSampled to TransactionContext (#885) @Tyrrrz
 - Retrieve CurrentVersion for ASP.NET applications (#884) @lucas-zimerman
 - Make description parameter nullable on `ISpan.StartChild(...)` and related methods (#900) @Tyrrrz
+- Add Platform to Transaction, mimicking the same property on SentryEvent (#901) @Tyrrrz
 
 ## 3.1.0
 
