@@ -40,6 +40,9 @@ namespace Sentry
         public string Name { get; set; }
 
         /// <inheritdoc />
+        public string? Platform { get; set; } = Constants.Platform;
+
+        /// <inheritdoc />
         public string? Release { get; set; }
 
         /// <inheritdoc />

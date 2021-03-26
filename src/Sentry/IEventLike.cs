@@ -38,6 +38,11 @@ namespace Sentry
         User User { get; set; }
 
         /// <summary>
+        /// The name of the platform.
+        /// </summary>
+        public string? Platform { get; set; }
+
+        /// <summary>
         /// The release version of the application.
         /// </summary>
         string? Release { get; set; }

@@ -64,6 +64,9 @@ namespace Sentry.Internal
                 eventLike.Sdk.AddPackage("nuget:" + _sdkVersionLazy.Value.Name, _sdkVersionLazy.Value.Version);
             }
 
+            // Platform
+            eventLike.Platform ??= Sentry.Constants.Platform;
+
             // Release
             eventLike.Release ??= _options.Release ?? _releaseLazy.Value;
 

@@ -109,6 +109,9 @@ namespace Sentry
         }
 
         /// <inheritdoc />
+        public string? Platform { get; set; }
+
+        /// <inheritdoc />
         public string? Release { get; set; }
 
         /// <inheritdoc />
@@ -292,6 +295,7 @@ namespace Sentry
             Request.CopyTo(other.Request);
             User.CopyTo(other.User);
 
+            other.Platform ??= Platform;
             other.Release ??= Release;
             other.Environment ??= Environment;
             other.TransactionName ??= TransactionName;
