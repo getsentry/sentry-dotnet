@@ -54,7 +54,7 @@ namespace Sentry
         /// <summary>
         /// Starts a child span.
         /// </summary>
-        public static ISpan StartChild(this ISpan span, string operation, string description)
+        public static ISpan StartChild(this ISpan span, string operation, string? description)
         {
             var child = span.StartChild(operation);
             child.Description = description;

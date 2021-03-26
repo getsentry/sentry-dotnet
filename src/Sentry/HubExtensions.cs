@@ -33,7 +33,7 @@ namespace Sentry
             this IHub hub,
             string name,
             string operation,
-            string description)
+            string? description)
         {
             var transaction = hub.StartTransaction(name, operation);
             transaction.Description = description;
