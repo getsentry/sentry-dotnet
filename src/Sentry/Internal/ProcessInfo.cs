@@ -36,21 +36,28 @@ namespace Sentry.Internal
         /// </summary>
         internal void SetupStartupTime()
         {
-            _ = Task.Run(() =>
+            try
             {
-                try
+                _ = Task.Run(() =>
                 {
-                    using (var proc = Process.GetCurrentProcess())
+                    try
                     {
-                        StartupTime = proc.StartTime.ToUniversalTime();
+                        using (var proc = Process.GetCurrentProcess())
+                        {
+                            StartupTime = proc.StartTime.ToUniversalTime();
+                        }
                     }
-                }
-                catch(Exception e)
-                {
-                    _options.DiagnosticLogger?.LogError("Failure to GetCurrentProcess", e);
-                    //Ignore any exception and stay with the fallback DateTime.UtcNow value.
-                }
-            }).ConfigureAwait(false);
+                    catch (Exception e)
+                    {
+                        _options.DiagnosticLogger?.LogError("Failure to GetCurrentProcess", e);
+                        //Ignore any exception and stay with the fallback DateTime.UtcNow value.
+                    }
+                }).ConfigureAwait(false);
+            }
+            catch (Exception te)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to execute Task", te);
+            }
         }
 
     }
