@@ -274,22 +274,6 @@ namespace Sentry.Tests
             Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(TaskUnobservedTaskExceptionIntegration));
         }
 
-        [Fact]
-        public async void SetupStartupTime_StartupTimeSet()
-        {
-            //Arrange
-            var unsetDateTime = new DateTime(1995, 01, 01);
-            var options = new SentryOptions();
-            options.StartupTime = unsetDateTime;
-            var func = new Func<bool> (()=> options.StartupTime != unsetDateTime);
-
-            //Act
-            options.SetupStartupTime();
-
-            //Assert
-            Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(1)));
-        }
-
         [Theory]
         [InlineData("Microsoft.")]
         [InlineData("System.")]

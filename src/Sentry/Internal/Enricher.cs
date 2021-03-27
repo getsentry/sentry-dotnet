@@ -91,11 +91,9 @@ namespace Sentry.Internal
                 eventLike.User.IpAddress ??= "{{auto}}";
             }
 
-            //Apply App startup time
-            eventLike.Contexts.App.StartTime ??= _options.StartupTime;
-
-            eventLike.Contexts.Device.BootTime ??= new DateTimeOffset(DateTime.UtcNow - TimeSpan.FromTicks(Stopwatch.GetTimestamp()),
-                    TimeSpan.Zero);
+            //Apply App startup and Boot time
+            eventLike.Contexts.App.StartTime ??= ProcessInfo.Instance?.StartupTime;
+            eventLike.Contexts.Device.BootTime ??= ProcessInfo.Instance?.BootTime;
 
             // Default tags
             _options.ApplyDefaultTags(eventLike);

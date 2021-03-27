@@ -94,11 +94,6 @@ namespace Sentry
         internal string[]? InAppInclude { get; set; }
 
         /// <summary>
-        /// When the code was initialized/
-        /// </summary>
-        internal DateTime StartupTime { get; set; } = DateTime.UtcNow;
-
-        /// <summary>
         /// Whether to include default Personal Identifiable information
         /// </summary>
         /// <remarks>
