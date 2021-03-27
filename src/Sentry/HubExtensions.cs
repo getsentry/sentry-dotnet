@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -34,7 +33,7 @@ namespace Sentry
             this IHub hub,
             string name,
             string operation,
-            string description)
+            string? description)
         {
             var transaction = hub.StartTransaction(name, operation);
             transaction.Description = description;

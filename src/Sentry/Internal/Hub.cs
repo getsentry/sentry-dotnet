@@ -106,7 +106,7 @@ namespace Sentry.Internal
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
         {
-            var transaction = new Transaction(this, context);
+            var transaction = new TransactionTracer(this, context);
 
             // Tracing sampler callback runs regardless of whether a decision
             // has already been made, as it can be used to override it.
@@ -187,7 +187,7 @@ namespace Sentry.Internal
             }
         }
 
-        public void CaptureTransaction(ITransaction transaction)
+        public void CaptureTransaction(Transaction transaction)
         {
             try
             {
@@ -200,15 +200,6 @@ namespace Sentry.Internal
                 _enricher.Apply(transaction);
 
                 currentScope.Value.CaptureTransaction(transaction);
-
-                // Clear the transaction from the scope
-                ScopeManager.WithScope(scope =>
-                {
-                    if (scope.Transaction == transaction)
-                    {
-                        scope.Transaction = null;
-                    }
-                });
             }
             catch (Exception e)
             {

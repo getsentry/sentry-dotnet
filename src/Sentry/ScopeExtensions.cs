@@ -5,7 +5,6 @@ using System.IO;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
-using Sentry.Protocol;
 
 namespace Sentry
 {

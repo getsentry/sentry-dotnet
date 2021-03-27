@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry
@@ -103,7 +102,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void CaptureTransaction(ITransaction transaction)
+        public void CaptureTransaction(Transaction transaction)
         {
             if (_disposed)
             {

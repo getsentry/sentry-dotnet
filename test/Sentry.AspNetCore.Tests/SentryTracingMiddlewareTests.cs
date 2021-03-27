@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
-using Sentry.Extensibility;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -74,7 +73,7 @@ namespace Sentry.AspNetCore.Tests
         public async Task Transaction_is_bound_on_the_scope_automatically()
         {
             // Arrange
-            ITransaction transaction = null;
+            ITransactionData transaction = null;
 
             var sentryClient = Substitute.For<ISentryClient>();
 
@@ -102,7 +101,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ =>
                         {
-                            transaction = hub.GetSpan() as ITransaction;
+                            transaction = hub.GetSpan() as ITransactionData;
                             return Task.CompletedTask;
                         });
                     });
@@ -123,7 +122,7 @@ namespace Sentry.AspNetCore.Tests
         public async Task Transaction_is_started_automatically_from_incoming_trace_header()
         {
             // Arrange
-            ITransaction transaction = null;
+            ITransactionData transaction = null;
 
             var sentryClient = Substitute.For<ISentryClient>();
 
@@ -152,7 +151,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ =>
                         {
-                            transaction = hub.GetSpan() as ITransaction;
+                            transaction = hub.GetSpan() as ITransactionData;
                             return Task.CompletedTask;
                         });
                     });
@@ -181,7 +180,7 @@ namespace Sentry.AspNetCore.Tests
         public async Task Transaction_is_automatically_populated_with_request_data()
         {
             // Arrange
-            ITransaction transaction = null;
+            ITransactionData transaction = null;
 
             var sentryClient = Substitute.For<ISentryClient>();
 
@@ -210,7 +209,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ =>
                         {
-                            transaction = hub.GetSpan() as ITransaction;
+                            transaction = hub.GetSpan() as ITransactionData;
                             return Task.CompletedTask;
                         });
                     });

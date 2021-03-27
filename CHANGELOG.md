@@ -5,8 +5,16 @@
 ### Changes
 
 - Add StartupTime and Device.BootTime (#887) @lucas-zimerman
+
+## 3.2.0
+
+### Changes
+
+- Changed the underlying implementation of `ITransaction` and `ISpan`. `IHub.CaptureTransaction` now takes a `Transaction` instead of `ITransaction`. (#880) @Tyrrrz
 - Add IsParentSampled to TransactionContext (#885) @Tyrrrz
 - Retrieve CurrentVersion for ASP.NET applications (#884) @lucas-zimerman
+- Make description parameter nullable on `ISpan.StartChild(...)` and related methods (#900) @Tyrrrz
+- Add Platform to Transaction, mimicking the same property on SentryEvent (#901) @Tyrrrz
 
 ## 3.1.0
 
@@ -16,7 +24,7 @@
 - Enrich transactions with more data (#875) @Tyrrrz
 
 ### Fixes
-  - Don't add version prefix in release if it's already set (#877) @Tyrrrz
+- Don't add version prefix in release if it's already set (#877) @Tyrrrz
 
 ## 3.0.8
 
