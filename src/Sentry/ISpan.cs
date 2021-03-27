@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 
 namespace Sentry
 {
     /// <summary>
     /// Span.
     /// </summary>
-    public interface ISpan : ISpanContext, IHasTags, IHasExtra
+    public interface ISpan : ISpanData
     {
         /// <summary>
         /// Span description.
@@ -26,21 +26,6 @@ namespace Sentry
         new SpanStatus? Status { get; set; }
 
         /// <summary>
-        /// Start timestamp.
-        /// </summary>
-        DateTimeOffset StartTimestamp { get; }
-
-        /// <summary>
-        /// End timestamp.
-        /// </summary>
-        DateTimeOffset? EndTimestamp { get; }
-
-        /// <summary>
-        /// Whether the span is finished.
-        /// </summary>
-        bool IsFinished { get; }
-
-        /// <summary>
         /// Starts a child span.
         /// </summary>
         ISpan StartChild(string operation);
@@ -59,11 +44,6 @@ namespace Sentry
         /// Finishes the span with the specified exception and automatically inferred status.
         /// </summary>
         void Finish(Exception exception);
-
-        /// <summary>
-        /// Get Sentry trace header.
-        /// </summary>
-        SentryTraceHeader GetTraceHeader();
     }
 
     /// <summary>
@@ -74,7 +54,7 @@ namespace Sentry
         /// <summary>
         /// Starts a child span.
         /// </summary>
-        public static ISpan StartChild(this ISpan span, string operation, string description)
+        public static ISpan StartChild(this ISpan span, string operation, string? description)
         {
             var child = span.StartChild(operation);
             child.Description = description;

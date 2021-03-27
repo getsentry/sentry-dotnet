@@ -5,13 +5,8 @@ namespace Sentry
     /// <summary>
     /// Transaction.
     /// </summary>
-    public interface ITransaction : ISpan, ITransactionContext, IEventLike
+    public interface ITransaction : ITransactionData, ISpan
     {
-        /// <summary>
-        /// Transaction event ID.
-        /// </summary>
-        SentryId EventId { get; }
-
         /// <summary>
         /// Transaction name.
         /// </summary>

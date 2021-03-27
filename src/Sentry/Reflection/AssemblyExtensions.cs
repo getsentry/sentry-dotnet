@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Reflection;
-using Sentry.Protocol;
 
 namespace Sentry.Reflection
 {

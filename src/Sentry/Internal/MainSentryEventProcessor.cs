@@ -57,8 +57,6 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
-            @event.Platform = Sentry.Constants.Platform;
-
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.

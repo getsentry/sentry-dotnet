@@ -70,7 +70,7 @@ namespace Sentry.Tests
             // Arrange
             var hub = Substitute.For<IHub>();
 
-            var transaction = new Transaction(
+            var transaction = new TransactionTracer(
                 Substitute.For<IHub>(),
                 "foo",
                 "bar"

@@ -1,7 +1,6 @@
 using System;
 using FluentAssertions;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 using Sentry.Testing;
 using Xunit;
 
@@ -126,7 +125,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var scope = new Scope();
-            scope.Transaction = new Transaction(DisabledHub.Instance, "bar", "_");
+            scope.Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_");
 
             // Act
             scope.TransactionName = "foo";
@@ -141,7 +140,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var scope = new Scope();
-            scope.Transaction = new Transaction(DisabledHub.Instance, "bar", "_");
+            scope.Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_");
 
             // Act
             scope.TransactionName = null;
@@ -160,7 +159,7 @@ namespace Sentry.Tests
             scope.TransactionName = "bar";
 
             // Act
-            scope.Transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            scope.Transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
 
             // Assert
             scope.TransactionName.Should().Be("foo");
@@ -172,7 +171,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var scope = new Scope();
-            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
             scope.Transaction = transaction;
 
             // Act
@@ -188,7 +187,7 @@ namespace Sentry.Tests
             // Arrange
             var scope = new Scope();
 
-            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
             transaction.StartChild("123").Finish();
             transaction.StartChild("456").Finish();
 
@@ -207,7 +206,7 @@ namespace Sentry.Tests
             // Arrange
             var scope = new Scope();
 
-            var transaction = new Transaction(DisabledHub.Instance, "foo", "_");
+            var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
             var activeSpan = transaction.StartChild("123");
             transaction.StartChild("456").Finish();
 

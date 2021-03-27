@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
-using Sentry.Protocol;
 
 namespace Sentry
 {
@@ -321,7 +320,7 @@ namespace Sentry
         /// Captures a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static void CaptureTransaction(ITransaction transaction)
+        public static void CaptureTransaction(Transaction transaction)
             => _hub.CaptureTransaction(transaction);
 
         /// <summary>
@@ -351,7 +350,7 @@ namespace Sentry
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
-        public static ITransaction StartTransaction(string name, string operation, string description)
+        public static ITransaction StartTransaction(string name, string operation, string? description)
             => _hub.StartTransaction(name, operation, description);
 
         /// <summary>
