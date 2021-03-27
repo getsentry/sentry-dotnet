@@ -13,5 +13,12 @@ namespace Sentry.Internal
                 return Random.NextDouble();
             }
         }
+
+        public static bool NextBool(double rate) => rate switch
+        {
+            >= 1 => true,
+            <= 0 => false,
+            _ => NextDouble() < rate
+        };
     }
 }
