@@ -34,16 +34,14 @@ namespace Sentry.Internal
         /// You call this extension to give a better precision to the StartupTime at a cost of a small overhead to current
         /// Thread.
         /// </summary>
-        internal void SetupStartupTime()
+        internal void StartAccurateStartupTime()
         {
             _ = Task.Run(() =>
             {
                 try
                 {
-                    using (var proc = Process.GetCurrentProcess())
-                    {
-                        StartupTime = proc.StartTime.ToUniversalTime();
-                    }
+                    using var proc = Process.GetCurrentProcess();
+                    StartupTime = proc.StartTime.ToUniversalTime();
                 }
                 catch (Exception e)
                 {

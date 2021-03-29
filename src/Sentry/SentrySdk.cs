@@ -32,8 +32,12 @@ namespace Sentry
             // Side-effects in a factory function 🤮
             options.SetupLogging();
 
-            ProcessInfo.Instance ??= new ProcessInfo(options);
-            ProcessInfo.Instance.SetupStartupTime();
+            if (ProcessInfo.Instance is null)
+            {
+                var processInfo = new ProcessInfo(options);
+                processInfo.SetupStartupTime();
+                ProcessInfo.Instance = processInfo;
+          	}
 
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.

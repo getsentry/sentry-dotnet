@@ -9,7 +9,7 @@ namespace Sentry.Tests.Internals
     public class ProcessInfoTests
     {
         [Fact]
-        public async void SetupStartupTime_StartupTimeSet()
+        public async Task SetupStartupTime_StartupTimeSet()
         {
             //Arrange
             var unsetDateTime = new DateTime(1995, 01, 01);
@@ -27,7 +27,7 @@ namespace Sentry.Tests.Internals
 
 
         [Fact]
-        public async void SetupStartupTime_MultipleCalls_DoesntCrash()
+        public async Task SetupStartupTime_MultipleCalls_DoesntCrash()
         {
             //Arrange
             var unsetDateTime = new DateTime(1995, 01, 01);
@@ -44,8 +44,6 @@ namespace Sentry.Tests.Internals
 
             //Assert
             Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(2)));
-            await Task.Delay(200);
         }
-
     }
 }
