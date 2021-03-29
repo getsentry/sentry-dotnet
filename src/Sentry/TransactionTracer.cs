@@ -46,7 +46,7 @@ namespace Sentry
         public string? Release { get; set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp { get; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; internal set; }
