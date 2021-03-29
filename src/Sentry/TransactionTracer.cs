@@ -199,7 +199,11 @@ namespace Sentry
                 IsSampled = IsSampled
             };
 
-            _spans.Add(span);
+            // Transaction can only have up to 1000 spans
+            if (_spans.Count < 1000)
+            {
+                _spans.Add(span);
+            }
 
             return span;
         }
