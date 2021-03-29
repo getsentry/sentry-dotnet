@@ -19,10 +19,10 @@ namespace Sentry.Testing
 
             while (now.Add(timeout.Value) >= DateTime.UtcNow && condition() != expectedResult) 
             {
-                await Task.Delay(250);
+                await Task.Delay(50);
             }
 
-            if(condition() != expectedResult)
+            if (condition() != expectedResult)
             {
                 throw new TaskCanceledException();
             }

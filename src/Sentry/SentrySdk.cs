@@ -36,9 +36,9 @@ namespace Sentry
             if (processInfo is null)
             {
                 processInfo = new ProcessInfo(options);
+                processInfo.StartAccurateStartupTime();
                 ProcessInfo.Instance = processInfo;
-          	}
-            processInfo.StartAccurateStartupTime();
+            }
 
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.

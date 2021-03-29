@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-### Changes
+### Features
 
 - Add StartupTime and Device.BootTime (#887) @lucas-zimerman
 

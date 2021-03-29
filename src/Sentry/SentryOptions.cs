@@ -153,7 +153,6 @@ namespace Sentry
         /// </example>
         /// <see href="https://develop.sentry.dev/sdk/features/#event-sampling"/>
         private float? _sampleRate;
-       
         /// <summary>
         /// The optional sample rate.
         /// </summary>

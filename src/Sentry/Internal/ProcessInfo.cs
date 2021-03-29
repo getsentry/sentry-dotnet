@@ -29,10 +29,10 @@ namespace Sentry.Internal
         }
 
         /// <summary>
-        /// By default, the StartupTime is set once SentryOptions is created.
-        /// That way is computationally cheap but not so precise.
-        /// You call this extension to give a better precision to the StartupTime at a cost of a small overhead to current
-        /// Thread.
+        /// StartupTime is set to UtcNow in this constructor.
+        /// That's computationally cheap but not very precise.
+        /// This method will give a better precision to the StartupTime at a cost
+        /// of calling Process.GetCurrentProcess, on a thread pool thread.
         /// </summary>
         internal void StartAccurateStartupTime()
         {
@@ -50,6 +50,5 @@ namespace Sentry.Internal
                 }
             }).ConfigureAwait(false);
         }
-
     }
 }
