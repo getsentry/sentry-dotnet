@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add StartupTime and Device.BootTime (#887) @lucas-zimerman
+
 ## 3.2.0
 
 ### Changes
