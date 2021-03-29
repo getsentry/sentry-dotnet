@@ -6,6 +6,10 @@
 
 - Add StartupTime and Device.BootTime (#887) @lucas-zimerman
 
+### Changes
+
+- Limit max spans in transaction to 1000 (#908) @Tyrrrz
+
 ## 3.2.0
 
 ### Changes
