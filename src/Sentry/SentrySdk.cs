@@ -32,12 +32,13 @@ namespace Sentry
             // Side-effects in a factory function 🤮
             options.SetupLogging();
 
-            if (ProcessInfo.Instance is null)
+            var processInfo = ProcessInfo.Instance;
+            if (processInfo is null)
             {
-                var processInfo = new ProcessInfo(options);
-                processInfo.SetupStartupTime();
+                processInfo = new ProcessInfo(options);
                 ProcessInfo.Instance = processInfo;
           	}
+            processInfo.StartAccurateStartupTime();
 
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.
@@ -128,8 +129,8 @@ namespace Sentry
         public static void Close()
         {
             var oldHub = Interlocked.Exchange(ref _hub, DisabledHub.Instance);
-            ProcessInfo.Instance = null;
             (oldHub as IDisposable)?.Dispose();
+            ProcessInfo.Instance = null;
         }
 
         private class DisposeHandle : IDisposable
