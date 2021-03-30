@@ -16,7 +16,7 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var timestamp = DateTimeOffset.MaxValue;
-            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "op123", "name123")
+            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "name123", "op123")
             {
                 Description = "desc123",
                 Status = SpanStatus.Aborted,
@@ -87,7 +87,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_LevelOne_Works()
         {
             // Arrange
-            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my op", "my name");
+            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my name", "my op");
 
             // Act
             var child = transaction.StartChild("child op", "child desc");
@@ -104,7 +104,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_LevelTwo_Works()
         {
             // Arrange
-            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my op", "my name");
+            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my name", "my op");
 
             // Act
             var child = transaction.StartChild("child op", "child desc");
@@ -125,7 +125,7 @@ namespace Sentry.Tests.Protocol
             // Arrange
             var options = new SentryOptions {MaxSpans = 1500};
 
-            var transaction = new TransactionTracer(DisabledHub.Instance, options, "my op", "my name")
+            var transaction = new TransactionTracer(DisabledHub.Instance, options, "my name", "my op")
             {
                 IsSampled = true
             };
@@ -145,7 +145,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_SamplingInherited_Null()
         {
             // Arrange
-            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my op", "my name")
+            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my name", "my op")
             {
                 IsSampled = null
             };
@@ -161,7 +161,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_SamplingInherited_True()
         {
             // Arrange
-            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my op", "my name")
+            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my name", "my op")
             {
                 IsSampled = true
             };
@@ -177,7 +177,7 @@ namespace Sentry.Tests.Protocol
         public void StartChild_SamplingInherited_False()
         {
             // Arrange
-            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my op", "my name")
+            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my name", "my op")
             {
                 IsSampled = false
             };
@@ -193,7 +193,7 @@ namespace Sentry.Tests.Protocol
         public void Finish_RecordsTime()
         {
             // Arrange
-            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my op", "my name");
+            var transaction = new TransactionTracer(DisabledHub.Instance, new SentryOptions(), "my name", "my op");
 
             // Act
             transaction.Finish();
@@ -211,7 +211,7 @@ namespace Sentry.Tests.Protocol
             var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret};
             var hub = new Hub(client, options);
 
-            var transaction = new TransactionTracer(hub, options, "my op", "my name");
+            var transaction = new TransactionTracer(hub, options, "my name", "my op");
 
             // Act
             transaction.Finish();
@@ -229,7 +229,7 @@ namespace Sentry.Tests.Protocol
             var hub = new Hub(client, options);
 
             var exception = new InvalidOperationException();
-            var transaction = new TransactionTracer(hub, options, "my op", "my name");
+            var transaction = new TransactionTracer(hub, options, "my name", "my op");
 
             // Act
             transaction.Finish(exception);
