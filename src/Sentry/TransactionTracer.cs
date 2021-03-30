@@ -168,7 +168,7 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public TransactionTracer(IHub hub, SentryOptions options, ITransactionContext context)
-            : this(hub, options, context.Operation, context.Name)
+            : this(hub, options, context.Name, context.Operation)
         {
             SpanId = context.SpanId;
             ParentSpanId = context.ParentSpanId;
