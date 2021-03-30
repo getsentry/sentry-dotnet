@@ -36,7 +36,7 @@ namespace Sentry.AspNetCore.Tests
             {
                 HubAccessor = () => Hub;
                 _ = Hub.IsEnabled.Returns(true);
-                _ = Hub.StartTransaction("", "").ReturnsForAnyArgs(new TransactionTracer(Hub, "test", "test"));
+                _ = Hub.StartTransaction("", "").ReturnsForAnyArgs(new TransactionTracer(Hub, Options, "test", "test"));
                 _ = HttpContext.Features.Returns(FeatureCollection);
             }
 
