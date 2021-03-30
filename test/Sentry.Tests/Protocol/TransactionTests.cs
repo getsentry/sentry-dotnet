@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
@@ -116,6 +117,26 @@ namespace Sentry.Tests.Protocol
             grandChild.Operation.Should().Be("grandchild op");
             grandChild.Description.Should().Be("grandchild desc");
             grandChild.ParentSpanId.Should().Be(child.SpanId);
+        }
+
+        [Fact]
+        public void StartChild_Limit_Maintained()
+        {
+            // Arrange
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op")
+            {
+                IsSampled = true
+            };
+
+            // Act
+            var spans = Enumerable
+                .Range(0, 2000)
+                .Select(i => transaction.StartChild("span " + i))
+                .ToArray();
+
+            // Assert
+            transaction.Spans.Should().HaveCount(1000);
+            spans.Count(s => s.IsSampled == true).Should().Be(1000);
         }
 
         [Fact]
