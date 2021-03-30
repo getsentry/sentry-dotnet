@@ -2,6 +2,9 @@
 
 namespace Sentry.AspNetCore
 {
+    /// <summary>
+    /// Methods to extract ASP.NET Core specific data from <see cref="TransactionSamplingContext"/>.
+    /// </summary>
     public static class SamplingExtensions
     {
         internal const string KeyForHttpRoute = "__HttpRoute";
