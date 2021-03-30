@@ -59,7 +59,7 @@ namespace Sentry.Extensibility
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext) =>
             // Transactions from DisabledHub are always sampled out
-            new TransactionTracer(this, context) {IsSampled = false};
+            new TransactionTracer(this, new SentryOptions(), context) {IsSampled = false};
 
         /// <summary>
         /// No-Op.

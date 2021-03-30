@@ -11,6 +11,7 @@ namespace Sentry
     public class TransactionTracer : ITransaction
     {
         private readonly IHub _hub;
+        private readonly SentryOptions _options;
 
         /// <inheritdoc />
         public SpanId SpanId
@@ -153,9 +154,10 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public TransactionTracer(IHub hub, string name, string operation)
+        public TransactionTracer(IHub hub, SentryOptions options, string name, string operation)
         {
             _hub = hub;
+            _options = options;
             Name = name;
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
@@ -165,8 +167,8 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
-        public TransactionTracer(IHub hub, ITransactionContext context)
-            : this(hub, context.Name, context.Operation)
+        public TransactionTracer(IHub hub, SentryOptions options, ITransactionContext context)
+            : this(hub, options, context.Name, context.Operation)
         {
             SpanId = context.SpanId;
             ParentSpanId = context.ParentSpanId;
@@ -194,8 +196,8 @@ namespace Sentry
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
-            // Transaction can only have up to 1000 spans
-            var isOutOfLimit = _spans.Count >= 1000;
+            // Respect the span limit set in options
+            var isOutOfLimit = _spans.Count >= _options.MaxSpans;
 
             var span = new SpanTracer(_hub, this, parentSpanId, operation)
             {

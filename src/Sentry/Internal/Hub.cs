@@ -106,7 +106,7 @@ namespace Sentry.Internal
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
         {
-            var transaction = new TransactionTracer(this, context);
+            var transaction = new TransactionTracer(this, _options, context);
 
             // Tracing sampler callback runs regardless of whether a decision
             // has already been made, as it can be used to override it.
