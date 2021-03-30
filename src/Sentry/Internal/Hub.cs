@@ -153,6 +153,19 @@ namespace Sentry.Internal
 
         public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
+        private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
+        {
+            // Find the span which is bound to the same exception
+            if (evt.Exception is { } exception &&
+                _exceptionToSpanMap.TryGetValue(exception, out var spanBoundToException))
+            {
+                return spanBoundToException;
+            }
+
+            // Otherwise just get the currently active span on the scope
+            return scope.GetSpan();
+        }
+
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
@@ -161,8 +174,7 @@ namespace Sentry.Internal
                 var actualScope = scope ?? currentScope.Key;
 
                 // Inject trace information from a linked span
-                if (evt.Exception is { } exception &&
-                    _exceptionToSpanMap.TryGetValue(exception, out var linkedSpan))
+                if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
                 {
                     evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                     evt.Contexts.Trace.TraceId = linkedSpan.TraceId;

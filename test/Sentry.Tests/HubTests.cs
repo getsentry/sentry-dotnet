@@ -144,6 +144,86 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void CaptureException_FinishedSpanBoundToSameExceptionExists_EventIsLinkedToSpan()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var exception = new Exception("error");
+
+            var transaction = hub.StartTransaction("foo", "bar");
+            transaction.Finish(exception);
+
+            // Act
+            hub.CaptureException(exception);
+
+            // Assert
+            client.Received(1).CaptureEvent(
+                Arg.Is<SentryEvent>(evt =>
+                    evt.Contexts.Trace.TraceId == transaction.TraceId &&
+                    evt.Contexts.Trace.SpanId == transaction.SpanId),
+                Arg.Any<Scope>()
+            );
+        }
+
+        [Fact]
+        public void CaptureException_ActiveSpanExistsOnScope_EventIsLinkedToSpan()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var exception = new Exception("error");
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+            // Act
+            hub.CaptureException(exception);
+
+            // Assert
+            client.Received(1).CaptureEvent(
+                Arg.Is<SentryEvent>(evt =>
+                    evt.Contexts.Trace.TraceId == transaction.TraceId &&
+                    evt.Contexts.Trace.SpanId == transaction.SpanId),
+                Arg.Any<Scope>()
+            );
+        }
+
+        [Fact]
+        public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            hub.CaptureException(new Exception("error"));
+
+            // Assert
+            client.Received(1).CaptureEvent(
+                Arg.Is<SentryEvent>(evt =>
+                    evt.Contexts.Trace.TraceId == default &&
+                    evt.Contexts.Trace.SpanId == default),
+                Arg.Any<Scope>()
+            );
+        }
+
+        [Fact]
         public void StartTransaction_NameOpDescription_Works()
         {
             // Arrange
