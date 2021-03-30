@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -70,16 +71,17 @@ namespace Sentry.AspNetCore
                     context.TryGetTransactionName() ??
                     UnknownRouteTransactionName;
 
-                var transaction = traceHeader is not null
-                    ? hub.StartTransaction(
-                        transactionName,
-                        OperationName,
-                        traceHeader
-                    )
-                    : hub.StartTransaction(
-                        transactionName,
-                        OperationName
-                    );
+                var transactionContext = traceHeader is not null
+                    ? new TransactionContext(transactionName, OperationName, traceHeader)
+                    : new TransactionContext(transactionName, OperationName);
+
+                var customSamplingContext = new Dictionary<string, object?>(StringComparer.Ordinal)
+                {
+                    [SamplingExtensions.KeyForHttpRoute] = context.TryGetRouteTemplate(),
+                    [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value
+                };
+
+                var transaction = hub.StartTransaction(transactionContext, customSamplingContext);
 
                 _options.DiagnosticLogger?.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",

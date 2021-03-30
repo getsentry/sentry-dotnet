@@ -48,21 +48,8 @@ namespace Sentry
             this IHub hub,
             string name,
             string operation,
-            SentryTraceHeader traceHeader)
-        {
-            var parentSpanId = traceHeader.SpanId;
-            var isParentSampled = traceHeader.IsSampled;
-
-            var context = new TransactionContext(
-                parentSpanId,
-                traceHeader.TraceId,
-                name,
-                operation,
-                isParentSampled
-            );
-
-            return hub.StartTransaction(context);
-        }
+            SentryTraceHeader traceHeader) =>
+            hub.StartTransaction(new TransactionContext(name, operation, traceHeader));
 
         /// <summary>
         /// Adds a breadcrumb to the current scope.

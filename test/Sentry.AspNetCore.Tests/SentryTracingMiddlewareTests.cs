@@ -232,6 +232,57 @@ namespace Sentry.AspNetCore.Tests
             transaction?.Request.Url.Should().Be("http://localhost/person/13");
             transaction?.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
         }
+
+        [Fact]
+        public async Task Transaction_sampling_context_contains_HTTP_context_data()
+        {
+            // Arrange
+            TransactionSamplingContext samplingContext = null;
+
+            var sentryClient = Substitute.For<ISentryClient>();
+
+            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampler = ctx =>
+                {
+                    samplingContext = ctx;
+                    return 1;
+                }
+            });
+
+            var server = new TestServer(new WebHostBuilder()
+                .UseDefaultServiceProvider(di => di.EnableValidation())
+                .UseSentry()
+                .ConfigureServices(services =>
+                {
+                    services.AddRouting();
+
+                    services.RemoveAll(typeof(Func<IHub>));
+                    services.AddSingleton<Func<IHub>>(() => hub);
+                })
+                .Configure(app =>
+                {
+                    app.UseRouting();
+                    app.UseSentryTracing();
+
+                    app.UseEndpoints(routes =>
+                    {
+                        routes.Map("/person/{id}", _ => Task.CompletedTask);
+                    });
+                })
+            );
+
+            var client = server.CreateClient();
+
+            // Act
+            await client.GetAsync("/person/13");
+
+            // Assert
+            samplingContext.Should().NotBeNull();
+            samplingContext.TryGetHttpRoute().Should().Be("/person/{id}");
+            samplingContext.TryGetHttpPath().Should().Be("/person/13");
+        }
     }
 }
 #endif

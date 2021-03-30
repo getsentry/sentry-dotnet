@@ -59,8 +59,19 @@
         /// <summary>
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>
+        public TransactionContext(
+            string name,
+            string operation,
+            SentryTraceHeader traceHeader)
+            : this(traceHeader.SpanId, traceHeader.TraceId, name, operation, traceHeader.IsSampled)
+        {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="TransactionContext"/>.
+        /// </summary>
         public TransactionContext(string name, string operation)
-            : this(name, operation, null)
+            : this(name, operation, (bool?) null)
         {
         }
     }
