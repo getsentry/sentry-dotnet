@@ -12,6 +12,7 @@ namespace Sentry.AspNetCore
 
         /// <summary>
         /// Gets the HTTP route associated with the transaction.
+        /// May return null if the value has not been set by the integration.
         /// </summary>
         /// <remarks>
         /// This method extracts data from <see cref="TransactionSamplingContext.CustomSamplingContext"/>
@@ -22,6 +23,7 @@ namespace Sentry.AspNetCore
 
         /// <summary>
         /// Gets the HTTP path associated with the transaction.
+        /// May return null if the value has not been set by the integration.
         /// </summary>
         /// <remarks>
         /// This method extracts data from <see cref="TransactionSamplingContext.CustomSamplingContext"/>
