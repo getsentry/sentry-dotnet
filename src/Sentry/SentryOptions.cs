@@ -450,7 +450,7 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
-        private int _maxSpans;
+        private int _maxSpans = 1000;
 
         /// <summary>
         /// Maximum spans allowed in a transaction.
