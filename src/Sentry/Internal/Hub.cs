@@ -162,8 +162,13 @@ namespace Sentry.Internal
                 return spanBoundToException;
             }
 
-            // Otherwise just get the currently active span on the scope
-            return scope.GetSpan();
+            // Otherwise just get the currently active span on the scope (unless it's sampled out)
+            if (scope.GetSpan() is {IsSampled: not false} span)
+            {
+                return span;
+            }
+
+            return null;
         }
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
