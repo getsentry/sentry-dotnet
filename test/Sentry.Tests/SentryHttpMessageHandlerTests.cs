@@ -72,6 +72,7 @@ namespace Sentry.Tests
 
             var transaction = new TransactionTracer(
                 Substitute.For<IHub>(),
+                new SentryOptions(),
                 "foo",
                 "bar"
             );
