@@ -5,6 +5,7 @@
 ### Features
 
 - Add StartupTime and Device.BootTime (#887) @lucas-zimerman
+- Link events to currently active span (#909) @Tyrrrz
 
 ## 3.2.0
 
