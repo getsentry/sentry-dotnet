@@ -194,13 +194,17 @@ namespace Sentry
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
+            // Transaction can only have up to 1000 spans
+            var isOutOfLimit = _spans.Count >= 1000;
+
             var span = new SpanTracer(_hub, this, parentSpanId, operation)
             {
-                IsSampled = IsSampled
+                IsSampled = !isOutOfLimit
+                    ? IsSampled
+                    : false // sample out out-of-limit spans
             };
 
-            // Transaction can only have up to 1000 spans
-            if (_spans.Count < 1000)
+            if (!isOutOfLimit)
             {
                 _spans.Add(span);
             }

@@ -135,6 +135,12 @@ namespace Sentry.Internal
 
         public void BindException(Exception exception, ISpan span)
         {
+            // Don't bind on sampled out spans
+            if (span.IsSampled == false)
+            {
+                return;
+            }
+
             // Don't overwrite existing pair in the unlikely event that it already exists
             _ = _exceptionToSpanMap.GetValue(exception, _ => span);
         }
