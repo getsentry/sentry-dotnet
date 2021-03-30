@@ -151,7 +151,8 @@ namespace NotSentry.Tests
 
             var hub = new Hub(client, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             });
 
             var exception = new Exception("error");
@@ -179,7 +180,8 @@ namespace NotSentry.Tests
 
             var hub = new Hub(client, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             });
 
             var exception = new Exception("error");
@@ -208,12 +210,13 @@ namespace NotSentry.Tests
 
             var hub = new Hub(client, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 0
             });
 
             var exception = new Exception("error");
 
-            var transaction = hub.StartTransaction(new TransactionContext("foo", "bar", false));
+            var transaction = hub.StartTransaction("foo", "bar");
 
             hub.ConfigureScope(scope => scope.Transaction = transaction);
 
@@ -237,7 +240,8 @@ namespace NotSentry.Tests
 
             var hub = new Hub(client, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             });
 
             // Act
