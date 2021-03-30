@@ -201,6 +201,35 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            var exception = new Exception("error");
+
+            var transaction = hub.StartTransaction(new TransactionContext("foo", "bar", false));
+
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+            // Act
+            hub.CaptureException(exception);
+
+            // Assert
+            client.Received(1).CaptureEvent(
+                Arg.Is<SentryEvent>(evt =>
+                    evt.Contexts.Trace.TraceId == default &&
+                    evt.Contexts.Trace.SpanId == default),
+                Arg.Any<Scope>()
+            );
+        }
+
+        [Fact]
         public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
         {
             // Arrange
