@@ -280,6 +280,7 @@ namespace Sentry.AspNetCore.Tests
 
             // Assert
             samplingContext.Should().NotBeNull();
+            samplingContext.TryGetHttpMethod().Should().Be("GET");
             samplingContext.TryGetHttpRoute().Should().Be("/person/{id}");
             samplingContext.TryGetHttpPath().Should().Be("/person/13");
         }

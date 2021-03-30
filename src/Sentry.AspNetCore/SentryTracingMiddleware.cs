@@ -77,6 +77,7 @@ namespace Sentry.AspNetCore
 
                 var customSamplingContext = new Dictionary<string, object?>(StringComparer.Ordinal)
                 {
+                    [SamplingExtensions.KeyForHttpMethod] = context.Request.Method,
                     [SamplingExtensions.KeyForHttpRoute] = context.TryGetRouteTemplate(),
                     [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value
                 };
