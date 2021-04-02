@@ -129,11 +129,6 @@ namespace Sentry
                 writer.WriteString("status", status.ToString().ToSnakeCase());
             }
 
-            if (IsSampled is {} isSampled)
-            {
-                writer.WriteBoolean("sampled", isSampled);
-            }
-
             writer.WriteString("start_timestamp", StartTimestamp);
 
             if (EndTimestamp is {} endTimestamp)

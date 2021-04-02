@@ -43,8 +43,7 @@ namespace Sentry.Tests.Protocol.Context
                 "\"parent_span_id\":\"1000000000000000\"," +
                 "\"trace_id\":\"75302ac48a024bde9a3b3734a82e36c8\"," +
                 "\"op\":\"op123\"," +
-                "\"status\":\"aborted\"," +
-                "\"sampled\":false" +
+                "\"status\":\"aborted\"" +
                 "}",
                 actual
             );

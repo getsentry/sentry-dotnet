@@ -76,11 +76,6 @@ namespace Sentry.Protocol
                 writer.WriteString("status", status.ToString().ToSnakeCase());
             }
 
-            if (IsSampled is {} isSampled)
-            {
-                writer.WriteBoolean("sampled", isSampled);
-            }
-
             writer.WriteEndObject();
         }
 
