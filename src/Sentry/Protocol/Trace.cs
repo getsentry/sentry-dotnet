@@ -26,6 +26,9 @@ namespace Sentry.Protocol
         public string Operation { get; set; } = "";
 
         /// <inheritdoc />
+        public string? Description { get; set; }
+
+        /// <inheritdoc />
         public SpanStatus? Status { get; set; }
 
         /// <inheritdoc />
@@ -71,6 +74,11 @@ namespace Sentry.Protocol
                 writer.WriteString("op", Operation);
             }
 
+            if (!string.IsNullOrWhiteSpace(Description))
+            {
+                writer.WriteString("description", Description);
+            }
+
             if (Status is {} status)
             {
                 writer.WriteString("status", status.ToString().ToSnakeCase());
@@ -88,6 +96,7 @@ namespace Sentry.Protocol
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "";
+            var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
 
@@ -97,6 +106,7 @@ namespace Sentry.Protocol
                 ParentSpanId = parentSpanId,
                 TraceId = traceId,
                 Operation = operation,
+                Description = description,
                 Status = status,
                 IsSampled = isSampled
             };

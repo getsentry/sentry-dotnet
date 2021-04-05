@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Move Description field from Transaction to Trace context (#924) @Tyrrrz
 - Drop unfinished spans from transaction (#923) @Tyrrrz
 - Don't dispose the SDK when UnobservedTaskException is captured (#925) @bruno-garcia
 - Fix spans not inheriting TraceId from transaction (#922) @Tyrrrz

@@ -7,9 +7,5 @@ namespace Sentry
     /// </summary>
     public interface ISpanContext : ITraceContext
     {
-        /// <summary>
-        /// Description.
-        /// </summary>
-        string? Description { get; }
     }
 }
