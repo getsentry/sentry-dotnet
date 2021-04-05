@@ -194,7 +194,7 @@ namespace Sentry
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
-            var span = new SpanTracer(_hub, this, parentSpanId, operation)
+            var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation)
             {
                 IsSampled = IsSampled
             };
