@@ -450,27 +450,6 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
-        private int _maxSpans = 1000;
-
-        /// <summary>
-        /// Maximum spans allowed in a transaction.
-        /// Attempting to add more spans to a transaction than this limit dictates
-        /// will result in the excess spans being silently dropped.
-        /// </summary>
-        public int MaxSpans
-        {
-            get => _maxSpans;
-            set
-            {
-                if (value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Value must be above zero.");
-                }
-
-                _maxSpans = value;
-            }
-        }
-
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!
         /// </summary>
