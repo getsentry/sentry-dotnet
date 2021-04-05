@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix spans not inheriting TraceId from transaction (#922) @Tyrrrz
+
 ## 3.3.0
 
 ### Features
