@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Drop unfinished spans from transaction (#923) @Tyrrrz
+
 ## 3.3.0
 
 ### Features
