@@ -67,14 +67,19 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="SpanTracer"/>.
         /// </summary>
-        public SpanTracer(IHub hub, TransactionTracer transaction, SpanId? parentSpanId, string operation)
+        public SpanTracer(
+            IHub hub,
+            TransactionTracer transaction,
+            SpanId? parentSpanId,
+            SentryId traceId,
+            string operation)
         {
             _hub = hub;
             _transaction = transaction;
 
             SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
-            TraceId = SentryId.Create();
+            TraceId = traceId;
             Operation = operation;
         }
 

@@ -188,6 +188,24 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public void StartChild_TraceIdInherited()
+        {
+            // Arrange
+            var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
+
+            // Act
+            var children = new[]
+            {
+                transaction.StartChild("op1"),
+                transaction.StartChild("op2"),
+                transaction.StartChild("op3")
+            };
+
+            // Assert
+            children.Should().OnlyContain(s => s.TraceId == transaction.TraceId);
+        }
+
+        [Fact]
         public void Finish_RecordsTime()
         {
             // Arrange

@@ -197,7 +197,7 @@ namespace Sentry
             // Limit spans to 1000
             var isOutOfLimit = _spans.Count >= 1000;
 
-            var span = new SpanTracer(_hub, this, parentSpanId, operation)
+            var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation)
             {
                 IsSampled = !isOutOfLimit
                     ? IsSampled
