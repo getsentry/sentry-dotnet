@@ -237,6 +237,33 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
+        public void Finish_DropsUnfinishedSpans()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
+
+            var transaction = new TransactionTracer(hub, "my name", "my op");
+
+            transaction.StartChild("op1").Finish();
+            transaction.StartChild("op2");
+            transaction.StartChild("op3").Finish();
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            client.Received(1).CaptureTransaction(
+                Arg.Is<Transaction>(t =>
+                    t.Spans.Count == 2 &&
+                    t.Spans.Any(s => s.Operation == "op1") &&
+                    t.Spans.All(s => s.Operation != "op2") &&
+                    t.Spans.Any(s => s.Operation == "op3")
+                )
+            );
+        }
+
+        [Fact]
         public void Finish_LinksExceptionToEvent()
         {
             // Arrange

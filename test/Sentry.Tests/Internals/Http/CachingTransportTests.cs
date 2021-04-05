@@ -206,7 +206,7 @@ namespace Sentry.Tests.Internals.Http
             _ = innerTransport.Received(0).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
         }
 
-        [Fact(Timeout = 7000)]
+        [Fact(Timeout = 7000, Skip = "Flaky")]
         public async Task DoesNotDeleteCacheIfConnectionWithIssue()
         {
             // Arrange
