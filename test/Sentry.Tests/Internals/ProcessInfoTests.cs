@@ -37,7 +37,7 @@ namespace Sentry.Tests.Internals
             processInfo.StartAccurateStartupTime();
 
             //Assert
-            Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(1)));
+            Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(10)));
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace Sentry.Tests.Internals
             }
 
             //Assert
-            Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(2)));
+            Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(10)));
         }
     }
 }

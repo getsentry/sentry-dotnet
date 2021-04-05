@@ -2,9 +2,11 @@
 
 ## Unreleased
 
-### Changes
+### Fixes
 
 - Drop unfinished spans from transaction (#923) @Tyrrrz
+- Don't dispose the SDK when UnobservedTaskException is captured (#925) @bruno-garcia
+- Fix spans not inheriting TraceId from transaction (#922) @Tyrrrz
 
 ## 3.3.0
 
