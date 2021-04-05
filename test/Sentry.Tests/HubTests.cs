@@ -151,7 +151,8 @@ namespace NotSentry.Tests
 
             var hub = new Hub(client, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             });
 
             var exception = new Exception("error");
@@ -179,7 +180,8 @@ namespace NotSentry.Tests
 
             var hub = new Hub(client, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             });
 
             var exception = new Exception("error");
@@ -201,6 +203,36 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 0
+            });
+
+            var exception = new Exception("error");
+
+            var transaction = hub.StartTransaction("foo", "bar");
+
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+            // Act
+            hub.CaptureException(exception);
+
+            // Assert
+            client.Received(1).CaptureEvent(
+                Arg.Is<SentryEvent>(evt =>
+                    evt.Contexts.Trace.TraceId == default &&
+                    evt.Contexts.Trace.SpanId == default),
+                Arg.Any<Scope>()
+            );
+        }
+
+        [Fact]
         public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
         {
             // Arrange
@@ -208,7 +240,8 @@ namespace NotSentry.Tests
 
             var hub = new Hub(client, new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             });
 
             // Act
