@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+- Move Description field from Transaction to Trace context (#924) @Tyrrrz
+
 ## 3.3.0
 
 ### Features
