@@ -13,16 +13,16 @@ namespace Sentry
         private readonly TransactionTracer _transaction;
 
         /// <inheritdoc />
-        public SpanId SpanId { get; private set; }
+        public SpanId SpanId { get; }
 
         /// <inheritdoc />
-        public SpanId? ParentSpanId { get; private set; }
+        public SpanId? ParentSpanId { get; }
 
         /// <inheritdoc />
-        public SentryId TraceId { get; private set; }
+        public SentryId TraceId { get; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp { get; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
@@ -67,14 +67,19 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="SpanTracer"/>.
         /// </summary>
-        public SpanTracer(IHub hub, TransactionTracer transaction, SpanId? parentSpanId, string operation)
+        public SpanTracer(
+            IHub hub,
+            TransactionTracer transaction,
+            SpanId? parentSpanId,
+            SentryId traceId,
+            string operation)
         {
             _hub = hub;
             _transaction = transaction;
 
             SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
-            TraceId = SentryId.Create();
+            TraceId = traceId;
             Operation = operation;
         }
 
