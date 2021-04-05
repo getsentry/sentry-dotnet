@@ -135,6 +135,12 @@ namespace Sentry.Internal
 
         public void BindException(Exception exception, ISpan span)
         {
+            // Don't bind on sampled out spans
+            if (span.IsSampled == false)
+            {
+                return;
+            }
+
             // Don't overwrite existing pair in the unlikely event that it already exists
             _ = _exceptionToSpanMap.GetValue(exception, _ => span);
         }
@@ -156,8 +162,13 @@ namespace Sentry.Internal
                 return spanBoundToException;
             }
 
-            // Otherwise just get the currently active span on the scope
-            return scope.GetSpan();
+            // Otherwise just get the currently active span on the scope (unless it's sampled out)
+            if (scope.GetSpan() is {IsSampled: not false} span)
+            {
+                return span;
+            }
+
+            return null;
         }
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)

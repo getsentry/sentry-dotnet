@@ -2,9 +2,12 @@
 
 ## Unreleased
 
-### Changes
+### Fixes
 
 - Move Description field from Transaction to Trace context (#924) @Tyrrrz
+- Drop unfinished spans from transaction (#923) @Tyrrrz
+- Don't dispose the SDK when UnobservedTaskException is captured (#925) @bruno-garcia
+- Fix spans not inheriting TraceId from transaction (#922) @Tyrrrz
 
 ## 3.3.0
 
@@ -13,6 +16,10 @@
 - Add StartupTime and Device.BootTime (#887) @lucas-zimerman
 - Link events to currently active span (#909) @Tyrrrz
 - Add useful contextual data to TransactionSamplingContext in ASP.NET Core integration (#910) @Tyrrrz
+
+### Changes
+
+- Limit max spans in transaction to 1000 (#908) @Tyrrrz
 
 ## 3.2.0
 

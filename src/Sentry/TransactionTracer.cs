@@ -46,7 +46,7 @@ namespace Sentry
         public string? Release { get; set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp { get; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; internal set; }
@@ -194,12 +194,20 @@ namespace Sentry
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
-            var span = new SpanTracer(_hub, this, parentSpanId, operation)
+            // Limit spans to 1000
+            var isOutOfLimit = _spans.Count >= 1000;
+
+            var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation)
             {
-                IsSampled = IsSampled
+                IsSampled = !isOutOfLimit
+                    ? IsSampled
+                    : false // sample out out-of-limit spans
             };
 
-            _spans.Add(span);
+            if (!isOutOfLimit)
+            {
+                _spans.Add(span);
+            }
 
             return span;
         }

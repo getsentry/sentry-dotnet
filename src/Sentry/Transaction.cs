@@ -158,6 +158,11 @@ namespace Sentry
         // Not readonly because of deserialization
         private Span[] _spans = Array.Empty<Span>();
 
+        /// <summary>
+        /// Flat list of spans within this transaction.
+        /// </summary>
+        public IReadOnlyCollection<Span> Spans => _spans;
+
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
 
@@ -210,7 +215,7 @@ namespace Sentry
             _breadcrumbs = tracer.Breadcrumbs.ToList();
             _extra = tracer.Extra.ToDictionary();
             _tags = tracer.Tags.ToDictionary();
-            _spans = tracer.Spans.Select(s => new Span(s)).ToArray();
+            _spans = tracer.Spans.Where(s => s.IsFinished).Select(s => new Span(s)).ToArray();
         }
 
         /// <inheritdoc />
