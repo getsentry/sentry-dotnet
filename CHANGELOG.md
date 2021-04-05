@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Don't dispose the SDK when UnobservedTaskException is captured (#925) @bruno-garcia
+- Fix spans not inheriting TraceId from transaction (#922) @Tyrrrz
+
 ## 3.3.0
 
 ### Features
