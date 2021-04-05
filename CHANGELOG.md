@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Don't dispose the SDK when UnobservedTaskException is captured (#925) @bruno-garcia
+
 ## 3.3.0
 
 ### Features
