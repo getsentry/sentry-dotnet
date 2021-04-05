@@ -16,6 +16,10 @@
 - Link events to currently active span (#909) @Tyrrrz
 - Add useful contextual data to TransactionSamplingContext in ASP.NET Core integration (#910) @Tyrrrz
 
+### Changes
+
+- Limit max spans in transaction to 1000 (#908) @Tyrrrz
+
 ## 3.2.0
 
 ### Changes
