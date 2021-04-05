@@ -64,7 +64,11 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public string? Description { get; private set; }
+        public string? Description
+        {
+            get => Contexts.Trace.Description;
+            set => Contexts.Trace.Description = value;
+        }
 
         /// <inheritdoc />
         public SpanStatus? Status
@@ -265,11 +269,6 @@ namespace Sentry
                 writer.WriteString("transaction", Name);
             }
 
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
             writer.WriteString("start_timestamp", StartTimestamp);
 
             if (EndTimestamp is {} endTimestamp)
@@ -370,7 +369,6 @@ namespace Sentry
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var name = json.GetProperty("transaction").GetStringOrThrow();
-            var description = json.GetPropertyOrNull("description")?.GetString();
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
@@ -394,7 +392,6 @@ namespace Sentry
             {
                 EventId = eventId,
                 ParentSpanId = parentSpanId,
-                Description = description,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
                 Level = level,

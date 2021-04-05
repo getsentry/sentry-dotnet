@@ -26,6 +26,11 @@
         string Operation { get; }
 
         /// <summary>
+        /// Description.
+        /// </summary>
+        string? Description { get; }
+
+        /// <summary>
         /// Status.
         /// </summary>
         SpanStatus? Status { get; }
