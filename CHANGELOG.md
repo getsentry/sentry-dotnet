@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased
+## 3.3.0
 
 ### Features
 
 - Add StartupTime and Device.BootTime (#887) @lucas-zimerman
 - Link events to currently active span (#909) @Tyrrrz
+- Add useful contextual data to TransactionSamplingContext in ASP.NET Core integration (#910) @Tyrrrz
 
 ### Changes
 
