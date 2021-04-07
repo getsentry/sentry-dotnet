@@ -217,12 +217,11 @@ namespace Sentry
             StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish(SpanStatus status = SpanStatus.Ok)
+        public void Finish()
         {
             try
             {
                 EndTimestamp = DateTimeOffset.UtcNow;
-                Status = status;
 
                 // Client decides whether to discard this transaction based on sampling
                 _hub.CaptureTransaction(new Transaction(this));
@@ -230,11 +229,15 @@ namespace Sentry
             finally
             {
                 // Clear the transaction from the scope
-                _hub.ConfigureScope(scope =>
-                {
-                    scope.ResetTransaction(this);
-                });
+                _hub.ConfigureScope(scope => scope.ResetTransaction(this));
             }
+        }
+
+        /// <inheritdoc />
+        public void Finish(SpanStatus status)
+        {
+            Status = status;
+            Finish();
         }
 
         /// <inheritdoc />

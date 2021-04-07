@@ -31,9 +31,14 @@ namespace Sentry
         ISpan StartChild(string operation);
 
         /// <summary>
+        /// Finishes the span.
+        /// </summary>
+        void Finish();
+
+        /// <summary>
         /// Finishes the span with the specified status.
         /// </summary>
-        void Finish(SpanStatus status = SpanStatus.Ok);
+        void Finish(SpanStatus status);
 
         /// <summary>
         /// Finishes the span with the specified exception and status.
