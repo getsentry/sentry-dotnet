@@ -221,6 +221,7 @@ namespace Sentry
         {
             try
             {
+                Status ??= SpanStatus.UnknownError;
                 EndTimestamp = DateTimeOffset.UtcNow;
 
                 // Client decides whether to discard this transaction based on sampling
