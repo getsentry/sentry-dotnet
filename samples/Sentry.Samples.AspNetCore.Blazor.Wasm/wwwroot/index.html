@@ -9,14 +9,35 @@
 </head>
 
 <body>
-<div id="app">Loading...</div>
+    <div id="app">Loading...</div>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
-<script src="_framework/blazor.webassembly.js"></script>
+<script src="https://browser.sentry-cdn.com/5.29.2/bundle.min.js"
+        integrity="sha384-ir4+BihBClNpjZk3UKgHTr0cwRhujAjy/M5VEGvcOzjhM1Db79GAg9xLxYn4uVK4"
+        crossorigin="anonymous"></script>
+<script type="text/javascript">
+    Sentry.init({
+        dsn: 'https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537',
+    });
+
+</script>
+
+        <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script type="text/javascript">
+        function throwFromJavaScript(caller) {
+            throw Error("Exceptional JavaScript function called by: " + caller);
+        }
+        function throwOnSetTimeout(caller) {
+            setTimeout(() => {
+                    throw Error("JavaScript error on setTimeout called by: " + caller);
+                },
+                1000);
+        }
+    </script>
+    <script src="_framework/blazor.webassembly.js"></script>
 </body>
 
 </html>
