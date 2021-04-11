@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Don't override Span/Transaction status on Finish(...) if status was not provided explicitly (#928) @Tyrrrz
+
 ## 3.3.1
 
 ### Fixes

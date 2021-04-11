@@ -88,10 +88,17 @@ namespace Sentry
             _transaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
-        public void Finish(SpanStatus status = SpanStatus.Ok)
+        public void Finish()
         {
+            Status ??= SpanStatus.UnknownError;
             EndTimestamp = DateTimeOffset.UtcNow;
+        }
+
+        /// <inheritdoc />
+        public void Finish(SpanStatus status)
+        {
             Status = status;
+            Finish();
         }
 
         /// <inheritdoc />

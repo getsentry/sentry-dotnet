@@ -289,5 +289,36 @@ namespace Sentry.Tests.Protocol
                 e.Contexts.Trace.ParentSpanId == transaction.ParentSpanId
             ), Arg.Any<Scope>());
         }
+
+        [Fact]
+        public void Finish_NoStatus_DefaultsToUnknown()
+        {
+            // Arrange
+            var hub = Substitute.For<IHub>();
+            var transaction = new TransactionTracer(hub, "my name", "my op");
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            transaction.Status.Should().Be(SpanStatus.UnknownError);
+        }
+
+        [Fact]
+        public void Finish_StatusSet_DoesNotOverride()
+        {
+            // Arrange
+            var hub = Substitute.For<IHub>();
+            var transaction = new TransactionTracer(hub, "my name", "my op")
+            {
+                Status = SpanStatus.DataLoss
+            };
+
+            // Act
+            transaction.Finish();
+
+            // Assert
+            transaction.Status.Should().Be(SpanStatus.DataLoss);
+        }
     }
 }
