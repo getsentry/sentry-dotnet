@@ -46,6 +46,11 @@ jobs:
           with:
             dotnet-version: '5.0.100'
 
+        - name: Setup .NET SDK (v6.0)
+          uses: actions/setup-dotnet@v1.7.2
+          with:
+            dotnet-version: '6.0.100-preview.3.21202.5'
+
         - name: Run build script
           run: ${{ matrix.build_script }}
 

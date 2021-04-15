@@ -1,4 +1,4 @@
-#if !NET5_0
+#if !NET5_0_OR_GREATER
 // ReSharper disable once CheckNamespace - It's a polyfill to a type on this location
 namespace System.Runtime.CompilerServices
 {
