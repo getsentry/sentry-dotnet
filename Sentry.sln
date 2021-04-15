@@ -116,6 +116,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{274CEDC2-2129-469D-B269-649EFA2EF5E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Maui", "samples\Sentry.Samples.Maui\Sentry.Samples.Maui.csproj", "{B67F1464-F7CA-47BB-BC5A-604C6B4AB5EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -250,6 +252,10 @@ Global
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B67F1464-F7CA-47BB-BC5A-604C6B4AB5EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B67F1464-F7CA-47BB-BC5A-604C6B4AB5EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B67F1464-F7CA-47BB-BC5A-604C6B4AB5EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B67F1464-F7CA-47BB-BC5A-604C6B4AB5EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -290,6 +296,7 @@ Global
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{B67F1464-F7CA-47BB-BC5A-604C6B4AB5EB} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
