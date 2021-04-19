@@ -12,7 +12,7 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Envelope item.
     /// </summary>
-    internal sealed class EnvelopeItem : ISerializable, IDisposable
+    public sealed class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
         private const string TypeValueEvent = "event";
@@ -56,6 +56,10 @@ namespace Sentry.Protocol.Envelopes
                 var value => Convert.ToInt64(value) // can be int, long, or another numeric type
             };
 
+        /// <summary>
+        /// Tries to get the FileNameKey
+        /// </summary>
+        /// <returns>The FileNameKey or null, if not set</returns>
         public string? TryGetFileName() => Header.GetValueOrDefault(FileNameKey) as string;
 
         private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)

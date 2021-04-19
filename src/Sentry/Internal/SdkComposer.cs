@@ -12,17 +12,12 @@ namespace Sentry.Internal
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            if (options.Dsn is null) throw new ArgumentException("No DSN defined in the SentryOptions");
+            if (options.Dsn is null)
+                throw new ArgumentException("No DSN defined in the SentryOptions");
         }
 
-        private ITransport CreateTransport()
+        private HttpTransport CreateHttpTransport()
         {
-            // Override for tests
-            if (_options.Transport is not null)
-            {
-                return _options.Transport;
-            }
-
             if (_options.SentryHttpClientFactory is { })
             {
                 _options.DiagnosticLogger?.LogDebug(
@@ -34,16 +29,30 @@ namespace Sentry.Internal
             var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
             var httpClient = httpClientFactory.Create(_options);
 
-            var httpTransport = new HttpTransport(_options, httpClient);
+            return new HttpTransport(_options, httpClient);
+        }
+
+        private ITransport CreateTransport()
+        {
+            ITransport transport;
+
+            if (_options.Transport is not null)
+            {
+                transport = _options.Transport;
+            }
+            else
+            {
+                transport = CreateHttpTransport();
+            }
 
             // Non-caching transport
             if (string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
             {
-                return httpTransport;
+                return transport;
             }
 
             // Caching transport
-            var cachingTransport = new CachingTransport(httpTransport, _options);
+            var cachingTransport = new CachingTransport(transport, _options);
 
             // If configured, flush existing cache
             if (_options.InitCacheFlushTimeout > TimeSpan.Zero)

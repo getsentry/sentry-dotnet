@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Allow to configure the `ITransport` to support custom serialization scenarios (#944) @pchinery
+
 ### Fixes
 
 - Don't override Span/Transaction status on Finish(...) if status was not provided explicitly (#928) @Tyrrrz

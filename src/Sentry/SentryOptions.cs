@@ -8,6 +8,7 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.Internal.Http;
 using static Sentry.Internal.Constants;
 using static Sentry.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
@@ -21,8 +22,11 @@ namespace Sentry
     {
         private Dictionary<string, string>? _defaultTags;
 
-        // Override for tests
-        internal ITransport? Transport { get; set; }
+        /// <summary>
+        /// The <see cref="ITransport"/> to use for sending the events. If null, the <see cref="HttpTransport"/> will be used.
+        /// The Transport will be wrapped with a <see cref="CachingTransport"/>, if a cache directory is set.
+        /// </summary>
+        public ITransport? Transport { get; set; }
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
@@ -153,6 +157,7 @@ namespace Sentry
         /// </example>
         /// <see href="https://develop.sentry.dev/sdk/features/#event-sampling"/>
         private float? _sampleRate;
+
         /// <summary>
         /// The optional sample rate.
         /// </summary>
