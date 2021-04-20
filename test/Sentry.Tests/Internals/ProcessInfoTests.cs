@@ -30,7 +30,7 @@ namespace Sentry.Tests.Internals
 
             var diff = (utcNow - sut.StartupTime).Value.TotalSeconds;
             // CI is often slow and the diff stays around 10 seconds. 60 is enough to validate the code though:
-            Assert.True(diff <= 60, "diff isn't less than a second: " + diff);
+            Assert.True(diff <= 60, "diff isn't less expected 60 seconds: " + diff);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void Ctor_DefaultOptionValue_IsBestMode()
+        public void Options_DefaultOptionValue_IsBestMode()
         {
             Assert.Equal(StartupTimeDetectionMode.Best, new SentryOptions().DetectStartupTime);
         }
@@ -75,8 +75,15 @@ namespace Sentry.Tests.Internals
             Assert.NotNull(initialTime);
             if (initialTime == sut.StartupTime)
             {
-                // This is an integration test so GetCurrentProcess might fail in some platforms (did on linux)
-                logger.Received(1).Log(SentryLevel.Error, Arg.Any<string>());
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    // This is an integration test so GetCurrentProcess might fail in some platforms (did on linux)
+                    logger.Received(1).Log(SentryLevel.Error, Arg.Any<string>(), Arg.Any<Exception>());
+                }
+                else
+                {
+                    Assert.False(true);
+                }
             }
             else
             {
