@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
@@ -268,6 +269,32 @@ namespace Sentry.Tests
                 .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
                 .ToArray()
                 .Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Init_WithCustomTransport_UsesCaching()
+        {
+            // Arrange
+            using var cacheDirectory = new TempDirectory();
+
+            using var _ = SentrySdk.Init(o =>
+            {
+                o.Dsn = ValidDsnWithoutSecret;
+                o.DiagnosticLogger = _logger;
+                o.CacheDirectoryPath = cacheDirectory.Path;
+                o.Transport = new FakeFailingTransport();
+            });
+
+            // Act
+
+            SentrySdk.CaptureMessage("some message");
+            await SentrySdk.FlushAsync(TimeSpan.FromSeconds(5));
+
+            // Assert
+            Directory
+                .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
+                .ToArray()
+                .Should().NotBeEmpty();
         }
 
         [Fact]
