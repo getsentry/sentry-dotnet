@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Internal;
 using Sentry.Testing;
@@ -20,44 +21,51 @@ namespace Sentry.Tests.Internals
 
             //Assert
             Assert.True(utcNow >= processInfo.StartupTime);
-            Assert.True((utcNow - processInfo.StartupTime).TotalSeconds <= 1);
+            Assert.True((utcNow - processInfo.StartupTime).Value.TotalSeconds <= 1);
         }
 
         [Fact]
-        public async Task SetupStartupTime_StartupTimeSet()
+        public async Task Ctor_StartupTimeDetectionModeNone_NoDateTimeSet()
         {
-            //Arrange
-            var unsetDateTime = new DateTime(1995, 01, 01);
-            var options = new SentryOptions();
-            var processInfo = new ProcessInfo(options);
-            processInfo.StartupTime = unsetDateTime;
-            var func = new Func<bool>(() => processInfo.StartupTime != unsetDateTime);
+            var options = new SentryOptions {DetectStartupTime = StartupTimeDetectionMode.None};
 
-            //Act
-            processInfo.StartAccurateStartupTime();
+            var sut = new ProcessInfo(options);
+            await sut.PreciseAppStartupTask;
 
-            //Assert
-            Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(10)));
+            Assert.Null(sut.BootTime);
+            Assert.Null(sut.StartupTime);
         }
 
         [Fact]
-        public async Task SetupStartupTime_MultipleCalls_DoesntCrash()
+        public async Task Ctor_StartupTimeDetectionModeFast_TimeSet()
         {
-            //Arrange
-            var unsetDateTime = new DateTime(1995, 01, 01);
-            var options = new SentryOptions();
-            var processInfo = new ProcessInfo(options);
-            processInfo.StartupTime = unsetDateTime;
-            var func = new Func<bool>(() => processInfo.StartupTime != unsetDateTime);
+            var options = new SentryOptions {DetectStartupTime = StartupTimeDetectionMode.Fast};
 
-            //Act
-            for (int i = 0; i < 10; i++)
-            {
-                processInfo.StartAccurateStartupTime();
-            }
+            var sut = new ProcessInfo(options);
+            await sut.PreciseAppStartupTask;
 
-            //Assert
-            Assert.True(await func.WaitConditionAsync(true, TimeSpan.FromSeconds(10)));
+            Assert.NotNull(sut.BootTime);
+            Assert.NotNull(sut.StartupTime);
         }
+
+        [Fact]
+        public void Ctor_DefaultOptionValue_IsBestMode()
+        {
+            Assert.Equal(StartupTimeDetectionMode.Best, new SentryOptions().DetectStartupTime);
+        }
+
+        [Fact]
+        public async Task Ctor_DefaultArguments_ImproveStartupTimePrecision()
+        {
+            // Not passing a mock callback here so this is 'an integration test' with GetCurrentProcess()
+            var sut = new ProcessInfo(new SentryOptions());
+            var initialTime = sut.StartupTime;
+            await sut.PreciseAppStartupTask;
+
+            Assert.NotEqual(initialTime, sut.StartupTime);
+            // The SDK init time must have happened before the process started.
+            Assert.True(sut.StartupTime < initialTime);
+        }
+
     }
 }
