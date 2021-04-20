@@ -20,8 +20,12 @@ namespace Sentry.Tests.Internals
             var utcNow = DateTimeOffset.UtcNow;
 
             //Assert
-            Assert.True(utcNow >= processInfo.StartupTime);
-            Assert.True((utcNow - processInfo.StartupTime).Value.TotalSeconds <= 1);
+            Assert.True(utcNow >= processInfo.StartupTime, "Startup Time is before 'now': +" +
+                                                           "StartupTime: " + processInfo.StartupTime +
+                                                           "Now: " + utcNow);
+
+            var diff = (utcNow - processInfo.StartupTime).Value.TotalSeconds;
+            Assert.True(diff <= 1, "diff isn't less than a second: " + diff);
         }
 
         [Fact]
@@ -64,7 +68,9 @@ namespace Sentry.Tests.Internals
 
             Assert.NotEqual(initialTime, sut.StartupTime);
             // The SDK init time must have happened before the process started.
-            Assert.True(sut.StartupTime < initialTime);
+            Assert.True(sut.StartupTime < initialTime, "Startup Time is not before 'initialTime': +" +
+                                                       "StartupTime: " + sut.StartupTime +
+                                                       "initialTime: " + initialTime);
         }
 
         [Theory]

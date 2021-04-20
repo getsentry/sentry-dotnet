@@ -23,9 +23,14 @@ namespace Sentry.Internal
 
         private readonly SentryOptions _options;
         private readonly Func<DateTimeOffset> _findPreciseStartupTime;
+        private volatile Task _preciseAppStartupTask = Task.CompletedTask;
 
         // For testability
-        internal Task PreciseAppStartupTask { get; private set; } = Task.CompletedTask;
+        internal Task PreciseAppStartupTask
+        {
+            get => _preciseAppStartupTask;
+            private set => _preciseAppStartupTask = value;
+        }
 
         internal ProcessInfo(
             SentryOptions options,
@@ -35,8 +40,8 @@ namespace Sentry.Internal
             _findPreciseStartupTime = findPreciseStartupTime ?? GetStartupTime;
             if (options.DetectStartupTime == StartupTimeDetectionMode.None)
             {
-                _options.DiagnosticLogger?.LogDebug("Not detecting startup time due to options: {0}",
-                    options.DetectStartupTime);
+                _options.DiagnosticLogger?.LogDebug("Not detecting startup time due to option: {0}",
+                    _options.DetectStartupTime);
                 return;
             }
 
