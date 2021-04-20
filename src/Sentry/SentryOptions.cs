@@ -24,7 +24,7 @@ namespace Sentry
 
         /// <summary>
         /// The <see cref="ITransport"/> to use for sending the events. If null, the <see cref="HttpTransport"/> will be used.
-        /// The Transport will be wrapped with a <see cref="CachingTransport"/>, if a cache directory is set.
+        /// The Transport will be wrapped with a <see cref="CachingTransport"/>, if a <see cref="CacheDirectoryPath"/> is set.
         /// </summary>
         public ITransport? Transport { get; set; }
 
