@@ -12,8 +12,7 @@ namespace Sentry.Internal
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            if (options.Dsn is null)
-                throw new ArgumentException("No DSN defined in the SentryOptions");
+            if (options.Dsn is null) throw new ArgumentException("No DSN defined in the SentryOptions");
         }
 
         private HttpTransport CreateHttpTransport()
