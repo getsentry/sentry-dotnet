@@ -67,5 +67,21 @@ namespace Sentry.Tests.Internals
             Assert.True(sut.StartupTime < initialTime);
         }
 
+        [Theory]
+        [InlineData(StartupTimeDetectionMode.None, false)]
+        [InlineData(StartupTimeDetectionMode.Fast, false)]
+        [InlineData(StartupTimeDetectionMode.Best, true)]
+        public async Task Ctor_PreciseAppStartCallback_RunsOnlyOnBestMode(
+            StartupTimeDetectionMode mode,
+            bool fastCallbackInvoked)
+        {
+            var options = new SentryOptions {DetectStartupTime = mode};
+            var check = new Func<DateTimeOffset>(() => DateTimeOffset.MaxValue);
+
+            var sut = new ProcessInfo(options, check);
+            await sut.PreciseAppStartupTask;
+
+            Assert.Equal(fastCallbackInvoked, DateTimeOffset.MaxValue == sut.StartupTime);
+        }
     }
 }
