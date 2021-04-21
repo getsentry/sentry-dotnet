@@ -68,6 +68,7 @@ namespace Sentry.Tests.Internals
         {
             // Not passing a mock callback here so this is 'an integration test' with GetCurrentProcess()
             var logger = Substitute.For<IDiagnosticLogger>();
+            var now = DateTimeOffset.UtcNow;
             var sut = new ProcessInfo(new SentryOptions {DiagnosticLogger = logger});
             var initialTime = sut.StartupTime;
             await sut.PreciseAppStartupTask;
@@ -75,15 +76,8 @@ namespace Sentry.Tests.Internals
             Assert.NotNull(initialTime);
             if (initialTime == sut.StartupTime)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    // This is an integration test so GetCurrentProcess might fail in some platforms (did on linux)
-                    logger.Received(1).Log(SentryLevel.Error, Arg.Any<string>(), Arg.Any<Exception>());
-                }
-                else
-                {
-                    Assert.False(true);
-                }
+                // If the task completed before we awaited:
+                Assert.True(sut.StartupTime <= now);
             }
             else
             {
