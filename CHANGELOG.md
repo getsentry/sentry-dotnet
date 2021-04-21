@@ -5,6 +5,7 @@
 ### Fixes
 
 - Don't override Span/Transaction status on Finish(...) if status was not provided explicitly (#928) @Tyrrrz
+- Fix startup time shows incorrect value on macOS/Linux. Opt-out available for IL2CPP. (#948)
 
 ## 3.3.1
 
