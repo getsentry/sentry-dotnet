@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- boot time detection can fail in some cases #955
+- boot time detection can fail in some cases (#955)
 
 ## 3.3.2
 
