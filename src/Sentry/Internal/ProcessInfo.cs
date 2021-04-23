@@ -48,9 +48,20 @@ namespace Sentry.Internal
             // Fast
             var now = DateTimeOffset.UtcNow;
             StartupTime = now;
-            BootTime = now.AddTicks(-Stopwatch.GetTimestamp()
-                                    / (Stopwatch.Frequency
-                                       / TimeSpan.TicksPerSecond));
+            try
+            {
+                BootTime = now.AddTicks(-Stopwatch.GetTimestamp()
+                                        / (Stopwatch.Frequency
+                                           / TimeSpan.TicksPerSecond));
+            }
+            catch (DivideByZeroException e)
+            {
+                // Seems to have failed on a single Windows Server 2012 on .NET Framework 4.8
+                // https://github.com/getsentry/sentry-dotnet/issues/954
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to find BotoTime: GetTimestamp {0}, Frequency {1}, TicksPerSecond: {2}",
+                    e, Stopwatch.GetTimestamp(), Stopwatch.Frequency, TimeSpan.TicksPerSecond);
+            }
 
             // An opt-out to the more precise approach (mainly due to IL2CPP):
             // https://issuetracker.unity3d.com/issues/il2cpp-player-crashes-when-calling-process-dot-getcurrentprocess-dot-starttime
