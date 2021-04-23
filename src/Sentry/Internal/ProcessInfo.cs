@@ -59,7 +59,7 @@ namespace Sentry.Internal
                 // Seems to have failed on a single Windows Server 2012 on .NET Framework 4.8
                 // https://github.com/getsentry/sentry-dotnet/issues/954
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to find BotoTime: GetTimestamp {0}, Frequency {1}, TicksPerSecond: {2}",
+                    "Failed to find BootTime: GetTimestamp {0}, Frequency {1}, TicksPerSecond: {2}",
                     e, Stopwatch.GetTimestamp(), Stopwatch.Frequency, TimeSpan.TicksPerSecond);
             }
 
