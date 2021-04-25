@@ -282,7 +282,10 @@ namespace Sentry.Internal.Http
 
             Directory.CreateDirectory(_isolatedCacheDirectoryPath);
 
-            using (var stream = File.Create(envelopeFilePath))
+#if !NET461 && !NETSTANDARD2_0
+            await
+#endif
+                using (var stream = File.Create(envelopeFilePath))
             {
                 await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
             }

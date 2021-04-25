@@ -19,6 +19,8 @@ namespace Sentry.Internal.Http
         private readonly HttpClient _httpClient;
         private readonly ISystemClock _clock = new SystemClock();
 
+        private readonly Func<string, string?> _getEnvironmentVariable;
+
         // Keep track of rate limits and their expiry dates
         private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets =
             new();
@@ -26,9 +28,17 @@ namespace Sentry.Internal.Http
         internal const string DefaultErrorMessage = "No message";
 
         public HttpTransport(SentryOptions options, HttpClient httpClient)
+            : this(options, httpClient, Environment.GetEnvironmentVariable)
+        {
+
+        }
+
+        internal HttpTransport(SentryOptions options, HttpClient httpClient,
+            Func<string, string?> getEnvironmentVariable)
         {
             _options = options;
             _httpClient = httpClient;
+            _getEnvironmentVariable = getEnvironmentVariable;
         }
 
         private Envelope ProcessEnvelope(Envelope envelope, DateTimeOffset instant)
@@ -116,16 +126,29 @@ namespace Sentry.Internal.Http
             // Read & set rate limits for future requests
             ExtractRateLimits(response, instant);
 
-            if (response.StatusCode == HttpStatusCode.OK)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
-                _options.DiagnosticLogger?.LogDebug(
-                    "Envelope {0} successfully received by Sentry.",
-                    processedEnvelope.TryGetEventId()
-                );
+                await HandleFailureAsync(response, processedEnvelope, cancellationToken).ConfigureAwait(false);
+                return;
             }
-            else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
+
+            _options.DiagnosticLogger?.LogDebug(
+                "Envelope {0} successfully received by Sentry.",
+                processedEnvelope.TryGetEventId()
+            );
+
+        }
+
+        private async Task HandleFailureAsync(
+            HttpResponseMessage response,
+            Envelope processedEnvelope,
+            CancellationToken cancellationToken)
+        {
+            // Spare the overhead if level is not enabled
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
             {
-                if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json",
+                    StringComparison.OrdinalIgnoreCase))
                 {
                     var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
 
@@ -160,29 +183,32 @@ namespace Sentry.Internal.Http
                         responseString
                     );
                 }
+            }
 
-                // SDK is in debug mode, and envelope was too large. To help troubleshoot:
-                if (response.StatusCode == HttpStatusCode.RequestEntityTooLarge
-                    && Environment.GetEnvironmentVariable("SENTRY_KEEP_LARGE_ENVELOPE") is { } destinationDirectory)
-                {
-                    _options.DiagnosticLogger?
-                        .LogDebug("Environment variable 'SENTRY_KEEP_LARGE_ENVELOPE' set to {0}. " +
-                                  "Writing envelope to that location.", destinationDirectory);
+            // SDK is in debug mode, and envelope was too large. To help troubleshoot:
+            const String persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) == true
+                && response.StatusCode == HttpStatusCode.RequestEntityTooLarge
+                && _getEnvironmentVariable(persistLargeEnvelopePathEnvVar) is { } destinationDirectory)
+            {
+                _options.DiagnosticLogger?
+                    .LogDebug("Environment variable '{0}' set. Writing envelope to {1}",
+                        persistLargeEnvelopePathEnvVar,
+                        destinationDirectory);
 
-                    var destination = Path.Combine(destinationDirectory, "envelope_too_large",
-                        (processedEnvelope.TryGetEventId() ?? SentryId.Create()).ToString());
+                var destination = Path.Combine(destinationDirectory, "envelope_too_large",
+                    (processedEnvelope.TryGetEventId() ?? SentryId.Create()).ToString());
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 
 #if !NET461 && !NETSTANDARD2_0
-                    await
+                await
 #endif
-                        using var envelopeFile = File.OpenRead(destination);
-                    await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
-                    await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
-                    _options.DiagnosticLogger?.LogInfo("All {0} bytes written to: {1}",
-                        envelopeFile.Length, destination);
-                }
+                    using var envelopeFile = File.Create(destination);
+                await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
+                await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
+                _options.DiagnosticLogger?.LogInfo("Envelope's {0} bytes written to: {1}",
+                    envelopeFile.Length, destination);
             }
         }
 
