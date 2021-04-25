@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -158,6 +159,29 @@ namespace Sentry.Internal.Http
                         response.StatusCode,
                         responseString
                     );
+                }
+
+                // SDK is in debug mode, and envelope was too large. To help troubleshoot:
+                if (response.StatusCode == HttpStatusCode.RequestEntityTooLarge
+                    && Environment.GetEnvironmentVariable("SENTRY_KEEP_LARGE_ENVELOPE") is { } destinationDirectory)
+                {
+                    _options.DiagnosticLogger?
+                        .LogDebug("Environment variable 'SENTRY_KEEP_LARGE_ENVELOPE' set to {0}. " +
+                                  "Writing envelope to that location.", destinationDirectory);
+
+                    var destination = Path.Combine(destinationDirectory, "envelope_too_large",
+                        (processedEnvelope.TryGetEventId() ?? SentryId.Create()).ToString());
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+
+#if !NET461 && !NETSTANDARD2_0
+                    await
+#endif
+                        using var envelopeFile = File.OpenRead(destination);
+                    await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
+                    await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    _options.DiagnosticLogger?.LogInfo("All {0} bytes written to: {1}",
+                        envelopeFile.Length, destination);
                 }
             }
         }

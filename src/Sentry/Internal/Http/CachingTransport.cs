@@ -169,7 +169,10 @@ namespace Sentry.Internal.Http
 
                 try
                 {
-                    using var envelopeFile = File.OpenRead(envelopeFilePath);
+#if !NET461 && !NETSTANDARD2_0
+                    await
+#endif
+                        using var envelopeFile = File.OpenRead(envelopeFilePath);
                     using var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken)
                         .ConfigureAwait(false);
 
