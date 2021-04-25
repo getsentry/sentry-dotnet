@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Env var to keep large envelopes if they are rejected by Sentry (#957)
+
 ## 3.3.3
 
 ### Fixes
