@@ -6,6 +6,10 @@
 
 - Env var to keep large envelopes if they are rejected by Sentry (#957)
 
+### Fixes
+
+- serialize parent_span_id in contexts.trace (#958)
+
 ## 3.3.3
 
 ### Fixes
