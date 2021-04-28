@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sentry.Tests.Helpers;
 using Xunit;
 
 // ReSharper disable once CheckNamespace
