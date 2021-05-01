@@ -19,7 +19,7 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueUserReport = "user_report";
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueAttachment = "attachment";
-        private const string LengthKey = "length";
+        internal const string LengthKey = "length";
         private const string FileNameKey = "filename";
 
         /// <summary>

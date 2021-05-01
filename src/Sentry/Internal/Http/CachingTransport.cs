@@ -287,7 +287,9 @@ namespace Sentry.Internal.Http
 #endif
                 using (var stream = File.Create(envelopeFilePath))
             {
-                await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                var serializer = new SentryJsonSerializer(_options);
+                await serializer.SerializeAsync(envelope, stream, cancellationToken).ConfigureAwait(false);
+                // await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
             }
 
             // Tell the worker that there is work available
