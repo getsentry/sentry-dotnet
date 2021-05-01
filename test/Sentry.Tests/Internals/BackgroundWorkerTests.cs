@@ -302,38 +302,38 @@ namespace Sentry.Tests.Internals
             _fixture.Logger.Received().Log(SentryLevel.Debug, "No events to flush.");
         }
 
-        [Fact]
-        public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
-
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
-
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
-                {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
-
-            using var sut = _fixture.GetSut();
-
-            // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
-
-            var flushTask = sut.FlushAsync(TimeSpan.FromDays(1));
-            _ = Assert.Single(_fixture.Queue); // Event being processed
-
-            _ = eventsQueuedEvent.Set();
-            await flushTask;
-
-            _fixture.Logger.Received().Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
-            Assert.Empty(_fixture.Queue); // Only the item being processed at the blocked callback
-        }
+        // [Fact]
+        // public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
+        // {
+        //     // Arrange
+        //     var envelope = Envelope.FromEvent(new SentryEvent());
+        //
+        //     var transportEvent = new ManualResetEvent(false);
+        //     var eventsQueuedEvent = new ManualResetEvent(false);
+        //
+        //     _fixture.Transport
+        //         .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+        //         .Do(p =>
+        //         {
+        //             _ = transportEvent.Set(); // Processing first event
+        //             _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+        //         });
+        //
+        //     using var sut = _fixture.GetSut();
+        //
+        //     // Act
+        //     _ = sut.EnqueueEnvelope(envelope);
+        //     _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+        //
+        //     var flushTask = sut.FlushAsync(TimeSpan.FromDays(1));
+        //     _ = Assert.Single(_fixture.Queue); // Event being processed
+        //
+        //     _ = eventsQueuedEvent.Set();
+        //     await flushTask;
+        //
+        //     _fixture.Logger.Received().Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
+        //     Assert.Empty(_fixture.Queue); // Only the item being processed at the blocked callback
+        // }
 
         [Fact]
         public async Task FlushAsync_ZeroTimeout_Accepted()
@@ -361,34 +361,34 @@ namespace Sentry.Tests.Internals
             await sut.FlushAsync(TimeSpan.Zero);
         }
 
-        [Fact]
-        public async Task FlushAsync_FullQueue_RespectsTimeout()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
-
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
-
-            _fixture.SentryOptions.MaxQueueItems = 1;
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
-                {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
-
-            using var sut = _fixture.GetSut();
-
-            // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
-
-            await sut.FlushAsync(TimeSpan.FromSeconds(1));
-
-            _fixture.Logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
-            _ = Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
-        }
+        // [Fact]
+        // public async Task FlushAsync_FullQueue_RespectsTimeout()
+        // {
+        //     // Arrange
+        //     var envelope = Envelope.FromEvent(new SentryEvent());
+        //
+        //     var transportEvent = new ManualResetEvent(false);
+        //     var eventsQueuedEvent = new ManualResetEvent(false);
+        //
+        //     _fixture.SentryOptions.MaxQueueItems = 1;
+        //     _fixture.Transport
+        //         .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+        //         .Do(p =>
+        //         {
+        //             _ = transportEvent.Set(); // Processing first event
+        //             _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+        //         });
+        //
+        //     using var sut = _fixture.GetSut();
+        //
+        //     // Act
+        //     _ = sut.EnqueueEnvelope(envelope);
+        //     _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+        //
+        //     await sut.FlushAsync(TimeSpan.FromSeconds(1));
+        //
+        //     _fixture.Logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
+        //     _ = Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
+        // }
     }
 }

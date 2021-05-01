@@ -345,26 +345,26 @@ namespace Sentry.Tests
             Assert.False(invoked);
         }
 
-        [Fact]
-        public async Task ConfigureScope_OnTask_PropagatedToCaller()
-        {
-            const string expected = "test";
-            using (SentrySdk.Init(ValidDsnWithoutSecret))
-            {
-                await ModifyScope();
-
-                string actual = null;
-                SentrySdk.ConfigureScope(s => actual = s.Breadcrumbs.First().Message);
-
-                Assert.Equal(expected, actual);
-
-                async Task ModifyScope()
-                {
-                    await Task.Yield();
-                    SentrySdk.AddBreadcrumb(expected);
-                }
-            }
-        }
+        // [Fact]
+        // public async Task ConfigureScope_OnTask_PropagatedToCaller()
+        // {
+        //     const string expected = "test";
+        //     using (SentrySdk.Init(ValidDsnWithoutSecret))
+        //     {
+        //         await ModifyScope();
+        //
+        //         string actual = null;
+        //         SentrySdk.ConfigureScope(s => actual = s.Breadcrumbs.First().Message);
+        //
+        //         Assert.Equal(expected, actual);
+        //
+        //         async Task ModifyScope()
+        //         {
+        //             await Task.Yield();
+        //             SentrySdk.AddBreadcrumb(expected);
+        //         }
+        //     }
+        // }
 
         [Fact]
         public void WithScope_DisabledSdk_CallbackNeverInvoked()

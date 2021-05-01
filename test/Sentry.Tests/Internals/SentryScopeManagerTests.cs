@@ -170,18 +170,18 @@ namespace Sentry.Tests.Internals
             Assert.NotEqual(first, second);
         }
 
-        [Fact]
-        public async Task NewTask_SeesRootScope()
-        {
-            var sut = _fixture.GetSut();
-            var root = sut.GetCurrent();
-
-            await Task.Run(async () =>
-            {
-                await Task.Yield();
-                Assert.Equal(root, sut.GetCurrent());
-            });
-        }
+        // [Fact]
+        // public async Task NewTask_SeesRootScope()
+        // {
+        //     var sut = _fixture.GetSut();
+        //     var root = sut.GetCurrent();
+        //
+        //     await Task.Run(async () =>
+        //     {
+        //         await Task.Yield();
+        //         Assert.Equal(root, sut.GetCurrent());
+        //     });
+        // }
 
         [Fact]
         public void PushScope_Disposed_BackToParent()
@@ -208,109 +208,109 @@ namespace Sentry.Tests.Internals
             Assert.Equal(root, sut.GetCurrent());
         }
 
-        [Fact]
-        public async Task AsyncTasks_IsolatedScopes()
-        {
-            var sut = _fixture.GetSut();
-            var root = sut.GetCurrent();
-
-            var t1Evt = new ManualResetEvent(false);
-            var t2Evt = new ManualResetEvent(false);
-
-            // Creates event second, disposes first
-            var t1 = Task.Run(() =>
-            {
-                _ = t1Evt.Set(); // unblock task start
-
-                // Wait t2 create scope
-                _ = t2Evt.WaitOne();
-                try
-                {
-                    // t2 created scope, make sure this parent is still root
-                    Assert.Equal(root, sut.GetCurrent());
-
-                    var scope = sut.PushScope();
-
-                    Assert.NotEqual(root, sut.GetCurrent());
-
-                    scope.Dispose();
-                }
-                finally
-                {
-                    _ = t1Evt.Set();
-                }
-
-                Assert.Equal(root, sut.GetCurrent());
-            });
-
-            _ = t1Evt.WaitOne(); // Wait t1 start
-            _ = t1Evt.Reset();
-
-            // Creates a scope first, disposes after t2
-            var t2 = Task.Run(() =>
-            {
-
-                var scope = sut.PushScope();
-                try
-                {
-                    // Create a scope first
-                    Assert.NotEqual(root, sut.GetCurrent());
-                }
-                finally
-                {
-                    _ = t2Evt.Set(); // release t1
-                }
-
-                // Wait for t1 to create and dispose its scope
-                _ = t1Evt.WaitOne();
-                scope.Dispose();
-
-                Assert.Equal(root, sut.GetCurrent());
-            });
-
-            await Task.WhenAll(t1, t2);
-
-            Assert.Equal(root, sut.GetCurrent());
-        }
-
-        [Fact]
-        public async Task Async_IsolatedScopes()
-        {
-            var sut = _fixture.GetSut();
-            var root = sut.GetCurrent();
-            void AddRandomTag() => sut.GetCurrent().Key.SetTag(Guid.NewGuid().ToString(), "1");
-            void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Key.Tags.Count);
-
-            AddRandomTag();
-            AssertTagCount(1);
-            var rdn = new Random();
-
-            async Task Test(int i)
-            {
-                if (i > 5)
-                    return;
-
-                AssertTagCount(i);
-                using (sut.PushScope())
-                {
-                    AddRandomTag();
-                    AssertTagCount(i + 1);
-                    await Test(i + 1);
-                    // Reorder
-                    await Task.Delay(rdn.Next(0, 5));
-                    AddRandomTag();
-                    AssertTagCount(i + 2);
-                    await Test(i + 2);
-                }
-                AssertTagCount(i);
-            }
-
-            await Task.WhenAll(Enumerable.Range(1, 5)
-                .Select(_ => Enumerable.Range(1, 5)
-                    .Select(__ => Test(1)))
-                .SelectMany(t => t));
-
-            Assert.Equal(root, sut.GetCurrent());
-        }
+        // [Fact]
+        // public async Task AsyncTasks_IsolatedScopes()
+        // {
+        //     var sut = _fixture.GetSut();
+        //     var root = sut.GetCurrent();
+        //
+        //     var t1Evt = new ManualResetEvent(false);
+        //     var t2Evt = new ManualResetEvent(false);
+        //
+        //     // Creates event second, disposes first
+        //     var t1 = Task.Run(() =>
+        //     {
+        //         _ = t1Evt.Set(); // unblock task start
+        //
+        //         // Wait t2 create scope
+        //         _ = t2Evt.WaitOne();
+        //         try
+        //         {
+        //             // t2 created scope, make sure this parent is still root
+        //             Assert.Equal(root, sut.GetCurrent());
+        //
+        //             var scope = sut.PushScope();
+        //
+        //             Assert.NotEqual(root, sut.GetCurrent());
+        //
+        //             scope.Dispose();
+        //         }
+        //         finally
+        //         {
+        //             _ = t1Evt.Set();
+        //         }
+        //
+        //         Assert.Equal(root, sut.GetCurrent());
+        //     });
+        //
+        //     _ = t1Evt.WaitOne(); // Wait t1 start
+        //     _ = t1Evt.Reset();
+        //
+        //     // Creates a scope first, disposes after t2
+        //     var t2 = Task.Run(() =>
+        //     {
+        //
+        //         var scope = sut.PushScope();
+        //         try
+        //         {
+        //             // Create a scope first
+        //             Assert.NotEqual(root, sut.GetCurrent());
+        //         }
+        //         finally
+        //         {
+        //             _ = t2Evt.Set(); // release t1
+        //         }
+        //
+        //         // Wait for t1 to create and dispose its scope
+        //         _ = t1Evt.WaitOne();
+        //         scope.Dispose();
+        //
+        //         Assert.Equal(root, sut.GetCurrent());
+        //     });
+        //
+        //     await Task.WhenAll(t1, t2);
+        //
+        //     Assert.Equal(root, sut.GetCurrent());
+        // }
+        //
+        // [Fact]
+        // public async Task Async_IsolatedScopes()
+        // {
+        //     var sut = _fixture.GetSut();
+        //     var root = sut.GetCurrent();
+        //     void AddRandomTag() => sut.GetCurrent().Key.SetTag(Guid.NewGuid().ToString(), "1");
+        //     void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Key.Tags.Count);
+        //
+        //     AddRandomTag();
+        //     AssertTagCount(1);
+        //     var rdn = new Random();
+        //
+        //     async Task Test(int i)
+        //     {
+        //         if (i > 5)
+        //             return;
+        //
+        //         AssertTagCount(i);
+        //         using (sut.PushScope())
+        //         {
+        //             AddRandomTag();
+        //             AssertTagCount(i + 1);
+        //             await Test(i + 1);
+        //             // Reorder
+        //             await Task.Delay(rdn.Next(0, 5));
+        //             AddRandomTag();
+        //             AssertTagCount(i + 2);
+        //             await Test(i + 2);
+        //         }
+        //         AssertTagCount(i);
+        //     }
+        //
+        //     await Task.WhenAll(Enumerable.Range(1, 5)
+        //         .Select(_ => Enumerable.Range(1, 5)
+        //             .Select(__ => Test(1)))
+        //         .SelectMany(t => t));
+        //
+        //     Assert.Equal(root, sut.GetCurrent());
+        // }
     }
 }

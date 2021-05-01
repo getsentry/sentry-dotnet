@@ -9,7 +9,7 @@ namespace Sentry.Samples.Maui
 	public class Startup : IStartup
 	{
 		public void Configure(IAppHostBuilder appBuilder)
-		{
+        {
 			appBuilder
 				.UseFormsCompatibility()
                 .UseSentry(o =>
