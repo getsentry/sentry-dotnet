@@ -9,11 +9,12 @@ namespace Sentry.Tests.Helpers
     internal static class SerializableExtensions
     {
         public static async Task<string> SerializeToStringAsync(
-            this ISerializable serializable,
+            this Envelope envelope,
             CancellationToken cancellationToken = default)
         {
             using var stream = new MemoryStream();
-            await serializable.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+            var serializer = new SentryJsonSerializer(new SentryOptions());
+            await serializer.SerializeAsync(envelope, stream, cancellationToken).ConfigureAwait(false);
             return Encoding.UTF8.GetString(stream.ToArray());
         }
     }
