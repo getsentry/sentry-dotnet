@@ -1,10 +1,27 @@
 # Changelog
 
-## Unreleased
+## 3.3.4
+
+### Features
+
+- Env var to keep large envelopes if they are rejected by Sentry (#957)
+
+### Fixes
+
+- serialize parent_span_id in contexts.trace (#958)
+
+## 3.3.3
+
+### Fixes
+
+- boot time detection can fail in some cases (#955)
+
+## 3.3.2
 
 ### Fixes
 
 - Don't override Span/Transaction status on Finish(...) if status was not provided explicitly (#928) @Tyrrrz
+- Fix startup time shows incorrect value on macOS/Linux. Opt-out available for IL2CPP. (#948)
 
 ## 3.3.1
 

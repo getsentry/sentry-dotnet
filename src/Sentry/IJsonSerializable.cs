@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -22,17 +23,6 @@ namespace Sentry
 
     internal static class JsonSerializableExtensions
     {
-        public static string ToJsonString(this IJsonSerializable serializable)
-        {
-            using var stream = new MemoryStream();
-            using var writer = new Utf8JsonWriter(stream);
-
-            writer.WriteSerializableValue(serializable);
-            writer.Flush();
-
-            return Encoding.UTF8.GetString(stream.ToArray());
-        }
-
         public static void WriteSerializableValue(
             this Utf8JsonWriter writer,
             IJsonSerializable value)
