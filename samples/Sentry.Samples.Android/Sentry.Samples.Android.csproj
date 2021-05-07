@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-android</TargetFramework>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <!-- https://github.com/dotnet/maui/issues/749 -->
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    <ProjectReference Include="../../test/Sentry.Tests/Sentry.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.DotNet.XHarness.DefaultAndroidEntryPoint.Xunit, Version=42.42.42.42, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\..\..\xharness\artifacts\bin\Microsoft.DotNet.XHarness.DefaultAndroidEntryPoint.Xunit\Debug\net6.0\Microsoft.DotNet.XHarness.DefaultAndroidEntryPoint.Xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.DotNet.XHarness.TestRunners.Common, Version=42.42.42.42, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\..\..\xharness\artifacts\bin\Microsoft.DotNet.XHarness.TestRunners.Xunit\Debug\net6.0\Microsoft.DotNet.XHarness.TestRunners.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.DotNet.XHarness.TestRunners.Xunit, Version=42.42.42.42, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\..\..\xharness\artifacts\bin\Microsoft.DotNet.XHarness.TestRunners.Xunit\Debug\net6.0\Microsoft.DotNet.XHarness.TestRunners.Xunit.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Options" Version="6.6.0.161" />
+  </ItemGroup>
+</Project>

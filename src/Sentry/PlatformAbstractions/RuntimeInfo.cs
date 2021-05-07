@@ -83,7 +83,7 @@ namespace Sentry.PlatformAbstractions
             {
                 // https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-308424100
                 var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
-#if NET5_0 || NETCOREAPP3_0
+#if NETCOREAPP3_0_OR_GREATER
                 var assemblyPath = assembly.Location.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
 #else
                 var assemblyPath = assembly.CodeBase.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);

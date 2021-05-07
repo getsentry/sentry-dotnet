@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;Microsoft.Extensions.Logging</PackageTags>
     <PackageId>Sentry.Extensions.Logging</PackageId>
     <AssemblyName>Sentry.Extensions.Logging</AssemblyName>
@@ -26,6 +26,11 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0-preview.3.21201.4" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0-preview.3.21201.4" />
   </ItemGroup>
 
 </Project>
