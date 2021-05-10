@@ -394,7 +394,7 @@ namespace Sentry.NLog.Tests
                     && p.Message.Message == expectedMessage));
         }
 
-        [Fact(Skip = "Failing for unknown reason")]
+        [Fact]
         public void Log_SourceContextMatchesSentry_NoScopeConfigured()
         {
             var sut = _fixture.GetLogger();
@@ -404,7 +404,7 @@ namespace Sentry.NLog.Tests
             _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
-        [Fact(Skip = "Failing for unknown reason")]
+        [Fact]
         public void Log_SourceContextContainsSentry_NoScopeConfigured()
         {
             var sut = _fixture.GetLogger();
