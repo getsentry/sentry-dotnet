@@ -394,7 +394,7 @@ namespace Sentry.NLog.Tests
                     && p.Message.Message == expectedMessage));
         }
 
-        [Fact]
+        [Fact(Skip = "Flaky (after review)")]
         public void Log_SourceContextMatchesSentry_NoScopeConfigured()
         {
             var sut = _fixture.GetLogger();
