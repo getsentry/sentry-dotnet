@@ -404,7 +404,7 @@ namespace Sentry.NLog.Tests
             _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
-        [Fact]
+        [Fact(Skip = "Flaky (after review)")]
         public void Log_SourceContextContainsSentry_NoScopeConfigured()
         {
             var sut = _fixture.GetLogger();
