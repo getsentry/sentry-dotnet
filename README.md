@@ -1,4 +1,4 @@
-<p style="text-align: center">
+<p align="center">
   <a href="https://sentry.io" target="_blank">
     <img src=".assets/sentry-logo.png" alt="Sentry logo" width="280">
   </a>
