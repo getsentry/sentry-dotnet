@@ -14,4 +14,4 @@ jobs:
             fetch-depth: 2
 
         - name: List vulnerable packages
-          run: dotnet list package --vulnerable
+          run: dotnet list package --vulnerable --include-transitive
