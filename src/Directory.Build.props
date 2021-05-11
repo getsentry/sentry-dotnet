@@ -50,11 +50,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="../../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)/../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)/../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SIL.ReleaseTasks" Version="2.3.4" PrivateAssets="All"/>
+    <PackageReference Include="SIL.ReleaseTasks" Version="2.3.4" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'"/>
     <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="4.0.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Release'"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
   </ItemGroup>
