@@ -44,7 +44,7 @@ namespace Sentry.Protocol.Tests.Context
                 ModelId = "0921309128012",
                 Orientation = DeviceOrientation.Portrait,
                 Simulator = false,
-                Timezone = TimeZoneInfo.Local,
+                Timezone = TimeZoneInfo.Utc,
                 UsableMemory = 100,
                 LowMemory = true
             };
@@ -53,8 +53,8 @@ namespace Sentry.Protocol.Tests.Context
 
             Assert.Equal(
                 "{\"type\":\"device\"," +
-                $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
-                $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName.Replace("+", "\\u002B")}\"," +
+                $"\"timezone\":\"{TimeZoneInfo.Utc.Id}\"," +
+                $"\"timezone_display_name\":\"{TimeZoneInfo.Utc.DisplayName}\"," +
                 "\"name\":\"testing.sentry.io\"," +
                 "\"manufacturer\":\"Manufacturer\"," +
                 "\"brand\":\"Brand\"," +
