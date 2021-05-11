@@ -74,12 +74,24 @@ namespace Sentry.Internal
             // Environment
             if (string.IsNullOrWhiteSpace(eventLike.Environment))
             {
+                // Environment from environment variable
                 var foundEnvironment = EnvironmentLocator.Locate();
-                eventLike.Environment = string.IsNullOrWhiteSpace(foundEnvironment)
-                    ? string.IsNullOrWhiteSpace(_options.Environment)
-                        ? Constants.ProductionEnvironmentSetting
-                        : _options.Environment
-                    : foundEnvironment;
+                if (!string.IsNullOrWhiteSpace(foundEnvironment))
+                {
+                    eventLike.Environment = foundEnvironment;
+                }
+                // Environment from options
+                else if (!string.IsNullOrWhiteSpace(_options.Environment))
+                {
+                    eventLike.Environment = _options.Environment;
+                }
+                // Default
+                else
+                {
+                    eventLike.Environment = Debugger.IsAttached
+                        ? Constants.DebugEnvironmentSetting
+                        : Constants.ProductionEnvironmentSetting;
+                }
             }
 
             // User
