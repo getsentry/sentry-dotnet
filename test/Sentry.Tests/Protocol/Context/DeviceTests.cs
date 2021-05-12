@@ -23,6 +23,13 @@ namespace Sentry.Protocol.Tests.Context
         [Fact]
         public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
         {
+            var timeZone = TimeZoneInfo.CreateCustomTimeZone(
+                "tz_id",
+                TimeSpan.FromHours(2),
+                "my timezone",
+                "my timezone"
+            );
+
             var sut = new Device
             {
                 Name = "testing.sentry.io",
@@ -46,7 +53,7 @@ namespace Sentry.Protocol.Tests.Context
                 ModelId = "0921309128012",
                 Orientation = DeviceOrientation.Portrait,
                 Simulator = false,
-                Timezone = TimeZoneInfo.Local,
+                Timezone = timeZone,
                 UsableMemory = 100,
                 LowMemory = true
             };
@@ -55,8 +62,8 @@ namespace Sentry.Protocol.Tests.Context
 
             Assert.Equal(
                 "{\"type\":\"device\"," +
-                $"\"timezone\":\"{TimeZoneInfo.Local.Id}\"," +
-                $"\"timezone_display_name\":\"{TimeZoneInfo.Local.DisplayName.Replace("+", "\\u002B")}\"," +
+                "\"timezone\":\"tz_id\"," +
+                "\"timezone_display_name\":\"my timezone\"," +
                 "\"name\":\"testing.sentry.io\"," +
                 "\"manufacturer\":\"Manufacturer\"," +
                 "\"brand\":\"Brand\"," +
