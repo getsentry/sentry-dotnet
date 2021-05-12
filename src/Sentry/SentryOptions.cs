@@ -474,13 +474,24 @@ namespace Sentry
         public long MaxAttachmentSize { get; set; } = 20 * 1024 * 1024;
 
         /// <summary>
+        /// Whether the SDK should attempt to detect the app's and device's startup time.
+        /// </summary>
+        /// <remarks>
+        /// Note that the highest precision value relies on <see cref="System.Diagnostics.Process.GetCurrentProcess"/>
+        /// which might not be available. For example on Unity's IL2CPP.
+        /// </remarks>
+        public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
             // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
             // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-            StackTraceMode = Runtime.Current.Name == ".NET Native" ? StackTraceMode.Original : StackTraceMode.Enhanced;
+            StackTraceMode = Runtime.Current.Name == ".NET Native"
+                ? StackTraceMode.Original
+                : StackTraceMode.Enhanced;
 
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()

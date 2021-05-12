@@ -28,6 +28,8 @@ namespace Sentry.Internal
 
         public const string DevelopmentEnvironmentSetting = "development";
 
+        public const string DebugEnvironmentSetting = "debug";
+
         // See: https://github.com/getsentry/sentry-release-registry
         public const string SdkName = "sentry.dotnet";
     }

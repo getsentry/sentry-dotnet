@@ -227,7 +227,7 @@ namespace Sentry.Tests
             second.Dispose();
         }
 
-        [Fact(Skip = "Flaky")]
+        [Fact(Skip = "Flaky (after review)")]
         public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
         {
             // Arrange

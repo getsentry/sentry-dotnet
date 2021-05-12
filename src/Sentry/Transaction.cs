@@ -32,7 +32,11 @@ namespace Sentry
         // transaction as the parent.
 
         /// <inheritdoc />
-        public SpanId? ParentSpanId { get; private set; }
+        public SpanId? ParentSpanId
+        {
+            get => Contexts.Trace.ParentSpanId;
+            private set => Contexts.Trace.ParentSpanId = value;
+        }
 
         /// <inheritdoc />
         public SentryId TraceId
@@ -249,11 +253,6 @@ namespace Sentry
             writer.WriteString("type", "transaction");
             writer.WriteSerializable("event_id", EventId);
 
-            if (ParentSpanId is { } parentSpanId)
-            {
-                writer.WriteString("parent_span_id", parentSpanId);
-            }
-
             if (Level is {} level)
             {
                 writer.WriteString("level", level.ToString().ToLowerInvariant());
@@ -372,7 +371,6 @@ namespace Sentry
         public static Transaction FromJson(JsonElement json)
         {
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
-            var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
             var name = json.GetProperty("transaction").GetStringOrThrow();
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
@@ -396,7 +394,6 @@ namespace Sentry
             var transaction = new Transaction(name)
             {
                 EventId = eventId,
-                ParentSpanId = parentSpanId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
                 Level = level,

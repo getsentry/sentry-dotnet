@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Sentry.Internal;
 using Sentry.Protocol;
+using Sentry.Tests.Helpers;
 using Xunit;
 
 namespace Sentry.Tests.Protocol
