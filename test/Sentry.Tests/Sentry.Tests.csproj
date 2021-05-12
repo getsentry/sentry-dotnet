@@ -21,7 +21,7 @@
   <!-- From Ben.Demystifier -->
 
   <ItemGroup>
-    <PackageReference Include="Verify.Xunit" Version="8.11.0" />
+    <PackageReference Include="Verify.Xunit" Version="11.12.1" />
   </ItemGroup>
 
   <ItemGroup>
