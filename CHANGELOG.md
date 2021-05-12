@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Default environment to "debug" if running with debugger attached (#978)
+
 ## 3.3.4
 
 ### Features
