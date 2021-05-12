@@ -1,8 +1,7 @@
 <p align="center">
-  <a href="https://sentry.io" target="_blank" align="center">
-    <img src="https://sentry-brand.storage.googleapis.com/sentry-logo-black.png" width="280">
+  <a href="https://sentry.io" target="_blank">
+    <img src="https://raw.githubusercontent.com/getsentry/sentry-dotnet/main/.assets/sentry-logo.png" alt="Sentry logo" width="280">
   </a>
-  <br />
 </p>
 
 _Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us [<kbd>**Check out our open positions**</kbd>](https://sentry.io/careers/)_
@@ -29,7 +28,7 @@ Sentry SDK for .NET
 
 ## More Sentry .NET Integrations
 
-Sentry offers other integrations that are not part of this reposistory:
+Sentry offers other integrations that are not part of this repository:
 
 * [Sentry.EntityFramework](https://github.com/getsentry/sentry-dotnet-ef): EF 6 for validation errors and query as breadcrumbs.
 * [Sentry.Minidump](https://github.com/getsentry/sentry-dotnet-minidump): Capture Minidumps on Windows, macOS and Linux.

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using Sentry.Internal;
+using Sentry.Tests.Helpers;
 using Xunit;
 
 // ReSharper disable once CheckNamespace
