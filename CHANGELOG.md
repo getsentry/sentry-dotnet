@@ -7,6 +7,10 @@
 - Allow to configure the `ITransport` to support custom serialization scenarios (#944) @pchinery
 - Default environment to "debug" if running with debugger attached (#978)
 
+### Fixes
+
+- Fixed an issue where an attempt to deserialize `Device` with a non-system time zone failed (#993)
+
 ## 3.3.4
 
 ### Features

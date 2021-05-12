@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using FluentAssertions;
+using Sentry.Internal;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -156,6 +158,21 @@ namespace Sentry.Protocol.Tests.Context
             var actual = @case.device.ToJsonString();
 
             Assert.Equal(@case.serialized, actual);
+        }
+
+        [Fact]
+        public void FromJson_NonSystemTimeZone_NoException()
+        {
+            // Arrange
+            const string json = "{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}";
+
+            // Act
+            var device = Device.FromJson(Json.Parse(json));
+
+            // Assert
+            device.Timezone.Should().NotBeNull();
+            device.Timezone?.Id.Should().Be("tz_id");
+            device.Timezone?.DisplayName.Should().Be("tz_name");
         }
 
         public static IEnumerable<object[]> TestCases()
