@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Unity can have negative line numbers ([#994](https://github.com/getsentry/sentry-dotnet/pull/994))
+
 ## 3.3.4
 
 ### Features
