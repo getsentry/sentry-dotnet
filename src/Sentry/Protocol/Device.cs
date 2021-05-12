@@ -16,6 +16,8 @@ namespace Sentry.Protocol
         /// </summary>
         public const string Type = "device";
 
+        // TODO: remove this and replace with separate properties for 'timezone' and 'timezone_display_name'
+        // since we don't carry enough data to deterministically recreate a TimeZoneInfo instance.
         /// <summary>
         /// The timezone of the device.
         /// </summary>
@@ -333,12 +335,30 @@ namespace Sentry.Protocol
             writer.WriteEndObject();
         }
 
+        private static TimeZoneInfo? TryParseTimezone(JsonElement json)
+        {
+            var timezoneId = json.GetPropertyOrNull("timezone")?.GetString();
+            var timezoneName = json.GetPropertyOrNull("timezone_display_name")?.GetString() ?? timezoneId;
+
+            if (string.IsNullOrWhiteSpace(timezoneId))
+                return null;
+
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                return TimeZoneInfo.CreateCustomTimeZone(timezoneId, TimeSpan.Zero, timezoneName, timezoneName);
+            }
+        }
+
         /// <summary>
         /// Parses from JSON.
         /// </summary>
         public static Device FromJson(JsonElement json)
         {
-            var timezone = json.GetPropertyOrNull("timezone")?.GetString()?.Pipe(TimeZoneInfo.FindSystemTimeZoneById);
+            var timezone = TryParseTimezone(json);
             var name = json.GetPropertyOrNull("name")?.GetString();
             var manufacturer = json.GetPropertyOrNull("manufacturer")?.GetString();
             var brand = json.GetPropertyOrNull("brand")?.GetString();
