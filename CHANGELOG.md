@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+### Features
+
+- Default environment to "debug" if running with debugger attached (#978)
+
 ### Fixes
 
 - Unity can have negative line numbers ([#994](https://github.com/getsentry/sentry-dotnet/pull/994))
+- Fixed an issue where an attempt to deserialize `Device` with a non-system time zone failed ([#993](https://github.com/getsentry/sentry-dotnet/pull/993))
 
 ## 3.3.4
 
