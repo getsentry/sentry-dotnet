@@ -176,13 +176,13 @@ namespace Sentry.Extensibility
             }
 
             var lineNo = stackFrame.GetFileLineNumber();
-            if (lineNo != 0)
+            if (lineNo > 0)
             {
                 frame.LineNumber = lineNo;
             }
 
             var colNo = stackFrame.GetFileColumnNumber();
-            if (lineNo != 0)
+            if (lineNo > 0)
             {
                 frame.ColumnNumber = colNo;
             }
