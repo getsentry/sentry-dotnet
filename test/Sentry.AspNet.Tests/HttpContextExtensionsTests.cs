@@ -1,7 +1,7 @@
-﻿using System.Collections.Specialized;
-using System.IO;
+﻿using System.IO;
 using System.Web;
 using FluentAssertions;
+using NSubstitute;
 using Xunit;
 
 namespace Sentry.AspNet.Tests
@@ -32,6 +32,11 @@ namespace Sentry.AspNet.Tests
         public void StartSentryTransaction_BindsToScope()
         {
             // Arrange
+            using var _ = SentrySdk.UseHub(new Sentry.Internal.Hub(
+                Substitute.For<ISentryClient>(),
+                new SentryOptions {Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"}
+            ));
+
             var context = new HttpContext(
                 new HttpRequest("foo", "https://localhost/person/13", "details=true")
                 {
@@ -46,34 +51,6 @@ namespace Sentry.AspNet.Tests
 
             // Assert
             transactionFromScope.Should().BeSameAs(transaction);
-        }
-
-        [Fact]
-        public void StartSentryTransaction_HandlesTraceHeader()
-        {
-            // Arrange
-            var context = new HttpContext(
-                new HttpRequest("foo", "https://localhost/person/13", "details=true")
-                {
-                    RequestType = "GET"
-                },
-                new HttpResponse(TextWriter.Null)
-            );
-
-            // When HttpRequest is created in isolation, its headers are readonly.
-            // Use reflection to unlock them for modification.
-            var headers = context.Request.Headers; // force headers to initialize
-            headers.GetType().GetProperty("IsReadOnly")?.GetSetMethod()?.Invoke(headers, new object[] {false});
-
-            headers["sentry-trace"] = "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0";
-
-            // Act
-            var transaction = context.StartSentryTransaction();
-
-            // Assert
-            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
-            transaction.ParentSpanId.Should().Be(SpanId.Parse("1000000000000000"));
-            transaction.IsSampled.Should().BeFalse();
         }
     }
 }
