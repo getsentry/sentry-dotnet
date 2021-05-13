@@ -12,7 +12,7 @@ namespace Sentry.AspNet.Tests
         {
             // Arrange
             var context = new HttpContext(
-                new HttpRequest("foo", "/person/13", "details=true")
+                new HttpRequest("foo", "https://localhost/person/13", "details=true")
                 {
                     RequestType = "GET"
                 },
@@ -32,7 +32,7 @@ namespace Sentry.AspNet.Tests
         {
             // Arrange
             var context = new HttpContext(
-                new HttpRequest("foo", "/person/13", "details=true")
+                new HttpRequest("foo", "https://localhost/person/13", "details=true")
                 {
                     RequestType = "GET"
                 },
@@ -52,7 +52,7 @@ namespace Sentry.AspNet.Tests
         {
             // Arrange
             var context = new HttpContext(
-                new HttpRequest("foo", "/person/13", "details=true")
+                new HttpRequest("foo", "https://localhost/person/13", "details=true")
                 {
                     RequestType = "GET",
                     Headers =
