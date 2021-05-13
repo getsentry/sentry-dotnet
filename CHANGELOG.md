@@ -5,6 +5,7 @@
 ### Features
 
 - Default environment to "debug" if running with debugger attached (#978)
+- Added `HttpContext.StartSentryTransaction()` extension method (#996)
 
 ### Fixes
 
