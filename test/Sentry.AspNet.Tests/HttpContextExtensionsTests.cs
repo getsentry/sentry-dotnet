@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Specialized;
+using System.IO;
 using System.Web;
 using FluentAssertions;
 using Xunit;
@@ -54,14 +55,17 @@ namespace Sentry.AspNet.Tests
             var context = new HttpContext(
                 new HttpRequest("foo", "https://localhost/person/13", "details=true")
                 {
-                    RequestType = "GET",
-                    Headers =
-                    {
-                        ["sentry-trace"] = "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"
-                    }
+                    RequestType = "GET"
                 },
                 new HttpResponse(TextWriter.Null)
             );
+
+            // When HttpRequest is created in isolation, its headers are readonly.
+            // Use reflection to unlock them for modification.
+            var headers = context.Request.Headers; // force headers to initialize
+            headers.GetType().GetProperty("IsReadOnly")?.GetSetMethod()?.Invoke(headers, new object[] {false});
+
+            headers["sentry-trace"] = "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0";
 
             // Act
             var transaction = context.StartSentryTransaction();
