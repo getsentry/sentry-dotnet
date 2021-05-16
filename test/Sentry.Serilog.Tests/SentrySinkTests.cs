@@ -7,6 +7,7 @@ using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Reflection;
 using Serilog.Events;
+using Serilog.Formatting.Display;
 using Serilog.Parsing;
 using Xunit;
 
@@ -258,6 +259,28 @@ namespace Sentry.Serilog.Tests
 
             _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
                     p.Message.Formatted == $"Test {param} log"
+                    && p.Message.Message == expectedMessage));
+        }
+
+        [Fact]
+        public void Emit_WithTextFormatter_EventCaptured()
+        {
+            const string expectedMessage = "Test log with formatter";
+            const int param = 10;
+
+            // Use custom TextFormatter
+            _fixture.Options.TextFormatter = new MessageTemplateTextFormatter("[{structured}] {Message}", null);
+
+            var sut = _fixture.GetSut();
+
+            var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null,
+                new MessageTemplateParser().Parse(expectedMessage),
+                new[] { new LogEventProperty("structured", new ScalarValue(param)) });
+
+            sut.Emit(evt);
+
+            _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+                    p.Message.Formatted == $"[{param}] Test log with formatter"
                     && p.Message.Message == expectedMessage));
         }
 
