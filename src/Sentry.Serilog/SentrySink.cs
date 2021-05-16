@@ -78,15 +78,15 @@ namespace Sentry.Serilog
             var exception = logEvent.Exception;
             var template = logEvent.MessageTemplate.Text;
             string formatted;
-            if (_options.TextFormatter is null)
+            if (_options.TextFormatter is { } formatter)
             {
-                formatted = logEvent.RenderMessage(_options.FormatProvider);
+                using var stringWriter = new StringWriter(new StringBuilder());
+                formatter.Format(logEvent, stringWriter);
+                formatted = stringWriter.ToString();
             }
             else
             {
-                var stringWriter = new StringWriter(new StringBuilder());
-                _options.TextFormatter.Format(logEvent, stringWriter);
-                formatted = stringWriter.ToString();
+                formatted = logEvent.RenderMessage(_options.FormatProvider);
             }
 
             if (logEvent.Level >= _options.MinimumEventLevel)

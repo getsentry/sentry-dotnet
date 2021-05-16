@@ -219,7 +219,7 @@ namespace Serilog
                 sentrySerilogOptions.FormatProvider = formatProvider;
             }
 
-            if(textFormatter != null)
+            if (textFormatter != null)
             {
                 sentrySerilogOptions.TextFormatter = textFormatter;
             }
