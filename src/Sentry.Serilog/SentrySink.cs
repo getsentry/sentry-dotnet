@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol;
@@ -74,8 +76,18 @@ namespace Sentry.Serilog
             }
 
             var exception = logEvent.Exception;
-            var formatted = logEvent.RenderMessage(_options.FormatProvider);
             var template = logEvent.MessageTemplate.Text;
+            string formatted;
+            if (_options.TextFormatter is null)
+            {
+                formatted = logEvent.RenderMessage(_options.FormatProvider);
+            }
+            else
+            {
+                var stringWriter = new StringWriter(new StringBuilder());
+                _options.TextFormatter.Format(logEvent, stringWriter);
+                formatted = stringWriter.ToString();
+            }
 
             if (logEvent.Level >= _options.MinimumEventLevel)
             {
