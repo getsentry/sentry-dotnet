@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Serilog: Add support for Serilog.Formatting.ITextFormatter ([#998](https://github.com/getsentry/sentry-dotnet/pull/998))
+
 ## 3.3.5-beta.0
 
 ### Features
