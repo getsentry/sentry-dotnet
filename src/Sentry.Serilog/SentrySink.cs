@@ -77,17 +77,7 @@ namespace Sentry.Serilog
 
             var exception = logEvent.Exception;
             var template = logEvent.MessageTemplate.Text;
-            string formatted;
-            if (_options.TextFormatter is { } formatter)
-            {
-                using var stringWriter = new StringWriter(new StringBuilder());
-                formatter.Format(logEvent, stringWriter);
-                formatted = stringWriter.ToString();
-            }
-            else
-            {
-                formatted = logEvent.RenderMessage(_options.FormatProvider);
-            }
+            var formatted = FormatLogEvent(logEvent);
 
             if (logEvent.Level >= _options.MinimumEventLevel)
             {
@@ -140,6 +130,20 @@ namespace Sentry.Serilog
                     context,
                     data: data,
                     level: logEvent.Level.ToBreadcrumbLevel());
+            }
+        }
+
+        private string FormatLogEvent(LogEvent logEvent)
+        {
+            if (_options.TextFormatter is { } formatter)
+            {
+                using var stringWriter = new StringWriter();
+                formatter.Format(logEvent, stringWriter);
+                return stringWriter.ToString();
+            }
+            else
+            {
+                return logEvent.RenderMessage(_options.FormatProvider);
             }
         }
 
