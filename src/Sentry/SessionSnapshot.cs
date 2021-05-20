@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 
 namespace Sentry
 {
@@ -56,6 +57,11 @@ namespace Sentry
             writer.WriteEndObject();
 
             writer.WriteEndObject();
+        }
+
+        public static SessionSnapshot FromJson(JsonElement json)
+        {
+            throw new NotImplementedException();
         }
     }
 }

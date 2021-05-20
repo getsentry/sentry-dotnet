@@ -177,14 +177,34 @@ namespace Sentry.Internal
             }
 
             _session = new Session(id, release);
+
+            _options.DiagnosticLogger?.LogInfo(
+                "Started new session (sid: {0}; did: {1}).",
+                _session.Id, _session.DistinctId
+            );
         }
 
         public void EndSession(SessionEndState state = SessionEndState.Exited)
         {
-            // TODO: do something terrible
+            var session = _session;
+            if (session is null)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Attempt to end a session failed because there is no active session."
+                );
+
+                return;
+            }
 
             // Clear out the session
             _session = null;
+
+            // TODO: do something terrible
+
+            _options.DiagnosticLogger?.LogInfo(
+                "Ended session (sid: {0}; did: {1}) with state '{2}'.",
+                session.Id, session.DistinctId, state
+            );
         }
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
@@ -218,6 +238,11 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                     evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                }
+
+                if (evt.Exception is not null)
+                {
+                    _session?.ReportError();
                 }
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);

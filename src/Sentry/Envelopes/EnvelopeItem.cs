@@ -18,6 +18,7 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
         private const string TypeValueTransaction = "transaction";
+        private const string TypeValueSession = "session";
         private const string TypeValueAttachment = "attachment";
         private const string LengthKey = "length";
         private const string FileNameKey = "filename";
@@ -151,7 +152,7 @@ namespace Sentry.Protocol.Envelopes
                 [TypeKey] = TypeValueTransaction
             };
 
-            return new EnvelopeItem(header, new JsonSerializable((IJsonSerializable)transaction));
+            return new EnvelopeItem(header, new JsonSerializable(transaction));
         }
 
         /// <summary>
@@ -247,6 +248,16 @@ namespace Sentry.Protocol.Envelopes
                 var json = Json.Parse(buffer);
 
                 return new JsonSerializable(Transaction.FromJson(json));
+            }
+
+            // Session
+            if (string.Equals(payloadType, TypeValueSession, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                var json = Json.Parse(buffer);
+
+                return new JsonSerializable(SessionSnapshot.FromJson(json));
             }
 
             // Arbitrary payload
