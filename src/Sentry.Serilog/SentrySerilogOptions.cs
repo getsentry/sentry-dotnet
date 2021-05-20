@@ -1,6 +1,7 @@
 using System;
 using Sentry.Protocol;
 using Serilog.Events;
+using Serilog.Formatting;
 
 namespace Sentry.Serilog
 {
@@ -39,5 +40,10 @@ namespace Sentry.Serilog
         /// Optional <see cref="IFormatProvider"/>
         /// </summary>
         public IFormatProvider? FormatProvider { get; set; }
+
+        /// <summary>
+        /// Optional <see cref="ITextFormatter"/>
+        /// </summary>
+        public ITextFormatter? TextFormatter { get; set; }
     }
 }

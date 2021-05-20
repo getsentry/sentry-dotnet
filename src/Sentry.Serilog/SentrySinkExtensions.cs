@@ -7,6 +7,7 @@ using Sentry;
 using Sentry.Serilog;
 using Serilog.Configuration;
 using Serilog.Events;
+using Serilog.Formatting;
 
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Serilog
@@ -24,6 +25,7 @@ namespace Serilog
         /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
         /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
         /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
+        /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
         /// <param name="sendDefaultPii">Whether to include default Personal Identifiable information. <seealso cref="SentryOptions.SendDefaultPii"/></param>
         /// <param name="isEnvironmentUser">Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event. <seealso cref="SentryOptions.IsEnvironmentUser"/></param>
         /// <param name="serverName">Gets or sets the name of the server running the application. <seealso cref="SentryOptions.ServerName"/></param>
@@ -94,6 +96,7 @@ namespace Serilog
             LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
             LogEventLevel minimumEventLevel = LogEventLevel.Error,
             IFormatProvider? formatProvider = null,
+            ITextFormatter? textFormatter = null,
             bool? sendDefaultPii = null,
             bool? isEnvironmentUser = null,
             string? serverName = null,
@@ -119,6 +122,7 @@ namespace Serilog
                 minimumEventLevel,
                 minimumBreadcrumbLevel,
                 formatProvider,
+                textFormatter,
                 sendDefaultPii,
                 isEnvironmentUser,
                 serverName,
@@ -148,6 +152,7 @@ namespace Serilog
         /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
         /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
         /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
+        /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
         /// <param name="sendDefaultPii">Whether to include default Personal Identifiable information. <seealso cref="SentryOptions.SendDefaultPii"/></param>
         /// <param name="isEnvironmentUser">Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event. <seealso cref="SentryOptions.IsEnvironmentUser"/></param>
         /// <param name="serverName">Gets or sets the name of the server running the application. <seealso cref="SentryOptions.ServerName"/></param>
@@ -173,6 +178,7 @@ namespace Serilog
             LogEventLevel? minimumEventLevel = null,
             LogEventLevel? minimumBreadcrumbLevel = null,
             IFormatProvider? formatProvider = null,
+            ITextFormatter? textFormatter = null,
             bool? sendDefaultPii = null,
             bool? isEnvironmentUser = null,
             string? serverName = null,
@@ -211,6 +217,11 @@ namespace Serilog
             if (formatProvider != null)
             {
                 sentrySerilogOptions.FormatProvider = formatProvider;
+            }
+
+            if (textFormatter != null)
+            {
+                sentrySerilogOptions.TextFormatter = textFormatter;
             }
 
             if (sendDefaultPii.HasValue)

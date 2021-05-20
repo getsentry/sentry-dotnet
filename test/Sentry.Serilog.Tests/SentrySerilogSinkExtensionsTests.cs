@@ -98,7 +98,7 @@ namespace Sentry.Serilog.Tests
             var sut = _fixture.GetSut();
 
             SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, _fixture.Dsn, _fixture.MinimumEventLevel,
-                _fixture.MinimumBreadcrumbLevel, null,_fixture.SendDefaultPii,
+                _fixture.MinimumBreadcrumbLevel, null, null, _fixture.SendDefaultPii,
                 _fixture.IsEnvironmentUser, _fixture.ServerName, _fixture.AttachStackTrace, _fixture.MaxBreadcrumbs,
                 _fixture.SampleRate, _fixture.Release, _fixture.Environment,  _fixture.MaxQueueItems,
                 _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
