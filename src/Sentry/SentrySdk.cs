@@ -381,5 +381,15 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryTraceHeader? GetTraceHeader()
             => _hub.GetTraceHeader();
+
+        /// <inheritdoc cref="IHub.StartSession"/>
+        [DebuggerStepThrough]
+        public static void StartSession(string? id = null)
+            => _hub.StartSession(id);
+
+        /// <inheritdoc cref="IHub.EndSession"/>
+        [DebuggerStepThrough]
+        public static void EndSession(SessionEndState state = SessionEndState.Exited)
+            => _hub.EndSession(state);
     }
 }

@@ -47,5 +47,16 @@ namespace Sentry
         /// Gets the Sentry trace header for the last active span.
         /// </summary>
         SentryTraceHeader? GetTraceHeader();
+
+        /// <summary>
+        /// Starts a new session, optionally with the provided unique identifier.
+        /// Session identifier can be user ID, IP address, device MAC address, or any other similarly distinct value.
+        /// </summary>
+        void StartSession(string? id = null);
+
+        /// <summary>
+        /// Ends the currently active session.
+        /// </summary>
+        void EndSession(SessionEndState state = SessionEndState.Exited);
     }
 }

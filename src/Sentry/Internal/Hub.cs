@@ -17,6 +17,8 @@ namespace Sentry.Internal
 
         private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
 
+        private Session? _session;
+
         internal SentryScopeManager ScopeManager { get; }
 
         public bool IsEnabled => true;
@@ -152,6 +154,38 @@ namespace Sentry.Internal
         }
 
         public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
+
+        public void StartSession(string? id = null)
+        {
+            if (_session is not null)
+            {
+                _options.DiagnosticLogger?.LogWarning(
+                    "Starting a new session without ending the previous one."
+                );
+            }
+
+            // TODO: pull this from the enricher somehow?
+            var release = ReleaseLocator.GetCurrent();
+            if (string.IsNullOrWhiteSpace(release))
+            {
+                // Release health without release is just health
+                _options.DiagnosticLogger?.LogError(
+                    "Attempt to start a session failed because there is no release information."
+                );
+
+                return;
+            }
+
+            _session = new Session(id, release);
+        }
+
+        public void EndSession(SessionEndState state = SessionEndState.Exited)
+        {
+            // TODO: do something terrible
+
+            // Clear out the session
+            _session = null;
+        }
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {

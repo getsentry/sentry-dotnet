@@ -104,6 +104,20 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
+        public void StartSession(string? id = null)
+            => SentrySdk.StartSession(id);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public void EndSession(SessionEndState state = SessionEndState.Exited)
+            => SentrySdk.EndSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
         public void BindClient(ISentryClient client)
             => SentrySdk.BindClient(client);
 
