@@ -5,53 +5,66 @@ namespace Sentry
 {
     internal class SessionSnapshot : IJsonSerializable
     {
-        private readonly Session _session;
-        private readonly bool _isInitial;
+        public Session Session { get; }
+
+        public bool IsInitial { get; }
+
+        public DateTimeOffset Timestamp { get; }
+
+        public TimeSpan Duration => Timestamp - Session.Timestamp;
+
+        internal SessionSnapshot(Session session, bool isInitial, DateTimeOffset timestamp)
+        {
+            Session = session;
+            IsInitial = isInitial;
+            Timestamp = timestamp;
+        }
 
         public SessionSnapshot(Session session, bool isInitial)
+            : this(session, isInitial, DateTimeOffset.Now)
         {
-            _session = session;
-            _isInitial = isInitial;
         }
 
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
 
-            writer.WriteString("sid", _session.Id);
+            writer.WriteString("sid", Session.Id);
 
-            if (!string.IsNullOrWhiteSpace(_session.DistinctId))
+            if (!string.IsNullOrWhiteSpace(Session.DistinctId))
             {
-                writer.WriteString("did", _session.DistinctId);
+                writer.WriteString("did", Session.DistinctId);
             }
 
-            if (_isInitial)
+            if (IsInitial)
             {
-                writer.WriteBoolean("init", _isInitial);
+                writer.WriteBoolean("init", IsInitial);
             }
 
-            writer.WriteString("timestamp", _session.Timestamp);
+            writer.WriteString("timestamp", Session.Timestamp);
 
-            writer.WriteNumber("errors", _session.ErrorCount);
+            writer.WriteNumber("duration", (int)Duration.TotalSeconds);
+
+            writer.WriteNumber("errors", Session.ErrorCount);
 
             // Attributes
             writer.WriteStartObject("attrs");
 
-            writer.WriteString("release", _session.Release);
+            writer.WriteString("release", Session.Release);
 
-            if (!string.IsNullOrWhiteSpace(_session.Environment))
+            if (!string.IsNullOrWhiteSpace(Session.Environment))
             {
-                writer.WriteString("environment", _session.Environment);
+                writer.WriteString("environment", Session.Environment);
             }
 
-            if (!string.IsNullOrWhiteSpace(_session.IpAddress))
+            if (!string.IsNullOrWhiteSpace(Session.IpAddress))
             {
-                writer.WriteString("ip_address", _session.IpAddress);
+                writer.WriteString("ip_address", Session.IpAddress);
             }
 
-            if (!string.IsNullOrWhiteSpace(_session.UserAgent))
+            if (!string.IsNullOrWhiteSpace(Session.UserAgent))
             {
-                writer.WriteString("user_agent", _session.UserAgent);
+                writer.WriteString("user_agent", Session.UserAgent);
             }
 
             writer.WriteEndObject();
