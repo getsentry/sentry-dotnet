@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Sentry
 {
-    internal class SessionSnapshot : IJsonSerializable
+    public class SessionSnapshot : IJsonSerializable
     {
         public Session Session { get; }
 

@@ -322,6 +322,13 @@ namespace Sentry
             => _hub.CaptureTransaction(transaction);
 
         /// <summary>
+        /// Captures a session snapshot.
+        /// </summary>
+        [DebuggerStepThrough]
+        public static void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot)
+            => _hub.CaptureSessionSnapshot(sessionSnapshot);
+
+        /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]

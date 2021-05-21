@@ -156,6 +156,19 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
+        /// Creates an envelope item from a session snapshot.
+        /// </summary>
+        public static EnvelopeItem FromSessionSnapshot(SessionSnapshot sessionSnapshot)
+        {
+            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                [TypeKey] = TypeValueSession
+            };
+
+            return new EnvelopeItem(header, new JsonSerializable(sessionSnapshot));
+        }
+
+        /// <summary>
         /// Creates an envelope item from attachment.
         /// </summary>
         public static EnvelopeItem FromAttachment(Attachment attachment)

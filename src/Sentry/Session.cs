@@ -2,7 +2,7 @@
 
 namespace Sentry
 {
-    internal class Session
+    public class Session
     {
         public string Id { get; }
 

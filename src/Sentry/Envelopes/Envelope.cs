@@ -36,6 +36,11 @@ namespace Sentry.Protocol.Envelopes
             Items = items;
         }
 
+        public Envelope(IReadOnlyList<EnvelopeItem> items)
+            : this(new Dictionary<string, object?>(), items)
+        {
+        }
+
         /// <summary>
         /// Attempts to extract the value of "sentry_id" header if it's present.
         /// </summary>
@@ -44,7 +49,7 @@ namespace Sentry.Protocol.Envelopes
             value is string valueString &&
             Guid.TryParse(valueString, out var guid)
                 ? new SentryId(guid)
-                : (SentryId?)null;
+                : null;
 
         private async Task SerializeHeaderAsync(Stream stream, CancellationToken cancellationToken = default)
         {
@@ -128,6 +133,19 @@ namespace Sentry.Protocol.Envelopes
             };
 
             return new Envelope(header, items);
+        }
+
+        /// <summary>
+        /// Creates an envelope that contains a session snapshot.
+        /// </summary>
+        public static Envelope FromSessionSnapshot(SessionSnapshot sessionSnapshot)
+        {
+            var items = new[]
+            {
+                EnvelopeItem.FromSessionSnapshot(sessionSnapshot)
+            };
+
+            return new Envelope(items);
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(

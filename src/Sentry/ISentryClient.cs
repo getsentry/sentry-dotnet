@@ -38,6 +38,16 @@ namespace Sentry
         void CaptureTransaction(Transaction transaction);
 
         /// <summary>
+        /// Captures a session snapshot.
+        /// </summary>
+        /// <remarks>
+        /// Note: this method is NOT meant to be called from user code!
+        /// It will be called automatically by the SDK.
+        /// </remarks>
+        /// <param name="sessionSnapshot">The snapshot to send to Sentry.</param>
+        void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot);
+
+        /// <summary>
         /// Flushes events queued up.
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>

@@ -158,6 +158,16 @@ namespace Sentry
             CaptureEnvelope(Envelope.FromTransaction(transaction));
         }
 
+        public void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            CaptureEnvelope(Envelope.FromSessionSnapshot(sessionSnapshot));
+        }
+
         /// <summary>
         /// Flushes events asynchronously.
         /// </summary>

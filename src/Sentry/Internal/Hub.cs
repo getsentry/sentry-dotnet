@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Timers;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 
@@ -14,8 +15,8 @@ namespace Sentry.Internal
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
-
         private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
+        private readonly Timer _captureSessionSnapshotTimer = new(TimeSpan.FromMinutes(1).TotalMilliseconds);
 
         private Session? _session;
 
@@ -55,6 +56,15 @@ namespace Sentry.Internal
             _rootScope = PushScope();
 
             _enricher = new Enricher(options);
+            _captureSessionSnapshotTimer.Elapsed += (_, _) =>
+            {
+                if (_session is not null)
+                {
+                    // Initial snapshot is captured immediately upon starting the session
+                    CaptureSessionSnapshot(_session.CreateSnapshot(false));
+                }
+            };
+            _captureSessionSnapshotTimer.Start();
         }
 
         public Hub(SentryOptions options)
@@ -177,6 +187,7 @@ namespace Sentry.Internal
             }
 
             _session = new Session(id, release);
+            CaptureSessionSnapshot(_session.CreateSnapshot(true));
 
             _options.DiagnosticLogger?.LogInfo(
                 "Started new session (sid: {0}; did: {1}).",
@@ -240,6 +251,7 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
+                // TODO: note, this is not processed event yet. does it matter?
                 if (evt.Exception is not null)
                 {
                     _session?.ReportError();
@@ -286,6 +298,18 @@ namespace Sentry.Internal
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+            }
+        }
+
+        public void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot)
+        {
+            try
+            {
+                _ownedClient.CaptureSessionSnapshot(sessionSnapshot);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture session snapshot: {0}", e, sessionSnapshot.Session.Id);
             }
         }
 
