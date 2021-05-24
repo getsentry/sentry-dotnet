@@ -8,6 +8,8 @@ namespace Sentry.AspNet
     /// </summary>
     public static class HttpContextExtensions
     {
+        private const string HttpContextTransactionItemName = "__SentryTransaction";
+
         private static SentryTraceHeader? TryGetTraceHeader(NameValueCollection headers)
         {
             try
@@ -41,8 +43,28 @@ namespace Sentry.AspNet
             var transaction = SentrySdk.StartTransaction(transactionContext);
 
             SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+            httpContext.Items[HttpContextTransactionItemName] = transaction;
 
             return transaction;
+        }
+
+        /// <summary>
+        /// Finishes an active Sentry transaction that encompasses the currently executing HTTP request (if present).
+        /// </summary>
+        public static void FinishSentryTransaction(this HttpContext httpContext)
+        {
+            if (!httpContext.Items.Contains(HttpContextTransactionItemName))
+            {
+                return;
+            }
+
+            if (httpContext.Items[HttpContextTransactionItemName] is not ISpan transaction)
+            {
+                return;
+            }
+
+            var status = SpanStatusConverter.FromHttpStatusCode(httpContext.Response.StatusCode);
+            transaction.Finish(status);
         }
     }
 }

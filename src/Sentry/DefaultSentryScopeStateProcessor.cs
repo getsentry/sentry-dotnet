@@ -1,4 +1,4 @@
-#if HAS_VALUE_TUPLE
+#if !NET461
 using System;
 #endif
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ namespace Sentry
 
                     break;
                 }
-#if HAS_VALUE_TUPLE
+#if !NET461
                 case ValueTuple<string, string> tupleStringString:
                     if (!string.IsNullOrEmpty(tupleStringString.Item2))
                     {

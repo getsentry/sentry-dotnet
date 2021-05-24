@@ -22,9 +22,9 @@ namespace Sentry.PlatformAbstractions
 
             runtime ??= GetFromEnvironmentVariable();
 
-#if NETFX
+#if NET461
             SetNetFxReleaseAndVersion(runtime);
-#elif NETSTANDARD || NETCOREAPP // Possibly .NET Core
+#else
             SetNetCoreVersion(runtime);
 #endif
             return runtime;
@@ -52,7 +52,7 @@ namespace Sentry.PlatformAbstractions
             return new Runtime(name, raw: rawRuntimeDescription);
         }
 
-#if NETFX
+#if NET461
         internal static void SetNetFxReleaseAndVersion(Runtime runtime)
         {
             if (runtime?.IsNetFx() == true)
@@ -75,7 +75,7 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
-#if NETSTANDARD || NETCOREAPP // Possibly .NET Core
+#if !NET461
         // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
         internal static void SetNetCoreVersion(Runtime runtime)
         {
@@ -83,7 +83,7 @@ namespace Sentry.PlatformAbstractions
             {
                 // https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-308424100
                 var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
-#if NET5_0 || NETCOREAPP3_0
+#if NETCOREAPP3_0_OR_GREATER
                 var assemblyPath = assembly.Location.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
 #else
                 var assemblyPath = assembly.CodeBase.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
