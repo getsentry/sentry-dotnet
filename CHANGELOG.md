@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Adjust parameter type in `AddBreadcrumb` to use `IReadOnlyDictionary<...>` instead of `Dictionary<...>` ([#1000](https://github.com/getsentry/sentry-dotnet/pull/1000))
+- await dispose everywhere ([#1009](https://github.com/getsentry/sentry-dotnet/pull/1009))
 
 ### Features
 
