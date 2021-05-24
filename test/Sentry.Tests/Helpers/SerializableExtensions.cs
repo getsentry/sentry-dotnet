@@ -12,6 +12,9 @@ namespace Sentry.Tests.Helpers
             this ISerializable serializable,
             CancellationToken cancellationToken = default)
         {
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var stream = new MemoryStream();
             await serializable.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
             return Encoding.UTF8.GetString(stream.ToArray());
