@@ -26,7 +26,7 @@ namespace Sentry
     /// </summary>
     public static class HasBreadcrumbsExtensions
     {
-#if HAS_VALUE_TUPLE
+#if !NET461
         /// <summary>
         /// Adds a breadcrumb to the object.
         /// </summary>

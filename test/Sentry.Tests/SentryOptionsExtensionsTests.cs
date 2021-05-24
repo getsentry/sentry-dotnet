@@ -4,8 +4,7 @@ using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 using Sentry.Internal;
-using Sentry.Testing;
-#if NETFX
+#if NET461
 using Sentry.PlatformAbstractions;
 #endif
 using Xunit;
@@ -24,7 +23,7 @@ namespace Sentry.Tests
                 p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
         }
 
-#if NETFX
+#if NET461
         [Fact]
         public void DisableNetFxInstallationsEventProcessor_RemovesDisableNetFxInstallationsEventProcessorEventProcessor()
         {
