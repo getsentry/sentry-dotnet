@@ -1,4 +1,4 @@
-#if NETFX
+#if NET461
 using Sentry.Integrations;
 using Sentry.PlatformAbstractions;
 using Xunit;
