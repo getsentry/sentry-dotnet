@@ -53,6 +53,9 @@ namespace Sentry.Internal.Http
             var memoryStream = new MemoryStream();
             if (request.Content is not null)
             {
+#if !NET461 && !NETSTANDARD2_0
+                await
+#endif
                 using (var gzipStream = new GZipStream(memoryStream, _compressionLevel, leaveOpen: true))
                 {
                     await request.Content.CopyToAsync(gzipStream).ConfigureAwait(false);
