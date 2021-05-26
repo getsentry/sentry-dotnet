@@ -163,8 +163,7 @@ namespace Sentry.Internal
                 );
             }
 
-            // TODO: pull this from the enricher somehow?
-            var release = ReleaseLocator.GetCurrent();
+            var release = _options.Release ?? ReleaseLocator.GetCurrent();
             if (string.IsNullOrWhiteSpace(release))
             {
                 // Release health without release is just health
