@@ -159,8 +159,11 @@ namespace Sentry.Internal
             if (_session is not null)
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Starting a new session without ending the previous one."
+                    "Starting a new session without having ended the previous one."
                 );
+
+                // End previous session
+                EndSession();
             }
 
             var release = _options.Release ?? ReleaseLocator.GetCurrent();
@@ -174,12 +177,13 @@ namespace Sentry.Internal
                 return;
             }
 
-            _session = new Session(id, release);
-            CaptureSessionSnapshot(_session.CreateSnapshot(true));
+            var session = new Session(id, release);
+            _session = session;
+            CaptureSessionSnapshot(session.CreateSnapshot(true));
 
             _options.DiagnosticLogger?.LogInfo(
                 "Started new session (sid: {0}; did: {1}).",
-                _session.Id, _session.DistinctId
+                session.Id, session.DistinctId
             );
         }
 
@@ -226,12 +230,13 @@ namespace Sentry.Internal
             return null;
         }
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Session? session = null)
         {
             try
             {
                 var currentScope = ScopeManager.GetCurrent();
                 var actualScope = scope ?? currentScope.Key;
+                var actualSession = session ?? _session;
 
                 // Inject trace information from a linked span
                 if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
@@ -244,7 +249,7 @@ namespace Sentry.Internal
                 // Treat all events as errors
                 _session?.ReportError();
 
-                var id = currentScope.Value.CaptureEvent(evt, actualScope);
+                var id = currentScope.Value.CaptureEvent(evt, actualScope, actualSession);
                 actualScope.LastEventId = id;
 
                 return id;

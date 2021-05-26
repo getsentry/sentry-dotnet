@@ -60,7 +60,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
+        public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null, Session? session = null)
         {
             if (_disposed)
             {
@@ -74,7 +74,7 @@ namespace Sentry
 
             try
             {
-                return DoSendEvent(@event, scope);
+                return DoSendEvent(@event, scope, session);
             }
             catch (Exception e)
             {
@@ -241,7 +241,7 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, session.CreateSnapshot()))
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, session?.CreateSnapshot(false)))
                 ? processedEvent.EventId
                 : SentryId.Empty;
         }
