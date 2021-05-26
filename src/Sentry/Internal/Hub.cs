@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Timers;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 
@@ -16,7 +15,6 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
         private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
-        private readonly Timer _captureSessionSnapshotTimer = new(TimeSpan.FromMinutes(1).TotalMilliseconds);
 
         private Session? _session;
 
@@ -56,15 +54,6 @@ namespace Sentry.Internal
             _rootScope = PushScope();
 
             _enricher = new Enricher(options);
-            _captureSessionSnapshotTimer.Elapsed += (_, _) =>
-            {
-                if (_session is not null)
-                {
-                    // Initial snapshot is captured immediately upon starting the session
-                    CaptureSessionSnapshot(_session.CreateSnapshot(false));
-                }
-            };
-            _captureSessionSnapshotTimer.Start();
         }
 
         public Hub(SentryOptions options)
@@ -207,10 +196,12 @@ namespace Sentry.Internal
                 return;
             }
 
+            // Send the final status
+            session.End(state);
+            CaptureSessionSnapshot(session.CreateSnapshot(false));
+
             // Clear out the session
             _session = null;
-
-            // TODO: do something terrible
 
             _options.DiagnosticLogger?.LogInfo(
                 "Ended session (sid: {0}; did: {1}) with state '{2}'.",
@@ -251,11 +242,8 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                // TODO: note, this is not processed event yet. does it matter?
-                if (evt.Exception is not null)
-                {
-                    _session?.ReportError();
-                }
+                // Treat all events as errors
+                _session?.ReportError();
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;

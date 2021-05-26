@@ -176,7 +176,7 @@ namespace Sentry
         public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
         // TODO: this method needs to be refactored, it's really hard to analyze nullability
-        private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
+        private SentryId DoSendEvent(SentryEvent @event, Scope? scope, Session? session)
         {
             if (_options.SampleRate != null)
             {
@@ -241,7 +241,7 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments))
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, session.CreateSnapshot()))
                 ? processedEvent.EventId
                 : SentryId.Empty;
         }
