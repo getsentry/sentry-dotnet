@@ -29,16 +29,9 @@ namespace Sentry
 
         internal static IHub InitHub(SentryOptions options)
         {
-            // Side-effects in a factory function 🤮
             options.SetupLogging();
 
-            var processInfo = ProcessInfo.Instance;
-            if (processInfo is null)
-            {
-                processInfo = new ProcessInfo(options);
-                processInfo.StartAccurateStartupTime();
-                ProcessInfo.Instance = processInfo;
-            }
+            ProcessInfo.Instance ??= new ProcessInfo(options);
 
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.

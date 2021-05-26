@@ -38,6 +38,9 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_EnvelopeWithoutItems_Success()
         {
             // Arrange
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var input = "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n".ToMemoryStream();
 
             using var expectedEnvelope = new Envelope(
@@ -83,6 +86,9 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_EnvelopeWithoutHeader_Success()
         {
             // Arrange
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var input = (
                 "{}\n" +
                 "{\"type\":\"session\",\"length\":75}\n" +
@@ -161,6 +167,9 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_EnvelopeWithTwoItems_Success()
         {
             // Arrange
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
                 "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
@@ -253,6 +262,9 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_EnvelopeWithTwoEmptyItems_Success()
         {
             // Arrange
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
                 "{\"type\":\"attachment\",\"length\":0}\n" +
@@ -322,6 +334,9 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_EnvelopeWithItemWithoutLength_Success()
         {
             // Arrange
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
                 "{\"type\":\"attachment\"}\n" +
@@ -381,6 +396,9 @@ namespace Sentry.Tests.Protocol.Envelopes
 
             using var envelope = Envelope.FromEvent(@event);
 
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var stream = new MemoryStream();
 
             // Act
@@ -419,6 +437,9 @@ namespace Sentry.Tests.Protocol.Envelopes
 
             using var envelope = Envelope.FromEvent(@event, new[] {attachment});
 
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var stream = new MemoryStream();
 
             // Act
@@ -449,6 +470,9 @@ namespace Sentry.Tests.Protocol.Envelopes
 
             using var envelope = Envelope.FromUserFeedback(feedback);
 
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var stream = new MemoryStream();
 
             // Act
@@ -472,6 +496,9 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_EmptyStream_Throws()
         {
             // Arrange
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var input = new MemoryStream();
 
             // Act & assert
@@ -484,6 +511,9 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_InvalidData_Throws()
         {
             // Arrange
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
             using var input = new MemoryStream(new byte[1_000_000]); // all 0's
 
             // Act & assert
@@ -496,10 +526,10 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Deserialization_MalformedData_Throws()
         {
             // Arrange
-            using var input = (
-                // no header
-                "helloworld\n"
-            ).ToMemoryStream();
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
+            using var input = "helloworld\n".ToMemoryStream();
 
             // Act & assert
             await Assert.ThrowsAnyAsync<Exception>(

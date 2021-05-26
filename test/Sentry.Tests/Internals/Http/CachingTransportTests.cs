@@ -56,7 +56,7 @@ namespace Sentry.Tests.Internals.Http
             sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
         }
 
-        [Fact(Timeout = 7000, Skip = "Flaky")]
+        [Fact(Timeout = 7000)]
         public async Task EnvelopeReachesInnerTransport()
         {
             // Arrange
@@ -206,7 +206,7 @@ namespace Sentry.Tests.Internals.Http
             _ = innerTransport.Received(0).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
         }
 
-        [Fact(Timeout = 7000, Skip = "Flaky")]
+        [Fact(Timeout = 7000)]
         public async Task DoesNotDeleteCacheIfConnectionWithIssue()
         {
             // Arrange

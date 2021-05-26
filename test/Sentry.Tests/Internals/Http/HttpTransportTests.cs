@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,7 +9,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Internal.Http;
-using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
@@ -94,6 +94,108 @@ namespace Sentry.Tests.Internals.Http
                 e.Args[2].ToString() == expectedMessage &&
                 e.Args[3].ToString() == expectedCausesFormatted
             ).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task SendEnvelopeAsync_ResponseRequestEntityTooLargeWithPathDefined_StoresFile()
+        {
+            // Arrange
+            var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+            httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(_ => SentryResponses.GetJsonErrorResponse(HttpStatusCode.RequestEntityTooLarge, ""));
+
+            var logger = new InMemoryDiagnosticLogger();
+
+            var func = Substitute.For<Func<string, string>>();
+            var path = Path.GetTempPath();
+            const string expectedEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
+
+            func(expectedEnvVar).Returns(path);
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    Debug = true,
+                    DiagnosticLogger = logger
+                },
+                new HttpClient(httpHandler),
+                func);
+
+            var envelope = Envelope.FromEvent(new SentryEvent());
+
+            // Act
+            await httpTransport.SendEnvelopeAsync(envelope);
+
+            // Assert
+            logger.Entries.Any(e =>
+                    e.Level == SentryLevel.Debug &&
+                    e.Message == "Environment variable '{0}' set. Writing envelope to {1}" &&
+                    e.Exception == null &&
+                    e.Args[0].ToString() == expectedEnvVar &&
+                    e.Args[1].ToString() == path)
+                .Should()
+                .BeTrue();
+
+            var fileStoredLogEntry = logger.Entries.FirstOrDefault(e =>
+                e.Level == SentryLevel.Info &&
+                e.Message == "Envelope's {0} bytes written to: {1}");
+
+            Assert.NotNull(fileStoredLogEntry);
+            var expectedFile = new FileInfo(fileStoredLogEntry.Args[1].ToString());
+            Assert.True(expectedFile.Exists);
+            try
+            {
+                Assert.Null(fileStoredLogEntry.Exception);
+                // // Path is based on the provided path:
+                Assert.Contains(path, fileStoredLogEntry.Args[1] as string);
+                // // Path contains the envelope id in its name:
+                Assert.Contains(envelope.TryGetEventId().ToString(), fileStoredLogEntry.Args[1] as string);
+                Assert.Equal(expectedFile.Length, (long)fileStoredLogEntry.Args[0]);
+            }
+            finally
+            {
+                // It's in the temp folder but just to keep things tidy:
+                expectedFile.Delete();
+            }
+        }
+
+        [Fact]
+        public async Task SendEnvelopeAsync_ResponseRequestEntityTooLargeWithoutPathDefined_DoesNotStoreFile()
+        {
+            // Arrange
+            var httpHandler = Substitute.For<MockableHttpMessageHandler>();
+
+            httpHandler.VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>())
+                .Returns(_ => SentryResponses.GetJsonErrorResponse(HttpStatusCode.RequestEntityTooLarge, ""));
+
+            var logger = new InMemoryDiagnosticLogger();
+
+            var func = Substitute.For<Func<string, string>>();
+            func(Arg.Any<string>()).Returns(null as string);
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    Debug = true,
+                    DiagnosticLogger = logger
+                },
+                new HttpClient(httpHandler),
+                func);
+
+            // Act
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+            // Assert
+            logger.Entries.Any(e => e.Message == "Environment variable '{0}' set. Writing envelope to {1}")
+                .Should()
+                .BeFalse();
+
+            logger.Entries.Any(e => e.Message == "Envelope's {0} bytes written to: {1}")
+                .Should()
+                .BeFalse();
         }
 
         [Fact]

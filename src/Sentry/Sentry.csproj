@@ -24,18 +24,6 @@
   </ItemGroup>
   <!-- Ben.Demystifier -->
 
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
-    <DefineConstants>$(DefineConstants);HAS_VALUE_TUPLE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
-    <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <Reference Include="System.Net.Http" />

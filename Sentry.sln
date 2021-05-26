@@ -101,10 +101,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F267
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E1800E08-72E6-45AE-91EC-69B4FDBA7555}"
-	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build.yaml = .github\workflows\build.yaml
-		.github\workflows\changelog.yaml = .github\workflows\changelog.yaml
-	EndProjectSection
+ProjectSection(SolutionItems) = preProject
+	.github\workflows\build.yml = .github\workflows\build.yml
+	.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
+	.github\workflows\danger.yml = .github\workflows\danger.yml
+	.github\workflows\docs.yml = .github\workflows\docs.yml
+	.github\workflows\vulnerabilities.yml = .github\workflows\vulnerabilities.yml
+EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.Grpc", "src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj", "{720811C8-29C7-4368-86F2-D61DF415AC2A}"
 EndProject

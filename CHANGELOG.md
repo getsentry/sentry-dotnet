@@ -2,9 +2,50 @@
 
 ## Unreleased
 
+- Adjust parameter type in `AddBreadcrumb` to use `IReadOnlyDictionary<...>` instead of `Dictionary<...>` ([#1000](https://github.com/getsentry/sentry-dotnet/pull/1000))
+- await dispose everywhere ([#1009](https://github.com/getsentry/sentry-dotnet/pull/1009))
+- Use `DebugDiagnosticLogger` as the default logger for legacy ASP.NET ([#1012](https://github.com/getsentry/sentry-dotnet/pull/1012))
+- Further simplify transaction integration from legacy ASP.NET ([#1011](https://github.com/getsentry/sentry-dotnet/pull/1011))
+- simplify ifdef ([#1010](https://github.com/getsentry/sentry-dotnet/pull/1010))
+
+### Features
+
+- Serilog: Add support for Serilog.Formatting.ITextFormatter ([#998](https://github.com/getsentry/sentry-dotnet/pull/998))
+
+## 3.3.5-beta.0
+
+### Features
+
+- Default environment to "debug" if running with debugger attached (#978)
+- ASP.NET Classic: `HttpContext.StartSentryTransaction()` extension method (#996)
+
+### Fixes
+
+- Unity can have negative line numbers ([#994](https://github.com/getsentry/sentry-dotnet/pull/994))
+- Fixed an issue where an attempt to deserialize `Device` with a non-system time zone failed ([#993](https://github.com/getsentry/sentry-dotnet/pull/993))
+
+## 3.3.4
+
+### Features
+
+- Env var to keep large envelopes if they are rejected by Sentry (#957)
+
+### Fixes
+
+- serialize parent_span_id in contexts.trace (#958)
+
+## 3.3.3
+
+### Fixes
+
+- boot time detection can fail in some cases (#955)
+
+## 3.3.2
+
 ### Fixes
 
 - Don't override Span/Transaction status on Finish(...) if status was not provided explicitly (#928) @Tyrrrz
+- Fix startup time shows incorrect value on macOS/Linux. Opt-out available for IL2CPP. (#948)
 
 ## 3.3.1
 

@@ -21,7 +21,7 @@ namespace Sentry.Samples.AspNetCore5.Mvc
                     {
                         o.Debug = true;
                         o.MaxRequestBodySize = RequestSize.Always;
-                        o.Dsn = "https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537";
+                        o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
                         o.TracesSampler = ctx =>
                         {
                             if (string.Equals(ctx.TryGetHttpRoute(), "/Home/Privacy", StringComparison.Ordinal))

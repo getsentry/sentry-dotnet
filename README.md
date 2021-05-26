@@ -1,19 +1,18 @@
 <p align="center">
-  <a href="https://sentry.io" target="_blank" align="center">
-    <img src="https://sentry-brand.storage.googleapis.com/sentry-logo-black.png" width="280">
+  <a href="https://sentry.io" target="_blank">
+    <img src="https://raw.githubusercontent.com/getsentry/sentry-dotnet/main/.assets/sentry-logo.png" alt="Sentry logo" width="280">
   </a>
-  <br />
 </p>
 
 _Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us [<kbd>**Check out our open positions**</kbd>](https://sentry.io/careers/)_
 
-Sentry SDK for .NET 
+Sentry SDK for .NET
 ===========
 
 [![build](https://github.com/getsentry/sentry-dotnet/workflows/build/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
 [![line count](https://tokei.rs/b1/github/getsentry/sentry-dotnet/)](https://github.com/getsentry/sentry-dotnet/tree/main/src)
-[![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)  
+[![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 
 
 |      Integrations             |    Downloads     |    NuGet Stable     |    NuGet Preview     |  Documentation |
@@ -29,7 +28,7 @@ Sentry SDK for .NET
 
 ## More Sentry .NET Integrations
 
-Sentry offers other integrations that are not part of this reposistory:
+Sentry offers other integrations that are not part of this repository:
 
 * [Sentry.EntityFramework](https://github.com/getsentry/sentry-dotnet-ef): EF 6 for validation errors and query as breadcrumbs.
 * [Sentry.Minidump](https://github.com/getsentry/sentry-dotnet-minidump): Capture Minidumps on Windows, macOS and Linux.
@@ -58,7 +57,7 @@ The packages target **.NET Standard 2.0** and **.NET Framework 4.6.1**. That mea
 * .NET Core 2.0
 * Mono 5.4
 * Xamarin.Android 8.0
-* Xamarin.Mac 3.8 
+* Xamarin.Mac 3.8
 * Xamarin.iOS 10.14
 * Universal Windows Platform 10.0.16299
 
@@ -82,6 +81,6 @@ Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested 
 
 * [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/)
 * [![Forum](https://img.shields.io/badge/forum-sentry-green.svg)](https://forum.sentry.io/c/sdks)
-* [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)  
+* [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 * [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-sentry-green.svg)](http://stackoverflow.com/questions/tagged/sentry)
 * [![Twitter Follow](https://img.shields.io/twitter/follow/getsentry?label=getsentry&style=social)](https://twitter.com/intent/follow?screen_name=getsentry)

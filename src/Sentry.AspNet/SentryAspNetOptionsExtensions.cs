@@ -1,5 +1,6 @@
 using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 
 namespace Sentry.AspNet
 {
@@ -21,6 +22,7 @@ namespace Sentry.AspNet
 
             var eventProcessor = new SystemWebRequestEventProcessor(payloadExtractor, options);
 
+            options.DiagnosticLogger ??= new DebugDiagnosticLogger(options.DiagnosticLevel);
             options.Release ??= SystemWebVersionLocator.GetCurrent();
             options.AddEventProcessor(eventProcessor);
         }

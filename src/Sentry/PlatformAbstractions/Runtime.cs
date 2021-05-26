@@ -27,7 +27,7 @@ namespace Sentry.PlatformAbstractions
         /// 4.7.2633.0
         /// </example>
         public string? Version { get; internal set; }
-#if NETFX
+#if NET461
         /// <summary>
         /// The .NET Framework installation which is running the process
         /// </summary>
@@ -51,14 +51,14 @@ namespace Sentry.PlatformAbstractions
         public Runtime(
             string? name = null,
             string? version = null,
-            #if NETFX
+#if NET461
             FrameworkInstallation? frameworkInstallation = null,
-            #endif
+#endif
             string? raw = null)
         {
             Name = name;
             Version = version;
-#if NETFX
+#if NET461
             FrameworkInstallation = frameworkInstallation;
 #endif
             Raw = raw;
@@ -95,7 +95,7 @@ namespace Sentry.PlatformAbstractions
             if (ReferenceEquals(this, other)) return true;
             return string.Equals(Name, other.Name)
                    && string.Equals(Version, other.Version)
-#if NETFX
+#if NET461
                    && Equals(FrameworkInstallation, other.FrameworkInstallation)
 #endif
                    && string.Equals(Raw, other.Raw);
@@ -124,7 +124,7 @@ namespace Sentry.PlatformAbstractions
             {
                 var hashCode = Name != null ? Name.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (Version != null ? Version.GetHashCode() : 0);
-#if NETFX
+#if NET461
                 hashCode = (hashCode * 397) ^ (FrameworkInstallation != null ? FrameworkInstallation.GetHashCode() : 0);
 #endif
                 hashCode = (hashCode * 397) ^ (Raw != null ? Raw.GetHashCode() : 0);

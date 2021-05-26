@@ -395,7 +395,7 @@ namespace Sentry.Tests.Protocol
             Assert.Equal("5", sut.Breadcrumbs.Last().Message);
         }
 
-#if HAS_VALUE_TUPLE
+#if !NET461
         [Fact]
         public void AddBreadcrumb_ValueTuple_AllArgumentsMatch()
         {
@@ -527,15 +527,15 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public async Task AddAttachment_FromStream_UnknownLength_IsDropped()
+        public void AddAttachment_FromStream_UnknownLength_IsDropped()
         {
             // Arrange
             var logger = new InMemoryDiagnosticLogger();
             _fixture.ScopeOptions.DiagnosticLogger = logger;
             _fixture.ScopeOptions.Debug = true;
 
-            // HTTP streams don't have length
-            using var stream = await new HttpClient().GetStreamAsync("https://example.com");
+            // Stream without length, similar to HTTP streams.
+            var stream = new LengthlessStream();
 
             var scope = _fixture.GetSut();
 

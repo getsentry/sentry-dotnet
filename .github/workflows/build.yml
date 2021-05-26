@@ -6,7 +6,8 @@ on:
       - main
       - release/*
   pull_request:
-
+    paths-ignore:
+      - 'CHANGELOG.md'
 jobs:
   build:
     name: ${{ matrix.os }}
@@ -31,25 +32,10 @@ jobs:
             submodules: recursive
             fetch-depth: 2 # default is 1 and codecov needs > 1
 
-        - name: Setup .NET SDK (v2.1)
-          uses: actions/setup-dotnet@v1.7.2
-          with:
-            dotnet-version: '2.1.809'
-
-        - name: Setup .NET SDK (v3.1)
-          uses: actions/setup-dotnet@v1.7.2
-          with:
-            dotnet-version: '3.1.401'
-
-        - name: Setup .NET SDK (v5.0)
-          uses: actions/setup-dotnet@v1.7.2
-          with:
-            dotnet-version: '5.0.100'
-
         - name: Setup .NET SDK (v6.0)
           uses: actions/setup-dotnet@v1.7.2
           with:
-            dotnet-version: '6.0.100-preview.3.21202.5'
+            dotnet-version: '6.0.100-preview.4.21255.9'
 
         - name: Run build script
           run: ${{ matrix.build_script }}
@@ -58,6 +44,8 @@ jobs:
           uses: codecov/codecov-action@v1
 
         - name: Archive Artifacts
+          # only the ps1 script packages the SDK
+          if: matrix.os == 'windows-latest'
           uses: actions/upload-artifact@v2
           with:
             name: ${{ github.sha }}

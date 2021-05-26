@@ -59,7 +59,7 @@ namespace Sentry.Extensions.Logging.Tests
 
             Assert.Equal(150, sentryLoggingOptions.MaxBreadcrumbs);
             Assert.Equal("e386dfd", sentryLoggingOptions.Release);
-            Assert.Equal("https://80aed643f81249d4bed3e30687b310ab@o447951.ingest.sentry.io/5428537", sentryLoggingOptions.Dsn);
+            Assert.Equal("https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537", sentryLoggingOptions.Dsn);
         }
 
         [Fact]
