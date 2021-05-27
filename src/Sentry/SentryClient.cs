@@ -158,6 +158,7 @@ namespace Sentry
             CaptureEnvelope(Envelope.FromTransaction(transaction));
         }
 
+        /// <inheritdoc />
         public void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot)
         {
             if (_disposed)
