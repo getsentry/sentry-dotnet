@@ -35,7 +35,7 @@ namespace Sentry.AspNet.Tests.Internal
             var sut = _fixture.GetSut();
             var expected = ApplicationVersionLocator.GetCurrent(sut);
 
-            var actual = SystemWebVersionLocator.Resolve(null);
+            var actual = SystemWebVersionLocator.Resolve(new SentryOptions());
 
             Assert.Equal(expected, actual);
         }
