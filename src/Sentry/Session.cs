@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Sentry
 {
@@ -20,7 +21,8 @@ namespace Sentry
 
         public SessionEndState EndState { get; private set; }
 
-        public int ErrorCount { get; private set; }
+        private int _errorCount;
+        public int ErrorCount => _errorCount;
 
         internal Session(
             string id,
@@ -54,7 +56,7 @@ namespace Sentry
 
         public void End(SessionEndState state) => EndState = state;
 
-        public void ReportError() => ErrorCount++;
+        public void ReportError() => Interlocked.Increment(ref _errorCount);
 
         public SessionSnapshot CreateSnapshot(bool isInitial) => new(this, isInitial);
     }
