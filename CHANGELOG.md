@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.4.0-beta.0
 
 ### Features
 
