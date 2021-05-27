@@ -18,7 +18,8 @@ namespace Sentry.Internal
 
         public static string Resolve(SentryOptions options)
         {
-            var fromEnvironmentVariable = FromEnvironmentVariable.Value;
+            // Changing from `LocateFromEnvironmentVariable()` to `Current` fails tests?
+            var fromEnvironmentVariable = LocateFromEnvironmentVariable();
             if (!string.IsNullOrWhiteSpace(fromEnvironmentVariable))
                 return fromEnvironmentVariable;
 
