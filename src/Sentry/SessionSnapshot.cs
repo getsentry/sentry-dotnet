@@ -41,7 +41,7 @@ namespace Sentry
                 writer.WriteBoolean("init", IsInitial);
             }
 
-            writer.WriteString("timestamp", Session.Timestamp);
+            writer.WriteString("started", Session.Timestamp);
 
             writer.WriteNumber("duration", (int)Duration.TotalSeconds);
 
