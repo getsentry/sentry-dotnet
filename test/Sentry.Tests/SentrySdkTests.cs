@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -449,13 +448,15 @@ namespace Sentry.Tests
         {
             var clientMembers = typeof(ISentryClient)
                 .GetMembers(BindingFlags.Public | BindingFlags.Instance)
-                .Select(m => m.ToString());
+                .Select(m => m.ToString())
+                .ToArray();
 
             var sentrySdkMembers = typeof(SentrySdk)
                 .GetMembers(BindingFlags.Public | BindingFlags.Static)
-                .Select(m => m.ToString());
+                .Select(m => m.ToString())
+                .ToArray();
 
-            clientMembers.Should().BeEquivalentTo(sentrySdkMembers);
+            sentrySdkMembers.Should().Contain(clientMembers);
         }
 
         [Fact]
