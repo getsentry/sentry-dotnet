@@ -5,9 +5,8 @@ namespace Sentry.AspNet.Internal
 {
     internal static class SystemWebVersionLocator
     {
-        public static string? Resolve(SentryOptions options, HttpContext context)
+        internal static string? Resolve(string? release, HttpContext context)
         {
-            var release = ReleaseLocator.Resolve(options);
             if (!string.IsNullOrWhiteSpace(release))
             {
                 return release;
@@ -20,6 +19,7 @@ namespace Sentry.AspNet.Internal
                 {
                     type = type.BaseType;
                 }
+
                 if (type?.Assembly is { } assembly)
                 {
                     return ApplicationVersionLocator.GetCurrent(assembly);
@@ -27,6 +27,12 @@ namespace Sentry.AspNet.Internal
             }
 
             return null;
+        }
+
+        public static string? Resolve(SentryOptions options, HttpContext context)
+        {
+            var release = ReleaseLocator.Resolve(options);
+            return Resolve(release, context);
         }
     }
 }
