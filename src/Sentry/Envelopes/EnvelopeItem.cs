@@ -99,6 +99,9 @@ namespace Sentry.Protocol.Envelopes
             // Length is NOT known (need to calculate)
             else
             {
+#if !NET461 && !NETSTANDARD2_0
+                await
+#endif
                 using var payloadBuffer = await BufferPayloadAsync(cancellationToken).ConfigureAwait(false);
 
                 // Header

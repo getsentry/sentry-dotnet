@@ -1,7 +1,4 @@
 using System;
-#if RELEASE
-using System.Threading;
-#endif
 using NSubstitute;
 using Sentry.Integrations;
 using Sentry.Internal;
@@ -43,7 +40,7 @@ namespace Sentry.Tests
         public void Handle_UnobservedTaskException_CaptureEvent()
         {
             _fixture.AppDomain = AppDomainAdapter.Instance;
-            var captureCalledEvent = new ManualResetEvent(false);
+            var captureCalledEvent = new System.Threading.ManualResetEvent(false);
             _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
                 .Do(_ => captureCalledEvent.Set());
 
@@ -51,7 +48,7 @@ namespace Sentry.Tests
             sut.Register(_fixture.Hub, SentryOptions);
             try
             {
-                var taskStartedEvent = new ManualResetEvent(false);
+                var taskStartedEvent = new System.Threading.ManualResetEvent(false);
                 _ = Task.Run(() =>
                 {
                     _ = taskStartedEvent.Set();

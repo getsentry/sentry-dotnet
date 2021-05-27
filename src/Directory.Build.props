@@ -22,6 +22,7 @@
     <PackageIcon>sentry-nuget.png</PackageIcon>
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
@@ -50,8 +51,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)/../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
-    <None Include="$(MSBuildThisFileDirectory)/../README.md" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>

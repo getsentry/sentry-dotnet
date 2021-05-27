@@ -395,7 +395,7 @@ namespace Sentry.Tests.Protocol
             Assert.Equal("5", sut.Breadcrumbs.Last().Message);
         }
 
-#if HAS_VALUE_TUPLE
+#if !NET461
         [Fact]
         public void AddBreadcrumb_ValueTuple_AllArgumentsMatch()
         {

@@ -514,7 +514,7 @@ namespace Sentry
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
                 new TaskUnobservedTaskExceptionIntegration(),
-#if NETFX
+#if NET461
                 new NetFxInstallationsIntegration(),
 #endif
             };
