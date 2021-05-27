@@ -3,14 +3,29 @@ using System.Text.Json;
 
 namespace Sentry
 {
+    /// <summary>
+    /// Snapshot of a session.
+    /// </summary>
     public class SessionSnapshot : IJsonSerializable
     {
+        /// <summary>
+        /// Session.
+        /// </summary>
         public Session Session { get; }
 
+        /// <summary>
+        /// Whether this is the initial snapshot.
+        /// </summary>
         public bool IsInitial { get; }
 
+        /// <summary>
+        /// Timestamp.
+        /// </summary>
         public DateTimeOffset Timestamp { get; }
 
+        /// <summary>
+        /// Duration of time since start of the session.
+        /// </summary>
         public TimeSpan Duration => Timestamp - Session.Timestamp;
 
         internal SessionSnapshot(Session session, bool isInitial, DateTimeOffset timestamp)
@@ -20,11 +35,15 @@ namespace Sentry
             Timestamp = timestamp;
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SessionSnapshot"/>.
+        /// </summary>
         public SessionSnapshot(Session session, bool isInitial)
             : this(session, isInitial, DateTimeOffset.Now)
         {
         }
 
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -72,6 +91,9 @@ namespace Sentry
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Parses <see cref="SessionSnapshot"/> from JSON.
+        /// </summary>
         public static SessionSnapshot FromJson(JsonElement json)
         {
             throw new NotImplementedException();
