@@ -168,7 +168,7 @@ namespace Sentry.Internal
                 EndSession();
             }
 
-            var release = _options.Release ?? ReleaseLocator.GetCurrent();
+            var release = ReleaseLocator.Resolve(_options);
             if (string.IsNullOrWhiteSpace(release))
             {
                 // Release health without release is just health (useless)

@@ -17,9 +17,8 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-            public SentryOptions SentryOptions { get; set; } = new();
-            public Lazy<string> LazyRelease { get; set; } = new(() => "release-123");
-            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory, LazyRelease);
+            public SentryOptions SentryOptions { get; set; } = new() {Release = "release-123"};
+            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
         }
 
         private readonly Fixture _fixture = new();

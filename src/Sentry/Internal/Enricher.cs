@@ -25,8 +25,6 @@ namespace Sentry.Internal
         private readonly Lazy<SdkVersion> _sdkVersionLazy =
             new(() => typeof(ISentryClient).Assembly.GetNameAndVersion());
 
-        private readonly Lazy<string?> _releaseLazy = new(ReleaseLocator.GetCurrent);
-
         public Enricher(SentryOptions options)
         {
             _options = options;
@@ -68,7 +66,7 @@ namespace Sentry.Internal
             eventLike.Platform ??= Sentry.Constants.Platform;
 
             // Release
-            eventLike.Release ??= _options.Release ?? _releaseLazy.Value;
+            eventLike.Release ??= ReleaseLocator.Resolve(_options);
 
             // Environment
             eventLike.Environment ??= EnvironmentLocator.Resolve(_options);

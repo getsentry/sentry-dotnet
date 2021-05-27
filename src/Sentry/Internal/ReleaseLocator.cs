@@ -4,12 +4,11 @@ namespace Sentry.Internal
 {
     internal static class ReleaseLocator
     {
-        /// <summary>
-        /// Attempts to locate the application release
-        /// </summary>
-        /// <returns>The app release or null, if it couldn't be located.</returns>
-        public static string? GetCurrent()
-            => Environment.GetEnvironmentVariable(Constants.ReleaseEnvironmentVariable)
-                ?? ApplicationVersionLocator.GetCurrent();
+        private static readonly Lazy<string?> CurrentLazy = new(() =>
+            Environment.GetEnvironmentVariable(Constants.ReleaseEnvironmentVariable)
+            ?? ApplicationVersionLocator.GetCurrent()
+        );
+
+        public static string? Resolve(SentryOptions options) => options.Release ?? CurrentLazy.Value;
     }
 }

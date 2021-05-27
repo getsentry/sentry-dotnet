@@ -1,5 +1,3 @@
-using System;
-using System.Reflection;
 using System.Web;
 using Sentry.Internal;
 
@@ -7,18 +5,18 @@ namespace Sentry.AspNet.Internal
 {
     internal static class SystemWebVersionLocator
     {
-        public static string? GetCurrent() => GetCurrent(ReleaseLocator.GetCurrent());
-        internal static string? GetCurrent(string? release)
-
+        public static string? Resolve(SentryOptions options)
         {
-            if (release != null)
+            var release = ReleaseLocator.Resolve(options);
+            if (!string.IsNullOrWhiteSpace(release))
             {
                 return release;
             }
-            else if (HttpContext.Current?.ApplicationInstance?.GetType() is { } type)
+
+            if (HttpContext.Current?.ApplicationInstance?.GetType() is { } type)
             {
-                //Usually the type is ASP.global_asax and the BaseType is the Web Application.
-                while (type != null && type.Namespace == "ASP")
+                // Usually the type is ASP.global_asax and the BaseType is the Web Application.
+                while (type is {Namespace: "ASP"})
                 {
                     type = type.BaseType;
                 }
@@ -27,6 +25,7 @@ namespace Sentry.AspNet.Internal
                     return ApplicationVersionLocator.GetCurrent(assembly);
                 }
             }
+
             return null;
         }
     }

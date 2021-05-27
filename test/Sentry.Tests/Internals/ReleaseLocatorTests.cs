@@ -12,7 +12,7 @@ namespace Sentry.Tests.Internals
     public class ReleaseLocatorTests
     {
         [Fact]
-        public void GetCurrent_WithEnvironmentVariable_VersionOfEnvironmentVariable()
+        public void Resolve_WithEnvironmentVariable_VersionOfEnvironmentVariable()
         {
             const string expectedVersion = "the version";
             EnvironmentVariableGuard.WithVariable(
@@ -20,7 +20,7 @@ namespace Sentry.Tests.Internals
                 expectedVersion,
                 () =>
                 {
-                    Assert.Equal(expectedVersion, ReleaseLocator.GetCurrent());
+                    Assert.Equal(expectedVersion, ReleaseLocator.Resolve(new SentryOptions()));
                 });
         }
 
@@ -30,7 +30,7 @@ namespace Sentry.Tests.Internals
 #else
         [Fact]
 #endif
-        public void GetCurrent_WithoutEnvironmentVariable_VersionOfEntryAssembly()
+        public void Resolve_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
 #if NET461
             Skip.If(Runtime.Current.IsMono(), "GetEntryAssembly returning null on Mono.");
@@ -44,7 +44,7 @@ namespace Sentry.Tests.Internals
                 {
                     Assert.Equal(
                         $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
-                        ReleaseLocator.GetCurrent()
+                        ReleaseLocator.Resolve(new SentryOptions())
                     );
                 });
         }
