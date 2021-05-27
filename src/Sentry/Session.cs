@@ -40,13 +40,13 @@ namespace Sentry
             UserAgent = userAgent;
         }
 
-        public Session(string? distinctId, string release)
+        public Session(string? distinctId, string release, string? environment)
             : this(
                 Guid.NewGuid().ToString(),
                 distinctId,
                 DateTimeOffset.Now,
                 release,
-                null,
+                environment,
                 null,
                 null)
         {

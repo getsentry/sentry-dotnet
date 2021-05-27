@@ -52,7 +52,7 @@ namespace Sentry
         /// Starts a new session, optionally with the provided unique identifier.
         /// Session identifier can be user ID, IP address, device MAC address, or any other similarly distinct value.
         /// </summary>
-        void StartSession(string? id = null);
+        void StartSession();
 
         /// <summary>
         /// Ends the currently active session.

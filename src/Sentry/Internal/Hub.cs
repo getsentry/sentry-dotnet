@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -154,7 +156,7 @@ namespace Sentry.Internal
 
         public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
-        public void StartSession(string? id = null)
+        public void StartSession()
         {
             if (_session is not null)
             {
@@ -169,7 +171,7 @@ namespace Sentry.Internal
             var release = _options.Release ?? ReleaseLocator.GetCurrent();
             if (string.IsNullOrWhiteSpace(release))
             {
-                // Release health without release is just health
+                // Release health without release is just health (useless)
                 _options.DiagnosticLogger?.LogError(
                     "Attempt to start a session failed because there is no release information."
                 );
@@ -177,8 +179,20 @@ namespace Sentry.Internal
                 return;
             }
 
-            var session = new Session(id, release);
+            var environment = EnvironmentLocator.Resolve(_options);
+
+            // TODO: proper distinct id
+            var distinctId = NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(nic =>
+                    nic.OperationalStatus == OperationalStatus.Up &&
+                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .Select(nic => nic.GetPhysicalAddress().ToString())
+                .FirstOrDefault();
+
+            var session = new Session(distinctId, release, environment);
             _session = session;
+
             CaptureSessionSnapshot(session.CreateSnapshot(true));
 
             _options.DiagnosticLogger?.LogInfo(

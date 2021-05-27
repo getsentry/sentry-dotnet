@@ -81,7 +81,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void StartSession(string? id = null)
+        public void StartSession()
         {
         }
 

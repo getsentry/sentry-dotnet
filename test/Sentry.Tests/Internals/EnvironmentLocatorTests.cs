@@ -16,7 +16,7 @@ namespace Sentry.Tests.Internals
                 expectedVersion,
                 () =>
                 {
-                    Assert.Equal(expectedVersion, EnvironmentLocator.Locate());
+                    Assert.Equal(expectedVersion, EnvironmentLocator.LocateFromEnvironmentVariable());
                 });
         }
 
@@ -28,7 +28,7 @@ namespace Sentry.Tests.Internals
                 null,
                 () =>
                 {
-                    Assert.Null(EnvironmentLocator.Locate());
+                    Assert.Null(EnvironmentLocator.LocateFromEnvironmentVariable());
                 });
         }
 

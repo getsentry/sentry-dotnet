@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
 using Sentry.Reflection;
@@ -72,27 +71,7 @@ namespace Sentry.Internal
             eventLike.Release ??= _options.Release ?? _releaseLazy.Value;
 
             // Environment
-            if (string.IsNullOrWhiteSpace(eventLike.Environment))
-            {
-                // Environment from environment variable
-                var foundEnvironment = EnvironmentLocator.Locate();
-                if (!string.IsNullOrWhiteSpace(foundEnvironment))
-                {
-                    eventLike.Environment = foundEnvironment;
-                }
-                // Environment from options
-                else if (!string.IsNullOrWhiteSpace(_options.Environment))
-                {
-                    eventLike.Environment = _options.Environment;
-                }
-                // Default
-                else
-                {
-                    eventLike.Environment = Debugger.IsAttached
-                        ? Constants.DebugEnvironmentSetting
-                        : Constants.ProductionEnvironmentSetting;
-                }
-            }
+            eventLike.Environment ??= EnvironmentLocator.Resolve(_options);
 
             // User
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:

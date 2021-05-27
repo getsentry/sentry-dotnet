@@ -391,8 +391,8 @@ namespace Sentry
 
         /// <inheritdoc cref="IHub.StartSession"/>
         [DebuggerStepThrough]
-        public static void StartSession(string? id = null)
-            => _hub.StartSession(id);
+        public static void StartSession()
+            => _hub.StartSession();
 
         /// <inheritdoc cref="IHub.EndSession"/>
         [DebuggerStepThrough]
