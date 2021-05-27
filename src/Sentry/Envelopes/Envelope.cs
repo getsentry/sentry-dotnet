@@ -37,7 +37,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         public Envelope(IReadOnlyList<EnvelopeItem> items)
-            : this(new Dictionary<string, object?>(), items)
+            : this(Empty.Dictionary<string, object?>(), items)
         {
         }
 
