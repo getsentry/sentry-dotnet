@@ -447,10 +447,15 @@ namespace Sentry.Tests
         [Fact]
         public void Implements_Client()
         {
-            var clientMembers = typeof(ISentryClient).GetMembers(BindingFlags.Public | BindingFlags.Instance);
-            var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+            var clientMembers = typeof(ISentryClient)
+                .GetMembers(BindingFlags.Public | BindingFlags.Instance)
+                .Select(m => m.ToString());
 
-            Assert.Empty(clientMembers.Select(m => m.ToString()).Except(sentrySdk.Select(m => m.ToString())));
+            var sentrySdkMembers = typeof(SentrySdk)
+                .GetMembers(BindingFlags.Public | BindingFlags.Static)
+                .Select(m => m.ToString());
+
+            clientMembers.Should().BeEquivalentTo(sentrySdkMembers);
         }
 
         [Fact]

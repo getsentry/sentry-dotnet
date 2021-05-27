@@ -239,6 +239,7 @@ namespace Sentry.Tests.Internals
         [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
         public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
         {
+            _fixture.SentryOptions.Environment = null;
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 

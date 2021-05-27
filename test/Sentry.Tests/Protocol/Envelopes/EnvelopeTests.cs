@@ -91,7 +91,7 @@ namespace Sentry.Tests.Protocol.Envelopes
 #endif
             using var input = (
                 "{}\n" +
-                "{\"type\":\"session\",\"length\":75}\n" +
+                "{\"type\":\"fake\",\"length\":75}\n" +
                 "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
             ).ToMemoryStream();
 
@@ -100,7 +100,7 @@ namespace Sentry.Tests.Protocol.Envelopes
                 new[]
                 {
                     new EnvelopeItem(
-                        new Dictionary<string, object>{["type"] = "session", ["length"] = 75L},
+                        new Dictionary<string, object>{["type"] = "fake", ["length"] = 75L},
                         new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
                             .ToMemoryStream())
                     )
