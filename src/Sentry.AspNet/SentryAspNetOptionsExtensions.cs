@@ -1,3 +1,4 @@
+using System.Web;
 using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
@@ -22,7 +23,7 @@ namespace Sentry.AspNet
 
             var eventProcessor = new SystemWebRequestEventProcessor(payloadExtractor, options);
 
-            options.Release ??= SystemWebVersionLocator.Resolve(options);
+            options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
             options.DiagnosticLogger ??= new DebugDiagnosticLogger(options.DiagnosticLevel);
             options.AddEventProcessor(eventProcessor);
         }
