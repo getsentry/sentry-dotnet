@@ -119,6 +119,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{274CEDC2-2129-469D-B269-649EFA2EF5E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.EntityFramework", "src\Sentry.EntityFramework\Sentry.EntityFramework.csproj", "{8B38F62E-0DD5-486F-96F5-2025AFB9B491}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.EntityFramework.Tests", "test\Sentry.EntityFramework.Tests\Sentry.EntityFramework.Tests.csproj", "{840B220E-68EC-4ECB-AEA1-67B0151F17FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.EntityFramework", "samples\Sentry.Samples.EntityFramework\Sentry.Samples.EntityFramework.csproj", "{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -253,6 +259,18 @@ Global
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B38F62E-0DD5-486F-96F5-2025AFB9B491}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B38F62E-0DD5-486F-96F5-2025AFB9B491}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B38F62E-0DD5-486F-96F5-2025AFB9B491}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B38F62E-0DD5-486F-96F5-2025AFB9B491}.Release|Any CPU.Build.0 = Release|Any CPU
+		{840B220E-68EC-4ECB-AEA1-67B0151F17FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{840B220E-68EC-4ECB-AEA1-67B0151F17FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{840B220E-68EC-4ECB-AEA1-67B0151F17FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{840B220E-68EC-4ECB-AEA1-67B0151F17FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -293,6 +311,9 @@ Global
 		{21599C29-C3D4-4DAC-A2D6-6C194600478F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{274CEDC2-2129-469D-B269-649EFA2EF5E0} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{8B38F62E-0DD5-486F-96F5-2025AFB9B491} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{840B220E-68EC-4ECB-AEA1-67B0151F17FC} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
