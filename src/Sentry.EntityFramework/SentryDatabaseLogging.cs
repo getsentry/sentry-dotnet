@@ -16,25 +16,29 @@ namespace Sentry.EntityFramework
         /// Adds an instance of <see cref="SentryCommandInterceptor"/> to <see cref="DbInterception"/>
         /// This is a static setup call, so make sure you only call it once for each <see cref="IQueryLogger"/> instance you want to register globally
         /// </summary>
-        /// <param name="queryLogger">Query Logger.</param>
-        /// <param name="diagnosticLogger">Diagnostic Logger.</param>
+        /// <param name="logger">Query Logger.</param>
         [Obsolete("This method is called automatically by options.AddEntityFramework. This method will be removed in future versions.")]
-        public static SentryCommandInterceptor? UseBreadcrumbs(IQueryLogger? queryLogger = null, IDiagnosticLogger? diagnosticLogger = null)
-        {
-            if (Interlocked.Exchange(ref Init, 1) == 0)
-            {
-                diagnosticLogger?.LogWarning("{0}.{1} adding interceptor.",
-                    nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
+        public static SentryCommandInterceptor? UseBreadcrumbs(IQueryLogger? logger = null) => UseBreadcrumbs(logger);
 
-                queryLogger ??= new SentryQueryLogger();
-                var interceptor = new SentryCommandInterceptor(queryLogger);
-                DbInterception.Add(interceptor);
-                return interceptor;
+        internal static SentryCommandInterceptor? UseBreadcrumbs(
+            IQueryLogger? queryLogger = null,
+            bool initOnce = true,
+            IDiagnosticLogger? diagnosticLogger = null)
+        {
+            if (initOnce && Interlocked.Exchange(ref Init, 1) != 0)
+            {
+                diagnosticLogger?.LogWarning("{0}.{1} was already executed.",
+                    nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
+                return null;
             }
 
-            diagnosticLogger?.LogWarning("{0}.{1} was already executed.",
+            diagnosticLogger?.LogWarning("{0}.{1} adding interceptor.",
                 nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
-            return null;
+
+            queryLogger ??= new SentryQueryLogger();
+            var interceptor = new SentryCommandInterceptor(queryLogger);
+            DbInterception.Add(interceptor);
+            return interceptor;
         }
     }
 }

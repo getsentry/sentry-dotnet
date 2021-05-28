@@ -28,7 +28,7 @@ namespace Sentry.EntityFramework.Tests
         [Fact]
         public void UseBreadCrumbs_SentryDatabaseLogging_AddsInterceptor()
         {
-            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
             Assert.NotNull(interceptor);
         }
 
@@ -40,7 +40,7 @@ namespace Sentry.EntityFramework.Tests
                 Query = "Expected query string"
             };
 
-            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
             var command = new EffortCommand()
             {
@@ -59,7 +59,7 @@ namespace Sentry.EntityFramework.Tests
                 Query = "Expected query string"
             };
 
-            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
             var command = new EffortCommand()
             {
@@ -78,7 +78,7 @@ namespace Sentry.EntityFramework.Tests
                 Query = "Expected query string"
             };
 
-            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
             var command = new EffortCommand()
             {
@@ -97,7 +97,7 @@ namespace Sentry.EntityFramework.Tests
                 Query = "Expected query string"
             };
 
-            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
             var command = new EffortCommand()
             {
@@ -116,7 +116,7 @@ namespace Sentry.EntityFramework.Tests
                 Query = "Expected query string"
             };
 
-            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
             var command = new EffortCommand()
             {
@@ -135,7 +135,7 @@ namespace Sentry.EntityFramework.Tests
                 Query = "Expected query string"
             };
 
-            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
             var command = new EffortCommand()
             {
@@ -149,7 +149,7 @@ namespace Sentry.EntityFramework.Tests
         [Fact]
         public void FirstOrDefault_FromDatabase_CapturesQuery()
         {
-            _ = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger);
+            _ = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
             _ = _fixture.DbContext.TestTable.FirstOrDefault();
 
