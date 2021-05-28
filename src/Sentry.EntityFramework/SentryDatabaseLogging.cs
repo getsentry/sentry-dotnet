@@ -32,7 +32,7 @@ namespace Sentry.EntityFramework
                 return null;
             }
 
-            diagnosticLogger?.LogWarning("{0}.{1} adding interceptor.",
+            diagnosticLogger?.LogInfo("{0}.{1} adding interceptor.",
                 nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
 
             queryLogger ??= new SentryQueryLogger();
