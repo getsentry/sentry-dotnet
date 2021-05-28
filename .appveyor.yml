@@ -1,9 +1,0 @@
-version: '{build}'
-image: Visual Studio 2017
-test: off
-before_build:
-  - nuget restore
-build_script:
-- ps: ./build.ps1
-artifacts:
-- path: 'src\**\*.nupkg'
