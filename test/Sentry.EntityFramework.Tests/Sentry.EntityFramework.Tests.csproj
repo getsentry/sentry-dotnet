@@ -1,11 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Running these tests on Mono fail -->
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <TargetFrameworks>net461;$(TargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Effort.EF6" Version="1.3.5" />
+    <PackageReference Include="Effort.EF6" Version="2.2.13" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,7 @@
+using System;
 using System.Data.Entity.Infrastructure.Interception;
+using System.Threading;
+using Sentry.Extensibility;
 
 namespace Sentry.EntityFramework
 {
@@ -7,17 +10,31 @@ namespace Sentry.EntityFramework
     /// </summary>
     public static class SentryDatabaseLogging
     {
+        private static int Init = 0;
+
         /// <summary>
         /// Adds an instance of <see cref="SentryCommandInterceptor"/> to <see cref="DbInterception"/>
         /// This is a static setup call, so make sure you only call it once for each <see cref="IQueryLogger"/> instance you want to register globally
         /// </summary>
-        /// <param name="logger"></param>
-        public static SentryCommandInterceptor UseBreadcrumbs(IQueryLogger logger = null)
+        /// <param name="queryLogger">Query Logger.</param>
+        /// <param name="diagnosticLogger">Diagnostic Logger.</param>
+        [Obsolete("This method is called automatically by options.AddEntityFramework. This method will be removed in future versions.")]
+        public static SentryCommandInterceptor? UseBreadcrumbs(IQueryLogger? queryLogger = null, IDiagnosticLogger? diagnosticLogger = null)
         {
-            logger = logger ?? new SentryQueryLogger();
-            var interceptor = new SentryCommandInterceptor(logger);
-            DbInterception.Add(interceptor);
-            return interceptor;
+            if (Interlocked.Exchange(ref Init, 1) == 0)
+            {
+                diagnosticLogger?.LogWarning("{0}.{1} adding interceptor.",
+                    nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
+
+                queryLogger ??= new SentryQueryLogger();
+                var interceptor = new SentryCommandInterceptor(queryLogger);
+                DbInterception.Add(interceptor);
+                return interceptor;
+            }
+
+            diagnosticLogger?.LogWarning("{0}.{1} was already executed.",
+                nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
+            return null;
         }
     }
 }

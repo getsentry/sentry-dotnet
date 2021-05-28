@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- Sentry.EntityFramework moved to this repository ([#1017](https://github.com/getsentry/sentry-dotnet/pull/1017))
+  - Additional `netstandard2.1` target added. Sample with .NET Core 3.1 console app. 
+
 ### Fixes
 
 - normalize line breaks ([#1016](https://github.com/getsentry/sentry-dotnet/pull/1016))

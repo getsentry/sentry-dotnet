@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.1</TargetFrameworks>
     <PackageId>Sentry.EntityFramework</PackageId>
     <AssemblyName>Sentry.EntityFramework</AssemblyName>
     <RootNamespace>Sentry.EntityFramework</RootNamespace>
@@ -10,8 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.0.0" />
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="EntityFramework" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="EntityFramework" Version="6.3.0" />
+  </ItemGroup>
+  
 </Project>
