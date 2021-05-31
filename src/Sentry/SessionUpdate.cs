@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -65,6 +66,12 @@ namespace Sentry
             writer.WriteNumber("duration", (int)Duration.TotalSeconds);
 
             writer.WriteNumber("errors", Session.ErrorCount);
+
+            // State
+            if (Session.EndState is { } endState)
+            {
+                writer.WriteString("state", endState.ToString().ToSnakeCase());
+            }
 
             // Attributes
             writer.WriteStartObject("attrs");

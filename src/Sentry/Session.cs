@@ -47,7 +47,7 @@ namespace Sentry
         /// <summary>
         /// End state.
         /// </summary>
-        public SessionEndState EndState { get; private set; }
+        public SessionEndState? EndState { get; private set; }
 
         private int _errorCount;
 
