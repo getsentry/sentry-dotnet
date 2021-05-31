@@ -22,8 +22,8 @@ namespace Serilog
         /// </summary>
         /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
         /// <param name="dsn">The Sentry DSN. <seealso cref="SentryOptions.Dsn"/></param>
-        /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
         /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
+        /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
         /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
         /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
         /// <param name="sendDefaultPii">Whether to include default Personal Identifiable information. <seealso cref="SentryOptions.SendDefaultPii"/></param>
@@ -144,6 +144,41 @@ namespace Serilog
                 defaultTags));
         }
 
+        // Overload without ITextFormatter to avoid breaking changes
+        /// <inheritdoc cref="Sentry(Serilog.Configuration.LoggerSinkConfiguration,string?,Serilog.Events.LogEventLevel,Serilog.Events.LogEventLevel,System.IFormatProvider?,Serilog.Formatting.ITextFormatter?,System.Nullable{bool},System.Nullable{bool},string?,System.Nullable{bool},System.Nullable{int},System.Nullable{float},string?,string?,System.Nullable{int},System.Nullable{System.TimeSpan},System.Nullable{System.Net.DecompressionMethods},System.Nullable{System.IO.Compression.CompressionLevel},System.Nullable{bool},System.Nullable{bool},System.Nullable{Sentry.SentryLevel},System.Nullable{bool},System.Nullable{Sentry.DeduplicateMode},System.Nullable{bool},System.Collections.Generic.Dictionary{string,string}?)" />
+        public static LoggerConfiguration Sentry(
+            this LoggerSinkConfiguration loggerConfiguration,
+            string? dsn = null,
+            LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
+            LogEventLevel minimumEventLevel = LogEventLevel.Error,
+            IFormatProvider? formatProvider = null,
+            bool? sendDefaultPii = null,
+            bool? isEnvironmentUser = null,
+            string? serverName = null,
+            bool? attachStackTrace = null,
+            int? maxBreadcrumbs = null,
+            float? sampleRate = null,
+            string? release = null,
+            string? environment = null,
+            int? maxQueueItems = null,
+            TimeSpan? shutdownTimeout = null,
+            DecompressionMethods? decompressionMethods = null,
+            CompressionLevel? requestBodyCompressionLevel = null,
+            bool? requestBodyCompressionBuffered = null,
+            bool? debug = null,
+            SentryLevel? diagnosticLevel = null,
+            bool? reportAssemblies = null,
+            DeduplicateMode? deduplicateMode = null,
+            bool? initializeSdk = null,
+            Dictionary<string, string>? defaultTags = null) =>
+            Sentry(
+                loggerConfiguration, dsn, minimumBreadcrumbLevel, minimumEventLevel, formatProvider, null,
+                sendDefaultPii, isEnvironmentUser, serverName, attachStackTrace, maxBreadcrumbs, sampleRate, release,
+                environment, maxQueueItems, shutdownTimeout, decompressionMethods, requestBodyCompressionLevel,
+                requestBodyCompressionBuffered, debug, diagnosticLevel, reportAssemblies, deduplicateMode,
+                initializeSdk, defaultTags
+            );
+
         /// <summary>
         /// Configure the Sentry Serilog Sink.
         /// </summary>
@@ -173,7 +208,7 @@ namespace Serilog
         /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
         /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
         public static void ConfigureSentrySerilogOptions(
-        SentrySerilogOptions sentrySerilogOptions,
+            SentrySerilogOptions sentrySerilogOptions,
             string? dsn = null,
             LogEventLevel? minimumEventLevel = null,
             LogEventLevel? minimumBreadcrumbLevel = null,
@@ -323,6 +358,41 @@ namespace Serilog
                 }
             }
         }
+
+        // Overload without TextFormatter to avoid breaking changes
+        /// <inheritdoc cref="ConfigureSentrySerilogOptions(Sentry.Serilog.SentrySerilogOptions,string?,System.Nullable{Serilog.Events.LogEventLevel},System.Nullable{Serilog.Events.LogEventLevel},System.IFormatProvider?,Serilog.Formatting.ITextFormatter?,System.Nullable{bool},System.Nullable{bool},string?,System.Nullable{bool},System.Nullable{int},System.Nullable{float},string?,string?,System.Nullable{int},System.Nullable{System.TimeSpan},System.Nullable{System.Net.DecompressionMethods},System.Nullable{System.IO.Compression.CompressionLevel},System.Nullable{bool},System.Nullable{bool},System.Nullable{Sentry.SentryLevel},System.Nullable{bool},System.Nullable{Sentry.DeduplicateMode},System.Nullable{bool},System.Collections.Generic.Dictionary{string,string}?)" />
+        public static void ConfigureSentrySerilogOptions(
+            SentrySerilogOptions sentrySerilogOptions,
+            string? dsn = null,
+            LogEventLevel? minimumEventLevel = null,
+            LogEventLevel? minimumBreadcrumbLevel = null,
+            IFormatProvider? formatProvider = null,
+            bool? sendDefaultPii = null,
+            bool? isEnvironmentUser = null,
+            string? serverName = null,
+            bool? attachStackTrace = null,
+            int? maxBreadcrumbs = null,
+            float? sampleRate = null,
+            string? release = null,
+            string? environment = null,
+            int? maxQueueItems = null,
+            TimeSpan? shutdownTimeout = null,
+            DecompressionMethods? decompressionMethods = null,
+            CompressionLevel? requestBodyCompressionLevel = null,
+            bool? requestBodyCompressionBuffered = null,
+            bool? debug = null,
+            SentryLevel? diagnosticLevel = null,
+            bool? reportAssemblies = null,
+            DeduplicateMode? deduplicateMode = null,
+            bool? initializeSdk = null,
+            Dictionary<string, string>? defaultTags = null) =>
+            ConfigureSentrySerilogOptions(
+                sentrySerilogOptions, dsn, minimumEventLevel, minimumBreadcrumbLevel, formatProvider, null,
+                sendDefaultPii, isEnvironmentUser, serverName, attachStackTrace,
+                maxBreadcrumbs, sampleRate, release, environment, maxQueueItems, shutdownTimeout, decompressionMethods,
+                requestBodyCompressionLevel, requestBodyCompressionBuffered,
+                debug, diagnosticLevel, reportAssemblies, deduplicateMode, initializeSdk, defaultTags
+            );
 
         /// <summary>
         /// Add Sentry sink to Serilog.
