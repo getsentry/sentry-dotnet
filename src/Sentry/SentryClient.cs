@@ -159,7 +159,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot)
+        public void CaptureSession(SessionSnapshot sessionSnapshot)
         {
             if (_disposed)
             {

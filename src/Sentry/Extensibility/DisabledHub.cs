@@ -114,7 +114,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot)
+        public void CaptureSession(SessionSnapshot sessionSnapshot)
         {
         }
 

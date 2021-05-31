@@ -1,13 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using Sentry;
 
-static class Program
+using (SentrySdk.Init("https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537"))
 {
-    static void Main()
-    {
-        using (SentrySdk.Init("https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537"))
-        {
-            // The following exception is captured and sent to Sentry
-            throw null;
-        }
-    }
+    SentrySdk.StartSession();
+
+    SentrySdk.CaptureMessage("test session");
+
+    SentrySdk.EndSession(SessionEndState.Crashed);
+
+    // The following exception is captured and sent to Sentry
+    //throw null;
 }

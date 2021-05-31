@@ -193,7 +193,7 @@ namespace Sentry.Internal
             var session = new Session(distinctId, release, environment);
             _session = session;
 
-            CaptureSessionSnapshot(session.CreateSnapshot(true));
+            CaptureSession(session.CreateSnapshot(true));
 
             _options.DiagnosticLogger?.LogInfo(
                 "Started new session (sid: {0}; did: {1}).",
@@ -215,7 +215,7 @@ namespace Sentry.Internal
 
             // Send the final status
             session.End(state);
-            CaptureSessionSnapshot(session.CreateSnapshot(false));
+            CaptureSession(session.CreateSnapshot(false));
 
             // Clear out the session
             _session = null;
@@ -307,11 +307,11 @@ namespace Sentry.Internal
             }
         }
 
-        public void CaptureSessionSnapshot(SessionSnapshot sessionSnapshot)
+        public void CaptureSession(SessionSnapshot sessionSnapshot)
         {
             try
             {
-                _ownedClient.CaptureSessionSnapshot(sessionSnapshot);
+                _ownedClient.CaptureSession(sessionSnapshot);
             }
             catch (Exception e)
             {
