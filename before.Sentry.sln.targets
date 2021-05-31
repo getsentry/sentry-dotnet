@@ -3,6 +3,6 @@
   <Target Name="RestoreSubmodule"
     Condition="!Exists('modules/Ben.Demystifier/Ben.Demystifier.sln')">
     <Message Importance="High" Text="Ben.Demystifer not found. Restoring git submodules." />
-    <Exec WorkingDirectory="$(MSBuildProjectDirectory)/../../" Command="git submodule update --init --recursive" />
+    <Exec Command="git submodule update --init --recursive" />
   </Target>
 </Project>
