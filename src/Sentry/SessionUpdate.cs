@@ -6,7 +6,7 @@ namespace Sentry
     /// <summary>
     /// Snapshot of a session.
     /// </summary>
-    public class SessionSnapshot : IJsonSerializable
+    public class SessionUpdate : IJsonSerializable
     {
         /// <summary>
         /// Session.
@@ -28,7 +28,7 @@ namespace Sentry
         /// </summary>
         public TimeSpan Duration => Timestamp - Session.Timestamp;
 
-        internal SessionSnapshot(Session session, bool isInitial, DateTimeOffset timestamp)
+        internal SessionUpdate(Session session, bool isInitial, DateTimeOffset timestamp)
         {
             Session = session;
             IsInitial = isInitial;
@@ -36,9 +36,9 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="SessionSnapshot"/>.
+        /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionSnapshot(Session session, bool isInitial)
+        public SessionUpdate(Session session, bool isInitial)
             : this(session, isInitial, DateTimeOffset.Now)
         {
         }
@@ -92,9 +92,9 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Parses <see cref="SessionSnapshot"/> from JSON.
+        /// Parses <see cref="SessionUpdate"/> from JSON.
         /// </summary>
-        public static SessionSnapshot FromJson(JsonElement json)
+        public static SessionUpdate FromJson(JsonElement json)
         {
             throw new NotImplementedException();
         }

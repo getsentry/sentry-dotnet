@@ -188,8 +188,8 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void CaptureSession(SessionSnapshot sessionSnapshot)
-            => SentrySdk.CaptureSession(sessionSnapshot);
+        public void CaptureSession(SessionUpdate sessionUpdate)
+            => SentrySdk.CaptureSession(sessionUpdate);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>

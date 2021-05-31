@@ -161,14 +161,14 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates an envelope item from a session snapshot.
         /// </summary>
-        public static EnvelopeItem FromSessionSnapshot(SessionSnapshot sessionSnapshot)
+        public static EnvelopeItem FromSessionSnapshot(SessionUpdate sessionUpdate)
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueSession
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(sessionSnapshot));
+            return new EnvelopeItem(header, new JsonSerializable(sessionUpdate));
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace Sentry.Protocol.Envelopes
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
                 var json = Json.Parse(buffer);
 
-                return new JsonSerializable(SessionSnapshot.FromJson(json));
+                return new JsonSerializable(SessionUpdate.FromJson(json));
             }
 
             // Arbitrary payload

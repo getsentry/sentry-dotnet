@@ -102,6 +102,6 @@ namespace Sentry
         /// <summary>
         /// Creates a snapshot of this session.
         /// </summary>
-        public SessionSnapshot CreateSnapshot(bool isInitial) => new(this, isInitial);
+        public SessionUpdate CreateSnapshot(bool isInitial) => new(this, isInitial);
     }
 }

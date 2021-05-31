@@ -159,14 +159,14 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void CaptureSession(SessionSnapshot sessionSnapshot)
+        public void CaptureSession(SessionUpdate sessionUpdate)
         {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(SentryClient));
             }
 
-            CaptureEnvelope(Envelope.FromSessionSnapshot(sessionSnapshot));
+            CaptureEnvelope(Envelope.FromSessionSnapshot(sessionUpdate));
         }
 
         /// <summary>

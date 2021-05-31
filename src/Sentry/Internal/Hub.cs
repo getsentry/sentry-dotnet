@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -12,22 +10,22 @@ namespace Sentry.Internal
     internal class Hub : IHub, IDisposable
     {
         private readonly ISentryClient _ownedClient;
+        private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
-        private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
 
-        private Session? _session;
+        private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
 
         internal SentryScopeManager ScopeManager { get; }
 
         public bool IsEnabled => true;
 
-        internal Hub(ISentryClient client, SentryOptions options)
+        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
         {
             _ownedClient = client;
-
+            _sessionManager = sessionManager;
             _options = options;
 
             if (Dsn.TryParse(options.Dsn) is null)
@@ -59,7 +57,7 @@ namespace Sentry.Internal
         }
 
         public Hub(SentryOptions options)
-            : this(new SentryClient(options), options)
+            : this(new SentryClient(options), new GlobalSessionManager(options), options)
         {
         }
 
@@ -158,72 +156,20 @@ namespace Sentry.Internal
 
         public void StartSession()
         {
-            if (_session is not null)
+            var session = _sessionManager.StartSession();
+            if (session is not null)
             {
-                _options.DiagnosticLogger?.LogWarning(
-                    "Starting a new session without having ended the previous one."
-                );
-
-                // End previous session
-                EndSession();
+                CaptureSession(session.CreateSnapshot(true));
             }
-
-            var release = ReleaseLocator.Resolve(_options);
-            if (string.IsNullOrWhiteSpace(release))
-            {
-                // Release health without release is just health (useless)
-                _options.DiagnosticLogger?.LogError(
-                    "Attempt to start a session failed because there is no release information."
-                );
-
-                return;
-            }
-
-            var environment = EnvironmentLocator.Resolve(_options);
-
-            // TODO: proper distinct id
-            var distinctId = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(nic =>
-                    nic.OperationalStatus == OperationalStatus.Up &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .Select(nic => nic.GetPhysicalAddress().ToString())
-                .FirstOrDefault();
-
-            var session = new Session(distinctId, release, environment);
-            _session = session;
-
-            CaptureSession(session.CreateSnapshot(true));
-
-            _options.DiagnosticLogger?.LogInfo(
-                "Started new session (sid: {0}; did: {1}).",
-                session.Id, session.DistinctId
-            );
         }
 
         public void EndSession(SessionEndState state = SessionEndState.Exited)
         {
-            var session = _session;
-            if (session is null)
+            var session = _sessionManager.EndSession(state);
+            if (session is not null)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Attempt to end a session failed because there is no active session."
-                );
-
-                return;
+                CaptureSession(session.CreateSnapshot(true));
             }
-
-            // Send the final status
-            session.End(state);
-            CaptureSession(session.CreateSnapshot(false));
-
-            // Clear out the session
-            _session = null;
-
-            _options.DiagnosticLogger?.LogInfo(
-                "Ended session (sid: {0}; did: {1}) with state '{2}'.",
-                session.Id, session.DistinctId, state
-            );
         }
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
@@ -250,7 +196,7 @@ namespace Sentry.Internal
             {
                 var currentScope = ScopeManager.GetCurrent();
                 var actualScope = scope ?? currentScope.Key;
-                var actualSession = session ?? _session;
+                var actualSession = session ?? _sessionManager.CurrentSession;
 
                 // Inject trace information from a linked span
                 if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
@@ -261,7 +207,7 @@ namespace Sentry.Internal
                 }
 
                 // Treat all events as errors
-                _session?.ReportError();
+                _sessionManager.CurrentSession?.ReportError();
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope, actualSession);
                 actualScope.LastEventId = id;
@@ -307,15 +253,15 @@ namespace Sentry.Internal
             }
         }
 
-        public void CaptureSession(SessionSnapshot sessionSnapshot)
+        public void CaptureSession(SessionUpdate sessionUpdate)
         {
             try
             {
-                _ownedClient.CaptureSession(sessionSnapshot);
+                _ownedClient.CaptureSession(sessionUpdate);
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture session snapshot: {0}", e, sessionSnapshot.Session.Id);
+                _options.DiagnosticLogger?.LogError("Failure to capture session snapshot: {0}", e, sessionUpdate.Session.Id);
             }
         }
 

@@ -45,8 +45,8 @@ namespace Sentry
         /// Note: this method is NOT meant to be called from user code!
         /// It will be called automatically by the SDK.
         /// </remarks>
-        /// <param name="sessionSnapshot">The snapshot to send to Sentry.</param>
-        void CaptureSession(SessionSnapshot sessionSnapshot);
+        /// <param name="sessionUpdate">The snapshot to send to Sentry.</param>
+        void CaptureSession(SessionUpdate sessionUpdate);
 
         /// <summary>
         /// Flushes events queued up.
