@@ -56,8 +56,13 @@ namespace Sentry.Internal
             _enricher = new Enricher(options);
         }
 
+        internal Hub(ISentryClient client, SentryOptions options)
+            : this(client, new GlobalSessionManager(options), options)
+        {
+        }
+
         public Hub(SentryOptions options)
-            : this(new SentryClient(options), new GlobalSessionManager(options), options)
+            : this(new SentryClient(options), options)
         {
         }
 
@@ -168,7 +173,7 @@ namespace Sentry.Internal
             var session = _sessionManager.EndSession(state);
             if (session is not null)
             {
-                CaptureSession(session.CreateSnapshot(true));
+                CaptureSession(session.CreateSnapshot(false));
             }
         }
 
