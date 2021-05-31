@@ -63,6 +63,8 @@ namespace Sentry
 
             writer.WriteString("started", Session.Timestamp);
 
+            writer.WriteString("timestamp", Timestamp);
+
             writer.WriteNumber("duration", (int)Duration.TotalSeconds);
 
             writer.WriteNumber("errors", Session.ErrorCount);
