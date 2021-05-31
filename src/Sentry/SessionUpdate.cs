@@ -105,7 +105,9 @@ namespace Sentry
         /// </summary>
         public static SessionUpdate FromJson(JsonElement json)
         {
-            throw new NotImplementedException();
+            var id = json.GetProperty("id").GetStringOrThrow();
+            var distinctId = json.GetPropertyOrNull("did")?.GetString();
+            var timestamp = json.GetProperty("started").GetDateTimeOffset();
         }
     }
 }
