@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.Hosting
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
         public static IHostBuilder UseSentry(this IHostBuilder builder)
-            => UseSentry(builder, (Action<SentryAspNetCoreOptions>?)null);
+            => builder.UseSentry((Action<SentryAspNetCoreOptions>?)null);
 
         /// <summary>
         /// Uses Sentry integration.
