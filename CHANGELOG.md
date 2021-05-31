@@ -4,6 +4,18 @@
 
 ### Features
 
+- Sentry.EntityFramework moved to this repository ([#1017](https://github.com/getsentry/sentry-dotnet/pull/1017))
+  - Additional `netstandard2.1` target added. Sample with .NET Core 3.1 console app.
+  - `UseBreadcrumbs` is called automatically by `AddEntityFramework`
+
+### Fixes
+
+- normalize line breaks ([#1016](https://github.com/getsentry/sentry-dotnet/pull/1016))
+
+## 3.4.0-beta.0
+
+### Features
+
 - Serilog: Add support for Serilog.Formatting.ITextFormatter ([#998](https://github.com/getsentry/sentry-dotnet/pull/998))
 - simplify ifdef ([#1010](https://github.com/getsentry/sentry-dotnet/pull/1010))
 - Use `DebugDiagnosticLogger` as the default logger for legacy ASP.NET ([#1012](https://github.com/getsentry/sentry-dotnet/pull/1012))
