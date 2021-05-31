@@ -47,7 +47,7 @@ namespace Sentry
         /// <summary>
         /// End state.
         /// </summary>
-        public SessionEndState? EndState { get; private set; }
+        public SessionEndStatus? EndStatus { get; private set; }
 
         private int _errorCount;
 
@@ -97,7 +97,7 @@ namespace Sentry
         /// <summary>
         /// Transitions the session to ended state.
         /// </summary>
-        public void End(SessionEndState state) => EndState = state;
+        public void End(SessionEndStatus status) => EndStatus = status;
 
         /// <summary>
         /// Creates a snapshot of this session.

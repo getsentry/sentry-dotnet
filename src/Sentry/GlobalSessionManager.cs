@@ -26,7 +26,7 @@ namespace Sentry
                 );
 
                 // End previous session (TODO: should this be abnormal instead?)
-                EndSession(SessionEndState.Exited);
+                EndSession(SessionEndStatus.Exited);
             }
 
             var release = ReleaseLocator.Resolve(_options);
@@ -62,7 +62,7 @@ namespace Sentry
             return session;
         }
 
-        public Session? EndSession(SessionEndState state)
+        public Session? EndSession(SessionEndStatus status)
         {
             var session = CurrentSession;
             if (session is null)
@@ -74,11 +74,11 @@ namespace Sentry
                 return null;
             }
 
-            session.End(state);
+            session.End(status);
 
             _options.DiagnosticLogger?.LogInfo(
                 "Ended session (SID: {0}; DID: {1}) with state '{2}'.",
-                session.Id, session.DistinctId, state
+                session.Id, session.DistinctId, status
             );
 
             CurrentSession = null;

@@ -6,6 +6,6 @@
 
         Session? StartSession();
 
-        Session? EndSession(SessionEndState state);
+        Session? EndSession(SessionEndStatus status);
     }
 }

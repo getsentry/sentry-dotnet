@@ -3,7 +3,7 @@
     /// <summary>
     /// Terminal state of a session.
     /// </summary>
-    public enum SessionEndState
+    public enum SessionEndStatus
     {
         /// <summary>
         /// Session ended normally.

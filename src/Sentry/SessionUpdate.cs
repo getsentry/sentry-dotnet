@@ -68,9 +68,9 @@ namespace Sentry
             writer.WriteNumber("errors", Session.ErrorCount);
 
             // State
-            if (Session.EndState is { } endState)
+            if (Session.EndStatus is { } endState)
             {
-                writer.WriteString("state", endState.ToString().ToSnakeCase());
+                writer.WriteString("status", endState.ToString().ToSnakeCase());
             }
 
             // Attributes

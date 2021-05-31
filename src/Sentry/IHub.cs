@@ -57,6 +57,6 @@ namespace Sentry
         /// <summary>
         /// Ends the currently active session.
         /// </summary>
-        void EndSession(SessionEndState state = SessionEndState.Exited);
+        void EndSession(SessionEndStatus status = SessionEndStatus.Exited);
     }
 }

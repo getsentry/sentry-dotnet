@@ -168,9 +168,9 @@ namespace Sentry.Internal
             }
         }
 
-        public void EndSession(SessionEndState state = SessionEndState.Exited)
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
         {
-            var session = _sessionManager.EndSession(state);
+            var session = _sessionManager.EndSession(status);
             if (session is not null)
             {
                 CaptureSession(session.CreateSnapshot(false));

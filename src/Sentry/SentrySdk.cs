@@ -397,7 +397,7 @@ namespace Sentry
 
         /// <inheritdoc cref="IHub.EndSession"/>
         [DebuggerStepThrough]
-        public static void EndSession(SessionEndState state = SessionEndState.Exited)
-            => _hub.EndSession(state);
+        public static void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+            => _hub.EndSession(status);
     }
 }
