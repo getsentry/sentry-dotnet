@@ -11,6 +11,7 @@
 ### Fixes
 
 - normalize line breaks ([#1016](https://github.com/getsentry/sentry-dotnet/pull/1016))
+- Add non-breaking overloads for Serilog integration ([#1022](https://github.com/getsentry/sentry-dotnet/pull/1022))
 
 ## 3.4.0-beta.0
 
