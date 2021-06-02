@@ -249,6 +249,11 @@ namespace Sentry.Internal
         {
             _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
 
+            if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
+            {
+                return;
+            }
+
             if (_integrations?.Length > 0)
             {
                 foreach (var integration in _integrations)
@@ -260,7 +265,6 @@ namespace Sentry.Internal
                 }
             }
 
-            Interlocked.Exchange(ref _isEnabled, 0);
             (_ownedClient as IDisposable)?.Dispose();
             _rootScope.Dispose();
             ScopeManager.Dispose();

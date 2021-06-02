@@ -639,5 +639,26 @@ namespace NotSentry.Tests
             // Assert
             hub.WithScope(scope => scope.Transaction.Should().BeNull());
         }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        public void Dispose_IsEnabled_SetToFalse(int disposeCount)
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            for (var i = 0; i < disposeCount; i++)
+            {
+                hub.Dispose();
+            }
+
+            // Assert
+            hub.IsEnabled.Should().BeFalse();
+        }
     }
 }
