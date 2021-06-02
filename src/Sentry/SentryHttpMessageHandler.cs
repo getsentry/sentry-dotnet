@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -79,12 +80,9 @@ namespace Sentry
 
                 return response;
             }
-            catch
+            catch (Exception ex)
             {
-                // TODO: attach the exception to the span, once
-                // that API is available.
-                span?.Finish(SpanStatus.UnknownError);
-
+                span?.Finish(ex);
                 throw;
             }
         }
