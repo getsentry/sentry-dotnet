@@ -5,12 +5,12 @@ targets:
   - name: github
   - name: registry
     sdks:
-      nuget:Sentry: {}
-      nuget:Sentry.Extensions.Logging: {}
-      nuget:Sentry.AspNetCore: {}
-      nuget:Sentry.AspNetCore.Grpc: {}
-      nuget:Sentry.AspNet: {}
-      nuget:Sentry.EntityFramework: {}
-      nuget:Sentry.Log4Net: {}
-      nuget:Sentry.Serilog: {}
-      nuget:Sentry.NLog: {}
+      nuget:Sentry:
+      nuget:Sentry.Extensions.Logging:
+      nuget:Sentry.AspNetCore:
+      nuget:Sentry.AspNetCore.Grpc:
+      nuget:Sentry.AspNet:
+      nuget:Sentry.EntityFramework:
+      nuget:Sentry.Log4Net:
+      nuget:Sentry.Serilog:
+      nuget:Sentry.NLog:
