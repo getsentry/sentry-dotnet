@@ -60,7 +60,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null, Session? session = null)
+        public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
         {
             if (_disposed)
             {
@@ -74,7 +74,7 @@ namespace Sentry
 
             try
             {
-                return DoSendEvent(@event, scope, session);
+                return DoSendEvent(@event, scope);
             }
             catch (Exception e)
             {
@@ -177,7 +177,7 @@ namespace Sentry
         public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
         // TODO: this method needs to be refactored, it's really hard to analyze nullability
-        private SentryId DoSendEvent(SentryEvent @event, Scope? scope, Session? session)
+        private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
         {
             if (_options.SampleRate != null)
             {
@@ -242,7 +242,7 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, session?.CreateSnapshot(false)))
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, scope.Session?.CreateSnapshot(false)))
                 ? processedEvent.EventId
                 : SentryId.Empty;
         }

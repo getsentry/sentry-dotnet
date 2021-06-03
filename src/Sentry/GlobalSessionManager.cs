@@ -9,10 +9,11 @@ namespace Sentry
     // AKA client mode
     internal class GlobalSessionManager : ISessionManager
     {
+        private readonly object _lock = new();
         private readonly SentryOptions _options;
 
+        private string? _cachedInstallationId;
         private Session? _currentSession;
-        public Session? CurrentSession => _currentSession;
 
         public GlobalSessionManager(SentryOptions options)
         {
@@ -21,32 +22,48 @@ namespace Sentry
 
         private string GetInstallationId()
         {
-            var filePath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Sentry",
-                ".installation"
-            );
-
-            var directoryPath = Path.GetDirectoryName(filePath);
-            if (!string.IsNullOrWhiteSpace(directoryPath))
+            // Prevent race conditions that could cause us to generate multiple IDs.
+            // Note: this has to be synchronized across multiple processes too.
+            lock (_lock)
             {
-                Directory.CreateDirectory(directoryPath);
-            }
+                // Avoid IO if possible
+                if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
+                {
+                    return _cachedInstallationId;
+                }
 
-            // Try to read existing
-            try
-            {
-                return File.ReadAllText(filePath);
-            }
-            catch (FileNotFoundException)
-            {
-            }
+                var filePath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Sentry",
+                    ".installation"
+                );
 
-            // Generate new
-            var id = Guid.NewGuid().ToString();
-            File.WriteAllText(filePath, id);
+                var directoryPath = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrWhiteSpace(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
 
-            return id;
+                // Try to read existing
+                try
+                {
+                    return _cachedInstallationId = File.ReadAllText(filePath);
+                }
+                catch (FileNotFoundException)
+                {
+                }
+
+                // Generate new
+                var id = Guid.NewGuid().ToString();
+                File.WriteAllText(filePath, id);
+
+                _options.DiagnosticLogger?.LogDebug(
+                    "Saved installation ID '{0}' to file '{1}'.",
+                    id, filePath
+                );
+
+                return _cachedInstallationId = id;
+            }
         }
 
         public Session? StartSession()
@@ -89,6 +106,8 @@ namespace Sentry
 
             return session;
         }
+
+        public void ReportError() => _currentSession?.ReportError();
 
         private Session EndSession(Session session, SessionEndStatus status)
         {

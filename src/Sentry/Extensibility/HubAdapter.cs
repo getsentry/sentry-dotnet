@@ -172,8 +172,8 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public SentryId CaptureEvent(SentryEvent evt, Scope? scope, Session? session = null)
-            => SentrySdk.CaptureEvent(evt, scope, session);
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
+            => SentrySdk.CaptureEvent(evt, scope);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.

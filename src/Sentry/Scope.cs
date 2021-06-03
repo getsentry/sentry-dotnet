@@ -161,6 +161,8 @@ namespace Sentry
             set => _transaction = value;
         }
 
+        internal Session? Session { get; set; }
+
         /// <inheritdoc />
         public SdkVersion Sdk { get; } = new();
 
@@ -328,6 +330,7 @@ namespace Sentry
             Apply((IEventLike)other);
 
             other.Transaction ??= Transaction;
+            other.Session ??= Session;
 
             foreach (var attachment in Attachments)
             {

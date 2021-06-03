@@ -166,6 +166,7 @@ namespace Sentry.Internal
             var session = _sessionManager.StartSession();
             if (session is not null)
             {
+                ConfigureScope(scope => scope.Session = session);
                 CaptureSession(session.CreateSnapshot(true));
             }
         }
@@ -197,13 +198,12 @@ namespace Sentry.Internal
             return null;
         }
 
-        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Session? session = null)
+        public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
             {
                 var currentScope = ScopeManager.GetCurrent();
                 var actualScope = scope ?? currentScope.Key;
-                var actualSession = session ?? _sessionManager.CurrentSession;
 
                 // Inject trace information from a linked span
                 if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
@@ -214,9 +214,9 @@ namespace Sentry.Internal
                 }
 
                 // Treat all events as errors
-                _sessionManager.CurrentSession?.ReportError();
+                _sessionManager.ReportError();
 
-                var id = currentScope.Value.CaptureEvent(evt, actualScope, actualSession);
+                var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
 
                 return id;

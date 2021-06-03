@@ -270,12 +270,11 @@ namespace Sentry
         /// </summary>
         /// <param name="evt">The event.</param>
         /// <param name="scope">The scope.</param>
-        /// <param name="session">The session.</param>
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static SentryId CaptureEvent(SentryEvent evt, Scope? scope, Session? session)
-            => _hub.CaptureEvent(evt, scope, session);
+        public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
+            => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
         /// Captures the exception.

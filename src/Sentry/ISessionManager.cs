@@ -2,9 +2,9 @@
 {
     internal interface ISessionManager
     {
-        Session? CurrentSession { get; }
-
         Session? StartSession();
+
+        void ReportError();
 
         Session? EndSession(SessionEndStatus status);
     }
