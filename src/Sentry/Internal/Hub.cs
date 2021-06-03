@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -218,6 +219,12 @@ namespace Sentry.Internal
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
+
+                // If the event contains unhandled exception - end session as crashed
+                if (evt.SentryExceptions?.Any(e => e.Mechanism?.Handled ?? true) ?? false)
+                {
+                    EndSession(SessionEndStatus.Crashed);
+                }
 
                 return id;
             }
