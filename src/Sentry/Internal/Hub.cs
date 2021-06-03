@@ -221,7 +221,7 @@ namespace Sentry.Internal
                 actualScope.LastEventId = id;
 
                 // If the event contains unhandled exception - end session as crashed
-                if (evt.SentryExceptions?.Any(e => e.Mechanism?.Handled ?? true) ?? false)
+                if (evt.SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
                 {
                     EndSession(SessionEndStatus.Crashed);
                 }
