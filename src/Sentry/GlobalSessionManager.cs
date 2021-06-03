@@ -25,6 +25,12 @@ namespace Sentry
                 ".installation"
             );
 
+            var directoryPath = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrWhiteSpace(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
             // Try to read existing
             try
             {
