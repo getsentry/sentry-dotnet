@@ -25,7 +25,7 @@ namespace Sentry
                     "Starting a new session while an existing one is still active."
                 );
 
-                // End previous session (TODO: should this be abnormal instead?)
+                // End previous session
                 EndSession(SessionEndStatus.Exited);
             }
 
