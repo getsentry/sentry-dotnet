@@ -10,23 +10,24 @@ async function checkChangelog() {
     const changelogFile = "CHANGELOG.md";
 
     // Check if skipped
-    const skipChangelog =
-        danger.github && (danger.github.pr.body + "").includes("#skip-changelog");
-
+    const skipChangelog = danger.github && (danger.github.pr.body + "").includes("#skip-changelog");
     if (skipChangelog) {
         return;
     }
 
     // Check if current PR has an entry in changelog
-    const changelogContents = await danger.github.utils.fileContents(
-        changelogFile
-    );
+    const changelogContents = await danger.github.utils.fileContents(changelogFile);
 
-    const hasChangelogEntry = RegExp(`#${danger.github.pr.number}\\b`).test(
-        changelogContents
-    );
-
+    const hasChangelogEntry = RegExp(`#${danger.github.pr.number}\\b`).testchangelogContents);
     if (hasChangelogEntry) {
+        return;
+    }
+
+    // Short-circuit if lacking permissions
+    const hasCommentPermission = danger.github.pr.head.repo.git_url == danger.github.pr.base.repo.git_url;
+    if (!hasCommentPermission) {
+        console.log("Please consider adding a changelog entry for the next release.");
+        process.exitCode = 1;
         return;
     }
 
