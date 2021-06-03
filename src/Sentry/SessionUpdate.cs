@@ -108,6 +108,25 @@ namespace Sentry
             var id = json.GetProperty("id").GetStringOrThrow();
             var distinctId = json.GetPropertyOrNull("did")?.GetString();
             var timestamp = json.GetProperty("started").GetDateTimeOffset();
+            var release = json.GetProperty("attrs").GetProperty("release").GetStringOrThrow();
+            var environment = json.GetProperty("attrs").GetPropertyOrNull("environment")?.GetString();
+            var ipAddress = json.GetProperty("attrs").GetPropertyOrNull("ip_address")?.GetString();
+            var userAgent = json.GetProperty("attrs").GetPropertyOrNull("user_agent")?.GetString();
+
+            var isInitial = json.GetPropertyOrNull("init")?.GetBoolean() ?? false;
+            var updateTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
+
+            var session = new Session(
+                id,
+                distinctId,
+                timestamp,
+                release,
+                environment,
+                ipAddress,
+                userAgent
+            );
+
+            return new SessionUpdate(session, isInitial, updateTimestamp);
         }
     }
 }
