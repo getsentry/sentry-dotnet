@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -71,7 +72,7 @@ namespace Sentry.Tests
             var hub = Substitute.For<IHub>();
 
             var transaction = new TransactionTracer(
-                Substitute.For<IHub>(),
+                hub,
                 "foo",
                 "bar"
             );
@@ -91,6 +92,33 @@ namespace Sentry.Tests
                 span.Description == "GET https://example.com/" &&
                 span.IsFinished
             );
+        }
+
+        [Fact]
+        public async Task SendAsync_ExceptionThrown_ExceptionLinkedToSpan()
+        {
+            // Arrange
+            var hub = Substitute.For<IHub>();
+
+            var transaction = new TransactionTracer(
+                hub,
+                "foo",
+                "bar"
+            );
+
+            hub.GetSpan().ReturnsForAnyArgs(transaction);
+
+            var exception = new Exception();
+
+            using var innerHandler = new FakeHttpMessageHandler(() => throw exception);
+            using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+            using var client = new HttpClient(sentryHandler);
+
+            // Act
+            await Assert.ThrowsAsync<Exception>(() => client.GetAsync("https://example.com/"));
+
+            // Assert
+            hub.Received(1).BindException(exception, Arg.Any<ISpan>()); // second argument is an implicitly created span
         }
     }
 }
