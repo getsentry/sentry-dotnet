@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
@@ -20,7 +21,8 @@ namespace Sentry.Internal
 
         internal SentryScopeManager ScopeManager { get; }
 
-        public bool IsEnabled => true;
+        private int _isEnabled = 1;
+        public bool IsEnabled => _isEnabled == 1;
 
         internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
         {
@@ -286,6 +288,11 @@ namespace Sentry.Internal
         public void Dispose()
         {
             _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
+
+            if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
+            {
+                return;
+            }
 
             if (_integrations?.Length > 0)
             {
