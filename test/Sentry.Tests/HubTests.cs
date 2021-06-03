@@ -640,10 +640,8 @@ namespace NotSentry.Tests
             hub.WithScope(scope => scope.Transaction.Should().BeNull());
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        public void Dispose_IsEnabled_SetToFalse(int disposeCount)
+        [Fact]
+        public void Dispose_IsEnabled_SetToFalse()
         {
             // Arrange
             var hub = new Hub(new SentryOptions
@@ -651,14 +649,30 @@ namespace NotSentry.Tests
                 Dsn = DsnSamples.ValidDsnWithSecret
             });
 
+            hub.IsEnabled.Should().BeTrue();
+
             // Act
-            for (var i = 0; i < disposeCount; i++)
-            {
-                hub.Dispose();
-            }
+            hub.Dispose();
 
             // Assert
             hub.IsEnabled.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Dispose_CalledSecondTime_ClientDisposedOnce()
+        {
+            var client = Substitute.For<ISentryClient, IDisposable>();
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            hub.Dispose();
+            hub.Dispose();
+
+            // Assert
+            (client as IDisposable).Received(1).Dispose();
         }
     }
 }
