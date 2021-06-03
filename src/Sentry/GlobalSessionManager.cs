@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using System.Net.NetworkInformation;
+﻿using System;
+using System.IO;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
@@ -15,6 +15,30 @@ namespace Sentry
         public GlobalSessionManager(SentryOptions options)
         {
             _options = options;
+        }
+
+        private string GetInstallationId()
+        {
+            var filePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Sentry",
+                ".installation"
+            );
+
+            // Try to read existing
+            try
+            {
+                return File.ReadAllText(filePath);
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            // Generate new
+            var id = Guid.NewGuid().ToString();
+            File.WriteAllText(filePath, id);
+
+            return id;
         }
 
         public Session? StartSession()
@@ -41,15 +65,7 @@ namespace Sentry
             }
 
             var environment = EnvironmentLocator.Resolve(_options);
-
-            // TODO: proper distinct id
-            var distinctId = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(nic =>
-                    nic.OperationalStatus == OperationalStatus.Up &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .Select(nic => nic.GetPhysicalAddress().ToString())
-                .FirstOrDefault();
+            var distinctId = GetInstallationId();
 
             var session = new Session(distinctId, release, environment);
             CurrentSession = session;
