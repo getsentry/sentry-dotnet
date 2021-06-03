@@ -18,7 +18,7 @@ async function checkChangelog() {
     // Check if current PR has an entry in changelog
     const changelogContents = await danger.github.utils.fileContents(changelogFile);
 
-    const hasChangelogEntry = RegExp(`#${danger.github.pr.number}\\b`).testchangelogContents);
+    const hasChangelogEntry = RegExp(`#${danger.github.pr.number}\\b`).test(changelogContents);
     if (hasChangelogEntry) {
         return;
     }
