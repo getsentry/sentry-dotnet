@@ -107,7 +107,19 @@ namespace Sentry
             return session;
         }
 
-        public void ReportError() => _currentSession?.ReportError();
+        public void ReportError()
+        {
+            if (_currentSession is { } session)
+            {
+                session.ReportError();
+            }
+            else
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to report an error on a session because there is none active."
+                );
+            }
+        }
 
         private Session EndSession(Session session, SessionEndStatus status)
         {
