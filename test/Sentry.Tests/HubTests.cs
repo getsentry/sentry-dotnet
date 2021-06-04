@@ -741,6 +741,24 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void StartSession_PutsSessionOnScope()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            hub.StartSession();
+
+            // Assert
+            hub.WithScope(s => s.Session.Should().NotBeNull());
+        }
+
+        [Fact]
         public void EndSession_CapturesUpdate()
         {
             // Arrange
