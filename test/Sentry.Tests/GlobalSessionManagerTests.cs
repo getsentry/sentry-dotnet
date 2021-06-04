@@ -117,5 +117,50 @@ namespace Sentry.Tests
                 e.Level == SentryLevel.Error
             );
         }
+
+        [Fact]
+        public void EndSession_ActiveSessionExists_EndsSession()
+        {
+            // Arrange
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                Release = "foo"
+            });
+
+            var session = sessionManager.StartSession();
+
+            // Act
+            var endedSession = sessionManager.EndSession(SessionEndStatus.Exited);
+
+            // Assert
+            session.Should().NotBeNull();
+            session.Should().Be(endedSession);
+            session?.EndStatus.Should().Be(SessionEndStatus.Exited);
+        }
+
+        [Fact]
+        public void EndSession_ActiveSessionDoesNotExist_DoesNothing()
+        {
+            // Arrange
+            var logger = new InMemoryDiagnosticLogger();
+
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                Release = "foo",
+                DiagnosticLogger = logger,
+                Debug = true
+            });
+
+            // Act
+            var endedSession = sessionManager.EndSession(SessionEndStatus.Exited);
+
+            // Assert
+            endedSession.Should().BeNull();
+
+            logger.Entries.Should().Contain(e =>
+                e.Message == "Failed to end session because there is none active." &&
+                e.Level == SentryLevel.Error
+            );
+        }
     }
 }
