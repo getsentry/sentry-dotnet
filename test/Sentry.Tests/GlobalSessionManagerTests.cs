@@ -11,40 +11,20 @@ namespace Sentry.Tests
         public void StartSession_ReleaseSet_CreatesNewSession()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                Release = "foo"
-            });
-
-            // Act
-            var session = sessionManager.StartSession();
-
-            // Assert
-            session.Should().NotBeNull();
-            session?.Release.Should().Be("foo");
-        }
-
-        [Fact]
-        public void StartSession_ReleaseUnset_DoesNotCreateSession()
-        {
-            // Arrange
             var sessionManager = new GlobalSessionManager(new SentryOptions());
 
             // Act
             var session = sessionManager.StartSession();
 
             // Assert
-            session.Should().BeNull();
+            session.Should().NotBeNull();
         }
 
         [Fact]
         public void StartSession_ActiveSessionExists_EndsPreviousSession()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                Release = "foo"
-            });
+            var sessionManager = new GlobalSessionManager(new SentryOptions());
 
             var previousSession = sessionManager.StartSession();
 
@@ -60,10 +40,7 @@ namespace Sentry.Tests
         public void StartSession_InstallationId_SameId()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                Release = "foo"
-            });
+            var sessionManager = new GlobalSessionManager(new SentryOptions());
 
             // Act
             var sessions = Enumerable.Range(0, 15).Select(_ => sessionManager.StartSession()).ToArray();
@@ -76,10 +53,7 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionExists_IncrementsErrorCount()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                Release = "foo"
-            });
+            var sessionManager = new GlobalSessionManager(new SentryOptions());
 
             var session = sessionManager.StartSession();
 
@@ -101,7 +75,6 @@ namespace Sentry.Tests
 
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                Release = "foo",
                 DiagnosticLogger = logger,
                 Debug = true
             });
@@ -122,10 +95,7 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionExists_EndsSession()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                Release = "foo"
-            });
+            var sessionManager = new GlobalSessionManager(new SentryOptions());
 
             var session = sessionManager.StartSession();
 
@@ -146,7 +116,6 @@ namespace Sentry.Tests
 
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                Release = "foo",
                 DiagnosticLogger = logger,
                 Debug = true
             });
