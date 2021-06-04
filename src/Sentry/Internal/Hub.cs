@@ -16,7 +16,8 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
+        // Internal for testability
+        internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
         internal SentryScopeManager ScopeManager { get; }
 
@@ -144,7 +145,7 @@ namespace Sentry.Internal
             }
 
             // Don't overwrite existing pair in the unlikely event that it already exists
-            _ = _exceptionToSpanMap.GetValue(exception, _ => span);
+            _ = ExceptionToSpanMap.GetValue(exception, _ => span);
         }
 
         public ISpan? GetSpan()
@@ -159,7 +160,7 @@ namespace Sentry.Internal
         {
             // Find the span which is bound to the same exception
             if (evt.Exception is { } exception &&
-                _exceptionToSpanMap.TryGetValue(exception, out var spanBoundToException))
+                ExceptionToSpanMap.TryGetValue(exception, out var spanBoundToException))
             {
                 return spanBoundToException;
             }
