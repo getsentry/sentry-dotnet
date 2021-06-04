@@ -19,10 +19,15 @@ namespace Sentry.Samples.AspNetCore.Basic
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
 
+                .ConfigureLogging(l => l.SetMinimumLevel(LogLevel.Debug))
                 // Add Sentry integration
                 // In this example, DSN and Release are set via environment variable:
                 // See: Properties/launchSettings.json
-                .UseSentry()
+                .UseSentry(o =>
+                {
+
+                    o.Debug = true;
+                })
                 // It can also be defined via configuration (including appsettings.json)
                 // or coded explicitly, via parameter like:
                 // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
