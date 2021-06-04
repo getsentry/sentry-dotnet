@@ -82,7 +82,7 @@ namespace Sentry.Protocol.Envelopes
         public static Envelope FromEvent(
             SentryEvent @event,
             IReadOnlyCollection<Attachment>? attachments = null,
-            SessionUpdate? sessionSnapshot = null)
+            SessionUpdate? sessionUpdate = null)
         {
             var header = new Dictionary<string, object?>(StringComparer.Ordinal)
             {
@@ -99,9 +99,9 @@ namespace Sentry.Protocol.Envelopes
                 items.AddRange(attachments.Select(EnvelopeItem.FromAttachment));
             }
 
-            if (sessionSnapshot is not null)
+            if (sessionUpdate is not null)
             {
-                items.Add(EnvelopeItem.FromSessionSnapshot(sessionSnapshot));
+                items.Add(EnvelopeItem.FromSession(sessionUpdate));
             }
 
             return new Envelope(header, items);
@@ -146,11 +146,11 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates an envelope that contains a session snapshot.
         /// </summary>
-        public static Envelope FromSessionSnapshot(SessionUpdate sessionUpdate)
+        public static Envelope FromSession(SessionUpdate sessionUpdate)
         {
             var items = new[]
             {
-                EnvelopeItem.FromSessionSnapshot(sessionUpdate)
+                EnvelopeItem.FromSession(sessionUpdate)
             };
 
             return new Envelope(items);

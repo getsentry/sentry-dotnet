@@ -166,7 +166,7 @@ namespace Sentry
                 throw new ObjectDisposedException(nameof(SentryClient));
             }
 
-            CaptureEnvelope(Envelope.FromSessionSnapshot(sessionUpdate));
+            CaptureEnvelope(Envelope.FromSession(sessionUpdate));
         }
 
         /// <summary>
