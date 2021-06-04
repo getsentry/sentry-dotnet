@@ -20,13 +20,13 @@ namespace Sentry.AspNetCore
             var section = configuration.GetSection("Sentry");
             _ = builder.Services.Configure<SentryAspNetCoreOptions>(section);
 
-            if(!builder.Services.IsRegistered<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>())
+            if (!builder.Services.IsRegistered<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>())
             {
                 _ = builder.Services
                     .AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
             }
 
-            if(!builder.Services.IsRegistered<ILoggerProvider, SentryAspNetCoreLoggerProvider>())
+            if (!builder.Services.IsRegistered<ILoggerProvider, SentryAspNetCoreLoggerProvider>())
             {
                 _ = builder.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
             }

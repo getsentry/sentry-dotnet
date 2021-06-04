@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static ISentryBuilder AddSentry(this IServiceCollection services)
         {
-            if(!services.IsRegistered<ISentryEventProcessor, AspNetCoreEventProcessor>())
+            if (!services.IsRegistered<ISentryEventProcessor, AspNetCoreEventProcessor>())
             {
                 services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
             }
@@ -30,13 +30,13 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
 
 
-            if(!services.IsRegistered<IRequestPayloadExtractor, FormRequestPayloadExtractor>())
+            if (!services.IsRegistered<IRequestPayloadExtractor, FormRequestPayloadExtractor>())
             {
                 services.AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>();
             }
 
             // Last
-            if(!services.IsRegistered<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>())
+            if (!services.IsRegistered<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>())
             {
                 services.AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
             }
@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         internal static IServiceCollection AddSentryStartupFilter(this IServiceCollection serviceCollection)
         {
-            if(!serviceCollection.IsRegistered<IStartupFilter, SentryStartupFilter>())
+            if (!serviceCollection.IsRegistered<IStartupFilter, SentryStartupFilter>())
             {
                 _ = serviceCollection.AddTransient<IStartupFilter, SentryStartupFilter>();
             }
