@@ -18,12 +18,8 @@ internal static class Program
                 c.AddJsonFile("appsettings.json", optional: false);
             })
             .ConfigureServices((c, s) => { s.AddHostedService<SampleHostedService>(); })
-            .ConfigureLogging((c, l) =>
-            {
-                l.AddConfiguration(c.Configuration);
-                l.AddConsole();
-                l.AddSentry();
-            })
+            .ConfigureLogging(b => b.AddConsole())
+            .UseSentry()
             .UseConsoleLifetime()
             .Build()
             .RunAsync();

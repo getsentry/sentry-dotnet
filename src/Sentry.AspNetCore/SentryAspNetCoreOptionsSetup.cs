@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Internal;
 #if NETSTANDARD2_0
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
 #else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
+using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostEnvironment;
 #endif
 
 namespace Sentry.AspNetCore
