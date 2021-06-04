@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Linq;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
@@ -20,17 +22,55 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static ISentryBuilder AddSentry(this IServiceCollection services)
         {
-            services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
+            if(!services.IsRegistered<ISentryEventProcessor, AspNetCoreEventProcessor>())
+            {
+                services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
+            }
+
             services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
 
-            services
-                    .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
-                    // Last
-                    .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
+
+            if(!services.IsRegistered<IRequestPayloadExtractor, FormRequestPayloadExtractor>())
+            {
+                services.AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>();
+            }
+
+            // Last
+            if(!services.IsRegistered<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>())
+            {
+                services.AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
+            }
 
             services.AddSentry<SentryAspNetCoreOptions>();
 
             return new SentryAspNetCoreBuilder(services);
+        }
+
+        /// <summary>
+        /// Checks if a specific ServiceDescriptor was previously registered in the <see cref="IServiceCollection"/>
+        /// </summary>
+        /// <param name="serviceCollection"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TU"></typeparam>
+        /// <returns></returns>
+        internal static bool IsRegistered<T, TU>(this IServiceCollection serviceCollection)
+        {
+            return serviceCollection.Any(x => x.ImplementationType == typeof(T) && x.ServiceType == typeof(TU));
+        }
+
+        /// <summary>
+        /// Adds Sentry's StartupFilter to the <see cref="IServiceCollection"/>
+        /// </summary>
+        /// <param name="serviceCollection"></param>
+        /// <returns></returns>
+        internal static IServiceCollection AddSentryStartupFilter(this IServiceCollection serviceCollection)
+        {
+            if(!serviceCollection.IsRegistered<IStartupFilter, SentryStartupFilter>())
+            {
+                _ = serviceCollection.AddTransient<IStartupFilter, SentryStartupFilter>();
+            }
+
+            return serviceCollection;
         }
     }
 }

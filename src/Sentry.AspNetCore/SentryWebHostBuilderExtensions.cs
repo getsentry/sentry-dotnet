@@ -1,9 +1,6 @@
 using System;
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Configuration;
-using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
 
 // ReSharper disable once CheckNamespace
@@ -81,24 +78,14 @@ namespace Microsoft.AspNetCore.Hosting
             // In case the logging backend was replaced, init happens later, at the StartupFilter
             _ = builder.ConfigureLogging((context, logging) =>
             {
-                logging.AddConfiguration();
-
-                var section = context.Configuration.GetSection("Sentry");
-                _ = logging.Services.Configure<SentryAspNetCoreOptions>(section);
-
-                _ = logging.Services
-                    .AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
-                _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
-
-                _ = logging.AddFilter<SentryAspNetCoreLoggerProvider>(
-                    "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
-                    LogLevel.None);
-
-                var sentryBuilder = logging.Services.AddSentry();
+                var sentryBuilder = logging.AddSentry(context.Configuration);
                 configureSentry?.Invoke(context, sentryBuilder);
             });
 
-            _ = builder.ConfigureServices(c => _ = c.AddTransient<IStartupFilter, SentryStartupFilter>());
+            _ = builder.ConfigureServices(c =>
+            {
+                _ = c.AddSentryStartupFilter();
+            });
 
             return builder;
         }
