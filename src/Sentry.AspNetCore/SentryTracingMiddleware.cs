@@ -153,7 +153,7 @@ namespace Sentry.AspNetCore
                     }
 
                     var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
-                    if (exception == null)
+                    if (exception is null)
                     {
                         transaction.Finish(status);
                     }
@@ -163,7 +163,7 @@ namespace Sentry.AspNetCore
                     }
                 }
 
-                if (exception != null)
+                if (exception is not null)
                 {
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }

@@ -15,7 +15,6 @@
       "environmentVariables": {
         "SENTRY_DSN": "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537",
         "SENTRY_RELEASE": "e386dfd",
-        "SENTRY_DEBUG": true,
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
@@ -26,7 +25,6 @@
       "environmentVariables": {
         "SENTRY_DSN": "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537",
         "SENTRY_RELEASE": "e386dfd",
-        "SENTRY_DEBUG": true,
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:59740"
