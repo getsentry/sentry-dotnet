@@ -15,7 +15,7 @@ namespace Sentry.Tests
             var session = new Session(
                 "foo",
                 "bar",
-                DateTimeOffset.Parse("2020-01-01", CultureInfo.InvariantCulture),
+                DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
                 "release123",
                 "env123",
                 "192.168.0.1",
@@ -31,7 +31,7 @@ namespace Sentry.Tests
             var sessionUpdate = new SessionUpdate(
                 session,
                 true,
-                DateTimeOffset.Parse("2020-01-02", CultureInfo.InvariantCulture)
+                DateTimeOffset.Parse("2020-01-02T00:00:00+00:00", CultureInfo.InvariantCulture)
             );
 
             // Act
@@ -43,8 +43,8 @@ namespace Sentry.Tests
                 "\"sid\":\"foo\"," +
                 "\"did\":\"bar\"," +
                 "\"init\":true," +
-                "\"started\":\"2020-01-01T00:00:00+02:00\"," +
-                "\"timestamp\":\"2020-01-02T00:00:00+02:00\"," +
+                "\"started\":\"2020-01-01T00:00:00+00:00\"," +
+                "\"timestamp\":\"2020-01-02T00:00:00+00:00\"," +
                 "\"duration\":86400," +
                 "\"errors\":3," +
                 "\"status\":\"crashed\"," +
