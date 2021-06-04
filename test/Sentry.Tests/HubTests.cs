@@ -7,6 +7,7 @@ using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using Xunit;
 
@@ -144,6 +145,28 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void CaptureMessage_SessionActive_ReportsError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            });
+
+            hub.StartSession();
+            client.ClearReceivedCalls();
+
+            // Act
+            hub.CaptureMessage("test");
+            hub.EndSession();
+
+            // Assert
+            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 1));
+        }
+
+        [Fact]
         public void CaptureException_FinishedSpanBoundToSameExceptionExists_EventIsLinkedToSpan()
         {
             // Arrange
@@ -254,6 +277,30 @@ namespace NotSentry.Tests
                     evt.Contexts.Trace.SpanId == default),
                 Arg.Any<Scope>()
             );
+        }
+
+        [Fact]
+        public void CaptureException_ActiveSessionUnhandledException_SessionEndedAsCrashed()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            hub.StartSession();
+            client.ClearReceivedCalls();
+
+            var exception = new Exception("error");
+            exception.Data.Add(Mechanism.HandledKey, false);
+
+            // Act
+            hub.CaptureException(exception);
+
+            // Assert
+            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.EndStatus == SessionEndStatus.Crashed));
         }
 
         [Fact]
@@ -673,6 +720,45 @@ namespace NotSentry.Tests
 
             // Assert
             (client as IDisposable).Received(1).Dispose();
+        }
+
+        [Fact]
+        public void StartSession_CapturesUpdate()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            hub.StartSession();
+
+            // Assert
+            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        }
+
+        [Fact]
+        public void EndSession_CapturesUpdate()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            hub.StartSession();
+            client.ClearReceivedCalls();
+
+            // Act
+            hub.EndSession();
+
+            // Assert
+            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
         }
     }
 }
