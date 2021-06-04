@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-- connect exception to transaction ([#1043](https://github.com/getsentry/sentry-dotnet/pull/1043))
+
+### Fixes
+
+- Connect middleware exceptions to transactions ([#1043](https://github.com/getsentry/sentry-dotnet/pull/1043))
 
 ## 3.4.0
 
