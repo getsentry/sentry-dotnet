@@ -280,7 +280,7 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void CaptureException_ActiveSessionUnhandledException_SessionEndedAsCrashed()
+        public void CaptureEvent_ActiveSessionUnhandledException_SessionEndedAsCrashed()
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
@@ -293,11 +293,11 @@ namespace NotSentry.Tests
             hub.StartSession();
             client.ClearReceivedCalls();
 
-            var exception = new Exception("error");
-            exception.Data.Add(Mechanism.HandledKey, false);
-
             // Act
-            hub.CaptureException(exception);
+            hub.CaptureEvent(new SentryEvent
+            {
+                SentryExceptions = new[] {new SentryException {Mechanism = new Mechanism {Handled = false}}}
+            });
 
             // Assert
             client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.EndStatus == SessionEndStatus.Crashed));
