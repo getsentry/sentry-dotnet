@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+
+### Fixes
+
+- Connect middleware exceptions to transactions ([#1043](https://github.com/getsentry/sentry-dotnet/pull/1043))
+- Hub.IsEnabled set to false when Hub disposed ([#1021](https://github.com/getsentry/sentry-dotnet/pull/1021))
+
 ## 3.4.0
 
 ### Features
