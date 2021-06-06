@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+
+- Report user IP address for ASP.NET Core ([#1045](https://github.com/getsentry/sentry-unity/pull/1045))
 
 ### Fixes
 
