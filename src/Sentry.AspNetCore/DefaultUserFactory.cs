@@ -36,7 +36,7 @@ namespace Sentry.AspNetCore
             // Identity.Name Reads the value of: ClaimsIdentity.NameClaimType which by default is ClaimTypes.Name
             // It can be changed by the application to read a different claim though:
             var name = principal.Identity?.Name;
-            if (name is not null && username is not name)
+            if (name is not null && username != name)
             {
                 username = name;
             }
