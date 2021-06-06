@@ -48,8 +48,11 @@ namespace Sentry.AspNetCore.Tests
         [InlineData("", "Production", "production")] // Custom - nothing set. ASPNET_ENVIRONMENT is default PROD.
         [InlineData(null, "Development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is default DEV.
         [InlineData("", "Development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is default DEV.
+        [InlineData(null, "Staging", "staging")] // Custom - nothing set. ASPNET_ENVIRONMENT is default DEV.
+        [InlineData("", "Staging", "staging")] // Custom - nothing set. ASPNET_ENVIRONMENT is default DEV.
         [InlineData(null, "production", "production")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'p').
         [InlineData(null, "development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'd').
+        [InlineData(null, "staging", "staging")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 's').
         public void Filters_Environment_CustomOrASPNETEnvironment_Set(string environment, string hostingEnvironmentSetting, string expectedEnvironment)
         {
             // Arrange.
