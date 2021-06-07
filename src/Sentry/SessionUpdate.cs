@@ -44,6 +44,11 @@ namespace Sentry
         {
         }
 
+        internal SessionUpdate(SessionUpdate sessionUpdate, bool isInitial)
+            : this(sessionUpdate.Session, isInitial, sessionUpdate.Timestamp)
+        {
+        }
+
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)
         {

@@ -22,15 +22,16 @@ namespace Sentry.Internal.Http
         private readonly Func<string, string?> _getEnvironmentVariable;
 
         // Keep track of rate limits and their expiry dates
-        private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets =
-            new();
+        private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets = new();
+
+        // Keep track of session IDs, whose initial envelope item was dropped
+        private readonly HashSet<string> _discardedSessionInits = new(StringComparer.Ordinal);
 
         internal const string DefaultErrorMessage = "No message";
 
         public HttpTransport(SentryOptions options, HttpClient httpClient)
             : this(options, httpClient, Environment.GetEnvironmentVariable)
         {
-
         }
 
         internal HttpTransport(SentryOptions options, HttpClient httpClient,
@@ -58,6 +59,17 @@ namespace Sentry.Internal.Http
                         envelopeItem.TryGetType()
                     );
 
+                    // Check if session update with init=true
+                    if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
+                    {
+                        _discardedSessionInits.Add(discardedSessionUpdate.Session.Id);
+
+                        _options.DiagnosticLogger?.LogDebug(
+                            "Discarded envelope item containing initial session update (SID: {0}).",
+                            discardedSessionUpdate.Session.Id
+                        );
+                    }
+
                     continue;
                 }
 
@@ -74,7 +86,28 @@ namespace Sentry.Internal.Http
                     continue;
                 }
 
-                envelopeItems.Add(envelopeItem);
+                // If session update (not discarded) without init=true,
+                // check if it continues a session with dropped init.
+                if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
+                    _discardedSessionInits.Contains(sessionUpdate.Session.Id))
+                {
+                    var modifiedEnvelopeItem = new EnvelopeItem(
+                        envelopeItem.Header,
+                        new JsonSerializable(new SessionUpdate(sessionUpdate, true))
+                    );
+
+                    _discardedSessionInits.Remove(sessionUpdate.Session.Id);
+                    envelopeItems.Add(modifiedEnvelopeItem);
+
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
+                        sessionUpdate.Session.Id
+                    );
+                }
+                else
+                {
+                    envelopeItems.Add(envelopeItem);
+                }
             }
 
             return new Envelope(envelope.Header, envelopeItems);
