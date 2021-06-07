@@ -116,10 +116,19 @@ namespace Sentry
                 TryGetPersistentInstallationId() ??
                 TryGetHardwareInstallationId();
 
-            _options.DiagnosticLogger?.LogDebug(
-                "Resolved installation ID '{0}'.",
-                id
-            );
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Resolved installation ID '{0}'.",
+                    id
+                );
+            }
+            else
+            {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Failed to resolve installation ID."
+                );
+            }
 
             return _cachedInstallationId = id;
         }
