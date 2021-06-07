@@ -156,7 +156,6 @@ namespace NotSentry.Tests
             });
 
             hub.StartSession();
-            client.ClearReceivedCalls();
 
             // Act
             hub.CaptureMessage("test");
@@ -280,7 +279,7 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void CaptureEvent_ActiveSessionUnhandledException_SessionEndedAsCrashed()
+        public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
@@ -291,7 +290,6 @@ namespace NotSentry.Tests
             });
 
             hub.StartSession();
-            client.ClearReceivedCalls();
 
             // Act
             hub.CaptureEvent(new SentryEvent
@@ -770,7 +768,6 @@ namespace NotSentry.Tests
             });
 
             hub.StartSession();
-            client.ClearReceivedCalls();
 
             // Act
             hub.EndSession();
