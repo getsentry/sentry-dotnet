@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Sentry.Testing;
 using Xunit;
@@ -11,7 +12,11 @@ namespace Sentry.Tests
         public void StartSession_ReleaseSet_CreatesNewSession()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions());
+            using var tempDirectory = new TempDirectory();
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                CacheDirectoryPath = tempDirectory.Path
+            });
 
             // Act
             var session = sessionManager.StartSession();
@@ -24,7 +29,11 @@ namespace Sentry.Tests
         public void StartSession_ActiveSessionExists_EndsPreviousSession()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions());
+            using var tempDirectory = new TempDirectory();
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                CacheDirectoryPath = tempDirectory.Path
+            });
 
             var previousSession = sessionManager.StartSession();
 
@@ -37,10 +46,33 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void StartSession_InstallationId_SameId()
+        public void StartSession_InstallationId_FileCreated()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions());
+            using var tempDirectory = new TempDirectory();
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                CacheDirectoryPath = tempDirectory.Path
+            });
+
+            var filePath = Path.Combine(tempDirectory.Path, ".installation");
+
+            // Act
+            sessionManager.StartSession();
+
+            // Assert
+            File.Exists(filePath).Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartSession_InstallationId_AlwaysSameId()
+        {
+            // Arrange
+            using var tempDirectory = new TempDirectory();
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                CacheDirectoryPath = tempDirectory.Path
+            });
 
             // Act
             var sessions = Enumerable.Range(0, 15).Select(_ => sessionManager.StartSession()).ToArray();
@@ -53,7 +85,11 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionExists_IncrementsErrorCount()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions());
+            using var tempDirectory = new TempDirectory();
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                CacheDirectoryPath = tempDirectory.Path
+            });
 
             var session = sessionManager.StartSession();
 
@@ -71,10 +107,13 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionDoesNotExist_IncrementsErrorCount()
         {
             // Arrange
+            using var tempDirectory = new TempDirectory();
+
             var logger = new InMemoryDiagnosticLogger();
 
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
+                CacheDirectoryPath = tempDirectory.Path,
                 DiagnosticLogger = logger,
                 Debug = true
             });
@@ -95,7 +134,11 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionExists_EndsSession()
         {
             // Arrange
-            var sessionManager = new GlobalSessionManager(new SentryOptions());
+            using var tempDirectory = new TempDirectory();
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                CacheDirectoryPath = tempDirectory.Path
+            });
 
             var session = sessionManager.StartSession();
 
@@ -112,10 +155,13 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionDoesNotExist_DoesNothing()
         {
             // Arrange
+            using var tempDirectory = new TempDirectory();
+
             var logger = new InMemoryDiagnosticLogger();
 
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
+                CacheDirectoryPath = tempDirectory.Path,
                 DiagnosticLogger = logger,
                 Debug = true
             });
