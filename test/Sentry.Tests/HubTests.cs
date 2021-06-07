@@ -162,7 +162,7 @@ namespace NotSentry.Tests
             hub.EndSession();
 
             // Assert
-            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 1));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 1));
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace NotSentry.Tests
             hub.CaptureException(exception);
 
             // Assert
-            client.Received(1).CaptureEvent(
+            client.Received().CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
@@ -216,7 +216,7 @@ namespace NotSentry.Tests
             hub.CaptureException(exception);
 
             // Assert
-            client.Received(1).CaptureEvent(
+            client.Received().CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
@@ -246,7 +246,7 @@ namespace NotSentry.Tests
             hub.CaptureException(exception);
 
             // Assert
-            client.Received(1).CaptureEvent(
+            client.Received().CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
@@ -270,7 +270,7 @@ namespace NotSentry.Tests
             hub.CaptureException(new Exception("error"));
 
             // Assert
-            client.Received(1).CaptureEvent(
+            client.Received().CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
@@ -298,7 +298,7 @@ namespace NotSentry.Tests
             });
 
             // Assert
-            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.EndStatus == SessionEndStatus.Crashed));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.EndStatus == SessionEndStatus.Crashed));
         }
 
         [Fact]
@@ -735,7 +735,7 @@ namespace NotSentry.Tests
             hub.StartSession();
 
             // Assert
-            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
         }
 
         [Fact]
@@ -773,7 +773,7 @@ namespace NotSentry.Tests
             hub.EndSession();
 
             // Assert
-            client.Received(1).CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
         }
     }
 }
