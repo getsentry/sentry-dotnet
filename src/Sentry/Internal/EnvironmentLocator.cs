@@ -21,11 +21,15 @@ namespace Sentry.Internal
             // Changing from `LocateFromEnvironmentVariable()` to `Current` fails tests?
             var fromEnvironmentVariable = LocateFromEnvironmentVariable();
             if (!string.IsNullOrWhiteSpace(fromEnvironmentVariable))
+            {
                 return fromEnvironmentVariable;
+            }
 
             var fromOptions = options.Environment;
             if (!string.IsNullOrWhiteSpace(fromOptions))
+            {
                 return fromOptions;
+            }
 
             return Debugger.IsAttached
                 ? Constants.DebugEnvironmentSetting
