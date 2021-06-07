@@ -165,20 +165,40 @@ namespace Sentry.Internal
 
         public void StartSession()
         {
-            var session = _sessionManager.StartSession();
-            if (session is not null)
+            try
             {
-                ConfigureScope(scope => scope.Session = session);
-                CaptureSession(session.CreateSnapshot(true));
+                var session = _sessionManager.StartSession();
+                if (session is not null)
+                {
+                    ConfigureScope(scope => scope.Session = session);
+                    CaptureSession(session.CreateSnapshot(true));
+                }
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to start a session.",
+                    ex
+                );
             }
         }
 
         public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
         {
-            var session = _sessionManager.EndSession(status);
-            if (session is not null)
+            try
             {
-                CaptureSession(session.CreateSnapshot(false));
+                var session = _sessionManager.EndSession(status);
+                if (session is not null)
+                {
+                    CaptureSession(session.CreateSnapshot(false));
+                }
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to end a session.",
+                    ex
+                );
             }
         }
 
