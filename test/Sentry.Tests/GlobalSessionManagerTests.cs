@@ -104,7 +104,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void ReportError_ActiveSessionDoesNotExist_IncrementsErrorCount()
+        public void ReportError_ActiveSessionDoesNotExist_LogsOutError()
         {
             // Arrange
             using var tempDirectory = new TempDirectory();
