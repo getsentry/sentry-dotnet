@@ -22,11 +22,19 @@ namespace Sentry
 
         private string GetInstallationId()
         {
-            // Prevent race conditions that could cause us to generate multiple IDs.
-            // Note: this has to be synchronized across multiple processes too.
+            // Installation ID could have already been resolved by this point.
+            // Try to retrieve it from cache to avoid expensive I/O and locking.
+            if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
+            {
+                return _cachedInstallationId;
+            }
+
+            // Resolve installation ID in a locked manner to avoid race conditions.
+            // Note: in the future, this probably has to be synchronized across multiple processes too.
             lock (_lock)
             {
-                // Avoid IO if possible
+                // We may have acquired the lock after another thread has already resolved
+                // installation ID, so check the cache one more time.
                 if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
                 {
                     return _cachedInstallationId;
@@ -44,7 +52,7 @@ namespace Sentry
                     Directory.CreateDirectory(directoryPath);
                 }
 
-                // Try to read existing
+                // Read installation ID stored in a file
                 try
                 {
                     return _cachedInstallationId = File.ReadAllText(filePath);
@@ -53,7 +61,7 @@ namespace Sentry
                 {
                 }
 
-                // Generate new
+                // Generate new installation ID and store it in a file
                 var id = Guid.NewGuid().ToString();
                 File.WriteAllText(filePath, id);
 
