@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Internal;
@@ -20,55 +22,106 @@ namespace Sentry
             _options = options;
         }
 
-        private string GetInstallationId()
+        private string? TryGetPersistentInstallationId()
         {
-            // Installation ID could have already been resolved by this point.
-            // Try to retrieve it from cache to avoid expensive I/O and locking.
-            if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
-            {
-                return _cachedInstallationId;
-            }
-
-            // Resolve installation ID in a locked manner to avoid race conditions.
+            // Resolve installation ID in a locked manner to guarantee consistency because ID is not deterministic.
             // Note: in the future, this probably has to be synchronized across multiple processes too.
             lock (_lock)
             {
                 // We may have acquired the lock after another thread has already resolved
-                // installation ID, so check the cache one more time.
+                // installation ID, so check the cache one more time before proceeding with I/O.
                 if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
                 {
                     return _cachedInstallationId;
                 }
 
-                // Store in cache directory or fall back to appdata
-                var directoryPath = !string.IsNullOrWhiteSpace(_options.CacheDirectoryPath)
-                    ? _options.CacheDirectoryPath
-                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
-
-                Directory.CreateDirectory(directoryPath);
-
-                var filePath = Path.Combine(directoryPath, ".installation");
-
-                // Read installation ID stored in a file
                 try
                 {
-                    return _cachedInstallationId = File.ReadAllText(filePath);
+                    // Store in cache directory or fall back to appdata
+                    var directoryPath = !string.IsNullOrWhiteSpace(_options.CacheDirectoryPath)
+                        ? _options.CacheDirectoryPath
+                        : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
+
+                    Directory.CreateDirectory(directoryPath);
+
+                    var filePath = Path.Combine(directoryPath, ".installation");
+
+                    // Read installation ID stored in a file
+                    try
+                    {
+                        return File.ReadAllText(filePath);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        _options.DiagnosticLogger?.LogDebug(
+                            "File containing installation ID does not exist ({0}).",
+                            filePath
+                        );
+                    }
+
+                    // Generate new installation ID and store it in a file
+                    var id = Guid.NewGuid().ToString();
+                    File.WriteAllText(filePath, id);
+
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Saved installation ID '{0}' to file '{1}'.",
+                        id, filePath
+                    );
+
+                    return id;
                 }
-                catch (FileNotFoundException)
+                catch (IOException ex)
                 {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to resolve persistent installation ID.",
+                        ex
+                    );
+
+                    return null;
                 }
+            }
+        }
 
-                // Generate new installation ID and store it in a file
-                var id = Guid.NewGuid().ToString();
-                File.WriteAllText(filePath, id);
+        private string? TryGetHardwareInstallationId()
+        {
+            var installationId = NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(nic =>
+                    nic.OperationalStatus == OperationalStatus.Up &&
+                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .Select(nic => nic.GetPhysicalAddress().ToString())
+                .FirstOrDefault();
 
-                _options.DiagnosticLogger?.LogDebug(
-                    "Saved installation ID '{0}' to file '{1}'.",
-                    id, filePath
+            if (string.IsNullOrWhiteSpace(installationId))
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to resolve hardware installation ID."
                 );
 
-                return _cachedInstallationId = id;
+                return null;
             }
+
+            return installationId;
+        }
+
+        private string? TryGetInstallationId()
+        {
+            // Installation ID could have already been resolved by this point
+            if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
+            {
+                return _cachedInstallationId;
+            }
+
+            var id =
+                TryGetPersistentInstallationId() ??
+                TryGetHardwareInstallationId();
+
+            _options.DiagnosticLogger?.LogDebug(
+                "Resolved installation ID '{0}'.",
+                id
+            );
+
+            return _cachedInstallationId = id;
         }
 
         public Session? StartSession()
@@ -87,7 +140,7 @@ namespace Sentry
 
             // Extract other parameters
             var environment = EnvironmentLocator.Resolve(_options);
-            var distinctId = GetInstallationId();
+            var distinctId = TryGetInstallationId();
 
             // Create new session
             var session = new Session(distinctId, release, environment);
