@@ -40,17 +40,14 @@ namespace Sentry
                     return _cachedInstallationId;
                 }
 
-                var filePath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Sentry",
-                    ".installation"
-                );
+                // Store in cache directory or fall back to appdata
+                var directoryPath = !string.IsNullOrWhiteSpace(_options.CacheDirectoryPath)
+                    ? _options.CacheDirectoryPath
+                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
 
-                var directoryPath = Path.GetDirectoryName(filePath);
-                if (!string.IsNullOrWhiteSpace(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
+                Directory.CreateDirectory(directoryPath);
+
+                var filePath = Path.Combine(directoryPath, ".installation");
 
                 // Read installation ID stored in a file
                 try
