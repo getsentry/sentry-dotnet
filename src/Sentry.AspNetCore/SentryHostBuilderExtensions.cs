@@ -82,7 +82,7 @@ namespace Microsoft.Extensions.Hosting
                 configureSentry?.Invoke(context, sentryBuilder);
             });
 
-            _ = builder.ConfigureServices((c, s) =>
+            _ = builder.ConfigureServices( s=>
             {
                 _ = s.AddSentryStartupFilter();
             });

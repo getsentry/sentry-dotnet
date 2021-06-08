@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Sentry.AspNetCore;
 
 namespace Sentry.Samples.AspNetCore.Basic
@@ -13,7 +14,9 @@ namespace Sentry.Samples.AspNetCore.Basic
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            WebHostExtensions.Run(BuildWebHost(args));
+            // or
+            // BuildHost(args).Run();
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
@@ -68,6 +71,22 @@ namespace Sentry.Samples.AspNetCore.Basic
                             );
                         });
                     });
+                })
+                .Build();
+
+        public static IHost BuildHost(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+
+                // Add Sentry integration
+                // In this example, DSN and Release are set via environment variable:
+                // See: Properties/launchSettings.json
+                .UseSentry()
+                // It can also be defined via configuration (including appsettings.json)
+                // or coded explicitly, via parameter like:
+                // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
                 })
                 .Build();
     }
