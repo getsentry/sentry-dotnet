@@ -275,7 +275,7 @@ namespace NotSentry.Tests
             hub.EndSession();
 
             // Assert
-            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 0));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 0));
         }
 
         [Fact]
@@ -296,7 +296,7 @@ namespace NotSentry.Tests
             hub.EndSession();
 
             // Assert
-            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 1));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 1));
         }
 
         [Fact]
@@ -319,7 +319,7 @@ namespace NotSentry.Tests
             });
 
             // Assert
-            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.EndStatus == SessionEndStatus.Crashed));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Crashed));
         }
 
         [Fact]
