@@ -16,7 +16,8 @@ namespace Sentry.Tests
             using var tempDirectory = new TempDirectory();
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                CacheDirectoryPath = tempDirectory.Path
+                CacheDirectoryPath = tempDirectory.Path,
+                Release = "test"
             });
 
             // Act
@@ -33,7 +34,8 @@ namespace Sentry.Tests
             using var tempDirectory = new TempDirectory();
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                CacheDirectoryPath = tempDirectory.Path
+                CacheDirectoryPath = tempDirectory.Path,
+                Release = "test"
             });
 
             var previousSession = sessionManager.StartSession();
@@ -53,7 +55,8 @@ namespace Sentry.Tests
             using var tempDirectory = new TempDirectory();
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                CacheDirectoryPath = tempDirectory.Path
+                CacheDirectoryPath = tempDirectory.Path,
+                Release = "test"
             });
 
             var filePath = Path.Combine(tempDirectory.Path, ".installation");
@@ -70,7 +73,10 @@ namespace Sentry.Tests
         {
             // Arrange
             using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions());
+            var sessionManager = new GlobalSessionManager(new SentryOptions
+            {
+                Release = "test"
+            });
 
             var filePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -92,7 +98,8 @@ namespace Sentry.Tests
             using var tempDirectory = new TempDirectory();
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                CacheDirectoryPath = tempDirectory.Path
+                CacheDirectoryPath = tempDirectory.Path,
+                Release = "test"
             });
 
             // Act
@@ -109,7 +116,8 @@ namespace Sentry.Tests
             using var tempDirectory = new TempDirectory();
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                CacheDirectoryPath = tempDirectory.Path
+                CacheDirectoryPath = tempDirectory.Path,
+                Release = "test"
             });
 
             var session = sessionManager.StartSession();
@@ -135,6 +143,7 @@ namespace Sentry.Tests
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
                 CacheDirectoryPath = tempDirectory.Path,
+                Release = "test",
                 DiagnosticLogger = logger,
                 Debug = true
             });
@@ -158,7 +167,8 @@ namespace Sentry.Tests
             using var tempDirectory = new TempDirectory();
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
-                CacheDirectoryPath = tempDirectory.Path
+                CacheDirectoryPath = tempDirectory.Path,
+                Release = "test"
             });
 
             var session = sessionManager.StartSession();
@@ -183,6 +193,7 @@ namespace Sentry.Tests
             var sessionManager = new GlobalSessionManager(new SentryOptions
             {
                 CacheDirectoryPath = tempDirectory.Path,
+                Release = "test",
                 DiagnosticLogger = logger,
                 Debug = true
             });
