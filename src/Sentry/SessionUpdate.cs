@@ -7,12 +7,34 @@ namespace Sentry
     /// <summary>
     /// Snapshot of a session.
     /// </summary>
-    public class SessionUpdate : IJsonSerializable
+    public class SessionUpdate : ISession, IJsonSerializable
     {
-        /// <summary>
-        /// Session.
-        /// </summary>
-        public Session Session { get; }
+        /// <inheritdoc />
+        public string Id { get; }
+
+        /// <inheritdoc />
+        public string? DistinctId { get; }
+
+        /// <inheritdoc />
+        public DateTimeOffset StartTimestamp { get; }
+
+        /// <inheritdoc />
+        public string Release { get; }
+
+        /// <inheritdoc />
+        public string? Environment { get; }
+
+        /// <inheritdoc />
+        public string? IpAddress { get; }
+
+        /// <inheritdoc />
+        public string? UserAgent { get; }
+
+        /// <inheritdoc />
+        public SessionEndStatus? EndStatus { get; }
+
+        /// <inheritdoc />
+        public int ErrorCount { get; }
 
         /// <summary>
         /// Whether this is the initial snapshot.
@@ -25,13 +47,35 @@ namespace Sentry
         public DateTimeOffset Timestamp { get; }
 
         /// <summary>
-        /// Duration of time since start of the session.
+        /// Duration of time since the start of the session.
         /// </summary>
-        public TimeSpan Duration => Timestamp - Session.Timestamp;
+        public TimeSpan Duration => Timestamp - StartTimestamp;
 
-        internal SessionUpdate(Session session, bool isInitial, DateTimeOffset timestamp)
+        /// <summary>
+        /// Initializes a new instance of <see cref="SessionUpdate"/>.
+        /// </summary>
+        public SessionUpdate(
+            string id,
+            string? distinctId,
+            DateTimeOffset startTimestamp,
+            string release,
+            string? environment,
+            string? ipAddress,
+            string? userAgent,
+            SessionEndStatus? endStatus,
+            int errorCount,
+            bool isInitial,
+            DateTimeOffset timestamp)
         {
-            Session = session;
+            Id = id;
+            DistinctId = distinctId;
+            StartTimestamp = startTimestamp;
+            Release = release;
+            Environment = environment;
+            IpAddress = ipAddress;
+            UserAgent = userAgent;
+            EndStatus = endStatus;
+            ErrorCount = errorCount;
             IsInitial = isInitial;
             Timestamp = timestamp;
         }
@@ -39,13 +83,28 @@ namespace Sentry
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionUpdate(Session session, bool isInitial)
-            : this(session, isInitial, DateTimeOffset.Now)
+        public SessionUpdate(ISession session, bool isInitial, DateTimeOffset timestamp)
+            : this(
+                session.Id,
+                session.DistinctId,
+                session.StartTimestamp,
+                session.Release,
+                session.Environment,
+                session.IpAddress,
+                session.UserAgent,
+                session.EndStatus,
+                session.ErrorCount,
+                isInitial,
+                timestamp
+            )
         {
         }
 
-        internal SessionUpdate(SessionUpdate sessionUpdate, bool isInitial)
-            : this(sessionUpdate.Session, isInitial, sessionUpdate.Timestamp)
+        /// <summary>
+        /// Initializes a new instance of <see cref="SessionUpdate"/>.
+        /// </summary>
+        public SessionUpdate(ISession session, bool isInitial)
+            : this(session, isInitial, DateTimeOffset.Now)
         {
         }
 
@@ -54,11 +113,11 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            writer.WriteString("sid", Session.Id);
+            writer.WriteString("sid", Id);
 
-            if (!string.IsNullOrWhiteSpace(Session.DistinctId))
+            if (!string.IsNullOrWhiteSpace(DistinctId))
             {
-                writer.WriteString("did", Session.DistinctId);
+                writer.WriteString("did", DistinctId);
             }
 
             if (IsInitial)
@@ -66,16 +125,16 @@ namespace Sentry
                 writer.WriteBoolean("init", IsInitial);
             }
 
-            writer.WriteString("started", Session.Timestamp);
+            writer.WriteString("started", StartTimestamp);
 
             writer.WriteString("timestamp", Timestamp);
 
             writer.WriteNumber("duration", (int)Duration.TotalSeconds);
 
-            writer.WriteNumber("errors", Session.ErrorCount);
+            writer.WriteNumber("errors", ErrorCount);
 
             // State
-            if (Session.EndStatus is { } endState)
+            if (EndStatus is { } endState)
             {
                 writer.WriteString("status", endState.ToString().ToSnakeCase());
             }
@@ -83,21 +142,21 @@ namespace Sentry
             // Attributes
             writer.WriteStartObject("attrs");
 
-            writer.WriteString("release", Session.Release);
+            writer.WriteString("release", Release);
 
-            if (!string.IsNullOrWhiteSpace(Session.Environment))
+            if (!string.IsNullOrWhiteSpace(Environment))
             {
-                writer.WriteString("environment", Session.Environment);
+                writer.WriteString("environment", Environment);
             }
 
-            if (!string.IsNullOrWhiteSpace(Session.IpAddress))
+            if (!string.IsNullOrWhiteSpace(IpAddress))
             {
-                writer.WriteString("ip_address", Session.IpAddress);
+                writer.WriteString("ip_address", IpAddress);
             }
 
-            if (!string.IsNullOrWhiteSpace(Session.UserAgent))
+            if (!string.IsNullOrWhiteSpace(UserAgent))
             {
-                writer.WriteString("user_agent", Session.UserAgent);
+                writer.WriteString("user_agent", UserAgent);
             }
 
             writer.WriteEndObject();
@@ -112,26 +171,29 @@ namespace Sentry
         {
             var id = json.GetProperty("sid").GetStringOrThrow();
             var distinctId = json.GetPropertyOrNull("did")?.GetString();
-            var timestamp = json.GetProperty("started").GetDateTimeOffset();
+            var startTimestamp = json.GetProperty("started").GetDateTimeOffset();
             var release = json.GetProperty("attrs").GetProperty("release").GetStringOrThrow();
             var environment = json.GetProperty("attrs").GetPropertyOrNull("environment")?.GetString();
             var ipAddress = json.GetProperty("attrs").GetPropertyOrNull("ip_address")?.GetString();
             var userAgent = json.GetProperty("attrs").GetPropertyOrNull("user_agent")?.GetString();
-
+            var endStatus = json.GetPropertyOrNull("status")?.GetString()?.ParseEnum<SessionEndStatus>();
+            var errorCount = json.GetPropertyOrNull("errors")?.GetInt32() ?? 0;
             var isInitial = json.GetPropertyOrNull("init")?.GetBoolean() ?? false;
-            var updateTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
+            var timestamp = json.GetProperty("timestamp").GetDateTimeOffset();
 
-            var session = new Session(
+            return new SessionUpdate(
                 id,
                 distinctId,
-                timestamp,
+                startTimestamp,
                 release,
                 environment,
                 ipAddress,
-                userAgent
+                userAgent,
+                endStatus,
+                errorCount,
+                isInitial,
+                timestamp
             );
-
-            return new SessionUpdate(session, isInitial, updateTimestamp);
         }
     }
 }

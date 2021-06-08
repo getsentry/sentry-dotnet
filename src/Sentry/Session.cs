@@ -7,59 +7,41 @@ namespace Sentry
     /// Sentry session.
     /// </summary>
     // https://develop.sentry.dev/sdk/sessions
-    public class Session
+    public class Session : ISession
     {
-        /// <summary>
-        /// Auto-generated ID.
-        /// </summary>
+        /// <inheritdoc />
         public string Id { get; }
 
-        /// <summary>
-        /// Distinct ID.
-        /// </summary>
+        /// <inheritdoc />
         public string? DistinctId { get; }
 
-        /// <summary>
-        /// Start timestamp.
-        /// </summary>
-        public DateTimeOffset Timestamp { get; }
+        /// <inheritdoc />
+        public DateTimeOffset StartTimestamp { get; }
 
-        /// <summary>
-        /// Release.
-        /// </summary>
+        /// <inheritdoc />
         public string Release { get; }
 
-        /// <summary>
-        /// Environment.
-        /// </summary>
+        /// <inheritdoc />
         public string? Environment { get; }
 
-        /// <summary>
-        /// IP Address.
-        /// </summary>
+        /// <inheritdoc />
         public string? IpAddress { get; }
 
-        /// <summary>
-        /// User agent.
-        /// </summary>
+        /// <inheritdoc />
         public string? UserAgent { get; }
 
-        /// <summary>
-        /// End state.
-        /// </summary>
+        /// <inheritdoc />
         public SessionEndStatus? EndStatus { get; private set; }
 
         private int _errorCount;
 
-        /// <summary>
-        /// Reported error count.
-        /// </summary>
+        /// <inheritdoc />
         public int ErrorCount => _errorCount;
 
         internal Session(
             string id,
             string? distinctId,
-            DateTimeOffset timestamp,
+            DateTimeOffset startTimestamp,
             string release,
             string? environment,
             string? ipAddress,
@@ -67,7 +49,7 @@ namespace Sentry
         {
             Id = id;
             DistinctId = distinctId;
-            Timestamp = timestamp;
+            StartTimestamp = startTimestamp;
             Release = release;
             Environment = environment;
             IpAddress = ipAddress;
@@ -102,6 +84,6 @@ namespace Sentry
         /// <summary>
         /// Creates a snapshot of this session.
         /// </summary>
-        public SessionUpdate CreateSnapshot(bool isInitial) => new(this, isInitial);
+        public SessionUpdate CreateUpdate(bool isInitial) => new(this, isInitial);
     }
 }

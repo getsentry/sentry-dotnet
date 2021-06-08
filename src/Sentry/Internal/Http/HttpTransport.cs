@@ -62,11 +62,11 @@ namespace Sentry.Internal.Http
                     // Check if session update with init=true
                     if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
                     {
-                        _discardedSessionInits.Add(discardedSessionUpdate.Session.Id);
+                        _discardedSessionInits.Add(discardedSessionUpdate.Id);
 
                         _options.DiagnosticLogger?.LogDebug(
                             "Discarded envelope item containing initial session update (SID: {0}).",
-                            discardedSessionUpdate.Session.Id
+                            discardedSessionUpdate.Id
                         );
                     }
 
@@ -89,19 +89,19 @@ namespace Sentry.Internal.Http
                 // If session update (not discarded) without init=true,
                 // check if it continues a session with dropped init.
                 if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
-                    _discardedSessionInits.Contains(sessionUpdate.Session.Id))
+                    _discardedSessionInits.Contains(sessionUpdate.Id))
                 {
                     var modifiedEnvelopeItem = new EnvelopeItem(
                         envelopeItem.Header,
-                        new JsonSerializable(new SessionUpdate(sessionUpdate, true))
+                        new JsonSerializable(new SessionUpdate(sessionUpdate, true, sessionUpdate.Timestamp))
                     );
 
-                    _discardedSessionInits.Remove(sessionUpdate.Session.Id);
+                    _discardedSessionInits.Remove(sessionUpdate.Id);
                     envelopeItems.Add(modifiedEnvelopeItem);
 
                     _options.DiagnosticLogger?.LogDebug(
                         "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
-                        sessionUpdate.Session.Id
+                        sessionUpdate.Id
                     );
                 }
                 else

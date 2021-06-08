@@ -171,7 +171,7 @@ namespace Sentry.Internal
                 if (session is not null)
                 {
                     ConfigureScope(scope => scope.Session = session);
-                    CaptureSession(session.CreateSnapshot(true));
+                    CaptureSession(session.CreateUpdate(true));
                 }
             }
             catch (Exception ex)
@@ -190,7 +190,7 @@ namespace Sentry.Internal
                 var session = _sessionManager.EndSession(status);
                 if (session is not null)
                 {
-                    CaptureSession(session.CreateSnapshot(false));
+                    CaptureSession(session.CreateUpdate(false));
                 }
             }
             catch (Exception ex)
@@ -299,7 +299,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture session snapshot: {0}", e, sessionUpdate.Session.Id);
+                _options.DiagnosticLogger?.LogError("Failure to capture session snapshot: {0}", e, sessionUpdate.Id);
             }
         }
 
