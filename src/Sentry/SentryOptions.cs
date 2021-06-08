@@ -180,7 +180,7 @@ namespace Sentry
         /// <remarks>
         /// This value will generally be something along the lines of the git SHA for the given project.
         /// If not explicitly defined via configuration or environment variable (SENTRY_RELEASE).
-        /// It will attempt o read it from:
+        /// It will attempt to read it from:
         /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
