@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Integrations;
@@ -15,11 +16,13 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
+        // Internal for testability
+        internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
         internal SentryScopeManager ScopeManager { get; }
 
-        public bool IsEnabled => true;
+        private int _isEnabled = 1;
+        public bool IsEnabled => _isEnabled == 1;
 
         internal Hub(ISentryClient client, SentryOptions options)
         {
@@ -142,7 +145,7 @@ namespace Sentry.Internal
             }
 
             // Don't overwrite existing pair in the unlikely event that it already exists
-            _ = _exceptionToSpanMap.GetValue(exception, _ => span);
+            _ = ExceptionToSpanMap.GetValue(exception, _ => span);
         }
 
         public ISpan? GetSpan()
@@ -157,7 +160,7 @@ namespace Sentry.Internal
         {
             // Find the span which is bound to the same exception
             if (evt.Exception is { } exception &&
-                _exceptionToSpanMap.TryGetValue(exception, out var spanBoundToException))
+                ExceptionToSpanMap.TryGetValue(exception, out var spanBoundToException))
             {
                 return spanBoundToException;
             }
@@ -246,6 +249,11 @@ namespace Sentry.Internal
         public void Dispose()
         {
             _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
+
+            if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
+            {
+                return;
+            }
 
             if (_integrations?.Length > 0)
             {

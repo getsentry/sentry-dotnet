@@ -1,16 +1,28 @@
 # Changelog
 
+## 3.5.0
+
+### Features
+
+- Report user IP address for ASP.NET Core ([#1045](https://github.com/getsentry/sentry-unity/pull/1045))
+
+### Fixes
+
+- Connect middleware exceptions to transactions ([#1043](https://github.com/getsentry/sentry-dotnet/pull/1043))
+- Hub.IsEnabled set to false when Hub disposed ([#1021](https://github.com/getsentry/sentry-dotnet/pull/1021))
+
 ## 3.4.0
 
 ### Features
 
 - Sentry.EntityFramework moved to this repository ([#1017](https://github.com/getsentry/sentry-dotnet/pull/1017))
-  - Additional `netstandard2.1` target added. Sample with .NET Core 3.1 console app.
-  - `UseBreadcrumbs` is called automatically by `AddEntityFramework`
+- Additional `netstandard2.1` target added. Sample with .NET Core 3.1 console app.
+- `UseBreadcrumbs` is called automatically by `AddEntityFramework`
 
 ### Fixes
 
-- normalize line breaks ([#1016](https://github.com/getsentry/sentry-dotnet/pull/1016))
+- Normalize line breaks ([#1016](https://github.com/getsentry/sentry-dotnet/pull/1016))
+- Finish span with exception in SentryHttpMessageHandler ([#1037](https://github.com/getsentry/sentry-dotnet/pull/1037))
 
 ## 3.4.0-beta.0
 
