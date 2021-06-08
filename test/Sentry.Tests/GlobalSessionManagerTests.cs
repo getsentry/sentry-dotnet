@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Sentry.Testing;
@@ -46,7 +47,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void StartSession_InstallationId_FileCreated()
+        public void StartSession_CacheDirectoryProvided_InstallationIdFileCreated()
         {
             // Arrange
             using var tempDirectory = new TempDirectory();
@@ -56,6 +57,26 @@ namespace Sentry.Tests
             });
 
             var filePath = Path.Combine(tempDirectory.Path, ".installation");
+
+            // Act
+            sessionManager.StartSession();
+
+            // Assert
+            File.Exists(filePath).Should().BeTrue();
+        }
+
+        [Fact]
+        public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
+        {
+            // Arrange
+            using var tempDirectory = new TempDirectory();
+            var sessionManager = new GlobalSessionManager(new SentryOptions());
+
+            var filePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Sentry",
+                ".installation"
+            );
 
             // Act
             sessionManager.StartSession();
