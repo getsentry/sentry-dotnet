@@ -402,6 +402,89 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact]
+        public async Task SendEnvelopeAsync_ItemRateLimit_PromotesNextSessionWithSameId()
+        {
+            // Arrange
+            using var httpHandler = new RecordingHttpMessageHandler(
+                new FakeHttpMessageHandler(
+                    () => SentryResponses.GetRateLimitResponse("1:session")
+                )
+            );
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret
+                },
+                new HttpClient(httpHandler)
+            );
+
+            var session = new Session("foo", "bar", "baz");
+
+            // First request always goes through
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+            // Send session update with init=true
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true)));
+
+            // Wait for the rate limit to pass
+            await Task.Delay(2000);
+
+            // Act
+
+            // Send another update with init=false (should get promoted)
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(false)));
+
+            var lastRequest = httpHandler.GetRequests().Last();
+            var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+            // Assert
+            actualEnvelopeSerialized.Should().Contain("\"init\":true");
+        }
+
+        [Fact]
+        public async Task SendEnvelopeAsync_ItemRateLimit_DoesNotAffectNextSessionWithDifferentId()
+        {
+            // Arrange
+            using var httpHandler = new RecordingHttpMessageHandler(
+                new FakeHttpMessageHandler(
+                    () => SentryResponses.GetRateLimitResponse("1:session")
+                )
+            );
+
+            var httpTransport = new HttpTransport(
+                new SentryOptions
+                {
+                    Dsn = DsnSamples.ValidDsnWithSecret
+                },
+                new HttpClient(httpHandler)
+            );
+
+            var session = new Session("foo", "bar", "baz");
+
+            // First request always goes through
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+            // Send session update with init=true
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true)));
+
+            // Wait for the rate limit to pass
+            await Task.Delay(2000);
+
+            // Act
+
+            // Send an update for different session with init=false (should NOT get promoted)
+            var nextSession = new Session("foo2", "bar2", "baz2");
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, nextSession.CreateUpdate(false)));
+
+            var lastRequest = httpHandler.GetRequests().Last();
+            var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+            // Assert
+            actualEnvelopeSerialized.Should().NotContain("\"init\":true");
+        }
+
+        [Fact]
         public void CreateRequest_AuthHeader_IsSet()
         {
             // Arrange

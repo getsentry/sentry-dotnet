@@ -120,10 +120,7 @@ namespace Sentry
                 writer.WriteString("did", DistinctId);
             }
 
-            if (IsInitial)
-            {
-                writer.WriteBoolean("init", IsInitial);
-            }
+            writer.WriteBoolean("init", IsInitial);
 
             writer.WriteString("started", StartTimestamp);
 
