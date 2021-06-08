@@ -235,8 +235,11 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                // Treat all events as errors
-                _sessionManager.ReportError();
+                // Report an error on current session if contains an exception
+                if (evt.Exception is not null)
+                {
+                    _sessionManager.ReportError();
+                }
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;

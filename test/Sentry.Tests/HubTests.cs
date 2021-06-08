@@ -145,27 +145,6 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void CaptureMessage_SessionActive_ReportsError()
-        {
-            // Arrange
-            var client = Substitute.For<ISentryClient>();
-
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-            });
-
-            hub.StartSession();
-
-            // Act
-            hub.CaptureMessage("test");
-            hub.EndSession();
-
-            // Assert
-            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 1));
-        }
-
-        [Fact]
         public void CaptureException_FinishedSpanBoundToSameExceptionExists_EventIsLinkedToSpan()
         {
             // Arrange
@@ -276,6 +255,48 @@ namespace NotSentry.Tests
                     evt.Contexts.Trace.SpanId == default),
                 Arg.Any<Scope>()
             );
+        }
+
+        [Fact]
+        public void CaptureEvent_SessionActive_NoExceptionDoesNotReportError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            });
+
+            hub.StartSession();
+
+            // Act
+            hub.CaptureEvent(new SentryEvent());
+            hub.EndSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 0));
+        }
+
+        [Fact]
+        public void CaptureEvent_SessionActive_ExceptionReportsError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            });
+
+            hub.StartSession();
+
+            // Act
+            hub.CaptureEvent(new SentryEvent(new Exception()));
+            hub.EndSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.Session.ErrorCount == 1));
         }
 
         [Fact]
