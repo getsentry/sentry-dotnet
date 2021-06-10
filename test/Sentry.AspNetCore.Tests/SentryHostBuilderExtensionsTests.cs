@@ -27,19 +27,8 @@ namespace Sentry.AspNetCore.Tests
         {
             var context = new HostBuilderContext(new Dictionary<object, object>())
             {
-                Configuration = Configuration,
-                HostingEnvironment = HostingEnvironment
+                Configuration = Configuration, HostingEnvironment = HostingEnvironment
             };
-
-            //LoggingBuilder.Services.Returns(Services);
-
-            HostBuilder
-                .When(b => b.ConfigureServices(Arg.Any<Action<IServiceCollection>>()))
-                .Do(i => i.Arg<Action<IServiceCollection>>()(Services));
-
-            // HostBuilder
-            //     .When(b => b.ConfigureLogging(Arg.Any<Action<HostBuilderContext, ILoggingBuilder>>()))
-            //     .Do(i => i.Arg<Action<HostBuilderContext, ILoggingBuilder>>()(context, LoggingBuilder));
 
             HostBuilder
                 .When(b => b.ConfigureServices(Arg.Any<Action<HostBuilderContext, IServiceCollection>>()))
@@ -76,15 +65,21 @@ namespace Sentry.AspNetCore.Tests
 
         public static IEnumerable<object[]> ExpectedServices()
         {
-            yield return new object[] {
+            yield return new object[]
+            {
                 new Action<IServiceCollection>(c =>
-                    Assert.Single(c, d => d.ServiceType == typeof(IHub)))};
-            yield return new object[] {
+                    Assert.Single(c, d => d.ServiceType == typeof(IHub)))
+            };
+            yield return new object[]
+            {
                 new Action<IServiceCollection>(c =>
-                    Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreLoggerProvider)))};
-            yield return new object[] {
+                    Assert.Single(c, d => d.ImplementationType == typeof(SentryAspNetCoreLoggerProvider)))
+            };
+            yield return new object[]
+            {
                 new Action<IServiceCollection>(c =>
-                    Assert.Single(c, d => d.ImplementationType == typeof(SentryStartupFilter)))};
+                    Assert.Single(c, d => d.ImplementationType == typeof(SentryStartupFilter)))
+            };
         }
     }
 }
