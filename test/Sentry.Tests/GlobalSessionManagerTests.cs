@@ -181,11 +181,9 @@ namespace Sentry.Tests
 
             // Act
             sessionManager.EndSession(SessionEndStatus.Exited);
-            var endedSession = sessionManager.CurrentSession;
 
             // Assert
             session.Should().NotBeNull();
-            session.Should().Be(endedSession);
             session?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
