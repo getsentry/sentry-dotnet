@@ -24,13 +24,6 @@ namespace Sentry
 
         private string? TryGetPersistentInstallationId()
         {
-            // We may have acquired the lock after another thread has already resolved
-            // installation ID, so check the cache one more time before proceeding with I/O.
-            if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
-            {
-                return _cachedInstallationId;
-            }
-
             try
             {
                 // Store in cache directory or fall back to appdata
@@ -125,6 +118,13 @@ namespace Sentry
             // Note: in the future, this probably has to be synchronized across multiple processes too.
             lock (_lock)
             {
+                // We may have acquired the lock after another thread has already resolved
+                // installation ID, so check the cache one more time before proceeding with I/O.
+                if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
+                {
+                    return _cachedInstallationId;
+                }
+
                 var id =
                     TryGetPersistentInstallationId() ??
                     TryGetHardwareInstallationId();
