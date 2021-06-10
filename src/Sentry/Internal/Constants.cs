@@ -26,6 +26,8 @@ namespace Sentry.Internal
         /// <remarks>Best Sentry practice is to always try and have a value for this setting.</remarks>
         public const string ProductionEnvironmentSetting = "production";
 
+        public const string StagingEnvironmentSetting = "staging";
+
         public const string DevelopmentEnvironmentSetting = "development";
 
         public const string DebugEnvironmentSetting = "debug";
