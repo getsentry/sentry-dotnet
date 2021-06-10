@@ -96,7 +96,7 @@ namespace Sentry.Internal.Http
                 {
                     var modifiedEnvelopeItem = new EnvelopeItem(
                         envelopeItem.Header,
-                        new JsonSerializable(new SessionUpdate(sessionUpdate, true, sessionUpdate.Timestamp))
+                        new JsonSerializable(new SessionUpdate(sessionUpdate, true))
                     );
 
                     envelopeItems.Add(modifiedEnvelopeItem);

@@ -111,8 +111,8 @@ namespace Sentry
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionUpdate(ISession session, bool isInitial, int sequenceNumber)
-            : this(session, isInitial, DateTimeOffset.Now, sequenceNumber)
+        public SessionUpdate(SessionUpdate sessionUpdate, bool isInitial)
+            : this(sessionUpdate, isInitial, sessionUpdate.Timestamp, sessionUpdate.SequenceNumber)
         {
         }
 

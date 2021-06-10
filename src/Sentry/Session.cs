@@ -89,6 +89,6 @@ namespace Sentry
         /// Creates an update of this session.
         /// </summary>
         public SessionUpdate CreateUpdate(bool isInitial) =>
-            new(this, isInitial, Interlocked.Increment(ref _sequenceNumber));
+            new(this, isInitial, DateTimeOffset.Now, Interlocked.Increment(ref _sequenceNumber));
     }
 }
