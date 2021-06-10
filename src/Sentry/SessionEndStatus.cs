@@ -11,7 +11,7 @@
         Exited,
 
         /// <summary>
-        /// Session ended with an error.
+        /// Session ended with an unhandled exception.
         /// </summary>
         Crashed,
 

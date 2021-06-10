@@ -23,8 +23,8 @@ namespace Sentry.AspNet
 
             var eventProcessor = new SystemWebRequestEventProcessor(payloadExtractor, options);
 
-            options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
             options.DiagnosticLogger ??= new DebugDiagnosticLogger(options.DiagnosticLevel);
+            options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
             options.AddEventProcessor(eventProcessor);
         }
     }

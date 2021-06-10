@@ -84,7 +84,7 @@ namespace Sentry.Protocol.Envelopes
             IReadOnlyCollection<Attachment>? attachments = null,
             SessionUpdate? sessionUpdate = null)
         {
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [EventIdKey] = @event.EventId.ToString()
             };
@@ -112,7 +112,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [EventIdKey] = sentryUserFeedback.EventId.ToString()
             };
@@ -130,7 +130,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromTransaction(Transaction transaction)
         {
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [EventIdKey] = transaction.EventId.ToString()
             };

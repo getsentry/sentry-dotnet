@@ -124,7 +124,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueEvent
             };
@@ -137,7 +137,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueUserReport
             };
@@ -150,7 +150,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromTransaction(Transaction transaction)
         {
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueTransaction
             };
@@ -163,7 +163,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static EnvelopeItem FromSession(SessionUpdate sessionUpdate)
         {
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueSession
             };
@@ -187,7 +187,7 @@ namespace Sentry.Protocol.Envelopes
                 _ => "event.attachment"
             };
 
-            var header = new Dictionary<string, object?>(StringComparer.Ordinal)
+            var header = new Dictionary<string, object?>(5, StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueAttachment,
                 [LengthKey] = stream.TryGetLength(),
