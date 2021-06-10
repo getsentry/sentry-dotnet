@@ -69,11 +69,12 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void Create_NoClaimsNoIdentity_Null()
+        public void Create_NoClaimsNoIdentity_IpAddress()
         {
             _ = HttpContext.User.Identity.ReturnsNull();
             _ = HttpContext.User.Claims.Returns(Enumerable.Empty<Claim>());
-            Assert.Null(_sut.Create(HttpContext));
+            var actual = _sut.Create(HttpContext);
+            Assert.Equal(IPAddress.IPv6Loopback.ToString(), actual?.IpAddress);
         }
 
         [Fact]
