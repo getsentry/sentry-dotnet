@@ -427,8 +427,11 @@ namespace Sentry.Tests.Internals.Http
             // Send session update with init=true
             await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true)));
 
-            // Wait for the rate limit to pass
-            await Task.Delay(2000);
+            // Pretend the rate limit has already passed
+            foreach (var (category, _) in httpTransport.CategoryLimitResets)
+            {
+                httpTransport.CategoryLimitResets[category] = DateTimeOffset.Now - TimeSpan.FromDays(1);
+            }
 
             // Act
 
@@ -468,8 +471,11 @@ namespace Sentry.Tests.Internals.Http
             // Send session update with init=true
             await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true)));
 
-            // Wait for the rate limit to pass
-            await Task.Delay(2000);
+            // Pretend the rate limit has already passed
+            foreach (var (category, _) in httpTransport.CategoryLimitResets)
+            {
+                httpTransport.CategoryLimitResets[category] = DateTimeOffset.Now - TimeSpan.FromDays(1);
+            }
 
             // Act
 

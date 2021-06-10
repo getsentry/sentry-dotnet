@@ -22,8 +22,9 @@ namespace Sentry.Internal.Http
 
         private readonly Func<string, string?> _getEnvironmentVariable;
 
-        // Keep track of rate limits and their expiry dates
-        private readonly ConcurrentDictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets = new();
+        // Keep track of rate limits and their expiry dates.
+        // Internal for testing.
+        internal ConcurrentDictionary<RateLimitCategory, DateTimeOffset> CategoryLimitResets { get; } = new();
 
         // Keep track of last discarded session init so that we can promote the next update.
         // We only track one because session updates are ordered.
@@ -51,7 +52,7 @@ namespace Sentry.Internal.Http
             foreach (var envelopeItem in envelope.Items)
             {
                 // Check if there is at least one matching category for this item that is rate-limited
-                var isRateLimited = _categoryLimitResets
+                var isRateLimited = CategoryLimitResets
                     .Any(kvp => kvp.Value > instant && kvp.Key.Matches(envelopeItem));
 
                 if (isRateLimited)
@@ -133,7 +134,7 @@ namespace Sentry.Internal.Http
             {
                 foreach (var rateLimitCategory in rateLimit.Categories)
                 {
-                    _categoryLimitResets[rateLimitCategory] = instant + rateLimit.RetryAfter;
+                    CategoryLimitResets[rateLimitCategory] = instant + rateLimit.RetryAfter;
                 }
             }
         }
