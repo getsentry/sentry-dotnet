@@ -161,7 +161,7 @@ namespace Sentry.Tests
             // Assert
             logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to report an error on a session because there is none active." &&
-                e.Level == SentryLevel.Error
+                e.Level == SentryLevel.Debug
             );
         }
 
