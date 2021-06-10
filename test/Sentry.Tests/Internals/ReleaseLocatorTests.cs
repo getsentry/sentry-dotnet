@@ -20,7 +20,7 @@ namespace Sentry.Tests.Internals
                 expectedVersion,
                 () =>
                 {
-                    Assert.Equal(expectedVersion, ReleaseLocator.ResolveFromEnvironment());
+                    Assert.Equal(expectedVersion, ReleaseLocator.LocateFromEnvironment());
                 });
         }
 
@@ -44,7 +44,7 @@ namespace Sentry.Tests.Internals
                 {
                     Assert.Equal(
                         $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
-                        ReleaseLocator.ResolveFromEnvironment()
+                        ReleaseLocator.LocateFromEnvironment()
                     );
                 });
         }

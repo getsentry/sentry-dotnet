@@ -5,21 +5,17 @@ namespace Sentry.Internal
 {
     internal static class EnvironmentLocator
     {
-        private static readonly Lazy<string?> FromEnvironmentVariable = new(LocateFromEnvironmentVariable);
+        private static Lazy<string?> FromEnvironmentVariableLazy = new(LocateFromEnvironmentVariable);
 
-        /// <summary>
-        /// Attempts to locate the environment the app is running in.
-        /// </summary>
-        /// <returns>The Environment name or null, if it couldn't be located.</returns>
-        public static string? Current => FromEnvironmentVariable.Value;
+        // For testing
+        internal static void Reset() => FromEnvironmentVariableLazy = new(LocateFromEnvironmentVariable);
 
         internal static string? LocateFromEnvironmentVariable() =>
             Environment.GetEnvironmentVariable(Constants.EnvironmentEnvironmentVariable);
 
         public static string Resolve(SentryOptions options)
         {
-            // Changing from `LocateFromEnvironmentVariable()` to `Current` fails tests?
-            var fromEnvironmentVariable = LocateFromEnvironmentVariable();
+            var fromEnvironmentVariable = FromEnvironmentVariableLazy.Value;
             if (!string.IsNullOrWhiteSpace(fromEnvironmentVariable))
             {
                 return fromEnvironmentVariable;

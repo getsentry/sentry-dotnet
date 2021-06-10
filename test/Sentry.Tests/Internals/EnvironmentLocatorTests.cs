@@ -1,4 +1,3 @@
-using System;
 using Sentry.Internal;
 using Sentry.Testing;
 using Xunit;
@@ -29,19 +28,6 @@ namespace Sentry.Tests.Internals
                 () =>
                 {
                     Assert.Null(EnvironmentLocator.LocateFromEnvironmentVariable());
-                });
-        }
-
-        [Fact]
-        public void Current_CachesValue()
-        {
-            var expected = EnvironmentLocator.Current;
-            EnvironmentVariableGuard.WithVariable(
-                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
-                Guid.NewGuid().ToString(),
-                () =>
-                {
-                    Assert.Equal(expected, EnvironmentLocator.Current);
                 });
         }
     }

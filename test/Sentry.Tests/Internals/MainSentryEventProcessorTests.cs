@@ -248,6 +248,9 @@ namespace Sentry.Tests.Internals
                 environment,
                 () =>
                 {
+                    // Environment is cached
+                    EnvironmentLocator.Reset();
+
                     _ = sut.Process(evt);
                 });
 

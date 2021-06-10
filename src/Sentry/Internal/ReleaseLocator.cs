@@ -4,10 +4,10 @@ namespace Sentry.Internal
 {
     internal static class ReleaseLocator
     {
-        private static readonly Lazy<string?> FromEnvironmentLazy = new(ResolveFromEnvironment);
+        private static readonly Lazy<string?> FromEnvironmentLazy = new(LocateFromEnvironment);
 
         // Internal for testing
-        internal static string? ResolveFromEnvironment() =>
+        internal static string? LocateFromEnvironment() =>
             Environment.GetEnvironmentVariable(Constants.ReleaseEnvironmentVariable)
             ?? ApplicationVersionLocator.GetCurrent();
 
