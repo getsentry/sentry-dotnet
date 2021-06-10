@@ -49,8 +49,7 @@ namespace Sentry
         SentryTraceHeader? GetTraceHeader();
 
         /// <summary>
-        /// Starts a new session, optionally with the provided unique identifier.
-        /// Session identifier can be user ID, IP address, device MAC address, or any other similarly distinct value.
+        /// Starts a new session.
         /// </summary>
         void StartSession();
 
