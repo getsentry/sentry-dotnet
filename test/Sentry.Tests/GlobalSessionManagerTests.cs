@@ -21,10 +21,10 @@ namespace Sentry.Tests
             });
 
             // Act
-            var session = sessionManager.StartSession();
+            var sessionUpdate = sessionManager.StartSession();
 
             // Assert
-            session.Should().NotBeNull();
+            sessionUpdate.Should().NotBeNull();
         }
 
         [Fact]
@@ -38,14 +38,15 @@ namespace Sentry.Tests
                 Release = "test"
             });
 
-            var previousSession = sessionManager.StartSession();
+            var previousSessionUpdate = sessionManager.StartSession();
 
             // Act
-            var session = sessionManager.StartSession();
+            var sessionUpdate = sessionManager.StartSession();
 
             // Assert
-            session.Should().NotBe(previousSession);
-            previousSession?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            sessionUpdate.Should().NotBe(previousSessionUpdate);
+            sessionUpdate?.Id.Should().NotBe(previousSessionUpdate?.Id);
+            previousSessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
         [Fact]
@@ -59,7 +60,7 @@ namespace Sentry.Tests
                 Release = "test"
             });
 
-            var filePath = Path.Combine(tempDirectory.Path, ".installation");
+            var filePath = Path.Combine(tempDirectory.Path, "Sentry", ".installation");
 
             // Act
             sessionManager.StartSession();
@@ -103,10 +104,10 @@ namespace Sentry.Tests
             });
 
             // Act
-            var sessions = Enumerable.Range(0, 15).Select(_ => sessionManager.StartSession()).ToArray();
+            var sessionUpdates = Enumerable.Range(0, 15).Select(_ => sessionManager.StartSession()).ToArray();
 
             // Assert
-            sessions.Select(s => s.DistinctId).Distinct().Should().ContainSingle();
+            sessionUpdates.Select(s => s.DistinctId).Distinct().Should().ContainSingle();
         }
 
         [Fact]
@@ -120,7 +121,7 @@ namespace Sentry.Tests
                 Release = "test"
             });
 
-            var session = sessionManager.StartSession();
+            var sessionUpdate = sessionManager.StartSession();
 
             // Act
             sessionManager.ReportError();
@@ -128,8 +129,8 @@ namespace Sentry.Tests
             sessionManager.ReportError();
 
             // Assert
-            session.Should().NotBeNull();
-            session?.ErrorCount.Should().Be(3);
+            sessionUpdate.Should().NotBeNull();
+            sessionUpdate?.ErrorCount.Should().Be(3);
         }
 
         [Fact]
@@ -171,15 +172,15 @@ namespace Sentry.Tests
                 Release = "test"
             });
 
-            var session = sessionManager.StartSession();
+            var sessionUpdate = sessionManager.StartSession();
 
             // Act
-            var endedSession = sessionManager.EndSession(SessionEndStatus.Exited);
+            var endedSessionUpdate = sessionManager.EndSession(SessionEndStatus.Exited);
 
             // Assert
-            session.Should().NotBeNull();
-            session.Should().Be(endedSession);
-            session?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            sessionUpdate.Should().NotBeNull();
+            sessionUpdate.Should().Be(endedSessionUpdate);
+            sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
         [Fact]

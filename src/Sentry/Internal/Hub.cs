@@ -167,11 +167,10 @@ namespace Sentry.Internal
         {
             try
             {
-                var session = _sessionManager.StartSession();
-                if (session is not null)
+                var sessionUpdate = _sessionManager.StartSession();
+                if (sessionUpdate is not null)
                 {
-                    ConfigureScope(scope => scope.Session = session);
-                    CaptureSession(session.CreateUpdate(true));
+                    CaptureSession(sessionUpdate);
                 }
             }
             catch (Exception ex)
@@ -187,10 +186,10 @@ namespace Sentry.Internal
         {
             try
             {
-                var session = _sessionManager.EndSession(status);
-                if (session is not null)
+                var sessionUpdate = _sessionManager.EndSession(status);
+                if (sessionUpdate is not null)
                 {
-                    CaptureSession(session.CreateUpdate(false));
+                    CaptureSession(sessionUpdate);
                 }
             }
             catch (Exception ex)

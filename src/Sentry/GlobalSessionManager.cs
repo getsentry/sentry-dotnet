@@ -26,10 +26,14 @@ namespace Sentry
         {
             try
             {
-                // Store in cache directory or fall back to appdata
-                var directoryPath = !string.IsNullOrWhiteSpace(_options.CacheDirectoryPath)
-                    ? _options.CacheDirectoryPath
-                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
+                var directoryPath = Path.Combine(
+                    // Store in cache directory or fall back to appdata
+                    !string.IsNullOrWhiteSpace(_options.CacheDirectoryPath)
+                        ? _options.CacheDirectoryPath
+                        : Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    // Put under "Sentry" subdirectory
+                    "Sentry"
+                );
 
                 Directory.CreateDirectory(directoryPath);
 
@@ -147,7 +151,7 @@ namespace Sentry
             }
         }
 
-        public Session? StartSession()
+        public SessionUpdate? StartSession()
         {
             // Extract release
             var release = ReleaseLocator.Resolve(_options);
@@ -185,24 +189,25 @@ namespace Sentry
                 session.Id, session.DistinctId
             );
 
-            return session;
+            return session.CreateUpdate(true);
         }
 
-        public void ReportError()
+        public SessionUpdate? ReportError()
         {
             if (_currentSession is { } session)
             {
                 session.ReportError();
+                return session.CreateUpdate(false);
             }
-            else
-            {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to report an error on a session because there is none active."
-                );
-            }
+
+            _options.DiagnosticLogger?.LogDebug(
+                "Failed to report an error on a session because there is none active."
+            );
+
+            return null;
         }
 
-        private Session EndSession(Session session, SessionEndStatus status)
+        private SessionUpdate? EndSession(Session session, SessionEndStatus status)
         {
             session.End(status);
 
@@ -211,10 +216,10 @@ namespace Sentry
                 session.Id, session.DistinctId, status
             );
 
-            return session;
+            return session.CreateUpdate(false);
         }
 
-        public Session? EndSession(SessionEndStatus status)
+        public SessionUpdate? EndSession(SessionEndStatus status)
         {
             var session = Interlocked.Exchange(ref _currentSession, null);
             if (session is null)
