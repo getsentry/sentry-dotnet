@@ -31,7 +31,8 @@ namespace Sentry.Tests
             var sessionUpdate = new SessionUpdate(
                 session,
                 true,
-                DateTimeOffset.Parse("2020-01-02T00:00:00+00:00", CultureInfo.InvariantCulture)
+                DateTimeOffset.Parse("2020-01-02T00:00:00+00:00", CultureInfo.InvariantCulture),
+                5
             );
 
             // Act
@@ -45,6 +46,7 @@ namespace Sentry.Tests
                 "\"init\":true," +
                 "\"started\":\"2020-01-01T00:00:00+00:00\"," +
                 "\"timestamp\":\"2020-01-02T00:00:00+00:00\"," +
+                "\"seq\":5," +
                 "\"duration\":86400," +
                 "\"errors\":3," +
                 "\"status\":\"crashed\"," +
@@ -56,6 +58,31 @@ namespace Sentry.Tests
                 "}" +
                 "}"
             );
+        }
+
+        [Fact]
+        public void CreateUpdate_IncrementsSequenceNumber()
+        {
+            // Arrange
+            var session = new Session(
+                "foo",
+                "bar",
+                DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
+                "release123",
+                "env123",
+                "192.168.0.1",
+                "Google Chrome"
+            );
+
+            // Act
+            var sessionUpdate1 = session.CreateUpdate(true);
+            var sessionUpdate2 = session.CreateUpdate(false);
+            var sessionUpdate3 = session.CreateUpdate(false);
+
+            // Assert
+            sessionUpdate1.SequenceNumber.Should().Be(0);
+            sessionUpdate2.SequenceNumber.Should().Be(1);
+            sessionUpdate3.SequenceNumber.Should().Be(2);
         }
     }
 }

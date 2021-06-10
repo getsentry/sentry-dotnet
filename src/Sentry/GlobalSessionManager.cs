@@ -210,7 +210,7 @@ namespace Sentry
             return null;
         }
 
-        private SessionUpdate? EndSession(Session session, SessionEndStatus status)
+        private SessionUpdate EndSession(Session session, SessionEndStatus status)
         {
             session.End(status);
 

@@ -36,7 +36,11 @@ namespace Sentry
         private int _errorCount;
 
         /// <inheritdoc />
+        // Sentry's implementation changed to only care whether it's 0 or 1 (has error(s))
         public int ErrorCount => _errorCount;
+
+        // Start at -1 so that the first increment puts it at 0
+        private int _sequenceNumber = -1;
 
         internal Session(
             string id,
@@ -84,6 +88,7 @@ namespace Sentry
         /// <summary>
         /// Creates an update of this session.
         /// </summary>
-        public SessionUpdate CreateUpdate(bool isInitial) => new(this, isInitial);
+        public SessionUpdate CreateUpdate(bool isInitial) =>
+            new(this, isInitial, Interlocked.Increment(ref _sequenceNumber));
     }
 }

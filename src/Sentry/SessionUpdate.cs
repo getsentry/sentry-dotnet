@@ -48,6 +48,11 @@ namespace Sentry
         public DateTimeOffset Timestamp { get; }
 
         /// <summary>
+        /// Sequence number.
+        /// </summary>
+        public int SequenceNumber { get; }
+
+        /// <summary>
         /// Duration of time since the start of the session.
         /// </summary>
         public TimeSpan Duration => Timestamp - StartTimestamp;
@@ -66,7 +71,8 @@ namespace Sentry
             SessionEndStatus? endStatus,
             int errorCount,
             bool isInitial,
-            DateTimeOffset timestamp)
+            DateTimeOffset timestamp,
+            int sequenceNumber)
         {
             Id = id;
             DistinctId = distinctId;
@@ -79,12 +85,13 @@ namespace Sentry
             ErrorCount = errorCount;
             IsInitial = isInitial;
             Timestamp = timestamp;
+            SequenceNumber = sequenceNumber;
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionUpdate(ISession session, bool isInitial, DateTimeOffset timestamp)
+        public SessionUpdate(ISession session, bool isInitial, DateTimeOffset timestamp, int sequenceNumber)
             : this(
                 session.Id,
                 session.DistinctId,
@@ -96,16 +103,16 @@ namespace Sentry
                 session.EndStatus,
                 session.ErrorCount,
                 isInitial,
-                timestamp
-            )
+                timestamp,
+                sequenceNumber)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionUpdate(ISession session, bool isInitial)
-            : this(session, isInitial, DateTimeOffset.Now)
+        public SessionUpdate(ISession session, bool isInitial, int sequenceNumber)
+            : this(session, isInitial, DateTimeOffset.Now, sequenceNumber)
         {
         }
 
@@ -126,6 +133,8 @@ namespace Sentry
             writer.WriteString("started", StartTimestamp);
 
             writer.WriteString("timestamp", Timestamp);
+
+            writer.WriteNumber("seq", SequenceNumber);
 
             writer.WriteNumber("duration", (int)Duration.TotalSeconds);
 
@@ -178,6 +187,7 @@ namespace Sentry
             var errorCount = json.GetPropertyOrNull("errors")?.GetInt32() ?? 0;
             var isInitial = json.GetPropertyOrNull("init")?.GetBoolean() ?? false;
             var timestamp = json.GetProperty("timestamp").GetDateTimeOffset();
+            var sequenceNumber = json.GetProperty("seq").GetInt32();
 
             return new SessionUpdate(
                 id,
@@ -190,7 +200,8 @@ namespace Sentry
                 endStatus,
                 errorCount,
                 isInitial,
-                timestamp
+                timestamp,
+                sequenceNumber
             );
         }
     }
