@@ -165,7 +165,7 @@ namespace NotSentry.Tests
             hub.CaptureException(exception);
 
             // Assert
-            client.Received().CaptureEvent(
+            client.Received(1).CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
@@ -195,7 +195,7 @@ namespace NotSentry.Tests
             hub.CaptureException(exception);
 
             // Assert
-            client.Received().CaptureEvent(
+            client.Received(1).CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
@@ -225,7 +225,7 @@ namespace NotSentry.Tests
             hub.CaptureException(exception);
 
             // Assert
-            client.Received().CaptureEvent(
+            client.Received(1).CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
@@ -249,7 +249,7 @@ namespace NotSentry.Tests
             hub.CaptureException(new Exception("error"));
 
             // Assert
-            client.Received().CaptureEvent(
+            client.Received(1).CaptureEvent(
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
