@@ -82,7 +82,7 @@ namespace Sentry
         public void End(SessionEndStatus status) => EndStatus = status;
 
         /// <summary>
-        /// Creates a snapshot of this session.
+        /// Creates an update of this session.
         /// </summary>
         public SessionUpdate CreateUpdate(bool isInitial) => new(this, isInitial);
     }

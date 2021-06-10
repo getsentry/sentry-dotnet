@@ -5,7 +5,7 @@ using Sentry.Internal.Extensions;
 namespace Sentry
 {
     /// <summary>
-    /// Snapshot of a session.
+    /// Session update.
     /// </summary>
     public class SessionUpdate : ISession, IJsonSerializable
     {
@@ -37,7 +37,7 @@ namespace Sentry
         public int ErrorCount { get; }
 
         /// <summary>
-        /// Whether this is the initial snapshot.
+        /// Whether this is the initial update.
         /// </summary>
         public bool IsInitial { get; }
 

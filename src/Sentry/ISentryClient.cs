@@ -38,13 +38,13 @@ namespace Sentry
         void CaptureTransaction(Transaction transaction);
 
         /// <summary>
-        /// Captures a session snapshot.
+        /// Captures a session update.
         /// </summary>
         /// <remarks>
         /// Note: this method is NOT meant to be called from user code!
         /// It will be called automatically by the SDK.
         /// </remarks>
-        /// <param name="sessionUpdate">The snapshot to send to Sentry.</param>
+        /// <param name="sessionUpdate">The update to send to Sentry.</param>
         void CaptureSession(SessionUpdate sessionUpdate);
 
         /// <summary>

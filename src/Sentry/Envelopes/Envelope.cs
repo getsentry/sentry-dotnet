@@ -144,7 +144,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope that contains a session snapshot.
+        /// Creates an envelope that contains a session update.
         /// </summary>
         public static Envelope FromSession(SessionUpdate sessionUpdate)
         {

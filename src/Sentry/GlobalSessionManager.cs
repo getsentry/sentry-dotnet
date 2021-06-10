@@ -212,7 +212,7 @@ namespace Sentry
             session.End(status);
 
             _options.DiagnosticLogger?.LogInfo(
-                "Ended session (SID: {0}; DID: {1}) with state '{2}'.",
+                "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
                 session.Id, session.DistinctId, status
             );
 

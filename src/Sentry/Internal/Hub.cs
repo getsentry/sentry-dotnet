@@ -298,7 +298,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture session snapshot: {0}", e, sessionUpdate.Id);
+                _options.DiagnosticLogger?.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
             }
         }
 

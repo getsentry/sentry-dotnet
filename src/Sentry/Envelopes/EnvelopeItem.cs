@@ -159,7 +159,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from a session snapshot.
+        /// Creates an envelope item from a session update.
         /// </summary>
         public static EnvelopeItem FromSession(SessionUpdate sessionUpdate)
         {
