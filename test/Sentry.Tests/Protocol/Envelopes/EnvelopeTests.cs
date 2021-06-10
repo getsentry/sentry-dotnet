@@ -497,7 +497,8 @@ namespace Sentry.Tests.Protocol.Envelopes
 
             envelopeRoundtrip.Items[1].Payload.Should().BeOfType<StreamSerializable>();
 
-            envelopeRoundtrip.Items[2].Payload.Should().BeOfType<JsonSerializable>();
+            envelopeRoundtrip.Items[2].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(sessionUpdate);
         }
 
         [Fact]
@@ -530,9 +531,8 @@ namespace Sentry.Tests.Protocol.Envelopes
             // which original envelope doesn't have.
             envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
             envelopeRoundtrip.Items.Should().ContainSingle();
-
-            var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
-            payloadContent.Should().BeEquivalentTo(feedback);
+            envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(feedback);
         }
 
         [Fact]
@@ -560,9 +560,8 @@ namespace Sentry.Tests.Protocol.Envelopes
             // which original envelope doesn't have.
             envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
             envelopeRoundtrip.Items.Should().ContainSingle();
-
-            var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
-            payloadContent.Should().BeEquivalentTo(sessionUpdate);
+            envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(sessionUpdate);
         }
 
         [Fact]
