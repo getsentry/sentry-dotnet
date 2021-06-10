@@ -235,13 +235,20 @@ namespace Sentry.Internal
                 }
 
                 // Report an error on current session if contains an exception
-                if (evt.Exception is not null)
-                {
-                    _sessionManager.ReportError();
-                }
+                var sessionUpdate = evt.Exception is not null
+                    ? _sessionManager.ReportError()
+                    : null;
+
+                // Only set the session if the error count changed from 0 to 1.
+                // We don't care about error count going above 1 because it has no
+                // visible impact (a session is either errored or not).
+                actualScope.SessionUpdate = sessionUpdate?.ErrorCount == 1
+                    ? sessionUpdate
+                    : null;
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
+                actualScope.SessionUpdate = null;
 
                 // If the event contains unhandled exception - end session as crashed
                 if (evt.SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)

@@ -242,7 +242,7 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, scope.Session?.CreateUpdate(false)))
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, scope.SessionUpdate))
                 ? processedEvent.EventId
                 : SentryId.Empty;
         }
