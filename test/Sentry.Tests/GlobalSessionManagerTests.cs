@@ -25,6 +25,8 @@ namespace Sentry.Tests
 
             // Assert
             sessionUpdate.Should().NotBeNull();
+            sessionUpdate?.Id.Should().NotBeNullOrWhiteSpace();
+            sessionUpdate?.Release.Should().NotBeNullOrWhiteSpace();
         }
 
         [Fact]
@@ -38,15 +40,17 @@ namespace Sentry.Tests
                 Release = "test"
             });
 
-            var previousSessionUpdate = sessionManager.StartSession();
+            sessionManager.StartSession();
+            var previousSession = sessionManager.CurrentSession;
 
             // Act
-            var sessionUpdate = sessionManager.StartSession();
+            sessionManager.StartSession();
+            var session = sessionManager.CurrentSession;
 
             // Assert
-            sessionUpdate.Should().NotBe(previousSessionUpdate);
-            sessionUpdate?.Id.Should().NotBe(previousSessionUpdate?.Id);
-            previousSessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            session.Should().NotBe(previousSession);
+            session?.Id.Should().NotBe(previousSession?.Id);
+            previousSession?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
         [Fact]
@@ -121,12 +125,12 @@ namespace Sentry.Tests
                 Release = "test"
             });
 
-            var sessionUpdate = sessionManager.StartSession();
+            sessionManager.StartSession();
 
             // Act
             sessionManager.ReportError();
             sessionManager.ReportError();
-            sessionManager.ReportError();
+            var sessionUpdate = sessionManager.ReportError();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
@@ -172,15 +176,16 @@ namespace Sentry.Tests
                 Release = "test"
             });
 
-            var sessionUpdate = sessionManager.StartSession();
+            sessionManager.StartSession();
+            var session = sessionManager.CurrentSession;
 
             // Act
             var endedSessionUpdate = sessionManager.EndSession(SessionEndStatus.Exited);
 
             // Assert
-            sessionUpdate.Should().NotBeNull();
-            sessionUpdate.Should().Be(endedSessionUpdate);
-            sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            session.Should().NotBeNull();
+            session.Should().Be(endedSessionUpdate);
+            session?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
         [Fact]

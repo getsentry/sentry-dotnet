@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,10 +23,11 @@ namespace Sentry.Internal.Http
         private readonly Func<string, string?> _getEnvironmentVariable;
 
         // Keep track of rate limits and their expiry dates
-        private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets = new();
+        private readonly ConcurrentDictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets = new();
 
-        // Keep track of session IDs, whose initial envelope item was dropped
-        private readonly HashSet<string> _discardedSessionInits = new(StringComparer.Ordinal);
+        // Keep track of last discarded session init so that we can promote the next update.
+        // We only track one because session updates are ordered.
+        private string? _lastDiscardedSessionInitId;
 
         internal const string DefaultErrorMessage = "No message";
 
@@ -62,7 +64,7 @@ namespace Sentry.Internal.Http
                     // Check if session update with init=true
                     if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
                     {
-                        _discardedSessionInits.Add(discardedSessionUpdate.Id);
+                        _lastDiscardedSessionInitId = discardedSessionUpdate.Id;
 
                         _options.DiagnosticLogger?.LogDebug(
                             "Discarded envelope item containing initial session update (SID: {0}).",
@@ -86,17 +88,17 @@ namespace Sentry.Internal.Http
                     continue;
                 }
 
-                // If session update (not discarded) without init=true,
-                // check if it continues a session with dropped init.
+                // If it's a session update (not discarded) with init=false, check if it continues
+                // a session with previously dropped init and, if so, promote this update to init=true.
                 if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
-                    _discardedSessionInits.Contains(sessionUpdate.Id))
+                    string.Equals(sessionUpdate.Id, Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
+                        StringComparison.Ordinal))
                 {
                     var modifiedEnvelopeItem = new EnvelopeItem(
                         envelopeItem.Header,
                         new JsonSerializable(new SessionUpdate(sessionUpdate, true, sessionUpdate.Timestamp))
                     );
 
-                    _discardedSessionInits.Remove(sessionUpdate.Id);
                     envelopeItems.Add(modifiedEnvelopeItem);
 
                     _options.DiagnosticLogger?.LogDebug(
@@ -219,7 +221,7 @@ namespace Sentry.Internal.Http
             }
 
             // SDK is in debug mode, and envelope was too large. To help troubleshoot:
-            const String persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
+            const string persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) == true
                 && response.StatusCode == HttpStatusCode.RequestEntityTooLarge
                 && _getEnvironmentVariable(persistLargeEnvelopePathEnvVar) is { } destinationDirectory)

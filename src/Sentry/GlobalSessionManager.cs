@@ -17,6 +17,9 @@ namespace Sentry
         private string? _cachedInstallationId;
         private Session? _currentSession;
 
+        // Internal for testing
+        internal Session? CurrentSession => _currentSession;
+
         public GlobalSessionManager(SentryOptions options)
         {
             _options = options;
