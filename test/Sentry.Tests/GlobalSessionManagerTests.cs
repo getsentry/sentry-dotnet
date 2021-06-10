@@ -9,19 +9,42 @@ namespace Sentry.Tests
 {
     public class GlobalSessionManagerTests
     {
+        private class Fixture : IDisposable
+        {
+            private readonly TempDirectory _cacheDirectory = new();
+
+            public InMemoryDiagnosticLogger Logger { get; }
+
+            public SentryOptions Options { get; }
+
+            public GlobalSessionManager SessionManager { get; }
+
+            public Fixture()
+            {
+                Logger = new InMemoryDiagnosticLogger();
+
+                Options = new SentryOptions
+                {
+                    CacheDirectoryPath = _cacheDirectory.Path,
+                    Release = "test",
+                    Debug = true,
+                    DiagnosticLogger = Logger
+                };
+
+                SessionManager = new GlobalSessionManager(Options);
+            }
+
+            public void Dispose() => _cacheDirectory.Dispose();
+        }
+
         [Fact]
         public void StartSession_ReleaseSet_CreatesNewSession()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test"
-            });
+            using var fixture = new Fixture();
 
             // Act
-            var sessionUpdate = sessionManager.StartSession();
+            var sessionUpdate = fixture.SessionManager.StartSession();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
@@ -33,19 +56,14 @@ namespace Sentry.Tests
         public void StartSession_ActiveSessionExists_EndsPreviousSession()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test"
-            });
+            using var fixture = new Fixture();
 
-            sessionManager.StartSession();
-            var previousSession = sessionManager.CurrentSession;
+            fixture.SessionManager.StartSession();
+            var previousSession = fixture.SessionManager.CurrentSession;
 
             // Act
-            sessionManager.StartSession();
-            var session = sessionManager.CurrentSession;
+            fixture.SessionManager.StartSession();
+            var session = fixture.SessionManager.CurrentSession;
 
             // Assert
             session.Should().NotBe(previousSession);
@@ -57,17 +75,12 @@ namespace Sentry.Tests
         public void StartSession_CacheDirectoryProvided_InstallationIdFileCreated()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test"
-            });
+            using var fixture = new Fixture();
 
-            var filePath = Path.Combine(tempDirectory.Path, "Sentry", ".installation");
+            var filePath = Path.Combine(fixture.Options.CacheDirectoryPath!, "Sentry", ".installation");
 
             // Act
-            sessionManager.StartSession();
+            fixture.SessionManager.StartSession();
 
             // Assert
             File.Exists(filePath).Should().BeTrue();
@@ -77,11 +90,8 @@ namespace Sentry.Tests
         public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                Release = "test"
-            });
+            using var fixture = new Fixture();
+            fixture.Options.CacheDirectoryPath = null;
 
             var filePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -90,7 +100,7 @@ namespace Sentry.Tests
             );
 
             // Act
-            sessionManager.StartSession();
+            fixture.SessionManager.StartSession();
 
             // Assert
             File.Exists(filePath).Should().BeTrue();
@@ -100,15 +110,13 @@ namespace Sentry.Tests
         public void StartSession_InstallationId_AlwaysSameId()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test"
-            });
+            using var fixture = new Fixture();
 
             // Act
-            var sessionUpdates = Enumerable.Range(0, 15).Select(_ => sessionManager.StartSession()).ToArray();
+            var sessionUpdates = Enumerable
+                .Range(0, 15)
+                .Select(_ => fixture.SessionManager.StartSession())
+                .ToArray();
 
             // Assert
             sessionUpdates.Select(s => s.DistinctId).Distinct().Should().ContainSingle();
@@ -118,19 +126,14 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionExists_IncrementsErrorCount()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test"
-            });
+            using var fixture = new Fixture();
 
-            sessionManager.StartSession();
+            fixture.SessionManager.StartSession();
 
             // Act
-            sessionManager.ReportError();
-            sessionManager.ReportError();
-            var sessionUpdate = sessionManager.ReportError();
+            fixture.SessionManager.ReportError();
+            fixture.SessionManager.ReportError();
+            var sessionUpdate = fixture.SessionManager.ReportError();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
@@ -141,25 +144,15 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionDoesNotExist_LogsOutError()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-
-            var logger = new InMemoryDiagnosticLogger();
-
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test",
-                DiagnosticLogger = logger,
-                Debug = true
-            });
+            using var fixture = new Fixture();
 
             // Act
-            sessionManager.ReportError();
-            sessionManager.ReportError();
-            sessionManager.ReportError();
+            fixture.SessionManager.ReportError();
+            fixture.SessionManager.ReportError();
+            fixture.SessionManager.ReportError();
 
             // Assert
-            logger.Entries.Should().Contain(e =>
+            fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to report an error on a session because there is none active." &&
                 e.Level == SentryLevel.Debug
             );
@@ -169,18 +162,13 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionExists_EndsSession()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test"
-            });
+            using var fixture = new Fixture();
 
-            sessionManager.StartSession();
-            var session = sessionManager.CurrentSession;
+            fixture.SessionManager.StartSession();
+            var session = fixture.SessionManager.CurrentSession;
 
             // Act
-            sessionManager.EndSession(SessionEndStatus.Exited);
+            fixture.SessionManager.EndSession(SessionEndStatus.Exited);
 
             // Assert
             session.Should().NotBeNull();
@@ -191,25 +179,15 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionDoesNotExist_DoesNothing()
         {
             // Arrange
-            using var tempDirectory = new TempDirectory();
-
-            var logger = new InMemoryDiagnosticLogger();
-
-            var sessionManager = new GlobalSessionManager(new SentryOptions
-            {
-                CacheDirectoryPath = tempDirectory.Path,
-                Release = "test",
-                DiagnosticLogger = logger,
-                Debug = true
-            });
+            using var fixture = new Fixture();
 
             // Act
-            var endedSession = sessionManager.EndSession(SessionEndStatus.Exited);
+            var endedSession = fixture.SessionManager.EndSession(SessionEndStatus.Exited);
 
             // Assert
             endedSession.Should().BeNull();
 
-            logger.Entries.Should().Contain(e =>
+            fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to end session because there is none active." &&
                 e.Level == SentryLevel.Error
             );
