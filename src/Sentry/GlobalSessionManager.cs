@@ -81,24 +81,36 @@ namespace Sentry
 
         private string? TryGetHardwareInstallationId()
         {
-            var installationId = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(nic =>
-                    nic.OperationalStatus == OperationalStatus.Up &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .Select(nic => nic.GetPhysicalAddress().ToString())
-                .FirstOrDefault();
+            try
+            {
+                var installationId = NetworkInterface
+                    .GetAllNetworkInterfaces()
+                    .Where(nic =>
+                        nic.OperationalStatus == OperationalStatus.Up &&
+                        nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                    .Select(nic => nic.GetPhysicalAddress().ToString())
+                    .FirstOrDefault();
 
-            if (string.IsNullOrWhiteSpace(installationId))
+                if (string.IsNullOrWhiteSpace(installationId))
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to resolve hardware installation ID."
+                    );
+
+                    return null;
+                }
+
+                return installationId;
+            }
+            catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to resolve hardware installation ID."
+                    "Failed to resolve hardware installation ID.",
+                    ex
                 );
 
                 return null;
             }
-
-            return installationId;
         }
 
         private string? TryGetInstallationId()
