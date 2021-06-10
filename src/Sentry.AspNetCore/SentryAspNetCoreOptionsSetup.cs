@@ -4,8 +4,10 @@ using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Internal;
 #if NETSTANDARD2_0
+using Microsoft.AspNetCore.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
+using Microsoft.Extensions.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 
@@ -36,7 +38,7 @@ namespace Sentry.AspNetCore
                 }
                 else
                 {
-                    // NOTE: Sentry prefers to have it's environment setting to be all lower case.
+                    // NOTE: Sentry prefers to have its environment setting to be all lower case.
                     //       .NET Core sets the ENV variable to 'Production' (upper case P) or
                     //       'Development' (upper case D) which conflicts with the Sentry recommendation.
                     //       As such, we'll be kind and override those values, here ... if applicable.
@@ -46,11 +48,15 @@ namespace Sentry.AspNetCore
                     //             need to respect (especially the case-sensitivity).
                     //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
 
-                    if (_hostingEnvironment.EnvironmentName.Equals(Constants.ASPNETCoreProductionEnvironmentName))
+                    if (_hostingEnvironment.IsProduction())
                     {
                         options.Environment = Internal.Constants.ProductionEnvironmentSetting;
                     }
-                    else if (_hostingEnvironment.EnvironmentName.Equals(Constants.ASPNETCoreDevelopmentEnvironmentName))
+                    else if (_hostingEnvironment.IsStaging())
+                    {
+                        options.Environment = Internal.Constants.StagingEnvironmentSetting;
+                    }
+                    else if (_hostingEnvironment.IsDevelopment())
                     {
                         options.Environment = Internal.Constants.DevelopmentEnvironmentSetting;
                     }
