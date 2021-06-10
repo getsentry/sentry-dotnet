@@ -66,7 +66,9 @@ namespace Sentry
 
                 return id;
             }
-            catch (IOException ex)
+            // If there's no write permission or the platform doesn't support this, we handle
+            // and let the next installation id strategy kick in
+            catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to resolve persistent installation ID.",
