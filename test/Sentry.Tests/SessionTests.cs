@@ -65,7 +65,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var session = new Session(
-                "foo",
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 "bar",
                 DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
                 "release123",
