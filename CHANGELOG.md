@@ -40,6 +40,7 @@
 - Adjust parameter type in `AddBreadcrumb` to use `IReadOnlyDictionary<...>` instead of `Dictionary<...>` ([#1000](https://github.com/getsentry/sentry-dotnet/pull/1000))
 - await dispose everywhere ([#1009](https://github.com/getsentry/sentry-dotnet/pull/1009))
 - Further simplify transaction integration from legacy ASP.NET ([#1011](https://github.com/getsentry/sentry-dotnet/pull/1011))
+- Implemented client-mode release health ([#1013](https://github.com/getsentry/sentry-dotnet/pull/1013))
 
 ## 3.3.5-beta.0
 

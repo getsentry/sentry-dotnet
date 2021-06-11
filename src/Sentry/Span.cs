@@ -161,7 +161,7 @@ namespace Sentry
             var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
+            var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
             var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
             var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();

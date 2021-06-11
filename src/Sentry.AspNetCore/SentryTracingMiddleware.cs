@@ -76,7 +76,7 @@ namespace Sentry.AspNetCore
                     ? new TransactionContext(transactionName, OperationName, traceHeader)
                     : new TransactionContext(transactionName, OperationName);
 
-                var customSamplingContext = new Dictionary<string, object?>(StringComparer.Ordinal)
+                var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
                 {
                     [SamplingExtensions.KeyForHttpMethod] = context.Request.Method,
                     [SamplingExtensions.KeyForHttpRoute] = context.TryGetRouteTemplate(),

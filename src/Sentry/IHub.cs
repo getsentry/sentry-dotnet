@@ -47,5 +47,15 @@ namespace Sentry
         /// Gets the Sentry trace header for the last active span.
         /// </summary>
         SentryTraceHeader? GetTraceHeader();
+
+        /// <summary>
+        /// Starts a new session.
+        /// </summary>
+        void StartSession();
+
+        /// <summary>
+        /// Ends the currently active session.
+        /// </summary>
+        void EndSession(SessionEndStatus status = SessionEndStatus.Exited);
     }
 }
