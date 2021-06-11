@@ -10,7 +10,7 @@ namespace Sentry
     public class Session : ISession
     {
         /// <inheritdoc />
-        public string Id { get; }
+        public SentryId Id { get; }
 
         /// <inheritdoc />
         public string? DistinctId { get; }
@@ -43,7 +43,7 @@ namespace Sentry
         private int _sequenceNumber = -1;
 
         internal Session(
-            string id,
+            SentryId id,
             string? distinctId,
             DateTimeOffset startTimestamp,
             string release,
@@ -65,7 +65,7 @@ namespace Sentry
         /// </summary>
         public Session(string? distinctId, string release, string? environment)
             : this(
-                Guid.NewGuid().ToString(),
+                SentryId.Create(),
                 distinctId,
                 DateTimeOffset.Now,
                 release,
