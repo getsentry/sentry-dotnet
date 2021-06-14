@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
