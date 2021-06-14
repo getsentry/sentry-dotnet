@@ -13,7 +13,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var session = new Session(
-                "foo",
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 "bar",
                 DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
                 "release123",
@@ -41,7 +41,7 @@ namespace Sentry.Tests
             // Assert
             json.Should().Be(
                 "{" +
-                "\"sid\":\"foo\"," +
+                "\"sid\":\"75302ac48a024bde9a3b3734a82e36c8\"," +
                 "\"did\":\"bar\"," +
                 "\"init\":true," +
                 "\"started\":\"2020-01-01T00:00:00+00:00\"," +
@@ -65,7 +65,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var session = new Session(
-                "foo",
+                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 "bar",
                 DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
                 "release123",

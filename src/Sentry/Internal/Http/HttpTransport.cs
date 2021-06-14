@@ -28,6 +28,7 @@ namespace Sentry.Internal.Http
 
         // Keep track of last discarded session init so that we can promote the next update.
         // We only track one because session updates are ordered.
+        // Using string instead of SentryId here so that we can use Interlocked.Exchange(...).
         private string? _lastDiscardedSessionInitId;
 
         internal const string DefaultErrorMessage = "No message";
@@ -65,7 +66,7 @@ namespace Sentry.Internal.Http
                     // Check if session update with init=true
                     if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
                     {
-                        _lastDiscardedSessionInitId = discardedSessionUpdate.Id;
+                        _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
 
                         _options.DiagnosticLogger?.LogDebug(
                             "Discarded envelope item containing initial session update (SID: {0}).",
@@ -92,7 +93,7 @@ namespace Sentry.Internal.Http
                 // If it's a session update (not discarded) with init=false, check if it continues
                 // a session with previously dropped init and, if so, promote this update to init=true.
                 if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
-                    string.Equals(sessionUpdate.Id, Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
+                    string.Equals(sessionUpdate.Id.ToString(), Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
                         StringComparison.Ordinal))
                 {
                     var modifiedEnvelopeItem = new EnvelopeItem(
