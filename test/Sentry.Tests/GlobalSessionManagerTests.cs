@@ -48,7 +48,7 @@ namespace Sentry.Tests
 
             // Assert
             sessionUpdate.Should().NotBeNull();
-            sessionUpdate?.Id.Should().NotBeNullOrWhiteSpace();
+            sessionUpdate?.Id.Should().NotBe(SentryId.Empty);
             sessionUpdate?.Release.Should().NotBeNullOrWhiteSpace();
         }
 
