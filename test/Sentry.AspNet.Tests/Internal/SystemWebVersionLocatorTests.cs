@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
-using NSubstitute;
 using Sentry.AspNet.Internal;
-using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
 
@@ -42,7 +35,7 @@ namespace Sentry.AspNet.Tests.Internal
             var sut = _fixture.GetSut();
             var expected = ApplicationVersionLocator.GetCurrent(sut);
 
-            var actual = SystemWebVersionLocator.GetCurrent(null);
+            var actual = SystemWebVersionLocator.Resolve((string) null, _fixture.HttpContext);
 
             Assert.Equal(expected, actual);
         }
@@ -52,7 +45,7 @@ namespace Sentry.AspNet.Tests.Internal
         {
             var expected = ApplicationVersionLocator.GetCurrent();
 
-            var actual = SystemWebVersionLocator.GetCurrent();
+            var actual = SystemWebVersionLocator.Resolve(new SentryOptions(), _fixture.HttpContext);
 
             Assert.Equal(expected, actual);
         }

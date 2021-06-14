@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.6.0-alpha.1
+
+### Features
+
+- Implemented client-mode release health ([#1013](https://github.com/getsentry/sentry-dotnet/pull/1013))
 
 ### Fixes
 

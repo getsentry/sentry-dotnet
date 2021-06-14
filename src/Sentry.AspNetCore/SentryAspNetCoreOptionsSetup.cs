@@ -28,7 +28,7 @@ namespace Sentry.AspNetCore
             // Don't override user defined value.
             if (string.IsNullOrWhiteSpace(options.Environment))
             {
-                var locatedEnvironment = EnvironmentLocator.Locate();
+                var locatedEnvironment = EnvironmentLocator.LocateFromEnvironmentVariable();
                 if (!string.IsNullOrWhiteSpace(locatedEnvironment))
                 {
                     // Sentry specific environment takes precedence #92.

@@ -158,6 +158,17 @@ namespace Sentry
             CaptureEnvelope(Envelope.FromTransaction(transaction));
         }
 
+        /// <inheritdoc />
+        public void CaptureSession(SessionUpdate sessionUpdate)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            CaptureEnvelope(Envelope.FromSession(sessionUpdate));
+        }
+
         /// <summary>
         /// Flushes events asynchronously.
         /// </summary>
@@ -231,7 +242,7 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments))
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, scope.SessionUpdate))
                 ? processedEvent.EventId
                 : SentryId.Empty;
         }

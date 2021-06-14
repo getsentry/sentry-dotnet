@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace Sentry.Internal
     internal class Hub : IHub, IDisposable
     {
         private readonly ISentryClient _ownedClient;
+        private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
@@ -24,10 +26,10 @@ namespace Sentry.Internal
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;
 
-        internal Hub(ISentryClient client, SentryOptions options)
+        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
         {
             _ownedClient = client;
-
+            _sessionManager = sessionManager;
             _options = options;
 
             if (Dsn.TryParse(options.Dsn) is null)
@@ -56,6 +58,11 @@ namespace Sentry.Internal
             _rootScope = PushScope();
 
             _enricher = new Enricher(options);
+        }
+
+        internal Hub(ISentryClient client, SentryOptions options)
+            : this(client, new GlobalSessionManager(options), options)
+        {
         }
 
         public Hub(SentryOptions options)
@@ -156,6 +163,44 @@ namespace Sentry.Internal
 
         public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
+        public void StartSession()
+        {
+            try
+            {
+                var sessionUpdate = _sessionManager.StartSession();
+                if (sessionUpdate is not null)
+                {
+                    CaptureSession(sessionUpdate);
+                }
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to start a session.",
+                    ex
+                );
+            }
+        }
+
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+        {
+            try
+            {
+                var sessionUpdate = _sessionManager.EndSession(status);
+                if (sessionUpdate is not null)
+                {
+                    CaptureSession(sessionUpdate);
+                }
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to end a session.",
+                    ex
+                );
+            }
+        }
+
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {
             // Find the span which is bound to the same exception
@@ -189,8 +234,27 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
+                // Report an error on current session if contains an exception
+                var sessionUpdate = evt.Exception is not null
+                    ? _sessionManager.ReportError()
+                    : null;
+
+                // Only set the session if the error count changed from 0 to 1.
+                // We don't care about error count going above 1 because it has no
+                // visible impact (a session is either errored or not).
+                actualScope.SessionUpdate = sessionUpdate?.ErrorCount == 1
+                    ? sessionUpdate
+                    : null;
+
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
+                actualScope.SessionUpdate = null;
+
+                // If the event contains unhandled exception - end session as crashed
+                if (evt.SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
+                {
+                    EndSession(SessionEndStatus.Crashed);
+                }
 
                 return id;
             }
@@ -230,6 +294,18 @@ namespace Sentry.Internal
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+            }
+        }
+
+        public void CaptureSession(SessionUpdate sessionUpdate)
+        {
+            try
+            {
+                _ownedClient.CaptureSession(sessionUpdate);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
             }
         }
 
