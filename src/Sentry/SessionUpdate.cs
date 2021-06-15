@@ -11,7 +11,7 @@ namespace Sentry
     public class SessionUpdate : ISession, IJsonSerializable
     {
         /// <inheritdoc />
-        public string Id { get; }
+        public SentryId Id { get; }
 
         /// <inheritdoc />
         public string? DistinctId { get; }
@@ -61,7 +61,7 @@ namespace Sentry
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
         public SessionUpdate(
-            string id,
+            SentryId id,
             string? distinctId,
             DateTimeOffset startTimestamp,
             string release,
@@ -121,7 +121,7 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            writer.WriteString("sid", Id);
+            writer.WriteSerializable("sid", Id);
 
             if (!string.IsNullOrWhiteSpace(DistinctId))
             {
@@ -176,7 +176,7 @@ namespace Sentry
         /// </summary>
         public static SessionUpdate FromJson(JsonElement json)
         {
-            var id = json.GetProperty("sid").GetStringOrThrow();
+            var id = json.GetProperty("sid").GetStringOrThrow().Pipe(SentryId.Parse);
             var distinctId = json.GetPropertyOrNull("did")?.GetString();
             var startTimestamp = json.GetProperty("started").GetDateTimeOffset();
             var release = json.GetProperty("attrs").GetProperty("release").GetStringOrThrow();

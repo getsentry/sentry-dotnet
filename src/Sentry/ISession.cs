@@ -10,7 +10,7 @@ namespace Sentry
         /// <summary>
         /// Session auto-generated ID.
         /// </summary>
-        string Id { get; }
+        SentryId Id { get; }
 
         /// <summary>
         /// Session distinct ID.
