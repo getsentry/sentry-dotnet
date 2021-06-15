@@ -40,6 +40,16 @@ namespace Sentry.AspNetCore
         public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
+        /// Controls whether the case of the standard (Production, Development and Staging) EnvironmentName supplied by HostingEnvironment
+        /// is adjusted when setting the Sentry environment. Defaults to true.
+        /// </summary>
+        /// <remarks>
+        /// The default .NET Core EnvironmentNames include Production, Development and Staging (note Pascal casing), whereas sentry prefers
+        /// to have its environment setting be all lower case.
+        /// </remarks>
+        public bool AdjustStandardEnvironmentNameCasing { get; set; } = true;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryAspNetCoreOptions"/>.
         /// </summary>
         public SentryAspNetCoreOptions()
