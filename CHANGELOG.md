@@ -4,6 +4,20 @@
 
 - Introduce TraceDiagnosticLogger and obsolete DebugDiagnosticLogger ([#1048](https://github.com/getsentry/sentry-dotnet/pull/1048))
 
+### Changes
+
+- Use SentryId for ISession.Id ([#1052](https://github.com/getsentry/sentry-dotnet/pull/1052))
+
+## 3.6.0-alpha.1
+
+### Features
+
+- Implemented client-mode release health ([#1013](https://github.com/getsentry/sentry-dotnet/pull/1013))
+
+### Fixes
+
+- Report lowercase staging environment for ASP.NET Core ([#1046](https://github.com/getsentry/sentry-unity/pull/1046))
+
 ## 3.5.0
 
 ### Features

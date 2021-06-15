@@ -374,7 +374,7 @@ namespace Sentry
             var name = json.GetProperty("transaction").GetStringOrThrow();
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
-            var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<SentryLevel>());
+            var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
             var platform = json.GetPropertyOrNull("platform")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
             var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);

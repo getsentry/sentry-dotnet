@@ -369,7 +369,7 @@ namespace Sentry.Protocol
             var batteryLevel = json.GetPropertyOrNull("battery_level")?.GetInt16();
             var isCharging = json.GetPropertyOrNull("charging")?.GetBoolean();
             var isOnline = json.GetPropertyOrNull("online")?.GetBoolean();
-            var orientation = json.GetPropertyOrNull("orientation")?.GetString()?.Pipe(s => s.ParseEnum<DeviceOrientation>());
+            var orientation = json.GetPropertyOrNull("orientation")?.GetString()?.ParseEnum<DeviceOrientation>();
             var simulator = json.GetPropertyOrNull("simulator")?.GetBoolean();
             var memorySize = json.GetPropertyOrNull("memory_size")?.GetInt64();
             var freeMemory = json.GetPropertyOrNull("free_memory")?.GetInt64();

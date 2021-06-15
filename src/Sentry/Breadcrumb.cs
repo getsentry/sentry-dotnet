@@ -168,7 +168,7 @@ namespace Sentry
             var type = json.GetPropertyOrNull("type")?.GetString();
             var data = json.GetPropertyOrNull("data")?.GetDictionary();
             var category = json.GetPropertyOrNull("category")?.GetString();
-            var level = json.GetPropertyOrNull("level")?.GetString()?.Pipe(s => s.ParseEnum<BreadcrumbLevel>()) ?? default;
+            var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<BreadcrumbLevel>() ?? default;
 
             return new Breadcrumb(timestamp, message, type, data!, category, level);
         }

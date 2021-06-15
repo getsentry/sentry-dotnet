@@ -17,9 +17,8 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-            public SentryOptions SentryOptions { get; set; } = new();
-            public Lazy<string> LazyRelease { get; set; } = new(() => "release-123");
-            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory, LazyRelease);
+            public SentryOptions SentryOptions { get; set; } = new() {Release = "release-123"};
+            public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
         }
 
         private readonly Fixture _fixture = new();
@@ -240,6 +239,7 @@ namespace Sentry.Tests.Internals
         [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
         public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
         {
+            _fixture.SentryOptions.Environment = null;
             var sut = _fixture.GetSut();
             var evt = new SentryEvent();
 
@@ -248,6 +248,9 @@ namespace Sentry.Tests.Internals
                 environment,
                 () =>
                 {
+                    // Environment is cached
+                    EnvironmentLocator.Reset();
+
                     _ = sut.Process(evt);
                 });
 
