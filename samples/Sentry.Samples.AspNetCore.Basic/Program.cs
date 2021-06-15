@@ -14,9 +14,9 @@ namespace Sentry.Samples.AspNetCore.Basic
     {
         public static void Main(string[] args)
         {
-            WebHostExtensions.Run(BuildWebHost(args));
+            BuildWebHost(args).Run();
             // or
-            // BuildHost(args).Run();
+            //BuildHost(args).Run();
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
