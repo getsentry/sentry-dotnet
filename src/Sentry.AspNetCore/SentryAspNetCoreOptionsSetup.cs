@@ -38,39 +38,37 @@ namespace Sentry.AspNetCore
                 }
                 else
                 {
-                    if (options.AdjustStandardEnvironmentNameCasing)
-                    {
-                        // NOTE: Sentry prefers to have its environment setting to be all lower case.
-                        //       .NET Core sets the ENV variable to 'Production' (upper case P),
-                        //       'Development' (upper case D) or 'Staging' (upper case S) which conflicts with
-                        //       the Sentry recommendation. As such, we'll be kind and override those values,
-                        //       here ... if applicable.
-                        // Assumption: The Hosting Environment is always set.
-                        //             If not set by a developer, then the framework will auto set it.
-                        //             Alternatively, developers might set this to a CUSTOM value, which we
-                        //             need to respect (especially the case-sensitivity).
-                        //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
+                    // NOTE: Sentry prefers to have its environment setting to be all lower case.
+                    //       .NET Core sets the ENV variable to 'Production' (upper case P),
+                    //       'Development' (upper case D) or 'Staging' (upper case S) which conflicts with
+                    //       the Sentry recommendation. As such, we'll be kind and override those values,
+                    //       here ... if applicable.
+                    // Assumption: The Hosting Environment is always set.
+                    //             If not set by a developer, then the framework will auto set it.
+                    //             Alternatively, developers might set this to a CUSTOM value, which we
+                    //             need to respect (especially the case-sensitivity).
+                    //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
 
-                        if (_hostingEnvironment.IsProduction())
-                        {
-                            options.Environment = Internal.Constants.ProductionEnvironmentSetting;
-                        }
-                        else if (_hostingEnvironment.IsStaging())
-                        {
-                            options.Environment = Internal.Constants.StagingEnvironmentSetting;
-                        }
-                        else if (_hostingEnvironment.IsDevelopment())
-                        {
-                            options.Environment = Internal.Constants.DevelopmentEnvironmentSetting;
-                        }
-                        else
-                        {
-                            // Use the value set by the developer.
-                            options.Environment = _hostingEnvironment.EnvironmentName;
-                        }
+                    if (!options.AdjustStandardEnvironmentNameCasing)
+                    {
+                        // Use the value set by the developer.
+                        options.Environment = _hostingEnvironment.EnvironmentName;
+                    }
+                    else if (_hostingEnvironment.IsProduction())
+                    {
+                        options.Environment = Internal.Constants.ProductionEnvironmentSetting;
+                    }
+                    else if (_hostingEnvironment.IsStaging())
+                    {
+                        options.Environment = Internal.Constants.StagingEnvironmentSetting;
+                    }
+                    else if (_hostingEnvironment.IsDevelopment())
+                    {
+                        options.Environment = Internal.Constants.DevelopmentEnvironmentSetting;
                     }
                     else
                     {
+                        // Use the value set by the developer.
                         options.Environment = _hostingEnvironment.EnvironmentName;
                     }
                 }
