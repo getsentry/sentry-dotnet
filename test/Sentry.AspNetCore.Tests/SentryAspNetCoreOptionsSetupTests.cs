@@ -42,24 +42,18 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Theory]
-        [InlineData("foo", "Production", true, "foo")] // Custom - set. Adjust standard casing - true. Rest ignored.
-        [InlineData("Production", "Production", true, "Production")] // Custom - set. Adjust standard casing - true. Rest ignored. NOTE: Custom value _happens_ to be the common ASPNET_ENVIRONMENT PROD setting.
-        [InlineData(null, "Production", true, "production")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default PROD.
-        [InlineData("", "Production", true, "production")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default PROD.
-        [InlineData(null, "Development", true, "development")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default DEV.
-        [InlineData("", "Development", true, "development")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default DEV.
-        [InlineData(null, "Staging", true, "staging")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default STAGING.
-        [InlineData("", "Staging", true, "staging")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default STAGING.
-        [InlineData(null, "Production", false, "Production")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default PROD.
-        [InlineData("", "Production", false, "Production")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default PROD.
-        [InlineData(null, "Development", false, "Development")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default DEV.
-        [InlineData("", "Development", false, "Development")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default DEV.
-        [InlineData(null, "Staging", false, "Staging")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default STAGING.
-        [InlineData("", "Staging", false, "Staging")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default STAGING.
-        [InlineData(null, "production", true, "production")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is custom (notice lowercase 'p').
-        [InlineData(null, "development", true, "development")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is custom (notice lowercase 'd').
-        [InlineData(null, "staging", true, "staging")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is custom (notice lowercase 's').
-        public void Filters_Environment_CustomOrASPNETEnvironment_Set(string environment, string hostingEnvironmentSetting, bool adjustStandardEnvironmentNameCasingSetting, string expectedEnvironment)
+        [InlineData("foo", "Production", "foo")] // Custom - set. Rest ignored.
+        [InlineData("Production", "Production", "Production")] // Custom - set. Rest ignored. NOTE: Custom value _happens_ to be the common ASPNET_ENVIRONMENT PROD setting.
+        [InlineData(null, "Production", "production")] // Custom - nothing set. ASPNET_ENVIRONMENT is default PROD.
+        [InlineData("", "Production", "production")] // Custom - nothing set. ASPNET_ENVIRONMENT is default PROD.
+        [InlineData(null, "Development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is default DEV.
+        [InlineData("", "Development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is default DEV.
+        [InlineData(null, "Staging", "staging")] // Custom - nothing set. ASPNET_ENVIRONMENT is default STAGING.
+        [InlineData("", "Staging", "staging")] // Custom - nothing set. ASPNET_ENVIRONMENT is default STAGING.
+        [InlineData(null, "production", "production")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'p').
+        [InlineData(null, "development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'd').
+        [InlineData(null, "staging", "staging")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 's').
+        public void Filters_Environment_CustomOrASPNETEnvironment_Set(string environment, string hostingEnvironmentSetting, string expectedEnvironment)
         {
             // Arrange.
             var hostingEnvironment = Substitute.For<IHostingEnvironment>();
@@ -70,6 +64,34 @@ namespace Sentry.AspNetCore.Tests
                 hostingEnvironment);
 
             //const string environment = "some environment";
+            _target.Environment = environment;
+
+            // Act.
+            sut.Configure(_target);
+
+            // Assert.
+            Assert.Equal(expectedEnvironment, _target.Environment);
+        }
+
+        [Theory]
+        [InlineData("Foo", "Production", true, "Foo")] // Custom - set. Don't modify.
+        [InlineData(null, "Foo", true, "Foo")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom. Don't modify.
+        [InlineData(null, "Production", true, "production")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default PROD.
+        [InlineData(null, "Development", true, "development")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default DEV.
+        [InlineData(null, "Staging", true, "staging")] // Custom - nothing set. Adjust standard casing - true. ASPNET_ENVIRONMENT is default STAGING.
+        [InlineData(null, "Production", false, "Production")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default PROD.
+        [InlineData(null, "Development", false, "Development")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default DEV.
+        [InlineData(null, "Staging", false, "Staging")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default STAGING.
+        public void Filters_Environment_AdjustStandardEnvironmentNameCasing_AffectsSentryEnvironment(string environment, string hostingEnvironmentSetting, bool adjustStandardEnvironmentNameCasingSetting, string expectedEnvironment)
+        {
+            // Arrange.
+            var hostingEnvironment = Substitute.For<IHostingEnvironment>();
+            hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
+
+            var sut = new SentryAspNetCoreOptionsSetup(
+                Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
+                hostingEnvironment);
+
             _target.Environment = environment;
             _target.AdjustStandardEnvironmentNameCasing = adjustStandardEnvironmentNameCasingSetting;
 
