@@ -40,7 +40,7 @@ namespace Sentry.AspNetCore
         public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
-        /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.HostingEnvironment" />
+        /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />
         /// is adjusted when setting the Sentry environment. Defaults to true.
         /// </summary>
         /// <remarks>
