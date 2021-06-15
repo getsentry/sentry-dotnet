@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Make debug diagnostic logger obsolete and add Trace diagnostic logger ([#1048](https://github.com/getsentry/sentry-dotnet/pull/1048))
+- Introduce TraceDiagnosticLogger and obsolete DebugDiagnosticLogger ([#1048](https://github.com/getsentry/sentry-dotnet/pull/1048))
 
 ## 3.5.0
 
