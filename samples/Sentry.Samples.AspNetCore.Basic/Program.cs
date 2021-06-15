@@ -86,6 +86,7 @@ namespace Sentry.Samples.AspNetCore.Basic
                 // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
                 .ConfigureWebHost(webBuilder =>
                 {
+                    // Note that it's NOT needed to also call UseSentry here. That's because it's already hooked through IHostBuilder
                     webBuilder.UseStartup<Startup>();
                 })
                 .Build();
