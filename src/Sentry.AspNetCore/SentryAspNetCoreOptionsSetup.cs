@@ -36,7 +36,7 @@ namespace Sentry.AspNetCore
                     // Sentry specific environment takes precedence #92.
                     options.Environment = locatedEnvironment;
                 }
-                else
+                else if (options.AdjustStandardEnvironmentNameCasing)
                 {
                     // NOTE: Sentry prefers to have its environment setting to be all lower case.
                     //       .NET Core sets the ENV variable to 'Production' (upper case P),
@@ -49,12 +49,7 @@ namespace Sentry.AspNetCore
                     //             need to respect (especially the case-sensitivity).
                     //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
 
-                    if (!options.AdjustStandardEnvironmentNameCasing)
-                    {
-                        // Use the value set by the developer.
-                        options.Environment = _hostingEnvironment.EnvironmentName;
-                    }
-                    else if (_hostingEnvironment.IsProduction())
+                    if (_hostingEnvironment.IsProduction())
                     {
                         options.Environment = Internal.Constants.ProductionEnvironmentSetting;
                     }
@@ -71,6 +66,10 @@ namespace Sentry.AspNetCore
                         // Use the value set by the developer.
                         options.Environment = _hostingEnvironment.EnvironmentName;
                     }
+                }
+                else
+                {
+                    options.Environment = _hostingEnvironment.EnvironmentName;
                 }
             }
 
