@@ -48,30 +48,9 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Message
-            if (!string.IsNullOrWhiteSpace(Message))
-            {
-                writer.WriteString("message", Message);
-            }
-
-            // Params
-            if (Params is {} @params)
-            {
-                writer.WriteStartArray("params");
-
-                foreach (var i in @params)
-                {
-                    writer.WriteDynamicValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Formatted
-            if (!string.IsNullOrWhiteSpace(Formatted))
-            {
-                writer.WriteString("formatted", Formatted);
-            }
+            writer.WriteStringIfNotWhiteSpace("message", Message);
+            writer.WriteArrayIfNotEmpty("params", Params);
+            writer.WriteStringIfNotWhiteSpace("formatted", Formatted);
 
             writer.WriteEndObject();
         }
