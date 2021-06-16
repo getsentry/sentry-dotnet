@@ -5,7 +5,8 @@
 ### Changes
 
 - Use SentryId for ISession.Id ([#1052](https://github.com/getsentry/sentry-dotnet/pull/1052))
-- Added SentryAspNetCoreOptions.AdjustStandardEnvironmentNameCasing to control whether to transform the environment name to lower case or to keep it as is. [#1057](https://github.com/getsentry/sentry-dotnet/pull/1057)
+- Added SentryAspNetCoreOptions.AdjustStandardEnvironmentNameCasing to control whether to transform the environment name to lower case. [#1057](https://github.com/getsentry/sentry-dotnet/pull/1057)
+- Improve exception check in `CaptureEvent(...)` for the purpose of reporting errors in session ([#1058](https://github.com/getsentry/sentry-dotnet/pull/1058))
 
 ## 3.6.0-alpha.1
 
