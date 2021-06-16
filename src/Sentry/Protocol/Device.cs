@@ -157,7 +157,7 @@ namespace Sentry.Protocol
         /// A formatted UTC timestamp when the system was booted.
         /// </summary>
         /// <example>
-        /// 018-02-08T12:52:12Z
+        /// 2018-02-08T12:52:12Z
         /// </example>
         public DateTimeOffset? BootTime { get; set; }
 
