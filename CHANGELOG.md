@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Handle error thrown while trying to get `BootTime` (IL2CPP on PS4)
+
 ### Changes
 
 - Use SentryId for ISession.Id ([#1052](https://github.com/getsentry/sentry-dotnet/pull/1052))
