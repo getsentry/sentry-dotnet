@@ -416,5 +416,16 @@ namespace Sentry.Internal.Extensions
                 writer.WriteStringArray(propertyName, asList);
             }
         }
+
+        public static void WriteDynamicIfNotNull(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            object? value)
+        {
+            if (value is not null)
+            {
+                writer.WriteDynamic(propertyName, value);
+            }
+        }
     }
 }

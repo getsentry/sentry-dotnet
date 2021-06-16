@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -78,55 +77,12 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
-            // Data
-            if (InternalData is {} data && data.Any())
-            {
-                writer.WriteStartObject("data");
-
-                foreach (var (key, value) in data)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            // Meta
-            if (InternalMeta is {} meta && meta.Any())
-            {
-                writer.WriteStartObject("meta");
-
-                foreach (var (key, value) in meta)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            // Type
-            if (!string.IsNullOrWhiteSpace(Type))
-            {
-                writer.WriteString("type", Type);
-            }
-
-            // Description
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            // Help link
-            if (!string.IsNullOrWhiteSpace(HelpLink))
-            {
-                writer.WriteString("help_link", HelpLink);
-            }
-
-            // Handled
-            if (Handled is {} handled)
-            {
-                writer.WriteBoolean("handled", handled);
-            }
+            writer.WriteDictionaryIfNotEmpty("data", InternalData!);
+            writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!);
+            writer.WriteStringIfNotWhiteSpace("type", Type);
+            writer.WriteStringIfNotWhiteSpace("description", Description);
+            writer.WriteStringIfNotWhiteSpace("help_link", HelpLink);
+            writer.WriteBooleanIfNotNull("handled", Handled);
 
             writer.WriteEndObject();
         }

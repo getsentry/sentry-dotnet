@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -132,53 +131,14 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Env
-            if (InternalEnv is {} env && env.Any())
-            {
-                writer.WriteStringDictionary("env", env!);
-            }
-
-            // Other
-            if (InternalOther is {} other && other.Any())
-            {
-                writer.WriteStringDictionary("other", other!);
-            }
-
-            // Headers
-            if (InternalHeaders is {} headers && headers.Any())
-            {
-                writer.WriteStringDictionary("headers", headers!);
-            }
-
-            // Url
-            if (!string.IsNullOrWhiteSpace(Url))
-            {
-                writer.WriteString("url", Url);
-            }
-
-            // Method
-            if (!string.IsNullOrWhiteSpace(Method))
-            {
-                writer.WriteString("method", Method);
-            }
-
-            // Data
-            if (Data is {} data)
-            {
-                writer.WriteDynamic("data", data);
-            }
-
-            // Query
-            if (!string.IsNullOrWhiteSpace(QueryString))
-            {
-                writer.WriteString("query_string", QueryString);
-            }
-
-            // Cookies
-            if (!string.IsNullOrWhiteSpace(Cookies))
-            {
-                writer.WriteString("cookies", Cookies);
-            }
+            writer.WriteStringDictionaryIfNotEmpty("env", InternalEnv!);
+            writer.WriteStringDictionaryIfNotEmpty("other", InternalOther!);
+            writer.WriteStringDictionaryIfNotEmpty("headers", InternalHeaders!);
+            writer.WriteStringIfNotWhiteSpace("url", Url);
+            writer.WriteStringIfNotWhiteSpace("method", Method);
+            writer.WriteDynamicIfNotNull("data", Data);
+            writer.WriteStringIfNotWhiteSpace("query_string", QueryString);
+            writer.WriteStringIfNotWhiteSpace("cookies", Cookies);
 
             writer.WriteEndObject();
         }

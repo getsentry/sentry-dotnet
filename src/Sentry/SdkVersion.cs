@@ -60,31 +60,9 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Packages
-            var packages = InternalPackages.ToArray();
-            if (packages.Any())
-            {
-                writer.WriteStartArray("packages");
-
-                foreach (var package in packages)
-                {
-                    writer.WriteSerializableValue(package);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Name
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            // Version
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
+            writer.WriteArrayIfNotEmpty("packages", InternalPackages);
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
 
             writer.WriteEndObject();
         }

@@ -108,51 +108,15 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            if (Id is {} id)
-            {
-                writer.WriteNumber("id", id);
-            }
-
-            if (!string.IsNullOrWhiteSpace(VendorId))
-            {
-                writer.WriteString("vendor_id", VendorId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(VendorName))
-            {
-                writer.WriteString("vendor_name", VendorName);
-            }
-
-            if (MemorySize is {} memorySize)
-            {
-                writer.WriteNumber("memory_size", memorySize);
-            }
-
-            if (!string.IsNullOrWhiteSpace(ApiType))
-            {
-                writer.WriteString("api_type", ApiType);
-            }
-
-            if (MultiThreadedRendering is {} multiThreadedRendering)
-            {
-                writer.WriteBoolean("multi_threaded_rendering", multiThreadedRendering);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
-
-            if (!string.IsNullOrWhiteSpace(NpotSupport))
-            {
-                writer.WriteString("npot_support", NpotSupport);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteNumberIfNotNull("id", Id);
+            writer.WriteStringIfNotWhiteSpace("vendor_id", VendorId);
+            writer.WriteStringIfNotWhiteSpace("vendor_name", VendorName);
+            writer.WriteNumberIfNotNull("memory_size", MemorySize);
+            writer.WriteStringIfNotWhiteSpace("api_type", ApiType);
+            writer.WriteBooleanIfNotNull("multi_threaded_rendering", MultiThreadedRendering);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
+            writer.WriteStringIfNotWhiteSpace("npot_support", NpotSupport);
 
             writer.WriteEndObject();
         }
