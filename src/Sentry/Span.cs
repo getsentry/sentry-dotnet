@@ -138,7 +138,7 @@ namespace Sentry
 
             if (_tags is {} tags && tags.Any())
             {
-                writer.WriteDictionary("tags", tags!);
+                writer.WriteStringDictionary("tags", tags!);
             }
 
             if (_extra is {} data && data.Any())
@@ -163,8 +163,8 @@ namespace Sentry
             var description = json.GetPropertyOrNull("description")?.GetString();
             var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
+            var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()?.ToDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDictionary();
 
             return new Span(parentSpanId, operation)
             {

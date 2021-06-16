@@ -166,7 +166,7 @@ namespace Sentry
             // Vars
             if (InternalVars is {} vars && vars.Any())
             {
-                writer.WriteDictionary("vars", vars!);
+                writer.WriteStringDictionary("vars", vars!);
             }
 
             // Frames omitted
@@ -276,7 +276,7 @@ namespace Sentry
         {
             var preContext = json.GetPropertyOrNull("pre_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
             var postContext = json.GetPropertyOrNull("post_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
-            var vars = json.GetPropertyOrNull("vars")?.GetDictionary();
+            var vars = json.GetPropertyOrNull("vars")?.GetStringDictionaryOrNull();
             var framesOmitted = json.GetPropertyOrNull("frames_omitted")?.EnumerateArray().Select(j => j.GetInt32()).ToList();
             var filename = json.GetPropertyOrNull("filename")?.GetString();
             var function = json.GetPropertyOrNull("function")?.GetString();

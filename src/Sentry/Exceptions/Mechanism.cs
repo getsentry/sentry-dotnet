@@ -136,8 +136,8 @@ namespace Sentry.Protocol
         /// </summary>
         public static Mechanism FromJson(JsonElement json)
         {
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary();
-            var meta = json.GetPropertyOrNull("meta")?.GetObjectDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull();
+            var meta = json.GetPropertyOrNull("meta")?.GetDictionaryOrNull();
             var type = json.GetPropertyOrNull("type")?.GetString();
             var description = json.GetPropertyOrNull("description")?.GetString();
             var helpLink = json.GetPropertyOrNull("help_link")?.GetString();

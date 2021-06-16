@@ -212,151 +212,27 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Modules
-            if (_modules is {} modules && modules.Any())
-            {
-                writer.WriteDictionary("modules", modules!);
-            }
-
-            // Event id
+            writer.WriteStringDictionaryIfNotEmpty("modules", _modules!);
             writer.WriteSerializable("event_id", EventId);
-
-            // Timestamp
             writer.WriteString("timestamp", Timestamp);
-
-            // Message
-            if (Message is {} message)
-            {
-                writer.WritePropertyName("logentry");
-                writer.WriteSerializableValue(message);
-            }
-
-            // Logger
-            if (!string.IsNullOrWhiteSpace(Logger))
-            {
-                writer.WriteString("logger", Logger);
-            }
-
-            // Platform
-            if (!string.IsNullOrWhiteSpace(Platform))
-            {
-                writer.WriteString("platform", Platform);
-            }
-
-            // Server name
-            if (!string.IsNullOrWhiteSpace(ServerName))
-            {
-                writer.WriteString("server_name", ServerName);
-            }
-
-            // Release
-            if (!string.IsNullOrWhiteSpace(Release))
-            {
-                writer.WriteString("release", Release);
-            }
-
-            // Exceptions
-            if (SentryExceptionValues is {} exceptionValues)
-            {
-                writer.WriteSerializable("exception", exceptionValues);
-            }
-
-            // Threads
-            if (SentryThreadValues is {} threadValues)
-            {
-                writer.WriteSerializable("threads", threadValues);
-            }
-
-            // Level
-            if (Level is {} level)
-            {
-                writer.WriteString("level", level.ToString().ToLowerInvariant());
-            }
-
-            // Transaction
-            if (!string.IsNullOrWhiteSpace(TransactionName))
-            {
-                writer.WriteString("transaction", TransactionName);
-            }
-
-            // Request
-            if (_request is {} request)
-            {
-                writer.WriteSerializable("request", request);
-            }
-
-            // Contexts
-            if (_contexts is {} contexts)
-            {
-                writer.WriteSerializable("contexts", contexts);
-            }
-
-            // User
-            if (_user is {} user)
-            {
-                writer.WriteSerializable("user", user);
-            }
-
-            // Environment
-            if (!string.IsNullOrWhiteSpace(Environment))
-            {
-                writer.WriteString("environment", Environment);
-            }
-
-            // SDK
+            writer.WriteSerializableIfNotNull("logentry", Message);
+            writer.WriteStringIfNotWhiteSpace("logger", Logger);
+            writer.WriteStringIfNotWhiteSpace("platform", Platform);
+            writer.WriteStringIfNotWhiteSpace("server_name", ServerName);
+            writer.WriteStringIfNotWhiteSpace("release", Release);
+            writer.WriteSerializableIfNotNull("exception", SentryExceptionValues);
+            writer.WriteSerializableIfNotNull("threads", SentryThreadValues);
+            writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
+            writer.WriteStringIfNotWhiteSpace("transaction", TransactionName);
+            writer.WriteSerializableIfNotNull("request", _request);
+            writer.WriteSerializableIfNotNull("contexts", _contexts);
+            writer.WriteSerializableIfNotNull("user", _user);
+            writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteSerializable("sdk", Sdk);
-
-            // Fingerprint
-            if (_fingerprint is {} fingerprint && fingerprint.Any())
-            {
-                writer.WriteStartArray("fingerprint");
-
-                foreach (var i in fingerprint)
-                {
-                    writer.WriteStringValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Breadcrumbs
-            if (_breadcrumbs is {} breadcrumbs && breadcrumbs.Any())
-            {
-                writer.WriteStartArray("breadcrumbs");
-
-                foreach (var i in breadcrumbs)
-                {
-                    writer.WriteSerializableValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Extra
-            if (_extra is {} extra && extra.Any())
-            {
-                writer.WriteStartObject("extra");
-
-                foreach (var (key, value) in extra)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            // Tags
-            if (_tags is {} tags && tags.Any())
-            {
-                writer.WriteStartObject("tags");
-
-                foreach (var (key, value) in tags)
-                {
-                    writer.WriteString(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
+            writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
+            writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs);
+            writer.WriteDictionaryIfNotEmpty("extra", _extra);
+            writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
 
             writer.WriteEndObject();
         }
@@ -366,7 +242,7 @@ namespace Sentry
         /// </summary>
         public static SentryEvent FromJson(JsonElement json)
         {
-            var modules = json.GetPropertyOrNull("modules")?.GetDictionary();
+            var modules = json.GetPropertyOrNull("modules")?.GetStringDictionaryOrNull();
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var message = json.GetPropertyOrNull("logentry")?.Pipe(SentryMessage.FromJson);
@@ -385,8 +261,8 @@ namespace Sentry
             var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
             var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
             var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
-            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary();
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary();
+            var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
+            var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
 
             return new SentryEvent(null, timestamp, eventId)
             {

@@ -386,9 +386,9 @@ namespace Sentry
                 .ToArray();
             var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson)
                 .Pipe(v => new List<Breadcrumb>(v));
-            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()
+            var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull()
                 ?.ToDictionary();
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()
+            var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()
                 ?.ToDictionary();
 
             var transaction = new Transaction(name)

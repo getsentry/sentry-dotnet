@@ -135,19 +135,19 @@ namespace Sentry
             // Env
             if (InternalEnv is {} env && env.Any())
             {
-                writer.WriteDictionary("env", env!);
+                writer.WriteStringDictionary("env", env!);
             }
 
             // Other
             if (InternalOther is {} other && other.Any())
             {
-                writer.WriteDictionary("other", other!);
+                writer.WriteStringDictionary("other", other!);
             }
 
             // Headers
             if (InternalHeaders is {} headers && headers.Any())
             {
-                writer.WriteDictionary("headers", headers!);
+                writer.WriteStringDictionary("headers", headers!);
             }
 
             // Url
@@ -188,9 +188,9 @@ namespace Sentry
         /// </summary>
         public static Request FromJson(JsonElement json)
         {
-            var env = json.GetPropertyOrNull("env")?.GetDictionary();
-            var other = json.GetPropertyOrNull("other")?.GetDictionary();
-            var headers = json.GetPropertyOrNull("headers")?.GetDictionary();
+            var env = json.GetPropertyOrNull("env")?.GetStringDictionaryOrNull();
+            var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
+            var headers = json.GetPropertyOrNull("headers")?.GetStringDictionaryOrNull();
             var url = json.GetPropertyOrNull("url")?.GetString();
             var method = json.GetPropertyOrNull("method")?.GetString();
             var data = json.GetPropertyOrNull("data")?.GetDynamic();

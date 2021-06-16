@@ -140,7 +140,7 @@ namespace Sentry
             if (Data is { } data)
             {
                 // Why is ! required here? No idea
-                writer.WriteDictionary("data", data!);
+                writer.WriteStringDictionary("data", data!);
             }
 
             // Category
@@ -166,7 +166,7 @@ namespace Sentry
             var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var message = json.GetPropertyOrNull("message")?.GetString();
             var type = json.GetPropertyOrNull("type")?.GetString();
-            var data = json.GetPropertyOrNull("data")?.GetDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetStringDictionaryOrNull();
             var category = json.GetPropertyOrNull("category")?.GetString();
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<BreadcrumbLevel>() ?? default;
 

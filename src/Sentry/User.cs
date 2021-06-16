@@ -117,7 +117,7 @@ namespace Sentry
             // Other
             if (InternalOther is {} other && other.Any())
             {
-                writer.WriteDictionary("other", other!);
+                writer.WriteStringDictionary("other", other!);
             }
 
             writer.WriteEndObject();
@@ -132,7 +132,7 @@ namespace Sentry
             var id = json.GetPropertyOrNull("id")?.GetString();
             var ip = json.GetPropertyOrNull("ip_address")?.GetString();
             var username = json.GetPropertyOrNull("username")?.GetString();
-            var other = json.GetPropertyOrNull("other")?.GetDictionary();
+            var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
 
             return new User
             {
