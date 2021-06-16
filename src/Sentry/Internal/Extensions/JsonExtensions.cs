@@ -281,6 +281,61 @@ namespace Sentry.Internal.Extensions
             writer.WriteDynamicValue(value);
         }
 
+        public static void WriteBooleanIfNotNull(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            bool? value)
+        {
+            if (value is not null)
+            {
+                writer.WriteBoolean(propertyName, value.Value);
+            }
+        }
+
+        public static void WriteNumberIfNotNull(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            short? value)
+        {
+            if (value is not null)
+            {
+                writer.WriteNumber(propertyName, value.Value);
+            }
+        }
+
+        public static void WriteNumberIfNotNull(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            int? value)
+        {
+            if (value is not null)
+            {
+                writer.WriteNumber(propertyName, value.Value);
+            }
+        }
+
+        public static void WriteNumberIfNotNull(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            long? value)
+        {
+            if (value is not null)
+            {
+                writer.WriteNumber(propertyName, value.Value);
+            }
+        }
+
+        public static void WriteNumberIfNotNull(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            float? value)
+        {
+            if (value is not null)
+            {
+                writer.WriteNumber(propertyName, value.Value);
+            }
+        }
+
         public static void WriteStringIfNotWhiteSpace(
             this Utf8JsonWriter writer,
             string propertyName,
@@ -289,6 +344,17 @@ namespace Sentry.Internal.Extensions
             if (!string.IsNullOrWhiteSpace(value))
             {
                 writer.WriteString(propertyName, value);
+            }
+        }
+
+        public static void WriteStringIfNotNull(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            DateTimeOffset? value)
+        {
+            if (value is not null)
+            {
+                writer.WriteString(propertyName, value.Value);
             }
         }
 
