@@ -109,7 +109,7 @@ namespace Sentry.Extensibility
             this IDiagnosticLogger logger,
             string message,
             Exception? exception = null)
-            => logger.LogIfEnabled(SentryLevel.Error, null, message, exception);
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message);
 
         /// <summary>
         /// Log a error message.
@@ -119,7 +119,7 @@ namespace Sentry.Extensibility
             string message,
             Exception exception,
             TArg arg)
-            => logger.LogIfEnabled(SentryLevel.Error, null, message, exception, arg);
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg);
 
         /// <summary>
         /// Log a error message.
@@ -130,7 +130,7 @@ namespace Sentry.Extensibility
             Exception exception,
             TArg arg,
             TArg2 arg2)
-            => logger.LogIfEnabled(SentryLevel.Error, null, message, exception, arg, arg2);
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2);
 
         /// <summary>
         /// Log a error message.
@@ -216,7 +216,7 @@ namespace Sentry.Extensibility
         {
             if (logger.IsEnabled(level))
             {
-                logger.Log(level, message, exception, arg, arg2);
+                logger.Log(level, message, exception, arg, arg2, arg3);
             }
         }
 
