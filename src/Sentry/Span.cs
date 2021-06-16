@@ -106,45 +106,15 @@ namespace Sentry
             writer.WriteStartObject();
 
             writer.WriteSerializable("span_id", SpanId);
-
-            if (ParentSpanId is {} parentSpanId)
-            {
-                writer.WriteSerializable("parent_span_id", parentSpanId);
-            }
-
+            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId);
             writer.WriteSerializable("trace_id", TraceId);
-
-            if (!string.IsNullOrWhiteSpace(Operation))
-            {
-                writer.WriteString("op", Operation);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            if (Status is {} status)
-            {
-                writer.WriteString("status", status.ToString().ToSnakeCase());
-            }
-
+            writer.WriteStringIfNotWhiteSpace("op", Operation);
+            writer.WriteStringIfNotWhiteSpace("description", Description);
+            writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
             writer.WriteString("start_timestamp", StartTimestamp);
-
-            if (EndTimestamp is {} endTimestamp)
-            {
-                writer.WriteString("timestamp", endTimestamp);
-            }
-
-            if (_tags is {} tags && tags.Any())
-            {
-                writer.WriteStringDictionary("tags", tags!);
-            }
-
-            if (_extra is {} data && data.Any())
-            {
-                writer.WriteDictionary("data", data!);
-            }
+            writer.WriteStringIfNotNull("timestamp", EndTimestamp);
+            writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
+            writer.WriteDictionaryIfNotEmpty("data", _extra!);
 
             writer.WriteEndObject();
         }

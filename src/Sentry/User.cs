@@ -43,7 +43,7 @@ namespace Sentry
         /// </value>
         public string? Username { get; set; }
 
-        internal IDictionary<string, string>? InternalOther;
+        internal IDictionary<string, string>? InternalOther { get; private set; }
 
         /// <summary>
         /// Additional information about the user.
@@ -90,35 +90,11 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Email
-            if (!string.IsNullOrWhiteSpace(Email))
-            {
-                writer.WriteString("email", Email);
-            }
-
-            // Id
-            if (!string.IsNullOrWhiteSpace(Id))
-            {
-                writer.WriteString("id", Id);
-            }
-
-            // IP
-            if (!string.IsNullOrWhiteSpace(IpAddress))
-            {
-                writer.WriteString("ip_address", IpAddress);
-            }
-
-            // Username
-            if (!string.IsNullOrWhiteSpace(Username))
-            {
-                writer.WriteString("username", Username);
-            }
-
-            // Other
-            if (InternalOther is {} other && other.Any())
-            {
-                writer.WriteStringDictionary("other", other!);
-            }
+            writer.WriteStringIfNotWhiteSpace("email", Email);
+            writer.WriteStringIfNotWhiteSpace("id", Id);
+            writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
+            writer.WriteStringIfNotWhiteSpace("username", Username);
+            writer.WriteStringDictionaryIfNotEmpty("other", InternalOther!);
 
             writer.WriteEndObject();
         }
