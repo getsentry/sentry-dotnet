@@ -235,7 +235,7 @@ namespace Sentry.Internal
                 }
 
                 // Report an error on current session if contains an exception
-                var sessionUpdate = evt.Exception is not null
+                var sessionUpdate = evt.Exception is not null || evt.SentryExceptions?.Any() == true
                     ? _sessionManager.ReportError()
                     : null;
 
