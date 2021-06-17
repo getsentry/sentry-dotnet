@@ -279,7 +279,7 @@ namespace Sentry.Protocol.Envelopes
             // Arbitrary payload
             var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
 
-            if (payloadLength != null)
+            if (payloadLength is not null)
             {
                 stream.Seek(payloadLength.Value, SeekOrigin.Current);
             }
