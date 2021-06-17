@@ -21,6 +21,12 @@ namespace Sentry.Protocol.Tests.Context
                 MultiThreadedRendering = true,
                 Version = "Version 3232",
                 NpotSupport = "Full NPOT",
+                MaxTextureSize = 10000,
+                GraphicsShaderLevel = "Shader Model 2.0",
+                SupportsDrawCallInstancing = true,
+                SupportsRayTracing = false,
+                SupportsComputeShaders = true,
+                SupportsGeometryShaders = true
             };
 
             var actual = sut.ToJsonString();
@@ -35,9 +41,16 @@ namespace Sentry.Protocol.Tests.Context
                 "\"api_type\":\"API Type\"," +
                 "\"multi_threaded_rendering\":true," +
                 "\"version\":\"Version 3232\"," +
-                "\"npot_support\":\"Full NPOT\"}",
+                "\"npot_support\":\"Full NPOT\"," +
+                "\"max_texture_size\":10000," +
+                "\"graphics_shader_level\":\"Shader Model 2.0\"," +
+                "\"supports_draw_call_instancing\":true," +
+                "\"supports_ray_tracing\":false," +
+                "\"supports_compute_shaders\":true," +
+                "\"supports_geometry_shaders\":true}",
                 actual
             );
+            // TODO: add } to the last one
         }
 
         [Fact]
@@ -54,6 +67,12 @@ namespace Sentry.Protocol.Tests.Context
                 MultiThreadedRendering = true,
                 Version = "Version 3232",
                 NpotSupport = "Full NPOT",
+                MaxTextureSize = 10000,
+                GraphicsShaderLevel = "Shader Model 2.0",
+                SupportsDrawCallInstancing = true,
+                SupportsRayTracing = false,
+                SupportsComputeShaders = true,
+                SupportsGeometryShaders = true
             };
 
             var clone = sut.Clone();
@@ -66,6 +85,11 @@ namespace Sentry.Protocol.Tests.Context
             Assert.Equal(sut.MultiThreadedRendering, clone.MultiThreadedRendering);
             Assert.Equal(sut.Version, clone.Version);
             Assert.Equal(sut.NpotSupport, clone.NpotSupport);
+            Assert.Equal(sut.MaxTextureSize, clone.MaxTextureSize);
+            Assert.Equal(sut.GraphicsShaderLevel, clone.GraphicsShaderLevel);
+            Assert.Equal(sut.SupportsDrawCallInstancing, clone.SupportsDrawCallInstancing);
+            Assert.Equal(sut.SupportsRayTracing, clone.SupportsRayTracing);
+            Assert.Equal(sut.SupportsComputeShaders, clone.SupportsComputeShaders);
         }
 
         [Theory]
@@ -89,6 +113,12 @@ namespace Sentry.Protocol.Tests.Context
             yield return new object[] { (new Gpu { MultiThreadedRendering = false }, "{\"type\":\"gpu\",\"multi_threaded_rendering\":false}") };
             yield return new object[] { (new Gpu { Version = "some version" }, "{\"type\":\"gpu\",\"version\":\"some version\"}") };
             yield return new object[] { (new Gpu { NpotSupport = "some npot_support" }, "{\"type\":\"gpu\",\"npot_support\":\"some npot_support\"}") };
+            yield return new object[] { (new Gpu { MaxTextureSize = 10000 }, "{\"type\":\"gpu\",\"max_texture_size\":10000}") };
+            yield return new object[] { (new Gpu { GraphicsShaderLevel = "Shader Model 2.0" }, "{\"type\":\"gpu\",\"graphics_shader_level\":\"Shader Model 2.0\"}") };
+            yield return new object[] { (new Gpu { SupportsDrawCallInstancing = true }, "{\"type\":\"gpu\",\"supports_draw_call_instancing\":true}") };
+            yield return new object[] { (new Gpu { SupportsRayTracing = false }, "{\"type\":\"gpu\",\"supports_ray_tracing\":false}") };
+            yield return new object[] { (new Gpu { SupportsComputeShaders = true }, "{\"type\":\"gpu\",\"supports_compute_shaders\":true}") };
+            yield return new object[] { (new Gpu { SupportsGeometryShaders = true }, "{\"type\":\"gpu\",\"supports_geometry_shaders\":true}") };
         }
     }
 }
