@@ -153,15 +153,15 @@ namespace Sentry
             var headers = json.GetPropertyOrNull("headers")?.GetStringDictionaryOrNull();
             var url = json.GetPropertyOrNull("url")?.GetString();
             var method = json.GetPropertyOrNull("method")?.GetString();
-            var data = json.GetPropertyOrNull("data")?.GetDynamic();
+            var data = json.GetPropertyOrNull("data")?.GetDynamicOrNull();
             var query = json.GetPropertyOrNull("query_string")?.GetString();
             var cookies = json.GetPropertyOrNull("cookies")?.GetString();
 
             return new Request
             {
-                InternalEnv = env?.ToDictionary()!,
-                InternalOther = other?.ToDictionary()!,
-                InternalHeaders = headers?.ToDictionary()!,
+                InternalEnv = env?.WhereNotNullValue()?.ToDictionary(),
+                InternalOther = other?.WhereNotNullValue().ToDictionary(),
+                InternalHeaders = headers?.WhereNotNullValue().ToDictionary(),
                 Url = url,
                 Method = method,
                 Data = data,

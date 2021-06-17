@@ -266,7 +266,7 @@ namespace Sentry
 
             return new SentryEvent(null, timestamp, eventId)
             {
-                _modules = modules?.ToDictionary()!,
+                _modules = modules?.WhereNotNullValue().ToDictionary(),
                 Message = message,
                 Logger = logger,
                 Platform = platform,
@@ -284,7 +284,7 @@ namespace Sentry
                 _fingerprint = fingerprint!,
                 _breadcrumbs = breadcrumbs,
                 _extra = extra?.ToDictionary(),
-                _tags = tags?.ToDictionary()!
+                _tags = tags?.WhereNotNullValue().ToDictionary()
             };
         }
     }

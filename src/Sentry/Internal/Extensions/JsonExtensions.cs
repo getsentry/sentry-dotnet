@@ -25,7 +25,7 @@ namespace Sentry.Internal.Extensions
 
             foreach (var (name, value) in json.EnumerateObject())
             {
-                result[name] = value.GetDynamic();
+                result[name] = value.GetDynamicOrNull();
             }
 
             return result;
@@ -64,13 +64,13 @@ namespace Sentry.Internal.Extensions
             return null;
         }
 
-        public static object? GetDynamic(this JsonElement json) => json.ValueKind switch
+        public static object? GetDynamicOrNull(this JsonElement json) => json.ValueKind switch
         {
             JsonValueKind.True => true,
             JsonValueKind.False => false,
             JsonValueKind.Number => json.GetDouble(),
             JsonValueKind.String => json.GetString(),
-            JsonValueKind.Array => json.EnumerateArray().Select(GetDynamic).ToArray(),
+            JsonValueKind.Array => json.EnumerateArray().Select(GetDynamicOrNull).ToArray(),
             JsonValueKind.Object => json.GetDictionaryOrNull(),
             _ => null
         };

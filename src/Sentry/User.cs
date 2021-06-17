@@ -116,7 +116,7 @@ namespace Sentry
                 Id = id,
                 IpAddress = ip,
                 Username = username,
-                Other = other?.ToDictionary()!
+                InternalOther = other?.WhereNotNullValue().ToDictionary()
             };
         }
     }

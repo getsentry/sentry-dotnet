@@ -101,8 +101,8 @@ namespace Sentry.Protocol
 
             return new Mechanism
             {
-                InternalData = data?.ToDictionary()!,
-                InternalMeta = meta?.ToDictionary()!,
+                InternalData = data?.WhereNotNullValue().ToDictionary(),
+                InternalMeta = meta?.WhereNotNullValue().ToDictionary(),
                 Type = type,
                 Description = description,
                 HelpLink = helpLink,

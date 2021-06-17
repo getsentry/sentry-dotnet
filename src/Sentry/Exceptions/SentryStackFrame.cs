@@ -187,7 +187,7 @@ namespace Sentry
             {
                 InternalPreContext = preContext!,
                 InternalPostContext = postContext!,
-                InternalVars = vars?.ToDictionary()!,
+                InternalVars = vars?.WhereNotNullValue().ToDictionary(),
                 InternalFramesOmitted = framesOmitted,
                 FileName = filename,
                 Function = function,
