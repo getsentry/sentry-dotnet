@@ -34,7 +34,6 @@ namespace Sentry.Infrastructure
                 {
                     Trace.Listeners[index].Write($@"{logLevel,7}: {string.Format(message, args)}
 {exception}");
-                    System.Threading.Thread.Sleep(10000);
                 }
             }
         }
