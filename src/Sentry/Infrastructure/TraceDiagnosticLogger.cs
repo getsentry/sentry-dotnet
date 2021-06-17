@@ -33,8 +33,12 @@ namespace Sentry.Infrastructure
             {
                 for (var i = 0; i < Trace.Listeners.Count; i++)
                 {
-                    Trace.Listeners[i].WriteLine($@"{logLevel,7}: {string.Format(message, args)}
-{exception}");
+                    var listener = Trace.Listeners[i];
+                    listener.WriteLine($"{logLevel,7}: {string.Format(message, args)}");
+                    if (exception != null)
+                    {
+                        listener.WriteLine(exception);
+                    }
                 }
             }
             catch (ArgumentOutOfRangeException)
