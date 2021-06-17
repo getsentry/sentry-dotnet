@@ -7,7 +7,7 @@
     <RootNamespace>Sentry</RootNamespace>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
-    <DefineConstants>$(AdditionalConstants);TRACE</DefineConstants>
+    <DefineConstants>$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <!-- Ben.Demystifier -->

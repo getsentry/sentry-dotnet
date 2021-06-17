@@ -27,7 +27,16 @@ namespace Sentry.Infrastructure
         /// Log message with level, exception and parameters.
         /// </summary>
         public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
-            => Trace.Write($@"{logLevel,7}: {string.Format(message, args)}
+        {
+            lock (Trace.Listeners)
+            {
+                for (int index = 0; index < Trace.Listeners.Count; index++)
+                {
+                    Trace.Listeners[index].Write($@"{logLevel,7}: {string.Format(message, args)}
 {exception}");
+                    System.Threading.Thread.Sleep(10000);
+                }
+            }
+        }
     }
 }
