@@ -162,6 +162,84 @@ namespace Sentry.Protocol
         public DateTimeOffset? BootTime { get; set; }
 
         /// <summary>
+        /// Number of "logical processors".
+        /// </summary>
+        /// <example>
+        /// 8
+        /// </example>
+        public int? ProcessorCount { get; set; }
+
+        /// <summary>
+        /// CPU description.
+        /// </summary>
+        /// <example>
+        /// Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz
+        /// </example>
+        public string? CpuDescription { get; set; }
+
+        /// <summary>
+        /// Processor frequency in MHz. Note that the actual CPU frequency might vary depending on current load and power
+        /// conditions, especially on low-powered devices like phones and laptops. On some platforms it's not possible
+        /// to query the CPU frequency. Currently such platforms are iOS and WebGL.
+        /// </summary>
+        /// <example>
+        /// 2500
+        /// </example>
+        public int? ProcessorFrequency { get; set; }
+
+        /// <summary>
+        /// Kind of device the application is running on.
+        /// </summary>
+        /// <example>
+        /// Unknown, Handheld, Console, Desktop
+        /// </example>
+        public string? DeviceType { get; set; }
+
+        /// <summary>
+        /// Status of the device's battery.
+        /// </summary>
+        /// <example>
+        /// Unknown, Charging, Discharging, NotCharging, Full
+        /// </example>
+        public string? BatteryStatus { get; set; }
+
+        /// <summary>
+        /// Unique device identifier. Depends on the running platform.
+        /// </summary>
+        /// <example>
+        /// iOS: UIDevice.identifierForVendor
+        /// Android: md5 of ANDROID_ID
+        /// Windows Store Apps: AdvertisingManager::AdvertisingId (possible fallback to HardwareIdentification::GetPackageSpecificToken().Id)
+        /// Windows Standalone: hash from the concatenation of strings taken from Computer System Hardware Classes
+        /// </example>
+        public string? DeviceUniqueIdentifier { get; set; }
+
+        /// <summary>
+        /// Is vibration available on the device?
+        /// </summary>
+        public bool? SupportsVibration { get; set; }
+
+        /// <summary>
+        /// Is accelerometer available on the device?
+        /// </summary>
+        public bool? SupportsAccelerometer { get; set; }
+
+        /// <summary>
+        /// Is gyroscope available on the device?
+        /// </summary>
+        public bool? SupportsGyroscope { get; set; }
+
+        /// <summary>
+        /// Is audio available on the device?
+        /// </summary>
+        public bool? SupportsAudio { get; set; }
+
+        /// <summary>
+        /// Is the device capable of reporting its location?
+        /// </summary>
+        public bool? SupportsLocationService { get; set; }
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         internal Device Clone()
@@ -191,7 +269,18 @@ namespace Sentry.Protocol
                 StorageSize = StorageSize,
                 Timezone = Timezone,
                 UsableMemory = UsableMemory,
-                LowMemory = LowMemory
+                LowMemory = LowMemory,
+                ProcessorCount = ProcessorCount,
+                CpuDescription = CpuDescription,
+                ProcessorFrequency = ProcessorFrequency,
+                SupportsVibration = SupportsVibration,
+                DeviceType = DeviceType,
+                BatteryStatus = BatteryStatus,
+                DeviceUniqueIdentifier = DeviceUniqueIdentifier,
+                SupportsAccelerometer = SupportsAccelerometer,
+                SupportsGyroscope = SupportsGyroscope,
+                SupportsAudio = SupportsAudio,
+                SupportsLocationService = SupportsLocationService
             };
 
         /// <inheritdoc />
@@ -332,6 +421,61 @@ namespace Sentry.Protocol
                 writer.WriteString("boot_time", bootTime);
             }
 
+            if (ProcessorCount is {} processorCount)
+            {
+                writer.WriteNumber("processor_count", processorCount);
+            }
+
+            if (!string.IsNullOrWhiteSpace(CpuDescription))
+            {
+                writer.WriteString("cpu_description", CpuDescription);
+            }
+
+            if (ProcessorFrequency is {} processorFrequency)
+            {
+                writer.WriteNumber("processor_frequency", processorFrequency);
+            }
+
+            if (!string.IsNullOrWhiteSpace(DeviceType))
+            {
+                writer.WriteString("device_type", DeviceType);
+            }
+
+            if (!string.IsNullOrWhiteSpace(BatteryStatus))
+            {
+                writer.WriteString("battery_status", BatteryStatus);
+            }
+
+            if (!string.IsNullOrWhiteSpace(DeviceUniqueIdentifier))
+            {
+                writer.WriteString("device_unique_identifier", DeviceUniqueIdentifier);
+            }
+
+            if (SupportsVibration is {} supportsVibration)
+            {
+                writer.WriteBoolean("supports_vibration", supportsVibration);
+            }
+
+            if (SupportsAccelerometer is {} supportsAccelerometer)
+            {
+                writer.WriteBoolean("supports_accelerometer", supportsAccelerometer);
+            }
+
+            if (SupportsGyroscope is {} supportsGyroscope)
+            {
+                writer.WriteBoolean("supports_gyroscope", supportsGyroscope);
+            }
+
+            if (SupportsAudio is {} supportsAudio)
+            {
+                writer.WriteBoolean("supports_audio", supportsAudio);
+            }
+
+            if (SupportsLocationService is {} supportsLocationService)
+            {
+                writer.WriteBoolean("supports_location_service", supportsLocationService);
+            }
+
             writer.WriteEndObject();
         }
 
@@ -383,6 +527,17 @@ namespace Sentry.Protocol
             var screenDensity = json.GetPropertyOrNull("screen_density")?.GetSingle();
             var screenDpi = json.GetPropertyOrNull("screen_dpi")?.GetInt32();
             var bootTime = json.GetPropertyOrNull("boot_time")?.GetDateTimeOffset();
+            var processorCount = json.GetPropertyOrNull("processor_count")?.GetInt32();
+            var cpuDescription = json.GetPropertyOrNull("cpu_description")?.GetString();
+            var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.GetInt32();
+            var deviceType = json.GetPropertyOrNull("device_type")?.GetString();
+            var batteryStatus = json.GetPropertyOrNull("battery_status")?.GetString();
+            var deviceUniqueIdentifier = json.GetPropertyOrNull("battery_status")?.GetString();
+            var supportsVibration = json.GetPropertyOrNull("supports_vibration")?.GetBoolean();
+            var supportsAccelerometer = json.GetPropertyOrNull("supports_accelerometer")?.GetBoolean();
+            var supportsGyroscope = json.GetPropertyOrNull("supports_gyroscope")?.GetBoolean();
+            var supportsAudio = json.GetPropertyOrNull("supports_audio")?.GetBoolean();
+            var supportsLocationService = json.GetPropertyOrNull("supports_location_service")?.GetBoolean();
 
             return new Device
             {
@@ -410,7 +565,18 @@ namespace Sentry.Protocol
                 ScreenResolution = screenResolution,
                 ScreenDensity = screenDensity,
                 ScreenDpi = screenDpi,
-                BootTime = bootTime
+                BootTime = bootTime,
+                ProcessorCount = processorCount,
+                CpuDescription = cpuDescription,
+                ProcessorFrequency = processorFrequency,
+                DeviceType = deviceType,
+                BatteryStatus = batteryStatus,
+                DeviceUniqueIdentifier = deviceUniqueIdentifier,
+                SupportsVibration = supportsVibration,
+                SupportsAccelerometer = supportsAccelerometer,
+                SupportsGyroscope = supportsGyroscope,
+                SupportsAudio = supportsAudio,
+                SupportsLocationService = supportsLocationService
             };
         }
     }
