@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Sentry.Extensibility;
 namespace Sentry.Infrastructure
@@ -28,13 +29,18 @@ namespace Sentry.Infrastructure
         /// </summary>
         public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
         {
-            lock (Trace.Listeners)
+            try
             {
-                for (int index = 0; index < Trace.Listeners.Count; index++)
+                for (var i = 0; i < Trace.Listeners.Count; i++)
                 {
-                    Trace.Listeners[index].Write($@"{logLevel,7}: {string.Format(message, args)}
+                    Trace.Listeners[i].WriteLine($@"{logLevel,7}: {string.Format(message, args)}
 {exception}");
                 }
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // Trace.Listeners is a public mutable static property and listeners can be removed
+                // from anywhere at anytime.
             }
         }
     }
