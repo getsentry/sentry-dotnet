@@ -11,6 +11,7 @@
 
 - Handle error thrown while trying to get `BootTime` on PS4 with IL2CPP ([#1062](https://github.com/getsentry/sentry-dotnet/pull/1062))
 - Use SentryId for ISession.Id ([#1052](https://github.com/getsentry/sentry-dotnet/pull/1052))
+- Add System.Reflection.Metadata as a dependency for netcoreapp3.0 target([#1064](https://github.com/getsentry/sentry-dotnet/pull/1064))
 
 ## 3.6.0-alpha.1
 
