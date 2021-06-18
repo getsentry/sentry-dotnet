@@ -10,6 +10,7 @@ namespace Sentry.Infrastructure
     /// <remarks>
     /// Logger available when compiled in Debug mode. It's useful when debugging apps running under IIS which have no output to Console logger.
     /// </remarks>
+    [Obsolete("Logger doesn't work outside of Sentry SDK. Please use TraceDiagnosticLogger instead")]
     public class DebugDiagnosticLogger : IDiagnosticLogger
     {
         private readonly SentryLevel _minimalLevel;
