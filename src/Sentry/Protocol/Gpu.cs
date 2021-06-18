@@ -86,6 +86,39 @@ namespace Sentry.Protocol
         public string? NpotSupport { get; set; }
 
         /// <summary>
+        /// Largest size of a texture that is supported by the graphics hardware.
+        /// </summary>
+        public int? MaxTextureSize { get; set; }
+
+        /// <summary>
+        /// Approximate "shader capability" level of the graphics device.
+        /// </summary>
+        /// <example>
+        /// Shader Model 2.0, OpenGL ES 3.0, Metal / OpenGL ES 3.1, 27 (unknown)
+        /// </example>
+        public string? GraphicsShaderLevel { get; set; }
+
+        /// <summary>
+        /// Is audio available on the device?
+        /// </summary>
+        public bool? SupportsDrawCallInstancing { get; set; }
+
+        /// <summary>
+        /// Is ray tracing available on the device?
+        /// </summary>
+        public bool? SupportsRayTracing { get; set; }
+
+        /// <summary>
+        /// Are compute shaders available on the device?
+        /// </summary>
+        public bool? SupportsComputeShaders { get; set; }
+
+        /// <summary>
+        /// Are geometry shaders available on the device?
+        /// </summary>
+        public bool? SupportsGeometryShaders { get; set; }
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         internal Gpu Clone()
@@ -100,6 +133,12 @@ namespace Sentry.Protocol
                 MultiThreadedRendering = MultiThreadedRendering,
                 Version = Version,
                 NpotSupport = NpotSupport,
+                MaxTextureSize = MaxTextureSize,
+                GraphicsShaderLevel = GraphicsShaderLevel,
+                SupportsDrawCallInstancing = SupportsDrawCallInstancing,
+                SupportsRayTracing = SupportsRayTracing,
+                SupportsComputeShaders = SupportsComputeShaders,
+                SupportsGeometryShaders = SupportsGeometryShaders
             };
 
         /// <inheritdoc />
@@ -154,6 +193,36 @@ namespace Sentry.Protocol
                 writer.WriteString("npot_support", NpotSupport);
             }
 
+            if (MaxTextureSize is {} maxTextureSize)
+            {
+                writer.WriteNumber("max_texture_size", maxTextureSize);
+            }
+
+            if (!string.IsNullOrWhiteSpace(GraphicsShaderLevel))
+            {
+                writer.WriteString("graphics_shader_level", GraphicsShaderLevel);
+            }
+
+            if (SupportsDrawCallInstancing is {} supportsDrawCallInstancing)
+            {
+                writer.WriteBoolean("supports_draw_call_instancing", supportsDrawCallInstancing);
+            }
+
+            if (SupportsRayTracing is {} supportsRayTracing)
+            {
+                writer.WriteBoolean("supports_ray_tracing", supportsRayTracing);
+            }
+
+            if (SupportsComputeShaders is {} supportsComputeShaders)
+            {
+                writer.WriteBoolean("supports_compute_shaders", supportsComputeShaders);
+            }
+
+            if (SupportsGeometryShaders is {} supportsGeometryShaders)
+            {
+                writer.WriteBoolean("supports_geometry_shaders", supportsGeometryShaders);
+            }
+
             writer.WriteEndObject();
         }
 
@@ -171,6 +240,12 @@ namespace Sentry.Protocol
             var multiThreadedRendering = json.GetPropertyOrNull("multi_threaded_rendering")?.GetBoolean();
             var version = json.GetPropertyOrNull("version")?.GetString();
             var npotSupport = json.GetPropertyOrNull("npot_support")?.GetString();
+            var maxTextureSize = json.GetPropertyOrNull("max_texture_size")?.GetInt32();
+            var graphicsShaderLevel = json.GetPropertyOrNull("graphics_shader_level")?.GetString();
+            var supportsDrawCallInstancing = json.GetPropertyOrNull("supports_draw_call_instancing")?.GetBoolean();
+            var supportsRayTracing = json.GetPropertyOrNull("supports_ray_tracing")?.GetBoolean();
+            var supportsComputeShaders = json.GetPropertyOrNull("supports_compute_shaders")?.GetBoolean();
+            var supportsGeometryShaders = json.GetPropertyOrNull("supports_geometry_shaders")?.GetBoolean();
 
             return new Gpu
             {
@@ -182,7 +257,13 @@ namespace Sentry.Protocol
                 ApiType = apiType,
                 MultiThreadedRendering = multiThreadedRendering,
                 Version = version,
-                NpotSupport = npotSupport
+                NpotSupport = npotSupport,
+                MaxTextureSize = maxTextureSize,
+                GraphicsShaderLevel = graphicsShaderLevel,
+                SupportsDrawCallInstancing = supportsDrawCallInstancing,
+                SupportsRayTracing = supportsRayTracing,
+                SupportsComputeShaders = supportsComputeShaders,
+                SupportsGeometryShaders = supportsGeometryShaders
             };
         }
     }
