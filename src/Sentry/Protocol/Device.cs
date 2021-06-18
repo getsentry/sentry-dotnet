@@ -289,192 +289,49 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
+            writer.WriteStringIfNotWhiteSpace("timezone", Timezone?.Id);
 
-            if (Timezone is {} timezone)
+            // Write display name, but only if it's different from the ID
+            if (!string.Equals(Timezone?.Id, Timezone?.DisplayName, StringComparison.OrdinalIgnoreCase))
             {
-                writer.WriteString("timezone", timezone.Id);
-
-                // Write display name, but only if it's different from the ID
-                if (!string.Equals(timezone.Id, timezone.DisplayName, StringComparison.OrdinalIgnoreCase))
-                {
-                    writer.WriteString("timezone_display_name", timezone.DisplayName);
-                }
+                writer.WriteStringIfNotWhiteSpace("timezone_display_name", Timezone?.DisplayName);
             }
 
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Manufacturer))
-            {
-                writer.WriteString("manufacturer", Manufacturer);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Brand))
-            {
-                writer.WriteString("brand", Brand);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Family))
-            {
-                writer.WriteString("family", Family);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Model))
-            {
-                writer.WriteString("model", Model);
-            }
-
-            if (!string.IsNullOrWhiteSpace(ModelId))
-            {
-                writer.WriteString("model_id", ModelId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Architecture))
-            {
-                writer.WriteString("arch", Architecture);
-            }
-
-            if (BatteryLevel is {} batteryLevel)
-            {
-                writer.WriteNumber("battery_level", batteryLevel);
-            }
-
-            if (IsCharging is {} isCharging)
-            {
-                writer.WriteBoolean("charging", isCharging);
-            }
-
-            if (IsOnline is {} isOnline)
-            {
-                writer.WriteBoolean("online", isOnline);
-            }
-
-            if (Orientation is {} orientation)
-            {
-                writer.WriteString("orientation", orientation.ToString().ToLowerInvariant());
-            }
-
-            if (Simulator is {} simulator)
-            {
-                writer.WriteBoolean("simulator", simulator);
-            }
-
-            if (MemorySize is {} memorySize)
-            {
-                writer.WriteNumber("memory_size", memorySize);
-            }
-
-            if (FreeMemory is {} freeMemory)
-            {
-                writer.WriteNumber("free_memory", freeMemory);
-            }
-
-            if (UsableMemory is {} usableMemory)
-            {
-                writer.WriteNumber("usable_memory", usableMemory);
-            }
-
-            if (LowMemory is {} lowMemory)
-            {
-                writer.WriteBoolean("low_memory", lowMemory);
-            }
-
-            if (StorageSize is {} storageSize)
-            {
-                writer.WriteNumber("storage_size", storageSize);
-            }
-
-            if (FreeStorage is {} freeStorage)
-            {
-                writer.WriteNumber("free_storage", freeStorage);
-            }
-
-            if (ExternalStorageSize is {} externalStorageSize)
-            {
-                writer.WriteNumber("external_storage_size", externalStorageSize);
-            }
-
-            if (ExternalFreeStorage is {} externalFreeStorage)
-            {
-                writer.WriteNumber("external_free_storage", externalFreeStorage);
-            }
-
-            if (!string.IsNullOrWhiteSpace(ScreenResolution))
-            {
-                writer.WriteString("screen_resolution", ScreenResolution);
-            }
-
-            if (ScreenDensity is {} screenDensity)
-            {
-                writer.WriteNumber("screen_density", screenDensity);
-            }
-
-            if (ScreenDpi is {} screenDpi)
-            {
-                writer.WriteNumber("screen_dpi", screenDpi);
-            }
-
-            if (BootTime is {} bootTime)
-            {
-                writer.WriteString("boot_time", bootTime);
-            }
-
-            if (ProcessorCount is {} processorCount)
-            {
-                writer.WriteNumber("processor_count", processorCount);
-            }
-
-            if (!string.IsNullOrWhiteSpace(CpuDescription))
-            {
-                writer.WriteString("cpu_description", CpuDescription);
-            }
-
-            if (ProcessorFrequency is {} processorFrequency)
-            {
-                writer.WriteNumber("processor_frequency", processorFrequency);
-            }
-
-            if (!string.IsNullOrWhiteSpace(DeviceType))
-            {
-                writer.WriteString("device_type", DeviceType);
-            }
-
-            if (!string.IsNullOrWhiteSpace(BatteryStatus))
-            {
-                writer.WriteString("battery_status", BatteryStatus);
-            }
-
-            if (!string.IsNullOrWhiteSpace(DeviceUniqueIdentifier))
-            {
-                writer.WriteString("device_unique_identifier", DeviceUniqueIdentifier);
-            }
-
-            if (SupportsVibration is {} supportsVibration)
-            {
-                writer.WriteBoolean("supports_vibration", supportsVibration);
-            }
-
-            if (SupportsAccelerometer is {} supportsAccelerometer)
-            {
-                writer.WriteBoolean("supports_accelerometer", supportsAccelerometer);
-            }
-
-            if (SupportsGyroscope is {} supportsGyroscope)
-            {
-                writer.WriteBoolean("supports_gyroscope", supportsGyroscope);
-            }
-
-            if (SupportsAudio is {} supportsAudio)
-            {
-                writer.WriteBoolean("supports_audio", supportsAudio);
-            }
-
-            if (SupportsLocationService is {} supportsLocationService)
-            {
-                writer.WriteBoolean("supports_location_service", supportsLocationService);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("manufacturer", Manufacturer);
+            writer.WriteStringIfNotWhiteSpace("brand", Brand);
+            writer.WriteStringIfNotWhiteSpace("family", Family);
+            writer.WriteStringIfNotWhiteSpace("model", Model);
+            writer.WriteStringIfNotWhiteSpace("model_id", ModelId);
+            writer.WriteStringIfNotWhiteSpace("arch", Architecture);
+            writer.WriteNumberIfNotNull("battery_level", BatteryLevel);
+            writer.WriteBooleanIfNotNull("charging", IsCharging);
+            writer.WriteBooleanIfNotNull("online", IsOnline);
+            writer.WriteStringIfNotWhiteSpace("orientation", Orientation?.ToString().ToLowerInvariant());
+            writer.WriteBooleanIfNotNull("simulator", Simulator);
+            writer.WriteNumberIfNotNull("memory_size", MemorySize);
+            writer.WriteNumberIfNotNull("free_memory", FreeMemory);
+            writer.WriteNumberIfNotNull("usable_memory", UsableMemory);
+            writer.WriteBooleanIfNotNull("low_memory", LowMemory);
+            writer.WriteNumberIfNotNull("storage_size", StorageSize);
+            writer.WriteNumberIfNotNull("free_storage", FreeStorage);
+            writer.WriteNumberIfNotNull("external_storage_size", ExternalStorageSize);
+            writer.WriteNumberIfNotNull("external_free_storage", ExternalFreeStorage);
+            writer.WriteStringIfNotWhiteSpace("screen_resolution", ScreenResolution);
+            writer.WriteNumberIfNotNull("screen_density", ScreenDensity);
+            writer.WriteNumberIfNotNull("screen_dpi", ScreenDpi);
+            writer.WriteStringIfNotNull("boot_time", BootTime);
+            writer.WriteNumberIfNotNull("processor_count", ProcessorCount);
+            writer.WriteStringIfNotWhiteSpace("cpu_description", CpuDescription);
+            writer.WriteNumberIfNotNull("processor_frequency", ProcessorFrequency);
+            writer.WriteStringIfNotWhiteSpace("device_type", DeviceType);
+            writer.WriteStringIfNotWhiteSpace("battery_status", BatteryStatus);
+            writer.WriteStringIfNotWhiteSpace("device_unique_identifier", DeviceUniqueIdentifier);
+            writer.WriteBooleanIfNotNull("supports_vibration", SupportsVibration);
+            writer.WriteBooleanIfNotNull("supports_accelerometer", SupportsAccelerometer);
+            writer.WriteBooleanIfNotNull("supports_gyroscope", SupportsGyroscope);
+            writer.WriteBooleanIfNotNull("supports_audio", SupportsAudio);
+            writer.WriteBooleanIfNotNull("supports_location_service", SupportsLocationService);
 
             writer.WriteEndObject();
         }

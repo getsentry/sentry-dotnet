@@ -147,81 +147,21 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            if (Id is {} id)
-            {
-                writer.WriteNumber("id", id);
-            }
-
-            if (!string.IsNullOrWhiteSpace(VendorId))
-            {
-                writer.WriteString("vendor_id", VendorId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(VendorName))
-            {
-                writer.WriteString("vendor_name", VendorName);
-            }
-
-            if (MemorySize is {} memorySize)
-            {
-                writer.WriteNumber("memory_size", memorySize);
-            }
-
-            if (!string.IsNullOrWhiteSpace(ApiType))
-            {
-                writer.WriteString("api_type", ApiType);
-            }
-
-            if (MultiThreadedRendering is {} multiThreadedRendering)
-            {
-                writer.WriteBoolean("multi_threaded_rendering", multiThreadedRendering);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
-
-            if (!string.IsNullOrWhiteSpace(NpotSupport))
-            {
-                writer.WriteString("npot_support", NpotSupport);
-            }
-
-            if (MaxTextureSize is {} maxTextureSize)
-            {
-                writer.WriteNumber("max_texture_size", maxTextureSize);
-            }
-
-            if (!string.IsNullOrWhiteSpace(GraphicsShaderLevel))
-            {
-                writer.WriteString("graphics_shader_level", GraphicsShaderLevel);
-            }
-
-            if (SupportsDrawCallInstancing is {} supportsDrawCallInstancing)
-            {
-                writer.WriteBoolean("supports_draw_call_instancing", supportsDrawCallInstancing);
-            }
-
-            if (SupportsRayTracing is {} supportsRayTracing)
-            {
-                writer.WriteBoolean("supports_ray_tracing", supportsRayTracing);
-            }
-
-            if (SupportsComputeShaders is {} supportsComputeShaders)
-            {
-                writer.WriteBoolean("supports_compute_shaders", supportsComputeShaders);
-            }
-
-            if (SupportsGeometryShaders is {} supportsGeometryShaders)
-            {
-                writer.WriteBoolean("supports_geometry_shaders", supportsGeometryShaders);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteNumberIfNotNull("id", Id);
+            writer.WriteStringIfNotWhiteSpace("vendor_id", VendorId);
+            writer.WriteStringIfNotWhiteSpace("vendor_name", VendorName);
+            writer.WriteNumberIfNotNull("memory_size", MemorySize);
+            writer.WriteStringIfNotWhiteSpace("api_type", ApiType);
+            writer.WriteBooleanIfNotNull("multi_threaded_rendering", MultiThreadedRendering);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
+            writer.WriteStringIfNotWhiteSpace("npot_support", NpotSupport);
+            writer.WriteNumberIfNotNull("max_texture_size", MaxTextureSize);
+            writer.WriteStringIfNotWhiteSpace("graphics_shader_level", GraphicsShaderLevel);
+            writer.WriteBooleanIfNotNull("supports_draw_call_instancing", SupportsDrawCallInstancing);
+            writer.WriteBooleanIfNotNull("supports_ray_tracing", SupportsRayTracing);
+            writer.WriteBooleanIfNotNull("supports_compute_shaders", SupportsComputeShaders);
+            writer.WriteBooleanIfNotNull("supports_geometry_shaders", SupportsGeometryShaders);
 
             writer.WriteEndObject();
         }

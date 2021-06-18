@@ -24,8 +24,20 @@ namespace Sentry.Internal.Extensions
             }
         }
 
-        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source)
-                where TKey : notnull =>
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+            this IEnumerable<KeyValuePair<TKey, TValue>> source) where TKey : notnull =>
             source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        public static IEnumerable<KeyValuePair<TKey, TValue>> WhereNotNullValue<TKey, TValue>(
+            this IEnumerable<KeyValuePair<TKey, TValue?>> source) where TKey : notnull
+        {
+            foreach (var kvp in source)
+            {
+                if (kvp.Value is not null)
+                {
+                    yield return kvp!;
+                }
+            }
+        }
     }
 }

@@ -118,42 +118,16 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Timestamp
             writer.WriteString(
                 "timestamp",
                 Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffZ", DateTimeFormatInfo.InvariantInfo)
             );
 
-            // Message
-            if (!string.IsNullOrWhiteSpace(Message))
-            {
-                writer.WriteString("message", Message);
-            }
-
-            // Type
-            if (!string.IsNullOrWhiteSpace(Type))
-            {
-                writer.WriteString("type", Type);
-            }
-
-            // Data
-            if (Data is { } data)
-            {
-                // Why is ! required here? No idea
-                writer.WriteDictionary("data", data!);
-            }
-
-            // Category
-            if (!string.IsNullOrWhiteSpace(Category))
-            {
-                writer.WriteString("category", Category);
-            }
-
-            // Level
-            if (Level != default)
-            {
-                writer.WriteString("level", Level.ToString().ToLowerInvariant());
-            }
+            writer.WriteStringIfNotWhiteSpace("message", Message);
+            writer.WriteStringIfNotWhiteSpace("type", Type);
+            writer.WriteStringDictionaryIfNotEmpty("data", Data!);
+            writer.WriteStringIfNotWhiteSpace("category", Category);
+            writer.WriteStringIfNotWhiteSpace("level", Level.NullIfDefault()?.ToString().ToLowerInvariant());
 
             writer.WriteEndObject();
         }
@@ -166,7 +140,7 @@ namespace Sentry
             var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var message = json.GetPropertyOrNull("message")?.GetString();
             var type = json.GetPropertyOrNull("type")?.GetString();
-            var data = json.GetPropertyOrNull("data")?.GetDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetStringDictionaryOrNull();
             var category = json.GetPropertyOrNull("category")?.GetString();
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<BreadcrumbLevel>() ?? default;
 

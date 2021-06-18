@@ -252,115 +252,22 @@ namespace Sentry
 
             writer.WriteString("type", "transaction");
             writer.WriteSerializable("event_id", EventId);
-
-            if (Level is {} level)
-            {
-                writer.WriteString("level", level.ToString().ToLowerInvariant());
-            }
-
-            if (!string.IsNullOrWhiteSpace(Platform))
-            {
-                writer.WriteString("platform", Platform);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Release))
-            {
-                writer.WriteString("release", Release);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("transaction", Name);
-            }
-
+            writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
+            writer.WriteStringIfNotWhiteSpace("platform", Platform);
+            writer.WriteStringIfNotWhiteSpace("release", Release);
+            writer.WriteStringIfNotWhiteSpace("transaction", Name);
             writer.WriteString("start_timestamp", StartTimestamp);
-
-            if (EndTimestamp is {} endTimestamp)
-            {
-                writer.WriteString("timestamp", endTimestamp);
-            }
-
-            if (_request is {} request)
-            {
-                writer.WriteSerializable("request", request);
-            }
-
-            if (_contexts is {} contexts)
-            {
-                writer.WriteSerializable("contexts", contexts);
-            }
-
-            if (_user is {} user)
-            {
-                writer.WriteSerializable("user", user);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Environment))
-            {
-                writer.WriteString("environment", Environment);
-            }
-
+            writer.WriteStringIfNotNull("timestamp", EndTimestamp);
+            writer.WriteSerializableIfNotNull("request", _request);
+            writer.WriteSerializableIfNotNull("contexts", _contexts);
+            writer.WriteSerializableIfNotNull("user", _user);
+            writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteSerializable("sdk", Sdk);
-
-            if (_fingerprint is {} fingerprint && fingerprint.Any())
-            {
-                writer.WriteStartArray("fingerprint");
-
-                foreach (var i in fingerprint)
-                {
-                    writer.WriteStringValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            if (_breadcrumbs.Any())
-            {
-                writer.WriteStartArray("breadcrumbs");
-
-                foreach (var i in _breadcrumbs)
-                {
-                    writer.WriteSerializableValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            if (_extra.Any())
-            {
-                writer.WriteStartObject("extra");
-
-                foreach (var (key, value) in _extra)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            if (_tags.Any())
-            {
-                writer.WriteStartObject("tags");
-
-                foreach (var (key, value) in _tags)
-                {
-                    writer.WriteString(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            if (_spans.Any())
-            {
-                writer.WriteStartArray("spans");
-
-                foreach (var span in _spans)
-                {
-                    writer.WriteSerializableValue(span);
-                }
-
-                writer.WriteEndArray();
-            }
+            writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
+            writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs);
+            writer.WriteDictionaryIfNotEmpty("extra", _extra);
+            writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
+            writer.WriteArrayIfNotEmpty("spans", _spans);
 
             writer.WriteEndObject();
         }
@@ -386,9 +293,9 @@ namespace Sentry
                 .ToArray();
             var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson)
                 .Pipe(v => new List<Breadcrumb>(v));
-            var extra = json.GetPropertyOrNull("extra")?.GetObjectDictionary()
+            var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull()
                 ?.ToDictionary();
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()
+            var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()
                 ?.ToDictionary();
 
             var transaction = new Transaction(name)

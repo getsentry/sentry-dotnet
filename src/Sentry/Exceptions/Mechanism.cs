@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -78,55 +77,12 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
-            // Data
-            if (InternalData is {} data && data.Any())
-            {
-                writer.WriteStartObject("data");
-
-                foreach (var (key, value) in data)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            // Meta
-            if (InternalMeta is {} meta && meta.Any())
-            {
-                writer.WriteStartObject("meta");
-
-                foreach (var (key, value) in meta)
-                {
-                    writer.WriteDynamic(key, value);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            // Type
-            if (!string.IsNullOrWhiteSpace(Type))
-            {
-                writer.WriteString("type", Type);
-            }
-
-            // Description
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            // Help link
-            if (!string.IsNullOrWhiteSpace(HelpLink))
-            {
-                writer.WriteString("help_link", HelpLink);
-            }
-
-            // Handled
-            if (Handled is {} handled)
-            {
-                writer.WriteBoolean("handled", handled);
-            }
+            writer.WriteDictionaryIfNotEmpty("data", InternalData!);
+            writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!);
+            writer.WriteStringIfNotWhiteSpace("type", Type);
+            writer.WriteStringIfNotWhiteSpace("description", Description);
+            writer.WriteStringIfNotWhiteSpace("help_link", HelpLink);
+            writer.WriteBooleanIfNotNull("handled", Handled);
 
             writer.WriteEndObject();
         }
@@ -136,8 +92,8 @@ namespace Sentry.Protocol
         /// </summary>
         public static Mechanism FromJson(JsonElement json)
         {
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary();
-            var meta = json.GetPropertyOrNull("meta")?.GetObjectDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull();
+            var meta = json.GetPropertyOrNull("meta")?.GetDictionaryOrNull();
             var type = json.GetPropertyOrNull("type")?.GetString();
             var description = json.GetPropertyOrNull("description")?.GetString();
             var helpLink = json.GetPropertyOrNull("help_link")?.GetString();
@@ -145,8 +101,8 @@ namespace Sentry.Protocol
 
             return new Mechanism
             {
-                InternalData = data?.ToDictionary()!,
-                InternalMeta = meta?.ToDictionary()!,
+                InternalData = data?.WhereNotNullValue().ToDictionary(),
+                InternalMeta = meta?.WhereNotNullValue().ToDictionary(),
                 Type = type,
                 Description = description,
                 HelpLink = helpLink,

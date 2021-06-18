@@ -122,50 +122,21 @@ namespace Sentry
             writer.WriteStartObject();
 
             writer.WriteSerializable("sid", Id);
-
-            if (!string.IsNullOrWhiteSpace(DistinctId))
-            {
-                writer.WriteString("did", DistinctId);
-            }
-
+            writer.WriteStringIfNotWhiteSpace("did", DistinctId);
             writer.WriteBoolean("init", IsInitial);
-
             writer.WriteString("started", StartTimestamp);
-
             writer.WriteString("timestamp", Timestamp);
-
             writer.WriteNumber("seq", SequenceNumber);
-
             writer.WriteNumber("duration", (int)Duration.TotalSeconds);
-
             writer.WriteNumber("errors", ErrorCount);
-
-            // State
-            if (EndStatus is { } endState)
-            {
-                writer.WriteString("status", endState.ToString().ToSnakeCase());
-            }
+            writer.WriteStringIfNotWhiteSpace("status", EndStatus?.ToString().ToSnakeCase());
 
             // Attributes
             writer.WriteStartObject("attrs");
-
             writer.WriteString("release", Release);
-
-            if (!string.IsNullOrWhiteSpace(Environment))
-            {
-                writer.WriteString("environment", Environment);
-            }
-
-            if (!string.IsNullOrWhiteSpace(IpAddress))
-            {
-                writer.WriteString("ip_address", IpAddress);
-            }
-
-            if (!string.IsNullOrWhiteSpace(UserAgent))
-            {
-                writer.WriteString("user_agent", UserAgent);
-            }
-
+            writer.WriteStringIfNotWhiteSpace("environment", Environment);
+            writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
+            writer.WriteStringIfNotWhiteSpace("user_agent", UserAgent);
             writer.WriteEndObject();
 
             writer.WriteEndObject();
