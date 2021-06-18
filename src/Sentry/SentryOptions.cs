@@ -478,6 +478,16 @@ namespace Sentry
         public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
 
         /// <summary>
+        /// Whether the SDK should start a session automatically when it's initialized and
+        /// end the session when it's closed.
+        /// </summary>
+        /// <remarks>
+        /// This is enabled by default, but may be disabled by certain integrations in case
+        /// they provide a better mechanism for automatically tracking sessions.
+        /// </remarks>
+        public bool AutoSessionTracking { get; set; } = true;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
@@ -501,9 +511,9 @@ namespace Sentry
             ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
-                    // de-dupe to be the first to run
-                    new DuplicateEventDetectionEventProcessor(this),
-                    new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor),
+                // De-dupe to be the first to run
+                new DuplicateEventDetectionEventProcessor(this),
+                new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
             };
 
             ExceptionProcessors = new ISentryEventExceptionProcessor[] {
@@ -511,6 +521,8 @@ namespace Sentry
             };
 
             Integrations = new ISdkIntegration[] {
+                // Auto-session tracking to be the first to run
+                new AutoSessionTrackingIntegration(),
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
                 new TaskUnobservedTaskExceptionIntegration(),
