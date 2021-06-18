@@ -532,7 +532,7 @@ namespace Sentry.Protocol
             var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.GetInt32();
             var deviceType = json.GetPropertyOrNull("device_type")?.GetString();
             var batteryStatus = json.GetPropertyOrNull("battery_status")?.GetString();
-            var deviceUniqueIdentifier = json.GetPropertyOrNull("battery_status")?.GetString();
+            var deviceUniqueIdentifier = json.GetPropertyOrNull("device_unique_identifier")?.GetString();
             var supportsVibration = json.GetPropertyOrNull("supports_vibration")?.GetBoolean();
             var supportsAccelerometer = json.GetPropertyOrNull("supports_accelerometer")?.GetBoolean();
             var supportsGyroscope = json.GetPropertyOrNull("supports_gyroscope")?.GetBoolean();
