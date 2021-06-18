@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Device and gpu protocols updated; public IJsonSerializable([#1063](https://github.com/getsentry/sentry-dotnet/pull/1063))
+
 ### Features
 
 - ASP.NET Core: Option `AdjustStandardEnvironmentNameCasing` to opt-out from lower casing env name. [#1057](https://github.com/getsentry/sentry-dotnet/pull/1057)
