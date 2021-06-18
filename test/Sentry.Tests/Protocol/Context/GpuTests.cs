@@ -50,7 +50,6 @@ namespace Sentry.Protocol.Tests.Context
                 "\"supports_geometry_shaders\":true}",
                 actual
             );
-            // TODO: add } to the last one
         }
 
         [Fact]
