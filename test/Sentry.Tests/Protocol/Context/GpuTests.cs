@@ -90,6 +90,7 @@ namespace Sentry.Protocol.Tests.Context
             Assert.Equal(sut.SupportsDrawCallInstancing, clone.SupportsDrawCallInstancing);
             Assert.Equal(sut.SupportsRayTracing, clone.SupportsRayTracing);
             Assert.Equal(sut.SupportsComputeShaders, clone.SupportsComputeShaders);
+            Assert.Equal(sut.SupportsGeometryShaders, clone.SupportsGeometryShaders);
         }
 
         [Theory]
