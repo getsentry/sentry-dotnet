@@ -482,10 +482,10 @@ namespace Sentry
         /// end the session when it's closed.
         /// </summary>
         /// <remarks>
-        /// This is enabled by default, but may be disabled by certain integrations in case
-        /// they provide a better mechanism for automatically tracking sessions.
+        /// Note: this is disabled by default in the current version, but may be become
+        /// enabled by default in a future major update.
         /// </remarks>
-        public bool AutoSessionTracking { get; set; } = true;
+        public bool AutoSessionTracking { get; set; } = false;
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
