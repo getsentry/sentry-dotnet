@@ -207,7 +207,7 @@ namespace Sentry.Protocol
         /// Unique device identifier. Depends on the running platform.
         /// </summary>
         /// <example>
-        /// iOS: UIDevice.identifierForVendor
+        /// iOS: UIDevice.identifierForVendor (UUID)
         /// Android: md5 of ANDROID_ID
         /// Windows Store Apps: AdvertisingManager::AdvertisingId (possible fallback to HardwareIdentification::GetPackageSpecificToken().Id)
         /// Windows Standalone: hash from the concatenation of strings taken from Computer System Hardware Classes

@@ -55,7 +55,18 @@ namespace Sentry.Protocol.Tests.Context
                 Simulator = false,
                 Timezone = timeZone,
                 UsableMemory = 100,
-                LowMemory = true
+                LowMemory = true,
+                ProcessorCount = 8,
+                CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz",
+                ProcessorFrequency = 2500,
+                DeviceType = "Console",
+                BatteryStatus = "Charging",
+                DeviceUniqueIdentifier = "d610540d-11d6-4daa-a98c-b71030acae4d",
+                SupportsVibration = false,
+                SupportsAccelerometer = true,
+                SupportsGyroscope = true,
+                SupportsAudio = true,
+                SupportsLocationService = true
             };
 
             var actual = sut.ToJsonString();
@@ -86,7 +97,18 @@ namespace Sentry.Protocol.Tests.Context
                 "\"screen_resolution\":\"800x600\"," +
                 "\"screen_density\":42," +
                 "\"screen_dpi\":42," +
-                "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}",
+                "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"," +
+                "\"processor_count\":8," +
+                "\"cpu_description\":\"Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz\"," +
+                "\"processor_frequency\":2500," +
+                "\"device_type\":\"Console\"," +
+                "\"battery_status\":\"Charging\"," +
+                "\"device_unique_identifier\":\"d610540d-11d6-4daa-a98c-b71030acae4d\"," +
+                "\"supports_vibration\":false," +
+                "\"supports_accelerometer\":true," +
+                "\"supports_gyroscope\":true," +
+                "\"supports_audio\":true," +
+                "\"supports_location_service\":true}",
                 actual);
         }
 
@@ -119,7 +141,18 @@ namespace Sentry.Protocol.Tests.Context
                 ScreenDpi = 11,
                 BootTime = DateTimeOffset.UtcNow,
                 Timezone = TimeZoneInfo.Utc,
-                IsOnline = false
+                IsOnline = false,
+                ProcessorCount = 8,
+                CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz",
+                ProcessorFrequency = 2500,
+                DeviceType = "Console",
+                BatteryStatus = "Charging",
+                DeviceUniqueIdentifier = "d610540d-11d6-4daa-a98c-b71030acae4d",
+                SupportsVibration = false,
+                SupportsAccelerometer = true,
+                SupportsGyroscope = true,
+                SupportsAudio = true,
+                SupportsLocationService = true
             };
 
             var clone = sut.Clone();
@@ -149,6 +182,17 @@ namespace Sentry.Protocol.Tests.Context
             Assert.Equal(sut.BootTime, clone.BootTime);
             Assert.Equal(sut.Timezone, clone.Timezone);
             Assert.Equal(sut.IsOnline, clone.IsOnline);
+            Assert.Equal(sut.ProcessorCount, clone.ProcessorCount);
+            Assert.Equal(sut.CpuDescription, clone.CpuDescription);
+            Assert.Equal(sut.ProcessorFrequency, clone.ProcessorFrequency);
+            Assert.Equal(sut.DeviceType, clone.DeviceType);
+            Assert.Equal(sut.BatteryStatus, clone.BatteryStatus);
+            Assert.Equal(sut.DeviceUniqueIdentifier, clone.DeviceUniqueIdentifier);
+            Assert.Equal(sut.SupportsVibration, clone.SupportsVibration);
+            Assert.Equal(sut.SupportsAccelerometer, clone.SupportsAccelerometer);
+            Assert.Equal(sut.SupportsGyroscope, clone.SupportsGyroscope);
+            Assert.Equal(sut.SupportsAudio, clone.SupportsAudio);
+            Assert.Equal(sut.SupportsLocationService, clone.SupportsLocationService);
         }
 
         [Theory]
@@ -204,6 +248,17 @@ namespace Sentry.Protocol.Tests.Context
             yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, "{\"type\":\"device\",\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
             yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_name", "tz_name") }, "{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}") };
             yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_id", "tz_id") }, "{\"type\":\"device\",\"timezone\":\"tz_id\"}") };
+            yield return new object[] { (new Device { ProcessorCount = 8 }, "{\"type\":\"device\",\"processor_count\":8}") };
+            yield return new object[] { (new Device { CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz" }, "{\"type\":\"device\",\"cpu_description\":\"Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz\"}") };
+            yield return new object[] { (new Device { ProcessorFrequency = 2500 }, "{\"type\":\"device\",\"processor_frequency\":2500}") };
+            yield return new object[] { (new Device { DeviceType = "Handheld" }, "{\"type\":\"device\",\"device_type\":\"Handheld\"}") };
+            yield return new object[] { (new Device { BatteryStatus = "Charging" }, "{\"type\":\"device\",\"battery_status\":\"Charging\"}") };
+            yield return new object[] { (new Device { DeviceUniqueIdentifier = "d610540d-11d6-4daa-a98c-b71030acae4d" }, "{\"type\":\"device\",\"device_unique_identifier\":\"d610540d-11d6-4daa-a98c-b71030acae4d\"}") };
+            yield return new object[] { (new Device { SupportsVibration = false }, "{\"type\":\"device\",\"supports_vibration\":false}") };
+            yield return new object[] { (new Device { SupportsAccelerometer = true }, "{\"type\":\"device\",\"supports_accelerometer\":true}") };
+            yield return new object[] { (new Device { SupportsGyroscope = true }, "{\"type\":\"device\",\"supports_gyroscope\":true}") };
+            yield return new object[] { (new Device { SupportsAudio = true }, "{\"type\":\"device\",\"supports_audio\":true}") };
+            yield return new object[] { (new Device { SupportsLocationService = true }, "{\"type\":\"device\",\"supports_location_service\":true}") };
         }
     }
 }
