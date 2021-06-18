@@ -156,36 +156,12 @@ namespace Sentry.Protocol
             writer.WriteBooleanIfNotNull("multi_threaded_rendering", MultiThreadedRendering);
             writer.WriteStringIfNotWhiteSpace("version", Version);
             writer.WriteStringIfNotWhiteSpace("npot_support", NpotSupport);
-
-            if (MaxTextureSize is {} maxTextureSize)
-            {
-                writer.WriteNumber("max_texture_size", maxTextureSize);
-            }
-
-            if (!string.IsNullOrWhiteSpace(GraphicsShaderLevel))
-            {
-                writer.WriteString("graphics_shader_level", GraphicsShaderLevel);
-            }
-
-            if (SupportsDrawCallInstancing is {} supportsDrawCallInstancing)
-            {
-                writer.WriteBoolean("supports_draw_call_instancing", supportsDrawCallInstancing);
-            }
-
-            if (SupportsRayTracing is {} supportsRayTracing)
-            {
-                writer.WriteBoolean("supports_ray_tracing", supportsRayTracing);
-            }
-
-            if (SupportsComputeShaders is {} supportsComputeShaders)
-            {
-                writer.WriteBoolean("supports_compute_shaders", supportsComputeShaders);
-            }
-
-            if (SupportsGeometryShaders is {} supportsGeometryShaders)
-            {
-                writer.WriteBoolean("supports_geometry_shaders", supportsGeometryShaders);
-            }
+            writer.WriteNumberIfNotNull("max_texture_size", MaxTextureSize);
+            writer.WriteStringIfNotWhiteSpace("graphics_shader_level", GraphicsShaderLevel);
+            writer.WriteBooleanIfNotNull("supports_draw_call_instancing", SupportsDrawCallInstancing);
+            writer.WriteBooleanIfNotNull("supports_ray_tracing", SupportsRayTracing);
+            writer.WriteBooleanIfNotNull("supports_compute_shaders", SupportsComputeShaders);
+            writer.WriteBooleanIfNotNull("supports_geometry_shaders", SupportsGeometryShaders);
 
             writer.WriteEndObject();
         }

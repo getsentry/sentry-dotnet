@@ -321,61 +321,17 @@ namespace Sentry.Protocol
             writer.WriteNumberIfNotNull("screen_density", ScreenDensity);
             writer.WriteNumberIfNotNull("screen_dpi", ScreenDpi);
             writer.WriteStringIfNotNull("boot_time", BootTime);
-
-            if (ProcessorCount is {} processorCount)
-            {
-                writer.WriteNumber("processor_count", processorCount);
-            }
-
-            if (!string.IsNullOrWhiteSpace(CpuDescription))
-            {
-                writer.WriteString("cpu_description", CpuDescription);
-            }
-
-            if (ProcessorFrequency is {} processorFrequency)
-            {
-                writer.WriteNumber("processor_frequency", processorFrequency);
-            }
-
-            if (!string.IsNullOrWhiteSpace(DeviceType))
-            {
-                writer.WriteString("device_type", DeviceType);
-            }
-
-            if (!string.IsNullOrWhiteSpace(BatteryStatus))
-            {
-                writer.WriteString("battery_status", BatteryStatus);
-            }
-
-            if (!string.IsNullOrWhiteSpace(DeviceUniqueIdentifier))
-            {
-                writer.WriteString("device_unique_identifier", DeviceUniqueIdentifier);
-            }
-
-            if (SupportsVibration is {} supportsVibration)
-            {
-                writer.WriteBoolean("supports_vibration", supportsVibration);
-            }
-
-            if (SupportsAccelerometer is {} supportsAccelerometer)
-            {
-                writer.WriteBoolean("supports_accelerometer", supportsAccelerometer);
-            }
-
-            if (SupportsGyroscope is {} supportsGyroscope)
-            {
-                writer.WriteBoolean("supports_gyroscope", supportsGyroscope);
-            }
-
-            if (SupportsAudio is {} supportsAudio)
-            {
-                writer.WriteBoolean("supports_audio", supportsAudio);
-            }
-
-            if (SupportsLocationService is {} supportsLocationService)
-            {
-                writer.WriteBoolean("supports_location_service", supportsLocationService);
-            }
+            writer.WriteNumberIfNotNull("processor_count", ProcessorCount);
+            writer.WriteStringIfNotWhiteSpace("cpu_description", CpuDescription);
+            writer.WriteNumberIfNotNull("processor_frequency", ProcessorFrequency);
+            writer.WriteStringIfNotWhiteSpace("device_type", DeviceType);
+            writer.WriteStringIfNotWhiteSpace("battery_status", BatteryStatus);
+            writer.WriteStringIfNotWhiteSpace("device_unique_identifier", DeviceUniqueIdentifier);
+            writer.WriteBooleanIfNotNull("supports_vibration", SupportsVibration);
+            writer.WriteBooleanIfNotNull("supports_accelerometer", SupportsAccelerometer);
+            writer.WriteBooleanIfNotNull("supports_gyroscope", SupportsGyroscope);
+            writer.WriteBooleanIfNotNull("supports_audio", SupportsAudio);
+            writer.WriteBooleanIfNotNull("supports_location_service", SupportsLocationService);
 
             writer.WriteEndObject();
         }
