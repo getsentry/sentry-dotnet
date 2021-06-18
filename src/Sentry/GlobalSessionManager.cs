@@ -11,7 +11,8 @@ namespace Sentry
     // AKA client mode
     internal class GlobalSessionManager : ISessionManager
     {
-        private readonly object _lock = new();
+        private readonly object _installationIdLock = new();
+
         private readonly SentryOptions _options;
 
         private string? _cachedInstallationId;
@@ -123,7 +124,7 @@ namespace Sentry
 
             // Resolve installation ID in a locked manner to guarantee consistency because ID can be non-deterministic.
             // Note: in the future, this probably has to be synchronized across multiple processes too.
-            lock (_lock)
+            lock (_installationIdLock)
             {
                 // We may have acquired the lock after another thread has already resolved
                 // installation ID, so check the cache one more time before proceeding with I/O.
@@ -184,7 +185,7 @@ namespace Sentry
                 );
 
                 // End previous session
-                EndSession(previousSession, SessionEndStatus.Exited);
+                EndSession(previousSession, SessionEndStatus.Exited, DateTimeOffset.Now);
             }
 
             _options.DiagnosticLogger?.LogInfo(
@@ -193,6 +194,33 @@ namespace Sentry
             );
 
             return session.CreateUpdate(true);
+        }
+
+        private SessionUpdate EndSession(Session session, SessionEndStatus status, DateTimeOffset timestamp)
+        {
+            session.End(status);
+
+            _options.DiagnosticLogger?.LogInfo(
+                "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
+                session.Id, session.DistinctId, status
+            );
+
+            return session.CreateUpdate(false, timestamp);
+        }
+
+        public SessionUpdate? EndSession(SessionEndStatus status, DateTimeOffset timestamp)
+        {
+            var session = Interlocked.Exchange(ref _currentSession, null);
+            if (session is null)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to end session because there is none active."
+                );
+
+                return null;
+            }
+
+            return EndSession(session, status, timestamp);
         }
 
         public SessionUpdate? ReportError()
@@ -208,33 +236,6 @@ namespace Sentry
             );
 
             return null;
-        }
-
-        private SessionUpdate EndSession(Session session, SessionEndStatus status)
-        {
-            session.End(status);
-
-            _options.DiagnosticLogger?.LogInfo(
-                "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
-                session.Id, session.DistinctId, status
-            );
-
-            return session.CreateUpdate(false);
-        }
-
-        public SessionUpdate? EndSession(SessionEndStatus status)
-        {
-            var session = Interlocked.Exchange(ref _currentSession, null);
-            if (session is null)
-            {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to end session because there is none active."
-                );
-
-                return null;
-            }
-
-            return EndSession(session, status);
         }
     }
 }

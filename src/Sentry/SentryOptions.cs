@@ -478,6 +478,11 @@ namespace Sentry
         public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
 
         /// <summary>
+        /// Determines the duration of time a session can stay paused before it's considered ended.
+        /// </summary>
+        public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(5);
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()

@@ -85,10 +85,12 @@ namespace Sentry
         /// </summary>
         public void End(SessionEndStatus status) => EndStatus = status;
 
+        internal SessionUpdate CreateUpdate(bool isInitial, DateTimeOffset timestamp) =>
+            new(this, isInitial, timestamp, Interlocked.Increment(ref _sequenceNumber));
+
         /// <summary>
         /// Creates an update of this session.
         /// </summary>
-        public SessionUpdate CreateUpdate(bool isInitial) =>
-            new(this, isInitial, DateTimeOffset.Now, Interlocked.Increment(ref _sequenceNumber));
+        public SessionUpdate CreateUpdate(bool isInitial) => CreateUpdate(isInitial, DateTimeOffset.Now);
     }
 }

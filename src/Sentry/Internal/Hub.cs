@@ -11,12 +11,16 @@ namespace Sentry.Internal
 {
     internal class Hub : IHub, IDisposable
     {
+        private readonly object _sessionPauseLock = new();
+
         private readonly ISentryClient _ownedClient;
         private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
+
+        private DateTimeOffset _sessionPauseTimestamp;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
@@ -182,11 +186,38 @@ namespace Sentry.Internal
             }
         }
 
-        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+        public void PauseSession()
+        {
+            lock (_sessionPauseLock)
+            {
+                _sessionPauseTimestamp = DateTimeOffset.Now;
+            }
+        }
+
+        public void ResumeSession()
+        {
+            lock (_sessionPauseLock)
+            {
+                var pauseDuration = (DateTimeOffset.Now - _sessionPauseTimestamp).Duration();
+                if (pauseDuration >= _options.AutoSessionTrackingInterval)
+                {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Paused session has been paused for {0}, which is longer than the configured limit. " +
+                        "Starting a new session instead of resuming this one.",
+                        pauseDuration
+                    );
+
+                    EndSession(SessionEndStatus.Exited, _sessionPauseTimestamp);
+                    StartSession();
+                }
+            }
+        }
+
+        private void EndSession(SessionEndStatus status, DateTimeOffset timestamp)
         {
             try
             {
-                var sessionUpdate = _sessionManager.EndSession(status);
+                var sessionUpdate = _sessionManager.EndSession(status, timestamp);
                 if (sessionUpdate is not null)
                 {
                     CaptureSession(sessionUpdate);
@@ -200,6 +231,9 @@ namespace Sentry.Internal
                 );
             }
         }
+
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
+            EndSession(status, DateTimeOffset.Now);
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {
