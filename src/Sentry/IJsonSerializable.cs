@@ -2,7 +2,10 @@ using System.Text.Json;
 
 namespace Sentry
 {
-    internal interface IJsonSerializable
+    /// <summary>
+    /// Sentry JsonSerializable.
+    /// </summary>
+    public interface IJsonSerializable
     {
         /// <summary>
         /// Writes the object as JSON.

@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.6.0-alpha.1</Version>
+    <Version>3.6.0-alpha.2</Version>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
@@ -19,7 +19,7 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
     <PackageReference Include="Roslynator.Analyzers" Version="3.0.0" PrivateAssets="All" />

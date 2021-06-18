@@ -19,7 +19,7 @@
       <Link>%(RecursiveDir)/%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcoreapp')) or '$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
   <!-- Ben.Demystifier -->
