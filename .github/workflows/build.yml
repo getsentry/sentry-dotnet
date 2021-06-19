@@ -51,7 +51,7 @@ jobs:
 
         - name: Install workloads on macOS
           if: matrix.os == 'macos-latest'
-          run: >-
+          run: |
             dotnet tool install -g redth.net.maui.check
             sudo maui-check --ci --fix
 #            sudo dotnet workload install microsoft-android-sdk-full
@@ -62,14 +62,14 @@ jobs:
 
         - name: Install workloads on Linux
           if: matrix.os == 'ubuntu-latest'
-          run: >-
+          run: |
             dotnet tool install -g redth.net.maui.check
             sudo maui-check --ci --fix
 #            dotnet workload install microsoft-android-sdk-full
 
         - name: Install workloads on Windows
           if: matrix.os == 'windows-latest'
-          run: >-
+          run: |
             dotnet tool install -g redth.net.maui.check
             maui-check
 #            dotnet workload install microsoft-android-sdk-full
