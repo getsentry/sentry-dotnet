@@ -51,22 +51,28 @@ jobs:
 
         - name: Install workloads on macOS
           if: matrix.os == 'macos-latest'
+          run: >-
+            dotnet tool install -g redth.net.maui.check
+            sudo maui-check
+#            sudo dotnet workload install microsoft-android-sdk-full
+#            sudo dotnet workload install microsoft-ios-sdk-full
+#            sudo dotnet workload install microsoft-maccatalyst-sdk-full
 #            sudo dotnet workload install microsoft-macos-sdk-full
 #            sudo dotnet workload install microsoft-tvos-sdk-full
-          run: >-
-            sudo dotnet workload install microsoft-android-sdk-full
-            sudo dotnet workload install microsoft-ios-sdk-full
-            sudo dotnet workload install microsoft-maccatalyst-sdk-full
 
         - name: Install workloads on Linux
           if: matrix.os == 'ubuntu-latest'
           run: >-
-            dotnet workload install microsoft-android-sdk-full
+            dotnet tool install -g redth.net.maui.check
+            maui-check
+#            dotnet workload install microsoft-android-sdk-full
 
         - name: Install workloads on Windows
           if: matrix.os == 'windows-latest'
           run: >-
-            dotnet workload install microsoft-android-sdk-full
+            dotnet tool install -g redth.net.maui.check
+            maui-check
+#            dotnet workload install microsoft-android-sdk-full
 
         - name: Run build script
           run: ${{ matrix.build_script }}
