@@ -63,26 +63,10 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
-
-            if (!string.IsNullOrWhiteSpace(RawDescription))
-            {
-                writer.WriteString("raw_description", RawDescription);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Build))
-            {
-                writer.WriteString("build", Build);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
+            writer.WriteStringIfNotWhiteSpace("raw_description", RawDescription);
+            writer.WriteStringIfNotWhiteSpace("build", Build);
 
             writer.WriteEndObject();
         }

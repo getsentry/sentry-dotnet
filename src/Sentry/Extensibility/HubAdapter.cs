@@ -104,6 +104,20 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
+        public void StartSession()
+            => SentrySdk.StartSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+            => SentrySdk.EndSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
         public void BindClient(ISentryClient client)
             => SentrySdk.BindClient(client);
 
@@ -168,6 +182,14 @@ namespace Sentry.Extensibility
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void CaptureTransaction(Transaction transaction)
             => SentrySdk.CaptureTransaction(transaction);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void CaptureSession(SessionUpdate sessionUpdate)
+            => SentrySdk.CaptureSession(sessionUpdate);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>

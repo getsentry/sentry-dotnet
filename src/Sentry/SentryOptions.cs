@@ -180,7 +180,7 @@ namespace Sentry
         /// <remarks>
         /// This value will generally be something along the lines of the git SHA for the given project.
         /// If not explicitly defined via configuration or environment variable (SENTRY_RELEASE).
-        /// It will attempt o read it from:
+        /// It will attempt to read it from:
         /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
@@ -478,6 +478,16 @@ namespace Sentry
         public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
 
         /// <summary>
+        /// Whether the SDK should start a session automatically when it's initialized and
+        /// end the session when it's closed.
+        /// </summary>
+        /// <remarks>
+        /// Note: this is disabled by default in the current version, but may be become
+        /// enabled by default in a future major update.
+        /// </remarks>
+        public bool AutoSessionTracking { get; set; } = false;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
@@ -501,9 +511,9 @@ namespace Sentry
             ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
-                    // de-dupe to be the first to run
-                    new DuplicateEventDetectionEventProcessor(this),
-                    new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor),
+                // De-dupe to be the first to run
+                new DuplicateEventDetectionEventProcessor(this),
+                new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
             };
 
             ExceptionProcessors = new ISentryEventExceptionProcessor[] {
@@ -511,6 +521,8 @@ namespace Sentry
             };
 
             Integrations = new ISdkIntegration[] {
+                // Auto-session tracking to be the first to run
+                new AutoSessionTrackingIntegration(),
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
                 new TaskUnobservedTaskExceptionIntegration(),

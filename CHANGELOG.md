@@ -1,16 +1,54 @@
 # Changelog
 
-## Unreleased
+## 3.6.0-alpha.2
+
+### Features
+
+- Extended Device and GPU protocol; public IJsonSerializable ([#1063](https://github.com/getsentry/sentry-dotnet/pull/1063))
+- ASP.NET Core: Option `AdjustStandardEnvironmentNameCasing` to opt-out from lower casing env name. [#1057](https://github.com/getsentry/sentry-dotnet/pull/1057)
+- Sessions: Improve exception check in `CaptureEvent(...)` for the purpose of reporting errors in session ([#1058](https://github.com/getsentry/sentry-dotnet/pull/1058))
+- Introduce TraceDiagnosticLogger and obsolete DebugDiagnosticLogger ([#1048](https://github.com/getsentry/sentry-dotnet/pull/1048))
+- Add auto session tracking ([#1068](https://github.com/getsentry/sentry-dotnet/pull/1068))
+
+### Fixes
+
+- Handle error thrown while trying to get `BootTime` on PS4 with IL2CPP ([#1062](https://github.com/getsentry/sentry-dotnet/pull/1062))
+- Use SentryId for ISession.Id ([#1052](https://github.com/getsentry/sentry-dotnet/pull/1052))
+- Add System.Reflection.Metadata as a dependency for netcoreapp3.0 target([#1064](https://github.com/getsentry/sentry-dotnet/pull/1064))
+
+## 3.6.0-alpha.1
+
+### Features
+
+- Implemented client-mode release health ([#1013](https://github.com/getsentry/sentry-dotnet/pull/1013))
+
+### Fixes
+
+- Report lowercase staging environment for ASP.NET Core ([#1046](https://github.com/getsentry/sentry-unity/pull/1046))
+
+## 3.5.0
+
+### Features
+
+- Report user IP address for ASP.NET Core ([#1045](https://github.com/getsentry/sentry-unity/pull/1045))
+
+### Fixes
+
+- Connect middleware exceptions to transactions ([#1043](https://github.com/getsentry/sentry-dotnet/pull/1043))
+- Hub.IsEnabled set to false when Hub disposed ([#1021](https://github.com/getsentry/sentry-dotnet/pull/1021))
+
+## 3.4.0
 
 ### Features
 
 - Sentry.EntityFramework moved to this repository ([#1017](https://github.com/getsentry/sentry-dotnet/pull/1017))
-  - Additional `netstandard2.1` target added. Sample with .NET Core 3.1 console app.
-  - `UseBreadcrumbs` is called automatically by `AddEntityFramework`
+- Additional `netstandard2.1` target added. Sample with .NET Core 3.1 console app.
+- `UseBreadcrumbs` is called automatically by `AddEntityFramework`
 
 ### Fixes
 
-- normalize line breaks ([#1016](https://github.com/getsentry/sentry-dotnet/pull/1016))
+- Normalize line breaks ([#1016](https://github.com/getsentry/sentry-dotnet/pull/1016))
+- Finish span with exception in SentryHttpMessageHandler ([#1037](https://github.com/getsentry/sentry-dotnet/pull/1037))
 
 ## 3.4.0-beta.0
 

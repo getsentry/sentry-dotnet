@@ -81,6 +81,20 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
+        public void StartSession()
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
         public void BindClient(ISentryClient client)
         {
         }
@@ -94,6 +108,13 @@ namespace Sentry.Extensibility
         /// No-Op.
         /// </summary>
         public void CaptureTransaction(Transaction transaction)
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void CaptureSession(SessionUpdate sessionUpdate)
         {
         }
 

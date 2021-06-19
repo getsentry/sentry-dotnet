@@ -9,7 +9,7 @@ namespace Sentry.AspNetCore
         public User? Create(HttpContext context)
         {
             var principal = context.User;
-            if (principal == null)
+            if (principal is null)
             {
                 return null;
             }
@@ -36,20 +36,21 @@ namespace Sentry.AspNetCore
             // Identity.Name Reads the value of: ClaimsIdentity.NameClaimType which by default is ClaimTypes.Name
             // It can be changed by the application to read a different claim though:
             var name = principal.Identity?.Name;
-            if (name != null && username != name)
+            if (name is not null && username != name)
             {
                 username = name;
             }
 
-            // Don't create a user if all we have is his IP address
-            return email == null && id == null && username == null
+            var ipAddress = context.Connection?.RemoteIpAddress?.ToString();
+
+            return email is null && id is null && username is null && ipAddress is null
                 ? null
                 : new User
                 {
                     Id = id,
                     Email = email,
                     Username = username,
-                    IpAddress = context.Connection?.RemoteIpAddress?.ToString()
+                    IpAddress = ipAddress,
                 };
         }
     }

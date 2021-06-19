@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,16 +22,20 @@ namespace Sentry.Internal.Http
 
         private readonly Func<string, string?> _getEnvironmentVariable;
 
-        // Keep track of rate limits and their expiry dates
-        private readonly Dictionary<RateLimitCategory, DateTimeOffset> _categoryLimitResets =
-            new();
+        // Keep track of rate limits and their expiry dates.
+        // Internal for testing.
+        internal ConcurrentDictionary<RateLimitCategory, DateTimeOffset> CategoryLimitResets { get; } = new();
+
+        // Keep track of last discarded session init so that we can promote the next update.
+        // We only track one because session updates are ordered.
+        // Using string instead of SentryId here so that we can use Interlocked.Exchange(...).
+        private string? _lastDiscardedSessionInitId;
 
         internal const string DefaultErrorMessage = "No message";
 
         public HttpTransport(SentryOptions options, HttpClient httpClient)
             : this(options, httpClient, Environment.GetEnvironmentVariable)
         {
-
         }
 
         internal HttpTransport(SentryOptions options, HttpClient httpClient,
@@ -48,7 +53,7 @@ namespace Sentry.Internal.Http
             foreach (var envelopeItem in envelope.Items)
             {
                 // Check if there is at least one matching category for this item that is rate-limited
-                var isRateLimited = _categoryLimitResets
+                var isRateLimited = CategoryLimitResets
                     .Any(kvp => kvp.Value > instant && kvp.Key.Matches(envelopeItem));
 
                 if (isRateLimited)
@@ -57,6 +62,17 @@ namespace Sentry.Internal.Http
                         "Envelope item of type {0} was discarded because it's rate-limited.",
                         envelopeItem.TryGetType()
                     );
+
+                    // Check if session update with init=true
+                    if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
+                    {
+                        _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
+
+                        _options.DiagnosticLogger?.LogDebug(
+                            "Discarded envelope item containing initial session update (SID: {0}).",
+                            discardedSessionUpdate.Id
+                        );
+                    }
 
                     continue;
                 }
@@ -74,7 +90,28 @@ namespace Sentry.Internal.Http
                     continue;
                 }
 
-                envelopeItems.Add(envelopeItem);
+                // If it's a session update (not discarded) with init=false, check if it continues
+                // a session with previously dropped init and, if so, promote this update to init=true.
+                if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
+                    string.Equals(sessionUpdate.Id.ToString(), Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
+                        StringComparison.Ordinal))
+                {
+                    var modifiedEnvelopeItem = new EnvelopeItem(
+                        envelopeItem.Header,
+                        new JsonSerializable(new SessionUpdate(sessionUpdate, true))
+                    );
+
+                    envelopeItems.Add(modifiedEnvelopeItem);
+
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
+                        sessionUpdate.Id
+                    );
+                }
+                else
+                {
+                    envelopeItems.Add(envelopeItem);
+                }
             }
 
             return new Envelope(envelope.Header, envelopeItems);
@@ -98,7 +135,7 @@ namespace Sentry.Internal.Http
             {
                 foreach (var rateLimitCategory in rateLimit.Categories)
                 {
-                    _categoryLimitResets[rateLimitCategory] = instant + rateLimit.RetryAfter;
+                    CategoryLimitResets[rateLimitCategory] = instant + rateLimit.RetryAfter;
                 }
             }
         }
@@ -186,7 +223,7 @@ namespace Sentry.Internal.Http
             }
 
             // SDK is in debug mode, and envelope was too large. To help troubleshoot:
-            const String persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
+            const string persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) == true
                 && response.StatusCode == HttpStatusCode.RequestEntityTooLarge
                 && _getEnvironmentVariable(persistLargeEnvelopePathEnvVar) is { } destinationDirectory)

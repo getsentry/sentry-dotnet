@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -75,7 +76,7 @@ namespace Sentry.AspNetCore
                     ? new TransactionContext(transactionName, OperationName, traceHeader)
                     : new TransactionContext(transactionName, OperationName);
 
-                var customSamplingContext = new Dictionary<string, object?>(StringComparer.Ordinal)
+                var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
                 {
                     [SamplingExtensions.KeyForHttpMethod] = context.Request.Method,
                     [SamplingExtensions.KeyForHttpRoute] = context.TryGetRouteTemplate(),
@@ -122,9 +123,14 @@ namespace Sentry.AspNetCore
                 scope.OnEvaluating += (_, _) => scope.Populate(context, _options);
             });
 
+            Exception? exception = null;
             try
             {
                 await _next(context).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                exception = e;
             }
             finally
             {
@@ -146,9 +152,20 @@ namespace Sentry.AspNetCore
                         transaction.Name = transactionName;
                     }
 
-                    transaction.Finish(
-                        SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
-                    );
+                    var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
+                    if (exception is null)
+                    {
+                        transaction.Finish(status);
+                    }
+                    else
+                    {
+                        transaction.Finish(exception, status);
+                    }
+                }
+
+                if (exception is not null)
+                {
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
             }
         }

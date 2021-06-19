@@ -7,6 +7,7 @@ using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 using Xunit;
 
@@ -254,6 +255,71 @@ namespace NotSentry.Tests
                     evt.Contexts.Trace.SpanId == default),
                 Arg.Any<Scope>()
             );
+        }
+
+        [Fact]
+        public void CaptureEvent_SessionActive_NoExceptionDoesNotReportError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            });
+
+            hub.StartSession();
+
+            // Act
+            hub.CaptureEvent(new SentryEvent());
+            hub.EndSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 0));
+        }
+
+        [Fact]
+        public void CaptureEvent_SessionActive_ExceptionReportsError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            });
+
+            hub.StartSession();
+
+            // Act
+            hub.CaptureEvent(new SentryEvent(new Exception()));
+            hub.EndSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 1));
+        }
+
+        [Fact]
+        public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            hub.StartSession();
+
+            // Act
+            hub.CaptureEvent(new SentryEvent
+            {
+                SentryExceptions = new[] {new SentryException {Mechanism = new Mechanism {Handled = false}}}
+            });
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Crashed));
         }
 
         [Fact]
@@ -638,6 +704,79 @@ namespace NotSentry.Tests
 
             // Assert
             hub.WithScope(scope => scope.Transaction.Should().BeNull());
+        }
+
+        [Fact]
+        public void Dispose_IsEnabled_SetToFalse()
+        {
+            // Arrange
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            hub.IsEnabled.Should().BeTrue();
+
+            // Act
+            hub.Dispose();
+
+            // Assert
+            hub.IsEnabled.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Dispose_CalledSecondTime_ClientDisposedOnce()
+        {
+            var client = Substitute.For<ISentryClient, IDisposable>();
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            hub.Dispose();
+            hub.Dispose();
+
+            // Assert
+            (client as IDisposable).Received(1).Dispose();
+        }
+
+        [Fact]
+        public void StartSession_CapturesUpdate()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            // Act
+            hub.StartSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        }
+
+        [Fact]
+        public void EndSession_CapturesUpdate()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret
+            });
+
+            hub.StartSession();
+
+            // Act
+            hub.EndSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
         }
     }
 }

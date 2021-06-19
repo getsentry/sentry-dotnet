@@ -53,36 +53,12 @@ namespace Sentry.Protocol
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (SpanId != SpanId.Empty)
-            {
-                writer.WriteSerializable("span_id", SpanId);
-            }
-
-            if (ParentSpanId is {} parentSpanId && parentSpanId != SpanId.Empty)
-            {
-                writer.WriteSerializable("parent_span_id", parentSpanId);
-            }
-
-            if (TraceId != SentryId.Empty)
-            {
-                writer.WriteSerializable("trace_id", TraceId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Operation))
-            {
-                writer.WriteString("op", Operation);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            if (Status is {} status)
-            {
-                writer.WriteString("status", status.ToString().ToSnakeCase());
-            }
+            writer.WriteSerializableIfNotNull("span_id", SpanId.NullIfDefault());
+            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId?.NullIfDefault());
+            writer.WriteSerializableIfNotNull("trace_id", TraceId.NullIfDefault());
+            writer.WriteStringIfNotWhiteSpace("op", Operation);
+            writer.WriteStringIfNotWhiteSpace("description", Description);
+            writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
 
             writer.WriteEndObject();
         }
@@ -97,7 +73,7 @@ namespace Sentry.Protocol
             var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "";
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
+            var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
 
             return new Trace

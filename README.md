@@ -75,7 +75,7 @@ For more details, please: **refer to the [documentation](https://getsentry.githu
 
 ### Legacy frameworks
 
-Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 2.500.000 downloads on NuGet has support to .NET Framework 3.5+.
+Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested with over 3.500.000 downloads on NuGet has support to .NET Framework 3.5+ and is compatible with all versions of Sentry including [sentry.io](sentry.io).
 
 ## Resources
 

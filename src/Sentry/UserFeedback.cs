@@ -45,26 +45,10 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Event ID
             writer.WriteSerializable("event_id", EventId);
-
-            // Name
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            // Email
-            if (!string.IsNullOrWhiteSpace(Email))
-            {
-                writer.WriteString("email", Email);
-            }
-
-            // Comments
-            if (!string.IsNullOrWhiteSpace(Comments))
-            {
-                writer.WriteString("comments", Comments);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("email", Email);
+            writer.WriteStringIfNotWhiteSpace("comments", Comments);
 
             writer.WriteEndObject();
         }
