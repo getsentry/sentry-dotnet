@@ -58,8 +58,6 @@ jobs:
         - name: Install workloads on macOS
           if: matrix.os == 'macos-latest'
           run: |
-            dotnet tool install -g redth.net.maui.check
-            sudo maui-check --ci --fix
             sudo dotnet workload install microsoft-android-sdk-full
             sudo dotnet workload install microsoft-ios-sdk-full
             sudo dotnet workload install microsoft-maccatalyst-sdk-full
