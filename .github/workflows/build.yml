@@ -49,30 +49,32 @@ jobs:
           with:
             dotnet-version: '6.0.100-preview.5.21302.13'
 
+        - name: Install JDK 1.8
+          uses: actions/setup-java@v2
+          with:
+            distribution: 'adopt'
+            java-version: '8'
+
         - name: Install workloads on macOS
           if: matrix.os == 'macos-latest'
           run: |
             dotnet tool install -g redth.net.maui.check
             sudo maui-check --ci --fix
-#            sudo dotnet workload install microsoft-android-sdk-full
-#            sudo dotnet workload install microsoft-ios-sdk-full
-#            sudo dotnet workload install microsoft-maccatalyst-sdk-full
-#            sudo dotnet workload install microsoft-macos-sdk-full
-#            sudo dotnet workload install microsoft-tvos-sdk-full
+            sudo dotnet workload install microsoft-android-sdk-full
+            sudo dotnet workload install microsoft-ios-sdk-full
+            sudo dotnet workload install microsoft-maccatalyst-sdk-full
+            sudo dotnet workload install microsoft-macos-sdk-full
+            sudo dotnet workload install microsoft-tvos-sdk-full
 
         - name: Install workloads on Linux
           if: matrix.os == 'ubuntu-latest'
           run: |
-            dotnet tool install -g redth.net.maui.check
-            sudo maui-check --ci --fix
-#            dotnet workload install microsoft-android-sdk-full
+            dotnet workload install microsoft-android-sdk-full
 
         - name: Install workloads on Windows
           if: matrix.os == 'windows-latest'
           run: |
-            dotnet tool install -g redth.net.maui.check
-            maui-check
-#            dotnet workload install microsoft-android-sdk-full
+            dotnet workload install microsoft-android-sdk-full
 
         - name: Run build script
           run: ${{ matrix.build_script }}
