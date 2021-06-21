@@ -282,7 +282,8 @@ namespace Sentry.Internal
                     var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>
                         _sessionManager.EndSession(SessionEndStatus.Crashed),
 
-                    // Event contains a non-terminal exception -> just increment error count
+                    // Event contains a non-terminal exception -> report error
+                    // (this might return null if the session has already error before)
                     var e when e.Exception is not null || e.SentryExceptions?.Any() == true =>
                         _sessionManager.ReportError(),
 
