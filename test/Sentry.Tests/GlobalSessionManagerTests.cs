@@ -168,7 +168,7 @@ namespace Sentry.Tests
 
             fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to end session because there is none active." &&
-                e.Level == SentryLevel.Error
+                e.Level == SentryLevel.Debug
             );
         }
     }
