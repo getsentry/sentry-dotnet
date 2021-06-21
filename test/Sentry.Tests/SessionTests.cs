@@ -26,13 +26,12 @@ namespace Sentry.Tests
             session.ReportError();
             session.ReportError();
 
-            session.End(SessionEndStatus.Crashed);
-
             var sessionUpdate = new SessionUpdate(
                 session,
                 true,
                 DateTimeOffset.Parse("2020-01-02T00:00:00+00:00", CultureInfo.InvariantCulture),
-                5
+                5,
+                SessionEndStatus.Crashed
             );
 
             // Act
