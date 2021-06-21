@@ -88,6 +88,20 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
+        public void PauseSession()
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void ResumeSession()
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
         public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
         {
         }
