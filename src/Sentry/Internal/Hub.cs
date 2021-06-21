@@ -215,13 +215,13 @@ namespace Sentry.Internal
                         pauseDuration
                     );
 
-                    EndSession(SessionEndStatus.Exited, _sessionPauseTimestamp);
+                    EndSession(_sessionPauseTimestamp, SessionEndStatus.Exited);
                     StartSession();
                 }
             }
         }
 
-        private void EndSession(SessionEndStatus status, DateTimeOffset timestamp)
+        private void EndSession(DateTimeOffset timestamp, SessionEndStatus status)
         {
             try
             {
@@ -241,7 +241,7 @@ namespace Sentry.Internal
         }
 
         public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
-            EndSession(status, _clock.GetUtcNow());
+            EndSession(_clock.GetUtcNow(), status);
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {
