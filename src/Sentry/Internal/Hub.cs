@@ -283,7 +283,7 @@ namespace Sentry.Internal
                         _sessionManager.EndSession(SessionEndStatus.Crashed),
 
                     // Event contains a non-terminal exception -> report error
-                    // (this might return null if the session has already error before)
+                    // (this might return null if the session has already reported errors before)
                     var e when e.Exception is not null || e.SentryExceptions?.Any() == true =>
                         _sessionManager.ReportError(),
 
