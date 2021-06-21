@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 
 namespace Sentry
@@ -13,6 +14,7 @@ namespace Sentry
     {
         private readonly object _installationIdLock = new();
 
+        private readonly ISystemClock _clock;
         private readonly SentryOptions _options;
 
         private string? _cachedInstallationId;
@@ -21,9 +23,15 @@ namespace Sentry
         // Internal for testing
         internal Session? CurrentSession => _currentSession;
 
-        public GlobalSessionManager(SentryOptions options)
+        public GlobalSessionManager(ISystemClock clock, SentryOptions options)
         {
+            _clock = clock;
             _options = options;
+        }
+
+        public GlobalSessionManager(SentryOptions options)
+            : this(SystemClock.Clock, options)
+        {
         }
 
         private string? TryGetPersistentInstallationId()
@@ -185,7 +193,7 @@ namespace Sentry
                 );
 
                 // End previous session
-                EndSession(previousSession, SessionEndStatus.Exited, DateTimeOffset.Now);
+                EndSession(previousSession, SessionEndStatus.Exited, _clock.GetUtcNow());
             }
 
             _options.DiagnosticLogger?.LogInfo(

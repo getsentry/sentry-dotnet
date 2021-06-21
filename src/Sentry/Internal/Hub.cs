@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Integrations;
 
 namespace Sentry.Internal
@@ -14,6 +15,7 @@ namespace Sentry.Internal
         private readonly object _sessionPauseLock = new();
 
         private readonly ISentryClient _ownedClient;
+        private readonly ISystemClock _clock;
         private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
@@ -30,9 +32,10 @@ namespace Sentry.Internal
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;
 
-        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
+        internal Hub(ISentryClient client, ISystemClock clock, ISessionManager sessionManager, SentryOptions options)
         {
             _ownedClient = client;
+            _clock = clock;
             _sessionManager = sessionManager;
             _options = options;
 
@@ -62,6 +65,11 @@ namespace Sentry.Internal
             _rootScope = PushScope();
 
             _enricher = new Enricher(options);
+        }
+
+        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
+            : this(client, SystemClock.Clock, sessionManager, options)
+        {
         }
 
         internal Hub(ISentryClient client, SentryOptions options)
@@ -190,7 +198,7 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                _sessionPauseTimestamp = DateTimeOffset.Now;
+                _sessionPauseTimestamp = _clock.GetUtcNow();
             }
         }
 
@@ -198,7 +206,7 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                var pauseDuration = (DateTimeOffset.Now - _sessionPauseTimestamp).Duration();
+                var pauseDuration = (_clock.GetUtcNow() - _sessionPauseTimestamp).Duration();
                 if (pauseDuration >= _options.AutoSessionTrackingInterval)
                 {
                     _options.DiagnosticLogger?.LogDebug(
@@ -233,7 +241,7 @@ namespace Sentry.Internal
         }
 
         public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
-            EndSession(status, DateTimeOffset.Now);
+            EndSession(status, _clock.GetUtcNow());
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {
