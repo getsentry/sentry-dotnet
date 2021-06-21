@@ -74,9 +74,9 @@ namespace Sentry.Tests
             );
 
             // Act
-            var sessionUpdate1 = session.CreateUpdate(true);
-            var sessionUpdate2 = session.CreateUpdate(false);
-            var sessionUpdate3 = session.CreateUpdate(false);
+            var sessionUpdate1 = session.CreateUpdate(true, DateTimeOffset.Now);
+            var sessionUpdate2 = session.CreateUpdate(false, DateTimeOffset.Now);
+            var sessionUpdate3 = session.CreateUpdate(false, DateTimeOffset.Now);
 
             // Assert
             sessionUpdate1.SequenceNumber.Should().Be(0);
