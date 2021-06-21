@@ -303,12 +303,11 @@ namespace NotSentry.Tests
         public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
         {
             // Arrange
-            var client = Substitute.For<ISentryClient>();
+            var worker = Substitute.For<IBackgroundWorker>();
 
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret};
+            var client = new SentryClient(options, worker);
+            var hub = new Hub(client, options);
 
             hub.StartSession();
 
@@ -319,7 +318,17 @@ namespace NotSentry.Tests
             });
 
             // Assert
-            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Crashed));
+            worker.Received().EnqueueEnvelope(
+                Arg.Is<Envelope>(e =>
+                    e.Items
+                        .Select(i => i.Payload)
+                        .OfType<JsonSerializable>()
+                        .Select(i => i.Source)
+                        .OfType<SessionUpdate>()
+                        .Single()
+                        .EndStatus == SessionEndStatus.Crashed
+                )
+            );
         }
 
         [Fact]

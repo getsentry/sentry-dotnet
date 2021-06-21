@@ -236,6 +236,18 @@ namespace Sentry
             if (_currentSession is { } session)
             {
                 session.ReportError();
+
+                // If we already have at least one error reported, the session update is pointless,
+                // so don't return anything.
+                if (session.ErrorCount > 1)
+                {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Reported an error on a session that already contains error. Not creating an update."
+                    );
+
+                    return null;
+                }
+
                 return session.CreateUpdate(false);
             }
 

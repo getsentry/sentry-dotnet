@@ -276,7 +276,7 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                var sessionUpdate = evt switch
+                actualScope.SessionUpdate = evt switch
                 {
                     // Event contains a terminal exception -> end session as crashed
                     var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>
@@ -289,13 +289,6 @@ namespace Sentry.Internal
                     // Event doesn't contain any kind of exception -> no reason to attach session update
                     _ => null
                 };
-
-                // Only set the session if the error count changed from 0 to 1.
-                // We don't care about error count going above 1 because it has no
-                // visible impact (a session is either errored or not).
-                actualScope.SessionUpdate = sessionUpdate?.ErrorCount == 1
-                    ? sessionUpdate
-                    : null;
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
