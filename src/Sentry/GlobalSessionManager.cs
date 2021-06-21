@@ -201,7 +201,7 @@ namespace Sentry
                 session.Id, session.DistinctId
             );
 
-            return session.CreateUpdate(true);
+            return session.CreateUpdate(true, _clock.GetUtcNow());
         }
 
         private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
@@ -248,7 +248,7 @@ namespace Sentry
                     return null;
                 }
 
-                return session.CreateUpdate(false);
+                return session.CreateUpdate(false, _clock.GetUtcNow());
             }
 
             _options.DiagnosticLogger?.LogDebug(
