@@ -53,26 +53,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void StartSession_ActiveSessionExists_EndsPreviousSession()
-        {
-            // Arrange
-            using var fixture = new Fixture();
-
-            var previousSessionUpdate = fixture.SessionManager.StartSession();
-            var previousSession = fixture.SessionManager.CurrentSession;
-
-            // Act
-            var sessionUpdate = fixture.SessionManager.StartSession();
-            var session = fixture.SessionManager.CurrentSession;
-
-            // Assert
-            session.Should().NotBe(previousSession);
-            session?.Id.Should().NotBe(previousSession?.Id);
-            previousSessionUpdate?.EndStatus.Should().BeNull();
-            sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
-        }
-
-        [Fact]
         public void StartSession_CacheDirectoryProvided_InstallationIdFileCreated()
         {
             // Arrange
