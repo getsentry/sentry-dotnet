@@ -219,7 +219,7 @@ namespace Sentry
             var session = Interlocked.Exchange(ref _currentSession, null);
             if (session is null)
             {
-                _options.DiagnosticLogger?.LogError(
+                _options.DiagnosticLogger?.LogDebug(
                     "Failed to end session because there is none active."
                 );
 
