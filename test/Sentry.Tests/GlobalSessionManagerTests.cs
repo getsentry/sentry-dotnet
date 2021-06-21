@@ -58,17 +58,18 @@ namespace Sentry.Tests
             // Arrange
             using var fixture = new Fixture();
 
-            fixture.SessionManager.StartSession();
+            var previousSessionUpdate = fixture.SessionManager.StartSession();
             var previousSession = fixture.SessionManager.CurrentSession;
 
             // Act
-            fixture.SessionManager.StartSession();
+            var sessionUpdate = fixture.SessionManager.StartSession();
             var session = fixture.SessionManager.CurrentSession;
 
             // Assert
             session.Should().NotBe(previousSession);
             session?.Id.Should().NotBe(previousSession?.Id);
-            previousSession?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            previousSessionUpdate?.EndStatus.Should().BeNull();
+            sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
         [Fact]
@@ -164,7 +165,7 @@ namespace Sentry.Tests
             // Arrange
             using var fixture = new Fixture();
 
-            fixture.SessionManager.StartSession();
+            var sessionUpdate = fixture.SessionManager.StartSession();
             var session = fixture.SessionManager.CurrentSession;
 
             // Act
@@ -172,7 +173,7 @@ namespace Sentry.Tests
 
             // Assert
             session.Should().NotBeNull();
-            session?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
         [Fact]

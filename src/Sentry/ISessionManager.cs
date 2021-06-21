@@ -6,7 +6,9 @@ namespace Sentry
     {
         SessionUpdate? StartSession();
 
-        SessionUpdate? EndSession(SessionEndStatus status, DateTimeOffset timestamp);
+        SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
+
+        SessionUpdate? EndSession(SessionEndStatus status);
 
         SessionUpdate? ReportError();
     }

@@ -193,7 +193,7 @@ namespace Sentry
                 );
 
                 // End previous session
-                EndSession(previousSession, SessionEndStatus.Exited, _clock.GetUtcNow());
+                EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
             }
 
             _options.DiagnosticLogger?.LogInfo(
@@ -204,19 +204,17 @@ namespace Sentry
             return session.CreateUpdate(true);
         }
 
-        private SessionUpdate EndSession(Session session, SessionEndStatus status, DateTimeOffset timestamp)
+        private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
         {
-            session.End(status);
-
             _options.DiagnosticLogger?.LogInfo(
                 "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
                 session.Id, session.DistinctId, status
             );
 
-            return session.CreateUpdate(false, timestamp);
+            return session.CreateUpdate(false, timestamp, status);
         }
 
-        public SessionUpdate? EndSession(SessionEndStatus status, DateTimeOffset timestamp)
+        public SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status)
         {
             var session = Interlocked.Exchange(ref _currentSession, null);
             if (session is null)
@@ -228,8 +226,10 @@ namespace Sentry
                 return null;
             }
 
-            return EndSession(session, status, timestamp);
+            return EndSession(session, timestamp, status);
         }
+
+        public SessionUpdate? EndSession(SessionEndStatus status) => EndSession(_clock.GetUtcNow(), status);
 
         public SessionUpdate? ReportError()
         {

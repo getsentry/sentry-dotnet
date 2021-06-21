@@ -225,7 +225,7 @@ namespace Sentry.Internal
         {
             try
             {
-                var sessionUpdate = _sessionManager.EndSession(status, timestamp);
+                var sessionUpdate = _sessionManager.EndSession(timestamp, status);
                 if (sessionUpdate is not null)
                 {
                     CaptureSession(sessionUpdate);
@@ -276,16 +276,19 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                // If the event contains unhandled exception - end session as crashed
-                if (evt.SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
+                var sessionUpdate = evt switch
                 {
-                    EndSession(SessionEndStatus.Crashed);
-                }
+                    // Event contains a terminal exception -> end session as crashed
+                    var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>
+                        _sessionManager.EndSession(SessionEndStatus.Crashed),
 
-                // Report an error on current session if contains an exception
-                var sessionUpdate = evt.Exception is not null || evt.SentryExceptions?.Any() == true
-                    ? _sessionManager.ReportError()
-                    : null;
+                    // Event contains a non-terminal exception -> just increment error count
+                    var e when e.Exception is not null || e.SentryExceptions?.Any() == true =>
+                        _sessionManager.ReportError(),
+
+                    // Event doesn't contain any kind of exception -> no reason to attach session update
+                    _ => null
+                };
 
                 // Only set the session if the error count changed from 0 to 1.
                 // We don't care about error count going above 1 because it has no
