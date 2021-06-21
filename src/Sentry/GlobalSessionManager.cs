@@ -242,7 +242,7 @@ namespace Sentry
                 if (session.ErrorCount > 1)
                 {
                     _options.DiagnosticLogger?.LogDebug(
-                        "Reported an error on a session that already contains error. Not creating an update."
+                        "Reported an error on a session that already contains errors. Not creating an update."
                     );
 
                     return null;
