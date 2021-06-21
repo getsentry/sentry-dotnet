@@ -23,14 +23,14 @@ namespace Sentry
         // Internal for testing
         internal Session? CurrentSession => _currentSession;
 
-        public GlobalSessionManager(ISystemClock clock, SentryOptions options)
+        public GlobalSessionManager(SentryOptions options, ISystemClock clock)
         {
-            _clock = clock;
             _options = options;
+            _clock = clock;
         }
 
         public GlobalSessionManager(SentryOptions options)
-            : this(SystemClock.Clock, options)
+            : this(options, SystemClock.Clock)
         {
         }
 
