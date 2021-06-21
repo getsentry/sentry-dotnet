@@ -112,13 +112,11 @@ namespace Sentry.Tests
             fixture.SessionManager.StartSession();
 
             // Act
-            fixture.SessionManager.ReportError();
-            fixture.SessionManager.ReportError();
             var sessionUpdate = fixture.SessionManager.ReportError();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
-            sessionUpdate?.ErrorCount.Should().Be(3);
+            sessionUpdate?.ErrorCount.Should().Be(1);
         }
 
         [Fact]
