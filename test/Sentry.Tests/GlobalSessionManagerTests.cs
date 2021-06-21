@@ -165,11 +165,11 @@ namespace Sentry.Tests
             // Arrange
             using var fixture = new Fixture();
 
-            var sessionUpdate = fixture.SessionManager.StartSession();
+            fixture.SessionManager.StartSession();
             var session = fixture.SessionManager.CurrentSession;
 
             // Act
-            fixture.SessionManager.EndSession(SessionEndStatus.Exited);
+            var sessionUpdate = fixture.SessionManager.EndSession(SessionEndStatus.Exited);
 
             // Assert
             session.Should().NotBeNull();
