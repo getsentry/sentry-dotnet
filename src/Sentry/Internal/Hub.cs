@@ -276,6 +276,12 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
+                // If the event contains unhandled exception - end session as crashed
+                if (evt.SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
+                {
+                    EndSession(SessionEndStatus.Crashed);
+                }
+
                 // Report an error on current session if contains an exception
                 var sessionUpdate = evt.Exception is not null || evt.SentryExceptions?.Any() == true
                     ? _sessionManager.ReportError()
@@ -291,12 +297,6 @@ namespace Sentry.Internal
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
                 actualScope.SessionUpdate = null;
-
-                // If the event contains unhandled exception - end session as crashed
-                if (evt.SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
-                {
-                    EndSession(SessionEndStatus.Crashed);
-                }
 
                 return id;
             }
