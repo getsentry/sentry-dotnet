@@ -32,9 +32,6 @@ namespace Sentry
         public string? UserAgent { get; }
 
         /// <inheritdoc />
-        public SessionEndStatus? EndStatus { get; }
-
-        /// <inheritdoc />
         public int ErrorCount { get; }
 
         /// <summary>
@@ -58,6 +55,11 @@ namespace Sentry
         public TimeSpan Duration => Timestamp - StartTimestamp;
 
         /// <summary>
+        /// Status with which the session was ended.
+        /// </summary>
+        public SessionEndStatus? EndStatus { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
         public SessionUpdate(
@@ -68,11 +70,11 @@ namespace Sentry
             string? environment,
             string? ipAddress,
             string? userAgent,
-            SessionEndStatus? endStatus,
             int errorCount,
             bool isInitial,
             DateTimeOffset timestamp,
-            int sequenceNumber)
+            int sequenceNumber,
+            SessionEndStatus? endStatus)
         {
             Id = id;
             DistinctId = distinctId;
@@ -81,17 +83,22 @@ namespace Sentry
             Environment = environment;
             IpAddress = ipAddress;
             UserAgent = userAgent;
-            EndStatus = endStatus;
             ErrorCount = errorCount;
             IsInitial = isInitial;
             Timestamp = timestamp;
             SequenceNumber = sequenceNumber;
+            EndStatus = endStatus;
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionUpdate(ISession session, bool isInitial, DateTimeOffset timestamp, int sequenceNumber)
+        public SessionUpdate(
+            ISession session,
+            bool isInitial,
+            DateTimeOffset timestamp,
+            int sequenceNumber,
+            SessionEndStatus? endStatus)
             : this(
                 session.Id,
                 session.DistinctId,
@@ -100,11 +107,11 @@ namespace Sentry
                 session.Environment,
                 session.IpAddress,
                 session.UserAgent,
-                session.EndStatus,
                 session.ErrorCount,
                 isInitial,
                 timestamp,
-                sequenceNumber)
+                sequenceNumber,
+                endStatus)
         {
         }
 
@@ -112,7 +119,12 @@ namespace Sentry
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
         public SessionUpdate(SessionUpdate sessionUpdate, bool isInitial)
-            : this(sessionUpdate, isInitial, sessionUpdate.Timestamp, sessionUpdate.SequenceNumber)
+            : this(
+                sessionUpdate,
+                isInitial,
+                sessionUpdate.Timestamp,
+                sessionUpdate.SequenceNumber,
+                sessionUpdate.EndStatus)
         {
         }
 
@@ -154,11 +166,11 @@ namespace Sentry
             var environment = json.GetProperty("attrs").GetPropertyOrNull("environment")?.GetString();
             var ipAddress = json.GetProperty("attrs").GetPropertyOrNull("ip_address")?.GetString();
             var userAgent = json.GetProperty("attrs").GetPropertyOrNull("user_agent")?.GetString();
-            var endStatus = json.GetPropertyOrNull("status")?.GetString()?.ParseEnum<SessionEndStatus>();
             var errorCount = json.GetPropertyOrNull("errors")?.GetInt32() ?? 0;
             var isInitial = json.GetPropertyOrNull("init")?.GetBoolean() ?? false;
             var timestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var sequenceNumber = json.GetProperty("seq").GetInt32();
+            var endStatus = json.GetPropertyOrNull("status")?.GetString()?.ParseEnum<SessionEndStatus>();
 
             return new SessionUpdate(
                 id,
@@ -168,11 +180,11 @@ namespace Sentry
                 environment,
                 ipAddress,
                 userAgent,
-                endStatus,
                 errorCount,
                 isInitial,
                 timestamp,
-                sequenceNumber
+                sequenceNumber,
+                endStatus
             );
         }
     }

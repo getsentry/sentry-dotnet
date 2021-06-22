@@ -474,7 +474,7 @@ namespace Sentry.Tests.Protocol.Envelopes
                 null
             );
 
-            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false);
+            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
 
             using var envelope = Envelope.FromEvent(@event, new[] {attachment}, sessionUpdate);
 
@@ -539,7 +539,7 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Roundtrip_WithSession_Success()
         {
             // Arrange
-            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(true);
+            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(true, DateTimeOffset.Now);
 
             using var envelope = Envelope.FromSession(sessionUpdate);
 

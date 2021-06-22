@@ -53,25 +53,6 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void StartSession_ActiveSessionExists_EndsPreviousSession()
-        {
-            // Arrange
-            using var fixture = new Fixture();
-
-            fixture.SessionManager.StartSession();
-            var previousSession = fixture.SessionManager.CurrentSession;
-
-            // Act
-            fixture.SessionManager.StartSession();
-            var session = fixture.SessionManager.CurrentSession;
-
-            // Assert
-            session.Should().NotBe(previousSession);
-            session?.Id.Should().NotBe(previousSession?.Id);
-            previousSession?.EndStatus.Should().Be(SessionEndStatus.Exited);
-        }
-
-        [Fact]
         public void StartSession_CacheDirectoryProvided_InstallationIdFileCreated()
         {
             // Arrange
@@ -131,13 +112,11 @@ namespace Sentry.Tests
             fixture.SessionManager.StartSession();
 
             // Act
-            fixture.SessionManager.ReportError();
-            fixture.SessionManager.ReportError();
             var sessionUpdate = fixture.SessionManager.ReportError();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
-            sessionUpdate?.ErrorCount.Should().Be(3);
+            sessionUpdate?.ErrorCount.Should().Be(1);
         }
 
         [Fact]
@@ -168,11 +147,11 @@ namespace Sentry.Tests
             var session = fixture.SessionManager.CurrentSession;
 
             // Act
-            fixture.SessionManager.EndSession(SessionEndStatus.Exited);
+            var sessionUpdate = fixture.SessionManager.EndSession(SessionEndStatus.Exited);
 
             // Assert
             session.Should().NotBeNull();
-            session?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
         }
 
         [Fact]
@@ -189,7 +168,7 @@ namespace Sentry.Tests
 
             fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to end session because there is none active." &&
-                e.Level == SentryLevel.Error
+                e.Level == SentryLevel.Debug
             );
         }
     }

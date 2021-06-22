@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 
 namespace Sentry
@@ -11,7 +12,9 @@ namespace Sentry
     // AKA client mode
     internal class GlobalSessionManager : ISessionManager
     {
-        private readonly object _lock = new();
+        private readonly object _installationIdLock = new();
+
+        private readonly ISystemClock _clock;
         private readonly SentryOptions _options;
 
         private string? _cachedInstallationId;
@@ -20,9 +23,15 @@ namespace Sentry
         // Internal for testing
         internal Session? CurrentSession => _currentSession;
 
-        public GlobalSessionManager(SentryOptions options)
+        public GlobalSessionManager(SentryOptions options, ISystemClock clock)
         {
             _options = options;
+            _clock = clock;
+        }
+
+        public GlobalSessionManager(SentryOptions options)
+            : this(options, SystemClock.Clock)
+        {
         }
 
         private string? TryGetPersistentInstallationId()
@@ -123,7 +132,7 @@ namespace Sentry
 
             // Resolve installation ID in a locked manner to guarantee consistency because ID can be non-deterministic.
             // Note: in the future, this probably has to be synchronized across multiple processes too.
-            lock (_lock)
+            lock (_installationIdLock)
             {
                 // We may have acquired the lock after another thread has already resolved
                 // installation ID, so check the cache one more time before proceeding with I/O.
@@ -184,7 +193,7 @@ namespace Sentry
                 );
 
                 // End previous session
-                EndSession(previousSession, SessionEndStatus.Exited);
+                EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
             }
 
             _options.DiagnosticLogger?.LogInfo(
@@ -192,15 +201,54 @@ namespace Sentry
                 session.Id, session.DistinctId
             );
 
-            return session.CreateUpdate(true);
+            return session.CreateUpdate(true, _clock.GetUtcNow());
         }
+
+        private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
+        {
+            _options.DiagnosticLogger?.LogInfo(
+                "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
+                session.Id, session.DistinctId, status
+            );
+
+            return session.CreateUpdate(false, timestamp, status);
+        }
+
+        public SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status)
+        {
+            var session = Interlocked.Exchange(ref _currentSession, null);
+            if (session is null)
+            {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Failed to end session because there is none active."
+                );
+
+                return null;
+            }
+
+            return EndSession(session, timestamp, status);
+        }
+
+        public SessionUpdate? EndSession(SessionEndStatus status) => EndSession(_clock.GetUtcNow(), status);
 
         public SessionUpdate? ReportError()
         {
             if (_currentSession is { } session)
             {
                 session.ReportError();
-                return session.CreateUpdate(false);
+
+                // If we already have at least one error reported, the session update is pointless,
+                // so don't return anything.
+                if (session.ErrorCount > 1)
+                {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Reported an error on a session that already contains errors. Not creating an update."
+                    );
+
+                    return null;
+                }
+
+                return session.CreateUpdate(false, _clock.GetUtcNow());
             }
 
             _options.DiagnosticLogger?.LogDebug(
@@ -208,33 +256,6 @@ namespace Sentry
             );
 
             return null;
-        }
-
-        private SessionUpdate EndSession(Session session, SessionEndStatus status)
-        {
-            session.End(status);
-
-            _options.DiagnosticLogger?.LogInfo(
-                "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
-                session.Id, session.DistinctId, status
-            );
-
-            return session.CreateUpdate(false);
-        }
-
-        public SessionUpdate? EndSession(SessionEndStatus status)
-        {
-            var session = Interlocked.Exchange(ref _currentSession, null);
-            if (session is null)
-            {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to end session because there is none active."
-                );
-
-                return null;
-            }
-
-            return EndSession(session, status);
         }
     }
 }

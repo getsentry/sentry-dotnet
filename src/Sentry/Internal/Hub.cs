@@ -5,18 +5,24 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Integrations;
 
 namespace Sentry.Internal
 {
     internal class Hub : IHub, IDisposable
     {
+        private readonly object _sessionPauseLock = new();
+
         private readonly ISentryClient _ownedClient;
+        private readonly ISystemClock _clock;
         private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
+
+        private DateTimeOffset _sessionPauseTimestamp;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
@@ -26,9 +32,10 @@ namespace Sentry.Internal
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;
 
-        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
+        internal Hub(ISentryClient client, ISystemClock clock, ISessionManager sessionManager, SentryOptions options)
         {
             _ownedClient = client;
+            _clock = clock;
             _sessionManager = sessionManager;
             _options = options;
 
@@ -58,6 +65,11 @@ namespace Sentry.Internal
             _rootScope = PushScope();
 
             _enricher = new Enricher(options);
+        }
+
+        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
+            : this(client, SystemClock.Clock, sessionManager, options)
+        {
         }
 
         internal Hub(ISentryClient client, SentryOptions options)
@@ -182,11 +194,38 @@ namespace Sentry.Internal
             }
         }
 
-        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+        public void PauseSession()
+        {
+            lock (_sessionPauseLock)
+            {
+                _sessionPauseTimestamp = _clock.GetUtcNow();
+            }
+        }
+
+        public void ResumeSession()
+        {
+            lock (_sessionPauseLock)
+            {
+                var pauseDuration = (_clock.GetUtcNow() - _sessionPauseTimestamp).Duration();
+                if (pauseDuration >= _options.AutoSessionTrackingInterval)
+                {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Paused session has been paused for {0}, which is longer than the configured limit. " +
+                        "Starting a new session instead of resuming this one.",
+                        pauseDuration
+                    );
+
+                    EndSession(_sessionPauseTimestamp, SessionEndStatus.Exited);
+                    StartSession();
+                }
+            }
+        }
+
+        private void EndSession(DateTimeOffset timestamp, SessionEndStatus status)
         {
             try
             {
-                var sessionUpdate = _sessionManager.EndSession(status);
+                var sessionUpdate = _sessionManager.EndSession(timestamp, status);
                 if (sessionUpdate is not null)
                 {
                     CaptureSession(sessionUpdate);
@@ -200,6 +239,9 @@ namespace Sentry.Internal
                 );
             }
         }
+
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
+            EndSession(_clock.GetUtcNow(), status);
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {
@@ -234,27 +276,24 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                // Report an error on current session if contains an exception
-                var sessionUpdate = evt.Exception is not null || evt.SentryExceptions?.Any() == true
-                    ? _sessionManager.ReportError()
-                    : null;
+                actualScope.SessionUpdate = evt switch
+                {
+                    // Event contains a terminal exception -> end session as crashed
+                    var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>
+                        _sessionManager.EndSession(SessionEndStatus.Crashed),
 
-                // Only set the session if the error count changed from 0 to 1.
-                // We don't care about error count going above 1 because it has no
-                // visible impact (a session is either errored or not).
-                actualScope.SessionUpdate = sessionUpdate?.ErrorCount == 1
-                    ? sessionUpdate
-                    : null;
+                    // Event contains a non-terminal exception -> report error
+                    // (this might return null if the session has already reported errors before)
+                    var e when e.Exception is not null || e.SentryExceptions?.Any() == true =>
+                        _sessionManager.ReportError(),
+
+                    // Event doesn't contain any kind of exception -> no reason to attach session update
+                    _ => null
+                };
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
                 actualScope.SessionUpdate = null;
-
-                // If the event contains unhandled exception - end session as crashed
-                if (evt.SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
-                {
-                    EndSession(SessionEndStatus.Crashed);
-                }
 
                 return id;
             }

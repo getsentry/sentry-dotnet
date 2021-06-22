@@ -478,12 +478,20 @@ namespace Sentry
         public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
 
         /// <summary>
+        /// Determines the duration of time a session can stay paused before it's considered ended.
+        /// </summary>
+        /// <remarks>
+        /// Note: This internal is only taken into account when integrations support Pause and Resume.
+        /// </remarks>
+        public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(5);
+
+        /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and
         /// end the session when it's closed.
         /// </summary>
         /// <remarks>
-        /// Note: this is disabled by default in the current version, but may be become
-        /// enabled by default in a future major update.
+        /// Note: this is disabled by default in the current version, but will become
+        /// enabled by default in the next major version.
         /// </remarks>
         public bool AutoSessionTracking { get; set; } = false;
 

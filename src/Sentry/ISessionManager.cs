@@ -1,11 +1,15 @@
-﻿namespace Sentry
+﻿using System;
+
+namespace Sentry
 {
     internal interface ISessionManager
     {
         SessionUpdate? StartSession();
 
-        SessionUpdate? ReportError();
+        SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
 
         SessionUpdate? EndSession(SessionEndStatus status);
+
+        SessionUpdate? ReportError();
     }
 }
