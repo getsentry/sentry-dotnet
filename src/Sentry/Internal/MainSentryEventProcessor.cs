@@ -108,24 +108,21 @@ namespace Sentry.Internal
                     }
 
                     var asmName = assembly.GetName();
-                    if (asmName.Name is not null)
+                    if (asmName.Name is null)
                     {
-                        var asmVersion = string.Empty;
+                        continue;
+                    }
 
-                        switch (_options.ReportAssembliesMode)
-                        {
-                            case ReportAssembliesMode.Version:
-                                asmVersion = asmName.Version?.ToString() ?? string.Empty;
-                                break;
+                    var asmVersion = _options.ReportAssembliesMode switch
+                    {
+                        ReportAssembliesMode.Version => asmName.Version?.ToString() ?? string.Empty,
+                        ReportAssembliesMode.InformationalVersion => assembly.GetNameAndVersion().Version ?? string.Empty,
+                        _ => throw new ArgumentOutOfRangeException(
+                            $"Report assemblies mode '{_options.ReportAssembliesMode}' is not yet supported")
+                    };
 
-                            case ReportAssembliesMode.InformationalVersion:
-                                asmVersion = assembly.GetNameAndVersion().Version ?? string.Empty;
-                                break;
-
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(_options.ReportAssembliesMode), $"Report assemblies mode '{_options.ReportAssembliesMode}' is not yet supported");
-                        }
-
+                    if (!string.IsNullOrWhiteSpace(asmVersion))
+                    {
                         @event.Modules[asmName.Name] = asmVersion;
                     }
                 }
