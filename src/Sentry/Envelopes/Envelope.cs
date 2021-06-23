@@ -36,11 +36,6 @@ namespace Sentry.Protocol.Envelopes
             Items = items;
         }
 
-        public Envelope(IReadOnlyList<EnvelopeItem> items)
-            : this(Empty.Dictionary<string, object?>(), items)
-        {
-        }
-
         /// <summary>
         /// Attempts to extract the value of "sentry_id" header if it's present.
         /// </summary>
@@ -76,6 +71,26 @@ namespace Sentry.Protocol.Envelopes
         /// <inheritdoc />
         public void Dispose() => Items.DisposeAll();
 
+        private static Dictionary<string, object?> CreateHeader(SentryId? eventId = null)
+        {
+            var header = new Dictionary<string, object?>(2, StringComparer.Ordinal)
+            {
+                // Include limited SDK information (no packages)
+                ["sdk"] = new Dictionary<string, string?>(2, StringComparer.Ordinal)
+                {
+                    ["name"] = SdkVersion.Instance.Name,
+                    ["version"] = SdkVersion.Instance.Version
+                }
+            };
+
+            if (eventId is not null)
+            {
+                header[EventIdKey] = eventId.Value.ToString();
+            }
+
+            return header;
+        }
+
         /// <summary>
         /// Creates an envelope that contains a single event.
         /// </summary>
@@ -84,10 +99,7 @@ namespace Sentry.Protocol.Envelopes
             IReadOnlyCollection<Attachment>? attachments = null,
             SessionUpdate? sessionUpdate = null)
         {
-            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-            {
-                [EventIdKey] = @event.EventId.ToString()
-            };
+            var header = CreateHeader(@event.EventId);
 
             var items = new List<EnvelopeItem>
             {
@@ -112,10 +124,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-            {
-                [EventIdKey] = sentryUserFeedback.EventId.ToString()
-            };
+            var header = CreateHeader(sentryUserFeedback.EventId);
 
             var items = new[]
             {
@@ -130,10 +139,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromTransaction(Transaction transaction)
         {
-            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-            {
-                [EventIdKey] = transaction.EventId.ToString()
-            };
+            var header = CreateHeader(transaction.EventId);
 
             var items = new[]
             {
@@ -148,12 +154,14 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromSession(SessionUpdate sessionUpdate)
         {
+            var header = CreateHeader();
+
             var items = new[]
             {
                 EnvelopeItem.FromSession(sessionUpdate)
             };
 
-            return new Envelope(items);
+            return new Envelope(header, items);
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(

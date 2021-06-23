@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
-using Sentry.Reflection;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 using Runtime = Sentry.Protocol.Runtime;
 
@@ -21,9 +20,6 @@ namespace Sentry.Internal
                 RawDescription = current.Raw
             };
         });
-
-        private readonly Lazy<SdkVersion> _sdkVersionLazy =
-            new(() => typeof(ISentryClient).Assembly.GetNameAndVersion());
 
         public Enricher(SentryOptions options)
         {
@@ -54,12 +50,12 @@ namespace Sentry.Internal
             if (eventLike.Sdk.Version is null && eventLike.Sdk.Name is null)
             {
                 eventLike.Sdk.Name = Constants.SdkName;
-                eventLike.Sdk.Version = _sdkVersionLazy.Value.Version;
+                eventLike.Sdk.Version = SdkVersion.Instance.Version;
             }
 
-            if (_sdkVersionLazy.Value.Version is not null)
+            if (SdkVersion.Instance.Version is not null)
             {
-                eventLike.Sdk.AddPackage("nuget:" + _sdkVersionLazy.Value.Name, _sdkVersionLazy.Value.Version);
+                eventLike.Sdk.AddPackage("nuget:" + SdkVersion.Instance.Name, SdkVersion.Instance.Version);
             }
 
             // Platform
