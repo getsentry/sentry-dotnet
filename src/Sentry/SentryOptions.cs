@@ -372,7 +372,18 @@ namespace Sentry
         /// <summary>
         /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
         /// </summary>
-        public bool ReportAssemblies { get; set; } = true;
+        [Obsolete("Use ReportAssembliesMode instead", error : false)]
+        public bool ReportAssemblies
+        {
+            // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode
+            get { return ReportAssembliesMode != ReportAssembliesMode.None; }
+            set { ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None; }
+        }
+
+        /// <summary>
+        /// What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="ReportAssembliesMode.Version"/>.
+        /// </summary>
+        public ReportAssembliesMode ReportAssembliesMode { get; set; } = ReportAssembliesMode.Version;
 
         /// <summary>
         /// What modes to use for event automatic deduplication
