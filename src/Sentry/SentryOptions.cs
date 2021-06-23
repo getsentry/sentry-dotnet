@@ -376,12 +376,12 @@ namespace Sentry
         public bool ReportAssemblies
         {
             // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode
-            get { return ReportAssembliesMode != ReportAssembliesMode.None; }
-            set { ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None; }
+            get => ReportAssembliesMode != ReportAssembliesMode.None;
+            set => ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None;
         }
 
         /// <summary>
-        /// What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="ReportAssembliesMode.Version"/>.
+        /// What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/>.
         /// </summary>
         public ReportAssembliesMode ReportAssembliesMode { get; set; } = ReportAssembliesMode.Version;
 
