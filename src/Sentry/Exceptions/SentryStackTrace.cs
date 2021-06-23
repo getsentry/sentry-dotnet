@@ -34,17 +34,7 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            if (InternalFrames is {} frames && frames.Any())
-            {
-                writer.WriteStartArray("frames");
-
-                foreach (var frame in frames)
-                {
-                    writer.WriteSerializableValue(frame);
-                }
-
-                writer.WriteEndArray();
-            }
+            writer.WriteArrayIfNotEmpty("frames", InternalFrames);
 
             writer.WriteEndObject();
         }

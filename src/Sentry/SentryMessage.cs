@@ -48,30 +48,9 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            // Message
-            if (!string.IsNullOrWhiteSpace(Message))
-            {
-                writer.WriteString("message", Message);
-            }
-
-            // Params
-            if (Params is {} @params)
-            {
-                writer.WriteStartArray("params");
-
-                foreach (var i in @params)
-                {
-                    writer.WriteDynamicValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Formatted
-            if (!string.IsNullOrWhiteSpace(Formatted))
-            {
-                writer.WriteString("formatted", Formatted);
-            }
+            writer.WriteStringIfNotWhiteSpace("message", Message);
+            writer.WriteArrayIfNotEmpty("params", Params);
+            writer.WriteStringIfNotWhiteSpace("formatted", Formatted);
 
             writer.WriteEndObject();
         }
@@ -82,7 +61,7 @@ namespace Sentry
         public static SentryMessage FromJson(JsonElement json)
         {
             var message = json.GetPropertyOrNull("message")?.GetString();
-            var @params = json.GetPropertyOrNull("params")?.EnumerateArray().Select(j => j.GetDynamic()).Where(o => o != null).ToArray();
+            var @params = json.GetPropertyOrNull("params")?.EnumerateArray().Select(j => j.GetDynamicOrNull()).Where(o => o != null).ToArray();
             var formatted = json.GetPropertyOrNull("formatted")?.GetString();
 
             return new SentryMessage

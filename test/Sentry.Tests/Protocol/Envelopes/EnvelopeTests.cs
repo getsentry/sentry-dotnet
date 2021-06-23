@@ -91,7 +91,7 @@ namespace Sentry.Tests.Protocol.Envelopes
 #endif
             using var input = (
                 "{}\n" +
-                "{\"type\":\"session\",\"length\":75}\n" +
+                "{\"type\":\"fake\",\"length\":75}\n" +
                 "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
             ).ToMemoryStream();
 
@@ -100,7 +100,7 @@ namespace Sentry.Tests.Protocol.Envelopes
                 new[]
                 {
                     new EnvelopeItem(
-                        new Dictionary<string, object>{["type"] = "session", ["length"] = 75L},
+                        new Dictionary<string, object>{["type"] = "fake", ["length"] = 75L},
                         new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
                             .ToMemoryStream())
                     )
@@ -458,6 +458,50 @@ namespace Sentry.Tests.Protocol.Envelopes
         }
 
         [Fact]
+        public async Task Roundtrip_WithEvent_WithSession_Success()
+        {
+            // Arrange
+            var @event = new SentryEvent
+            {
+                Message = "Test",
+                Sdk = new SdkVersion {Name = "SDK-test", Version = "1.0.0"}
+            };
+
+            var attachment = new Attachment(
+                AttachmentType.Default,
+                new StreamAttachmentContent(Stream.Null),
+                "file.txt",
+                null
+            );
+
+            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
+
+            using var envelope = Envelope.FromEvent(@event, new[] {attachment}, sessionUpdate);
+
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
+                using var stream = new MemoryStream();
+
+            // Act
+            await envelope.SerializeAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
+
+            // Assert
+            envelopeRoundtrip.Items.Should().HaveCount(3);
+
+            envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(@event);
+
+            envelopeRoundtrip.Items[1].Payload.Should().BeOfType<StreamSerializable>();
+
+            envelopeRoundtrip.Items[2].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(sessionUpdate);
+        }
+
+        [Fact]
         public async Task Roundtrip_WithUserFeedback_Success()
         {
             // Arrange
@@ -487,9 +531,37 @@ namespace Sentry.Tests.Protocol.Envelopes
             // which original envelope doesn't have.
             envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
             envelopeRoundtrip.Items.Should().ContainSingle();
+            envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(feedback);
+        }
 
-            var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
-            payloadContent.Should().BeEquivalentTo(feedback);
+        [Fact]
+        public async Task Roundtrip_WithSession_Success()
+        {
+            // Arrange
+            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(true, DateTimeOffset.Now);
+
+            using var envelope = Envelope.FromSession(sessionUpdate);
+
+#if !NET461 && !NETCOREAPP2_1
+            await
+#endif
+                using var stream = new MemoryStream();
+
+            // Act
+            await envelope.SerializeAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
+
+            // Assert
+
+            // Can't compare the entire object graph because output envelope contains evaluated length,
+            // which original envelope doesn't have.
+            envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
+            envelopeRoundtrip.Items.Should().ContainSingle();
+            envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
+                .Which.Source.Should().BeEquivalentTo(sessionUpdate);
         }
 
         [Fact]

@@ -14,21 +14,17 @@ namespace Sentry.Internal
 
         private readonly Enricher _enricher;
 
-        private readonly Lazy<string?> _release;
-
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
-        internal string? Release => _release.Value;
+        internal string? Release => ReleaseLocator.Resolve(_options);
 
         public MainSentryEventProcessor(
             SentryOptions options,
-            Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor,
-            Lazy<string?>? lazyRelease = null)
+            Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
         {
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
-            _release = lazyRelease ?? new Lazy<string?>(ReleaseLocator.GetCurrent);
 
             _enricher = new Enricher(options);
         }
@@ -77,7 +73,7 @@ namespace Sentry.Internal
 
             if (@event.Release == null)
             {
-                @event.Release = _options.Release ?? Release;
+                @event.Release = Release;
             }
 
             if (@event.Exception == null)

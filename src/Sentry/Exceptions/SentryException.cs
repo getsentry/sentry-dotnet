@@ -61,41 +61,12 @@ namespace Sentry.Protocol
         {
             writer.WriteStartObject();
 
-            // Type
-            if (!string.IsNullOrWhiteSpace(Type))
-            {
-                writer.WriteString("type", Type);
-            }
-
-            // Value
-            if (!string.IsNullOrWhiteSpace(Value))
-            {
-                writer.WriteString("value", Value);
-            }
-
-            // Module
-            if (!string.IsNullOrWhiteSpace(Module))
-            {
-                writer.WriteString("module", Module);
-            }
-
-            // Thread ID
-            if (ThreadId != default)
-            {
-                writer.WriteNumber("thread_id", ThreadId);
-            }
-
-            // Stack trace
-            if (Stacktrace is {} stacktrace)
-            {
-                writer.WriteSerializable("stacktrace", stacktrace);
-            }
-
-            // Mechanism
-            if (Mechanism is {} mechanism)
-            {
-                writer.WriteSerializable("mechanism", mechanism);
-            }
+            writer.WriteStringIfNotWhiteSpace("type", Type);
+            writer.WriteStringIfNotWhiteSpace("value", Value);
+            writer.WriteStringIfNotWhiteSpace("module", Module);
+            writer.WriteNumberIfNotNull("thread_id", ThreadId.NullIfDefault());
+            writer.WriteSerializableIfNotNull("stacktrace", Stacktrace);
+            writer.WriteSerializableIfNotNull("mechanism", Mechanism);
 
             writer.WriteEndObject();
         }

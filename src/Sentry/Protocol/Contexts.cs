@@ -136,7 +136,11 @@ namespace Sentry
                 else
                 {
                     // Unknown context - parse as dictionary
-                    result[name] = value.GetDynamic()!;
+                    var dynamicContext = value.GetDynamicOrNull();
+                    if (dynamicContext is not null)
+                    {
+                        result[name] = dynamicContext;
+                    }
                 }
             }
 
