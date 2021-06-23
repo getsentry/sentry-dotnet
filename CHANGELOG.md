@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- System.Text.Json 5.0.2 ([#1078](https://github.com/getsentry/sentry-dotnet/pull/1078))
+
 ## Features
 
 - Implement pause & resume session ([#1069](https://github.com/getsentry/sentry-dotnet/pull/1069))
