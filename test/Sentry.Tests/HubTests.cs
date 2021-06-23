@@ -6,6 +6,7 @@ using FluentAssertions;
 using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
@@ -786,6 +787,94 @@ namespace NotSentry.Tests
 
             // Assert
             client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
+        }
+
+        [Fact]
+        public void Ctor_AutoSessionTrackingEnabled_StartsSession()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            // Act
+            _ = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTracking = true
+            });
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        }
+
+        [Fact]
+        public void Dispose_AutoSessionTrackingEnabled_EndsSession()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTracking = true
+            });
+
+            // Act
+            hub.Dispose();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
+        }
+
+        [Fact]
+        public void ResumeSession_WithinAutoTrackingInterval_ContinuesSameSession()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(client, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
+            });
+
+            hub.StartSession();
+            hub.PauseSession();
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+        }
+
+        [Fact]
+        public void ResumeSession_BeyondAutoTrackingInterval_EndsPreviousSessionAndStartsANewOne()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var clock = Substitute.For<ISystemClock>();
+
+            var options = new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            };
+
+            var hub = new Hub(client, clock, new GlobalSessionManager(options, clock), options);
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now);
+
+            hub.StartSession();
+            hub.PauseSession();
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
         }
     }
 }
