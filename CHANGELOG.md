@@ -6,6 +6,7 @@
 
 - Implement pause & resume session ([#1069](https://github.com/getsentry/sentry-dotnet/pull/1069))
 - Add auto session tracking ([#1068](https://github.com/getsentry/sentry-dotnet/pull/1068))
+- Add SDK information to envelope ([#1084](https://github.com/getsentry/sentry-dotnet/pull/1084))
 - Add ReportAssembliesMode in favor of ReportAssemblies ([#1079](https://github.com/getsentry/sentry-dotnet/pull/1079))
 
 ### Fixes

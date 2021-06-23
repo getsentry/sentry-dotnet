@@ -69,8 +69,7 @@ namespace Sentry.Tests.PlatformAbstractions
         }
 #endif
 
-        // TODO: Should be NET5_0_OR_GREATER which isn't available (to be added when NET6 lands)
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Fact]
         public void SetNetCoreVersion_Net5Runtime_NullNetCoreVersion()
         {
