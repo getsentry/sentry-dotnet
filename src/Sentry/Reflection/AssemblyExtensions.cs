@@ -22,7 +22,7 @@ namespace Sentry.Reflection
         {
             var asmName = asm.GetName();
             var name = asmName.Name;
-            var asmVersion = string.Empty;
+            string? asmVersion = null;
 
             // Note: on full .NET FX, checking the AssemblyInformationalVersionAttribute could throw an exception, therefore
             // this method uses a try/catch to make sure this method always returns a value
@@ -34,7 +34,11 @@ namespace Sentry.Reflection
             {
             }
 
-            if (string.IsNullOrWhiteSpace(asmVersion))
+            // Note: even though the informational version could be "invalid" (e.g. string.Empty), it should
+            // be used for versioning and the software should not fallback to the assembly version string.
+            //
+            // See https://github.com/getsentry/sentry-dotnet/pull/1079#issuecomment-866992216
+            if (asmVersion is null)
             {
                 asmVersion = asmName?.Version?.ToString();
             }
