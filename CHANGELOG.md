@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Use System.Text.Json v5.0.2 to fix the CVE-2021-26701 in the System.Text.Encodings.Web library ([#1075](https://github.com/getsentry/sentry-dotnet/issues/1075))
+
 ## 3.5.0
 
 ### Features
