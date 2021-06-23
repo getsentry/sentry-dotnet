@@ -481,7 +481,7 @@ namespace Sentry
         /// Determines the duration of time a session can stay paused before it's considered ended.
         /// </summary>
         /// <remarks>
-        /// Note: This internal is only taken into account when integrations support Pause and Resume.
+        /// Note: This interval is only taken into account when integrations support Pause and Resume.
         /// </remarks>
         public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
 
@@ -492,6 +492,8 @@ namespace Sentry
         /// <remarks>
         /// Note: this is disabled by default in the current version, but will become
         /// enabled by default in the next major version.
+        /// Currently this only works for release health in client mode
+        /// (desktop, mobile applications, but not web servers).
         /// </remarks>
         public bool AutoSessionTracking { get; set; } = false;
 
