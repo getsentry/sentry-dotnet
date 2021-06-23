@@ -483,7 +483,7 @@ namespace Sentry
         /// <remarks>
         /// Note: This internal is only taken into account when integrations support Pause and Resume.
         /// </remarks>
-        public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(5);
+        public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
 
         /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and

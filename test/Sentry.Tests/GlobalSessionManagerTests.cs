@@ -104,7 +104,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void ReportError_ActiveSessionExists_IncrementsErrorCount()
+        public void ReportError_ActiveSessionExists_ReturnsNewUpdateWithIncrementedErrorCount()
         {
             // Arrange
             using var fixture = new Fixture();
@@ -120,14 +120,28 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void ReportError_ActiveSessionExistsWithNonZeroErrorCount_DoesNotReturnNewUpdate()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            fixture.SessionManager.StartSession();
+
+            // Act
+            fixture.SessionManager.ReportError();
+            var sessionUpdate = fixture.SessionManager.ReportError();
+
+            // Assert
+            sessionUpdate.Should().BeNull();
+        }
+
+        [Fact]
         public void ReportError_ActiveSessionDoesNotExist_LogsOutError()
         {
             // Arrange
             using var fixture = new Fixture();
 
             // Act
-            fixture.SessionManager.ReportError();
-            fixture.SessionManager.ReportError();
             fixture.SessionManager.ReportError();
 
             // Assert
