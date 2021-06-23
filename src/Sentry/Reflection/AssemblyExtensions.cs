@@ -22,11 +22,24 @@ namespace Sentry.Reflection
         {
             var asmName = asm.GetName();
             var name = asmName.Name;
-            var version =
-                asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                ?? asmName?.Version?.ToString();
+            var asmVersion = string.Empty;
 
-            return new SdkVersion {Name = name, Version = version};
+            // Note: on full .NET FX, checking the AssemblyInformationalVersionAttribute could throw an exception, therefore
+            // this method uses a try/catch to make sure this method always returns a value
+            try
+            {
+                asmVersion = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            }
+            catch
+            {
+            }
+
+            if (string.IsNullOrWhiteSpace(asmVersion))
+            {
+                asmVersion = asmName?.Version?.ToString();
+            }
+
+            return new SdkVersion {Name = name, Version = asmVersion };
         }
     }
 }

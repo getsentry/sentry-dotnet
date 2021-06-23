@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Reflection;
 
 namespace Sentry.Internal
 {
@@ -96,19 +97,36 @@ namespace Sentry.Internal
                 }
             }
 
-            if (_options.ReportAssemblies)
+            if (_options.ReportAssembliesMode != ReportAssembliesMode.None)
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    if (assembly.IsDynamic)
+                    if (assembly is null ||
+                        assembly.IsDynamic)
                     {
                         continue;
                     }
 
                     var asmName = assembly.GetName();
-                    if (asmName.Name is not null && asmName.Version is not null)
+                    if (asmName.Name is not null)
                     {
-                        @event.Modules[asmName.Name] = asmName.Version.ToString();
+                        var asmVersion = string.Empty;
+
+                        switch (_options.ReportAssembliesMode)
+                        {
+                            case ReportAssembliesMode.Version:
+                                asmVersion = asmName.Version?.ToString() ?? string.Empty;
+                                break;
+
+                            case ReportAssembliesMode.InformationalVersion:
+                                asmVersion = assembly.GetNameAndVersion().Version ?? string.Empty;
+                                break;
+
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(_options.ReportAssembliesMode), $"Report assemblies mode '{_options.ReportAssembliesMode}' is not yet supported");
+                        }
+
+                        @event.Modules[asmName.Name] = asmVersion;
                     }
                 }
             }
