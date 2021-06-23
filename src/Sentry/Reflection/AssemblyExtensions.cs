@@ -24,24 +24,21 @@ namespace Sentry.Reflection
             var name = asmName.Name;
             string? asmVersion = null;
 
-            // Note: on full .NET FX, checking the AssemblyInformationalVersionAttribute could throw an exception, therefore
-            // this method uses a try/catch to make sure this method always returns a value
             try
             {
                 asmVersion = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
             }
             catch
             {
+                // Note: on full .NET FX, checking the AssemblyInformationalVersionAttribute could throw an exception,
+                // therefore this method uses a try/catch to make sure this method always returns a value
             }
 
             // Note: even though the informational version could be "invalid" (e.g. string.Empty), it should
             // be used for versioning and the software should not fallback to the assembly version string.
-            //
             // See https://github.com/getsentry/sentry-dotnet/pull/1079#issuecomment-866992216
-            if (asmVersion is null)
-            {
-                asmVersion = asmName?.Version?.ToString();
-            }
+            // TODO: Lets change this in a new major to return the Version as fallback
+            asmVersion ??= asmName.Version?.ToString();
 
             return new SdkVersion {Name = name, Version = asmVersion };
         }
