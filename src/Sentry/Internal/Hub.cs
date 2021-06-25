@@ -22,7 +22,7 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private DateTimeOffset _sessionPauseTimestamp;
+        private DateTimeOffset? _sessionPauseTimestamp;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
@@ -198,7 +198,13 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                _sessionPauseTimestamp = _clock.GetUtcNow();
+                // Only pause if there's anything to pause.
+                // This might race if a session is started at the same time,
+                // but that's fine.
+                if (_sessionManager.IsSessionActive)
+                {
+                    _sessionPauseTimestamp = _clock.GetUtcNow();
+                }
             }
         }
 
@@ -206,18 +212,31 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                var pauseDuration = (_clock.GetUtcNow() - _sessionPauseTimestamp).Duration();
-                if (pauseDuration >= _options.AutoSessionTrackingInterval)
+                // Ensure a session has been paused before
+                if (_sessionPauseTimestamp is not { } sessionPauseTimestamp)
                 {
-                    _options.DiagnosticLogger?.LogDebug(
-                        "Paused session has been paused for {0}, which is longer than the configured limit. " +
-                        "Starting a new session instead of resuming this one.",
-                        pauseDuration
-                    );
-
-                    EndSession(_sessionPauseTimestamp, SessionEndStatus.Exited);
-                    StartSession();
+                    return;
                 }
+
+                // Reset the pause timestamp since the session is about to be resumed
+                _sessionPauseTimestamp = null;
+
+                // If the pause duration is within the tracking interval, then just do nothing
+                var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
+                if (pauseDuration < _options.AutoSessionTrackingInterval)
+                {
+                    return;
+                }
+
+                // Otherwise, end the current session and start a new one
+                _options.DiagnosticLogger?.LogDebug(
+                    "Paused session has been paused for {0}, which is longer than the configured limit. " +
+                    "Starting a new session instead of resuming this one.",
+                    pauseDuration
+                );
+
+                EndSession(sessionPauseTimestamp, SessionEndStatus.Exited);
+                StartSession();
             }
         }
 

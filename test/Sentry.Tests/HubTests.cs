@@ -876,5 +876,61 @@ namespace NotSentry.Tests
             client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
             client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
         }
+
+        [Fact]
+        public void ResumeSession_NoActiveSession_DoesNothing()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var clock = Substitute.For<ISystemClock>();
+
+            var options = new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            };
+
+            var hub = new Hub(client, clock, new GlobalSessionManager(options, clock), options);
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now);
+
+            hub.PauseSession();
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.DidNotReceive().CaptureSession(Arg.Any<SessionUpdate>());
+        }
+
+        [Fact]
+        public void ResumeSession_NoPausedSession_DoesNothing()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var clock = Substitute.For<ISystemClock>();
+
+            var options = new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            };
+
+            var hub = new Hub(client, clock, new GlobalSessionManager(options, clock), options);
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now);
+
+            hub.StartSession();
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+        }
     }
 }

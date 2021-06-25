@@ -23,6 +23,8 @@ namespace Sentry
         // Internal for testing
         internal Session? CurrentSession => _currentSession;
 
+        public bool IsSessionActive => _currentSession is not null;
+
         public GlobalSessionManager(SentryOptions options, ISystemClock clock)
         {
             _options = options;
