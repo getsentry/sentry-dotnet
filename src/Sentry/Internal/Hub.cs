@@ -218,25 +218,23 @@ namespace Sentry.Internal
                     return;
                 }
 
-                // Reset the pause timestamp since the session is about to be resumed
-                _sessionPauseTimestamp = null;
-
-                // If the pause duration is within the tracking interval, then just do nothing
+                // If the pause duration exceeded tracking interval, start a new session
+                // (otherwise do nothing)
                 var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
-                if (pauseDuration < _options.AutoSessionTrackingInterval)
+                if (pauseDuration >= _options.AutoSessionTrackingInterval)
                 {
-                    return;
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Paused session has been paused for {0}, which is longer than the configured limit. " +
+                        "Starting a new session instead of resuming this one.",
+                        pauseDuration
+                    );
+
+                    EndSession(sessionPauseTimestamp, SessionEndStatus.Exited);
+                    StartSession();
                 }
 
-                // Otherwise, end the current session and start a new one
-                _options.DiagnosticLogger?.LogDebug(
-                    "Paused session has been paused for {0}, which is longer than the configured limit. " +
-                    "Starting a new session instead of resuming this one.",
-                    pauseDuration
-                );
-
-                EndSession(sessionPauseTimestamp, SessionEndStatus.Exited);
-                StartSession();
+                // Reset the pause timestamp since the session is about to be resumed
+                _sessionPauseTimestamp = null;
             }
         }
 
