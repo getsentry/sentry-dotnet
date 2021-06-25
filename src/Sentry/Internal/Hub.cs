@@ -233,7 +233,7 @@ namespace Sentry.Internal
                     StartSession();
                 }
 
-                // Reset the pause timestamp since the session is about to be resumed
+                // Reset the pause timestamp since the session is now resumed
                 _sessionPauseTimestamp = null;
             }
         }
