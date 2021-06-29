@@ -6,6 +6,10 @@
 
 - `IHub.ResumeSession()`: don't start a new session if pause wasn't called or if there is no active session ([#1089](https://github.com/getsentry/sentry-dotnet/pull/1089))
 
+### Changes
+
+- Change DSN resolving logic to throw if the DSN was neither provided directly through options nor through environment variable ([#1093](https://github.com/getsentry/sentry-dotnet/pull/1093))
+
 ## 3.6.0
 
 ### Features
