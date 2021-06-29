@@ -56,7 +56,7 @@ namespace Sentry
                 return DisabledHub.Instance;
             }
 
-            // Validate DSN for an early exception in case it's malformed or null
+            // Validate DSN for an early exception in case it's malformed
             _ = Dsn.Parse(dsn);
 
             return new Hub(options);
