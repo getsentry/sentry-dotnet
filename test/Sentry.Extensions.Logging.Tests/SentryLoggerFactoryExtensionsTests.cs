@@ -68,6 +68,7 @@ namespace Sentry.Extensions.Logging.Tests
             var sut = Substitute.For<ILoggerFactory>();
             _ = sut.AddSentry(o =>
             {
+                o.Dsn = DsnSamples.ValidDsnWithoutSecret;
                 o.Debug = true;
                 options = o;
             });
@@ -83,6 +84,7 @@ namespace Sentry.Extensions.Logging.Tests
             var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
             _ = sut.AddSentry(o =>
             {
+                o.Dsn = DsnSamples.ValidDsnWithoutSecret;
                 o.Debug = true;
                 Assert.Null(o.DiagnosticLogger);
                 o.DiagnosticLogger = diagnosticLogger;
@@ -97,7 +99,11 @@ namespace Sentry.Extensions.Logging.Tests
         {
             var callbackInvoked = false;
             var expected = Substitute.For<ILoggerFactory>();
-            _ = expected.AddSentry(_ => callbackInvoked = true);
+            _ = expected.AddSentry(o =>
+            {
+                o.Dsn = DsnSamples.ValidDsnWithoutSecret;
+                callbackInvoked = true;
+            });
 
             Assert.True(callbackInvoked);
         }
@@ -116,7 +122,7 @@ namespace Sentry.Extensions.Logging.Tests
         public void AddSentry_ReturnsSameFactory()
         {
             var expected = Substitute.For<ILoggerFactory>();
-            var actual = expected.AddSentry();
+            var actual = expected.AddSentry(o => o.Dsn = DsnSamples.ValidDsnWithoutSecret);
 
             Assert.Same(expected, actual);
         }
@@ -125,7 +131,7 @@ namespace Sentry.Extensions.Logging.Tests
         public void AddSentry_ConfigureOptionsOverload_ReturnsSameFactory()
         {
             var expected = Substitute.For<ILoggerFactory>();
-            var actual = expected.AddSentry(_ => { });
+            var actual = expected.AddSentry(o => o.Dsn = DsnSamples.ValidDsnWithoutSecret);
 
             Assert.Same(expected, actual);
         }

@@ -29,7 +29,7 @@ namespace Sentry.AspNetCore.Tests
         [Fact]
         public void UseSentry_NoDsnProvided_DisabledSdk()
         {
-            _ = _webHostBuilder.UseSentry().Build();
+            _ = _webHostBuilder.UseSentry("").Build();
 
             Assert.False(SentrySdk.IsEnabled);
         }
