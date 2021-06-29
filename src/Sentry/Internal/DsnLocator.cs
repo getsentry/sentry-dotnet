@@ -19,5 +19,8 @@ namespace Sentry.Internal
         /// <returns>DSN string or null if none found.</returns>
         internal static string? FindDsn(Assembly? asm = null)
             => (asm ?? Assembly.GetEntryAssembly())?.GetCustomAttribute<DsnAttribute>()?.Dsn;
+
+        internal static string? Resolve() =>
+            Environment.GetEnvironmentVariable(Constants.DsnEnvironmentVariable) ?? FindDsn();
     }
 }

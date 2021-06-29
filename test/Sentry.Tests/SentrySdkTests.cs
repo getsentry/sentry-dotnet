@@ -139,7 +139,7 @@ namespace Sentry.Tests
                 });
         }
 
-        [Fact]
+        [Fact(Skip = "Setting an environment variable to an empty string is the same as not having that variable set at all, so this is not testable")]
         public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
         {
             EnvironmentVariableGuard.WithVariable(
@@ -172,13 +172,20 @@ namespace Sentry.Tests
             var options = new SentryOptions
             {
                 DiagnosticLogger = logger,
-                Debug = true
+                Debug = true,
+                Dsn = ""
             };
 
             using (SentrySdk.Init(options))
             {
                 logger.Received(1).Log(SentryLevel.Warning, "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
             }
+        }
+
+        [Fact]
+        public void Init_NullDsn_Throws()
+        {
+            Assert.Throws<InvalidOperationException>(() => SentrySdk.Init((string)null));
         }
 
         [Fact]
@@ -191,6 +198,7 @@ namespace Sentry.Tests
             {
                 DiagnosticLogger = logger,
                 Debug = false,
+                Dsn = ""
             };
 
             using (SentrySdk.Init(options))
@@ -272,7 +280,7 @@ namespace Sentry.Tests
         [Fact]
         public void Disposable_MultipleCalls_NoOp()
         {
-            var disposable = SentrySdk.Init();
+            var disposable = SentrySdk.Init(ValidDsnWithoutSecret);
             disposable.Dispose();
             disposable.Dispose();
             Assert.False(SentrySdk.IsEnabled);
@@ -483,14 +491,14 @@ namespace Sentry.Tests
         [Fact]
         public void InitHub_NoDsn_DisposeDoesNotThrow()
         {
-            var sut = SentrySdk.InitHub(new SentryOptions()) as IDisposable;
+            var sut = SentrySdk.InitHub(new SentryOptions {Dsn = ""}) as IDisposable;
             sut?.Dispose();
         }
 
         [Fact]
         public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
         {
-            var sut = SentrySdk.InitHub(new SentryOptions());
+            var sut = SentrySdk.InitHub(new SentryOptions {Dsn = ""});
             await sut.FlushAsync(TimeSpan.FromDays(1));
         }
     }

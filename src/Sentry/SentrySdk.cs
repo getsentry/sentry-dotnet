@@ -35,10 +35,18 @@ namespace Sentry
 
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.
-            var dsn = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
+            var dsn = options.Dsn ??= DsnLocator.Resolve();
 
-            // If it's either explicitly disabled or we couldn't resolve the DSN
-            // from anywhere else, return a disabled hub.
+            // If DSN is still null, throw
+            if (dsn is null)
+            {
+                throw new InvalidOperationException(
+                    "DSN was neither set on options nor provided through an environment variable."
+                );
+            }
+
+            // If DSN is explicitly disabled (either directly on options or through environment),
+            // then return a disabled hub.
             if (Dsn.IsDisabled(dsn))
             {
                 options.DiagnosticLogger?.LogWarning(
@@ -48,7 +56,7 @@ namespace Sentry
                 return DisabledHub.Instance;
             }
 
-            // Validate DSN for an early exception in case it's malformed
+            // Validate DSN for an early exception in case it's malformed or null
             _ = Dsn.Parse(dsn);
 
             return new Hub(options);
