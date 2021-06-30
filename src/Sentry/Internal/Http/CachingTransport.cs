@@ -73,6 +73,9 @@ namespace Sentry.Internal.Http
         {
             try
             {
+                // Identify abandoned cache directories of other processes which exited before
+                // they could fully flush their cache, and snatch their files into our own cache
+                // directory to finish the job.
                 foreach (var dirPath in Directory.EnumerateDirectories(_sharedDsnCacheDirectoryPath))
                 {
                     var dirName = Path.GetFileName(dirPath);
@@ -90,16 +93,28 @@ namespace Sentry.Internal.Http
                         continue;
                     }
 
-                    // Move all processing files from that directory into our cache directory
-                    foreach (var filePath in Directory.EnumerateFiles(Path.Combine(dirPath, ProcessingDirName)))
+                    // Move all files from that cache directory into our current cache directory
+                    foreach (var filePath in Directory.EnumerateFiles(dirPath, "*", SearchOption.AllDirectories))
                     {
-                        File.Move(
-                            filePath,
-                            Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
-                        );
+                        try
+                        {
+                            File.Move(
+                                filePath,
+                                Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
+                            );
+                        }
+                        // Might fail if another process already snatched that file before us
+                        catch (Exception ex)
+                        {
+                            _options.DiagnosticLogger?.LogError(
+                                "Failed to move cache file of an exited process: '{0}'.",
+                                ex,
+                                filePath
+                            );
+                        }
                     }
 
-                    // Attempt to delete the directory (if it doesn't have any other files)
+                    // Attempt to delete the directory
                     try
                     {
                         Directory.Delete(dirPath, true);
