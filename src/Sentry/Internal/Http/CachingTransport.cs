@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -18,6 +19,7 @@ namespace Sentry.Internal.Http
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
+        private readonly string _sharedDsnCacheDirectoryPath;
         private readonly string _isolatedCacheDirectoryPath;
         private readonly int _keepCount;
 
@@ -48,13 +50,18 @@ namespace Sentry.Internal.Http
                 ? _options.MaxCacheItems - 1
                 : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
 
-            _isolatedCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
-                ? _isolatedCacheDirectoryPath = Path.Combine(
+            _sharedDsnCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
+                ? Path.Combine(
                     options.CacheDirectoryPath,
                     "Sentry",
                     options.Dsn?.GetHashString() ?? "no-dsn"
                 )
                 : throw new InvalidOperationException("Cache directory is not set.");
+
+            _isolatedCacheDirectoryPath = Path.Combine(
+                _sharedDsnCacheDirectoryPath,
+                ProcessEx.GetCurrentProcessId().ToString(CultureInfo.InvariantCulture)
+            );
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
 
@@ -65,17 +72,40 @@ namespace Sentry.Internal.Http
         {
             try
             {
-                // Processing directory may already contain some files left from previous session
-                // if the worker has been terminated unexpectedly.
-                // Move everything from that directory back to cache directory.
-                if (Directory.Exists(_processingDirectoryPath))
+                foreach (var dirPath in Directory.EnumerateDirectories(_sharedDsnCacheDirectoryPath))
                 {
-                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+                    var dirName = Path.GetFileName(dirPath);
+
+                    if (!int.TryParse(dirName, NumberStyles.Integer, CultureInfo.InvariantCulture, out var processId))
                     {
-                        File.Move(
-                            filePath,
-                            Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
-                        );
+                        // There might be unrelated directories
+                        continue;
+                    }
+
+                    if (!ProcessEx.IsProcessAlive(processId))
+                    {
+                        // Move all processing files from that directory into our cache directory
+                        foreach (var filePath in Directory.EnumerateFiles(Path.Combine(dirPath, "__processing")))
+                        {
+                            File.Move(
+                                filePath,
+                                Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
+                            );
+                        }
+
+                        // Attempt to delete the directory (if it doesn't have any other files)
+                        try
+                        {
+                            Directory.Delete(dirPath, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            _options.DiagnosticLogger?.LogError(
+                                "Failed to delete cache directory of an exited process: '{0}'.",
+                                ex,
+                                dirPath
+                            );
+                        }
                     }
                 }
 
