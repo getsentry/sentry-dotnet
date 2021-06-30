@@ -76,57 +76,77 @@ namespace Sentry.Internal.Http
                 // Identify abandoned cache directories of other processes which exited before
                 // they could fully flush their cache, and snatch their files into our own cache
                 // directory to finish the job.
-                foreach (var dirPath in Directory.EnumerateDirectories(_sharedDsnCacheDirectoryPath))
+                try
                 {
-                    var dirName = Path.GetFileName(dirPath);
-
-                    // Attempt to get process ID from the directory name
-                    if (!int.TryParse(dirName, NumberStyles.Integer, CultureInfo.InvariantCulture, out var processId))
+                    foreach (var dirPath in Directory.EnumerateDirectories(_sharedDsnCacheDirectoryPath))
                     {
-                        // There might be unrelated directories
-                        continue;
-                    }
+                        var dirName = Path.GetFileName(dirPath);
 
-                    // Skip processes that are still alive
-                    if (ProcessEx.IsProcessAlive(processId))
-                    {
-                        continue;
-                    }
+                        // Attempt to get process ID from the directory name
+                        if (!int.TryParse(dirName, NumberStyles.Integer, CultureInfo.InvariantCulture,
+                            out var processId))
+                        {
+                            // There might be unrelated directories
+                            continue;
+                        }
 
-                    // Move all files from that cache directory into our current cache directory
-                    foreach (var filePath in Directory.EnumerateFiles(dirPath, "*", SearchOption.AllDirectories))
-                    {
+                        // Skip processes that are still alive
+                        if (ProcessEx.IsProcessAlive(processId))
+                        {
+                            continue;
+                        }
+
+                        // Move all files from that cache directory into our current cache directory
+                        foreach (var filePath in Directory.EnumerateFiles(dirPath, "*", SearchOption.AllDirectories))
+                        {
+                            try
+                            {
+                                Directory.CreateDirectory(_isolatedCacheDirectoryPath);
+
+                                File.Move(
+                                    filePath,
+                                    Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
+                                );
+                            }
+                            // Might fail if another process already snatched that file before us
+                            catch (Exception ex)
+                            {
+                                _options.DiagnosticLogger?.LogError(
+                                    "Failed to move cache file of an exited process: '{0}'.",
+                                    ex,
+                                    filePath
+                                );
+                            }
+                        }
+
+                        // Attempt to delete the directory
                         try
                         {
-                            File.Move(
-                                filePath,
-                                Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
-                            );
+                            Directory.Delete(dirPath, true);
                         }
-                        // Might fail if another process already snatched that file before us
                         catch (Exception ex)
                         {
                             _options.DiagnosticLogger?.LogError(
-                                "Failed to move cache file of an exited process: '{0}'.",
+                                "Failed to delete cache directory of an exited process: '{0}'.",
                                 ex,
-                                filePath
+                                dirPath
                             );
                         }
                     }
-
-                    // Attempt to delete the directory
-                    try
-                    {
-                        Directory.Delete(dirPath, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        _options.DiagnosticLogger?.LogError(
-                            "Failed to delete cache directory of an exited process: '{0}'.",
-                            ex,
-                            dirPath
-                        );
-                    }
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // No cache directories, that's fine
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Cache directory doesn't exist yet. Not scanning for leftover cache files."
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to scan cache directory for leftover files.",
+                        ex
+                    );
                 }
 
                 while (!_workerCts.IsCancellationRequested)
@@ -271,8 +291,8 @@ namespace Sentry.Internal.Http
         // For that reason, we're not retrying IOException, to avoid any disk related exception from retrying.
         private static bool IsRetryable(Exception exception) =>
             exception is OperationCanceledException // Timed-out or Shutdown triggered
-            || exception is HttpRequestException // Myriad of HTTP related errors
-            || exception is SocketException; // Network related
+            or HttpRequestException // Myriad of HTTP related errors
+            or SocketException; // Network related
 
         // Gets the next cache file and moves it to "processing"
         private async Task<string?> TryPrepareNextCacheFileAsync(
