@@ -253,7 +253,7 @@ namespace Sentry
             Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
-        public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
+        public ISpan? GetLastActiveSpan() => Spans.OrderBy(x => x.StartTimestamp).LastOrDefault(s => !s.IsFinished);
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
