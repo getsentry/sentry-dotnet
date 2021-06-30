@@ -16,6 +16,7 @@ namespace Sentry.Internal.Http
     internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
     {
         private const string EnvelopeFileExt = "envelope";
+        private const string ProcessingDirName = "__processing";
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
@@ -63,7 +64,7 @@ namespace Sentry.Internal.Http
                 ProcessEx.GetCurrentProcessId().ToString(CultureInfo.InvariantCulture)
             );
 
-            _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+            _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingDirName);
 
             _worker = Task.Run(CachedTransportBackgroundTask);
         }
@@ -76,36 +77,40 @@ namespace Sentry.Internal.Http
                 {
                     var dirName = Path.GetFileName(dirPath);
 
+                    // Attempt to get process ID from the directory name
                     if (!int.TryParse(dirName, NumberStyles.Integer, CultureInfo.InvariantCulture, out var processId))
                     {
                         // There might be unrelated directories
                         continue;
                     }
 
-                    if (!ProcessEx.IsProcessAlive(processId))
+                    // Skip processes that are still alive
+                    if (ProcessEx.IsProcessAlive(processId))
                     {
-                        // Move all processing files from that directory into our cache directory
-                        foreach (var filePath in Directory.EnumerateFiles(Path.Combine(dirPath, "__processing")))
-                        {
-                            File.Move(
-                                filePath,
-                                Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
-                            );
-                        }
+                        continue;
+                    }
 
-                        // Attempt to delete the directory (if it doesn't have any other files)
-                        try
-                        {
-                            Directory.Delete(dirPath, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            _options.DiagnosticLogger?.LogError(
-                                "Failed to delete cache directory of an exited process: '{0}'.",
-                                ex,
-                                dirPath
-                            );
-                        }
+                    // Move all processing files from that directory into our cache directory
+                    foreach (var filePath in Directory.EnumerateFiles(Path.Combine(dirPath, ProcessingDirName)))
+                    {
+                        File.Move(
+                            filePath,
+                            Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
+                        );
+                    }
+
+                    // Attempt to delete the directory (if it doesn't have any other files)
+                    try
+                    {
+                        Directory.Delete(dirPath, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        _options.DiagnosticLogger?.LogError(
+                            "Failed to delete cache directory of an exited process: '{0}'.",
+                            ex,
+                            dirPath
+                        );
                     }
                 }
 
