@@ -5,6 +5,7 @@
 ### Fixes
 
 - `IHub.ResumeSession()`: don't start a new session if pause wasn't called or if there is no active session ([#1089](https://github.com/getsentry/sentry-dotnet/pull/1089))
+- Fixed incorrect order when getting the last active span ([#1094](https://github.com/getsentry/sentry-dotnet/pull/1094))
 
 ## 3.6.0
 
