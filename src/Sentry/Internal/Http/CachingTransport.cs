@@ -20,7 +20,7 @@ namespace Sentry.Internal.Http
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
-        private readonly string _sharedDsnCacheDirectoryPath;
+        private readonly string _dsnCacheDirectoryPath;
         private readonly string _isolatedCacheDirectoryPath;
         private readonly int _keepCount;
 
@@ -51,7 +51,7 @@ namespace Sentry.Internal.Http
                 ? _options.MaxCacheItems - 1
                 : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
 
-            _sharedDsnCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
+            _dsnCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
                 ? Path.Combine(
                     options.CacheDirectoryPath,
                     "Sentry",
@@ -60,7 +60,7 @@ namespace Sentry.Internal.Http
                 : throw new InvalidOperationException("Cache directory is not set.");
 
             _isolatedCacheDirectoryPath = Path.Combine(
-                _sharedDsnCacheDirectoryPath,
+                _dsnCacheDirectoryPath,
                 ProcessEx.GetCurrentProcessId().ToString(CultureInfo.InvariantCulture)
             );
 
@@ -78,7 +78,7 @@ namespace Sentry.Internal.Http
                 // directory to finish the job.
                 try
                 {
-                    foreach (var dirPath in Directory.EnumerateDirectories(_sharedDsnCacheDirectoryPath))
+                    foreach (var dirPath in Directory.EnumerateDirectories(_dsnCacheDirectoryPath))
                     {
                         var dirName = Path.GetFileName(dirPath);
 
