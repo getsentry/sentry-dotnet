@@ -7,7 +7,7 @@ namespace Sentry.Integrations
     {
         public void Register(IHub hub, SentryOptions options)
         {
-            if (!Runtime.Current.IsMono())
+            if (!Runtime.Current.IsMono() && FrameworkInfo.RegistryAccessAllowed)
             {
                 options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
             }

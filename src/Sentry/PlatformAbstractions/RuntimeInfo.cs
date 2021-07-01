@@ -60,14 +60,14 @@ namespace Sentry.PlatformAbstractions
                 var latest = FrameworkInfo.GetLatest(Environment.Version.Major);
 
                 runtime.FrameworkInstallation = latest;
-                if (latest.Version?.Major < 4)
+                if (latest?.Version?.Major < 4)
                 {
                     // prior to 4, user-friendly versions are always 2 digit: 1.0, 1.1, 2.0, 3.0, 3.5
                     runtime.Version = latest.ServicePack == null
                         ? $"{latest.Version.Major}.{latest.Version.Minor}"
                         : $"{latest.Version.Major}.{latest.Version.Minor} SP {latest.ServicePack}";
                 }
-                else
+                else if (latest != null)                
                 {
                     runtime.Version = latest.Version?.ToString();
                 }
