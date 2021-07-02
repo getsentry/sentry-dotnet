@@ -10,7 +10,11 @@ namespace Sentry.PlatformAbstractions
     /// </summary>
     public static partial class FrameworkInfo
     {
-        internal static bool RegistryAccessAllowed { get; set; } = true;
+        /// <summary>
+        /// Blocks any function to access the registry if a previous attempt had failed.
+        /// By default: it's set to false.
+        /// </summary>
+        internal static bool RegistryLocked { get; private set; }
 
         /// <summary>
         /// Get the latest Framework installation for the specified CLR
@@ -22,8 +26,9 @@ namespace Sentry.PlatformAbstractions
         /// CLR 4 => .NET 4.0, 4.5.x, 4.6.x, 4.7.x
         /// </remarks>
         /// <param name="clrVersion">The CLR version: 1, 2 or 4</param>
-        /// <returns>The framework installation or null if none is found.</returns>
-        public static FrameworkInstallation? GetLatest(int clrVersion)
+        /// <param name="registryLock">Blocks this function to access the System's registry.</param>
+        /// <returns>The framework installation or null if none is found, used for fine-tuning the Latest info.</returns>
+        public static FrameworkInstallation? GetLatest(int clrVersion, bool registryLock = false)
         {
             // CLR versions
             // https://docs.microsoft.com/en-us/dotnet/standard/clr
@@ -35,16 +40,19 @@ namespace Sentry.PlatformAbstractions
             if (clrVersion == 4)
             {
                 int? release = null;
-                ;
                 try
                 {
-                    release = Get45PlusLatestInstallationFromRegistry();
+                    if (registryLock)
+                    {
+                        RegistryLocked = true;
+                    }
+                    release = Get45PlusLatestInstallationFromRegistry(RegistryLocked);
                 }
                 catch (Exception ex)
                 {
                     _ = ex;
                     //Do something?
-                    RegistryAccessAllowed = false;
+                    RegistryLocked = true;
                 }
                 if (release != null)
                 {
@@ -94,11 +102,12 @@ namespace Sentry.PlatformAbstractions
         /// <summary>
         /// Get all .NET Framework installations in this machine
         /// </summary>
+        /// <param name="registryLock">Blocks this function to access the System's registry.</param>
         /// <seealso href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-1-4"/>
         /// <returns>Enumeration of installations</returns>
-        public static IEnumerable<FrameworkInstallation> GetInstallations()
+        public static IEnumerable<FrameworkInstallation> GetInstallations(bool registryLock = false)
         {
-            if (!RegistryAccessAllowed)
+            if (registryLock || RegistryLocked)
             {
                 yield break;
             }
@@ -177,14 +186,14 @@ namespace Sentry.PlatformAbstractions
                 },
                 Version = version,
                 ServicePack = subKey.GetInt("SP"),
-                Release = hasRelease ? release : null as int?
+                Release = hasRelease ? release : null
             };
         }
 
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
-        internal static int? Get45PlusLatestInstallationFromRegistry()
+        internal static int? Get45PlusLatestInstallationFromRegistry(bool registryLock)
         {
-            if (!RegistryAccessAllowed)
+            if (registryLock)
             {
                 return null;
             }

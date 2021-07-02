@@ -67,7 +67,7 @@ namespace Sentry.PlatformAbstractions
                         ? $"{latest.Version.Major}.{latest.Version.Minor}"
                         : $"{latest.Version.Major}.{latest.Version.Minor} SP {latest.ServicePack}";
                 }
-                else if (latest != null)                
+                else if (latest != null)
                 {
                     runtime.Version = latest.Version?.ToString();
                 }
