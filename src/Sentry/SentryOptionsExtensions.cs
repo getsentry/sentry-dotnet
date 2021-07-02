@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 #if NET461
 using Sentry.PlatformAbstractions;
 #endif
@@ -235,6 +237,26 @@ namespace Sentry
             {
                 options.DiagnosticLogger = null;
             }
+        }
+
+        internal static string? TryGetDsnSpecificCacheDirectoryPath(this SentryOptions options)
+        {
+            if (string.IsNullOrWhiteSpace(options.CacheDirectoryPath))
+            {
+                return null;
+            }
+
+            return Path.Combine(
+                options.CacheDirectoryPath,
+                "Sentry",
+                options.Dsn?.GetHashString() ?? "no-dsn"
+            );
+        }
+
+        internal static string? TryGetProcessSpecificCacheDirectoryPath(this SentryOptions options)
+        {
+            // In the future, this will most likely contain process ID
+            return options.TryGetDsnSpecificCacheDirectoryPath();
         }
     }
 }

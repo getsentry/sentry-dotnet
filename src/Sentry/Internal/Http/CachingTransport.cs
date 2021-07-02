@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
@@ -48,13 +47,9 @@ namespace Sentry.Internal.Http
                 ? _options.MaxCacheItems - 1
                 : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
 
-            _isolatedCacheDirectoryPath = !string.IsNullOrWhiteSpace(options.CacheDirectoryPath)
-                ? _isolatedCacheDirectoryPath = Path.Combine(
-                    options.CacheDirectoryPath,
-                    "Sentry",
-                    options.Dsn?.GetHashString() ?? "no-dsn"
-                )
-                : throw new InvalidOperationException("Cache directory is not set.");
+            _isolatedCacheDirectoryPath =
+                options.TryGetProcessSpecificCacheDirectoryPath() ??
+                throw new InvalidOperationException("Cache directory is not set.");
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
 

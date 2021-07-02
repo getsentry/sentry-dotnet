@@ -40,14 +40,9 @@ namespace Sentry
         {
             try
             {
-                var directoryPath = Path.Combine(
-                    // Store in cache directory or fall back to appdata
-                    !string.IsNullOrWhiteSpace(_options.CacheDirectoryPath)
-                        ? _options.CacheDirectoryPath
-                        : Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    // Put under "Sentry" subdirectory
-                    "Sentry"
-                );
+                var directoryPath =
+                    _options.TryGetDsnSpecificCacheDirectoryPath() ??
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
 
                 Directory.CreateDirectory(directoryPath);
 
