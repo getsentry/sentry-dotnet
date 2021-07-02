@@ -199,7 +199,6 @@ namespace Sentry.PlatformAbstractions
             }
             using var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
                 .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\");
-           // throw new Exception();
             return ndpKey?.GetInt("Release");
         }
 
