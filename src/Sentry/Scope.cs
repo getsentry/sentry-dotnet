@@ -251,13 +251,12 @@ namespace Sentry
         /// </summary>
         public void ClearAttachments()
         {
-
 #if NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1 || NET5_0_OR_GREATER
             _attachments.Clear();
 #else
             var oldAttachments = Interlocked.Exchange(ref _attachments, new());
 
-            while(!oldAttachments.IsEmpty)
+            while (!oldAttachments.IsEmpty)
             {
                 if (!oldAttachments.TryTake(out _))
                 {

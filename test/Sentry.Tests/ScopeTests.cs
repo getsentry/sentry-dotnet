@@ -221,7 +221,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void AddAttachment_AddsAttachmen()
+        public void AddAttachment_AddAttachments()
         {
             //Arrange
             var scope = new Scope();
@@ -233,8 +233,8 @@ namespace Sentry.Tests
             scope.AddAttachment(attachment2);
 
             //Assert
-            _ = scope.Attachments.Should().Contain(attachment, "Attachment added was not found");
-            _ = scope.Attachments.Should().Contain(attachment2, "Attachment added was not found");
+            _ = scope.Attachments.Should().Contain(attachment, "Attachment was not found.");
+            _ = scope.Attachments.Should().Contain(attachment2, "Attachment2 was not found.");
         }
 
         [Fact]
