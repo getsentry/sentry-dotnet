@@ -184,7 +184,7 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags;
 
-        private readonly ConcurrentBag<Attachment> _attachments = new();
+        private ConcurrentBag<Attachment> _attachments = new();
 
         /// <summary>
         /// Attachments.
@@ -225,7 +225,7 @@ namespace Sentry
 
             if (overflow > 0)
             {
-                _breadcrumbs.TryDequeue(out _);
+                _ = _breadcrumbs.TryDequeue(out _);
             }
 
             _breadcrumbs.Enqueue(breadcrumb);
@@ -244,6 +244,29 @@ namespace Sentry
         /// Adds an attachment.
         /// </summary>
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
+
+
+        /// <summary>
+        /// Clear all Attachments.
+        /// </summary>
+        public void ClearAttachments()
+        {
+
+#if NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1 || NET5_0_OR_GREATER
+            _attachments.Clear();
+#else
+            var oldAttachments = Interlocked.Exchange(ref _attachments, new());
+
+            while(!oldAttachments.IsEmpty)
+            {
+                if (!oldAttachments.TryTake(out _))
+                {
+                    Options.DiagnosticLogger?.LogWarning("Failed to complete the Attachments cleanup.");
+                    break;
+                }
+            }
+#endif
+        }
 
         /// <summary>
         /// Applies the data from this scope to another event-like object.

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using FluentAssertions;
 using Sentry.Extensibility;
 using Sentry.Testing;
@@ -217,6 +218,41 @@ namespace Sentry.Tests
 
             // Assert
             span.Should().Be(activeSpan);
+        }
+
+        [Fact]
+        public void AddAttachment_AddsAttachmen()
+        {
+            //Arrange
+            var scope = new Scope();
+            var attachment = new Attachment(default, default, default, default);
+            var attachment2 = new Attachment(default, default, default, default);
+
+            //Act
+            scope.AddAttachment(attachment);
+            scope.AddAttachment(attachment2);
+
+            //Assert
+            _ = scope.Attachments.Should().Contain(attachment, "Attachment added was not found");
+            _ = scope.Attachments.Should().Contain(attachment2, "Attachment added was not found");
+        }
+
+        [Fact]
+        public void ClearAttachments_HasAttachments_EmptyList()
+        {
+            //Arrange
+            var scope = new Scope();
+
+            for (int i = 0; i < 5; i++)
+            {
+                scope.AddAttachment(new MemoryStream(1_000), Guid.NewGuid().ToString());
+            }
+
+            //Act
+            scope.ClearAttachments();
+
+            //Assert
+            _ = scope.Attachments.Should().BeEmpty();
         }
     }
 }
