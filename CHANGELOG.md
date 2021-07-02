@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fetures
+
+- Add ClearAttachments to Scope([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))
+
 ## 3.6.1
 
 ### Fixes
