@@ -256,14 +256,8 @@ namespace Sentry
 #else
             var oldAttachments = Interlocked.Exchange(ref _attachments, new());
 
-            while (!oldAttachments.IsEmpty)
-            {
-                if (!oldAttachments.TryTake(out _))
-                {
-                    Options.DiagnosticLogger?.LogWarning("Failed to complete the Attachments cleanup.");
-                    break;
-                }
-            }
+            while (oldAttachments.TryTake(out _))
+            { }
 #endif
         }
 
