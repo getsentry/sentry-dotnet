@@ -12,12 +12,16 @@ namespace Sentry
     // AKA client mode
     internal class GlobalSessionManager : ISessionManager
     {
+        private const string CacheFileName = ".session";
+
         private readonly object _installationIdLock = new();
 
         private readonly ISystemClock _clock;
         private readonly SentryOptions _options;
 
-        private string? _cachedInstallationId;
+        private readonly string? _cacheDirectoryPath;
+
+        private string? _resolvedInstallationId;
         private Session? _currentSession;
 
         // Internal for testing
@@ -29,6 +33,10 @@ namespace Sentry
         {
             _options = options;
             _clock = clock;
+
+            // TODO: session file should really be process-isolated, but we
+            // don't have a proper mechanism for that right now.
+            _cacheDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
         }
 
         public GlobalSessionManager(SentryOptions options)
@@ -122,9 +130,9 @@ namespace Sentry
         private string? TryGetInstallationId()
         {
             // Installation ID could have already been resolved by this point
-            if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
+            if (!string.IsNullOrWhiteSpace(_resolvedInstallationId))
             {
-                return _cachedInstallationId;
+                return _resolvedInstallationId;
             }
 
             // Resolve installation ID in a locked manner to guarantee consistency because ID can be non-deterministic.
@@ -133,9 +141,9 @@ namespace Sentry
             {
                 // We may have acquired the lock after another thread has already resolved
                 // installation ID, so check the cache one more time before proceeding with I/O.
-                if (!string.IsNullOrWhiteSpace(_cachedInstallationId))
+                if (!string.IsNullOrWhiteSpace(_resolvedInstallationId))
                 {
-                    return _cachedInstallationId;
+                    return _resolvedInstallationId;
                 }
 
                 var id =
@@ -156,7 +164,7 @@ namespace Sentry
                     );
                 }
 
-                return _cachedInstallationId = id;
+                return _resolvedInstallationId = id;
             }
         }
 
@@ -198,7 +206,29 @@ namespace Sentry
                 session.Id, session.DistinctId
             );
 
-            return session.CreateUpdate(true, _clock.GetUtcNow());
+            var update = session.CreateUpdate(true, _clock.GetUtcNow());
+
+            if (!string.IsNullOrWhiteSpace(_cacheDirectoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(_cacheDirectoryPath);
+
+                    File.WriteAllBytes(
+                        Path.Combine(_cacheDirectoryPath, CacheFileName),
+                        update.WriteToMemory()
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to persist session on the file system",
+                        ex
+                    );
+                }
+            }
+
+            return update;
         }
 
         private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
@@ -208,7 +238,26 @@ namespace Sentry
                 session.Id, session.DistinctId, status
             );
 
-            return session.CreateUpdate(false, timestamp, status);
+            var update = session.CreateUpdate(false, timestamp, status);
+
+            if (!string.IsNullOrWhiteSpace(_cacheDirectoryPath))
+            {
+                try
+                {
+                    File.Delete(
+                        Path.Combine(_cacheDirectoryPath, CacheFileName)
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to delete persisted session from the file system",
+                        ex
+                    );
+                }
+            }
+
+            return update;
         }
 
         public SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status)
