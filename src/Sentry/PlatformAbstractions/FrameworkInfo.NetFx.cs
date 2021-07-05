@@ -1,6 +1,7 @@
 #if NET461
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Win32;
 
 namespace Sentry.PlatformAbstractions
@@ -90,10 +91,7 @@ namespace Sentry.PlatformAbstractions
             try
             {
                 using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpRegistryKey, false);
-                foreach (var installation in GetInstallationsFromRegistryKey(ndpKey))
-                {
-                    yield return installation;
-                }
+                return GetInstallationsFromRegistryKey(ndpKey).ToArray();
             }
             catch
             {
