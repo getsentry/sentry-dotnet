@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel;
+using System.Data.Entity.Infrastructure.Interception;
+using System.Diagnostics;
 using Sentry.EntityFramework;
 using Sentry.EntityFramework.ErrorProcessors;
 using Sentry.Extensibility;
@@ -23,7 +25,7 @@ namespace Sentry
             try
             {
 #pragma warning disable 618 // TODO: We can make the method internal on a new major release.
-                SentryDatabaseLogging.UseBreadcrumbs(diagnosticLogger: sentryOptions.DiagnosticLogger);
+                _ = SentryDatabaseLogging.UseBreadcrumbs(diagnosticLogger: sentryOptions.DiagnosticLogger);
 #pragma warning restore 618
             }
             catch (Exception e)
@@ -31,7 +33,7 @@ namespace Sentry
                 sentryOptions.DiagnosticLogger?
                     .LogError("Failed to configure EF breadcrumbs. Make sure to init Sentry before EF.", e);
             }
-
+            DbInterception.Add(new SentryQueryPerformanceListener());            
             sentryOptions.AddExceptionProcessor(new DbEntityValidationExceptionProcessor());
             // DbConcurrencyExceptionProcessor is untested due to problems with testing it, so it might not be production ready
             //sentryOptions.AddExceptionProcessor(new DbConcurrencyExceptionProcessor());
