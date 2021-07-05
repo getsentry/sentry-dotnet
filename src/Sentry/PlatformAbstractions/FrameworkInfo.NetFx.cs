@@ -90,7 +90,10 @@ namespace Sentry.PlatformAbstractions
             try
             {
                 using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpRegistryKey, false);
-                return GetInstallationsFromRegistryKey(ndpKey);
+                foreach (var installation in GetInstallationsFromRegistryKey(ndpKey))
+                {
+                    yield return installation;
+                }
             }
             catch
             {
