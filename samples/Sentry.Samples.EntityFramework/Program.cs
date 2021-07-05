@@ -14,7 +14,7 @@ var _ = SentrySdk.Init(o =>
 var dbConnection = Effort.DbConnectionFactory.CreateTransient();
 using var db = new SampleDbContext(dbConnection, true);
 
-var user = new SampleUser();
+var user = new SampleUser() { Id = 1, RequiredColumn = "123" };
 db.Users.Add(user);
 
 // This will throw a DbEntityValidationException and crash the app
