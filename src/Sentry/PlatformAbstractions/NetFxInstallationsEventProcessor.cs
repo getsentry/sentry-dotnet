@@ -23,7 +23,7 @@ namespace Sentry.PlatformAbstractions
         internal static Dictionary<string, string> GetInstallationsDictionary()
         {
             var versionsDictionary = new Dictionary<string, string>();
-            var registryKey = FrameworkInfo.TryOpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\", out var exception);
+            var registryKey = FrameworkInfo.TryOpenSubKey(FrameworkInfo.NetFxNdpRegistryKey, out var exception);
             if (exception != null)
             {
                 throw exception;

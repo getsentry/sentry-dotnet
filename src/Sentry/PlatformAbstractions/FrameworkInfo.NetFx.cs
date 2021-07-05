@@ -10,6 +10,8 @@ namespace Sentry.PlatformAbstractions
     /// </summary>
     public static partial class FrameworkInfo
     {
+        internal const string NetFxNdpRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\";
+        internal const string NetFxNdpFullRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
         /// <summary>
         /// Get the latest Framework installation for the specified CLR
         /// </summary>
@@ -101,7 +103,7 @@ namespace Sentry.PlatformAbstractions
         /// <returns>Enumeration of installations</returns>
         public static IEnumerable<FrameworkInstallation> GetInstallations()
         {
-            using var ndpKey = TryOpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\", out _);
+            using var ndpKey = TryOpenSubKey(NetFxNdpRegistryKey, out _);
             return GetInstallationsFromRegistryKey(ndpKey);
         }
 
@@ -187,7 +189,7 @@ namespace Sentry.PlatformAbstractions
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
         internal static int? Get45PlusLatestInstallationFromRegistry()
         {
-            using var ndpKey = TryOpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\", out _);
+            using var ndpKey = TryOpenSubKey(NetFxNdpFullRegistryKey, out _);
             return ndpKey?.GetInt("Release");
         }
 
