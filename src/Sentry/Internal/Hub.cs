@@ -23,6 +23,7 @@ namespace Sentry.Internal
         private readonly Enricher _enricher;
 
         private DateTimeOffset? _sessionPauseTimestamp;
+        private int _isPersistedSessionRecovered;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
@@ -177,6 +178,27 @@ namespace Sentry.Internal
 
         public void StartSession()
         {
+            // Attempt to recover persisted session left over from previous run
+            if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
+            {
+                try
+                {
+                    var recoveredSessionUpdate = _sessionManager.TryRecoverPersistedSession();
+                    if (recoveredSessionUpdate is not null)
+                    {
+                        CaptureSession(recoveredSessionUpdate);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to recover persisted session.",
+                        ex
+                    );
+                }
+            }
+
+            // Start a new session
             try
             {
                 var sessionUpdate = _sessionManager.StartSession();

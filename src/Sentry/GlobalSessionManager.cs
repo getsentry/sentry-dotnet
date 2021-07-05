@@ -12,14 +12,14 @@ namespace Sentry
     // AKA client mode
     internal class GlobalSessionManager : ISessionManager
     {
-        private const string CacheFileName = ".session";
+        private const string PersistedSessionFileName = ".session";
 
         private readonly object _installationIdLock = new();
 
         private readonly ISystemClock _clock;
         private readonly SentryOptions _options;
 
-        private readonly string? _cacheDirectoryPath;
+        private readonly string? _persistanceDirectoryPath;
 
         private string? _resolvedInstallationId;
         private Session? _currentSession;
@@ -36,7 +36,7 @@ namespace Sentry
 
             // TODO: session file should really be process-isolated, but we
             // don't have a proper mechanism for that right now.
-            _cacheDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
+            _persistanceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
         }
 
         public GlobalSessionManager(SentryOptions options)
@@ -168,6 +168,80 @@ namespace Sentry
             }
         }
 
+        private void PersistSession(SessionUpdate update, bool isPaused = false)
+        {
+            if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
+            {
+                return;
+            }
+
+            try
+            {
+                Directory.CreateDirectory(_persistanceDirectoryPath);
+
+                File.WriteAllBytes(
+                    Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName),
+                    update.WriteToMemory()
+                );
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to persist session on the file system",
+                    ex
+                );
+            }
+        }
+
+        private void DeletePersistedSession()
+        {
+            if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
+            {
+                return;
+            }
+
+            try
+            {
+                File.Delete(
+                    Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName)
+                );
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to delete persisted session from the file system",
+                    ex
+                );
+            }
+        }
+
+        public SessionUpdate? TryRecoverPersistedSession()
+        {
+            if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var data = File.ReadAllBytes(Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName));
+                var update = SessionUpdate.FromJson(Json.Parse(data));
+
+                // Switch status to abnormal and initial to false
+                // TODO: crashed for paused sessions
+                return new SessionUpdate(update, false, SessionEndStatus.Abnormal);
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to recover persisted session from the file system",
+                    ex
+                );
+
+                return null;
+            }
+        }
+
         public SessionUpdate? StartSession()
         {
             // Extract release
@@ -208,25 +282,7 @@ namespace Sentry
 
             var update = session.CreateUpdate(true, _clock.GetUtcNow());
 
-            if (!string.IsNullOrWhiteSpace(_cacheDirectoryPath))
-            {
-                try
-                {
-                    Directory.CreateDirectory(_cacheDirectoryPath);
-
-                    File.WriteAllBytes(
-                        Path.Combine(_cacheDirectoryPath, CacheFileName),
-                        update.WriteToMemory()
-                    );
-                }
-                catch (Exception ex)
-                {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to persist session on the file system",
-                        ex
-                    );
-                }
-            }
+            PersistSession(update);
 
             return update;
         }
@@ -240,22 +296,7 @@ namespace Sentry
 
             var update = session.CreateUpdate(false, timestamp, status);
 
-            if (!string.IsNullOrWhiteSpace(_cacheDirectoryPath))
-            {
-                try
-                {
-                    File.Delete(
-                        Path.Combine(_cacheDirectoryPath, CacheFileName)
-                    );
-                }
-                catch (Exception ex)
-                {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to delete persisted session from the file system",
-                        ex
-                    );
-                }
-            }
+            DeletePersistedSession();
 
             return update;
         }

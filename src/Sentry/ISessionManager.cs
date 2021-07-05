@@ -6,6 +6,8 @@ namespace Sentry
     {
         bool IsSessionActive { get; }
 
+        SessionUpdate? TryRecoverPersistedSession();
+
         SessionUpdate? StartSession();
 
         SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
