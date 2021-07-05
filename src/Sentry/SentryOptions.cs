@@ -513,6 +513,12 @@ namespace Sentry
         /// </summary>
         public SentryOptions()
         {
+            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
+            // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
+            StackTraceMode = Runtime.Current.Name == ".NET Native"
+                ? StackTraceMode.Original
+                : StackTraceMode.Enhanced;
+
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
@@ -520,12 +526,6 @@ namespace Sentry
             ExceptionProcessorsProviders = new Func<IEnumerable<ISentryEventExceptionProcessor>>[] {
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
-
-            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
-            // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-            StackTraceMode = Runtime.Current.Name == ".NET Native"
-                ? StackTraceMode.Original
-                : StackTraceMode.Enhanced;
 
             SentryStackTraceFactory = new SentryStackTraceFactory(this);
 

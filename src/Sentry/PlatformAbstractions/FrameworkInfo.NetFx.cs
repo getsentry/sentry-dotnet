@@ -11,12 +11,6 @@ namespace Sentry.PlatformAbstractions
     public static partial class FrameworkInfo
     {
         /// <summary>
-        /// Blocks any function to access the registry if a previous attempt had failed.
-        /// By default: it's set to false.
-        /// </summary>
-        internal static bool RegistryLocked { get; private set; }
-
-        /// <summary>
         /// Get the latest Framework installation for the specified CLR
         /// </summary>
         /// <remarks>
@@ -26,9 +20,8 @@ namespace Sentry.PlatformAbstractions
         /// CLR 4 => .NET 4.0, 4.5.x, 4.6.x, 4.7.x
         /// </remarks>
         /// <param name="clrVersion">The CLR version: 1, 2 or 4</param>
-        /// <param name="registryLock">Blocks this function to access the System's registry.</param>
         /// <returns>The framework installation or null if none is found, used for fine-tuning the Latest info.</returns>
-        public static FrameworkInstallation? GetLatest(int clrVersion, bool registryLock = false)
+        public static FrameworkInstallation? GetLatest(int clrVersion)
         {
             // CLR versions
             // https://docs.microsoft.com/en-us/dotnet/standard/clr
@@ -39,21 +32,7 @@ namespace Sentry.PlatformAbstractions
 
             if (clrVersion == 4)
             {
-                int? release = null;
-                try
-                {
-                    if (registryLock)
-                    {
-                        RegistryLocked = true;
-                    }
-                    release = Get45PlusLatestInstallationFromRegistry(RegistryLocked);
-                }
-                catch (Exception ex)
-                {
-                    _ = ex;
-                    //Do something?
-                    RegistryLocked = true;
-                }
+                var release = Get45PlusLatestInstallationFromRegistry();
                 if (release != null)
                 {
                     return new FrameworkInstallation
@@ -99,20 +78,35 @@ namespace Sentry.PlatformAbstractions
             return latest;
         }
 
+        internal static RegistryKey? TryOpenSubKey(string name, out Exception? exception)
+        {
+            try
+            {
+                var subKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
+                    .OpenSubKey(name);
+                exception = null;
+                return subKey;
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+                return null;
+            }
+        }
+
         /// <summary>
         /// Get all .NET Framework installations in this machine
         /// </summary>
-        /// <param name="registryLock">Blocks this function to access the System's registry.</param>
         /// <seealso href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-1-4"/>
         /// <returns>Enumeration of installations</returns>
-        public static IEnumerable<FrameworkInstallation> GetInstallations(bool registryLock = false)
+        public static IEnumerable<FrameworkInstallation> GetInstallations()
         {
-            if (registryLock || RegistryLocked)
-            {
-                yield break;
-            }
-            using var ndpKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, string.Empty)
-                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\");
+            using var ndpKey = TryOpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\", out _);
+            return GetInstallationsFromRegistryKey(ndpKey);
+        }
+
+        internal static IEnumerable<FrameworkInstallation> GetInstallationsFromRegistryKey(RegistryKey? ndpKey)
+        {
             if (ndpKey == null)
             {
                 yield break;
@@ -191,14 +185,9 @@ namespace Sentry.PlatformAbstractions
         }
 
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
-        internal static int? Get45PlusLatestInstallationFromRegistry(bool registryLock)
+        internal static int? Get45PlusLatestInstallationFromRegistry()
         {
-            if (registryLock)
-            {
-                return null;
-            }
-            using var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
-                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\");
+            using var ndpKey = TryOpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\", out _);
             return ndpKey?.GetInt("Release");
         }
 

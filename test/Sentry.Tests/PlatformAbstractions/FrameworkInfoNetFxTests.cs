@@ -24,14 +24,6 @@ namespace Sentry.Tests.PlatformAbstractions
         }
 
         [SkippableFact]
-        public void GetInstallations_RegistryLocked_Empty()
-        {
-            Skip.If(RuntimeInfo.GetRuntime().IsMono());
-            var allInstallations = FrameworkInfo.GetInstallations(true);
-            Assert.Empty(allInstallations);
-        }
-
-        [SkippableFact]
         public void GetInstallations_AllReleasesAreMappedToVersion()
         {
             Skip.If(RuntimeInfo.GetRuntime().IsMono());
