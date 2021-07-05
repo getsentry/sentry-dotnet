@@ -20,7 +20,9 @@ dbConnection.SetConnectionTimeout(60);
 using var db = new SampleDbContext(dbConnection, true);
 
 var transaction = SentrySdk.StartTransaction("Some Http Post request", "Create");
-
+Console.WriteLine("Some Http Post request");
+SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+var test = SentrySdk.GetSpan();
 //Populate the database
 for (int j=0; j < 10; j++)
 {
@@ -35,10 +37,22 @@ db.SaveChanges();
 
 transaction.Finish();
 transaction = SentrySdk.StartTransaction("Some Http Search", "Create");
+Console.WriteLine("Some Http Search");
+SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+
 var query = db.Users
         .Where(s => s.RequiredColumn == "Bill")
-        .FirstOrDefault<SampleUser>();
+        .ToList();
 transaction.Finish();
+Console.WriteLine($"Found {query.Count}");
+
+Console.WriteLine("Text SQL Search");
+transaction = SentrySdk.StartTransaction("Text SQL Search", "Create");
+SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+var query2 = db.Users.SqlQuery("SELECT * FROM Sample User where Id > 5").ToList();
+transaction.Finish();
+Console.WriteLine($"Found {query2.Count}");
+
 
 public class SampleUser : IDisposable
 {

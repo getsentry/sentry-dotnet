@@ -11,38 +11,44 @@ namespace Sentry.EntityFramework
 {
     internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     {
-        private ISpan? _mySpan;
+        private Dictionary<string,ISpan?> _mySpans = new Dictionary<string, ISpan?>();
         public void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         {
+            Console.WriteLine("ReaderExecuting");
             var span = SentrySdk.GetSpan();
-            _mySpan = span?.StartChild("A Reader child");
+            _mySpans["Reader"] = span?.StartChild("A Reader child", command.CommandText);
         }
 
         public void ReaderExecuted(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         {
-            _mySpan?.Finish();
+            Console.WriteLine("ReaderExecuted", command.CommandText);
+            _mySpans["Reader"]?.Finish();
         }
 
         public void NonQueryExecuting(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
         {
+            Console.WriteLine("NonQueryExecuting");
             var span = SentrySdk.GetSpan();
-            _mySpan = span?.StartChild("A NonQuery child");
+            _mySpans["NonQuery"] = span?.StartChild("A NonQuery child", command.CommandText);
         }
 
         public void NonQueryExecuted(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
         {
-            _mySpan?.Finish();
+            Console.WriteLine("NonQueryExecuted");
+            _mySpans["NonQuery"]?.Finish();
         }
 
         public void ScalarExecuting(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
         {
+            Console.WriteLine("ScalarExecuting");
             var span = SentrySdk.GetSpan();
-            _mySpan = span?.StartChild("A Scalar child");
+            _mySpans["Scalar"] = span?.StartChild("A Scalar child");
         }
 
         public void ScalarExecuted(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
         {
-            _mySpan?.Finish();
+            Console.WriteLine("ScalarExecuted");
+            _mySpans["Scalar"]?.Finish();
         }
     }
 }
