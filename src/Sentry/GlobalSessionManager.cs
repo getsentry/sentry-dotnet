@@ -131,6 +131,11 @@ namespace Sentry
             }
         }
 
+        // Internal for testing
+        internal string GetMachineNameInstallationId() =>
+            // Never fails
+            Environment.MachineName.GetHashString();
+
         private string? TryGetInstallationId()
         {
             // Installation ID could have already been resolved by this point
@@ -153,7 +158,7 @@ namespace Sentry
                 var id =
                     TryGetPersistentInstallationId() ??
                     TryGetHardwareInstallationId() ??
-                    Environment.MachineName.GetHashString();
+                    GetMachineNameInstallationId();
 
                 if (!string.IsNullOrWhiteSpace(id))
                 {
