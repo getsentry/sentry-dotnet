@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Microsoft.Win32;
 using Sentry.Extensibility;
 
 namespace Sentry.PlatformAbstractions
@@ -23,11 +24,7 @@ namespace Sentry.PlatformAbstractions
         internal static Dictionary<string, string> GetInstallationsDictionary()
         {
             var versionsDictionary = new Dictionary<string, string>();
-            var registryKey = FrameworkInfo.TryOpenSubKey(FrameworkInfo.NetFxNdpRegistryKey, out var exception);
-            if (exception != null)
-            {
-                throw exception;
-            }
+            using var registryKey = Registry.LocalMachine.OpenSubKey(FrameworkInfo.NetFxNdpRegistryKey, false);
             var installations = FrameworkInfo.GetInstallationsFromRegistryKey(registryKey).ToArray();
             foreach (var profile in installations.Select(p => p.Profile).Distinct())
             {
