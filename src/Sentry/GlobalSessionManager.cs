@@ -6,6 +6,7 @@ using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -152,7 +153,7 @@ namespace Sentry
                 var id =
                     TryGetPersistentInstallationId() ??
                     TryGetHardwareInstallationId() ??
-                    Environment.MachineName;
+                    Environment.MachineName.GetHashString();
 
                 if (!string.IsNullOrWhiteSpace(id))
                 {
