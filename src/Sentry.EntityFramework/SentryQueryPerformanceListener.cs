@@ -2,53 +2,63 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sentry.EntityFramework
 {
     internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     {
-        private Dictionary<string,ISpan?> _mySpans = new Dictionary<string, ISpan?>();
+        //AsyncLocal
+        private Dictionary<string, ISpan?> _mySpans = new Dictionary<string, ISpan?>();
         public void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         {
             Console.WriteLine("ReaderExecuting");
-            var span = SentrySdk.GetSpan();
-            _mySpans["Reader"] = span?.StartChild("A Reader child", command.CommandText);
+            CreateOrUpdateSpan("Reader", command.CommandText);
         }
 
         public void ReaderExecuted(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         {
             Console.WriteLine("ReaderExecuted", command.CommandText);
-            _mySpans["Reader"]?.Finish();
+            Finish("Reader");
         }
 
         public void NonQueryExecuting(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
         {
             Console.WriteLine("NonQueryExecuting");
-            var span = SentrySdk.GetSpan();
-            _mySpans["NonQuery"] = span?.StartChild("A NonQuery child", command.CommandText);
+            CreateOrUpdateSpan("NonQuery", command.CommandText);
         }
 
         public void NonQueryExecuted(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
         {
             Console.WriteLine("NonQueryExecuted");
-            _mySpans["NonQuery"]?.Finish();
+            Finish("NonQuery");
         }
 
         public void ScalarExecuting(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
         {
             Console.WriteLine("ScalarExecuting");
-            var span = SentrySdk.GetSpan();
-            _mySpans["Scalar"] = span?.StartChild("A Scalar child");
+            CreateOrUpdateSpan("Scalar", command.CommandText);
         }
 
         public void ScalarExecuted(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
         {
             Console.WriteLine("ScalarExecuted");
-            _mySpans["Scalar"]?.Finish();
+            Finish("Scalar");
+        }
+
+        private void CreateOrUpdateSpan(string key, string? command)
+        {
+            var span = SentrySdk.GetSpan();
+            if (_mySpans.ContainsKey(key) && _mySpans[key] is ISpan oldSpan) {
+                oldSpan.Finish();
+            }
+            _mySpans[key] = span?.StartChild("db", command ?? key);
+        }
+
+        private void Finish(string key)
+        {
+            var span =  _mySpans[key];
+            _mySpans[key] = null;
+            span?.Finish();
         }
     }
 }

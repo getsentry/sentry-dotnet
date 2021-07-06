@@ -19,30 +19,46 @@ var dbConnection = Effort.DbConnectionFactory.CreateTransient();
 dbConnection.SetConnectionTimeout(60);
 using var db = new SampleDbContext(dbConnection, true);
 
+// ========================= Insert Requests ==================
+//
+// ============================================================
 var transaction = SentrySdk.StartTransaction("Some Http Post request", "Create");
 Console.WriteLine("Some Http Post request");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-var test = SentrySdk.GetSpan();
+ISpan manualSpan;
+
+
 //Populate the database
 for (int j=0; j < 10; j++)
 {
+    manualSpan = SentrySdk.GetSpan().StartChild("manual - create item");
     _ = db.Users.Add(new SampleUser() { Id = j, RequiredColumn = "123" });
+    manualSpan.Finish();
 }
+manualSpan = SentrySdk.GetSpan().StartChild("manual - create item");
 db.Users.Add(new SampleUser() { Id = 52, RequiredColumn = "Bill" });
+manualSpan.Finish();
 
 
 // This will throw a DbEntityValidationException and crash the app
 // But Sentry will capture the error.
+manualSpan = SentrySdk.GetSpan().StartChild("manual - save changes");
 db.SaveChanges();
-
+manualSpan.Finish();
 transaction.Finish();
+
+// ========================= Search Request ===================
+//
+// ============================================================
 transaction = SentrySdk.StartTransaction("Some Http Search", "Create");
 Console.WriteLine("Some Http Search");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
+manualSpan = SentrySdk.GetSpan().StartChild("manual - search");
 var query = db.Users
         .Where(s => s.RequiredColumn == "Bill")
         .ToList();
+manualSpan.Finish();
 transaction.Finish();
 Console.WriteLine($"Found {query.Count}");
 

@@ -58,7 +58,7 @@ namespace Sentry.EntityFramework
             {
                 _queryLogger.Log(command.CommandText, BreadcrumbLevel.Error);
             }
-            else
+            else if (command.CommandText != null)
             {
                 _queryLogger.Log(command.CommandText);
             }
