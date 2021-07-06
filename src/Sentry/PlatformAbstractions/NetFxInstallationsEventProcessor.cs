@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using Microsoft.Win32;
 using Sentry.Extensibility;
@@ -24,8 +25,13 @@ namespace Sentry.PlatformAbstractions
         internal static Dictionary<string, string> GetInstallationsDictionary()
         {
             var versionsDictionary = new Dictionary<string, string>();
-            using var registryKey = Registry.LocalMachine.OpenSubKey(FrameworkInfo.NetFxNdpRegistryKey, false);
-            var installations = FrameworkInfo.GetInstallationsFromRegistryKey(registryKey).ToArray();
+            //We need access to the Registry to be able to collect the Installations.
+            //Without it, this Event processor should be disabled.
+            if (Registry.LocalMachine.GetLastException() is { } exception)
+            {
+                _ = ExceptionDispatchInfo.Capture(exception).Throw();
+            }
+            var installations = FrameworkInfo.GetInstallations();
             foreach (var profile in installations.Select(p => p.Profile).Distinct())
             {
                 versionsDictionary.Add($"{NetFxInstallationsKey} {profile}",

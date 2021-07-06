@@ -87,20 +87,8 @@ namespace Sentry.PlatformAbstractions
         /// <seealso href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-1-4"/>
         /// <returns>Enumeration of installations</returns>
         public static IEnumerable<FrameworkInstallation> GetInstallations()
-        {
-            try
-            {
-                using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpRegistryKey, false);
-                return GetInstallationsFromRegistryKey(ndpKey).ToArray();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        internal static IEnumerable<FrameworkInstallation> GetInstallationsFromRegistryKey(RegistryKey? ndpKey)
-        {
+        { 
+            using var ndpKey = Registry.LocalMachine.TryOpenLocalSubKey(NetFxNdpRegistryKey);
             if (ndpKey == null)
             {
                 yield break;
@@ -181,17 +169,8 @@ namespace Sentry.PlatformAbstractions
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
         internal static int? Get45PlusLatestInstallationFromRegistry()
         {
-            {
-                try
-                {
-                    using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpFullRegistryKey, false);
-                    return ndpKey?.GetInt("Release");
-                }
-                catch
-                {
-                    return null;
-                }
-            }
+            using var ndpKey = Registry.LocalMachine.TryOpenLocalSubKey(NetFxNdpFullRegistryKey);
+            return ndpKey?.GetInt("Release");
         }
 
         internal static Version GetNetFxVersionFromRelease(int release)
