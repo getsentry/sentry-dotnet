@@ -29,7 +29,7 @@ namespace Sentry.PlatformAbstractions
             //Without it, this Event processor should be disabled.
             if (Registry.LocalMachine.GetLastException() is { } exception)
             {
-                _ = ExceptionDispatchInfo.Capture(exception).Throw();
+                ExceptionDispatchInfo.Capture(exception).Throw();
             }
             var installations = FrameworkInfo.GetInstallations();
             foreach (var profile in installations.Select(p => p.Profile).Distinct())
