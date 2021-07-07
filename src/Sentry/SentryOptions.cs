@@ -484,7 +484,7 @@ namespace Sentry
                     // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
                     _stackTraceMode = Runtime.Current.Name == ".NET Native"
                         ? StackTraceMode.Original
-                        : StackTraceMode.Enhanced;                    
+                        : StackTraceMode.Enhanced;
                 }
                 catch (Exception ex)
                 {
