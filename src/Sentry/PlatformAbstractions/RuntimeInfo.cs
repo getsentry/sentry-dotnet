@@ -21,14 +21,19 @@ namespace Sentry.PlatformAbstractions
             runtime ??= GetFromMonoRuntime();
 
             runtime ??= GetFromEnvironmentVariable();
+            return runtime;
+        }
 
+        internal static void SetAdditionalParameters(Runtime runtime)
+        {
 #if NET461
             SetNetFxReleaseAndVersion(runtime);
 #else
             SetNetCoreVersion(runtime);
 #endif
-            return runtime;
         }
+
+
 
         internal static Runtime? Parse(string rawRuntimeDescription, string? name = null)
         {
@@ -60,14 +65,14 @@ namespace Sentry.PlatformAbstractions
                 var latest = FrameworkInfo.GetLatest(Environment.Version.Major);
 
                 runtime.FrameworkInstallation = latest;
-                if (latest?.Version?.Major < 4)
+                if (latest.Version?.Major < 4)
                 {
                     // prior to 4, user-friendly versions are always 2 digit: 1.0, 1.1, 2.0, 3.0, 3.5
                     runtime.Version = latest.ServicePack == null
                         ? $"{latest.Version.Major}.{latest.Version.Minor}"
                         : $"{latest.Version.Major}.{latest.Version.Minor} SP {latest.ServicePack}";
                 }
-                else if (latest != null)
+                else
                 {
                     runtime.Version = latest.Version?.ToString();
                 }

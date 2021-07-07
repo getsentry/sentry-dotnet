@@ -461,6 +461,8 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
+        private StackTraceMode? _stackTraceMode = null;
+
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!
         /// </summary>
@@ -468,7 +470,31 @@ namespace Sentry
         /// Sentry groups events by stack traces. If you change this mode and you have thousands of groups,
         /// you'll get thousands of new groups. So use this setting with care.
         /// </remarks>
-        public StackTraceMode StackTraceMode { get; set; }
+        public StackTraceMode StackTraceMode
+        {
+            get
+            {
+                if(_stackTraceMode  is { } stackTraceMode)
+                {
+                    return stackTraceMode;
+                }
+                try
+                {
+                    // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
+                    // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
+                    _stackTraceMode = Runtime.Current.Name == ".NET Native"
+                        ? StackTraceMode.Original
+                        : StackTraceMode.Enhanced;                    
+                }
+                catch (Exception ex)
+                {
+                    _stackTraceMode = StackTraceMode.Enhanced;
+                    DiagnosticLogger?.LogError("Failed to get runtime, setting StackTraceMode to {0} ", ex, StackTraceMode.Enhanced);
+                }
+                return _stackTraceMode.Value;
+            }
+            set => _stackTraceMode = value;
+        }
 
         /// <summary>
         /// Maximum allowed file size of attachments, in bytes.
@@ -513,12 +539,6 @@ namespace Sentry
         /// </summary>
         public SentryOptions()
         {
-            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
-            // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-            StackTraceMode = Runtime.Current.Name == ".NET Native"
-                ? StackTraceMode.Original
-                : StackTraceMode.Enhanced;
-
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };

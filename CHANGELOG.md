@@ -10,7 +10,6 @@
 
 ### Fixes
 
-- Avoid Unhandled Exception on .NET 461 if the Registry Access threw an exception([#1101](https://github.com/getsentry/sentry-dotnet/pull/1101))
 - `IHub.ResumeSession()`: don't start a new session if pause wasn't called or if there is no active session ([#1089](https://github.com/getsentry/sentry-dotnet/pull/1089))
 - Fixed incorrect order when getting the last active span ([#1094](https://github.com/getsentry/sentry-dotnet/pull/1094))
 - Fix logger call in BackgroundWorker that caused a formatting exception in runtime ([#1092](https://github.com/getsentry/sentry-dotnet/pull/1092))

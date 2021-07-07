@@ -1,7 +1,6 @@
 #if NET461
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Win32;
 
 namespace Sentry.PlatformAbstractions
@@ -23,7 +22,7 @@ namespace Sentry.PlatformAbstractions
         /// CLR 4 => .NET 4.0, 4.5.x, 4.6.x, 4.7.x
         /// </remarks>
         /// <param name="clrVersion">The CLR version: 1, 2 or 4</param>
-        /// <returns>The framework installation or null if none is found, used for fine-tuning the Latest info.</returns>
+        /// <returns>The framework installation or null if none is found.</returns>
         public static FrameworkInstallation? GetLatest(int clrVersion)
         {
             // CLR versions
@@ -87,8 +86,10 @@ namespace Sentry.PlatformAbstractions
         /// <seealso href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-1-4"/>
         /// <returns>Enumeration of installations</returns>
         public static IEnumerable<FrameworkInstallation> GetInstallations()
-        { 
-            using var ndpKey = Registry.LocalMachine.TryOpenLocalSubKey(NetFxNdpRegistryKey);
+        {
+            int i = 0; if (i == 0)
+                throw new Exception("Test");
+            using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpRegistryKey, false);
             if (ndpKey == null)
             {
                 yield break;
@@ -169,7 +170,10 @@ namespace Sentry.PlatformAbstractions
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
         internal static int? Get45PlusLatestInstallationFromRegistry()
         {
-            using var ndpKey = Registry.LocalMachine.TryOpenLocalSubKey(NetFxNdpFullRegistryKey);
+            int i = 0;
+            if (i == 0)
+                throw new Exception("Test");
+            using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpFullRegistryKey, false);
             return ndpKey?.GetInt("Release");
         }
 

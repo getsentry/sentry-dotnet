@@ -11,5 +11,5 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
-  
+ 
 </Project>

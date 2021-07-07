@@ -12,7 +12,18 @@ namespace Sentry.PlatformAbstractions
         /// <value>
         /// The current runtime.
         /// </value>
-        public static Runtime Current => _runtime ??= RuntimeInfo.GetRuntime();
+        public static Runtime Current
+        {
+            get
+            {
+                if( _runtime is null)
+                {
+                    _runtime = RuntimeInfo.GetRuntime();
+                    RuntimeInfo.SetAdditionalParameters(_runtime);
+                }
+                return _runtime;
+            }
+        }
         /// <summary>
         /// The name of the runtime
         /// </summary>
