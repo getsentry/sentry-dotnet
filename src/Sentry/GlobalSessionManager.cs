@@ -49,8 +49,8 @@ namespace Sentry
             try
             {
                 var directoryPath =
-                    _options.TryGetDsnSpecificCacheDirectoryPath() ??
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
+                    _persistanceDirectoryPath
+                    ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
 
                 Directory.CreateDirectory(directoryPath);
 
