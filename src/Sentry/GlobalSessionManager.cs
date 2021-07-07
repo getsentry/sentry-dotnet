@@ -269,8 +269,8 @@ namespace Sentry
                 var filePath = Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName);
                 var recoveredUpdate = SessionUpdate.FromJson(Json.Load(filePath));
 
-                // Switch status to abnormal and initial to false
-                // TODO: crashed for paused sessions
+                // TODO: Exited for paused sessions
+                // TODO: Crashed based on the result of a callback
                 return new SessionUpdate(recoveredUpdate, false, SessionEndStatus.Abnormal);
             }
             catch (Exception ex)
