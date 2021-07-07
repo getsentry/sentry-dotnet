@@ -20,15 +20,13 @@ namespace Sentry
 
     internal static class JsonSerializableExtensions
     {
-        public static byte[] WriteToMemory(this IJsonSerializable serializable)
+        public static void WriteToFile(this IJsonSerializable serializable, string filePath)
         {
-            using var buffer = new MemoryStream();
-            using var writer = new Utf8JsonWriter(buffer);
+            using var file = File.Create(filePath);
+            using var writer = new Utf8JsonWriter(file);
 
             serializable.WriteTo(writer);
             writer.Flush();
-
-            return buffer.ToArray();
         }
     }
 }

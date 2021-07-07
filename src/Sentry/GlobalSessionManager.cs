@@ -170,8 +170,11 @@ namespace Sentry
 
         private void PersistSession(SessionUpdate update, bool isPaused = false)
         {
+            _options.DiagnosticLogger?.LogDebug("Persisting session (SID: '{0}') to a file.", update.Id);
+
             if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
             {
+                _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
                 return;
             }
 
@@ -179,15 +182,23 @@ namespace Sentry
             {
                 Directory.CreateDirectory(_persistanceDirectoryPath);
 
-                File.WriteAllBytes(
-                    Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName),
-                    update.WriteToMemory()
+                _options.DiagnosticLogger?.LogDebug(
+                    "Created persistance directory for session file '{0}'.",
+                    _persistanceDirectoryPath
+                );
+
+                var filePath = Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName);
+                update.WriteToFile(filePath);
+
+                _options.DiagnosticLogger?.LogInfo(
+                    "Persisted session to a file '{0}'.",
+                    filePath
                 );
             }
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to persist session on the file system",
+                    "Failed to persist session on the file system.",
                     ex
                 );
             }
@@ -195,21 +206,49 @@ namespace Sentry
 
         private void DeletePersistedSession()
         {
+            _options.DiagnosticLogger?.LogDebug("Deleting persisted session file.");
+
             if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
             {
+                _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
                 return;
             }
 
             try
             {
-                File.Delete(
-                    Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName)
+                var filePath = Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName);
+
+                // Try to log the contents of the session file before we delete it
+                if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) ?? false)
+                {
+                    try
+                    {
+                        _options.DiagnosticLogger?.LogDebug(
+                            "Deleting persisted session file with contents: {0}",
+                            File.ReadAllText(filePath)
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        _options.DiagnosticLogger?.LogError(
+                            "Failed to read the contents of persisted session file '{0}'.",
+                            ex,
+                            filePath
+                        );
+                    }
+                }
+
+                File.Delete(filePath);
+
+                _options.DiagnosticLogger?.LogInfo(
+                    "Deleted persisted session file '{0}'.",
+                    filePath
                 );
             }
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to delete persisted session from the file system",
+                    "Failed to delete persisted session from the file system.",
                     ex
                 );
             }
@@ -217,19 +256,22 @@ namespace Sentry
 
         public SessionUpdate? TryRecoverPersistedSession()
         {
+            _options.DiagnosticLogger?.LogDebug("Attempting to recover persisted session from file.");
+
             if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
             {
+                _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
                 return null;
             }
 
             try
             {
-                var data = File.ReadAllBytes(Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName));
-                var update = SessionUpdate.FromJson(Json.Parse(data));
+                var filePath = Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName);
+                var recoveredUpdate = SessionUpdate.FromJson(Json.Load(filePath));
 
                 // Switch status to abnormal and initial to false
                 // TODO: crashed for paused sessions
-                return new SessionUpdate(update, false, SessionEndStatus.Abnormal);
+                return new SessionUpdate(recoveredUpdate, false, SessionEndStatus.Abnormal);
             }
             catch (Exception ex)
             {
