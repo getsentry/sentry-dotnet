@@ -49,7 +49,7 @@ namespace Sentry.Internal.Http
 
             _isolatedCacheDirectoryPath =
                 options.TryGetProcessSpecificCacheDirectoryPath() ??
-                throw new InvalidOperationException("Cache directory is not set.");
+                throw new InvalidOperationException("Cache directory or DSN is not set.");
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
 

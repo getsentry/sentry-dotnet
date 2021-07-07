@@ -246,11 +246,14 @@ namespace Sentry
                 return null;
             }
 
-            return Path.Combine(
-                options.CacheDirectoryPath,
-                "Sentry",
-                options.Dsn?.GetHashString() ?? "no-dsn"
-            );
+            // DSN must be set to use caching
+            var dsn = options.Dsn;
+            if (string.IsNullOrWhiteSpace(dsn))
+            {
+                return null;
+            }
+
+            return Path.Combine(options.CacheDirectoryPath, "Sentry", dsn.GetHashString());
         }
 
         internal static string? TryGetProcessSpecificCacheDirectoryPath(this SentryOptions options)
