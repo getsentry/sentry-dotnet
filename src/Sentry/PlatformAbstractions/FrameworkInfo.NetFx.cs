@@ -87,8 +87,6 @@ namespace Sentry.PlatformAbstractions
         /// <returns>Enumeration of installations</returns>
         public static IEnumerable<FrameworkInstallation> GetInstallations()
         {
-            int i = 0; if (i == 0)
-                throw new Exception("Test");
             using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpRegistryKey, false);
             if (ndpKey == null)
             {
@@ -170,9 +168,6 @@ namespace Sentry.PlatformAbstractions
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
         internal static int? Get45PlusLatestInstallationFromRegistry()
         {
-            int i = 0;
-            if (i == 0)
-                throw new Exception("Test");
             using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpFullRegistryKey, false);
             return ndpKey?.GetInt("Release");
         }
