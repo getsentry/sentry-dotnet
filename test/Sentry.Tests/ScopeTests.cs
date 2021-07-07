@@ -233,8 +233,8 @@ namespace Sentry.Tests
             scope.AddAttachment(attachment2);
 
             //Assert
-            _ = scope.Attachments.Should().Contain(attachment, "Attachment was not found.");
-            _ = scope.Attachments.Should().Contain(attachment2, "Attachment2 was not found.");
+            scope.Attachments.Should().Contain(attachment, "Attachment was not found.");
+            scope.Attachments.Should().Contain(attachment2, "Attachment2 was not found.");
         }
 
         [Fact]
@@ -252,7 +252,7 @@ namespace Sentry.Tests
             scope.ClearAttachments();
 
             //Assert
-            _ = scope.Attachments.Should().BeEmpty();
+            scope.Attachments.Should().BeEmpty();
         }
     }
 }

@@ -184,10 +184,11 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1
-        private readonly ConcurrentBag<Attachment> _attachments = new();
-#else
+#if NETSTANDARD2_0 || NET461
         private ConcurrentBag<Attachment> _attachments = new();
+#else
+        private readonly ConcurrentBag<Attachment> _attachments = new();
+        
 #endif
 
         /// <summary>
@@ -229,7 +230,7 @@ namespace Sentry
 
             if (overflow > 0)
             {
-                _ = _breadcrumbs.TryDequeue(out _);
+                _breadcrumbs.TryDequeue(out _);
             }
 
             _breadcrumbs.Enqueue(breadcrumb);
@@ -255,10 +256,10 @@ namespace Sentry
         /// </summary>
         public void ClearAttachments()
         {
-#if NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1
-            _attachments.Clear();
+#if NETSTANDARD2_0 || NET461
+            Interlocked.Exchange(ref _attachments, new());
 #else
-            _ = Interlocked.Exchange(ref _attachments, new());
+            _attachments.Clear();
 #endif
         }
 
