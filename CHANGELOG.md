@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- ASP.NET Core: fix handled not being set for Handled exceptions ([]())
+
 ### Fetures
 
 - Add ClearAttachments to Scope ([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))

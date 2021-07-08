@@ -89,6 +89,23 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task InvokeAsync_ExceptionThrown_HandledSet()
+        {
+            var expected = new Exception("test");
+            _fixture.RequestDelegate = _ => throw expected;
+
+            _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
+                .Do(c => Assert.True((bool)c.Arg<SentryEvent>().Exception.Data[Mechanism.HandledKey]));
+
+            var sut = _fixture.GetSut();
+
+            var actual = await Assert.ThrowsAsync<Exception>(
+                async () => await sut.InvokeAsync(_fixture.HttpContext));
+
+            Assert.Same(expected, actual);
+        }
+
+        [Fact]
         public async Task InvokeAsync_FeatureFoundWithNoError_DoesNotCapturesEvent()
         {
             var feature = Substitute.For<IExceptionHandlerFeature>();
