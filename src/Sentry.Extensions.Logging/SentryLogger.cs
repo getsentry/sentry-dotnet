@@ -1,16 +1,33 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
+using Sentry.Protocol;
 
 namespace Sentry.Extensions.Logging
 {
     internal sealed class SentryLogger : ILogger
     {
+        private class DelayedSpan : Span
+        {
+
+            public new DateTimeOffset StartTimestamp { get; set; }
+
+            public DelayedSpan(ISpan tracer, DateTimeOffset startTimestamp)
+                : base(tracer.ParentSpanId, tracer.Operation)
+            {
+                StartTimestamp = startTimestamp;
+            }
+
+        }
+
         private readonly IHub _hub;
         private readonly ISystemClock _clock;
         private readonly SentryLoggingOptions _options;
+        private AsyncLocal<ISpan?> _span = new AsyncLocal<ISpan?>();
 
         internal string CategoryName { get; }
 
@@ -41,10 +58,12 @@ namespace Sentry.Extensions.Logging
             Exception? exception,
             Func<TState, Exception?, string>? formatter)
         {
+            /*
             if (!IsEnabled(logLevel))
             {
                 return;
             }
+            */
 
             var message = formatter?.Invoke(state, exception);
 
@@ -88,8 +107,31 @@ namespace Sentry.Extensions.Logging
                 _ = _hub.CaptureEvent(@event);
             }
 
+
+            if (ShouldStartSpan(eventId))
+            {
+                var span = SentrySdk.GetSpan()?.StartChild("Logger db", "bob");
+                _span.Value?.Finish();
+                _span.Value = span;
+            }
+            else if (ShouldFinishSpan(eventId))
+            {
+                // Executed || DbCommand || TIME || SQL...
+                var data = message?.Split(new char[] { ' ' }, 4);
+                if (data?.Length == 4 && Regex.Match(data[2], @"\d+") is { } match &&
+                        match.Success)
+                {
+                    var oldTimeStamp = DateTime.UtcNow.AddMilliseconds(-double.Parse(match.Value));
+                    if (SentrySdk.GetSpan() is { } span &&
+                        span.StartChild("db", "logger") is SpanTracer spanTracer)
+                    {
+                        spanTracer.StartTimestamp = oldTimeStamp;
+                        spanTracer.Finish();
+                    }
+                }
+            }
             // Even if it was sent as event, add breadcrumb so next event includes it
-            if (ShouldAddBreadcrumb(logLevel, eventId, exception))
+            else if (ShouldAddBreadcrumb(logLevel, eventId, exception))
             {
                 var data = eventId.ToDictionaryOrNull();
 
@@ -144,5 +186,11 @@ namespace Sentry.Extensions.Logging
                        exception))
                && !CategoryName.StartsWith("Sentry.", StringComparison.Ordinal)
                && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal);
+
+        private bool ShouldStartSpan(EventId eventId)
+            => eventId.ToString() == "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting";
+
+        private bool ShouldFinishSpan(EventId eventid)
+            => eventid.ToString() == "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted";
     }
 }
