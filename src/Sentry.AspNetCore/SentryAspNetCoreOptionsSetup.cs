@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Internal;
+using System.Diagnostics;
 #if NETSTANDARD2_0
 using Microsoft.AspNetCore.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -71,6 +72,11 @@ namespace Sentry.AspNetCore
                 {
                     options.Environment = _hostingEnvironment.EnvironmentName;
                 }
+
+#if !NETSTANDARD2_0
+                //Not the desired place, but I'm unsure where to subscribe it.
+                DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener());
+#endif
             }
 
             options.AddLogEntryFilter((category, _, eventId, _)

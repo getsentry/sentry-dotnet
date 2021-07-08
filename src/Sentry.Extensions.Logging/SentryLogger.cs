@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -58,12 +59,10 @@ namespace Sentry.Extensions.Logging
             Exception? exception,
             Func<TState, Exception?, string>? formatter)
         {
-            /*
-            if (!IsEnabled(logLevel))
+            if (!IsEnabled(logLevel) || ShouldFinishSpan(eventId))
             {
                 return;
-            }
-            */
+            }            
 
             var message = formatter?.Invoke(state, exception);
 

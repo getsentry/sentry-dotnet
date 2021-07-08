@@ -47,7 +47,7 @@ namespace Sentry
                     break;
 #endif
                 default:
-                    /*scope.SetExtra("state", state);*/
+                    scope.SetExtra("state", state);
                     break;
             }
         }
