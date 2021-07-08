@@ -127,7 +127,7 @@ namespace Sentry.AspNetCore
 
                 void CaptureException(Exception e)
                 {
-                    e.Data[Mechanism.HandledKey] = true;
+                    e.Data[Mechanism.HandledKey] = false;
                     e.Data[Mechanism.MechanismKey] = "SentryMiddleware";
 
                     var evt = new SentryEvent(e);
