@@ -57,14 +57,7 @@ namespace Sentry.Internal
                 foreach (var integration in _integrations)
                 {
                     options.DiagnosticLogger?.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                    try
-                    {
-                        integration.Register(this, options);
-                    }
-                    catch (Exception ex)
-                    {
-                        options.DiagnosticLogger?.LogError("Failed to register integration: '{0}'.", ex, integration.GetType().Name);
-                    }
+                    integration.Register(this, options);
                 }
             }
 

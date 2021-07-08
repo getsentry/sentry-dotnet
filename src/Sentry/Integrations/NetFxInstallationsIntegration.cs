@@ -7,9 +7,16 @@ namespace Sentry.Integrations
     {
         public void Register(IHub hub, SentryOptions options)
         {
-            if (!Runtime.Current.IsMono())
+            try
             {
-                options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
+                if (!Runtime.Current.IsMono())
+                {
+                    options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
+                }
+            }
+            catch
+            {
+                // This can fail due to Xyz so let's just live without this information and let the SDK initialize
             }
         }
     }

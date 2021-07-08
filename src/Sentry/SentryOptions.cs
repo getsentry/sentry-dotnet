@@ -461,7 +461,7 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
-        private StackTraceMode? _stackTraceMode = null;
+        private StackTraceMode? _stackTraceMode;
 
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!
