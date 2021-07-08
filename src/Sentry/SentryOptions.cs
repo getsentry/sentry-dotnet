@@ -474,7 +474,7 @@ namespace Sentry
         {
             get
             {
-                if(_stackTraceMode  is { } stackTraceMode)
+                if (_stackTraceMode  is { } stackTraceMode)
                 {
                     return stackTraceMode;
                 }
