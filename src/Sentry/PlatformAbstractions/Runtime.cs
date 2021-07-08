@@ -16,7 +16,7 @@ namespace Sentry.PlatformAbstractions
         {
             get
             {
-                if( _runtime is null)
+                if (_runtime is null)
                 {
                     _runtime = RuntimeInfo.GetRuntime();
                     RuntimeInfo.SetAdditionalParameters(_runtime);

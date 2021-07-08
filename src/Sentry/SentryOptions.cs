@@ -478,6 +478,7 @@ namespace Sentry
                 {
                     return stackTraceMode;
                 }
+
                 try
                 {
                     // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
@@ -489,8 +490,9 @@ namespace Sentry
                 catch (Exception ex)
                 {
                     _stackTraceMode = StackTraceMode.Enhanced;
-                    DiagnosticLogger?.LogError("Failed to get runtime, setting StackTraceMode to {0} ", ex, StackTraceMode.Enhanced);
+                    DiagnosticLogger?.LogError($"Failed to get runtime, setting {nameof(StackTraceMode)} to {0} ", ex, _stackTraceMode);
                 }
+
                 return _stackTraceMode.Value;
             }
             set => _stackTraceMode = value;

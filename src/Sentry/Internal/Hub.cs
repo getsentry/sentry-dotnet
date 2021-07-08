@@ -63,7 +63,7 @@ namespace Sentry.Internal
                     }
                     catch (Exception ex)
                     {
-                        options.DiagnosticLogger?.LogError("Failed to Register integration: '{0}'.", ex, integration.GetType().Name);
+                        options.DiagnosticLogger?.LogError("Failed to register integration: '{0}'.", ex, integration.GetType().Name);
                     }
                 }
             }
