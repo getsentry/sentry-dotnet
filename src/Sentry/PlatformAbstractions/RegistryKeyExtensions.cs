@@ -1,5 +1,4 @@
 #if NET461
-using System;
 using Microsoft.Win32;
 
 namespace Sentry.PlatformAbstractions
