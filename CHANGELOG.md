@@ -2,11 +2,7 @@
 
 ## Unreleased
 
-### Fixes
-
-- Avoid Unhandled Exception on .NET 461 if the Registry Access threw an exception ([#1101](https://github.com/getsentry/sentry-dotnet/pull/1101))
-
-### Fetures
+### Features
 
 - Add ClearAttachments to Scope ([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))
 
