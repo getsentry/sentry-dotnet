@@ -11,7 +11,6 @@ Sentry SDK for .NET
 
 [![build](https://github.com/getsentry/sentry-dotnet/workflows/build/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
-[![line count](https://tokei.rs/b1/github/getsentry/sentry-dotnet/)](https://github.com/getsentry/sentry-dotnet/tree/main/src)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 
 
