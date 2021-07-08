@@ -1,4 +1,6 @@
 #if NET461
+using System;
+using Sentry.Extensibility;
 using Sentry.PlatformAbstractions;
 
 namespace Sentry.Integrations
@@ -14,9 +16,9 @@ namespace Sentry.Integrations
                     options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // This can fail due to Xyz so let's just live without this information and let the SDK initialize
+                options.DiagnosticLogger?.LogError("Failed to register NetFxInstallations.", ex);
             }
         }
     }
