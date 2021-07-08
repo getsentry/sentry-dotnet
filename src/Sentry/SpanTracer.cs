@@ -22,7 +22,7 @@ namespace Sentry
         public SentryId TraceId { get; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp { get; internal set; } = DateTimeOffset.UtcNow;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
