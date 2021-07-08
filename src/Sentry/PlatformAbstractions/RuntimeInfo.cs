@@ -33,8 +33,6 @@ namespace Sentry.PlatformAbstractions
 #endif
         }
 
-
-
         internal static Runtime? Parse(string rawRuntimeDescription, string? name = null)
         {
             if (rawRuntimeDescription == null)
