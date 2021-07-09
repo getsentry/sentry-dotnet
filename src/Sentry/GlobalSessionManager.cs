@@ -273,7 +273,6 @@ namespace Sentry
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
                 var recoveredUpdate = PersistedSessionUpdate.FromJson(Json.Load(filePath));
 
-                // TODO: Crashed based on the result of a callback
                 // Create a session update to end the recovered session
                 return new SessionUpdate(
                     recoveredUpdate.Update,
@@ -284,9 +283,12 @@ namespace Sentry
                     // Increment sequence number
                     recoveredUpdate.Update.SequenceNumber + 1,
                     // If the session was paused then end normally, otherwise abnormal or crashed
-                    recoveredUpdate.PauseTimestamp is not null
-                        ? SessionEndStatus.Exited
-                        : SessionEndStatus.Abnormal
+                    _options.CrashedLastRun switch
+                    {
+                        _ when recoveredUpdate.PauseTimestamp is not null => SessionEndStatus.Exited,
+                        { } crashedLastRun => crashedLastRun() ? SessionEndStatus.Crashed : SessionEndStatus.Abnormal,
+                        _ => SessionEndStatus.Abnormal
+                    }
                 );
             }
             catch (Exception ex)

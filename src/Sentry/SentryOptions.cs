@@ -509,6 +509,11 @@ namespace Sentry
         public bool AutoSessionTracking { get; set; } = false;
 
         /// <summary>
+        /// Delegate which is used to check whether the application crashed during last run.
+        /// </summary>
+        public Func<bool>? CrashedLastRun { get; set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
