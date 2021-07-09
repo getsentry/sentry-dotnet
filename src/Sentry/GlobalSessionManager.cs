@@ -170,7 +170,7 @@ namespace Sentry
             }
         }
 
-        private void PersistSession(SessionUpdate update, bool isPaused = false)
+        private void PersistSession(SessionUpdate update)
         {
             _options.DiagnosticLogger?.LogDebug("Persisting session (SID: '{0}') to a file.", update.Id);
 
@@ -190,7 +190,9 @@ namespace Sentry
                 );
 
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
-                update.WriteToFile(filePath);
+
+                var persistedSessionUpdate = new PersistedSessionUpdate(update, _lastPauseTimestamp);
+                persistedSessionUpdate.WriteToFile(filePath);
 
                 _options.DiagnosticLogger?.LogInfo(
                     "Persisted session to a file '{0}'.",
@@ -269,11 +271,23 @@ namespace Sentry
             try
             {
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
-                var recoveredUpdate = SessionUpdate.FromJson(Json.Load(filePath));
+                var recoveredUpdate = PersistedSessionUpdate.FromJson(Json.Load(filePath));
 
-                // TODO: Exited for paused sessions
                 // TODO: Crashed based on the result of a callback
-                return new SessionUpdate(recoveredUpdate, false, SessionEndStatus.Abnormal);
+                // Create a session update to end the recovered session
+                return new SessionUpdate(
+                    recoveredUpdate.Update,
+                    // We're recovering an ongoing session, so this can never be initial
+                    false,
+                    // If the session was paused, then use that as timestamp, otherwise use current timestamp
+                    recoveredUpdate.PauseTimestamp ?? _clock.GetUtcNow(),
+                    // Increment sequence number
+                    recoveredUpdate.Update.SequenceNumber + 1,
+                    // If the session was paused then end normally, otherwise abnormal or crashed
+                    recoveredUpdate.PauseTimestamp is not null
+                        ? SessionEndStatus.Exited
+                        : SessionEndStatus.Abnormal
+                );
             }
             catch (Exception ex)
             {
@@ -364,9 +378,10 @@ namespace Sentry
 
         public void PauseSession()
         {
-            if (IsSessionActive)
+            if (_currentSession is { } session)
             {
                 _lastPauseTimestamp = _clock.GetUtcNow();
+                PersistSession(session.CreateUpdate(false, _clock.GetUtcNow()));
             }
         }
 
