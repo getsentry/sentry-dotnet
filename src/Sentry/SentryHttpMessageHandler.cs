@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,15 +64,26 @@ namespace Sentry
 
             // Start a span that tracks this request
             // (may be null if transaction is not set on the scope)
+            var requestMethod = request.Method.Method.ToUpperInvariant();
             var span = _hub.GetSpan()?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
-                $"{request.Method.Method.ToUpperInvariant()} {request.RequestUri}"
+                $"{requestMethod} {request.RequestUri}"
             );
 
             try
             {
                 var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                if (request.RequestUri?.AbsoluteUri is { } uri)
+                {
+                    var breadcrumbData = new Dictionary<string, string>
+                    {
+                        { "url", uri },
+                        { "method", requestMethod }
+                    };
+                    _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
+                }
 
                 // This will handle unsuccessful status codes as well
                 span?.Finish(
