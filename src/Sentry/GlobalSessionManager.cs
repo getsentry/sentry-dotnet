@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -19,10 +20,11 @@ namespace Sentry
         private readonly ISystemClock _clock;
         private readonly SentryOptions _options;
 
-        private readonly string? _persistanceDirectoryPath;
+        private readonly string? _persistenceDirectoryPath;
 
         private string? _resolvedInstallationId;
         private Session? _currentSession;
+        private DateTimeOffset? _lastPauseTimestamp;
 
         // Internal for testing
         internal Session? CurrentSession => _currentSession;
@@ -36,7 +38,7 @@ namespace Sentry
 
             // TODO: session file should really be process-isolated, but we
             // don't have a proper mechanism for that right now.
-            _persistanceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
+            _persistenceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
         }
 
         public GlobalSessionManager(SentryOptions options)
@@ -49,7 +51,7 @@ namespace Sentry
             try
             {
                 var directoryPath =
-                    _persistanceDirectoryPath
+                    _persistenceDirectoryPath
                     ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
 
                 Directory.CreateDirectory(directoryPath);
@@ -172,7 +174,7 @@ namespace Sentry
         {
             _options.DiagnosticLogger?.LogDebug("Persisting session (SID: '{0}') to a file.", update.Id);
 
-            if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
+            if (string.IsNullOrWhiteSpace(_persistenceDirectoryPath))
             {
                 _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
                 return;
@@ -180,14 +182,14 @@ namespace Sentry
 
             try
             {
-                Directory.CreateDirectory(_persistanceDirectoryPath);
+                Directory.CreateDirectory(_persistenceDirectoryPath);
 
                 _options.DiagnosticLogger?.LogDebug(
                     "Created persistance directory for session file '{0}'.",
-                    _persistanceDirectoryPath
+                    _persistenceDirectoryPath
                 );
 
-                var filePath = Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName);
+                var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
                 update.WriteToFile(filePath);
 
                 _options.DiagnosticLogger?.LogInfo(
@@ -208,7 +210,7 @@ namespace Sentry
         {
             _options.DiagnosticLogger?.LogDebug("Deleting persisted session file.");
 
-            if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
+            if (string.IsNullOrWhiteSpace(_persistenceDirectoryPath))
             {
                 _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
                 return;
@@ -216,7 +218,7 @@ namespace Sentry
 
             try
             {
-                var filePath = Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName);
+                var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
                 // Try to log the contents of the session file before we delete it
                 if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) ?? false)
@@ -258,7 +260,7 @@ namespace Sentry
         {
             _options.DiagnosticLogger?.LogDebug("Attempting to recover persisted session from file.");
 
-            if (string.IsNullOrWhiteSpace(_persistanceDirectoryPath))
+            if (string.IsNullOrWhiteSpace(_persistenceDirectoryPath))
             {
                 _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
                 return null;
@@ -266,7 +268,7 @@ namespace Sentry
 
             try
             {
-                var filePath = Path.Combine(_persistanceDirectoryPath, PersistedSessionFileName);
+                var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
                 var recoveredUpdate = SessionUpdate.FromJson(Json.Load(filePath));
 
                 // TODO: Exited for paused sessions
@@ -359,6 +361,56 @@ namespace Sentry
         }
 
         public SessionUpdate? EndSession(SessionEndStatus status) => EndSession(_clock.GetUtcNow(), status);
+
+        public void PauseSession()
+        {
+            if (IsSessionActive)
+            {
+                _lastPauseTimestamp = _clock.GetUtcNow();
+            }
+        }
+
+        public IReadOnlyList<SessionUpdate> ResumeSession()
+        {
+            // Ensure a session has been paused before
+            if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
+            {
+                return Array.Empty<SessionUpdate>();
+            }
+
+            // Reset the pause timestamp since the session is about to be resumed
+            _lastPauseTimestamp = null;
+
+            // If the pause duration exceeded tracking interval, start a new session
+            // (otherwise do nothing)
+            var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
+            if (pauseDuration >= _options.AutoSessionTrackingInterval)
+            {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Paused session has been paused for {0}, which is longer than the configured limit. " +
+                    "Starting a new session instead of resuming this one.",
+                    pauseDuration
+                );
+
+                var updates = new List<SessionUpdate>(2);
+
+                // End current session
+                if (EndSession(sessionPauseTimestamp, SessionEndStatus.Exited) is { } endUpdate)
+                {
+                    updates.Add(endUpdate);
+                }
+
+                // Start a new session
+                if (StartSession() is { } startUpdate)
+                {
+                    updates.Add(startUpdate);
+                }
+
+                return updates;
+            }
+
+            return Array.Empty<SessionUpdate>();
+        }
 
         public SessionUpdate? ReportError()
         {
