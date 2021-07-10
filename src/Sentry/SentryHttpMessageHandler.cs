@@ -75,15 +75,12 @@ namespace Sentry
             {
                 var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-                if (request.RequestUri?.AbsoluteUri is { } uri)
+                var breadcrumbData = new Dictionary<string, string>
                 {
-                    var breadcrumbData = new Dictionary<string, string>
-                    {
-                        { "url", uri },
-                        { "method", requestMethod }
-                    };
-                    _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
-                }
+                    { "url", $"{request.RequestUri}" },
+                    { "method", requestMethod }
+                };
+                _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 
                 // This will handle unsuccessful status codes as well
                 span?.Finish(
