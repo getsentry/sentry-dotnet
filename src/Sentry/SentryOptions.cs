@@ -476,7 +476,7 @@ namespace Sentry
             {
                 if (_stackTraceMode is not null)
                 {
-                    return _stackTraceMode;
+                    return _stackTraceMode.Value;
                 }
 
                 try
