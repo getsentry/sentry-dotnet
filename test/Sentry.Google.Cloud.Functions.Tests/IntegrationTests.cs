@@ -70,6 +70,8 @@ namespace Sentry.Google.Cloud.Functions.Tests
                 Assert.True(evt.Wait(TimeSpan.FromSeconds(3)));
                 Assert.True(requests.Any(p => p.Contains(ExpectedMessage)),
                     "Expected error to be captured");
+                Assert.True(requests.All(p => p.Contains("sentry.dotnet.google-cloud-function")),
+                    "Expected SDK name to be in the payload");
                 return; // pass
             }
             Assert.False(true, "Exception should bubble from Middleware");

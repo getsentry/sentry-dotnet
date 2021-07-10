@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry;
 using Sentry.AspNetCore;
+using Sentry.Extensibility;
+using Sentry.Reflection;
 
 namespace Google.Cloud.Functions.Framework
 {
@@ -19,6 +22,8 @@ namespace Google.Cloud.Functions.Framework
         {
             base.ConfigureLogging(context, logging);
             logging.AddConfiguration(context.Configuration);
+
+            logging.Services.AddSingleton<ISentryEventProcessor, SentryGoogleCloudFunctionEventProcessor>();
 
             // TODO: refactor this with SentryWebHostBuilderExtensions
             var section = context.Configuration.GetSection("Sentry");
@@ -49,6 +54,29 @@ namespace Google.Cloud.Functions.Framework
         {
             base.ConfigureServices(context, services);
             services.AddTransient<IStartupFilter, SentryStartupFilter>();
+        }
+
+        private class SentryGoogleCloudFunctionEventProcessor : ISentryEventProcessor
+        {
+            private static readonly SdkVersion NameAndVersion
+                = typeof(SentryStartup).Assembly.GetNameAndVersion();
+
+            private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
+            private const string SdkName = "sentry.dotnet.google-cloud-function";
+
+            public SentryEvent Process(SentryEvent @event)
+            {
+                // Take over the SDK name since this wraps ASP.NET Core
+                @event.Sdk.Name = SdkName;
+                @event.Sdk.Version = NameAndVersion.Version;
+
+                if (NameAndVersion.Version != null)
+                {
+                    @event.Sdk.AddPackage(ProtocolPackageName, NameAndVersion.Version);
+                }
+
+                return @event;
+            }
         }
     }
 }
