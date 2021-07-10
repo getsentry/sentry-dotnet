@@ -129,6 +129,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Google.Cloud
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Google.Cloud.Functions", "src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj", "{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Google.Cloud.Functions.Tests", "test\Sentry.Google.Cloud.Functions.Tests\Sentry.Google.Cloud.Functions.Tests.csproj", "{066522A4-8380-4D29-8DD0-973B1EDF0B39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -283,6 +285,10 @@ Global
 		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -328,6 +334,7 @@ Global
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{88269A52-A0BA-41B2-8DF3-505B66B17243} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
