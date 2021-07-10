@@ -66,6 +66,7 @@ namespace Sentry
             // (may be null if transaction is not set on the scope)
             var requestMethod = request.Method.Method.ToUpperInvariant();
             var url = request.RequestUri?.ToString() ?? string.Empty;
+
             var span = _hub.GetSpan()?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
