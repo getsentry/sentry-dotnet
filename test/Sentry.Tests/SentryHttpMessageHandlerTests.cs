@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -119,6 +120,49 @@ namespace Sentry.Tests
 
             // Assert
             hub.Received(1).BindException(exception, Arg.Any<ISpan>()); // second argument is an implicitly created span
+        }
+
+        [Fact]
+        public async Task SendAsync_Executed_BreadcrumbCreated()
+        {
+            // Arrange
+            var scope = new Scope();
+            var hub = Substitute.For<IHub>();
+                hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
+                   .Do(c => c.Arg<Action<Scope>>()(scope));
+
+            var url = "https://example.com/";
+
+            var urlKey = "url";
+            var methodKey = "method";
+            var statusKey = "status_code";
+            var expectedBreadcrumbData = new Dictionary<string, string>
+                {
+                    { urlKey, url },
+                    { methodKey, "GET" },
+                    { statusKey, "200" }
+                };
+            var expectedType = "http";
+            var expectedCategory = "http";
+            using var sentryHandler = new SentryHttpMessageHandler(hub);
+            using var client = new HttpClient(sentryHandler);
+
+            // Act
+            await client.GetAsync(url);
+            var BreadcrumbGenerated = scope.Breadcrumbs.First();
+
+            // Assert
+            Assert.Equal(expectedType, BreadcrumbGenerated.Type);
+            Assert.Equal(expectedCategory, BreadcrumbGenerated.Category);
+
+            Assert.True(BreadcrumbGenerated.Data.ContainsKey(urlKey));
+            Assert.Equal(expectedBreadcrumbData[urlKey], BreadcrumbGenerated.Data[urlKey]);
+
+            Assert.True(BreadcrumbGenerated.Data.ContainsKey(methodKey));
+            Assert.Equal(expectedBreadcrumbData[methodKey], BreadcrumbGenerated.Data[methodKey]);
+
+            Assert.True(BreadcrumbGenerated.Data.ContainsKey(statusKey));
+            Assert.Equal(expectedBreadcrumbData[statusKey], BreadcrumbGenerated.Data[statusKey]);
         }
     }
 }
