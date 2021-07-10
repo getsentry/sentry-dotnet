@@ -11,4 +11,10 @@
     <ProjectReference Include="../../src/Sentry.Google.Cloud.Functions/Sentry.Google.Cloud.Functions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
