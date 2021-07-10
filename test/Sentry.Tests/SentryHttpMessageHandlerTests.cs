@@ -135,10 +135,12 @@ namespace Sentry.Tests
 
             var urlKey = "url";
             var methodKey = "method";
+            var statusKey = "status_code";
             var expectedBreadcrumbData = new Dictionary<string, string>
                 {
                     { urlKey, url },
-                    { methodKey, "GET" }
+                    { methodKey, "GET" },
+                    { statusKey, "200" }
                 };
             var expectedType = "http";
             var expectedCategory = "http";
@@ -158,6 +160,9 @@ namespace Sentry.Tests
 
             Assert.True(BreadcrumbGenerated.Data.ContainsKey(methodKey));
             Assert.Equal(expectedBreadcrumbData[methodKey], BreadcrumbGenerated.Data[methodKey]);
+
+            Assert.True(BreadcrumbGenerated.Data.ContainsKey(statusKey));
+            Assert.Equal(expectedBreadcrumbData[statusKey], BreadcrumbGenerated.Data[statusKey]);
         }
     }
 }

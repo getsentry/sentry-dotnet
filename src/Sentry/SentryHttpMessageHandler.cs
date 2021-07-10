@@ -62,13 +62,13 @@ namespace Sentry
             // in case the user didn't set an inner handler.
             InnerHandler ??= new HttpClientHandler();
 
+            // Start a span that tracks this request
+            // (may be null if transaction is not set on the scope)
             var requestMethod = request.Method.Method.ToUpperInvariant();
             var url = request.RequestUri?.ToString() ?? string.Empty;
 
-            // Start a span that tracks this request
-            // (may be null if transaction is not set on the scope)
             var span = _hub.GetSpan()?.StartChild(
-            "http.client",
+                "http.client",
                 // e.g. "GET https://example.com"
                 $"{requestMethod} {url}"
             );
@@ -80,7 +80,8 @@ namespace Sentry
                 var breadcrumbData = new Dictionary<string, string>
                 {
                     { "url", url },
-                    { "method", requestMethod }
+                    { "method", requestMethod },
+                    { "status_code", ((int)response.StatusCode).ToString() }
                 };
                 _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 
