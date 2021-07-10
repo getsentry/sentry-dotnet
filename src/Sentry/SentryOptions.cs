@@ -474,9 +474,9 @@ namespace Sentry
         {
             get
             {
-                if (_stackTraceMode  is { } stackTraceMode)
+                if (_stackTraceMode is not null)
                 {
-                    return stackTraceMode;
+                    return _stackTraceMode;
                 }
 
                 try
@@ -490,7 +490,7 @@ namespace Sentry
                 catch (Exception ex)
                 {
                     _stackTraceMode = StackTraceMode.Enhanced;
-                    DiagnosticLogger?.LogError($"Failed to get runtime, setting {nameof(StackTraceMode)} to {0} ", ex, _stackTraceMode);
+                    DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
                 }
 
                 return _stackTraceMode.Value;
