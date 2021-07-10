@@ -65,10 +65,11 @@ namespace Sentry
             // Start a span that tracks this request
             // (may be null if transaction is not set on the scope)
             var requestMethod = request.Method.Method.ToUpperInvariant();
+            var url = request.RequestUri?.ToString() ?? string.Empty;
             var span = _hub.GetSpan()?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
-                $"{requestMethod} {request.RequestUri}"
+                $"{requestMethod} {url}"
             );
 
             try
@@ -77,7 +78,7 @@ namespace Sentry
 
                 var breadcrumbData = new Dictionary<string, string>
                 {
-                    { "url", $"{request.RequestUri}" },
+                    { "url", url },
                     { "method", requestMethod }
                 };
                 _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
