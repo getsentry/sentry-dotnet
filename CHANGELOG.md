@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-### Changes
+### Features
 
+- Add ClearAttachments to Scope ([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))
 - Add additional logging and additional fallback for installation ID ([#1103](https://github.com/getsentry/sentry-dotnet/pull/1103))
 
 ## 3.6.1
