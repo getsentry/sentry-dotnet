@@ -22,22 +22,22 @@ namespace Google.Cloud.Functions.Framework
 
             // TODO: refactor this with SentryWebHostBuilderExtensions
             var section = context.Configuration.GetSection("Sentry");
-            _ = logging.Services.Configure<SentryAspNetCoreOptions>(section);
+            logging.Services.Configure<SentryAspNetCoreOptions>(section);
 
-            _ = logging.Services.Configure<SentryAspNetCoreOptions>(options =>
+            logging.Services.Configure<SentryAspNetCoreOptions>(options =>
             {
                 // Make sure all events are flushed out
                 options.FlushOnCompletedRequest = true;
             });
 
-            _ = logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
-            _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
+            logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
+            logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
 
-            _ = logging.AddFilter<SentryAspNetCoreLoggerProvider>(
+            logging.AddFilter<SentryAspNetCoreLoggerProvider>(
                 "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
                 LogLevel.None);
 
-            _ = logging.Services.AddSentry();
+            logging.Services.AddSentry();
         }
 
         /// <summary>
