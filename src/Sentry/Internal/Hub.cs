@@ -22,7 +22,7 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private DateTimeOffset _sessionPauseTimestamp;
+        private DateTimeOffset? _sessionPauseTimestamp;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
@@ -198,7 +198,13 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                _sessionPauseTimestamp = _clock.GetUtcNow();
+                // Only pause if there's anything to pause.
+                // This might race if a session is started at the same time,
+                // but that's fine.
+                if (_sessionManager.IsSessionActive)
+                {
+                    _sessionPauseTimestamp = _clock.GetUtcNow();
+                }
             }
         }
 
@@ -206,7 +212,15 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                var pauseDuration = (_clock.GetUtcNow() - _sessionPauseTimestamp).Duration();
+                // Ensure a session has been paused before
+                if (_sessionPauseTimestamp is not { } sessionPauseTimestamp)
+                {
+                    return;
+                }
+
+                // If the pause duration exceeded tracking interval, start a new session
+                // (otherwise do nothing)
+                var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
                 if (pauseDuration >= _options.AutoSessionTrackingInterval)
                 {
                     _options.DiagnosticLogger?.LogDebug(
@@ -215,9 +229,12 @@ namespace Sentry.Internal
                         pauseDuration
                     );
 
-                    EndSession(_sessionPauseTimestamp, SessionEndStatus.Exited);
+                    EndSession(sessionPauseTimestamp, SessionEndStatus.Exited);
                     StartSession();
                 }
+
+                // Reset the pause timestamp since the session is now resumed
+                _sessionPauseTimestamp = null;
             }
         }
 
