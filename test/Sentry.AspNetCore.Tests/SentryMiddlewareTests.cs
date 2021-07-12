@@ -120,6 +120,21 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task InvokeAsync_FeatureFoundWithError_CapturesEvent()
+        {
+            var exception = new Exception();
+            var feature = Substitute.For<IExceptionHandlerFeature>();
+            _ = feature.Error.Returns(exception);
+            _ = _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
+            var sut = _fixture.GetSut();
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            _ = _fixture.Hub.Received().CaptureEvent(Arg.Any<SentryEvent>());
+            Assert.Equal("IExceptionHandlerFeature", exception.Data[Mechanism.MechanismKey]);
+        }
+
+        [Fact]
         public async Task InvokeAsync_ScopePushed_BeforeConfiguringScope()
         {
             var scopePushed = false;
