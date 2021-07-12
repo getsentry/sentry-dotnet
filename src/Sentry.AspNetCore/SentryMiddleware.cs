@@ -115,18 +115,21 @@ namespace Sentry.AspNetCore
                     var exceptionFeature = context.Features.Get<IExceptionHandlerFeature?>();
                     if (exceptionFeature?.Error != null)
                     {
-                        CaptureException(exceptionFeature.Error);
+                        CaptureException(exceptionFeature.Error, "IExceptionHandlerFeature");
                     }
                 }
                 catch (Exception e)
                 {
-                    CaptureException(e);
+                    CaptureException(e, "SentryMiddleware.UnhandledException");
 
                     ExceptionDispatchInfo.Capture(e).Throw();
                 }
 
-                void CaptureException(Exception e)
+                void CaptureException(Exception e, string mechanism)
                 {
+                    e.Data[Mechanism.HandledKey] = false;
+                    e.Data[Mechanism.MechanismKey] = mechanism;
+
                     var evt = new SentryEvent(e);
 
                     _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
