@@ -6,9 +6,18 @@
 
 - ASP.NET Core: fix handled not being set for Handled exceptions ([#1111](https://github.com/getsentry/sentry-dotnet/pull/1111))
 
-### Fetures
+## 3.7.0
 
+### Features
+
+- Add HTTP request breadcrumb ([#1113](https://github.com/getsentry/sentry-dotnet/pull/1113))
+- Integration for Google Cloud Functions ([#1085](https://github.com/getsentry/sentry-dotnet/pull/1085)) 
 - Add ClearAttachments to Scope ([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))
+- Add additional logging and additional fallback for installation ID ([#1103](https://github.com/getsentry/sentry-dotnet/pull/1103))
+
+### Fixes
+
+- Avoid Unhandled Exception on .NET 461 if the Registry Access threw an exception ([#1101](https://github.com/getsentry/sentry-dotnet/pull/1101))
 
 ## 3.6.1
 
