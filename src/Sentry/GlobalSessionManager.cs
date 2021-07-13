@@ -417,7 +417,7 @@ namespace Sentry
             if (pauseDuration >= _options.AutoSessionTrackingInterval)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Paused session has been paused for {0}, which is longer than the configured limit. " +
+                    "Paused session has been paused for {0}, which is longer than the configured timeout. " +
                     "Starting a new session instead of resuming this one.",
                     pauseDuration
                 );
@@ -438,6 +438,11 @@ namespace Sentry
 
                 return updates;
             }
+
+            _options.DiagnosticLogger?.LogDebug(
+                "Paused session has been paused for {0}, which is shorter than the configured timeout.",
+                pauseDuration
+            );
 
             return Array.Empty<SessionUpdate>();
         }
