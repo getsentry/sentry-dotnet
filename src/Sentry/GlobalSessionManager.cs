@@ -237,9 +237,9 @@ namespace Sentry
                 return;
             }
 
+            var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
             try
             {
-                var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
                 // Try to log the contents of the session file before we delete it
                 if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) ?? false)
@@ -271,8 +271,9 @@ namespace Sentry
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to delete persisted session from the file system.",
-                    ex
+                    "Failed to delete persisted session from the file system: '{0}'",
+                    ex,
+                    filePath
                 );
             }
         }

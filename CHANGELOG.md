@@ -6,7 +6,7 @@
 
 - ASP.NET Core: fix handled not being set for Handled exceptions ([#1111](https://github.com/getsentry/sentry-dotnet/pull/1111))
 
-### Changed
+### Features
 
 - File system persistence for sessions ([#1105](https://github.com/getsentry/sentry-dotnet/pull/1105))
 
