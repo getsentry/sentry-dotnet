@@ -7,6 +7,7 @@ using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -56,6 +57,11 @@ namespace Sentry
 
                 Directory.CreateDirectory(directoryPath);
 
+                _options.DiagnosticLogger?.LogDebug(
+                    "Created directory for installation ID file ({0}).",
+                    directoryPath
+                );
+
                 var filePath = Path.Combine(directoryPath, ".installation");
 
                 // Read installation ID stored in a file
@@ -99,6 +105,7 @@ namespace Sentry
         {
             try
             {
+                // Get MAC address of the first network adapter
                 var installationId = NetworkInterface
                     .GetAllNetworkInterfaces()
                     .Where(nic =>
@@ -110,7 +117,7 @@ namespace Sentry
                 if (string.IsNullOrWhiteSpace(installationId))
                 {
                     _options.DiagnosticLogger?.LogError(
-                        "Failed to resolve hardware installation ID."
+                        "Failed to find an appropriate network interface for installation ID."
                     );
 
                     return null;
@@ -128,6 +135,11 @@ namespace Sentry
                 return null;
             }
         }
+
+        // Internal for testing
+        internal string GetMachineNameInstallationId() =>
+            // Never fails
+            Environment.MachineName.GetHashString();
 
         private string? TryGetInstallationId()
         {
@@ -150,7 +162,8 @@ namespace Sentry
 
                 var id =
                     TryGetPersistentInstallationId() ??
-                    TryGetHardwareInstallationId();
+                    TryGetHardwareInstallationId() ??
+                    GetMachineNameInstallationId();
 
                 if (!string.IsNullOrWhiteSpace(id))
                 {

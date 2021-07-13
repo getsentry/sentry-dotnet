@@ -185,5 +185,35 @@ namespace Sentry.Tests
                 e.Level == SentryLevel.Debug
             );
         }
+
+        [Fact]
+        public void GetMachineNameInstallationId_Hashed()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            // Act
+            var installationId = fixture.SessionManager.GetMachineNameInstallationId();
+
+            // Assert
+            installationId.Should().NotBeNullOrWhiteSpace();
+            installationId.Should().NotBeEquivalentTo(Environment.MachineName);
+        }
+
+        [Fact]
+        public void GetMachineNameInstallationId_Idempotent()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            // Act
+            var installationIds = Enumerable
+                .Range(0, 10)
+                .Select(_ => fixture.SessionManager.GetMachineNameInstallationId())
+                .ToArray();
+
+            // Assert
+            installationIds.Distinct().Should().ContainSingle();
+        }
     }
 }
