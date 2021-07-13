@@ -183,7 +183,7 @@ namespace Sentry
             }
         }
 
-        private void PersistSession(SessionUpdate update)
+        private void PersistSession(SessionUpdate update, DateTimeOffset? pauseTimestamp = null)
         {
             _options.DiagnosticLogger?.LogDebug("Persisting session (SID: '{0}') to a file.", update.Id);
 
@@ -204,7 +204,7 @@ namespace Sentry
 
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
-                var persistedSessionUpdate = new PersistedSessionUpdate(update, _lastPauseTimestamp);
+                var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
                 persistedSessionUpdate.WriteToFile(filePath);
 
                 _options.DiagnosticLogger?.LogInfo(
@@ -395,8 +395,9 @@ namespace Sentry
         {
             if (_currentSession is { } session)
             {
-                _lastPauseTimestamp = _clock.GetUtcNow();
-                PersistSession(session.CreateUpdate(false, _clock.GetUtcNow()));
+                var now = _clock.GetUtcNow();
+                _lastPauseTimestamp = now;
+                PersistSession(session.CreateUpdate(false, now), now);
             }
         }
 
