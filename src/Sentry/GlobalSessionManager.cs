@@ -55,8 +55,8 @@ namespace Sentry
                     _persistenceDirectoryPath
                     ?? Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        _options.Dsn!,
-                        "Sentry"
+                        "Sentry",
+                        _options.Dsn!.GetHashString()
                     );
 
                 Directory.CreateDirectory(directoryPath);
