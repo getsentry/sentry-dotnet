@@ -405,6 +405,10 @@ namespace Sentry
             // Ensure a session has been paused before
             if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
             {
+                _options.DiagnosticLogger?.LogDebug(
+                    "Attempted to resume a session, but the current session hasn't been paused."
+                );
+
                 return Array.Empty<SessionUpdate>();
             }
 
