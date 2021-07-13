@@ -183,13 +183,15 @@ namespace Sentry
             }
         }
 
+        // Take pause timestamp directly instead of referencing _lastPauseTimestamp to avoid
+        // potential race conditions.
         private void PersistSession(SessionUpdate update, DateTimeOffset? pauseTimestamp = null)
         {
             _options.DiagnosticLogger?.LogDebug("Persisting session (SID: '{0}') to a file.", update.Id);
 
             if (string.IsNullOrWhiteSpace(_persistenceDirectoryPath))
             {
-                _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
+                _options.DiagnosticLogger?.LogDebug("Persistence directory is not set, returning.");
                 return;
             }
 
@@ -198,7 +200,7 @@ namespace Sentry
                 Directory.CreateDirectory(_persistenceDirectoryPath);
 
                 _options.DiagnosticLogger?.LogDebug(
-                    "Created persistance directory for session file '{0}'.",
+                    "Created persistence directory for session file '{0}'.",
                     _persistenceDirectoryPath
                 );
 
@@ -227,7 +229,7 @@ namespace Sentry
 
             if (string.IsNullOrWhiteSpace(_persistenceDirectoryPath))
             {
-                _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
+                _options.DiagnosticLogger?.LogDebug("Persistence directory is not set, returning.");
                 return;
             }
 
@@ -277,7 +279,7 @@ namespace Sentry
 
             if (string.IsNullOrWhiteSpace(_persistenceDirectoryPath))
             {
-                _options.DiagnosticLogger?.LogDebug("Persistance directory is not set, returning.");
+                _options.DiagnosticLogger?.LogDebug("Persistence directory is not set, returning.");
                 return null;
             }
 
