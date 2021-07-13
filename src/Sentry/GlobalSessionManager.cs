@@ -53,7 +53,11 @@ namespace Sentry
             {
                 var directoryPath =
                     _persistenceDirectoryPath
-                    ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sentry");
+                    ?? Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        _options.Dsn!,
+                        "Sentry"
+                    );
 
                 Directory.CreateDirectory(directoryPath);
 

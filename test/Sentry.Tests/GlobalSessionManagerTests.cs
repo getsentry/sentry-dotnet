@@ -25,6 +25,7 @@ namespace Sentry.Tests
 
                 Options = new SentryOptions
                 {
+                    Dsn = DsnSamples.ValidDsnWithoutSecret,
                     CacheDirectoryPath = _cacheDirectory.Path,
                     Release = "test",
                     Debug = true,
@@ -58,7 +59,12 @@ namespace Sentry.Tests
             // Arrange
             using var fixture = new Fixture();
 
-            var filePath = Path.Combine(fixture.Options.CacheDirectoryPath!, "Sentry", ".installation");
+            var filePath = Path.Combine(
+                fixture.Options.CacheDirectoryPath!,
+                "Sentry",
+                fixture.Options.Dsn!,
+                ".installation"
+            );
 
             // Act
             fixture.SessionManager.StartSession();
@@ -77,6 +83,7 @@ namespace Sentry.Tests
             var filePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Sentry",
+                fixture.Options.Dsn!,
                 ".installation"
             );
 
