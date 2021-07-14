@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Don't log an error when attempting to recover a persisted session but none exists ([#1123](https://github.com/getsentry/sentry-dotnet/pull/1123))
+
 ## 3.8.0
 
 ### Fixes
