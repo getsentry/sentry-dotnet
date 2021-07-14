@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore.Server" Version="2.34.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.34.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.34.0" PrivateAssets="All" />
+    <PackageReference Include="Grpc.Tools" Version="2.38.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
