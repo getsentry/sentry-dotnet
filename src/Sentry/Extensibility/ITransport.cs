@@ -7,7 +7,7 @@ namespace Sentry.Extensibility
     /// <summary>
     /// An abstraction to the transport of the event.
     /// </summary>
-    internal interface ITransport
+    public interface ITransport
     {
         /// <summary>
         /// Sends the <see cref="Envelope" /> to Sentry asynchronously.

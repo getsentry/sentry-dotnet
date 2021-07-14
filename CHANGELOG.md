@@ -108,6 +108,7 @@
 
 ### Features
 
+- Allow to configure the `ITransport` to support custom serialization scenarios (#944) @pchinery
 - Default environment to "debug" if running with debugger attached (#978)
 - ASP.NET Classic: `HttpContext.StartSentryTransaction()` extension method (#996)
 
