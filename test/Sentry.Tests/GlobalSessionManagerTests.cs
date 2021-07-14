@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Sentry.Internal.Extensions;
 using Sentry.Testing;
 using Xunit;
 
@@ -19,17 +20,20 @@ namespace Sentry.Tests
 
             public GlobalSessionManager SessionManager { get; }
 
-            public Fixture()
+            public Fixture(Action<SentryOptions> configureOptions = null)
             {
                 Logger = new InMemoryDiagnosticLogger();
 
                 Options = new SentryOptions
                 {
+                    Dsn = DsnSamples.ValidDsnWithoutSecret,
                     CacheDirectoryPath = _cacheDirectory.Path,
                     Release = "test",
                     Debug = true,
                     DiagnosticLogger = Logger
                 };
+
+                configureOptions?.Invoke(Options);
 
                 SessionManager = new GlobalSessionManager(Options);
             }
@@ -58,7 +62,12 @@ namespace Sentry.Tests
             // Arrange
             using var fixture = new Fixture();
 
-            var filePath = Path.Combine(fixture.Options.CacheDirectoryPath!, "Sentry", ".installation");
+            var filePath = Path.Combine(
+                fixture.Options.CacheDirectoryPath!,
+                "Sentry",
+                fixture.Options.Dsn!.GetHashString(),
+                ".installation"
+            );
 
             // Act
             fixture.SessionManager.StartSession();
@@ -71,12 +80,14 @@ namespace Sentry.Tests
         public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
         {
             // Arrange
-            using var fixture = new Fixture();
-            fixture.Options.CacheDirectoryPath = null;
+            using var fixture = new Fixture(o =>
+                o.CacheDirectoryPath = null
+            );
 
             var filePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Sentry",
+                fixture.Options.Dsn!.GetHashString(),
                 ".installation"
             );
 
@@ -214,6 +225,134 @@ namespace Sentry.Tests
 
             // Assert
             installationIds.Distinct().Should().ContainSingle();
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_SessionNotStarted_ReturnsNull()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            // Act
+            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().BeNull();
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_SessionStarted_ReturnsLastSession()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            var sessionUpdate = fixture.SessionManager.StartSession();
+
+            // Act
+            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+
+            // Assert
+            sessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate.Should().BeEquivalentTo(sessionUpdate, o =>
+            {
+                o.Excluding(u => u.IsInitial);
+                o.Excluding(u => u.Timestamp);
+                o.Excluding(u => u.Duration);
+                o.Excluding(u => u.SequenceNumber);
+                o.Excluding(u => u.EndStatus);
+
+                return o;
+            });
+            persistedSessionUpdate!.IsInitial.Should().BeFalse();
+            persistedSessionUpdate!.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
+            persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
+            persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_SessionStarted_DidCrashDelegateNotProvided_EndsAsAbnormal()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            fixture.SessionManager.StartSession();
+
+            // Act
+            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Abnormal);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_SessionStarted_CrashDelegateReturnsFalse_EndsAsAbnormal()
+        {
+            // Arrange
+            using var fixture = new Fixture(o =>
+                o.CrashedLastRun = () => false
+            );
+
+            fixture.SessionManager.StartSession();
+
+            // Act
+            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Abnormal);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_SessionStarted_CrashDelegateReturnsTrue_EndsAsCrashed()
+        {
+            // Arrange
+            using var fixture = new Fixture(o =>
+                o.CrashedLastRun = () => true
+            );
+
+            fixture.SessionManager.StartSession();
+
+            // Act
+            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Crashed);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_SessionPaused_EndsAsExited()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            fixture.SessionManager.StartSession();
+            fixture.SessionManager.PauseSession();
+
+            // Act
+            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Exited);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_SessionEnded_ReturnsNull()
+        {
+            // Arrange
+            using var fixture = new Fixture();
+
+            fixture.SessionManager.StartSession();
+            fixture.SessionManager.EndSession(SessionEndStatus.Exited);
+
+            // Act
+            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().BeNull();
         }
     }
 }

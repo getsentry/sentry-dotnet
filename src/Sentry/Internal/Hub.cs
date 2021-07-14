@@ -22,7 +22,7 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private DateTimeOffset? _sessionPauseTimestamp;
+        private int _isPersistedSessionRecovered;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
@@ -177,6 +177,27 @@ namespace Sentry.Internal
 
         public void StartSession()
         {
+            // Attempt to recover persisted session left over from previous run
+            if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
+            {
+                try
+                {
+                    var recoveredSessionUpdate = _sessionManager.TryRecoverPersistedSession();
+                    if (recoveredSessionUpdate is not null)
+                    {
+                        CaptureSession(recoveredSessionUpdate);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to recover persisted session.",
+                        ex
+                    );
+                }
+            }
+
+            // Start a new session
             try
             {
                 var sessionUpdate = _sessionManager.StartSession();
@@ -198,12 +219,16 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                // Only pause if there's anything to pause.
-                // This might race if a session is started at the same time,
-                // but that's fine.
-                if (_sessionManager.IsSessionActive)
+                try
                 {
-                    _sessionPauseTimestamp = _clock.GetUtcNow();
+                    _sessionManager.PauseSession();
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to pause a session.",
+                        ex
+                    );
                 }
             }
         }
@@ -212,29 +237,20 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                // Ensure a session has been paused before
-                if (_sessionPauseTimestamp is not { } sessionPauseTimestamp)
+                try
                 {
-                    return;
+                    foreach (var update in _sessionManager.ResumeSession())
+                    {
+                        CaptureSession(update);
+                    }
                 }
-
-                // If the pause duration exceeded tracking interval, start a new session
-                // (otherwise do nothing)
-                var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
-                if (pauseDuration >= _options.AutoSessionTrackingInterval)
+                catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogDebug(
-                        "Paused session has been paused for {0}, which is longer than the configured limit. " +
-                        "Starting a new session instead of resuming this one.",
-                        pauseDuration
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to resume a session.",
+                        ex
                     );
-
-                    EndSession(sessionPauseTimestamp, SessionEndStatus.Exited);
-                    StartSession();
                 }
-
-                // Reset the pause timestamp since the session is now resumed
-                _sessionPauseTimestamp = null;
             }
         }
 
