@@ -23,6 +23,7 @@ namespace Sentry.AspNet
 
             var eventProcessor = new SystemWebRequestEventProcessor(payloadExtractor, options);
 
+            options.ScopeStackContainer ??= new HttpContextScopeStack(HttpContext.Current);
             options.DiagnosticLogger ??= new TraceDiagnosticLogger(options.DiagnosticLevel);
             options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
             options.AddEventProcessor(eventProcessor);

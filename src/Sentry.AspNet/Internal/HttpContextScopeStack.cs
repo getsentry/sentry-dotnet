@@ -17,10 +17,5 @@ namespace Sentry.AspNet.Internal
 
         public HttpContextScopeStack(HttpContext httpContext) =>
             _httpContext = httpContext;
-
-        public HttpContextScopeStack()
-            : this(HttpContext.Current)
-        {
-        }
     }
 }
