@@ -315,7 +315,8 @@ namespace Sentry
             {
                 // Not a notable error
                 _options.DiagnosticLogger?.LogDebug(
-                    "Failed to recover persisted session from the file system '{0}' because the file doesn't exist."
+                    "Failed to recover persisted session from the file system '{0}' because the file doesn't exist.",
+                    filePath
                 );
 
                 return null;
