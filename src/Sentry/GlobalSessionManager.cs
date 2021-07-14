@@ -240,7 +240,6 @@ namespace Sentry
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
             try
             {
-
                 // Try to log the contents of the session file before we delete it
                 if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) ?? false)
                 {
@@ -324,7 +323,7 @@ namespace Sentry
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to recover persisted session from the file system '{0}'",
+                    "Failed to recover persisted session from the file system '{0}'.",
                     ex,
                     filePath
                 );
