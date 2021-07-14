@@ -4,21 +4,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Sentry.AspNetCore;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.AspNetCore.Hosting
+namespace Microsoft.Extensions.Hosting
 {
     /// <summary>
-    /// Extension methods to <see cref="IWebHostBuilder"/>
+    /// Extension methods to <see cref="IHostBuilder"/>
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class SentryWebHostBuilderExtensions
+    public static class SentryHostBuilderExtensions
     {
         /// <summary>
         /// Uses Sentry integration.
         /// </summary>
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseSentry(this IWebHostBuilder builder)
-            => UseSentry(builder, (Action<SentryAspNetCoreOptions>?)null);
+        public static IHostBuilder UseSentry(this IHostBuilder builder)
+            => builder.UseSentry((Action<SentryAspNetCoreOptions>?)null);
 
         /// <summary>
         /// Uses Sentry integration.
@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Hosting
         /// <param name="builder">The builder.</param>
         /// <param name="dsn">The DSN.</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseSentry(this IWebHostBuilder builder, string dsn)
+        public static IHostBuilder UseSentry(this IHostBuilder builder, string dsn)
             => builder.UseSentry(o => o.Dsn = dsn);
 
         /// <summary>
@@ -35,8 +35,8 @@ namespace Microsoft.AspNetCore.Hosting
         /// <param name="builder">The builder.</param>
         /// <param name="configureOptions">The configure options.</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseSentry(
-            this IWebHostBuilder builder,
+        public static IHostBuilder UseSentry(
+            this IHostBuilder builder,
             Action<SentryAspNetCoreOptions>? configureOptions)
             => builder.UseSentry((_, options) => configureOptions?.Invoke(options));
 
@@ -46,9 +46,9 @@ namespace Microsoft.AspNetCore.Hosting
         /// <param name="builder">The builder.</param>
         /// <param name="configureOptions">The configure options.</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseSentry(
-            this IWebHostBuilder builder,
-            Action<WebHostBuilderContext, SentryAspNetCoreOptions>? configureOptions)
+        public static IHostBuilder UseSentry(
+            this IHostBuilder builder,
+            Action<HostBuilderContext, SentryAspNetCoreOptions>? configureOptions)
             => builder.UseSentry((context, sentryBuilder) =>
                 sentryBuilder.AddSentryOptions(options => configureOptions?.Invoke(context, options)));
 
@@ -58,8 +58,8 @@ namespace Microsoft.AspNetCore.Hosting
         /// <param name="builder">The builder.</param>
         /// <param name="configureSentry">The Sentry builder.</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseSentry(
-            this IWebHostBuilder builder,
+        public static IHostBuilder UseSentry(
+            this IHostBuilder builder,
             Action<ISentryBuilder>? configureSentry) =>
             builder.UseSentry((_, sentryBuilder) => configureSentry?.Invoke(sentryBuilder));
 
@@ -69,9 +69,9 @@ namespace Microsoft.AspNetCore.Hosting
         /// <param name="builder">The builder.</param>
         /// <param name="configureSentry">The Sentry builder.</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseSentry(
-            this IWebHostBuilder builder,
-            Action<WebHostBuilderContext, ISentryBuilder>? configureSentry)
+        public static IHostBuilder UseSentry(
+            this IHostBuilder builder,
+            Action<HostBuilderContext, ISentryBuilder>? configureSentry)
         {
             // The earliest we can hook the SDK initialization code with the framework
             // Initialization happens at a later time depending if the default MEL backend is enabled or not.
@@ -82,9 +82,9 @@ namespace Microsoft.AspNetCore.Hosting
                 configureSentry?.Invoke(context, sentryBuilder);
             });
 
-            _ = builder.ConfigureServices(c =>
+            _ = builder.ConfigureServices( s=>
             {
-                _ = c.AddSentryStartupFilter();
+                _ = s.AddSentryStartupFilter();
             });
 
             return builder;

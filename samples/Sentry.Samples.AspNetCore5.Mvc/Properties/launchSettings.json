@@ -15,7 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Sentry.Samples.AspNetCore3.Mvc": {
+    "Sentry.Samples.AspNetCore5.Mvc": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
