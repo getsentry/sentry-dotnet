@@ -288,9 +288,9 @@ namespace Sentry
                 return null;
             }
 
+            var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
             try
             {
-                var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
                 var recoveredUpdate = PersistedSessionUpdate.FromJson(Json.Load(filePath));
 
                 // Create a session update to end the recovered session
@@ -314,8 +314,9 @@ namespace Sentry
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to recover persisted session from the file system",
-                    ex
+                    "Failed to recover persisted session from the file system '{0}'",
+                    ex,
+                    filePath
                 );
 
                 return null;
