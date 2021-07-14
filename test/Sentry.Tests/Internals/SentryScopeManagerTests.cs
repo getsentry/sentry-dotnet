@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.ScopeStack;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -15,7 +16,7 @@ namespace Sentry.Tests.Internals
         {
             public SentryOptions SentryOptions { get; set; } = new();
             public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
-            public SentryScopeManager GetSut() => new(SentryOptions, Client);
+            public SentryScopeManager GetSut() => new(new AsyncLocalScopeStackContainer(), SentryOptions, Client);
         }
 
         private readonly Fixture _fixture = new();
