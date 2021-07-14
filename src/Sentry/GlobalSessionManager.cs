@@ -311,6 +311,15 @@ namespace Sentry
                     }
                 );
             }
+            catch (FileNotFoundException)
+            {
+                // Not a notable error
+                _options.DiagnosticLogger?.LogDebug(
+                    "Failed to recover persisted session from the file system '{0}' because the file doesn't exist."
+                );
+
+                return null;
+            }
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
