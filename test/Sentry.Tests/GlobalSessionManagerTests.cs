@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using NSubstitute;
+using Sentry.Infrastructure;
 using Sentry.Internal.Extensions;
 using Sentry.Testing;
 using Xunit;
@@ -18,7 +20,9 @@ namespace Sentry.Tests
 
             public SentryOptions Options { get; }
 
-            public GlobalSessionManager SessionManager { get; }
+            public ISystemClock Clock { get; }
+
+            public Func<string, PersistedSessionUpdate> PersistedSessionProvider { get; }
 
             public Fixture(Action<SentryOptions> configureOptions = null)
             {
@@ -34,21 +38,27 @@ namespace Sentry.Tests
                 };
 
                 configureOptions?.Invoke(Options);
-
-                SessionManager = new GlobalSessionManager(Options);
             }
+
+            public GlobalSessionManager GetSut() =>
+                new(
+                    Options,
+                    Clock,
+                    PersistedSessionProvider);
 
             public void Dispose() => _cacheDirectory.Dispose();
         }
+
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void StartSession_ReleaseSet_CreatesNewSession()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             // Act
-            var sessionUpdate = fixture.SessionManager.StartSession();
+            var sessionUpdate = sut.StartSession();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
@@ -60,17 +70,17 @@ namespace Sentry.Tests
         public void StartSession_CacheDirectoryProvided_InstallationIdFileCreated()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             var filePath = Path.Combine(
-                fixture.Options.CacheDirectoryPath!,
+                _fixture.Options.CacheDirectoryPath!,
                 "Sentry",
-                fixture.Options.Dsn!.GetHashString(),
+                _fixture.Options.Dsn!.GetHashString(),
                 ".installation"
             );
 
             // Act
-            fixture.SessionManager.StartSession();
+            sut.StartSession();
 
             // Assert
             File.Exists(filePath).Should().BeTrue();
@@ -80,19 +90,18 @@ namespace Sentry.Tests
         public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
         {
             // Arrange
-            using var fixture = new Fixture(o =>
-                o.CacheDirectoryPath = null
-            );
+            _fixture.Options.CacheDirectoryPath = null;
+            var sut = _fixture.GetSut();
 
             var filePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Sentry",
-                fixture.Options.Dsn!.GetHashString(),
+                _fixture.Options.Dsn!.GetHashString(),
                 ".installation"
             );
 
             // Act
-            fixture.SessionManager.StartSession();
+            sut.StartSession();
 
             // Assert
             File.Exists(filePath).Should().BeTrue();
@@ -102,12 +111,12 @@ namespace Sentry.Tests
         public void StartSession_InstallationId_AlwaysSameId()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             // Act
             var sessionUpdates = Enumerable
                 .Range(0, 15)
-                .Select(_ => fixture.SessionManager.StartSession())
+                .Select(_ => sut.StartSession())
                 .ToArray();
 
             // Assert
@@ -118,12 +127,12 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionExists_ReturnsNewUpdateWithIncrementedErrorCount()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
-            fixture.SessionManager.StartSession();
+            sut.StartSession();
 
             // Act
-            var sessionUpdate = fixture.SessionManager.ReportError();
+            var sessionUpdate = sut.ReportError();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
@@ -134,13 +143,13 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionExistsWithNonZeroErrorCount_DoesNotReturnNewUpdate()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
-            fixture.SessionManager.StartSession();
+            sut.StartSession();
 
             // Act
-            fixture.SessionManager.ReportError();
-            var sessionUpdate = fixture.SessionManager.ReportError();
+            sut.ReportError();
+            var sessionUpdate = sut.ReportError();
 
             // Assert
             sessionUpdate.Should().BeNull();
@@ -150,13 +159,13 @@ namespace Sentry.Tests
         public void ReportError_ActiveSessionDoesNotExist_LogsOutError()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             // Act
-            fixture.SessionManager.ReportError();
+            sut.ReportError();
 
             // Assert
-            fixture.Logger.Entries.Should().Contain(e =>
+            _fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to report an error on a session because there is none active." &&
                 e.Level == SentryLevel.Debug
             );
@@ -166,13 +175,13 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionExists_EndsSession()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
-            fixture.SessionManager.StartSession();
-            var session = fixture.SessionManager.CurrentSession;
+            sut.StartSession();
+            var session = sut.CurrentSession;
 
             // Act
-            var sessionUpdate = fixture.SessionManager.EndSession(SessionEndStatus.Exited);
+            var sessionUpdate = sut.EndSession(SessionEndStatus.Exited);
 
             // Assert
             session.Should().NotBeNull();
@@ -183,15 +192,15 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionDoesNotExist_DoesNothing()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             // Act
-            var endedSession = fixture.SessionManager.EndSession(SessionEndStatus.Exited);
+            var endedSession = sut.EndSession(SessionEndStatus.Exited);
 
             // Assert
             endedSession.Should().BeNull();
 
-            fixture.Logger.Entries.Should().Contain(e =>
+            _fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to end session because there is none active." &&
                 e.Level == SentryLevel.Debug
             );
@@ -201,10 +210,10 @@ namespace Sentry.Tests
         public void GetMachineNameInstallationId_Hashed()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             // Act
-            var installationId = fixture.SessionManager.GetMachineNameInstallationId();
+            var installationId = sut.GetMachineNameInstallationId();
 
             // Assert
             installationId.Should().NotBeNullOrWhiteSpace();
@@ -215,12 +224,12 @@ namespace Sentry.Tests
         public void GetMachineNameInstallationId_Idempotent()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             // Act
             var installationIds = Enumerable
                 .Range(0, 10)
-                .Select(_ => fixture.SessionManager.GetMachineNameInstallationId())
+                .Select(_ => sut.GetMachineNameInstallationId())
                 .ToArray();
 
             // Assert
@@ -231,25 +240,73 @@ namespace Sentry.Tests
         public void TryGetPersistentInstallationId_SessionNotStarted_ReturnsNull()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
             // Act
-            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
             // Assert
             persistedSessionUpdate.Should().BeNull();
         }
 
         [Fact]
+        public void TryGetPersistentInstallationId_FileNotFoundException_LogDebug()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+            sut = new GlobalSessionManager(
+                _fixture.Options,
+                persistedSessionProvider: _ => throw new FileNotFoundException());
+
+            // Act
+            sut.TryRecoverPersistedSession();
+
+            // Assert
+            _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_DirectoryNotFoundException_LogDebug()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+            sut = new GlobalSessionManager(
+                _fixture.Options,
+                persistedSessionProvider: _ => throw new DirectoryNotFoundException());
+
+            // Act
+            sut.TryRecoverPersistedSession();
+
+            // Assert
+            _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_EndOfStreamException_LogError()
+        {
+            // Arrange
+            var sut = _fixture.GetSut();
+            sut = new GlobalSessionManager(
+                _fixture.Options,
+                persistedSessionProvider: _ => throw new EndOfStreamException());
+
+            // Act
+            sut.TryRecoverPersistedSession();
+
+            // Assert
+            _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Error);
+        }
+
+        [Fact]
         public void TryGetPersistentInstallationId_SessionStarted_ReturnsLastSession()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
-            var sessionUpdate = fixture.SessionManager.StartSession();
+            var sessionUpdate = sut.StartSession();
 
             // Act
-            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
             // Assert
             sessionUpdate.Should().NotBeNull();
@@ -274,12 +331,12 @@ namespace Sentry.Tests
         public void TryGetPersistentInstallationId_SessionStarted_DidCrashDelegateNotProvided_EndsAsAbnormal()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
-            fixture.SessionManager.StartSession();
+            sut.StartSession();
 
             // Act
-            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
             // Assert
             persistedSessionUpdate.Should().NotBeNull();
@@ -290,14 +347,13 @@ namespace Sentry.Tests
         public void TryGetPersistentInstallationId_SessionStarted_CrashDelegateReturnsFalse_EndsAsAbnormal()
         {
             // Arrange
-            using var fixture = new Fixture(o =>
-                o.CrashedLastRun = () => false
-            );
+            _fixture.Options.CrashedLastRun = () => false;
+            var sut = _fixture.GetSut();
 
-            fixture.SessionManager.StartSession();
+            sut.StartSession();
 
             // Act
-            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
             // Assert
             persistedSessionUpdate.Should().NotBeNull();
@@ -308,14 +364,17 @@ namespace Sentry.Tests
         public void TryGetPersistentInstallationId_SessionStarted_CrashDelegateReturnsTrue_EndsAsCrashed()
         {
             // Arrange
+            _fixture.Options.CrashedLastRun = () => true;
+            var sut = _fixture.GetSut();
+
             using var fixture = new Fixture(o =>
                 o.CrashedLastRun = () => true
             );
 
-            fixture.SessionManager.StartSession();
+            sut.StartSession();
 
             // Act
-            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
             // Assert
             persistedSessionUpdate.Should().NotBeNull();
@@ -326,13 +385,13 @@ namespace Sentry.Tests
         public void TryGetPersistentInstallationId_SessionPaused_EndsAsExited()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
-            fixture.SessionManager.StartSession();
-            fixture.SessionManager.PauseSession();
+            sut.StartSession();
+            sut.PauseSession();
 
             // Act
-            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
             // Assert
             persistedSessionUpdate.Should().NotBeNull();
@@ -343,13 +402,13 @@ namespace Sentry.Tests
         public void TryGetPersistentInstallationId_SessionEnded_ReturnsNull()
         {
             // Arrange
-            using var fixture = new Fixture();
+            var sut = _fixture.GetSut();
 
-            fixture.SessionManager.StartSession();
-            fixture.SessionManager.EndSession(SessionEndStatus.Exited);
+            sut.StartSession();
+            sut.EndSession(SessionEndStatus.Exited);
 
             // Act
-            var persistedSessionUpdate = fixture.SessionManager.TryRecoverPersistedSession();
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
             // Assert
             persistedSessionUpdate.Should().BeNull();
