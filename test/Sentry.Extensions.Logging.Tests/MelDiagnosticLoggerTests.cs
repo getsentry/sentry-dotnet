@@ -46,7 +46,7 @@ namespace Sentry.Extensions.Logging.Tests
         // .NET Core 3 (and hence .NET 5) has turned FormattedLogValues into an internal readonly struct
         // and now we can't match that with NSubstitute
 #if NETCOREAPP2_1 || NET461
-        [Fact]
+        [Fact(Skip = "Taking net6 dependencies due to https://github.com/dotnet/runtime/issues/53454")]
         public void Log_PassedThrough()
         {
             const SentryLevel expectedLevel = SentryLevel.Debug;
