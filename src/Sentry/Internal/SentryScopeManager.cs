@@ -8,25 +8,27 @@ namespace Sentry.Internal
 {
     internal sealed class SentryScopeManager : IInternalScopeManager, IDisposable
     {
-        private readonly IScopeStackContainer _scopeStackContainer;
+        // Internal for testing
+        internal IScopeStackContainer ScopeStackContainer { get; }
+
         private readonly SentryOptions _options;
 
         internal KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
         {
-            get => _scopeStackContainer.Stack ??= NewStack();
-            set => _scopeStackContainer.Stack = value;
+            get => ScopeStackContainer.Stack ??= NewStack();
+            set => ScopeStackContainer.Stack = value;
         }
 
         private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
 
-        private bool IsGlobalMode => _scopeStackContainer is GlobalScopeStackContainer;
+        private bool IsGlobalMode => ScopeStackContainer is GlobalScopeStackContainer;
 
         public SentryScopeManager(
             IScopeStackContainer scopeStackContainer,
             SentryOptions options,
             ISentryClient rootClient)
         {
-            _scopeStackContainer = scopeStackContainer;
+            ScopeStackContainer = scopeStackContainer;
             _options = options;
             NewStack = () => new [] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
@@ -155,7 +157,7 @@ namespace Sentry.Internal
         public void Dispose()
         {
             _options.DiagnosticLogger?.LogDebug($"Disposing {nameof(SentryScopeManager)}.");
-            _scopeStackContainer.Stack = null;
+            ScopeStackContainer.Stack = null;
         }
     }
 }

@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Http;
+using Sentry.Internal.ScopeStack;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
+using Sentry.Tests.Internals.ScopeStack;
 using Xunit;
 using Xunit.Abstractions;
 using static Sentry.Internal.Constants;
@@ -492,6 +495,38 @@ namespace Sentry.Tests
         {
             var sut = SentrySdk.InitHub(new SentryOptions());
             await sut.FlushAsync(TimeSpan.FromDays(1));
+        }
+
+        [Fact]
+        public void InitHub_GlobalModeOff_AsyncLocalContainer()
+        {
+            // Act
+            var sut = SentrySdk.InitHub(new SentryOptions
+            {
+                Dsn = ValidDsnWithoutSecret,
+                IsGlobalModeEnabled = false
+            });
+
+            var hub = (Hub)sut;
+
+            // Assert
+            hub.ScopeManager.ScopeStackContainer.Should().BeOfType<AsyncLocalScopeStackContainer>();
+        }
+
+        [Fact]
+        public void InitHub_GlobalModeOn_GlobalContainer()
+        {
+            // Act
+            var sut = SentrySdk.InitHub(new SentryOptions
+            {
+                Dsn = ValidDsnWithoutSecret,
+                IsGlobalModeEnabled = true
+            });
+
+            var hub = (Hub)sut;
+
+            // Assert
+            hub.ScopeManager.ScopeStackContainer.Should().BeOfType<GlobalScopeStackContainer>();
         }
     }
 }
