@@ -19,6 +19,8 @@ namespace Sentry.Internal
 
         private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
 
+        private bool IsGlobalMode => _scopeStackContainer is GlobalScopeStackContainer;
+
         public SentryScopeManager(
             IScopeStackContainer scopeStackContainer,
             SentryOptions options,
@@ -49,10 +51,16 @@ namespace Sentry.Internal
             return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }
 
-        public IDisposable PushScope() => PushScope<object>(null!); // NRTs don't work well with generics
+        public IDisposable PushScope() => PushScope<object>(null);
 
-        public IDisposable PushScope<TState>(TState state)
+        public IDisposable PushScope<TState>(TState? state)
         {
+            if (IsGlobalMode)
+            {
+                _options.DiagnosticLogger?.LogWarning("Push scope called in global mode, returning.");
+                return DisabledHub.Instance;
+            }
+
             var currentScopeAndClientStack = ScopeAndClientStack;
             var scope = currentScopeAndClientStack[currentScopeAndClientStack.Length - 1];
 
