@@ -33,22 +33,15 @@ namespace Sentry
 
         public bool IsSessionActive => _currentSession is not null;
 
-        public GlobalSessionManager(SentryOptions options)
-            : this(
-                options,
-                SystemClock.Clock,
-                filePath => PersistedSessionUpdate.FromJson(Json.Load(filePath)))
-        {
-        }
-
-        internal GlobalSessionManager(
+        public GlobalSessionManager(
             SentryOptions options,
-            ISystemClock clock,
-            Func<string,PersistedSessionUpdate> persistedSessionProvider)
+            ISystemClock? clock = null,
+            Func<string,PersistedSessionUpdate>? persistedSessionProvider = null)
         {
             _options = options;
-            _clock = clock;
-            _persistedSessionProvider = persistedSessionProvider;
+            _clock = clock ?? SystemClock.Clock;
+            _persistedSessionProvider = persistedSessionProvider
+                                        ?? (filePath => PersistedSessionUpdate.FromJson(Json.Load(filePath)));
 
             // TODO: session file should really be process-isolated, but we
             // don't have a proper mechanism for that right now.
