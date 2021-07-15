@@ -24,6 +24,9 @@ namespace Sentry
 
         internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
+        /// <summary>
+        /// Specifies whether to use global scope management mode.
+        /// </summary>
         public bool IsGlobalModeEnabled
         {
             get => ScopeStackContainer is GlobalScopeStackContainer;
