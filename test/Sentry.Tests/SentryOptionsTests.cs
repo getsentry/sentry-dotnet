@@ -17,12 +17,14 @@ namespace Sentry.Tests
             var sut = new SentryOptions();
             Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
         }
+
         [Fact]
         public void RequestBodyCompressionLevel_ByDefault_Optimal()
         {
             var sut = new SentryOptions();
             Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
         }
+
 #if NET461
         [SkippableFact(typeof(IsTypeException))]
         public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
