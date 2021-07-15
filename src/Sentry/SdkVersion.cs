@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
+using Sentry.Reflection;
 
 namespace Sentry
 {
@@ -14,6 +15,12 @@ namespace Sentry
     /// <remarks>Requires Sentry version 8.4 or higher.</remarks>
     public sealed class SdkVersion : IJsonSerializable
     {
+        private static readonly Lazy<SdkVersion> InstanceLazy = new(
+            () => typeof(ISentryClient).Assembly.GetNameAndVersion()
+        );
+
+        internal static SdkVersion Instance => InstanceLazy.Value;
+
         internal ConcurrentBag<Package> InternalPackages { get; set; } = new();
 
         /// <summary>

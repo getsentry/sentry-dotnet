@@ -43,11 +43,6 @@ namespace Sentry
         string? UserAgent { get; }
 
         /// <summary>
-        /// Status with which the session was ended.
-        /// </summary>
-        SessionEndStatus? EndStatus { get; }
-
-        /// <summary>
         /// Reported error count.
         /// </summary>
         int ErrorCount { get; }

@@ -372,7 +372,18 @@ namespace Sentry
         /// <summary>
         /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
         /// </summary>
-        public bool ReportAssemblies { get; set; } = true;
+        [Obsolete("Use ReportAssembliesMode instead", error : false)]
+        public bool ReportAssemblies
+        {
+            // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode
+            get => ReportAssembliesMode != ReportAssembliesMode.None;
+            set => ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None;
+        }
+
+        /// <summary>
+        /// What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/>.
+        /// </summary>
+        public ReportAssembliesMode ReportAssembliesMode { get; set; } = ReportAssembliesMode.Version;
 
         /// <summary>
         /// What modes to use for event automatic deduplication
@@ -450,6 +461,8 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
+        private StackTraceMode? _stackTraceMode;
+
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!
         /// </summary>
@@ -457,7 +470,33 @@ namespace Sentry
         /// Sentry groups events by stack traces. If you change this mode and you have thousands of groups,
         /// you'll get thousands of new groups. So use this setting with care.
         /// </remarks>
-        public StackTraceMode StackTraceMode { get; set; }
+        public StackTraceMode StackTraceMode
+        {
+            get
+            {
+                if (_stackTraceMode is not null)
+                {
+                    return _stackTraceMode.Value;
+                }
+
+                try
+                {
+                    // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
+                    // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
+                    _stackTraceMode = Runtime.Current.Name == ".NET Native"
+                        ? StackTraceMode.Original
+                        : StackTraceMode.Enhanced;
+                }
+                catch (Exception ex)
+                {
+                    _stackTraceMode = StackTraceMode.Enhanced;
+                    DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
+                }
+
+                return _stackTraceMode.Value;
+            }
+            set => _stackTraceMode = value;
+        }
 
         /// <summary>
         /// Maximum allowed file size of attachments, in bytes.
@@ -478,26 +517,35 @@ namespace Sentry
         public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
 
         /// <summary>
+        /// Determines the duration of time a session can stay paused before it's considered ended.
+        /// </summary>
+        /// <remarks>
+        /// Note: This interval is only taken into account when integrations support Pause and Resume.
+        /// </remarks>
+        public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+        /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and
         /// end the session when it's closed.
         /// </summary>
         /// <remarks>
-        /// Note: this is disabled by default in the current version, but may be become
-        /// enabled by default in a future major update.
+        /// Note: this is disabled by default in the current version, but will become
+        /// enabled by default in the next major version.
+        /// Currently this only works for release health in client mode
+        /// (desktop, mobile applications, but not web servers).
         /// </remarks>
         public bool AutoSessionTracking { get; set; } = false;
+
+        /// <summary>
+        /// Delegate which is used to check whether the application crashed during last run.
+        /// </summary>
+        public Func<bool>? CrashedLastRun { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
-            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
-            // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-            StackTraceMode = Runtime.Current.Name == ".NET Native"
-                ? StackTraceMode.Original
-                : StackTraceMode.Enhanced;
-
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };

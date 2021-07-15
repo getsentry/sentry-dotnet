@@ -1,5 +1,55 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Don't log an error when attempting to recover a persisted session but none exists ([#1123](https://github.com/getsentry/sentry-dotnet/pull/1123))
+
+## 3.8.0
+
+### Fixes
+
+- ASP.NET Core: fix handled not being set for Handled exceptions ([#1111](https://github.com/getsentry/sentry-dotnet/pull/1111))
+
+### Features
+
+- File system persistence for sessions ([#1105](https://github.com/getsentry/sentry-dotnet/pull/1105))
+
+## 3.7.0
+
+### Features
+
+- Add HTTP request breadcrumb ([#1113](https://github.com/getsentry/sentry-dotnet/pull/1113))
+- Integration for Google Cloud Functions ([#1085](https://github.com/getsentry/sentry-dotnet/pull/1085)) 
+- Add ClearAttachments to Scope ([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))
+- Add additional logging and additional fallback for installation ID ([#1103](https://github.com/getsentry/sentry-dotnet/pull/1103))
+
+### Fixes
+
+- Avoid Unhandled Exception on .NET 461 if the Registry Access threw an exception ([#1101](https://github.com/getsentry/sentry-dotnet/pull/1101))
+
+## 3.6.1
+
+### Fixes
+
+- `IHub.ResumeSession()`: don't start a new session if pause wasn't called or if there is no active session ([#1089](https://github.com/getsentry/sentry-dotnet/pull/1089))
+- Fixed incorrect order when getting the last active span ([#1094](https://github.com/getsentry/sentry-dotnet/pull/1094))
+- Fix logger call in BackgroundWorker that caused a formatting exception in runtime ([#1092](https://github.com/getsentry/sentry-dotnet/pull/1092))
+
+## 3.6.0
+
+### Features
+
+- Implement pause & resume session ([#1069](https://github.com/getsentry/sentry-dotnet/pull/1069))
+- Add auto session tracking ([#1068](https://github.com/getsentry/sentry-dotnet/pull/1068))
+- Add SDK information to envelope ([#1084](https://github.com/getsentry/sentry-dotnet/pull/1084))
+- Add ReportAssembliesMode in favor of ReportAssemblies ([#1079](https://github.com/getsentry/sentry-dotnet/pull/1079))
+
+### Fixes
+
+- System.Text.Json 5.0.2 ([#1078](https://github.com/getsentry/sentry-dotnet/pull/1078))
+
 ## 3.6.0-alpha.2
 
 ### Features
@@ -8,7 +58,6 @@
 - ASP.NET Core: Option `AdjustStandardEnvironmentNameCasing` to opt-out from lower casing env name. [#1057](https://github.com/getsentry/sentry-dotnet/pull/1057)
 - Sessions: Improve exception check in `CaptureEvent(...)` for the purpose of reporting errors in session ([#1058](https://github.com/getsentry/sentry-dotnet/pull/1058))
 - Introduce TraceDiagnosticLogger and obsolete DebugDiagnosticLogger ([#1048](https://github.com/getsentry/sentry-dotnet/pull/1048))
-- Add auto session tracking ([#1068](https://github.com/getsentry/sentry-dotnet/pull/1068))
 
 ### Fixes
 

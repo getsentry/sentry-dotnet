@@ -30,9 +30,6 @@ namespace Sentry
         /// <inheritdoc />
         public string? UserAgent { get; }
 
-        /// <inheritdoc />
-        public SessionEndStatus? EndStatus { get; private set; }
-
         private int _errorCount;
 
         /// <inheritdoc />
@@ -80,15 +77,10 @@ namespace Sentry
         /// </summary>
         public void ReportError() => Interlocked.Increment(ref _errorCount);
 
-        /// <summary>
-        /// Transitions the session to ended state.
-        /// </summary>
-        public void End(SessionEndStatus status) => EndStatus = status;
-
-        /// <summary>
-        /// Creates an update of this session.
-        /// </summary>
-        public SessionUpdate CreateUpdate(bool isInitial) =>
-            new(this, isInitial, DateTimeOffset.Now, Interlocked.Increment(ref _sequenceNumber));
+        internal SessionUpdate CreateUpdate(
+            bool isInitial,
+            DateTimeOffset timestamp,
+            SessionEndStatus? endStatus = null) =>
+            new(this, isInitial, timestamp, Interlocked.Increment(ref _sequenceNumber), endStatus);
     }
 }

@@ -398,5 +398,15 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
             => _hub.EndSession(status);
+
+        /// <inheritdoc cref="IHub.PauseSession"/>
+        [DebuggerStepThrough]
+        public static void PauseSession()
+            => _hub.PauseSession();
+
+        /// <inheritdoc cref="IHub.ResumeSession"/>
+        [DebuggerStepThrough]
+        public static void ResumeSession()
+            => _hub.ResumeSession();
     }
 }
