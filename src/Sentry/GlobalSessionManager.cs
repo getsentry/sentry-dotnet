@@ -19,6 +19,7 @@ namespace Sentry
         private readonly object _installationIdLock = new();
 
         private readonly ISystemClock _clock;
+        private readonly Func<string, PersistedSessionUpdate> _persistedSessionProvider;
         private readonly SentryOptions _options;
 
         private readonly string? _persistenceDirectoryPath;
@@ -32,19 +33,19 @@ namespace Sentry
 
         public bool IsSessionActive => _currentSession is not null;
 
-        public GlobalSessionManager(SentryOptions options, ISystemClock clock)
+        public GlobalSessionManager(
+            SentryOptions options,
+            ISystemClock? clock = null,
+            Func<string,PersistedSessionUpdate>? persistedSessionProvider = null)
         {
             _options = options;
-            _clock = clock;
+            _clock = clock ?? SystemClock.Clock;
+            _persistedSessionProvider = persistedSessionProvider
+                                        ?? (filePath => PersistedSessionUpdate.FromJson(Json.Load(filePath)));
 
             // TODO: session file should really be process-isolated, but we
             // don't have a proper mechanism for that right now.
             _persistenceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
-        }
-
-        public GlobalSessionManager(SentryOptions options)
-            : this(options, SystemClock.Clock)
-        {
         }
 
         private string? TryGetPersistentInstallationId()
@@ -240,7 +241,6 @@ namespace Sentry
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
             try
             {
-
                 // Try to log the contents of the session file before we delete it
                 if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) ?? false)
                 {
@@ -291,7 +291,7 @@ namespace Sentry
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
             try
             {
-                var recoveredUpdate = PersistedSessionUpdate.FromJson(Json.Load(filePath));
+                var recoveredUpdate = _persistedSessionProvider(filePath);
 
                 // Create a session update to end the recovered session
                 return new SessionUpdate(
@@ -311,10 +311,20 @@ namespace Sentry
                     }
                 );
             }
+            catch (IOException ioEx) when (ioEx is FileNotFoundException or DirectoryNotFoundException)
+            {
+                // Not a notable error
+                _options.DiagnosticLogger?.LogDebug(
+                    "A persisted session does not exist at {0}.",
+                    filePath
+                );
+
+                return null;
+            }
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to recover persisted session from the file system '{0}'",
+                    "Failed to recover persisted session from the file system '{0}'.",
                     ex,
                     filePath
                 );
