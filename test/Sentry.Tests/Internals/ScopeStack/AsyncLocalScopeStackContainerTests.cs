@@ -30,7 +30,7 @@ namespace Sentry.Tests.Internals.ScopeStack
             {
                 container.Stack.Should().BeNull();
 
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeNull();
             });
@@ -40,7 +40,7 @@ namespace Sentry.Tests.Internals.ScopeStack
                 container.Stack.Should().BeNull();
 
                 container.Stack = new[] {scope1};
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeEquivalentTo(new[] {scope1});
             });
@@ -50,7 +50,7 @@ namespace Sentry.Tests.Internals.ScopeStack
                 container.Stack.Should().BeNull();
 
                 container.Stack = new[] {scope2};
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeEquivalentTo(new[] {scope2});
             });
@@ -81,7 +81,7 @@ namespace Sentry.Tests.Internals.ScopeStack
             {
                 container.Stack.Should().BeNull();
 
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeNull();
             });
@@ -91,7 +91,7 @@ namespace Sentry.Tests.Internals.ScopeStack
                 container.Stack.Should().BeNull();
 
                 container.Stack = new[] {scope1};
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeEquivalentTo(new[] {scope1});
             });
@@ -101,7 +101,7 @@ namespace Sentry.Tests.Internals.ScopeStack
                 container.Stack.Should().BeNull();
 
                 container.Stack = new[] {scope2};
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeEquivalentTo(new[] {scope2});
             });
@@ -130,7 +130,7 @@ namespace Sentry.Tests.Internals.ScopeStack
             {
                 container.Stack.Should().BeNull();
 
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeNull();
 
@@ -139,7 +139,7 @@ namespace Sentry.Tests.Internals.ScopeStack
                     container.Stack.Should().BeNull();
 
                     container.Stack = new[] {scope1};
-                    await Task.Delay(10).ConfigureAwait(false);
+                    await Task.Yield();
 
                     container.Stack.Should().BeEquivalentTo(new[] {scope1});
 
@@ -147,7 +147,7 @@ namespace Sentry.Tests.Internals.ScopeStack
                     {
                         container.Stack.Should().BeEquivalentTo(new[] {scope1});
 
-                        await Task.Delay(10).ConfigureAwait(false);
+                        await Task.Yield();
                         container.Stack = new[] {scope2};
 
                         container.Stack.Should().BeEquivalentTo(new[] {scope2});

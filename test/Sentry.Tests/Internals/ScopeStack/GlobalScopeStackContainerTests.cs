@@ -31,7 +31,7 @@ namespace Sentry.Tests.Internals.ScopeStack
                 container.Stack.Should().BeNull();
 
                 container.Stack = new[] {scope1, scope2};
-                await Task.Delay(10).ConfigureAwait(false);
+                await Task.Yield();
 
                 container.Stack.Should().BeEquivalentTo(new[] {scope1, scope2});
             });
