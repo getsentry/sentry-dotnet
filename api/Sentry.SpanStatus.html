@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Enum SpanStatus
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Enum SpanStatus
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.SpanStatus">
+  
+  
+  <h1 id="Sentry_SpanStatus" data-uid="Sentry.SpanStatus" class="text-break">Enum SpanStatus
+  </h1>
+  <div class="markdown level0 summary"><p>Span status.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_SpanStatus_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public enum SpanStatus : int</code></pre>
+  </div>
+  <h3 id="fields">Fields
+  </h3>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    <thead>
+    <tbody>
+      <tr>
+        <td id="Sentry_SpanStatus_Aborted">Aborted</td>
+        <td><p>The operation was aborted, typically due to a concurrency issue.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_AlreadyExists">AlreadyExists</td>
+        <td><p>Already exists (409).</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_Cancelled">Cancelled</td>
+        <td><p>The operation was cancelled (typically by the user).</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_DataLoss">DataLoss</td>
+        <td><p>Unrecoverable data loss or corruption</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_DeadlineExceeded">DeadlineExceeded</td>
+        <td><p>Deadline expired before operation could complete.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_FailedPrecondition">FailedPrecondition</td>
+        <td><p>Operation was rejected because the system is not in a state required for the operation.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_InternalError">InternalError</td>
+        <td><p>Other/generic 5xx.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_InvalidArgument">InvalidArgument</td>
+        <td><p>Client specified an invalid argument. 4xx.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_NotFound">NotFound</td>
+        <td><p>404 Not Found. Some requested entity (file or directory) was not found.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_Ok">Ok</td>
+        <td><p>The operation completed successfully.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_OutOfRange">OutOfRange</td>
+        <td><p>Operation was attempted past the valid range.</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_PermissionDenied">PermissionDenied</td>
+        <td><p>403 Forbidden</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_ResourceExhausted">ResourceExhausted</td>
+        <td><p>429 Too Many Requests</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_Unauthenticated">Unauthenticated</td>
+        <td><p>401 Unauthorized (actually does mean unauthenticated according to RFC 7235).</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_Unavailable">Unavailable</td>
+        <td><p>503 Service Unavailable</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_Unimplemented">Unimplemented</td>
+        <td><p>501 Not Implemented</p>
+</td>
+      </tr>
+      <tr>
+        <td id="Sentry_SpanStatus_UnknownError">UnknownError</td>
+        <td><p>Unknown. Any non-standard HTTP status code.</p>
+</td>
+      </tr>
+    </tbody>
+  </thead></thead></table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanStatus.md&amp;value=---%0Auid%3A%20Sentry.SpanStatus%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanStatus.cs/#L11" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

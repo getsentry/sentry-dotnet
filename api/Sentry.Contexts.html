@@ -1,0 +1,481 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class Contexts
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class Contexts
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.Contexts">
+  
+  
+  <h1 id="Sentry_Contexts" data-uid="Sentry.Contexts" class="text-break">Class Contexts
+  </h1>
+  <div class="markdown level0 summary"><p>Represents Sentry's structured Context.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">Contexts</span></div>
+  </div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><a class="xref" href="Sentry.IJsonSerializable.html">IJsonSerializable</a></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_Contexts_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class Contexts : ConcurrentDictionary&lt;string, object&gt;, IJsonSerializable</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts__ctor.md&amp;value=---%0Auid%3A%20Sentry.Contexts.%23ctor%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L57">View Source</a>
+  </span>
+  <a id="Sentry_Contexts__ctor_" data-uid="Sentry.Contexts.#ctor*"></a>
+  <h4 id="Sentry_Contexts__ctor" data-uid="Sentry.Contexts.#ctor">Contexts()</h4>
+  <div class="markdown level1 summary"><p>Initializes an instance of <a class="xref" href="Sentry.Contexts.html">Contexts</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Contexts()</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_App.md&amp;value=---%0Auid%3A%20Sentry.Contexts.App%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L19">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_App_" data-uid="Sentry.Contexts.App*"></a>
+  <h4 id="Sentry_Contexts_App" data-uid="Sentry.Contexts.App">App</h4>
+  <div class="markdown level1 summary"><p>Describes the application.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public App App { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Protocol.App.html">App</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_Browser.md&amp;value=---%0Auid%3A%20Sentry.Contexts.Browser%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L24">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_Browser_" data-uid="Sentry.Contexts.Browser*"></a>
+  <h4 id="Sentry_Contexts_Browser" data-uid="Sentry.Contexts.Browser">Browser</h4>
+  <div class="markdown level1 summary"><p>Describes the browser.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Browser Browser { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Protocol.Browser.html">Browser</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_Device.md&amp;value=---%0Auid%3A%20Sentry.Contexts.Device%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L29">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_Device_" data-uid="Sentry.Contexts.Device*"></a>
+  <h4 id="Sentry_Contexts_Device" data-uid="Sentry.Contexts.Device">Device</h4>
+  <div class="markdown level1 summary"><p>Describes the device.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Device Device { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Protocol.Device.html">Device</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_Gpu.md&amp;value=---%0Auid%3A%20Sentry.Contexts.Gpu%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L47">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_Gpu_" data-uid="Sentry.Contexts.Gpu*"></a>
+  <h4 id="Sentry_Contexts_Gpu" data-uid="Sentry.Contexts.Gpu">Gpu</h4>
+  <div class="markdown level1 summary"><p>This describes a GPU of the device.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Gpu Gpu { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Protocol.Gpu.html">Gpu</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_OperatingSystem.md&amp;value=---%0Auid%3A%20Sentry.Contexts.OperatingSystem%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L37">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_OperatingSystem_" data-uid="Sentry.Contexts.OperatingSystem*"></a>
+  <h4 id="Sentry_Contexts_OperatingSystem" data-uid="Sentry.Contexts.OperatingSystem">OperatingSystem</h4>
+  <div class="markdown level1 summary"><p>Defines the operating system.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public OperatingSystem OperatingSystem { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Protocol.OperatingSystem.html">OperatingSystem</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_Contexts_OperatingSystem_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_Runtime.md&amp;value=---%0Auid%3A%20Sentry.Contexts.Runtime%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L42">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_Runtime_" data-uid="Sentry.Contexts.Runtime*"></a>
+  <h4 id="Sentry_Contexts_Runtime" data-uid="Sentry.Contexts.Runtime">Runtime</h4>
+  <div class="markdown level1 summary"><p>This describes a runtime in more detail.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Runtime Runtime { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Protocol.Runtime.html">Runtime</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_Trace.md&amp;value=---%0Auid%3A%20Sentry.Contexts.Trace%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L52">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_Trace_" data-uid="Sentry.Contexts.Trace*"></a>
+  <h4 id="Sentry_Contexts_Trace" data-uid="Sentry.Contexts.Trace">Trace</h4>
+  <div class="markdown level1 summary"><p>This describes trace information.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Trace Trace { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Protocol.Trace.html">Trace</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_FromJson_JsonElement_.md&amp;value=---%0Auid%3A%20Sentry.Contexts.FromJson(JsonElement)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L99">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_FromJson_" data-uid="Sentry.Contexts.FromJson*"></a>
+  <h4 id="Sentry_Contexts_FromJson_JsonElement_" data-uid="Sentry.Contexts.FromJson(JsonElement)">FromJson(JsonElement)</h4>
+  <div class="markdown level1 summary"><p>Parses from JSON.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Contexts FromJson(JsonElement json)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">JsonElement</span></td>
+        <td><span class="parametername">json</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Contexts.html">Contexts</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts_WriteTo_Utf8JsonWriter_.md&amp;value=---%0Auid%3A%20Sentry.Contexts.WriteTo(Utf8JsonWriter)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L94">View Source</a>
+  </span>
+  <a id="Sentry_Contexts_WriteTo_" data-uid="Sentry.Contexts.WriteTo*"></a>
+  <h4 id="Sentry_Contexts_WriteTo_Utf8JsonWriter_" data-uid="Sentry.Contexts.WriteTo(Utf8JsonWriter)">WriteTo(Utf8JsonWriter)</h4>
+  <div class="markdown level1 summary"><p>Writes the object as JSON.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteTo(Utf8JsonWriter writer)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Utf8JsonWriter</span></td>
+        <td><span class="parametername">writer</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_Contexts_WriteTo_Utf8JsonWriter__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Note: this method is meant only for internal use and is exposed due to a language limitation.
+Avoid relying on this method in user code.</p>
+</div>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <a class="xref" href="Sentry.IJsonSerializable.html">IJsonSerializable</a>
+  </div>
+  <h3 id="seealso">See Also</h3>
+  <div class="seealso">
+      <div><span><a href="https://develop.sentry.dev/sdk/event-payloads/contexts/">https://develop.sentry.dev/sdk/event-payloads/contexts/</a></span></div>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Contexts.md&amp;value=---%0Auid%3A%20Sentry.Contexts%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Protocol/Contexts.cs/#L14" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

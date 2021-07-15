@@ -1,0 +1,1688 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class SentrySdk
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class SentrySdk
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.SentrySdk">
+  
+  
+  <h1 id="Sentry_SentrySdk" data-uid="Sentry.SentrySdk" class="text-break">Class SentrySdk
+  </h1>
+  <div class="markdown level0 summary"><p>Sentry SDK entrypoint.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">SentrySdk</span></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_SentrySdk_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static class SentrySdk : object</code></pre>
+  </div>
+  <h5 id="Sentry_SentrySdk_remarks"><strong>Remarks</strong></h5>
+  <div class="markdown level0 remarks"><p>This is a facade to the SDK instance.
+It allows safe static access to a client and scope management.
+When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.</p>
+</div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_IsEnabled.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.IsEnabled%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L146">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_IsEnabled_" data-uid="Sentry.SentrySdk.IsEnabled*"></a>
+  <h4 id="Sentry_SentrySdk_IsEnabled" data-uid="Sentry.SentrySdk.IsEnabled">IsEnabled</h4>
+  <div class="markdown level1 summary"><p>Whether the SDK is enabled or not.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool IsEnabled { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_LastEventId.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.LastEventId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L28">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_LastEventId_" data-uid="Sentry.SentrySdk.LastEventId*"></a>
+  <h4 id="Sentry_SentrySdk_LastEventId" data-uid="Sentry.SentrySdk.LastEventId">LastEventId</h4>
+  <div class="markdown level1 summary"><p>Last event id recorded in the current scope.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId LastEventId { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_AddBreadcrumb_Sentry_Infrastructure_ISystemClock_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.AddBreadcrumb(Sentry.Infrastructure.ISystemClock%2CSystem.String%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BIDictionary%7BSystem.String%2CSystem.String%7D%7D%2CSentry.BreadcrumbLevel)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L219">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_AddBreadcrumb_" data-uid="Sentry.SentrySdk.AddBreadcrumb*"></a>
+  <h4 id="Sentry_SentrySdk_AddBreadcrumb_Sentry_Infrastructure_ISystemClock_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel_" data-uid="Sentry.SentrySdk.AddBreadcrumb(Sentry.Infrastructure.ISystemClock,System.String,System.Nullable{System.String},System.Nullable{System.String},System.Nullable{IDictionary{System.String,System.String}},Sentry.BreadcrumbLevel)">AddBreadcrumb(ISystemClock, String, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;IDictionary&lt;String, String&gt;&gt;, BreadcrumbLevel)</h4>
+  <div class="markdown level1 summary"><p>Adds a breadcrumb to the current scope.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddBreadcrumb(ISystemClock clock, string message, string? category = null, string? type = null, IDictionary&lt;string, string&gt;? data = null, BreadcrumbLevel level = (BreadcrumbLevel)0)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Infrastructure.ISystemClock.html">ISystemClock</a></td>
+        <td><span class="parametername">clock</span></td>
+        <td><p>An optional <a class="xref" href="Sentry.Infrastructure.ISystemClock.html">ISystemClock</a>.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">message</span></td>
+        <td><p>The message.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">category</span></td>
+        <td><p>The category.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">type</span></td>
+        <td><p>The type.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">IDictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;&gt;</td>
+        <td><span class="parametername">data</span></td>
+        <td><p>The data.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.BreadcrumbLevel.html">BreadcrumbLevel</a></td>
+        <td><span class="parametername">level</span></td>
+        <td><p>The level.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_AddBreadcrumb_Sentry_Infrastructure_ISystemClock_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This overload is intended to be used by integrations only.
+The objective is to allow better testability by allowing control of the timestamp set to the breadcrumb.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_AddBreadcrumb_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.AddBreadcrumb(System.String%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BIDictionary%7BSystem.String%2CSystem.String%7D%7D%2CSentry.BreadcrumbLevel)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L197">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_AddBreadcrumb_" data-uid="Sentry.SentrySdk.AddBreadcrumb*"></a>
+  <h4 id="Sentry_SentrySdk_AddBreadcrumb_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel_" data-uid="Sentry.SentrySdk.AddBreadcrumb(System.String,System.Nullable{System.String},System.Nullable{System.String},System.Nullable{IDictionary{System.String,System.String}},Sentry.BreadcrumbLevel)">AddBreadcrumb(String, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;IDictionary&lt;String, String&gt;&gt;, BreadcrumbLevel)</h4>
+  <div class="markdown level1 summary"><p>Adds a breadcrumb to the current Scope.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddBreadcrumb(string message, string? category = null, string? type = null, IDictionary&lt;string, string&gt;? data = null, BreadcrumbLevel level = (BreadcrumbLevel)0)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">message</span></td>
+        <td><p>If a message is provided it’s rendered as text and the whitespace is preserved.
+Very long text might be abbreviated in the UI.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">category</span></td>
+        <td><p>Categories are dotted strings that indicate what the crumb is or where it comes from.
+Typically it’s a module name or a descriptive string.
+For instance ui.click could be used to indicate that a click happened in the UI or flask could be used to indicate that the event originated in the Flask framework.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">type</span></td>
+        <td><p>The type of breadcrumb.
+The default type is default which indicates no specific handling.
+Other types are currently http for HTTP requests and navigation for navigation events.
+<a href="https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types">https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">IDictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;&gt;</td>
+        <td><span class="parametername">data</span></td>
+        <td><p>Data associated with this breadcrumb.
+Contains a sub-object whose contents depend on the breadcrumb type.
+Additional parameters that are unsupported by the type are rendered as a key/value table.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.BreadcrumbLevel.html">BreadcrumbLevel</a></td>
+        <td><span class="parametername">level</span></td>
+        <td><p>Breadcrumb level.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_AddBreadcrumb_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel__seealso">See Also</h5>
+  <div class="seealso">
+      <div><span><a href="https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/">https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/</a></span></div>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_BindClient_Sentry_ISentryClient_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.BindClient(Sentry.ISentryClient)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L170">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_BindClient_" data-uid="Sentry.SentrySdk.BindClient*"></a>
+  <h4 id="Sentry_SentrySdk_BindClient_Sentry_ISentryClient_" data-uid="Sentry.SentrySdk.BindClient(Sentry.ISentryClient)">BindClient(ISentryClient)</h4>
+  <div class="markdown level1 summary"><p>Binds the client to the current scope.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void BindClient(ISentryClient client)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ISentryClient.html">ISentryClient</a></td>
+        <td><span class="parametername">client</span></td>
+        <td><p>The client.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_BindException_Exception_Sentry_ISpan_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.BindException(Exception%2CSentry.ISpan)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L374">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_BindException_" data-uid="Sentry.SentrySdk.BindException*"></a>
+  <h4 id="Sentry_SentrySdk_BindException_Exception_Sentry_ISpan_" data-uid="Sentry.SentrySdk.BindException(Exception,Sentry.ISpan)">BindException(Exception, ISpan)</h4>
+  <div class="markdown level1 summary"><p>Binds specified exception the specified span.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void BindException(Exception exception, ISpan span)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Exception</span></td>
+        <td><span class="parametername">exception</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.ISpan.html">ISpan</a></td>
+        <td><span class="parametername">span</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_BindException_Exception_Sentry_ISpan__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This method is used internally and is not meant for public use.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureEvent_Sentry_SentryEvent_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureEvent(Sentry.SentryEvent)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L264">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureEvent_" data-uid="Sentry.SentrySdk.CaptureEvent*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureEvent_Sentry_SentryEvent_" data-uid="Sentry.SentrySdk.CaptureEvent(Sentry.SentryEvent)">CaptureEvent(SentryEvent)</h4>
+  <div class="markdown level1 summary"><p>Captures the event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId CaptureEvent(SentryEvent evt)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryEvent.html">SentryEvent</a></td>
+        <td><span class="parametername">evt</span></td>
+        <td><p>The event.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><p>The Id of the event.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureEvent_Sentry_SentryEvent_Sentry_Scope_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureEvent(Sentry.SentryEvent%2CSentry.Scope)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L274">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureEvent_" data-uid="Sentry.SentrySdk.CaptureEvent*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureEvent_Sentry_SentryEvent_Sentry_Scope_" data-uid="Sentry.SentrySdk.CaptureEvent(Sentry.SentryEvent,Sentry.Scope)">CaptureEvent(SentryEvent, Scope)</h4>
+  <div class="markdown level1 summary"><p>Captures the event using the specified scope.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId CaptureEvent(SentryEvent evt, Scope scope)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryEvent.html">SentryEvent</a></td>
+        <td><span class="parametername">evt</span></td>
+        <td><p>The event.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.Scope.html">Scope</a></td>
+        <td><span class="parametername">scope</span></td>
+        <td><p>The scope.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><p>The Id of the event.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureException_Exception_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureException(Exception)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L284">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureException_" data-uid="Sentry.SentrySdk.CaptureException*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureException_Exception_" data-uid="Sentry.SentrySdk.CaptureException(Exception)">CaptureException(Exception)</h4>
+  <div class="markdown level1 summary"><p>Captures the exception.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId CaptureException(Exception exception)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Exception</span></td>
+        <td><span class="parametername">exception</span></td>
+        <td><p>The exception.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><p>The Id of the even.t</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureMessage_System_String_Sentry_SentryLevel_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureMessage(System.String%2CSentry.SentryLevel)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L294">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureMessage_" data-uid="Sentry.SentrySdk.CaptureMessage*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureMessage_System_String_Sentry_SentryLevel_" data-uid="Sentry.SentrySdk.CaptureMessage(System.String,Sentry.SentryLevel)">CaptureMessage(String, SentryLevel)</h4>
+  <div class="markdown level1 summary"><p>Captures the message.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">message</span></td>
+        <td><p>The message to send.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryLevel.html">SentryLevel</a></td>
+        <td><span class="parametername">level</span></td>
+        <td><p>The message level.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><p>The Id of the event.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureSession_Sentry_SessionUpdate_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureSession(Sentry.SessionUpdate)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L327">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureSession_" data-uid="Sentry.SentrySdk.CaptureSession*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureSession_Sentry_SessionUpdate_" data-uid="Sentry.SentrySdk.CaptureSession(Sentry.SessionUpdate)">CaptureSession(SessionUpdate)</h4>
+  <div class="markdown level1 summary"><p>Captures a session update.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void CaptureSession(SessionUpdate sessionUpdate)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SessionUpdate.html">SessionUpdate</a></td>
+        <td><span class="parametername">sessionUpdate</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureTransaction_Sentry_Transaction_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureTransaction(Sentry.Transaction)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L320">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureTransaction_" data-uid="Sentry.SentrySdk.CaptureTransaction*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureTransaction_Sentry_Transaction_" data-uid="Sentry.SentrySdk.CaptureTransaction(Sentry.Transaction)">CaptureTransaction(Transaction)</h4>
+  <div class="markdown level1 summary"><p>Captures a transaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void CaptureTransaction(Transaction transaction)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Transaction.html">Transaction</a></td>
+        <td><span class="parametername">transaction</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureUserFeedback_Sentry_SentryId_System_String_System_String_System_Nullable_System_String__.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureUserFeedback(Sentry.SentryId%2CSystem.String%2CSystem.String%2CSystem.Nullable%7BSystem.String%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L313">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureUserFeedback_" data-uid="Sentry.SentrySdk.CaptureUserFeedback*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureUserFeedback_Sentry_SentryId_System_String_System_String_System_Nullable_System_String__" data-uid="Sentry.SentrySdk.CaptureUserFeedback(Sentry.SentryId,System.String,System.String,System.Nullable{System.String})">CaptureUserFeedback(SentryId, String, String, Nullable&lt;String&gt;)</h4>
+  <div class="markdown level1 summary"><p>Captures a user feedback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">eventId</span></td>
+        <td><p>The event Id.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">email</span></td>
+        <td><p>The user email.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">comments</span></td>
+        <td><p>The user comments.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">name</span></td>
+        <td><p>The optional username.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_CaptureUserFeedback_Sentry_UserFeedback_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.CaptureUserFeedback(Sentry.UserFeedback)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L302">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_CaptureUserFeedback_" data-uid="Sentry.SentrySdk.CaptureUserFeedback*"></a>
+  <h4 id="Sentry_SentrySdk_CaptureUserFeedback_Sentry_UserFeedback_" data-uid="Sentry.SentrySdk.CaptureUserFeedback(Sentry.UserFeedback)">CaptureUserFeedback(UserFeedback)</h4>
+  <div class="markdown level1 summary"><p>Captures a user feedback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void CaptureUserFeedback(UserFeedback userFeedback)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.UserFeedback.html">UserFeedback</a></td>
+        <td><span class="parametername">userFeedback</span></td>
+        <td><p>The user feedback to send to Sentry.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_Close.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.Close%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L121">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_Close_" data-uid="Sentry.SentrySdk.Close*"></a>
+  <h4 id="Sentry_SentrySdk_Close" data-uid="Sentry.SentrySdk.Close">Close()</h4>
+  <div class="markdown level1 summary"><p>Close the SDK.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void Close()</code></pre>
+  </div>
+  <h5 id="Sentry_SentrySdk_Close_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Flushes the events and disables the SDK.
+This method is mostly used for testing the library since
+Init returns a IDisposable that can be used to shutdown the SDK.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_ConfigureScope_Action_Sentry_Scope__.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.ConfigureScope(Action%7BSentry.Scope%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L246">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_ConfigureScope_" data-uid="Sentry.SentrySdk.ConfigureScope*"></a>
+  <h4 id="Sentry_SentrySdk_ConfigureScope_Action_Sentry_Scope__" data-uid="Sentry.SentrySdk.ConfigureScope(Action{Sentry.Scope})">ConfigureScope(Action&lt;Scope&gt;)</h4>
+  <div class="markdown level1 summary"><p>Configures the scope through the callback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void ConfigureScope(Action&lt;Scope&gt; configureScope)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Action</span>&lt;<a class="xref" href="Sentry.Scope.html">Scope</a>&gt;</td>
+        <td><span class="parametername">configureScope</span></td>
+        <td><p>The configure scope callback.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_ConfigureScopeAsync_Func_Sentry_Scope_Task__.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.ConfigureScopeAsync(Func%7BSentry.Scope%2CTask%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L255">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_ConfigureScopeAsync_" data-uid="Sentry.SentrySdk.ConfigureScopeAsync*"></a>
+  <h4 id="Sentry_SentrySdk_ConfigureScopeAsync_Func_Sentry_Scope_Task__" data-uid="Sentry.SentrySdk.ConfigureScopeAsync(Func{Sentry.Scope,Task})">ConfigureScopeAsync(Func&lt;Scope, Task&gt;)</h4>
+  <div class="markdown level1 summary"><p>Configures the scope asynchronously.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Task ConfigureScopeAsync(Func&lt;Scope, Task&gt; configureScope)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Func</span>&lt;<a class="xref" href="Sentry.Scope.html">Scope</a>, <span class="xref">Task</span>&gt;</td>
+        <td><span class="parametername">configureScope</span></td>
+        <td><p>The configure scope callback.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Task</span></td>
+        <td><p>The Id of the event.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_EndSession_Sentry_SessionEndStatus_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.EndSession(Sentry.SessionEndStatus)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L398">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_EndSession_" data-uid="Sentry.SentrySdk.EndSession*"></a>
+  <h4 id="Sentry_SentrySdk_EndSession_Sentry_SessionEndStatus_" data-uid="Sentry.SentrySdk.EndSession(Sentry.SessionEndStatus)">EndSession(SessionEndStatus)</h4>
+  <div class="markdown level1 summary"><p>Ends the currently active session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void EndSession(SessionEndStatus status = SessionEndStatus.Exited)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SessionEndStatus.html">SessionEndStatus</a></td>
+        <td><span class="parametername">status</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_FlushAsync_TimeSpan_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.FlushAsync(TimeSpan)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L110">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_FlushAsync_" data-uid="Sentry.SentrySdk.FlushAsync*"></a>
+  <h4 id="Sentry_SentrySdk_FlushAsync_TimeSpan_" data-uid="Sentry.SentrySdk.FlushAsync(TimeSpan)">FlushAsync(TimeSpan)</h4>
+  <div class="markdown level1 summary"><p>Flushes events queued up.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static Task FlushAsync(TimeSpan timeout)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TimeSpan</span></td>
+        <td><span class="parametername">timeout</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Task</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_GetSpan.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.GetSpan%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L381">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_GetSpan_" data-uid="Sentry.SentrySdk.GetSpan*"></a>
+  <h4 id="Sentry_SentrySdk_GetSpan" data-uid="Sentry.SentrySdk.GetSpan">GetSpan()</h4>
+  <div class="markdown level1 summary"><p>Gets the last active span.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ISpan GetSpan()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ISpan.html">ISpan</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_GetTraceHeader.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.GetTraceHeader%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L388">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_GetTraceHeader_" data-uid="Sentry.SentrySdk.GetTraceHeader*"></a>
+  <h4 id="Sentry_SentrySdk_GetTraceHeader" data-uid="Sentry.SentrySdk.GetTraceHeader">GetTraceHeader()</h4>
+  <div class="markdown level1 summary"><p>Gets the Sentry trace header.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryTraceHeader GetTraceHeader()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryTraceHeader.html">SentryTraceHeader</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_Init.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.Init%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L63">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_Init_" data-uid="Sentry.SentrySdk.Init*"></a>
+  <h4 id="Sentry_SentrySdk_Init" data-uid="Sentry.SentrySdk.Init">Init()</h4>
+  <div class="markdown level1 summary"><p>Initializes the SDK while attempting to locate the DSN.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IDisposable Init()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IDisposable</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_Init_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>If the DSN is not found, the SDK will not change state.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_Init_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.Init(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L97">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_Init_" data-uid="Sentry.SentrySdk.Init*"></a>
+  <h4 id="Sentry_SentrySdk_Init_Sentry_SentryOptions_" data-uid="Sentry.SentrySdk.Init(Sentry.SentryOptions)">Init(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Initializes the SDK with the specified options instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IDisposable Init(SentryOptions options)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The options instance</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IDisposable</span></td>
+        <td><p>A disposable to close the SDK.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_Init_Sentry_SentryOptions__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Used by integrations which have their own delegates.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_Init_System_Nullable_Action_Sentry_SentryOptions___.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.Init(System.Nullable%7BAction%7BSentry.SentryOptions%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L81">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_Init_" data-uid="Sentry.SentrySdk.Init*"></a>
+  <h4 id="Sentry_SentrySdk_Init_System_Nullable_Action_Sentry_SentryOptions___" data-uid="Sentry.SentrySdk.Init(System.Nullable{Action{Sentry.SentryOptions}})">Init(Nullable&lt;Action&lt;SentryOptions&gt;&gt;)</h4>
+  <div class="markdown level1 summary"><p>Initializes the SDK with an optional configuration options callback.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IDisposable Init(Action&lt;SentryOptions&gt;? configureOptions)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Action</span>&lt;<a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a>&gt;&gt;</td>
+        <td><span class="parametername">configureOptions</span></td>
+        <td><p>The configure options.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IDisposable</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_Init_System_Nullable_System_String__.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.Init(System.Nullable%7BSystem.String%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L73">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_Init_" data-uid="Sentry.SentrySdk.Init*"></a>
+  <h4 id="Sentry_SentrySdk_Init_System_Nullable_System_String__" data-uid="Sentry.SentrySdk.Init(System.Nullable{System.String})">Init(Nullable&lt;String&gt;)</h4>
+  <div class="markdown level1 summary"><p>Initializes the SDK with the specified DSN.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IDisposable Init(string? dsn)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">dsn</span></td>
+        <td><p>The dsn.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IDisposable</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_Init_System_Nullable_System_String___remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>An empty string is interpreted as a disabled SDK.</p>
+</div>
+  <h5 id="Sentry_SentrySdk_Init_System_Nullable_System_String___seealso">See Also</h5>
+  <div class="seealso">
+      <div><span><a href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users">https://develop.sentry.dev/sdk/overview/#usage-for-end-users</a></span></div>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_PauseSession.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.PauseSession%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L403">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_PauseSession_" data-uid="Sentry.SentrySdk.PauseSession*"></a>
+  <h4 id="Sentry_SentrySdk_PauseSession" data-uid="Sentry.SentrySdk.PauseSession">PauseSession()</h4>
+  <div class="markdown level1 summary"><p>Pauses an active session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void PauseSession()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_PushScope.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.PushScope%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L163">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_PushScope_" data-uid="Sentry.SentrySdk.PushScope*"></a>
+  <h4 id="Sentry_SentrySdk_PushScope" data-uid="Sentry.SentrySdk.PushScope">PushScope()</h4>
+  <div class="markdown level1 summary"><p>Creates a new scope that will terminate when disposed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IDisposable PushScope()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IDisposable</span></td>
+        <td><p>A disposable that when disposed, ends the created scope.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_PushScope__1___0_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.PushScope%60%601(%60%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L156">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_PushScope_" data-uid="Sentry.SentrySdk.PushScope*"></a>
+  <h4 id="Sentry_SentrySdk_PushScope__1___0_" data-uid="Sentry.SentrySdk.PushScope``1(``0)">PushScope&lt;TState&gt;(TState)</h4>
+  <div class="markdown level1 summary"><p>Creates a new scope that will terminate when disposed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IDisposable PushScope&lt;TState&gt;(TState state)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TState</span></td>
+        <td><span class="parametername">state</span></td>
+        <td><p>A state object to be added to the scope.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IDisposable</span></td>
+        <td><p>A disposable that when disposed, ends the created scope.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TState</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_PushScope__1___0__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Pushes a new scope while inheriting the current scope's data.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_ResumeSession.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.ResumeSession%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L408">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_ResumeSession_" data-uid="Sentry.SentrySdk.ResumeSession*"></a>
+  <h4 id="Sentry_SentrySdk_ResumeSession" data-uid="Sentry.SentrySdk.ResumeSession">ResumeSession()</h4>
+  <div class="markdown level1 summary"><p>Resumes an active session.
+If the session has been paused for longer than the duration of time specified in
+<a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AutoSessionTrackingInterval">AutoSessionTrackingInterval</a> then the paused session is
+ended and a new one is started instead.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void ResumeSession()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_StartSession.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.StartSession%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L393">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_StartSession_" data-uid="Sentry.SentrySdk.StartSession*"></a>
+  <h4 id="Sentry_SentrySdk_StartSession" data-uid="Sentry.SentrySdk.StartSession">StartSession()</h4>
+  <div class="markdown level1 summary"><p>Starts a new session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void StartSession()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_StartTransaction_Sentry_ITransactionContext_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.StartTransaction(Sentry.ITransactionContext)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L343">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_StartTransaction_" data-uid="Sentry.SentrySdk.StartTransaction*"></a>
+  <h4 id="Sentry_SentrySdk_StartTransaction_Sentry_ITransactionContext_" data-uid="Sentry.SentrySdk.StartTransaction(Sentry.ITransactionContext)">StartTransaction(ITransactionContext)</h4>
+  <div class="markdown level1 summary"><p>Starts a transaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ITransaction StartTransaction(ITransactionContext context)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransactionContext.html">ITransactionContext</a></td>
+        <td><span class="parametername">context</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransaction.html">ITransaction</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_StartTransaction_Sentry_ITransactionContext_IReadOnlyDictionary_System_String_System_Nullable_System_Object___.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.StartTransaction(Sentry.ITransactionContext%2CIReadOnlyDictionary%7BSystem.String%2CSystem.Nullable%7BSystem.Object%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L334">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_StartTransaction_" data-uid="Sentry.SentrySdk.StartTransaction*"></a>
+  <h4 id="Sentry_SentrySdk_StartTransaction_Sentry_ITransactionContext_IReadOnlyDictionary_System_String_System_Nullable_System_Object___" data-uid="Sentry.SentrySdk.StartTransaction(Sentry.ITransactionContext,IReadOnlyDictionary{System.String,System.Nullable{System.Object}})">StartTransaction(ITransactionContext, IReadOnlyDictionary&lt;String, Nullable&lt;Object&gt;&gt;)</h4>
+  <div class="markdown level1 summary"><p>Starts a transaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ITransaction StartTransaction(ITransactionContext context, IReadOnlyDictionary&lt;string, object?&gt; customSamplingContext)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransactionContext.html">ITransactionContext</a></td>
+        <td><span class="parametername">context</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">IReadOnlyDictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a>&gt;&gt;</td>
+        <td><span class="parametername">customSamplingContext</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransaction.html">ITransaction</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_StartTransaction_System_String_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.StartTransaction(System.String%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L350">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_StartTransaction_" data-uid="Sentry.SentrySdk.StartTransaction*"></a>
+  <h4 id="Sentry_SentrySdk_StartTransaction_System_String_System_String_" data-uid="Sentry.SentrySdk.StartTransaction(System.String,System.String)">StartTransaction(String, String)</h4>
+  <div class="markdown level1 summary"><p>Starts a transaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ITransaction StartTransaction(string name, string operation)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">name</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">operation</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransaction.html">ITransaction</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_StartTransaction_System_String_System_String_Sentry_SentryTraceHeader_.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.StartTransaction(System.String%2CSystem.String%2CSentry.SentryTraceHeader)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L364">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_StartTransaction_" data-uid="Sentry.SentrySdk.StartTransaction*"></a>
+  <h4 id="Sentry_SentrySdk_StartTransaction_System_String_System_String_Sentry_SentryTraceHeader_" data-uid="Sentry.SentrySdk.StartTransaction(System.String,System.String,Sentry.SentryTraceHeader)">StartTransaction(String, String, SentryTraceHeader)</h4>
+  <div class="markdown level1 summary"><p>Starts a transaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">name</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">operation</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryTraceHeader.html">SentryTraceHeader</a></td>
+        <td><span class="parametername">traceHeader</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransaction.html">ITransaction</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_StartTransaction_System_String_System_String_System_Nullable_System_String__.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.StartTransaction(System.String%2CSystem.String%2CSystem.Nullable%7BSystem.String%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L357">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_StartTransaction_" data-uid="Sentry.SentrySdk.StartTransaction*"></a>
+  <h4 id="Sentry_SentrySdk_StartTransaction_System_String_System_String_System_Nullable_System_String__" data-uid="Sentry.SentrySdk.StartTransaction(System.String,System.String,System.Nullable{System.String})">StartTransaction(String, String, Nullable&lt;String&gt;)</h4>
+  <div class="markdown level1 summary"><p>Starts a transaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ITransaction StartTransaction(string name, string operation, string? description)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">name</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">operation</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">description</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransaction.html">ITransaction</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk_WithScope_Action_Sentry_Scope__.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk.WithScope(Action%7BSentry.Scope%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L238">View Source</a>
+  </span>
+  <a id="Sentry_SentrySdk_WithScope_" data-uid="Sentry.SentrySdk.WithScope*"></a>
+  <h4 id="Sentry_SentrySdk_WithScope_Action_Sentry_Scope__" data-uid="Sentry.SentrySdk.WithScope(Action{Sentry.Scope})">WithScope(Action&lt;Scope&gt;)</h4>
+  <div class="markdown level1 summary"><p>Runs the callback with a new scope which gets dropped at the end.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void WithScope(Action&lt;Scope&gt; scopeCallback)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Action</span>&lt;<a class="xref" href="Sentry.Scope.html">Scope</a>&gt;</td>
+        <td><span class="parametername">scopeCallback</span></td>
+        <td><p>The callback to run with the one time scope.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentrySdk_WithScope_Action_Sentry_Scope___remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Pushes a new scope, runs the callback, pops the scope.</p>
+</div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentrySdk.md&amp;value=---%0Auid%3A%20Sentry.SentrySdk%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentrySdk.cs/#L21" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

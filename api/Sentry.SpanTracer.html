@@ -1,0 +1,909 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class SpanTracer
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class SpanTracer
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.SpanTracer">
+  
+  
+  <h1 id="Sentry_SpanTracer" data-uid="Sentry.SpanTracer" class="text-break">Class SpanTracer
+  </h1>
+  <div class="markdown level0 summary"><p>Transaction span tracer.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">SpanTracer</span></div>
+  </div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><a class="xref" href="Sentry.ISpan.html">ISpan</a></div>
+    <div><a class="xref" href="Sentry.ISpanData.html">ISpanData</a></div>
+    <div><a class="xref" href="Sentry.ISpanContext.html">ISpanContext</a></div>
+    <div><a class="xref" href="Sentry.Protocol.ITraceContext.html">ITraceContext</a></div>
+    <div><a class="xref" href="Sentry.IHasTags.html">IHasTags</a></div>
+    <div><a class="xref" href="Sentry.IHasExtra.html">IHasExtra</a></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_SpanTracer_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class SpanTracer : object, ISpan, ISpanData, ISpanContext, ITraceContext, IHasTags, IHasExtra</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer__ctor_Sentry_IHub_Sentry_TransactionTracer_System_Nullable_Sentry_SpanId__Sentry_SentryId_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.%23ctor(Sentry.IHub%2CSentry.TransactionTracer%2CSystem.Nullable%7BSentry.SpanId%7D%2CSentry.SentryId%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L70">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer__ctor_" data-uid="Sentry.SpanTracer.#ctor*"></a>
+  <h4 id="Sentry_SpanTracer__ctor_Sentry_IHub_Sentry_TransactionTracer_System_Nullable_Sentry_SpanId__Sentry_SentryId_System_String_" data-uid="Sentry.SpanTracer.#ctor(Sentry.IHub,Sentry.TransactionTracer,System.Nullable{Sentry.SpanId},Sentry.SentryId,System.String)">SpanTracer(IHub, TransactionTracer, Nullable&lt;SpanId&gt;, SentryId, String)</h4>
+  <div class="markdown level1 summary"><p>Initializes an instance of <a class="xref" href="Sentry.SpanTracer.html">SpanTracer</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SpanTracer(IHub hub, TransactionTracer transaction, SpanId? parentSpanId, SentryId traceId, string operation)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.IHub.html">IHub</a></td>
+        <td><span class="parametername">hub</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.TransactionTracer.html">TransactionTracer</a></td>
+        <td><span class="parametername">transaction</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.SpanId.html">SpanId</a>&gt;</td>
+        <td><span class="parametername">parentSpanId</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">traceId</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">operation</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Description.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Description%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L37">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Description_" data-uid="Sentry.SpanTracer.Description*"></a>
+  <h4 id="Sentry_SpanTracer_Description" data-uid="Sentry.SpanTracer.Description">Description</h4>
+  <div class="markdown level1 summary"><p>Span description.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? Description { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_EndTimestamp.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.EndTimestamp%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L28">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_EndTimestamp_" data-uid="Sentry.SpanTracer.EndTimestamp*"></a>
+  <h4 id="Sentry_SpanTracer_EndTimestamp" data-uid="Sentry.SpanTracer.EndTimestamp">EndTimestamp</h4>
+  <div class="markdown level1 summary"><p>End timestamp.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DateTimeOffset? EndTimestamp { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">DateTimeOffset</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Extra.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Extra%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L61">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Extra_" data-uid="Sentry.SpanTracer.Extra*"></a>
+  <h4 id="Sentry_SpanTracer_Extra" data-uid="Sentry.SpanTracer.Extra">Extra</h4>
+  <div class="markdown level1 summary"><p>An arbitrary mapping of additional metadata to store with the event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IReadOnlyDictionary&lt;string, object?&gt; Extra { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IReadOnlyDictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a>&gt;&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_IsFinished.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.IsFinished%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L31">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_IsFinished_" data-uid="Sentry.SpanTracer.IsFinished*"></a>
+  <h4 id="Sentry_SpanTracer_IsFinished" data-uid="Sentry.SpanTracer.IsFinished">IsFinished</h4>
+  <div class="markdown level1 summary"><p>Whether the span is finished.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsFinished { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_IsSampled.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.IsSampled%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L43">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_IsSampled_" data-uid="Sentry.SpanTracer.IsSampled*"></a>
+  <h4 id="Sentry_SpanTracer_IsSampled" data-uid="Sentry.SpanTracer.IsSampled">IsSampled</h4>
+  <div class="markdown level1 summary"><p>Whether the span or transaction is sampled in (i.e. eligible for sending to Sentry).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool? IsSampled { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Operation.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Operation%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L34">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Operation_" data-uid="Sentry.SpanTracer.Operation*"></a>
+  <h4 id="Sentry_SpanTracer_Operation" data-uid="Sentry.SpanTracer.Operation">Operation</h4>
+  <div class="markdown level1 summary"><p>Span operation.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string Operation { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_ParentSpanId.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.ParentSpanId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L19">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_ParentSpanId_" data-uid="Sentry.SpanTracer.ParentSpanId*"></a>
+  <h4 id="Sentry_SpanTracer_ParentSpanId" data-uid="Sentry.SpanTracer.ParentSpanId">ParentSpanId</h4>
+  <div class="markdown level1 summary"><p>Parent ID.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SpanId? ParentSpanId { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.SpanId.html">SpanId</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_SpanId.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.SpanId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L16">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_SpanId_" data-uid="Sentry.SpanTracer.SpanId*"></a>
+  <h4 id="Sentry_SpanTracer_SpanId" data-uid="Sentry.SpanTracer.SpanId">SpanId</h4>
+  <div class="markdown level1 summary"><p>Span ID.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SpanId SpanId { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SpanId.html">SpanId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_StartTimestamp.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.StartTimestamp%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L25">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_StartTimestamp_" data-uid="Sentry.SpanTracer.StartTimestamp*"></a>
+  <h4 id="Sentry_SpanTracer_StartTimestamp" data-uid="Sentry.SpanTracer.StartTimestamp">StartTimestamp</h4>
+  <div class="markdown level1 summary"><p>Start timestamp.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DateTimeOffset StartTimestamp { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">DateTimeOffset</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Status.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Status%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L40">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Status_" data-uid="Sentry.SpanTracer.Status*"></a>
+  <h4 id="Sentry_SpanTracer_Status" data-uid="Sentry.SpanTracer.Status">Status</h4>
+  <div class="markdown level1 summary"><p>Span status.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SpanStatus? Status { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.SpanStatus.html">SpanStatus</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Tags.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Tags%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L48">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Tags_" data-uid="Sentry.SpanTracer.Tags*"></a>
+  <h4 id="Sentry_SpanTracer_Tags" data-uid="Sentry.SpanTracer.Tags">Tags</h4>
+  <div class="markdown level1 summary"><p>Arbitrary key-value for this event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IReadOnlyDictionary&lt;string, string&gt; Tags { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IReadOnlyDictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_TraceId.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.TraceId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L22">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_TraceId_" data-uid="Sentry.SpanTracer.TraceId*"></a>
+  <h4 id="Sentry_SpanTracer_TraceId" data-uid="Sentry.SpanTracer.TraceId">TraceId</h4>
+  <div class="markdown level1 summary"><p>Trace ID.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SentryId TraceId { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Finish.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Finish%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L91">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Finish_" data-uid="Sentry.SpanTracer.Finish*"></a>
+  <h4 id="Sentry_SpanTracer_Finish" data-uid="Sentry.SpanTracer.Finish">Finish()</h4>
+  <div class="markdown level1 summary"><p>Finishes the span.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Finish()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Finish_Exception_.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Finish(Exception)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L112">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Finish_" data-uid="Sentry.SpanTracer.Finish*"></a>
+  <h4 id="Sentry_SpanTracer_Finish_Exception_" data-uid="Sentry.SpanTracer.Finish(Exception)">Finish(Exception)</h4>
+  <div class="markdown level1 summary"><p>Finishes the span with the specified exception and automatically inferred status.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Finish(Exception exception)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Exception</span></td>
+        <td><span class="parametername">exception</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Finish_Exception_Sentry_SpanStatus_.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Finish(Exception%2CSentry.SpanStatus)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L105">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Finish_" data-uid="Sentry.SpanTracer.Finish*"></a>
+  <h4 id="Sentry_SpanTracer_Finish_Exception_Sentry_SpanStatus_" data-uid="Sentry.SpanTracer.Finish(Exception,Sentry.SpanStatus)">Finish(Exception, SpanStatus)</h4>
+  <div class="markdown level1 summary"><p>Finishes the span with the specified exception and status.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Finish(Exception exception, SpanStatus status)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Exception</span></td>
+        <td><span class="parametername">exception</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.SpanStatus.html">SpanStatus</a></td>
+        <td><span class="parametername">status</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_Finish_Sentry_SpanStatus_.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.Finish(Sentry.SpanStatus)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L98">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_Finish_" data-uid="Sentry.SpanTracer.Finish*"></a>
+  <h4 id="Sentry_SpanTracer_Finish_Sentry_SpanStatus_" data-uid="Sentry.SpanTracer.Finish(Sentry.SpanStatus)">Finish(SpanStatus)</h4>
+  <div class="markdown level1 summary"><p>Finishes the span with the specified status.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Finish(SpanStatus status)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SpanStatus.html">SpanStatus</a></td>
+        <td><span class="parametername">status</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_GetTraceHeader.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.GetTraceHeader%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L116">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_GetTraceHeader_" data-uid="Sentry.SpanTracer.GetTraceHeader*"></a>
+  <h4 id="Sentry_SpanTracer_GetTraceHeader" data-uid="Sentry.SpanTracer.GetTraceHeader">GetTraceHeader()</h4>
+  <div class="markdown level1 summary"><p>Get Sentry trace header.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SentryTraceHeader GetTraceHeader()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryTraceHeader.html">SentryTraceHeader</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_SetExtra_System_String_System_Nullable_System_Object__.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.SetExtra(System.String%2CSystem.Nullable%7BSystem.Object%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L64">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_SetExtra_" data-uid="Sentry.SpanTracer.SetExtra*"></a>
+  <h4 id="Sentry_SpanTracer_SetExtra_System_String_System_Nullable_System_Object__" data-uid="Sentry.SpanTracer.SetExtra(System.String,System.Nullable{System.Object})">SetExtra(String, Nullable&lt;Object&gt;)</h4>
+  <div class="markdown level1 summary"><p>Sets an extra.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetExtra(string key, object? value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">key</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a>&gt;</td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_SetTag_System_String_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.SetTag(System.String%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L51">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_SetTag_" data-uid="Sentry.SpanTracer.SetTag*"></a>
+  <h4 id="Sentry_SpanTracer_SetTag_System_String_System_String_" data-uid="Sentry.SpanTracer.SetTag(System.String,System.String)">SetTag(String, String)</h4>
+  <div class="markdown level1 summary"><p>Sets a tag.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetTag(string key, string value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">key</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_StartChild_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.StartChild(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L87">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_StartChild_" data-uid="Sentry.SpanTracer.StartChild*"></a>
+  <h4 id="Sentry_SpanTracer_StartChild_System_String_" data-uid="Sentry.SpanTracer.StartChild(System.String)">StartChild(String)</h4>
+  <div class="markdown level1 summary"><p>Starts a child span.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ISpan StartChild(string operation)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">operation</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ISpan.html">ISpan</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer_UnsetTag_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer.UnsetTag(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L55">View Source</a>
+  </span>
+  <a id="Sentry_SpanTracer_UnsetTag_" data-uid="Sentry.SpanTracer.UnsetTag*"></a>
+  <h4 id="Sentry_SpanTracer_UnsetTag_System_String_" data-uid="Sentry.SpanTracer.UnsetTag(System.String)">UnsetTag(String)</h4>
+  <div class="markdown level1 summary"><p>Removes a tag.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void UnsetTag(string key)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">key</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <a class="xref" href="Sentry.ISpan.html">ISpan</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.ISpanData.html">ISpanData</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.ISpanContext.html">ISpanContext</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Protocol.ITraceContext.html">ITraceContext</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.IHasTags.html">IHasTags</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.IHasExtra.html">IHasExtra</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SpanTracer.md&amp;value=---%0Auid%3A%20Sentry.SpanTracer%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SpanTracer.cs/#L10" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,746 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Struct SentryId
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Struct SentryId
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.SentryId">
+  
+  
+  <h1 id="Sentry_SentryId" data-uid="Sentry.SentryId" class="text-break">Struct SentryId
+  </h1>
+  <div class="markdown level0 summary"><p>The identifier of an event in Sentry.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">IEquatable</span>&lt;<a class="xref" href="Sentry.SentryId.html">SentryId</a>&gt;</div>
+    <div><a class="xref" href="Sentry.IJsonSerializable.html">IJsonSerializable</a></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_SentryId_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public struct SentryId : IEquatable&lt;SentryId&gt;, IJsonSerializable</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId__ctor_Guid_.md&amp;value=---%0Auid%3A%20Sentry.SentryId.%23ctor(Guid)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L21">View Source</a>
+  </span>
+  <a id="Sentry_SentryId__ctor_" data-uid="Sentry.SentryId.#ctor*"></a>
+  <h4 id="Sentry_SentryId__ctor_Guid_" data-uid="Sentry.SentryId.#ctor(Guid)">SentryId(Guid)</h4>
+  <div class="markdown level1 summary"><p>Creates a new instance of a Sentry Id.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SentryId(Guid guid)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Guid</span></td>
+        <td><span class="parametername">guid</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="fields">Fields
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_Empty.md&amp;value=---%0Auid%3A%20Sentry.SentryId.Empty%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L16">View Source</a>
+  </span>
+  <h4 id="Sentry_SentryId_Empty" data-uid="Sentry.SentryId.Empty">Empty</h4>
+  <div class="markdown level1 summary"><p>An empty sentry id.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static readonly SentryId Empty</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_Create.md&amp;value=---%0Auid%3A%20Sentry.SentryId.Create%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L45">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_Create_" data-uid="Sentry.SentryId.Create*"></a>
+  <h4 id="Sentry_SentryId_Create" data-uid="Sentry.SentryId.Create">Create()</h4>
+  <div class="markdown level1 summary"><p>Generates a new Sentry ID.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId Create()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_Equals_Sentry_SentryId_.md&amp;value=---%0Auid%3A%20Sentry.SentryId.Equals(Sentry.SentryId)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L34">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_Equals_" data-uid="Sentry.SentryId.Equals*"></a>
+  <h4 id="Sentry_SentryId_Equals_Sentry_SentryId_" data-uid="Sentry.SentryId.Equals(Sentry.SentryId)">Equals(SentryId)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(SentryId other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">other</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_Equals_System_Nullable_System_Object__.md&amp;value=---%0Auid%3A%20Sentry.SentryId.Equals(System.Nullable%7BSystem.Object%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L37">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_Equals_" data-uid="Sentry.SentryId.Equals*"></a>
+  <h4 id="Sentry_SentryId_Equals_System_Nullable_System_Object__" data-uid="Sentry.SentryId.Equals(System.Nullable{System.Object})">Equals(Nullable&lt;Object&gt;)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override bool Equals(object? obj)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a>&gt;</td>
+        <td><span class="parametername">obj</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_FromJson_JsonElement_.md&amp;value=---%0Auid%3A%20Sentry.SentryId.FromJson(JsonElement)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L58">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_FromJson_" data-uid="Sentry.SentryId.FromJson*"></a>
+  <h4 id="Sentry_SentryId_FromJson_JsonElement_" data-uid="Sentry.SentryId.FromJson(JsonElement)">FromJson(JsonElement)</h4>
+  <div class="markdown level1 summary"><p>Parses from JSON.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId FromJson(JsonElement json)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">JsonElement</span></td>
+        <td><span class="parametername">json</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_GetHashCode.md&amp;value=---%0Auid%3A%20Sentry.SentryId.GetHashCode%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L40">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_GetHashCode_" data-uid="Sentry.SentryId.GetHashCode*"></a>
+  <h4 id="Sentry_SentryId_GetHashCode" data-uid="Sentry.SentryId.GetHashCode">GetHashCode()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override int GetHashCode()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int32">Int32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_Parse_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SentryId.Parse(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L53">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_Parse_" data-uid="Sentry.SentryId.Parse*"></a>
+  <h4 id="Sentry_SentryId_Parse_System_String_" data-uid="Sentry.SentryId.Parse(System.String)">Parse(String)</h4>
+  <div class="markdown level1 summary"><p>Parses from string.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryId Parse(string value)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">value</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_ToString.md&amp;value=---%0Auid%3A%20Sentry.SentryId.ToString%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L31">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_ToString_" data-uid="Sentry.SentryId.ToString*"></a>
+  <h4 id="Sentry_SentryId_ToString" data-uid="Sentry.SentryId.ToString">ToString()</h4>
+  <div class="markdown level1 summary"><p>Sentry Id in the format Sentry recognizes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string ToString()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><p>String representation of the event id.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentryId_ToString_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Default <a class="xref" href="Sentry.SentryId.html#Sentry_SentryId_ToString">ToString()</a> of <see cref="!:Guid"></see> includes
+dashes which sentry doesn't expect when searching events.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_WriteTo_Utf8JsonWriter_.md&amp;value=---%0Auid%3A%20Sentry.SentryId.WriteTo(Utf8JsonWriter)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L48">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_WriteTo_" data-uid="Sentry.SentryId.WriteTo*"></a>
+  <h4 id="Sentry_SentryId_WriteTo_Utf8JsonWriter_" data-uid="Sentry.SentryId.WriteTo(Utf8JsonWriter)">WriteTo(Utf8JsonWriter)</h4>
+  <div class="markdown level1 summary"><p>Writes the object as JSON.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void WriteTo(Utf8JsonWriter writer)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Utf8JsonWriter</span></td>
+        <td><span class="parametername">writer</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentryId_WriteTo_Utf8JsonWriter__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Note: this method is meant only for internal use and is exposed due to a language limitation.
+Avoid relying on this method in user code.</p>
+</div>
+  <h3 id="operators">Operators
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_op_Equality_Sentry_SentryId_Sentry_SentryId_.md&amp;value=---%0Auid%3A%20Sentry.SentryId.op_Equality(Sentry.SentryId%2CSentry.SentryId)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L70">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_op_Equality_" data-uid="Sentry.SentryId.op_Equality*"></a>
+  <h4 id="Sentry_SentryId_op_Equality_Sentry_SentryId_Sentry_SentryId_" data-uid="Sentry.SentryId.op_Equality(Sentry.SentryId,Sentry.SentryId)">Equality(SentryId, SentryId)</h4>
+  <div class="markdown level1 summary"><p>Equality operator.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool operator ==(SentryId left, SentryId right)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">left</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">right</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_op_Implicit_Guid__Sentry_SentryId.md&amp;value=---%0Auid%3A%20Sentry.SentryId.op_Implicit(Guid)~Sentry.SentryId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L85">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_op_Implicit_" data-uid="Sentry.SentryId.op_Implicit*"></a>
+  <h4 id="Sentry_SentryId_op_Implicit_Guid__Sentry_SentryId" data-uid="Sentry.SentryId.op_Implicit(Guid)~Sentry.SentryId">Implicit(Guid to SentryId)</h4>
+  <div class="markdown level1 summary"><p>A <a class="xref" href="Sentry.SentryId.html">SentryId</a> from a <see cref="!:Guid"></see>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static implicit operator SentryId(Guid guid)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Guid</span></td>
+        <td><span class="parametername">guid</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_op_Implicit_Sentry_SentryId__Guid.md&amp;value=---%0Auid%3A%20Sentry.SentryId.op_Implicit(Sentry.SentryId)~Guid%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L80">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_op_Implicit_" data-uid="Sentry.SentryId.op_Implicit*"></a>
+  <h4 id="Sentry_SentryId_op_Implicit_Sentry_SentryId__Guid" data-uid="Sentry.SentryId.op_Implicit(Sentry.SentryId)~Guid">Implicit(SentryId to Guid)</h4>
+  <div class="markdown level1 summary"><p>The <see cref="!:Guid"></see> from the <a class="xref" href="Sentry.SentryId.html">SentryId</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static implicit operator Guid(SentryId sentryId)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">sentryId</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Guid</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId_op_Inequality_Sentry_SentryId_Sentry_SentryId_.md&amp;value=---%0Auid%3A%20Sentry.SentryId.op_Inequality(Sentry.SentryId%2CSentry.SentryId)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L75">View Source</a>
+  </span>
+  <a id="Sentry_SentryId_op_Inequality_" data-uid="Sentry.SentryId.op_Inequality*"></a>
+  <h4 id="Sentry_SentryId_op_Inequality_Sentry_SentryId_Sentry_SentryId_" data-uid="Sentry.SentryId.op_Inequality(Sentry.SentryId,Sentry.SentryId)">Inequality(SentryId, SentryId)</h4>
+  <div class="markdown level1 summary"><p>Equality operator.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool operator !=(SentryId left, SentryId right)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">left</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td><span class="parametername">right</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">IEquatable&lt;&gt;</span>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.IJsonSerializable.html">IJsonSerializable</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryId.md&amp;value=---%0Auid%3A%20Sentry.SentryId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryId.cs/#L9" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

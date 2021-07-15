@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class DelegateLogEntryFilter
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class DelegateLogEntryFilter
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.Extensions.Logging.DelegateLogEntryFilter">
+  
+  
+  <h1 id="Sentry_Extensions_Logging_DelegateLogEntryFilter" data-uid="Sentry.Extensions.Logging.DelegateLogEntryFilter" class="text-break">Class DelegateLogEntryFilter
+  </h1>
+  <div class="markdown level0 summary"><p>An implementation of <a class="xref" href="Sentry.Extensions.Logging.ILogEntryFilter.html">ILogEntryFilter</a> that invokes a <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.func-1">Func&lt;TResult&gt;</a></p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">DelegateLogEntryFilter</span></div>
+  </div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><a class="xref" href="Sentry.Extensions.Logging.ILogEntryFilter.html">ILogEntryFilter</a></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.Extensions.Logging.html">Sentry.Extensions.Logging</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.Extensions.Logging.dll</h6>
+  <h5 id="Sentry_Extensions_Logging_DelegateLogEntryFilter_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class DelegateLogEntryFilter : object, ILogEntryFilter</code></pre>
+  </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_DelegateLogEntryFilter__ctor_Func_System_String_LogLevel_EventId_System_Nullable_Exception__System_Boolean__.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.DelegateLogEntryFilter.%23ctor(Func%7BSystem.String%2CLogLevel%2CEventId%2CSystem.Nullable%7BException%7D%2CSystem.Boolean%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/DelegateLogEntryFilter.cs/#L18">View Source</a>
+  </span>
+  <a id="Sentry_Extensions_Logging_DelegateLogEntryFilter__ctor_" data-uid="Sentry.Extensions.Logging.DelegateLogEntryFilter.#ctor*"></a>
+  <h4 id="Sentry_Extensions_Logging_DelegateLogEntryFilter__ctor_Func_System_String_LogLevel_EventId_System_Nullable_Exception__System_Boolean__" data-uid="Sentry.Extensions.Logging.DelegateLogEntryFilter.#ctor(Func{System.String,LogLevel,EventId,System.Nullable{Exception},System.Boolean})">DelegateLogEntryFilter(Func&lt;String, LogLevel, EventId, Nullable&lt;Exception&gt;, Boolean&gt;)</h4>
+  <div class="markdown level1 summary"><p>Creates a new instance of <a class="xref" href="Sentry.Extensions.Logging.DelegateLogEntryFilter.html">DelegateLogEntryFilter</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DelegateLogEntryFilter(Func&lt;string, LogLevel, EventId, Exception?, bool&gt; filter)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Func</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <span class="xref">LogLevel</span>, <span class="xref">EventId</span>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Exception</span>&gt;, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">filter</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_DelegateLogEntryFilter_Filter_System_String_LogLevel_EventId_System_Nullable_Exception__.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.DelegateLogEntryFilter.Filter(System.String%2CLogLevel%2CEventId%2CSystem.Nullable%7BException%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/DelegateLogEntryFilter.cs/#L22">View Source</a>
+  </span>
+  <a id="Sentry_Extensions_Logging_DelegateLogEntryFilter_Filter_" data-uid="Sentry.Extensions.Logging.DelegateLogEntryFilter.Filter*"></a>
+  <h4 id="Sentry_Extensions_Logging_DelegateLogEntryFilter_Filter_System_String_LogLevel_EventId_System_Nullable_Exception__" data-uid="Sentry.Extensions.Logging.DelegateLogEntryFilter.Filter(System.String,LogLevel,EventId,System.Nullable{Exception})">Filter(String, LogLevel, EventId, Nullable&lt;Exception&gt;)</h4>
+  <div class="markdown level1 summary"><p>Whether a log entry should be filtered out or not.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Filter(string categoryName, LogLevel logLevel, EventId eventId, Exception? exception)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">categoryName</span></td>
+        <td><p>The logger category name.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">LogLevel</span></td>
+        <td><span class="parametername">logLevel</span></td>
+        <td><p>The event level.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">EventId</span></td>
+        <td><span class="parametername">eventId</span></td>
+        <td><p>The EventId.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Exception</span>&gt;</td>
+        <td><span class="parametername">exception</span></td>
+        <td><p>The Exception, if any.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_Extensions_Logging_DelegateLogEntryFilter_Filter_System_String_LogLevel_EventId_System_Nullable_Exception___remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Before processing a log entry, <span class="xref">Sentry.Extensions.Logging.SentryLogger</span> invokes all registered <a class="xref" href="Sentry.Extensions.Logging.ILogEntryFilter.html">ILogEntryFilter</a>
+giving the application an opportunity to avoid recoding the log entry as a breadcrumb or sending an event.</p>
+</div>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <a class="xref" href="Sentry.Extensions.Logging.ILogEntryFilter.html">ILogEntryFilter</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_DelegateLogEntryFilter.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.DelegateLogEntryFilter%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/DelegateLogEntryFilter.cs/#L10" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

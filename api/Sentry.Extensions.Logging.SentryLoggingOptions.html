@@ -1,0 +1,413 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class SentryLoggingOptions
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class SentryLoggingOptions
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions">
+  
+  
+  <h1 id="Sentry_Extensions_Logging_SentryLoggingOptions" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions" class="text-break">Class SentryLoggingOptions
+  </h1>
+  <div class="markdown level0 summary"><p>Sentry logging integration options</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></div>
+    <div class="level2"><span class="xref">SentryLoggingOptions</span></div>
+      <div class="level3"><a class="xref" href="Sentry.AspNetCore.SentryAspNetCoreOptions.html">SentryAspNetCoreOptions</a></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SentryScopeStateProcessor">SentryOptions.SentryScopeStateProcessor</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SendDefaultPii">SentryOptions.SendDefaultPii</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_IsEnvironmentUser">SentryOptions.IsEnvironmentUser</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ServerName">SentryOptions.ServerName</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AttachStacktrace">SentryOptions.AttachStacktrace</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxBreadcrumbs">SentryOptions.MaxBreadcrumbs</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SampleRate">SentryOptions.SampleRate</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Release">SentryOptions.Release</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Environment">SentryOptions.Environment</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Dsn">SentryOptions.Dsn</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_BeforeSend">SentryOptions.BeforeSend</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_BeforeBreadcrumb">SentryOptions.BeforeBreadcrumb</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxQueueItems">SentryOptions.MaxQueueItems</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxCacheItems">SentryOptions.MaxCacheItems</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ShutdownTimeout">SentryOptions.ShutdownTimeout</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DecompressionMethods">SentryOptions.DecompressionMethods</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionLevel">SentryOptions.RequestBodyCompressionLevel</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionBuffered">SentryOptions.RequestBodyCompressionBuffered</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_HttpProxy">SentryOptions.HttpProxy</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_CreateHttpClientHandler">SentryOptions.CreateHttpClientHandler</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ConfigureClient">SentryOptions.ConfigureClient</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Debug">SentryOptions.Debug</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DiagnosticLevel">SentryOptions.DiagnosticLevel</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DiagnosticLogger">SentryOptions.DiagnosticLogger</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ReportAssemblies">SentryOptions.ReportAssemblies</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ReportAssembliesMode">SentryOptions.ReportAssembliesMode</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DeduplicateMode">SentryOptions.DeduplicateMode</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_CacheDirectoryPath">SentryOptions.CacheDirectoryPath</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_InitCacheFlushTimeout">SentryOptions.InitCacheFlushTimeout</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DefaultTags">SentryOptions.DefaultTags</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_TracesSampleRate">SentryOptions.TracesSampleRate</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_TracesSampler">SentryOptions.TracesSampler</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_StackTraceMode">SentryOptions.StackTraceMode</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxAttachmentSize">SentryOptions.MaxAttachmentSize</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DetectStartupTime">SentryOptions.DetectStartupTime</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AutoSessionTrackingInterval">SentryOptions.AutoSessionTrackingInterval</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AutoSessionTracking">SentryOptions.AutoSessionTracking</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_CrashedLastRun">SentryOptions.CrashedLastRun</a>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.Extensions.Logging.html">Sentry.Extensions.Logging</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.Extensions.Logging.dll</h6>
+  <h5 id="Sentry_Extensions_Logging_SentryLoggingOptions_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class SentryLoggingOptions : SentryOptions</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_SentryLoggingOptions_InitializeSdk.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.SentryLoggingOptions.InitializeSdk%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/SentryLoggingOptions.cs/#L37">View Source</a>
+  </span>
+  <a id="Sentry_Extensions_Logging_SentryLoggingOptions_InitializeSdk_" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.InitializeSdk*"></a>
+  <h4 id="Sentry_Extensions_Logging_SentryLoggingOptions_InitializeSdk" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.InitializeSdk">InitializeSdk</h4>
+  <div class="markdown level1 summary"><p>Whether to initialize this SDK through this integration</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool InitializeSdk { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_SentryLoggingOptions_MinimumBreadcrumbLevel.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.SentryLoggingOptions.MinimumBreadcrumbLevel%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/SentryLoggingOptions.cs/#L21">View Source</a>
+  </span>
+  <a id="Sentry_Extensions_Logging_SentryLoggingOptions_MinimumBreadcrumbLevel_" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.MinimumBreadcrumbLevel*"></a>
+  <h4 id="Sentry_Extensions_Logging_SentryLoggingOptions_MinimumBreadcrumbLevel" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.MinimumBreadcrumbLevel">MinimumBreadcrumbLevel</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the minimum breadcrumb level.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LogLevel MinimumBreadcrumbLevel { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">LogLevel</span></td>
+        <td><p>The minimum breadcrumb level.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_Extensions_Logging_SentryLoggingOptions_MinimumBreadcrumbLevel_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Events with this level or higher will be stored as <a class="xref" href="Sentry.Breadcrumb.html">Breadcrumb</a></p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_SentryLoggingOptions_MinimumEventLevel.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.SentryLoggingOptions.MinimumEventLevel%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/SentryLoggingOptions.cs/#L32">View Source</a>
+  </span>
+  <a id="Sentry_Extensions_Logging_SentryLoggingOptions_MinimumEventLevel_" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.MinimumEventLevel*"></a>
+  <h4 id="Sentry_Extensions_Logging_SentryLoggingOptions_MinimumEventLevel" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.MinimumEventLevel">MinimumEventLevel</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the minimum event level.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LogLevel MinimumEventLevel { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">LogLevel</span></td>
+        <td><p>The minimum event level.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_Extensions_Logging_SentryLoggingOptions_MinimumEventLevel_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Events with this level or higher will be sent to Sentry</p>
+</div>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_SentryLoggingOptions_ConfigureScope_Action_Sentry_Scope__.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.SentryLoggingOptions.ConfigureScope(Action%7BSentry.Scope%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/SentryLoggingOptions.cs/#L43">View Source</a>
+  </span>
+  <a id="Sentry_Extensions_Logging_SentryLoggingOptions_ConfigureScope_" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.ConfigureScope*"></a>
+  <h4 id="Sentry_Extensions_Logging_SentryLoggingOptions_ConfigureScope_Action_Sentry_Scope__" data-uid="Sentry.Extensions.Logging.SentryLoggingOptions.ConfigureScope(Action{Sentry.Scope})">ConfigureScope(Action&lt;Scope&gt;)</h4>
+  <div class="markdown level1 summary"><p>Add a callback to configure the scope upon SDK initialization</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void ConfigureScope(Action&lt;Scope&gt; action)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Action</span>&lt;<a class="xref" href="Sentry.Scope.html">Scope</a>&gt;</td>
+        <td><span class="parametername">action</span></td>
+        <td><p>The function to invoke when initializing the SDK</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="extensionmethods">Extension Methods</h3>
+  <div>
+      <a class="xref" href="Sentry.AspNet.SentryAspNetOptionsExtensions.html#Sentry_AspNet_SentryAspNetOptionsExtensions_AddAspNet_Sentry_SentryOptions_Sentry_Extensibility_RequestSize_">SentryAspNetOptionsExtensions.AddAspNet(SentryOptions, RequestSize)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensions.Logging.SentryLoggingOptionsExtensions.html#Sentry_Extensions_Logging_SentryLoggingOptionsExtensions_AddLogEntryFilter_Sentry_Extensions_Logging_SentryLoggingOptions_Sentry_Extensions_Logging_ILogEntryFilter_">SentryLoggingOptionsExtensions.AddLogEntryFilter(SentryLoggingOptions, ILogEntryFilter)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensions.Logging.SentryLoggingOptionsExtensions.html#Sentry_Extensions_Logging_SentryLoggingOptionsExtensions_AddLogEntryFilter_Sentry_Extensions_Logging_SentryLoggingOptions_Func_System_String_LogLevel_EventId_System_Nullable_Exception__System_Boolean__">SentryLoggingOptionsExtensions.AddLogEntryFilter(SentryLoggingOptions, Func&lt;String, LogLevel, EventId, Nullable&lt;Exception&gt;, Boolean&gt;)</a>
+  </div>
+  <div>
+      <span class="xref">Sentry.SentryOptionsExtensions.AddEntityFramework(Sentry.SentryOptions)</span>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensions_Logging_SentryLoggingOptions.md&amp;value=---%0Auid%3A%20Sentry.Extensions.Logging.SentryLoggingOptions%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Extensions.Logging/SentryLoggingOptions.cs/#L12" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

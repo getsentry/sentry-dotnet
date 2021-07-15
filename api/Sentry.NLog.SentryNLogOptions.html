@@ -1,0 +1,774 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class SentryNLogOptions
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class SentryNLogOptions
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.NLog.SentryNLogOptions">
+  
+  
+  <h1 id="Sentry_NLog_SentryNLogOptions" data-uid="Sentry.NLog.SentryNLogOptions" class="text-break">Class SentryNLogOptions
+  </h1>
+  <div class="markdown level0 summary"><p>Sentry Options for NLog logging. All properties can be configured via code or in NLog.config xml file.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></div>
+    <div class="level2"><span class="xref">SentryNLogOptions</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SentryScopeStateProcessor">SentryOptions.SentryScopeStateProcessor</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SendDefaultPii">SentryOptions.SendDefaultPii</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_IsEnvironmentUser">SentryOptions.IsEnvironmentUser</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ServerName">SentryOptions.ServerName</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AttachStacktrace">SentryOptions.AttachStacktrace</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxBreadcrumbs">SentryOptions.MaxBreadcrumbs</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SampleRate">SentryOptions.SampleRate</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Release">SentryOptions.Release</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Environment">SentryOptions.Environment</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Dsn">SentryOptions.Dsn</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_BeforeSend">SentryOptions.BeforeSend</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_BeforeBreadcrumb">SentryOptions.BeforeBreadcrumb</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxQueueItems">SentryOptions.MaxQueueItems</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxCacheItems">SentryOptions.MaxCacheItems</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ShutdownTimeout">SentryOptions.ShutdownTimeout</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DecompressionMethods">SentryOptions.DecompressionMethods</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionLevel">SentryOptions.RequestBodyCompressionLevel</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionBuffered">SentryOptions.RequestBodyCompressionBuffered</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_HttpProxy">SentryOptions.HttpProxy</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_CreateHttpClientHandler">SentryOptions.CreateHttpClientHandler</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ConfigureClient">SentryOptions.ConfigureClient</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Debug">SentryOptions.Debug</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DiagnosticLevel">SentryOptions.DiagnosticLevel</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DiagnosticLogger">SentryOptions.DiagnosticLogger</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ReportAssemblies">SentryOptions.ReportAssemblies</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ReportAssembliesMode">SentryOptions.ReportAssembliesMode</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DeduplicateMode">SentryOptions.DeduplicateMode</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_CacheDirectoryPath">SentryOptions.CacheDirectoryPath</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_InitCacheFlushTimeout">SentryOptions.InitCacheFlushTimeout</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DefaultTags">SentryOptions.DefaultTags</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_TracesSampleRate">SentryOptions.TracesSampleRate</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_TracesSampler">SentryOptions.TracesSampler</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_StackTraceMode">SentryOptions.StackTraceMode</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxAttachmentSize">SentryOptions.MaxAttachmentSize</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DetectStartupTime">SentryOptions.DetectStartupTime</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AutoSessionTrackingInterval">SentryOptions.AutoSessionTrackingInterval</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AutoSessionTracking">SentryOptions.AutoSessionTracking</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_CrashedLastRun">SentryOptions.CrashedLastRun</a>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.NLog.html">Sentry.NLog</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.NLog.dll</h6>
+  <h5 id="Sentry_NLog_SentryNLogOptions_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class SentryNLogOptions : SentryOptions</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_BreadcrumbCategoryLayout.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.BreadcrumbCategoryLayout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L68">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_BreadcrumbCategoryLayout_" data-uid="Sentry.NLog.SentryNLogOptions.BreadcrumbCategoryLayout*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_BreadcrumbCategoryLayout" data-uid="Sentry.NLog.SentryNLogOptions.BreadcrumbCategoryLayout">BreadcrumbCategoryLayout</h4>
+  <div class="markdown level1 summary"><p>Custom layout for breadcrumbs category</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Layout? BreadcrumbCategoryLayout { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Layout</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_BreadcrumbLayout.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.BreadcrumbLayout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L62">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_BreadcrumbLayout_" data-uid="Sentry.NLog.SentryNLogOptions.BreadcrumbLayout*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_BreadcrumbLayout" data-uid="Sentry.NLog.SentryNLogOptions.BreadcrumbLayout">BreadcrumbLayout</h4>
+  <div class="markdown level1 summary"><p>Custom layout for breadcrumbs.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Layout? BreadcrumbLayout { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Layout</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_DsnLayout.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.DsnLayout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L80">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_DsnLayout_" data-uid="Sentry.NLog.SentryNLogOptions.DsnLayout*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_DsnLayout" data-uid="Sentry.NLog.SentryNLogOptions.DsnLayout">DsnLayout</h4>
+  <div class="markdown level1 summary"><p>Configured layout for Dsn-Address to Sentry</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Layout? DsnLayout { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Layout</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_EnvironmentLayout.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.EnvironmentLayout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L92">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_EnvironmentLayout_" data-uid="Sentry.NLog.SentryNLogOptions.EnvironmentLayout*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_EnvironmentLayout" data-uid="Sentry.NLog.SentryNLogOptions.EnvironmentLayout">EnvironmentLayout</h4>
+  <div class="markdown level1 summary"><p>Configured layout for application Environment to Sentry</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Layout? EnvironmentLayout { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Layout</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_FlushTimeout.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.FlushTimeout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L31">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_FlushTimeout_" data-uid="Sentry.NLog.SentryNLogOptions.FlushTimeout*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_FlushTimeout" data-uid="Sentry.NLog.SentryNLogOptions.FlushTimeout">FlushTimeout</h4>
+  <div class="markdown level1 summary"><p>How long to wait for the flush to finish. Defaults to 15 seconds (same as NLog default).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan FlushTimeout { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_IgnoreEventsWithNoException.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.IgnoreEventsWithNoException%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L46">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_IgnoreEventsWithNoException_" data-uid="Sentry.NLog.SentryNLogOptions.IgnoreEventsWithNoException*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_IgnoreEventsWithNoException" data-uid="Sentry.NLog.SentryNLogOptions.IgnoreEventsWithNoException">IgnoreEventsWithNoException</h4>
+  <div class="markdown level1 summary"><p>Set this to <span class="xref">true</span> to ignore log messages that don't contain an exception.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IgnoreEventsWithNoException { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_IncludeEventDataOnBreadcrumbs.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.IncludeEventDataOnBreadcrumbs%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L57">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_IncludeEventDataOnBreadcrumbs_" data-uid="Sentry.NLog.SentryNLogOptions.IncludeEventDataOnBreadcrumbs*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_IncludeEventDataOnBreadcrumbs" data-uid="Sentry.NLog.SentryNLogOptions.IncludeEventDataOnBreadcrumbs">IncludeEventDataOnBreadcrumbs</h4>
+  <div class="markdown level1 summary"><p>Determines whether or not to include event-level data as data in breadcrumbs for future errors.
+Defaults to <span class="xref">false</span>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IncludeEventDataOnBreadcrumbs { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_IncludeEventPropertiesAsTags.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.IncludeEventPropertiesAsTags%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L51">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_IncludeEventPropertiesAsTags_" data-uid="Sentry.NLog.SentryNLogOptions.IncludeEventPropertiesAsTags*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_IncludeEventPropertiesAsTags" data-uid="Sentry.NLog.SentryNLogOptions.IncludeEventPropertiesAsTags">IncludeEventPropertiesAsTags</h4>
+  <div class="markdown level1 summary"><p>Determines whether event properties will be sent to sentry as Tags or not. Defaults to <span class="xref">false</span>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IncludeEventPropertiesAsTags { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_InitializeSdk.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.InitializeSdk%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L108">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_InitializeSdk_" data-uid="Sentry.NLog.SentryNLogOptions.InitializeSdk*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_InitializeSdk" data-uid="Sentry.NLog.SentryNLogOptions.InitializeSdk">InitializeSdk</h4>
+  <div class="markdown level1 summary"><p>Whether the NLog integration should initialize the SDK.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool InitializeSdk { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_NLog_SentryNLogOptions_InitializeSdk_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>By default, if a DSN is provided to the NLog integration it will initialize the SDK.
+This might be not ideal when using multiple integrations in case you want another one doing the Init.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_Layout.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.Layout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L74">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_Layout_" data-uid="Sentry.NLog.SentryNLogOptions.Layout*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_Layout" data-uid="Sentry.NLog.SentryNLogOptions.Layout">Layout</h4>
+  <div class="markdown level1 summary"><p>Configured layout for rendering SentryEvent message</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Layout? Layout { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Layout</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_MinimumBreadcrumbLevel.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.MinimumBreadcrumbLevel%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L41">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_MinimumBreadcrumbLevel_" data-uid="Sentry.NLog.SentryNLogOptions.MinimumBreadcrumbLevel*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_MinimumBreadcrumbLevel" data-uid="Sentry.NLog.SentryNLogOptions.MinimumBreadcrumbLevel">MinimumBreadcrumbLevel</h4>
+  <div class="markdown level1 summary"><p>Minimum log level to be included in the breadcrumb. Defaults to <span class="xref">LogLevel.Info</span>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LogLevel? MinimumBreadcrumbLevel { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">LogLevel</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_MinimumEventLevel.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.MinimumEventLevel%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L36">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_MinimumEventLevel_" data-uid="Sentry.NLog.SentryNLogOptions.MinimumEventLevel*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_MinimumEventLevel" data-uid="Sentry.NLog.SentryNLogOptions.MinimumEventLevel">MinimumEventLevel</h4>
+  <div class="markdown level1 summary"><p>Minimum log level for events to trigger a send to Sentry. Defaults to <span class="xref">LogLevel.Error</span>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LogLevel? MinimumEventLevel { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">LogLevel</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_ReleaseLayout.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.ReleaseLayout%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L86">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_ReleaseLayout_" data-uid="Sentry.NLog.SentryNLogOptions.ReleaseLayout*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_ReleaseLayout" data-uid="Sentry.NLog.SentryNLogOptions.ReleaseLayout">ReleaseLayout</h4>
+  <div class="markdown level1 summary"><p>Configured layout for application Release version to Sentry</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Layout? ReleaseLayout { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Layout</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_ShutdownTimeoutSeconds.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.ShutdownTimeoutSeconds%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L22">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_ShutdownTimeoutSeconds_" data-uid="Sentry.NLog.SentryNLogOptions.ShutdownTimeoutSeconds*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_ShutdownTimeoutSeconds" data-uid="Sentry.NLog.SentryNLogOptions.ShutdownTimeoutSeconds">ShutdownTimeoutSeconds</h4>
+  <div class="markdown level1 summary"><p>How many seconds to wait after triggering <see cref="!:LogManager.Shutdown()"></see> before just shutting down the
+Sentry sdk.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ShutdownTimeoutSeconds { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int32">Int32</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_Tags.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.Tags%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L98">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_Tags_" data-uid="Sentry.NLog.SentryNLogOptions.Tags*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_Tags" data-uid="Sentry.NLog.SentryNLogOptions.Tags">Tags</h4>
+  <div class="markdown level1 summary"><p>Any additional tags to apply to each logged message.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IList&lt;TargetPropertyWithContext&gt; Tags { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IList</span>&lt;<span class="xref">TargetPropertyWithContext</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions_User.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions.User%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L113">View Source</a>
+  </span>
+  <a id="Sentry_NLog_SentryNLogOptions_User_" data-uid="Sentry.NLog.SentryNLogOptions.User*"></a>
+  <h4 id="Sentry_NLog_SentryNLogOptions_User" data-uid="Sentry.NLog.SentryNLogOptions.User">User</h4>
+  <div class="markdown level1 summary"><p>Optionally configure one or more parts of the user information to be rendered dynamically from an NLog layout</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SentryNLogUser User { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.NLog.SentryNLogUser.html">SentryNLogUser</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="extensionmethods">Extension Methods</h3>
+  <div>
+      <a class="xref" href="Sentry.AspNet.SentryAspNetOptionsExtensions.html#Sentry_AspNet_SentryAspNetOptionsExtensions_AddAspNet_Sentry_SentryOptions_Sentry_Extensibility_RequestSize_">SentryAspNetOptionsExtensions.AddAspNet(SentryOptions, RequestSize)</a>
+  </div>
+  <div>
+      <a class="xref" href="NLog.ConfigurationExtensions.html#NLog_ConfigurationExtensions_AddTag_Sentry_NLog_SentryNLogOptions_System_String_Layout_">ConfigurationExtensions.AddTag(SentryNLogOptions, String, Layout)</a>
+  </div>
+  <div>
+      <span class="xref">Sentry.SentryOptionsExtensions.AddEntityFramework(Sentry.SentryOptions)</span>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_NLog_SentryNLogOptions.md&amp;value=---%0Auid%3A%20Sentry.NLog.SentryNLogOptions%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.NLog/SentryNLogOptions.cs/#L15" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

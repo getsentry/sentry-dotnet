@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Interface IDiagnosticLogger
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Interface IDiagnosticLogger
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.Extensibility.IDiagnosticLogger">
+  
+  
+  <h1 id="Sentry_Extensibility_IDiagnosticLogger" data-uid="Sentry.Extensibility.IDiagnosticLogger" class="text-break">Interface IDiagnosticLogger
+  </h1>
+  <div class="markdown level0 summary"><p>Abstraction for internal logging.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.Extensibility.html">Sentry.Extensibility</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_Extensibility_IDiagnosticLogger_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IDiagnosticLogger</code></pre>
+  </div>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensibility_IDiagnosticLogger_IsEnabled_Sentry_SentryLevel_.md&amp;value=---%0Auid%3A%20Sentry.Extensibility.IDiagnosticLogger.IsEnabled(Sentry.SentryLevel)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Extensibility/IDiagnosticLogger.cs/#L13">View Source</a>
+  </span>
+  <a id="Sentry_Extensibility_IDiagnosticLogger_IsEnabled_" data-uid="Sentry.Extensibility.IDiagnosticLogger.IsEnabled*"></a>
+  <h4 id="Sentry_Extensibility_IDiagnosticLogger_IsEnabled_Sentry_SentryLevel_" data-uid="Sentry.Extensibility.IDiagnosticLogger.IsEnabled(Sentry.SentryLevel)">IsEnabled(SentryLevel)</h4>
+  <div class="markdown level1 summary"><p>Whether the logger is enabled or not to the specified <a class="xref" href="Sentry.SentryLevel.html">SentryLevel</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool IsEnabled(SentryLevel level)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryLevel.html">SentryLevel</a></td>
+        <td><span class="parametername">level</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensibility_IDiagnosticLogger_Log_Sentry_SentryLevel_System_String_System_Nullable_Exception__System_Nullable_System_Object____.md&amp;value=---%0Auid%3A%20Sentry.Extensibility.IDiagnosticLogger.Log(Sentry.SentryLevel%2CSystem.String%2CSystem.Nullable%7BException%7D%2CSystem.Nullable%7BSystem.Object%7D%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Extensibility/IDiagnosticLogger.cs/#L22">View Source</a>
+  </span>
+  <a id="Sentry_Extensibility_IDiagnosticLogger_Log_" data-uid="Sentry.Extensibility.IDiagnosticLogger.Log*"></a>
+  <h4 id="Sentry_Extensibility_IDiagnosticLogger_Log_Sentry_SentryLevel_System_String_System_Nullable_Exception__System_Nullable_System_Object____" data-uid="Sentry.Extensibility.IDiagnosticLogger.Log(Sentry.SentryLevel,System.String,System.Nullable{Exception},System.Nullable{System.Object}[])">Log(SentryLevel, String, Nullable&lt;Exception&gt;, Nullable&lt;Object&gt;[])</h4>
+  <div class="markdown level1 summary"><p>Log an internal SDK message.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void Log(SentryLevel logLevel, string message, Exception? exception = null, params object? [] args)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryLevel.html">SentryLevel</a></td>
+        <td><span class="parametername">logLevel</span></td>
+        <td><p>The level.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">message</span></td>
+        <td><p>The message.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Exception</span>&gt;</td>
+        <td><span class="parametername">exception</span></td>
+        <td><p>An optional Exception.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a>&gt;[]</td>
+        <td><span class="parametername">args</span></td>
+        <td><p>Optional arguments for string template.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="extensionmethods">Extension Methods</h3>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogDebug__1_Sentry_Extensibility_IDiagnosticLogger_System_String___0_">DiagnosticLoggerExtensions.LogDebug&lt;TArg&gt;(IDiagnosticLogger, String, TArg)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogDebug__2_Sentry_Extensibility_IDiagnosticLogger_System_String___0___1_">DiagnosticLoggerExtensions.LogDebug&lt;TArg, TArg2&gt;(IDiagnosticLogger, String, TArg, TArg2)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogDebug_Sentry_Extensibility_IDiagnosticLogger_System_String_">DiagnosticLoggerExtensions.LogDebug(IDiagnosticLogger, String)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogInfo_Sentry_Extensibility_IDiagnosticLogger_System_String_">DiagnosticLoggerExtensions.LogInfo(IDiagnosticLogger, String)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogInfo__1_Sentry_Extensibility_IDiagnosticLogger_System_String___0_">DiagnosticLoggerExtensions.LogInfo&lt;TArg&gt;(IDiagnosticLogger, String, TArg)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogInfo__2_Sentry_Extensibility_IDiagnosticLogger_System_String___0___1_">DiagnosticLoggerExtensions.LogInfo&lt;TArg, TArg2&gt;(IDiagnosticLogger, String, TArg, TArg2)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogInfo__3_Sentry_Extensibility_IDiagnosticLogger_System_String___0___1___2_">DiagnosticLoggerExtensions.LogInfo&lt;TArg, TArg2, TArg3&gt;(IDiagnosticLogger, String, TArg, TArg2, TArg3)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogWarning_Sentry_Extensibility_IDiagnosticLogger_System_String_">DiagnosticLoggerExtensions.LogWarning(IDiagnosticLogger, String)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogWarning__1_Sentry_Extensibility_IDiagnosticLogger_System_String___0_">DiagnosticLoggerExtensions.LogWarning&lt;TArg&gt;(IDiagnosticLogger, String, TArg)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogWarning__2_Sentry_Extensibility_IDiagnosticLogger_System_String___0___1_">DiagnosticLoggerExtensions.LogWarning&lt;TArg, TArg2&gt;(IDiagnosticLogger, String, TArg, TArg2)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogError_Sentry_Extensibility_IDiagnosticLogger_System_String_System_Nullable_Exception__">DiagnosticLoggerExtensions.LogError(IDiagnosticLogger, String, Nullable&lt;Exception&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogError__1_Sentry_Extensibility_IDiagnosticLogger_System_String_Exception___0_">DiagnosticLoggerExtensions.LogError&lt;TArg&gt;(IDiagnosticLogger, String, Exception, TArg)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogError__2_Sentry_Extensibility_IDiagnosticLogger_System_String_Exception___0___1_">DiagnosticLoggerExtensions.LogError&lt;TArg, TArg2&gt;(IDiagnosticLogger, String, Exception, TArg, TArg2)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogError__4_Sentry_Extensibility_IDiagnosticLogger_System_String_Exception___0___1___2___3_">DiagnosticLoggerExtensions.LogError&lt;TArg, TArg2, TArg3, TArg4&gt;(IDiagnosticLogger, String, Exception, TArg, TArg2, TArg3, TArg4)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogError__3_Sentry_Extensibility_IDiagnosticLogger_Exception_System_String___0___1___2_">DiagnosticLoggerExtensions.LogError&lt;TArg, TArg2, TArg3&gt;(IDiagnosticLogger, Exception, String, TArg, TArg2, TArg3)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.Extensibility.DiagnosticLoggerExtensions.html#Sentry_Extensibility_DiagnosticLoggerExtensions_LogFatal_Sentry_Extensibility_IDiagnosticLogger_System_String_System_Nullable_Exception__">DiagnosticLoggerExtensions.LogFatal(IDiagnosticLogger, String, Nullable&lt;Exception&gt;)</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_Extensibility_IDiagnosticLogger.md&amp;value=---%0Auid%3A%20Sentry.Extensibility.IDiagnosticLogger%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/Extensibility/IDiagnosticLogger.cs/#L8" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

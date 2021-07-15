@@ -1,0 +1,526 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Interface IEventLike
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Interface IEventLike
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.IEventLike">
+  
+  
+  <h1 id="Sentry_IEventLike" data-uid="Sentry.IEventLike" class="text-break">Interface IEventLike
+  </h1>
+  <div class="markdown level0 summary"><p>Models members common between types that represent event-like data.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="Sentry.IHasBreadcrumbs.html#Sentry_IHasBreadcrumbs_Breadcrumbs">IHasBreadcrumbs.Breadcrumbs</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.IHasBreadcrumbs.html#Sentry_IHasBreadcrumbs_AddBreadcrumb_Sentry_Breadcrumb_">IHasBreadcrumbs.AddBreadcrumb(Breadcrumb)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.IHasTags.html#Sentry_IHasTags_Tags">IHasTags.Tags</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.IHasTags.html#Sentry_IHasTags_SetTag_System_String_System_String_">IHasTags.SetTag(String, String)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.IHasTags.html#Sentry_IHasTags_UnsetTag_System_String_">IHasTags.UnsetTag(String)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.IHasExtra.html#Sentry_IHasExtra_Extra">IHasExtra.Extra</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.IHasExtra.html#Sentry_IHasExtra_SetExtra_System_String_System_Nullable_System_Object__">IHasExtra.SetExtra(String, Nullable&lt;Object&gt;)</a>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_IEventLike_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IEventLike : IHasBreadcrumbs, IHasTags, IHasExtra</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Contexts.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Contexts%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L30">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Contexts_" data-uid="Sentry.IEventLike.Contexts*"></a>
+  <h4 id="Sentry_IEventLike_Contexts" data-uid="Sentry.IEventLike.Contexts">Contexts</h4>
+  <div class="markdown level1 summary"><p>Gets the structured Sentry context.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Contexts Contexts { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Contexts.html">Contexts</a></td>
+        <td><p>The contexts.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Environment.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Environment%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L54">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Environment_" data-uid="Sentry.IEventLike.Environment*"></a>
+  <h4 id="Sentry_IEventLike_Environment" data-uid="Sentry.IEventLike.Environment">Environment</h4>
+  <div class="markdown level1 summary"><p>The environment name, such as 'production' or 'staging'.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string? Environment { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_IEventLike_Environment_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>Requires Sentry 8.0 or higher.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Fingerprint.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Fingerprint%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L83">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Fingerprint_" data-uid="Sentry.IEventLike.Fingerprint*"></a>
+  <h4 id="Sentry_IEventLike_Fingerprint" data-uid="Sentry.IEventLike.Fingerprint">Fingerprint</h4>
+  <div class="markdown level1 summary"><p>A list of strings used to dictate the deduplication of this event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlyList&lt;string&gt; Fingerprint { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IReadOnlyList</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_IEventLike_Fingerprint_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>A value of {{ default }} will be replaced with the built-in behavior, thus allowing you to extend it, or completely replace it.
+New in version Protocol: version '7'</p>
+</div>
+  <h5 id="Sentry_IEventLike_Fingerprint_examples">Examples</h5>
+  <p>{ &quot;fingerprint&quot;: [&quot;myrpc&quot;, &quot;POST&quot;, &quot;/foo.bar&quot;] }</p>
+
+  <p>{ &quot;fingerprint&quot;: [&quot;{{ default }}&quot;, &quot;http://example.com/my.url&quot;] }</p>
+
+  <h5 id="Sentry_IEventLike_Fingerprint_seealso">See Also</h5>
+  <div class="seealso">
+      <div><span><a href="https://docs.sentry.io/platforms/dotnet/data-management/event-grouping/grouping-enhancements/">https://docs.sentry.io/platforms/dotnet/data-management/event-grouping/grouping-enhancements/</a></span></div>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Level.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Level%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L14">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Level_" data-uid="Sentry.IEventLike.Level*"></a>
+  <h4 id="Sentry_IEventLike_Level" data-uid="Sentry.IEventLike.Level">Level</h4>
+  <div class="markdown level1 summary"><p>Sentry level.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">SentryLevel? Level { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.SentryLevel.html">SentryLevel</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Platform.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Platform%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L43">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Platform_" data-uid="Sentry.IEventLike.Platform*"></a>
+  <h4 id="Sentry_IEventLike_Platform" data-uid="Sentry.IEventLike.Platform">Platform</h4>
+  <div class="markdown level1 summary"><p>The name of the platform.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string? Platform { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Release.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Release%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L48">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Release_" data-uid="Sentry.IEventLike.Release*"></a>
+  <h4 id="Sentry_IEventLike_Release" data-uid="Sentry.IEventLike.Release">Release</h4>
+  <div class="markdown level1 summary"><p>The release version of the application.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string? Release { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Request.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Request%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L22">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Request_" data-uid="Sentry.IEventLike.Request*"></a>
+  <h4 id="Sentry_IEventLike_Request" data-uid="Sentry.IEventLike.Request">Request</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the HTTP.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Request Request { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Request.html">Request</a></td>
+        <td><p>The HTTP.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_Sdk.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.Sdk%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L71">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_Sdk_" data-uid="Sentry.IEventLike.Sdk*"></a>
+  <h4 id="Sentry_IEventLike_Sdk" data-uid="Sentry.IEventLike.Sdk">Sdk</h4>
+  <div class="markdown level1 summary"><p>SDK information.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">SdkVersion Sdk { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SdkVersion.html">SdkVersion</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_IEventLike_Sdk_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>New in Sentry version: 8.4</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_TransactionName.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.TransactionName%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L65">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_TransactionName_" data-uid="Sentry.IEventLike.TransactionName*"></a>
+  <h4 id="Sentry_IEventLike_TransactionName" data-uid="Sentry.IEventLike.TransactionName">TransactionName</h4>
+  <div class="markdown level1 summary"><p>The name of the transaction in which there was an event.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string? TransactionName { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_IEventLike_TransactionName_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>A transaction should only be defined when it can be well defined.
+On a Web framework, for example, a transaction is the route template
+rather than the actual request path. That is so GET /user/10 and /user/20
+(which have route template /user/{id}) are identified as the same transaction.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike_User.md&amp;value=---%0Auid%3A%20Sentry.IEventLike.User%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L38">View Source</a>
+  </span>
+  <a id="Sentry_IEventLike_User_" data-uid="Sentry.IEventLike.User*"></a>
+  <h4 id="Sentry_IEventLike_User" data-uid="Sentry.IEventLike.User">User</h4>
+  <div class="markdown level1 summary"><p>Gets the user information.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">User User { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.User.html">User</a></td>
+        <td><p>The user.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="extensionmethods">Extension Methods</h3>
+  <div>
+      <a class="xref" href="Sentry.EventLikeExtensions.html#Sentry_EventLikeExtensions_HasUser_Sentry_IEventLike_">EventLikeExtensions.HasUser(IEventLike)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.EventLikeExtensions.html#Sentry_EventLikeExtensions_SetFingerprint_Sentry_IEventLike_IEnumerable_System_String__">EventLikeExtensions.SetFingerprint(IEventLike, IEnumerable&lt;String&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.EventLikeExtensions.html#Sentry_EventLikeExtensions_SetFingerprint_Sentry_IEventLike_System_String___">EventLikeExtensions.SetFingerprint(IEventLike, String[])</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HasBreadcrumbsExtensions.html#Sentry_HasBreadcrumbsExtensions_AddBreadcrumb_Sentry_IHasBreadcrumbs_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_System_ValueTuple_System_String_System_String___Sentry_BreadcrumbLevel_">HasBreadcrumbsExtensions.AddBreadcrumb(IHasBreadcrumbs, String, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;(String, String)&gt;, BreadcrumbLevel)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HasBreadcrumbsExtensions.html#Sentry_HasBreadcrumbsExtensions_AddBreadcrumb_Sentry_IHasBreadcrumbs_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IReadOnlyDictionary_System_String_System_String___Sentry_BreadcrumbLevel_">HasBreadcrumbsExtensions.AddBreadcrumb(IHasBreadcrumbs, String, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;IReadOnlyDictionary&lt;String, String&gt;&gt;, BreadcrumbLevel)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HasBreadcrumbsExtensions.html#Sentry_HasBreadcrumbsExtensions_AddBreadcrumb_Sentry_IHasBreadcrumbs_System_Nullable_DateTimeOffset__System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IReadOnlyDictionary_System_String_System_String___Sentry_BreadcrumbLevel_">HasBreadcrumbsExtensions.AddBreadcrumb(IHasBreadcrumbs, Nullable&lt;DateTimeOffset&gt;, String, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;IReadOnlyDictionary&lt;String, String&gt;&gt;, BreadcrumbLevel)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HasExtraExtensions.html#Sentry_HasExtraExtensions_SetExtras_Sentry_IHasExtra_IEnumerable_KeyValuePair_System_String_System_Nullable_System_Object____">HasExtraExtensions.SetExtras(IHasExtra, IEnumerable&lt;KeyValuePair&lt;String, Nullable&lt;Object&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HasTagsExtensions.html#Sentry_HasTagsExtensions_SetTags_Sentry_IHasTags_IEnumerable_KeyValuePair_System_String_System_String___">HasTagsExtensions.SetTags(IHasTags, IEnumerable&lt;KeyValuePair&lt;String, String&gt;&gt;)</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IEventLike.md&amp;value=---%0Auid%3A%20Sentry.IEventLike%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IEventLike.cs/#L9" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

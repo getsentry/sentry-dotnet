@@ -1,0 +1,493 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Interface IHub
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Interface IHub
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.IHub">
+  
+  
+  <h1 id="Sentry_IHub" data-uid="Sentry.IHub" class="text-break">Interface IHub
+  </h1>
+  <div class="markdown level0 summary"><p>SDK API contract which combines a client and scope management.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <a class="xref" href="Sentry.ISentryClient.html#Sentry_ISentryClient_IsEnabled">ISentryClient.IsEnabled</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryClient.html#Sentry_ISentryClient_CaptureEvent_Sentry_SentryEvent_Sentry_Scope_">ISentryClient.CaptureEvent(SentryEvent, Scope)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryClient.html#Sentry_ISentryClient_CaptureUserFeedback_Sentry_UserFeedback_">ISentryClient.CaptureUserFeedback(UserFeedback)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryClient.html#Sentry_ISentryClient_CaptureTransaction_Sentry_Transaction_">ISentryClient.CaptureTransaction(Transaction)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryClient.html#Sentry_ISentryClient_CaptureSession_Sentry_SessionUpdate_">ISentryClient.CaptureSession(SessionUpdate)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryClient.html#Sentry_ISentryClient_FlushAsync_TimeSpan_">ISentryClient.FlushAsync(TimeSpan)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryScopeManager.html#Sentry_ISentryScopeManager_ConfigureScope_Action_Sentry_Scope__">ISentryScopeManager.ConfigureScope(Action&lt;Scope&gt;)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryScopeManager.html#Sentry_ISentryScopeManager_ConfigureScopeAsync_Func_Sentry_Scope_Task__">ISentryScopeManager.ConfigureScopeAsync(Func&lt;Scope, Task&gt;)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryScopeManager.html#Sentry_ISentryScopeManager_BindClient_Sentry_ISentryClient_">ISentryScopeManager.BindClient(ISentryClient)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryScopeManager.html#Sentry_ISentryScopeManager_PushScope">ISentryScopeManager.PushScope()</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryScopeManager.html#Sentry_ISentryScopeManager_PushScope__1___0_">ISentryScopeManager.PushScope&lt;TState&gt;(TState)</a>
+    </div>
+    <div>
+      <a class="xref" href="Sentry.ISentryScopeManager.html#Sentry_ISentryScopeManager_WithScope_Action_Sentry_Scope__">ISentryScopeManager.WithScope(Action&lt;Scope&gt;)</a>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_IHub_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IHub : ISentryClient, ISentryScopeManager</code></pre>
+  </div>
+  <h5 id="Sentry_IHub_remarks"><strong>Remarks</strong></h5>
+  <div class="markdown level0 remarks"><p>The contract of which <a class="xref" href="Sentry.SentrySdk.html">SentrySdk</a> exposes statically.
+This interface exist to allow better testability of integrations which otherwise
+would require dependency to the static <a class="xref" href="Sentry.SentrySdk.html">SentrySdk</a>.</p>
+</div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_LastEventId.md&amp;value=---%0Auid%3A%20Sentry.IHub.LastEventId%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L23">View Source</a>
+  </span>
+  <a id="Sentry_IHub_LastEventId_" data-uid="Sentry.IHub.LastEventId*"></a>
+  <h4 id="Sentry_IHub_LastEventId" data-uid="Sentry.IHub.LastEventId">LastEventId</h4>
+  <div class="markdown level1 summary"><p>Last event id recorded in the current scope.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">SentryId LastEventId { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryId.html">SentryId</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_BindException_Exception_Sentry_ISpan_.md&amp;value=---%0Auid%3A%20Sentry.IHub.BindException(Exception%2CSentry.ISpan)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L39">View Source</a>
+  </span>
+  <a id="Sentry_IHub_BindException_" data-uid="Sentry.IHub.BindException*"></a>
+  <h4 id="Sentry_IHub_BindException_Exception_Sentry_ISpan_" data-uid="Sentry.IHub.BindException(Exception,Sentry.ISpan)">BindException(Exception, ISpan)</h4>
+  <div class="markdown level1 summary"><p>Binds specified exception the specified span.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void BindException(Exception exception, ISpan span)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">Exception</span></td>
+        <td><span class="parametername">exception</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.ISpan.html">ISpan</a></td>
+        <td><span class="parametername">span</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_IHub_BindException_Exception_Sentry_ISpan__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This method is used internally and is not meant for public use.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_EndSession_Sentry_SessionEndStatus_.md&amp;value=---%0Auid%3A%20Sentry.IHub.EndSession(Sentry.SessionEndStatus)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L72">View Source</a>
+  </span>
+  <a id="Sentry_IHub_EndSession_" data-uid="Sentry.IHub.EndSession*"></a>
+  <h4 id="Sentry_IHub_EndSession_Sentry_SessionEndStatus_" data-uid="Sentry.IHub.EndSession(Sentry.SessionEndStatus)">EndSession(SessionEndStatus)</h4>
+  <div class="markdown level1 summary"><p>Ends the currently active session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void EndSession(SessionEndStatus status = SessionEndStatus.Exited)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SessionEndStatus.html">SessionEndStatus</a></td>
+        <td><span class="parametername">status</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_GetSpan.md&amp;value=---%0Auid%3A%20Sentry.IHub.GetSpan%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L44">View Source</a>
+  </span>
+  <a id="Sentry_IHub_GetSpan_" data-uid="Sentry.IHub.GetSpan*"></a>
+  <h4 id="Sentry_IHub_GetSpan" data-uid="Sentry.IHub.GetSpan">GetSpan()</h4>
+  <div class="markdown level1 summary"><p>Gets the currently ongoing (not finished) span or <pre><code>null</code></pre> if none available.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ISpan GetSpan()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ISpan.html">ISpan</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_GetTraceHeader.md&amp;value=---%0Auid%3A%20Sentry.IHub.GetTraceHeader%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L49">View Source</a>
+  </span>
+  <a id="Sentry_IHub_GetTraceHeader_" data-uid="Sentry.IHub.GetTraceHeader*"></a>
+  <h4 id="Sentry_IHub_GetTraceHeader" data-uid="Sentry.IHub.GetTraceHeader">GetTraceHeader()</h4>
+  <div class="markdown level1 summary"><p>Gets the Sentry trace header for the last active span.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">SentryTraceHeader GetTraceHeader()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryTraceHeader.html">SentryTraceHeader</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_PauseSession.md&amp;value=---%0Auid%3A%20Sentry.IHub.PauseSession%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L59">View Source</a>
+  </span>
+  <a id="Sentry_IHub_PauseSession_" data-uid="Sentry.IHub.PauseSession*"></a>
+  <h4 id="Sentry_IHub_PauseSession" data-uid="Sentry.IHub.PauseSession">PauseSession()</h4>
+  <div class="markdown level1 summary"><p>Pauses an active session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void PauseSession()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_ResumeSession.md&amp;value=---%0Auid%3A%20Sentry.IHub.ResumeSession%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L67">View Source</a>
+  </span>
+  <a id="Sentry_IHub_ResumeSession_" data-uid="Sentry.IHub.ResumeSession*"></a>
+  <h4 id="Sentry_IHub_ResumeSession" data-uid="Sentry.IHub.ResumeSession">ResumeSession()</h4>
+  <div class="markdown level1 summary"><p>Resumes an active session.
+If the session has been paused for longer than the duration of time specified in
+<a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AutoSessionTrackingInterval">AutoSessionTrackingInterval</a> then the paused session is
+ended and a new one is started instead.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void ResumeSession()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_StartSession.md&amp;value=---%0Auid%3A%20Sentry.IHub.StartSession%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L54">View Source</a>
+  </span>
+  <a id="Sentry_IHub_StartSession_" data-uid="Sentry.IHub.StartSession*"></a>
+  <h4 id="Sentry_IHub_StartSession" data-uid="Sentry.IHub.StartSession">StartSession()</h4>
+  <div class="markdown level1 summary"><p>Starts a new session.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void StartSession()</code></pre>
+  </div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub_StartTransaction_Sentry_ITransactionContext_IReadOnlyDictionary_System_String_System_Nullable_System_Object___.md&amp;value=---%0Auid%3A%20Sentry.IHub.StartTransaction(Sentry.ITransactionContext%2CIReadOnlyDictionary%7BSystem.String%2CSystem.Nullable%7BSystem.Object%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L28">View Source</a>
+  </span>
+  <a id="Sentry_IHub_StartTransaction_" data-uid="Sentry.IHub.StartTransaction*"></a>
+  <h4 id="Sentry_IHub_StartTransaction_Sentry_ITransactionContext_IReadOnlyDictionary_System_String_System_Nullable_System_Object___" data-uid="Sentry.IHub.StartTransaction(Sentry.ITransactionContext,IReadOnlyDictionary{System.String,System.Nullable{System.Object}})">StartTransaction(ITransactionContext, IReadOnlyDictionary&lt;String, Nullable&lt;Object&gt;&gt;)</h4>
+  <div class="markdown level1 summary"><p>Starts a transaction.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ITransaction StartTransaction(ITransactionContext context, IReadOnlyDictionary&lt;string, object?&gt; customSamplingContext)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransactionContext.html">ITransactionContext</a></td>
+        <td><span class="parametername">context</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="xref">IReadOnlyDictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a>&gt;&gt;</td>
+        <td><span class="parametername">customSamplingContext</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.ITransaction.html">ITransaction</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="extensionmethods">Extension Methods</h3>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_StartTransaction_Sentry_IHub_Sentry_ITransactionContext_">HubExtensions.StartTransaction(IHub, ITransactionContext)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_StartTransaction_Sentry_IHub_System_String_System_String_">HubExtensions.StartTransaction(IHub, String, String)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_StartTransaction_Sentry_IHub_System_String_System_String_System_Nullable_System_String__">HubExtensions.StartTransaction(IHub, String, String, Nullable&lt;String&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_StartTransaction_Sentry_IHub_System_String_System_String_Sentry_SentryTraceHeader_">HubExtensions.StartTransaction(IHub, String, String, SentryTraceHeader)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_AddBreadcrumb_Sentry_IHub_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel_">HubExtensions.AddBreadcrumb(IHub, String, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;IDictionary&lt;String, String&gt;&gt;, BreadcrumbLevel)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_AddBreadcrumb_Sentry_IHub_Sentry_Infrastructure_ISystemClock_System_String_System_Nullable_System_String__System_Nullable_System_String__System_Nullable_IDictionary_System_String_System_String___Sentry_BreadcrumbLevel_">HubExtensions.AddBreadcrumb(IHub, ISystemClock, String, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;IDictionary&lt;String, String&gt;&gt;, BreadcrumbLevel)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_PushAndLockScope_Sentry_IHub_">HubExtensions.PushAndLockScope(IHub)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_LockScope_Sentry_IHub_">HubExtensions.LockScope(IHub)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.HubExtensions.html#Sentry_HubExtensions_UnlockScope_Sentry_IHub_">HubExtensions.UnlockScope(IHub)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.SentryClientExtensions.html#Sentry_SentryClientExtensions_CaptureException_Sentry_ISentryClient_Exception_">SentryClientExtensions.CaptureException(ISentryClient, Exception)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.SentryClientExtensions.html#Sentry_SentryClientExtensions_CaptureMessage_Sentry_ISentryClient_System_String_Sentry_SentryLevel_">SentryClientExtensions.CaptureMessage(ISentryClient, String, SentryLevel)</a>
+  </div>
+  <div>
+      <a class="xref" href="Sentry.SentryClientExtensions.html#Sentry_SentryClientExtensions_CaptureUserFeedback_Sentry_ISentryClient_Sentry_SentryId_System_String_System_String_System_Nullable_System_String__">SentryClientExtensions.CaptureUserFeedback(ISentryClient, SentryId, String, String, Nullable&lt;String&gt;)</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_IHub.md&amp;value=---%0Auid%3A%20Sentry.IHub%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/IHub.cs/#L16" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

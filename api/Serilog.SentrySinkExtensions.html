@@ -1,0 +1,614 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class SentrySinkExtensions
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class SentrySinkExtensions
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Serilog.SentrySinkExtensions">
+  
+  
+  <h1 id="Serilog_SentrySinkExtensions" data-uid="Serilog.SentrySinkExtensions" class="text-break">Class SentrySinkExtensions
+  </h1>
+  <div class="markdown level0 summary"><p>Sentry Serilog Sink extensions.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">SentrySinkExtensions</span></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Serilog.html">Serilog</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.Serilog.dll</h6>
+  <h5 id="Serilog_SentrySinkExtensions_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static class SentrySinkExtensions : object</code></pre>
+  </div>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Serilog_SentrySinkExtensions_ConfigureSentrySerilogOptions_Sentry_Serilog_SentrySerilogOptions_System_Nullable_System_String__System_Nullable_LogEventLevel__System_Nullable_LogEventLevel__System_Nullable_IFormatProvider__System_Nullable_ITextFormatter__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_System_String__System_Nullable_System_Boolean__System_Nullable_System_Int32__System_Nullable_System_Single__System_Nullable_System_String__System_Nullable_System_String__System_Nullable_System_Int32__System_Nullable_TimeSpan__System_Nullable_DecompressionMethods__System_Nullable_CompressionLevel__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_Sentry_SentryLevel__System_Nullable_System_Boolean__System_Nullable_Sentry_DeduplicateMode__System_Nullable_System_Boolean__System_Nullable_Dictionary_System_String_System_String___.md&amp;value=---%0Auid%3A%20Serilog.SentrySinkExtensions.ConfigureSentrySerilogOptions(Sentry.Serilog.SentrySerilogOptions%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BLogEventLevel%7D%2CSystem.Nullable%7BLogEventLevel%7D%2CSystem.Nullable%7BIFormatProvider%7D%2CSystem.Nullable%7BITextFormatter%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.Int32%7D%2CSystem.Nullable%7BSystem.Single%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.Int32%7D%2CSystem.Nullable%7BTimeSpan%7D%2CSystem.Nullable%7BDecompressionMethods%7D%2CSystem.Nullable%7BCompressionLevel%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSentry.SentryLevel%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSentry.DeduplicateMode%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BDictionary%7BSystem.String%2CSystem.String%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Serilog/SentrySinkExtensions.cs/#L175">View Source</a>
+  </span>
+  <a id="Serilog_SentrySinkExtensions_ConfigureSentrySerilogOptions_" data-uid="Serilog.SentrySinkExtensions.ConfigureSentrySerilogOptions*"></a>
+  <h4 id="Serilog_SentrySinkExtensions_ConfigureSentrySerilogOptions_Sentry_Serilog_SentrySerilogOptions_System_Nullable_System_String__System_Nullable_LogEventLevel__System_Nullable_LogEventLevel__System_Nullable_IFormatProvider__System_Nullable_ITextFormatter__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_System_String__System_Nullable_System_Boolean__System_Nullable_System_Int32__System_Nullable_System_Single__System_Nullable_System_String__System_Nullable_System_String__System_Nullable_System_Int32__System_Nullable_TimeSpan__System_Nullable_DecompressionMethods__System_Nullable_CompressionLevel__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_Sentry_SentryLevel__System_Nullable_System_Boolean__System_Nullable_Sentry_DeduplicateMode__System_Nullable_System_Boolean__System_Nullable_Dictionary_System_String_System_String___" data-uid="Serilog.SentrySinkExtensions.ConfigureSentrySerilogOptions(Sentry.Serilog.SentrySerilogOptions,System.Nullable{System.String},System.Nullable{LogEventLevel},System.Nullable{LogEventLevel},System.Nullable{IFormatProvider},System.Nullable{ITextFormatter},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.String},System.Nullable{System.Boolean},System.Nullable{System.Int32},System.Nullable{System.Single},System.Nullable{System.String},System.Nullable{System.String},System.Nullable{System.Int32},System.Nullable{TimeSpan},System.Nullable{DecompressionMethods},System.Nullable{CompressionLevel},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{Sentry.SentryLevel},System.Nullable{System.Boolean},System.Nullable{Sentry.DeduplicateMode},System.Nullable{System.Boolean},System.Nullable{Dictionary{System.String,System.String}})">ConfigureSentrySerilogOptions(SentrySerilogOptions, Nullable&lt;String&gt;, Nullable&lt;LogEventLevel&gt;, Nullable&lt;LogEventLevel&gt;, Nullable&lt;IFormatProvider&gt;, Nullable&lt;ITextFormatter&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;String&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Int32&gt;, Nullable&lt;Single&gt;, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;Int32&gt;, Nullable&lt;TimeSpan&gt;, Nullable&lt;DecompressionMethods&gt;, Nullable&lt;CompressionLevel&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;SentryLevel&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;DeduplicateMode&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Dictionary&lt;String, String&gt;&gt;)</h4>
+  <div class="markdown level1 summary"><p>Configure the Sentry Serilog Sink.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void ConfigureSentrySerilogOptions(SentrySerilogOptions sentrySerilogOptions, string? dsn = null, LogEventLevel? minimumEventLevel = null, LogEventLevel? minimumBreadcrumbLevel = null, IFormatProvider? formatProvider = null, ITextFormatter? textFormatter = null, bool? sendDefaultPii = null, bool? isEnvironmentUser = null, string? serverName = null, bool? attachStackTrace = null, int? maxBreadcrumbs = null, float? sampleRate = null, string? release = null, string? environment = null, int? maxQueueItems = null, TimeSpan? shutdownTimeout = null, DecompressionMethods? decompressionMethods = null, CompressionLevel? requestBodyCompressionLevel = null, bool? requestBodyCompressionBuffered = null, bool? debug = null, SentryLevel? diagnosticLevel = null, bool? reportAssemblies = null, DeduplicateMode? deduplicateMode = null, bool? initializeSdk = null, Dictionary&lt;string, string&gt;? defaultTags = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html">SentrySerilogOptions</a></td>
+        <td><span class="parametername">sentrySerilogOptions</span></td>
+        <td><p>The logger configuration to configure with the given parameters.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">dsn</span></td>
+        <td><p>The Sentry DSN. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Dsn">Dsn</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">LogEventLevel</span>&gt;</td>
+        <td><span class="parametername">minimumEventLevel</span></td>
+        <td><p>Minimum log level to send an event. <a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html#Sentry_Serilog_SentrySerilogOptions_MinimumEventLevel">MinimumEventLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">LogEventLevel</span>&gt;</td>
+        <td><span class="parametername">minimumBreadcrumbLevel</span></td>
+        <td><p>Minimum log level to record a breadcrumb. <a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html#Sentry_Serilog_SentrySerilogOptions_MinimumBreadcrumbLevel">MinimumBreadcrumbLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">IFormatProvider</span>&gt;</td>
+        <td><span class="parametername">formatProvider</span></td>
+        <td><p>The Serilog format provider. <seealso cref="!:IFormatProvider"></seealso></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">ITextFormatter</span>&gt;</td>
+        <td><span class="parametername">textFormatter</span></td>
+        <td><p>The Serilog text formatter. <seealso cref="!:ITextFormatter"></seealso></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">sendDefaultPii</span></td>
+        <td><p>Whether to include default Personal Identifiable information. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SendDefaultPii">SendDefaultPii</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">isEnvironmentUser</span></td>
+        <td><p>Whether to report the <see cref="!:System.Environment.UserName"></see> as the User affected in the event. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_IsEnvironmentUser">IsEnvironmentUser</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">serverName</span></td>
+        <td><p>Gets or sets the name of the server running the application. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ServerName">ServerName</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">attachStackTrace</span></td>
+        <td><p>Whether to send the stack trace of a event captured without an exception. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AttachStacktrace">AttachStacktrace</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int32">Int32</a>&gt;</td>
+        <td><span class="parametername">maxBreadcrumbs</span></td>
+        <td><p>Gets or sets the maximum breadcrumbs. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxBreadcrumbs">MaxBreadcrumbs</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.single">Single</a>&gt;</td>
+        <td><span class="parametername">sampleRate</span></td>
+        <td><p>The rate to sample events. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SampleRate">SampleRate</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">release</span></td>
+        <td><p>The release version of the application. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Release">Release</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">environment</span></td>
+        <td><p>The environment the application is running. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Environment">Environment</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int32">Int32</a>&gt;</td>
+        <td><span class="parametername">maxQueueItems</span></td>
+        <td><p>The maximum number of events to keep while the worker attempts to send them. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxQueueItems">MaxQueueItems</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">TimeSpan</span>&gt;</td>
+        <td><span class="parametername">shutdownTimeout</span></td>
+        <td><p>How long to wait for events to be sent before shutdown. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ShutdownTimeout">ShutdownTimeout</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">DecompressionMethods</span>&gt;</td>
+        <td><span class="parametername">decompressionMethods</span></td>
+        <td><p>Decompression methods accepted. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DecompressionMethods">DecompressionMethods</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">CompressionLevel</span>&gt;</td>
+        <td><span class="parametername">requestBodyCompressionLevel</span></td>
+        <td><p>The level of which to compress the <a class="xref" href="Sentry.SentryEvent.html">SentryEvent</a> before sending to Sentry. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionLevel">RequestBodyCompressionLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">requestBodyCompressionBuffered</span></td>
+        <td><p>Whether the body compression is buffered and the request 'Content-Length' known in advance. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionBuffered">RequestBodyCompressionBuffered</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">debug</span></td>
+        <td><p>Whether to log diagnostics messages. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Debug">Debug</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.SentryLevel.html">SentryLevel</a>&gt;</td>
+        <td><span class="parametername">diagnosticLevel</span></td>
+        <td><p>The diagnostics level to be used. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DiagnosticLevel">DiagnosticLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">reportAssemblies</span></td>
+        <td><p>Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <span class="xref">true</span>. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ReportAssemblies">ReportAssemblies</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.DeduplicateMode.html">DeduplicateMode</a>&gt;</td>
+        <td><span class="parametername">deduplicateMode</span></td>
+        <td><p>What modes to use for event automatic de-duplication. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DeduplicateMode">DeduplicateMode</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">initializeSdk</span></td>
+        <td><p>Whether to initialize this SDK through this integration. <a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html#Sentry_Serilog_SentrySerilogOptions_InitializeSdk">InitializeSdk</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Dictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;&gt;</td>
+        <td><span class="parametername">defaultTags</span></td>
+        <td><p>Defaults tags to add to all events. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DefaultTags">DefaultTags</a></p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Serilog_SentrySinkExtensions_Sentry_LoggerSinkConfiguration_Action_Sentry_Serilog_SentrySerilogOptions__.md&amp;value=---%0Auid%3A%20Serilog.SentrySinkExtensions.Sentry(LoggerSinkConfiguration%2CAction%7BSentry.Serilog.SentrySerilogOptions%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Serilog/SentrySinkExtensions.cs/#L335">View Source</a>
+  </span>
+  <a id="Serilog_SentrySinkExtensions_Sentry_" data-uid="Serilog.SentrySinkExtensions.Sentry*"></a>
+  <h4 id="Serilog_SentrySinkExtensions_Sentry_LoggerSinkConfiguration_Action_Sentry_Serilog_SentrySerilogOptions__" data-uid="Serilog.SentrySinkExtensions.Sentry(LoggerSinkConfiguration,Action{Sentry.Serilog.SentrySerilogOptions})">Sentry(LoggerSinkConfiguration, Action&lt;SentrySerilogOptions&gt;)</h4>
+  <div class="markdown level1 summary"><p>Add Sentry sink to Serilog.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static LoggerConfiguration Sentry(this LoggerSinkConfiguration loggerConfiguration, Action&lt;SentrySerilogOptions&gt; configureOptions)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">LoggerSinkConfiguration</span></td>
+        <td><span class="parametername">loggerConfiguration</span></td>
+        <td><p>The logger configuration.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Action</span>&lt;<a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html">SentrySerilogOptions</a>&gt;</td>
+        <td><span class="parametername">configureOptions</span></td>
+        <td><p>The configure options callback.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">LoggerConfiguration</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Serilog_SentrySinkExtensions_Sentry_LoggerSinkConfiguration_System_Nullable_System_String__LogEventLevel_LogEventLevel_System_Nullable_IFormatProvider__System_Nullable_ITextFormatter__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_System_String__System_Nullable_System_Boolean__System_Nullable_System_Int32__System_Nullable_System_Single__System_Nullable_System_String__System_Nullable_System_String__System_Nullable_System_Int32__System_Nullable_TimeSpan__System_Nullable_DecompressionMethods__System_Nullable_CompressionLevel__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_Sentry_SentryLevel__System_Nullable_System_Boolean__System_Nullable_Sentry_DeduplicateMode__System_Nullable_System_Boolean__System_Nullable_Dictionary_System_String_System_String___.md&amp;value=---%0Auid%3A%20Serilog.SentrySinkExtensions.Sentry(LoggerSinkConfiguration%2CSystem.Nullable%7BSystem.String%7D%2CLogEventLevel%2CLogEventLevel%2CSystem.Nullable%7BIFormatProvider%7D%2CSystem.Nullable%7BITextFormatter%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.Int32%7D%2CSystem.Nullable%7BSystem.Single%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.String%7D%2CSystem.Nullable%7BSystem.Int32%7D%2CSystem.Nullable%7BTimeSpan%7D%2CSystem.Nullable%7BDecompressionMethods%7D%2CSystem.Nullable%7BCompressionLevel%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSentry.SentryLevel%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BSentry.DeduplicateMode%7D%2CSystem.Nullable%7BSystem.Boolean%7D%2CSystem.Nullable%7BDictionary%7BSystem.String%2CSystem.String%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Serilog/SentrySinkExtensions.cs/#L93">View Source</a>
+  </span>
+  <a id="Serilog_SentrySinkExtensions_Sentry_" data-uid="Serilog.SentrySinkExtensions.Sentry*"></a>
+  <h4 id="Serilog_SentrySinkExtensions_Sentry_LoggerSinkConfiguration_System_Nullable_System_String__LogEventLevel_LogEventLevel_System_Nullable_IFormatProvider__System_Nullable_ITextFormatter__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_System_String__System_Nullable_System_Boolean__System_Nullable_System_Int32__System_Nullable_System_Single__System_Nullable_System_String__System_Nullable_System_String__System_Nullable_System_Int32__System_Nullable_TimeSpan__System_Nullable_DecompressionMethods__System_Nullable_CompressionLevel__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_Sentry_SentryLevel__System_Nullable_System_Boolean__System_Nullable_Sentry_DeduplicateMode__System_Nullable_System_Boolean__System_Nullable_Dictionary_System_String_System_String___" data-uid="Serilog.SentrySinkExtensions.Sentry(LoggerSinkConfiguration,System.Nullable{System.String},LogEventLevel,LogEventLevel,System.Nullable{IFormatProvider},System.Nullable{ITextFormatter},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.String},System.Nullable{System.Boolean},System.Nullable{System.Int32},System.Nullable{System.Single},System.Nullable{System.String},System.Nullable{System.String},System.Nullable{System.Int32},System.Nullable{TimeSpan},System.Nullable{DecompressionMethods},System.Nullable{CompressionLevel},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{Sentry.SentryLevel},System.Nullable{System.Boolean},System.Nullable{Sentry.DeduplicateMode},System.Nullable{System.Boolean},System.Nullable{Dictionary{System.String,System.String}})">Sentry(LoggerSinkConfiguration, Nullable&lt;String&gt;, LogEventLevel, LogEventLevel, Nullable&lt;IFormatProvider&gt;, Nullable&lt;ITextFormatter&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;String&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Int32&gt;, Nullable&lt;Single&gt;, Nullable&lt;String&gt;, Nullable&lt;String&gt;, Nullable&lt;Int32&gt;, Nullable&lt;TimeSpan&gt;, Nullable&lt;DecompressionMethods&gt;, Nullable&lt;CompressionLevel&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;SentryLevel&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;DeduplicateMode&gt;, Nullable&lt;Boolean&gt;, Nullable&lt;Dictionary&lt;String, String&gt;&gt;)</h4>
+  <div class="markdown level1 summary"><p>Add Sentry Serilog Sink.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static LoggerConfiguration Sentry(this LoggerSinkConfiguration loggerConfiguration, string? dsn = null, LogEventLevel minimumBreadcrumbLevel = null, LogEventLevel minimumEventLevel = null, IFormatProvider? formatProvider = null, ITextFormatter? textFormatter = null, bool? sendDefaultPii = null, bool? isEnvironmentUser = null, string? serverName = null, bool? attachStackTrace = null, int? maxBreadcrumbs = null, float? sampleRate = null, string? release = null, string? environment = null, int? maxQueueItems = null, TimeSpan? shutdownTimeout = null, DecompressionMethods? decompressionMethods = null, CompressionLevel? requestBodyCompressionLevel = null, bool? requestBodyCompressionBuffered = null, bool? debug = null, SentryLevel? diagnosticLevel = null, bool? reportAssemblies = null, DeduplicateMode? deduplicateMode = null, bool? initializeSdk = null, Dictionary&lt;string, string&gt;? defaultTags = null)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">LoggerSinkConfiguration</span></td>
+        <td><span class="parametername">loggerConfiguration</span></td>
+        <td><p>The logger configuration .<seealso cref="!:LoggerSinkConfiguration"></seealso></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">dsn</span></td>
+        <td><p>The Sentry DSN. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Dsn">Dsn</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">LogEventLevel</span></td>
+        <td><span class="parametername">minimumBreadcrumbLevel</span></td>
+        <td><p>Minimum log level to record a breadcrumb. <a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html#Sentry_Serilog_SentrySerilogOptions_MinimumBreadcrumbLevel">MinimumBreadcrumbLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">LogEventLevel</span></td>
+        <td><span class="parametername">minimumEventLevel</span></td>
+        <td><p>Minimum log level to send an event. <a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html#Sentry_Serilog_SentrySerilogOptions_MinimumEventLevel">MinimumEventLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">IFormatProvider</span>&gt;</td>
+        <td><span class="parametername">formatProvider</span></td>
+        <td><p>The Serilog format provider. <seealso cref="!:IFormatProvider"></seealso></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">ITextFormatter</span>&gt;</td>
+        <td><span class="parametername">textFormatter</span></td>
+        <td><p>The Serilog text formatter. <seealso cref="!:ITextFormatter"></seealso></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">sendDefaultPii</span></td>
+        <td><p>Whether to include default Personal Identifiable information. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SendDefaultPii">SendDefaultPii</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">isEnvironmentUser</span></td>
+        <td><p>Whether to report the <see cref="!:System.Environment.UserName"></see> as the User affected in the event. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_IsEnvironmentUser">IsEnvironmentUser</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">serverName</span></td>
+        <td><p>Gets or sets the name of the server running the application. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ServerName">ServerName</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">attachStackTrace</span></td>
+        <td><p>Whether to send the stack trace of a event captured without an exception. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_AttachStacktrace">AttachStacktrace</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int32">Int32</a>&gt;</td>
+        <td><span class="parametername">maxBreadcrumbs</span></td>
+        <td><p>Gets or sets the maximum breadcrumbs. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxBreadcrumbs">MaxBreadcrumbs</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.single">Single</a>&gt;</td>
+        <td><span class="parametername">sampleRate</span></td>
+        <td><p>The rate to sample events. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_SampleRate">SampleRate</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">release</span></td>
+        <td><p>The release version of the application. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Release">Release</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;</td>
+        <td><span class="parametername">environment</span></td>
+        <td><p>The environment the application is running. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Environment">Environment</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.int32">Int32</a>&gt;</td>
+        <td><span class="parametername">maxQueueItems</span></td>
+        <td><p>The maximum number of events to keep while the worker attempts to send them. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_MaxQueueItems">MaxQueueItems</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">TimeSpan</span>&gt;</td>
+        <td><span class="parametername">shutdownTimeout</span></td>
+        <td><p>How long to wait for events to be sent before shutdown. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ShutdownTimeout">ShutdownTimeout</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">DecompressionMethods</span>&gt;</td>
+        <td><span class="parametername">decompressionMethods</span></td>
+        <td><p>Decompression methods accepted. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DecompressionMethods">DecompressionMethods</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">CompressionLevel</span>&gt;</td>
+        <td><span class="parametername">requestBodyCompressionLevel</span></td>
+        <td><p>The level of which to compress the <a class="xref" href="Sentry.SentryEvent.html">SentryEvent</a> before sending to Sentry. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionLevel">RequestBodyCompressionLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">requestBodyCompressionBuffered</span></td>
+        <td><p>Whether the body compression is buffered and the request 'Content-Length' known in advance. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_RequestBodyCompressionBuffered">RequestBodyCompressionBuffered</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">debug</span></td>
+        <td><p>Whether to log diagnostics messages. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_Debug">Debug</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.SentryLevel.html">SentryLevel</a>&gt;</td>
+        <td><span class="parametername">diagnosticLevel</span></td>
+        <td><p>The diagnostics level to be used. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DiagnosticLevel">DiagnosticLevel</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">reportAssemblies</span></td>
+        <td><p>Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <span class="xref">true</span>. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_ReportAssemblies">ReportAssemblies</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="Sentry.DeduplicateMode.html">DeduplicateMode</a>&gt;</td>
+        <td><span class="parametername">deduplicateMode</span></td>
+        <td><p>What modes to use for event automatic de-duplication. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DeduplicateMode">DeduplicateMode</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.boolean">Boolean</a>&gt;</td>
+        <td><span class="parametername">initializeSdk</span></td>
+        <td><p>Whether to initialize this SDK through this integration. <a class="xref" href="Sentry.Serilog.SentrySerilogOptions.html#Sentry_Serilog_SentrySerilogOptions_InitializeSdk">InitializeSdk</a></p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.nullable-1">Nullable</a>&lt;<span class="xref">Dictionary</span>&lt;<a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>, <a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a>&gt;&gt;</td>
+        <td><span class="parametername">defaultTags</span></td>
+        <td><p>Defaults tags to add to all events. <a class="xref" href="Sentry.SentryOptions.html#Sentry_SentryOptions_DefaultTags">DefaultTags</a></p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">LoggerConfiguration</span></td>
+        <td><p><see cref="!:LoggerConfiguration"></see></p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Serilog_SentrySinkExtensions_Sentry_LoggerSinkConfiguration_System_Nullable_System_String__LogEventLevel_LogEventLevel_System_Nullable_IFormatProvider__System_Nullable_ITextFormatter__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_System_String__System_Nullable_System_Boolean__System_Nullable_System_Int32__System_Nullable_System_Single__System_Nullable_System_String__System_Nullable_System_String__System_Nullable_System_Int32__System_Nullable_TimeSpan__System_Nullable_DecompressionMethods__System_Nullable_CompressionLevel__System_Nullable_System_Boolean__System_Nullable_System_Boolean__System_Nullable_Sentry_SentryLevel__System_Nullable_System_Boolean__System_Nullable_Sentry_DeduplicateMode__System_Nullable_System_Boolean__System_Nullable_Dictionary_System_String_System_String____examples">Examples</h5>
+  <p>This sample shows how each item may be set from within a configuration file:</p>
+<pre><code>{
+    &quot;Serilog&quot;: {
+        &quot;Using&quot;: [
+            &quot;Serilog&quot;,
+            &quot;Sentry&quot;,
+        ],
+        &quot;WriteTo&quot;: [{
+                &quot;Name&quot;: &quot;Sentry&quot;,
+                &quot;Args&quot;: {
+                    &quot;dsn&quot;: &quot;https://MY-DSN@sentry.io&quot;,
+                    &quot;minimumBreadcrumbLevel&quot;: &quot;Verbose&quot;,
+                    &quot;minimumEventLevel&quot;: &quot;Error&quot;,
+                    &quot;outputTemplate&quot;: &quot;{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}&quot;///
+                    &quot;sendDefaultPii&quot;: false,
+                    &quot;isEnvironmentUser&quot;: false,
+                    &quot;serverName&quot;: &quot;MyServerName&quot;,
+                    &quot;attachStackTrace&quot;: false,
+                    &quot;maxBreadcrumbs&quot;: 20,
+                    &quot;sampleRate&quot;: 0.5,
+                    &quot;release&quot;: &quot;0.0.1&quot;,
+                    &quot;environment&quot;: &quot;staging&quot;,
+                    &quot;maxQueueItems&quot;: 100,
+                    &quot;shutdownTimeout&quot;: &quot;00:00:05&quot;,
+                    &quot;decompressionMethods&quot;: &quot;GZip&quot;,
+                    &quot;requestBodyCompressionLevel&quot;: &quot;NoCompression&quot;,
+                    &quot;requestBodyCompressionBuffered&quot;: false,
+                    &quot;debug&quot;: false,
+                    &quot;diagnosticLevel&quot;: &quot;Debug&quot;,
+                    &quot;reportAssemblies&quot;: false,
+                    &quot;deduplicateMode&quot;: &quot;All&quot;,
+                    &quot;initializeSdk&quot;: true,
+                    &quot;defaultTags&quot;: {
+                        &quot;key-1&quot;, &quot;value-1&quot;,
+                        &quot;key-2&quot;, &quot;value-2&quot;
+                    }
+                }
+            }
+        ]
+    }
+}</code></pre>
+
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Serilog_SentrySinkExtensions.md&amp;value=---%0Auid%3A%20Serilog.SentrySinkExtensions%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry.Serilog/SentrySinkExtensions.cs/#L18" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

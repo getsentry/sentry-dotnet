@@ -1,0 +1,925 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class SentryOptionsExtensions
+   | Sentry .NET </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class SentryOptionsExtensions
+   | Sentry .NET ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/sentry.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/logo.png" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Sentry.SentryOptionsExtensions">
+  
+  
+  <h1 id="Sentry_SentryOptionsExtensions" data-uid="Sentry.SentryOptionsExtensions" class="text-break">Class SentryOptionsExtensions
+  </h1>
+  <div class="markdown level0 summary"><p>SentryOptions extensions.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.object">Object</a></div>
+    <div class="level1"><span class="xref">SentryOptionsExtensions</span></div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Sentry.html">Sentry</a></h6>
+  <h6><strong>Assembly</strong>: Sentry.dll</h6>
+  <h5 id="Sentry_SentryOptionsExtensions_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static class SentryOptionsExtensions : object</code></pre>
+  </div>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddEventProcessor_Sentry_SentryOptions_Sentry_Extensibility_ISentryEventProcessor_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddEventProcessor(Sentry.SentryOptions%2CSentry.Extensibility.ISentryEventProcessor)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L149">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddEventProcessor_" data-uid="Sentry.SentryOptionsExtensions.AddEventProcessor*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddEventProcessor_Sentry_SentryOptions_Sentry_Extensibility_ISentryEventProcessor_" data-uid="Sentry.SentryOptionsExtensions.AddEventProcessor(Sentry.SentryOptions,Sentry.Extensibility.ISentryEventProcessor)">AddEventProcessor(SentryOptions, ISentryEventProcessor)</h4>
+  <div class="markdown level1 summary"><p>Adds an event processor which is invoked when creating a <a class="xref" href="Sentry.SentryEvent.html">SentryEvent</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddEventProcessor(this SentryOptions options, ISentryEventProcessor processor)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.Extensibility.ISentryEventProcessor.html">ISentryEventProcessor</a></td>
+        <td><span class="parametername">processor</span></td>
+        <td><p>The event processor.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddEventProcessorProvider_Sentry_SentryOptions_Func_IEnumerable_Sentry_Extensibility_ISentryEventProcessor___.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddEventProcessorProvider(Sentry.SentryOptions%2CFunc%7BIEnumerable%7BSentry.Extensibility.ISentryEventProcessor%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L169">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddEventProcessorProvider_" data-uid="Sentry.SentryOptionsExtensions.AddEventProcessorProvider*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddEventProcessorProvider_Sentry_SentryOptions_Func_IEnumerable_Sentry_Extensibility_ISentryEventProcessor___" data-uid="Sentry.SentryOptionsExtensions.AddEventProcessorProvider(Sentry.SentryOptions,Func{IEnumerable{Sentry.Extensibility.ISentryEventProcessor}})">AddEventProcessorProvider(SentryOptions, Func&lt;IEnumerable&lt;ISentryEventProcessor&gt;&gt;)</h4>
+  <div class="markdown level1 summary"><p>Adds an event processor provider which is invoked when creating a <a class="xref" href="Sentry.SentryEvent.html">SentryEvent</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddEventProcessorProvider(this SentryOptions options, Func&lt;IEnumerable&lt;ISentryEventProcessor&gt;&gt; processorProvider)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor provider.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Func</span>&lt;<span class="xref">IEnumerable</span>&lt;<a class="xref" href="Sentry.Extensibility.ISentryEventProcessor.html">ISentryEventProcessor</a>&gt;&gt;</td>
+        <td><span class="parametername">processorProvider</span></td>
+        <td><p>The event processor provider.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddEventProcessors_Sentry_SentryOptions_IEnumerable_Sentry_Extensibility_ISentryEventProcessor__.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddEventProcessors(Sentry.SentryOptions%2CIEnumerable%7BSentry.Extensibility.ISentryEventProcessor%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L159">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddEventProcessors_" data-uid="Sentry.SentryOptionsExtensions.AddEventProcessors*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddEventProcessors_Sentry_SentryOptions_IEnumerable_Sentry_Extensibility_ISentryEventProcessor__" data-uid="Sentry.SentryOptionsExtensions.AddEventProcessors(Sentry.SentryOptions,IEnumerable{Sentry.Extensibility.ISentryEventProcessor})">AddEventProcessors(SentryOptions, IEnumerable&lt;ISentryEventProcessor&gt;)</h4>
+  <div class="markdown level1 summary"><p>Adds event processors which are invoked when creating a <a class="xref" href="Sentry.SentryEvent.html">SentryEvent</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddEventProcessors(this SentryOptions options, IEnumerable&lt;ISentryEventProcessor&gt; processors)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">IEnumerable</span>&lt;<a class="xref" href="Sentry.Extensibility.ISentryEventProcessor.html">ISentryEventProcessor</a>&gt;</td>
+        <td><span class="parametername">processors</span></td>
+        <td><p>The event processors.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddExceptionFilter_Sentry_SentryOptions_Sentry_Extensibility_IExceptionFilter_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddExceptionFilter(Sentry.SentryOptions%2CSentry.Extensibility.IExceptionFilter)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L95">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddExceptionFilter_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionFilter*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddExceptionFilter_Sentry_SentryOptions_Sentry_Extensibility_IExceptionFilter_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionFilter(Sentry.SentryOptions,Sentry.Extensibility.IExceptionFilter)">AddExceptionFilter(SentryOptions, IExceptionFilter)</h4>
+  <div class="markdown level1 summary"><p>Add an exception filter.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddExceptionFilter(this SentryOptions options, IExceptionFilter exceptionFilter)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.Extensibility.IExceptionFilter.html">IExceptionFilter</a></td>
+        <td><span class="parametername">exceptionFilter</span></td>
+        <td><p>The exception filter to add.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddExceptionFilterForType__1_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddExceptionFilterForType%60%601(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L105">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddExceptionFilterForType_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionFilterForType*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddExceptionFilterForType__1_Sentry_SentryOptions_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionFilterForType``1(Sentry.SentryOptions)">AddExceptionFilterForType&lt;TException&gt;(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Ignore exception of type <code data-dev-comment-type="typeparamref" class="typeparamref">TException</code> or derived.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddExceptionFilterForType&lt;TException&gt;(this SentryOptions options)
+    where TException : Exception</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to store the exceptions type ignore.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">TException</span></td>
+        <td><p>The type of the exception to ignore.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddExceptionProcessor_Sentry_SentryOptions_Sentry_Extensibility_ISentryEventExceptionProcessor_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddExceptionProcessor(Sentry.SentryOptions%2CSentry.Extensibility.ISentryEventExceptionProcessor)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L129">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddExceptionProcessor_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionProcessor*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddExceptionProcessor_Sentry_SentryOptions_Sentry_Extensibility_ISentryEventExceptionProcessor_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionProcessor(Sentry.SentryOptions,Sentry.Extensibility.ISentryEventExceptionProcessor)">AddExceptionProcessor(SentryOptions, ISentryEventExceptionProcessor)</h4>
+  <div class="markdown level1 summary"><p>Add an exception processor.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddExceptionProcessor(this SentryOptions options, ISentryEventExceptionProcessor processor)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.Extensibility.ISentryEventExceptionProcessor.html">ISentryEventExceptionProcessor</a></td>
+        <td><span class="parametername">processor</span></td>
+        <td><p>The exception processor.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddExceptionProcessorProvider_Sentry_SentryOptions_Func_IEnumerable_Sentry_Extensibility_ISentryEventExceptionProcessor___.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddExceptionProcessorProvider(Sentry.SentryOptions%2CFunc%7BIEnumerable%7BSentry.Extensibility.ISentryEventExceptionProcessor%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L179">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddExceptionProcessorProvider_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionProcessorProvider*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddExceptionProcessorProvider_Sentry_SentryOptions_Func_IEnumerable_Sentry_Extensibility_ISentryEventExceptionProcessor___" data-uid="Sentry.SentryOptionsExtensions.AddExceptionProcessorProvider(Sentry.SentryOptions,Func{IEnumerable{Sentry.Extensibility.ISentryEventExceptionProcessor}})">AddExceptionProcessorProvider(SentryOptions, Func&lt;IEnumerable&lt;ISentryEventExceptionProcessor&gt;&gt;)</h4>
+  <div class="markdown level1 summary"><p>Add the exception processor provider.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddExceptionProcessorProvider(this SentryOptions options, Func&lt;IEnumerable&lt;ISentryEventExceptionProcessor&gt;&gt; processorProvider)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor provider.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">Func</span>&lt;<span class="xref">IEnumerable</span>&lt;<a class="xref" href="Sentry.Extensibility.ISentryEventExceptionProcessor.html">ISentryEventExceptionProcessor</a>&gt;&gt;</td>
+        <td><span class="parametername">processorProvider</span></td>
+        <td><p>The exception processor provider.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddExceptionProcessors_Sentry_SentryOptions_IEnumerable_Sentry_Extensibility_ISentryEventExceptionProcessor__.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddExceptionProcessors(Sentry.SentryOptions%2CIEnumerable%7BSentry.Extensibility.ISentryEventExceptionProcessor%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L139">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddExceptionProcessors_" data-uid="Sentry.SentryOptionsExtensions.AddExceptionProcessors*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddExceptionProcessors_Sentry_SentryOptions_IEnumerable_Sentry_Extensibility_ISentryEventExceptionProcessor__" data-uid="Sentry.SentryOptionsExtensions.AddExceptionProcessors(Sentry.SentryOptions,IEnumerable{Sentry.Extensibility.ISentryEventExceptionProcessor})">AddExceptionProcessors(SentryOptions, IEnumerable&lt;ISentryEventExceptionProcessor&gt;)</h4>
+  <div class="markdown level1 summary"><p>Add the exception processors.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddExceptionProcessors(this SentryOptions options, IEnumerable&lt;ISentryEventExceptionProcessor&gt; processors)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">IEnumerable</span>&lt;<a class="xref" href="Sentry.Extensibility.ISentryEventExceptionProcessor.html">ISentryEventExceptionProcessor</a>&gt;</td>
+        <td><span class="parametername">processors</span></td>
+        <td><p>The exception processors.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddInAppExclude_Sentry_SentryOptions_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddInAppExclude(Sentry.SentryOptions%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L111">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddInAppExclude_" data-uid="Sentry.SentryOptionsExtensions.AddInAppExclude*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddInAppExclude_Sentry_SentryOptions_System_String_" data-uid="Sentry.SentryOptionsExtensions.AddInAppExclude(Sentry.SentryOptions,System.String)">AddInAppExclude(SentryOptions, String)</h4>
+  <div class="markdown level1 summary"><p>Add prefix to exclude from 'InApp' stack trace list.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddInAppExclude(this SentryOptions options, string prefix)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">prefix</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddInAppInclude_Sentry_SentryOptions_System_String_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddInAppInclude(Sentry.SentryOptions%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L119">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddInAppInclude_" data-uid="Sentry.SentryOptionsExtensions.AddInAppInclude*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddInAppInclude_Sentry_SentryOptions_System_String_" data-uid="Sentry.SentryOptionsExtensions.AddInAppInclude(Sentry.SentryOptions,System.String)">AddInAppInclude(SentryOptions, String)</h4>
+  <div class="markdown level1 summary"><p>Add prefix to include as in 'InApp' stack trace.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddInAppInclude(this SentryOptions options, string prefix)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="https://docs.microsoft.com/dotnet/api/system.string">String</a></td>
+        <td><span class="parametername">prefix</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_AddIntegration_Sentry_SentryOptions_Sentry_Integrations_ISdkIntegration_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.AddIntegration(Sentry.SentryOptions%2CSentry.Integrations.ISdkIntegration)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L76">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_AddIntegration_" data-uid="Sentry.SentryOptionsExtensions.AddIntegration*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_AddIntegration_Sentry_SentryOptions_Sentry_Integrations_ISdkIntegration_" data-uid="Sentry.SentryOptionsExtensions.AddIntegration(Sentry.SentryOptions,Sentry.Integrations.ISdkIntegration)">AddIntegration(SentryOptions, ISdkIntegration)</h4>
+  <div class="markdown level1 summary"><p>Add an integration</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.Integrations.ISdkIntegration.html">ISdkIntegration</a></td>
+        <td><span class="parametername">integration</span></td>
+        <td><p>The integration.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_ApplyDefaultTags_Sentry_SentryOptions_Sentry_IHasTags_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.ApplyDefaultTags(Sentry.SentryOptions%2CSentry.IHasTags)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L216">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_ApplyDefaultTags_" data-uid="Sentry.SentryOptionsExtensions.ApplyDefaultTags*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_ApplyDefaultTags_Sentry_SentryOptions_Sentry_IHasTags_" data-uid="Sentry.SentryOptionsExtensions.ApplyDefaultTags(Sentry.SentryOptions,Sentry.IHasTags)">ApplyDefaultTags(SentryOptions, IHasTags)</h4>
+  <div class="markdown level1 summary"><p>Applies the default tags to an event without resetting existing tags.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void ApplyDefaultTags(this SentryOptions options, IHasTags hasTags)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The options to read the default tags from.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.IHasTags.html">IHasTags</a></td>
+        <td><span class="parametername">hasTags</span></td>
+        <td><p>The event to apply the tags to.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_DisableAppDomainProcessExitFlush_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.DisableAppDomainProcessExitFlush(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L68">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_DisableAppDomainProcessExitFlush_" data-uid="Sentry.SentryOptionsExtensions.DisableAppDomainProcessExitFlush*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_DisableAppDomainProcessExitFlush_Sentry_SentryOptions_" data-uid="Sentry.SentryOptionsExtensions.DisableAppDomainProcessExitFlush(Sentry.SentryOptions)">DisableAppDomainProcessExitFlush(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Disables the capture of errors through <see cref="!:AppDomain.ProcessExit"></see></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void DisableAppDomainProcessExitFlush(this SentryOptions options)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to remove the integration from.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_DisableAppDomainUnhandledExceptionCapture_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.DisableAppDomainUnhandledExceptionCapture(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L41">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_DisableAppDomainUnhandledExceptionCapture_" data-uid="Sentry.SentryOptionsExtensions.DisableAppDomainUnhandledExceptionCapture*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_DisableAppDomainUnhandledExceptionCapture_Sentry_SentryOptions_" data-uid="Sentry.SentryOptionsExtensions.DisableAppDomainUnhandledExceptionCapture(Sentry.SentryOptions)">DisableAppDomainUnhandledExceptionCapture(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Disables the capture of errors through <see cref="!:AppDomain.UnhandledException"></see>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to remove the integration from.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_DisableDuplicateEventDetection_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.DisableDuplicateEventDetection(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L33">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_DisableDuplicateEventDetection_" data-uid="Sentry.SentryOptionsExtensions.DisableDuplicateEventDetection*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_DisableDuplicateEventDetection_Sentry_SentryOptions_" data-uid="Sentry.SentryOptionsExtensions.DisableDuplicateEventDetection(Sentry.SentryOptions)">DisableDuplicateEventDetection(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Disables the strategy to detect duplicate events.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void DisableDuplicateEventDetection(this SentryOptions options)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to remove the processor from.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="Sentry_SentryOptionsExtensions_DisableDuplicateEventDetection_Sentry_SentryOptions__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>In case a second event is being sent out from the same exception, that event will be discarded.
+It is possible the second event had in fact more data. In which case it'd be ideal to avoid the first
+event going out in the first place.</p>
+</div>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_DisableTaskUnobservedTaskExceptionCapture_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.DisableTaskUnobservedTaskExceptionCapture(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L48">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_DisableTaskUnobservedTaskExceptionCapture_" data-uid="Sentry.SentryOptionsExtensions.DisableTaskUnobservedTaskExceptionCapture*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_DisableTaskUnobservedTaskExceptionCapture_Sentry_SentryOptions_" data-uid="Sentry.SentryOptionsExtensions.DisableTaskUnobservedTaskExceptionCapture(Sentry.SentryOptions)">DisableTaskUnobservedTaskExceptionCapture(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Disables the capture of errors through <see cref="!:TaskScheduler.UnobservedTaskException"></see>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void DisableTaskUnobservedTaskExceptionCapture(this SentryOptions options)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to remove the integration from.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_GetAllEventProcessors_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.GetAllEventProcessors(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L189">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_GetAllEventProcessors_" data-uid="Sentry.SentryOptionsExtensions.GetAllEventProcessors*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_GetAllEventProcessors_Sentry_SentryOptions_" data-uid="Sentry.SentryOptionsExtensions.GetAllEventProcessors(Sentry.SentryOptions)">GetAllEventProcessors(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Invokes all event processor providers available.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IEnumerable&lt;ISentryEventProcessor&gt; GetAllEventProcessors(this SentryOptions options)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions which holds the processor providers.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IEnumerable</span>&lt;<a class="xref" href="Sentry.Extensibility.ISentryEventProcessor.html">ISentryEventProcessor</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_GetAllExceptionProcessors_Sentry_SentryOptions_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.GetAllExceptionProcessors(Sentry.SentryOptions)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L196">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_GetAllExceptionProcessors_" data-uid="Sentry.SentryOptionsExtensions.GetAllExceptionProcessors*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_GetAllExceptionProcessors_Sentry_SentryOptions_" data-uid="Sentry.SentryOptionsExtensions.GetAllExceptionProcessors(Sentry.SentryOptions)">GetAllExceptionProcessors(SentryOptions)</h4>
+  <div class="markdown level1 summary"><p>Invokes all exception processor providers available.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IEnumerable&lt;ISentryEventExceptionProcessor&gt; GetAllExceptionProcessors(this SentryOptions options)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions which holds the processor providers.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">IEnumerable</span>&lt;<a class="xref" href="Sentry.Extensibility.ISentryEventExceptionProcessor.html">ISentryEventExceptionProcessor</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions_UseStackTraceFactory_Sentry_SentryOptions_Sentry_Extensibility_ISentryStackTraceFactory_.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions.UseStackTraceFactory(Sentry.SentryOptions%2CSentry.Extensibility.ISentryStackTraceFactory)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L204">View Source</a>
+  </span>
+  <a id="Sentry_SentryOptionsExtensions_UseStackTraceFactory_" data-uid="Sentry.SentryOptionsExtensions.UseStackTraceFactory*"></a>
+  <h4 id="Sentry_SentryOptionsExtensions_UseStackTraceFactory_Sentry_SentryOptions_Sentry_Extensibility_ISentryStackTraceFactory_" data-uid="Sentry.SentryOptionsExtensions.UseStackTraceFactory(Sentry.SentryOptions,Sentry.Extensibility.ISentryStackTraceFactory)">UseStackTraceFactory(SentryOptions, ISentryStackTraceFactory)</h4>
+  <div class="markdown level1 summary"><p>Use custom <a class="xref" href="Sentry.Extensibility.ISentryStackTraceFactory.html">ISentryStackTraceFactory</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static SentryOptions UseStackTraceFactory(this SentryOptions options, ISentryStackTraceFactory sentryStackTraceFactory)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td><span class="parametername">options</span></td>
+        <td><p>The SentryOptions to hold the processor provider.</p>
+</td>
+      </tr>
+      <tr>
+        <td><a class="xref" href="Sentry.Extensibility.ISentryStackTraceFactory.html">ISentryStackTraceFactory</a></td>
+        <td><span class="parametername">sentryStackTraceFactory</span></td>
+        <td><p>The stack trace factory.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Sentry.SentryOptions.html">SentryOptions</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/new/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/apiSpec/new?filename=Sentry_SentryOptionsExtensions.md&amp;value=---%0Auid%3A%20Sentry.SentryOptionsExtensions%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/getsentry/sentry-dotnet/blob/ac5e40265f5ceff8ebf7a8f7ff65d02cc41a00e6/src/Sentry/SentryOptionsExtensions.cs/#L21" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
