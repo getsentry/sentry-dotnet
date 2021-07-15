@@ -256,16 +256,13 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut = new GlobalSessionManager(
                 _fixture.Options,
-                SystemClock.Clock,
-                (_) => throw new FileNotFoundException());
+                persistedSessionProvider: _ => throw new FileNotFoundException());
 
             // Act
-            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+            sut.TryRecoverPersistedSession();
 
             // Assert
-            _fixture.Logger.Entries.Should().Contain(e =>
-                e.Level == SentryLevel.Debug
-            );
+            _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
         }
 
         [Fact]
@@ -275,35 +272,29 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut = new GlobalSessionManager(
                 _fixture.Options,
-                SystemClock.Clock,
-                (_) => throw new DirectoryNotFoundException());
+                persistedSessionProvider: _ => throw new DirectoryNotFoundException());
 
             // Act
             sut.TryRecoverPersistedSession();
 
             // Assert
-            _fixture.Logger.Entries.Should().Contain(e =>
-                e.Level == SentryLevel.Debug
-            );
+            _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Debug);
         }
 
         [Fact]
-        public void TryGetPersistentInstallationId_EndOfStreamException_LogDebug()
+        public void TryGetPersistentInstallationId_EndOfStreamException_LogError()
         {
             // Arrange
             var sut = _fixture.GetSut();
             sut = new GlobalSessionManager(
                 _fixture.Options,
-                SystemClock.Clock,
-                (_) => throw new EndOfStreamException());
+                persistedSessionProvider: _ => throw new EndOfStreamException());
 
             // Act
             sut.TryRecoverPersistedSession();
 
             // Assert
-            _fixture.Logger.Entries.Should().Contain(e =>
-                e.Level == SentryLevel.Error
-            );
+            _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Error);
         }
 
         [Fact]
