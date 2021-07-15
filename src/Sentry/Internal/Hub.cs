@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
 {
@@ -48,7 +49,11 @@ namespace Sentry.Internal
 
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
-            ScopeManager = new SentryScopeManager(options, _ownedClient);
+            ScopeManager = new SentryScopeManager(
+                options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
+                options,
+                _ownedClient
+            );
 
             _integrations = options.Integrations;
 
