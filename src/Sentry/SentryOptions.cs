@@ -24,6 +24,12 @@ namespace Sentry
 
         internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
+        public bool IsGlobalModeEnabled
+        {
+            get => ScopeStackContainer is GlobalScopeStackContainer;
+            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
+        }
+
         // Override for tests
         internal ITransport? Transport { get; set; }
 
