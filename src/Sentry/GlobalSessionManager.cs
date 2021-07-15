@@ -240,7 +240,6 @@ namespace Sentry
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
             try
             {
-
                 // Try to log the contents of the session file before we delete it
                 if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) ?? false)
                 {
@@ -311,10 +310,20 @@ namespace Sentry
                     }
                 );
             }
+            catch (FileNotFoundException)
+            {
+                // Not a notable error
+                _options.DiagnosticLogger?.LogDebug(
+                    "Failed to recover persisted session from the file system '{0}' because the file doesn't exist.",
+                    filePath
+                );
+
+                return null;
+            }
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to recover persisted session from the file system '{0}'",
+                    "Failed to recover persisted session from the file system '{0}'.",
                     ex,
                     filePath
                 );
