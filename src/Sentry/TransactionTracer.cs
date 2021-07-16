@@ -39,6 +39,9 @@ namespace Sentry
         /// <inheritdoc cref="ITransaction.Name" />
         public string Name { get; set; }
 
+        /// <inheritdoc cref="ITransaction.IsParentSampled" />
+        public bool? IsParentSampled { get; set; }
+
         /// <inheritdoc />
         public string? Platform { get; set; } = Constants.Platform;
 
