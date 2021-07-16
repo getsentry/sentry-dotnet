@@ -8,9 +8,7 @@
         /// <inheritdoc />
         public string Name { get; }
 
-        /// <summary>
-        /// Whether the parent transaction of this transaction has been sampled.
-        /// </summary>
+        /// <inheritdoc />
         public bool? IsParentSampled { get; }
 
         /// <summary>
