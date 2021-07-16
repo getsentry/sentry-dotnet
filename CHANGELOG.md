@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix `ParentSampledId` being reset on `Transaction` ([#1130](https://github.com/getsentry/sentry-dotnet/pull/1130))
+
 ## 3.8.1
 
 ### Fixes
