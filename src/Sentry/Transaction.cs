@@ -197,11 +197,15 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(ITransaction tracer)
-            : this(tracer.Name, tracer.Operation)
+            : this(tracer.Name)
         {
+            // Contexts have to be set first because other fields use that
+            Contexts = tracer.Contexts;
+
             ParentSpanId = tracer.ParentSpanId;
             SpanId = tracer.SpanId;
             TraceId = tracer.TraceId;
+            Operation = tracer.Operation;
             Platform = tracer.Platform;
             Release = tracer.Release;
             StartTimestamp = tracer.StartTimestamp;
@@ -211,7 +215,6 @@ namespace Sentry
             IsSampled = tracer.IsSampled;
             Level = tracer.Level;
             Request = tracer.Request;
-            Contexts = tracer.Contexts;
             User = tracer.User;
             Environment = tracer.Environment;
             Sdk = tracer.Sdk;

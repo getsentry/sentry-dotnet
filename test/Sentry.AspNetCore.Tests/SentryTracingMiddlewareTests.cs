@@ -1,6 +1,8 @@
 ﻿#if !NETCOREAPP2_1
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -13,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.AspNetCore.Tests
@@ -122,8 +125,6 @@ namespace Sentry.AspNetCore.Tests
         public async Task Transaction_is_started_automatically_from_incoming_trace_header()
         {
             // Arrange
-            ITransactionData transaction = null;
-
             var sentryClient = Substitute.For<ISentryClient>();
 
             var hub = new Internal.Hub(sentryClient, new SentryOptions
@@ -149,11 +150,7 @@ namespace Sentry.AspNetCore.Tests
 
                     app.UseEndpoints(routes =>
                     {
-                        routes.Map("/person/{id}", _ =>
-                        {
-                            transaction = hub.GetSpan() as ITransactionData;
-                            return Task.CompletedTask;
-                        });
+                        routes.Map("/person/{id}", _ => Task.CompletedTask);
                     });
                 })
             );
@@ -169,11 +166,12 @@ namespace Sentry.AspNetCore.Tests
             await client.SendAsync(request);
 
             // Assert
-            transaction.Should().NotBeNull();
-            transaction?.Name.Should().Be("GET /person/{id}");
-            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
-            transaction.ParentSpanId.Should().Be(SpanId.Parse("1000000000000000"));
-            transaction.IsSampled.Should().BeFalse();
+            sentryClient.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
+                t.Name == "GET /person/{id}" &&
+                t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
+                t.ParentSpanId == SpanId.Parse("1000000000000000") &&
+                t.IsSampled == false
+            ));
         }
 
         [Fact]
@@ -344,6 +342,66 @@ namespace Sentry.AspNetCore.Tests
 
             // Assert
             Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out _));
+        }
+
+        [Fact]
+        public async Task Transaction_trace_ID_is_sent_as_part_of_trace_header_in_outgoing_requests()
+        {
+            // Arrange
+            var sentryClient = Substitute.For<ISentryClient>();
+
+            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
+            });
+
+            var fakeHttpHandler = new RecordingHttpMessageHandler();
+            var sentryHttpHandler = new SentryHttpMessageHandler(fakeHttpHandler, hub);
+
+            var server = new TestServer(new WebHostBuilder()
+                .UseDefaultServiceProvider(di => di.EnableValidation())
+                .UseSentry()
+                .ConfigureServices(services =>
+                {
+                    services.AddRouting();
+
+                    services.RemoveAll(typeof(Func<IHub>));
+                    services.AddSingleton<Func<IHub>>(() => hub);
+                })
+                .Configure(app =>
+                {
+                    app.UseRouting();
+                    app.UseSentryTracing();
+
+                    app.UseEndpoints(routes =>
+                    {
+                        routes.Map("/test", async _ =>
+                        {
+                            using var httpClient = new HttpClient(sentryHttpHandler);
+                            await httpClient.GetAsync("https://example.com");
+                        });
+                    });
+                })
+            );
+
+            var client = server.CreateClient();
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/test")
+            {
+                Headers = {{"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"}}
+            };
+
+            await client.SendAsync(request);
+
+            var outgoingRequest = fakeHttpHandler.GetRequests().Single();
+
+            // Assert
+            outgoingRequest.Headers.Should().ContainSingle(h =>
+                h.Key == "sentry-trace" &&
+                h.Value.Single().Trim() == "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"
+            );
         }
     }
 }
