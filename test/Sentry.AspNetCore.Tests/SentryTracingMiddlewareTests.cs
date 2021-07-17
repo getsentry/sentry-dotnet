@@ -25,11 +25,11 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampleRate = 1
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -77,10 +77,10 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -124,11 +124,11 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampleRate = 1
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -179,11 +179,11 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampleRate = 1
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -236,7 +236,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampler = ctx =>
@@ -244,7 +244,7 @@ namespace Sentry.AspNetCore.Tests
                     samplingContext = ctx;
                     return 1;
                 }
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -288,7 +288,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub( new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampler = ctx =>
@@ -296,7 +296,7 @@ namespace Sentry.AspNetCore.Tests
                     samplingContext = ctx;
                     return 1;
                 }
-            });
+            }, sentryClient);
             var exception = new Exception();
 
             var server = new TestServer(new WebHostBuilder()

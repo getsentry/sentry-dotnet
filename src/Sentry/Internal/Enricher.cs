@@ -21,10 +21,7 @@ namespace Sentry.Internal
             };
         });
 
-        public Enricher(SentryOptions options)
-        {
-            _options = options;
-        }
+        public Enricher(SentryOptions options) => _options = options;
 
         public void Apply(IEventLike eventLike)
         {
