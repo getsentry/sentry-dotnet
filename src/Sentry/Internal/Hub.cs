@@ -28,35 +28,45 @@ namespace Sentry.Internal
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
-        internal SentryScopeManager ScopeManager { get; }
+        internal IInternalScopeManager ScopeManager { get; }
 
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;
 
-        internal Hub(ISentryClient client, ISystemClock clock, ISessionManager sessionManager, SentryOptions options)
+        internal Hub(
+            SentryOptions options,
+            ISentryClient? client = null,
+            ISessionManager? sessionManager = null,
+            ISystemClock? clock = null,
+            IInternalScopeManager? scopeManager = null)
         {
-            _ownedClient = client;
-            _clock = clock;
-            _sessionManager = sessionManager;
-            _options = options;
-
-            if (Dsn.TryParse(options.Dsn) is null)
+            if (string.IsNullOrWhiteSpace(options.Dsn))
             {
                 const string msg = "Attempt to instantiate a Hub without a DSN.";
                 options.DiagnosticLogger?.LogFatal(msg);
                 throw new InvalidOperationException(msg);
             }
-
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
-            ScopeManager = new SentryScopeManager(
+            _options = options;
+            _ownedClient = client ?? new SentryClient(options);
+            _clock = clock ?? SystemClock.Clock;
+            _sessionManager = sessionManager ?? new GlobalSessionManager(options);
+
+            ScopeManager = scopeManager ?? new SentryScopeManager(
                 options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
                 options,
                 _ownedClient
             );
 
-            _integrations = options.Integrations;
+            _rootScope = options.IsGlobalModeEnabled
+                ? DisabledHub.Instance
+                // Push the first scope so the async local starts from here
+                : PushScope();
 
+            _enricher = new Enricher(options);
+
+            _integrations = options.Integrations;
             if (_integrations?.Length > 0)
             {
                 foreach (var integration in _integrations)
@@ -65,28 +75,6 @@ namespace Sentry.Internal
                     integration.Register(this, options);
                 }
             }
-
-            _rootScope = options.IsGlobalModeEnabled
-                ? DisabledHub.Instance
-                // Push the first scope so the async local starts from here
-                : PushScope();
-
-            _enricher = new Enricher(options);
-        }
-
-        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
-            : this(client, SystemClock.Clock, sessionManager, options)
-        {
-        }
-
-        internal Hub(ISentryClient client, SentryOptions options)
-            : this(client, new GlobalSessionManager(options), options)
-        {
-        }
-
-        public Hub(SentryOptions options)
-            : this(new SentryClient(options), options)
-        {
         }
 
         public void ConfigureScope(Action<Scope> configureScope)

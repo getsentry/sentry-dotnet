@@ -9,7 +9,7 @@ namespace Sentry.Internal
     internal sealed class SentryScopeManager : IInternalScopeManager, IDisposable
     {
         // Internal for testing
-        internal IScopeStackContainer ScopeStackContainer { get; }
+        public IScopeStackContainer ScopeStackContainer { get; }
 
         private readonly SentryOptions _options;
 
