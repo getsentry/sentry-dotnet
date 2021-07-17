@@ -824,7 +824,7 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void Ctor_GlobalModeFalse_DoesNotPushScope()
+        public void Ctor_GlobalModeFalse_DoesPushScope()
         {
             // Arrange
             var scopeManager = Substitute.For<IInternalScopeManager>();
