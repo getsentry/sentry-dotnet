@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix `ParentSampledId` being reset on `Transaction` ([#1130](https://github.com/getsentry/sentry-dotnet/pull/1130))
+- Add IsParentSampled to ITransactionContext ([#1128]https://github.com/getsentry/sentry-dotnet/pull/1128)
 
 ## 3.8.1
 
