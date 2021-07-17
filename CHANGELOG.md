@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Add IsParentSampled to ITransactionContext ([#1128]https://github.com/getsentry/sentry-dotnet/pull/1128)
+
 ## 3.8.1
 
 ### Fixes

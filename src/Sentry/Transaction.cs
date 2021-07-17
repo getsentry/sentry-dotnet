@@ -49,6 +49,9 @@ namespace Sentry
         public string Name { get; private set; }
 
         /// <inheritdoc />
+        public bool? IsParentSampled { get; set; }
+
+        /// <inheritdoc />
         public string? Platform { get; set; } = Constants.Platform;
 
         /// <inheritdoc />
