@@ -122,8 +122,6 @@ namespace Sentry.AspNetCore.Tests
         public async Task Transaction_is_started_automatically_from_incoming_trace_header()
         {
             // Arrange
-            ITransactionData transaction = null;
-
             var sentryClient = Substitute.For<ISentryClient>();
 
             var hub = new Internal.Hub(new SentryOptions
@@ -149,11 +147,7 @@ namespace Sentry.AspNetCore.Tests
 
                     app.UseEndpoints(routes =>
                     {
-                        routes.Map("/person/{id}", _ =>
-                        {
-                            transaction = hub.GetSpan() as ITransactionData;
-                            return Task.CompletedTask;
-                        });
+                        routes.Map("/person/{id}", _ => Task.CompletedTask);
                     });
                 })
             );
@@ -169,11 +163,12 @@ namespace Sentry.AspNetCore.Tests
             await client.SendAsync(request);
 
             // Assert
-            transaction.Should().NotBeNull();
-            transaction?.Name.Should().Be("GET /person/{id}");
-            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
-            transaction.ParentSpanId.Should().Be(SpanId.Parse("1000000000000000"));
-            transaction.IsSampled.Should().BeFalse();
+            sentryClient.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
+                t.Name == "GET /person/{id}" &&
+                t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
+                t.ParentSpanId == SpanId.Parse("1000000000000000") &&
+                t.IsSampled == false
+            ));
         }
 
         [Fact]
