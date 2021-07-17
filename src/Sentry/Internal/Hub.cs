@@ -66,8 +66,10 @@ namespace Sentry.Internal
                 }
             }
 
-            // Push the first scope so the async local starts from here
-            _rootScope = PushScope();
+            _rootScope = options.IsGlobalModeEnabled
+                ? DisabledHub.Instance
+                // Push the first scope so the async local starts from here
+                : PushScope();
 
             _enricher = new Enricher(options);
         }
