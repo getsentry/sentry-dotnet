@@ -4,7 +4,8 @@
 
 ### Fixes
 
-- Add IsParentSampled to ITransactionContext ([#1128]https://github.com/getsentry/sentry-dotnet/pull/1128)
+- Add IsParentSampled to ITransactionContext ([#1128](https://github.com/getsentry/sentry-dotnet/pull/1128)
+- Avoid warn in global mode ([#1132](https://github.com/getsentry/sentry-dotnet/pull/1132))
 
 ## 3.8.1
 
