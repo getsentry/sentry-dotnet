@@ -123,8 +123,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.EntityFramework.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.EntityFramework", "samples\Sentry.Samples.EntityFramework\Sentry.Samples.EntityFramework.csproj", "{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleAspNetWithEfCore", "D:\Programacao\Online Projects\sample-ef-core-in-asp-net-core-master\SampleAspNetWithEfCore\SampleAspNetWithEfCore.csproj", "{0BB33B7B-E022-4921-A8C4-4B9282975520}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Google.Cloud.Functions", "samples\Sentry.Samples.Google.Cloud.Functions\Sentry.Samples.Google.Cloud.Functions.csproj", "{88269A52-A0BA-41B2-8DF3-505B66B17243}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Google.Cloud.Functions", "src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj", "{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}"
@@ -273,10 +271,6 @@ Global
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0BB33B7B-E022-4921-A8C4-4B9282975520}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BB33B7B-E022-4921-A8C4-4B9282975520}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BB33B7B-E022-4921-A8C4-4B9282975520}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BB33B7B-E022-4921-A8C4-4B9282975520}.Release|Any CPU.Build.0 = Release|Any CPU
 		{88269A52-A0BA-41B2-8DF3-505B66B17243}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{88269A52-A0BA-41B2-8DF3-505B66B17243}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88269A52-A0BA-41B2-8DF3-505B66B17243}.Release|Any CPU.ActiveCfg = Release|Any CPU
