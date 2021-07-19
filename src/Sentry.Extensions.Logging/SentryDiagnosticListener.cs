@@ -32,14 +32,15 @@ namespace Sentry.Extensions.Logging
             }
             else if (value.Key == EFCommandExecuting)
             {
-                SentrySdk.GetSpan()?.StartChild("db", value.Value?.ToString());
+                SentrySdk.GetSpan()?.StartChild("db", null);
             }
             else if (value.Key == EFCommandExecuted &&
                      SentrySdk.GetSpan() is { } querySpan &&
                      querySpan.Operation == "db" &&
-                     querySpan.Description != "connection")
+                     querySpan.Description is null)
 
             {
+                querySpan.Description = value.Value?.ToString();
                 querySpan.Finish(status: SpanStatus.Ok);
             }
             else if (value.Key == EFConnectionClosed &&
