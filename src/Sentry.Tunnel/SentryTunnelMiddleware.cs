@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Net.Http.Headers;
 
 namespace Sentry.Tunnel
 {
@@ -33,6 +36,7 @@ namespace Sentry.Tunnel
 
             var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
             var client = httpClientFactory.CreateClient("SentryTunnel");
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET Tunnel", GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion));
             var ms = new MemoryStream();
             await context.Request.Body.CopyToAsync(ms);
             ms.Position = 0;
