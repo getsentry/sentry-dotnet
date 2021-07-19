@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
 {
@@ -22,36 +23,50 @@ namespace Sentry.Internal
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private DateTimeOffset? _sessionPauseTimestamp;
+        private int _isPersistedSessionRecovered;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
-        internal SentryScopeManager ScopeManager { get; }
+        internal IInternalScopeManager ScopeManager { get; }
 
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;
 
-        internal Hub(ISentryClient client, ISystemClock clock, ISessionManager sessionManager, SentryOptions options)
+        internal Hub(
+            SentryOptions options,
+            ISentryClient? client = null,
+            ISessionManager? sessionManager = null,
+            ISystemClock? clock = null,
+            IInternalScopeManager? scopeManager = null)
         {
-            _ownedClient = client;
-            _clock = clock;
-            _sessionManager = sessionManager;
-            _options = options;
-
-            if (Dsn.TryParse(options.Dsn) is null)
+            if (string.IsNullOrWhiteSpace(options.Dsn))
             {
                 const string msg = "Attempt to instantiate a Hub without a DSN.";
                 options.DiagnosticLogger?.LogFatal(msg);
                 throw new InvalidOperationException(msg);
             }
-
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
-            ScopeManager = new SentryScopeManager(options, _ownedClient);
+            _options = options;
+            _ownedClient = client ?? new SentryClient(options);
+            _clock = clock ?? SystemClock.Clock;
+            _sessionManager = sessionManager ?? new GlobalSessionManager(options);
+
+            ScopeManager = scopeManager ?? new SentryScopeManager(
+                options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
+                options,
+                _ownedClient
+            );
+
+            _rootScope = options.IsGlobalModeEnabled
+                ? DisabledHub.Instance
+                // Push the first scope so the async local starts from here
+                : PushScope();
+
+            _enricher = new Enricher(options);
 
             _integrations = options.Integrations;
-
             if (_integrations?.Length > 0)
             {
                 foreach (var integration in _integrations)
@@ -60,26 +75,6 @@ namespace Sentry.Internal
                     integration.Register(this, options);
                 }
             }
-
-            // Push the first scope so the async local starts from here
-            _rootScope = PushScope();
-
-            _enricher = new Enricher(options);
-        }
-
-        internal Hub(ISentryClient client, ISessionManager sessionManager, SentryOptions options)
-            : this(client, SystemClock.Clock, sessionManager, options)
-        {
-        }
-
-        internal Hub(ISentryClient client, SentryOptions options)
-            : this(client, new GlobalSessionManager(options), options)
-        {
-        }
-
-        public Hub(SentryOptions options)
-            : this(new SentryClient(options), options)
-        {
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
@@ -177,6 +172,27 @@ namespace Sentry.Internal
 
         public void StartSession()
         {
+            // Attempt to recover persisted session left over from previous run
+            if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
+            {
+                try
+                {
+                    var recoveredSessionUpdate = _sessionManager.TryRecoverPersistedSession();
+                    if (recoveredSessionUpdate is not null)
+                    {
+                        CaptureSession(recoveredSessionUpdate);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to recover persisted session.",
+                        ex
+                    );
+                }
+            }
+
+            // Start a new session
             try
             {
                 var sessionUpdate = _sessionManager.StartSession();
@@ -198,12 +214,16 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                // Only pause if there's anything to pause.
-                // This might race if a session is started at the same time,
-                // but that's fine.
-                if (_sessionManager.IsSessionActive)
+                try
                 {
-                    _sessionPauseTimestamp = _clock.GetUtcNow();
+                    _sessionManager.PauseSession();
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to pause a session.",
+                        ex
+                    );
                 }
             }
         }
@@ -212,29 +232,20 @@ namespace Sentry.Internal
         {
             lock (_sessionPauseLock)
             {
-                // Ensure a session has been paused before
-                if (_sessionPauseTimestamp is not { } sessionPauseTimestamp)
+                try
                 {
-                    return;
+                    foreach (var update in _sessionManager.ResumeSession())
+                    {
+                        CaptureSession(update);
+                    }
                 }
-
-                // If the pause duration exceeded tracking interval, start a new session
-                // (otherwise do nothing)
-                var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
-                if (pauseDuration >= _options.AutoSessionTrackingInterval)
+                catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogDebug(
-                        "Paused session has been paused for {0}, which is longer than the configured limit. " +
-                        "Starting a new session instead of resuming this one.",
-                        pauseDuration
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to resume a session.",
+                        ex
                     );
-
-                    EndSession(sessionPauseTimestamp, SessionEndStatus.Exited);
-                    StartSession();
                 }
-
-                // Reset the pause timestamp since the session is now resumed
-                _sessionPauseTimestamp = null;
             }
         }
 

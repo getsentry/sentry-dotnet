@@ -1,10 +1,46 @@
 # Changelog
 
-## Unreleased
+## 3.8.2
 
-### Fetures
+### Fixes
 
+- Add IsParentSampled to ITransactionContext ([#1128](https://github.com/getsentry/sentry-dotnet/pull/1128)
+- Avoid warn in global mode ([#1132](https://github.com/getsentry/sentry-dotnet/pull/1132))
+- Fix `ParentSampledId` being reset on `Transaction` ([#1130](https://github.com/getsentry/sentry-dotnet/pull/1130))
+
+## 3.8.1
+
+### Fixes
+
+- Persisted Sessions logging ([#1125](https://github.com/getsentry/sentry-dotnet/pull/1125))
+- Don't log an error when attempting to recover a persisted session but none exists ([#1123](https://github.com/getsentry/sentry-dotnet/pull/1123))
+
+### Features
+
+- Introduce scope stack abstraction to support global scope on desktop and mobile applications and `HttpContext`-backed scoped on legacy ASP.NET ([#1124](https://github.com/getsentry/sentry-dotnet/pull/1124))
+
+## 3.8.0
+
+### Fixes
+
+- ASP.NET Core: fix handled not being set for Handled exceptions ([#1111](https://github.com/getsentry/sentry-dotnet/pull/1111))
+
+### Features
+
+- File system persistence for sessions ([#1105](https://github.com/getsentry/sentry-dotnet/pull/1105))
+
+## 3.7.0
+
+### Features
+
+- Add HTTP request breadcrumb ([#1113](https://github.com/getsentry/sentry-dotnet/pull/1113))
+- Integration for Google Cloud Functions ([#1085](https://github.com/getsentry/sentry-dotnet/pull/1085)) 
 - Add ClearAttachments to Scope ([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))
+- Add additional logging and additional fallback for installation ID ([#1103](https://github.com/getsentry/sentry-dotnet/pull/1103))
+
+### Fixes
+
+- Avoid Unhandled Exception on .NET 461 if the Registry Access threw an exception ([#1101](https://github.com/getsentry/sentry-dotnet/pull/1101))
 
 ## 3.6.1
 

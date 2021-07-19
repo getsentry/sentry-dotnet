@@ -8,6 +8,7 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.Internal.ScopeStack;
 using static Sentry.Internal.Constants;
 using static Sentry.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
@@ -20,6 +21,17 @@ namespace Sentry
     public class SentryOptions
     {
         private Dictionary<string, string>? _defaultTags;
+
+        internal IScopeStackContainer? ScopeStackContainer { get; set; }
+
+        /// <summary>
+        /// Specifies whether to use global scope management mode.
+        /// </summary>
+        public bool IsGlobalModeEnabled
+        {
+            get => ScopeStackContainer is GlobalScopeStackContainer;
+            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
+        }
 
         // Override for tests
         internal ITransport? Transport { get; set; }
@@ -461,6 +473,8 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
+        private StackTraceMode? _stackTraceMode;
+
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!
         /// </summary>
@@ -468,7 +482,33 @@ namespace Sentry
         /// Sentry groups events by stack traces. If you change this mode and you have thousands of groups,
         /// you'll get thousands of new groups. So use this setting with care.
         /// </remarks>
-        public StackTraceMode StackTraceMode { get; set; }
+        public StackTraceMode StackTraceMode
+        {
+            get
+            {
+                if (_stackTraceMode is not null)
+                {
+                    return _stackTraceMode.Value;
+                }
+
+                try
+                {
+                    // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
+                    // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
+                    _stackTraceMode = Runtime.Current.Name == ".NET Native"
+                        ? StackTraceMode.Original
+                        : StackTraceMode.Enhanced;
+                }
+                catch (Exception ex)
+                {
+                    _stackTraceMode = StackTraceMode.Enhanced;
+                    DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
+                }
+
+                return _stackTraceMode.Value;
+            }
+            set => _stackTraceMode = value;
+        }
 
         /// <summary>
         /// Maximum allowed file size of attachments, in bytes.
@@ -509,16 +549,15 @@ namespace Sentry
         public bool AutoSessionTracking { get; set; } = false;
 
         /// <summary>
+        /// Delegate which is used to check whether the application crashed during last run.
+        /// </summary>
+        public Func<bool>? CrashedLastRun { get; set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
-            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
-            // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-            StackTraceMode = Runtime.Current.Name == ".NET Native"
-                ? StackTraceMode.Original
-                : StackTraceMode.Enhanced;
-
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
