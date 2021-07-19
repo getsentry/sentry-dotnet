@@ -11,8 +11,10 @@ namespace Sentry.Extensions.Logging
         internal const string EFContextDisposedKey = "EntityFrameworkCore.Infrastructure.ContextDisposed";
         internal const string EFConnectionOpening = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionOpening";
         internal const string EFConnectionClosed = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionClosed";
-        internal const string EFCommandExecuting = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionClosed";
+        internal const string EFCommandExecuting = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting";
         internal const string EFCommandExecuted = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted";
+
+        private AsyncLocal<ISpan?> _contextSpan = new AsyncLocal<ISpan?>();
 
         public void OnCompleted() { }
 
@@ -22,7 +24,7 @@ namespace Sentry.Extensions.Logging
         {
             if (value.Key == EFContextInitializedKey)
             {
-                SentrySdk.GetSpan()?.StartChild("ef.core", "Opening EF Core context.");
+                _contextSpan.Value = SentrySdk.GetSpan()?.StartChild("ef.core", "Opening EF Core context.");
             }
             else if (value.Key == EFConnectionOpening)
             {
@@ -47,13 +49,8 @@ namespace Sentry.Extensions.Logging
                 )
             {
                 connectionSpan.Finish();
-            }
-            else if (value.Key == EFContextDisposedKey &&
-                     SentrySdk.GetSpan() is { } contextSpan &&
-                     contextSpan.Operation == "ef.core"
-                )
-            {
-                contextSpan.Finish();
+                // We finish it here because the transaction will be dispsed once the context is ended.
+                _contextSpan.Value?.Finish();
             }
         }
     }
