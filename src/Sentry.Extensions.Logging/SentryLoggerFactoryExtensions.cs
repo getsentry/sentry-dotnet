@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
@@ -54,7 +53,6 @@ namespace Microsoft.Extensions.Logging
                     options.DiagnosticLogger?.LogDebug("Initializing from {0} and swapping current Hub.", nameof(SentryLoggerFactoryExtensions));
                     hub = SentrySdk.InitHub(options);
                     SentrySdk.UseHub(hub);
-
                 }
             }
             else

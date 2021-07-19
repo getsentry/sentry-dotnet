@@ -82,10 +82,8 @@ namespace Sentry.AspNetCore
                     options.Environment = _hostingEnvironment.EnvironmentName;
                 }
 
-#if !NETSTANDARD2_0
                 //Not the desired place, but I'm unsure where to subscribe it.
                 DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener());
-#endif
             }
 
             options.AddLogEntryFilter((category, _, eventId, _)

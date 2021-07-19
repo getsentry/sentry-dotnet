@@ -1,4 +1,3 @@
-#if !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,45 +7,59 @@ namespace Sentry.Extensions.Logging
 {
     public class NoLockInterceptor : IObserver<KeyValuePair<string, object?>>
     {
-        private AsyncLocal<ISpan?> _span = new AsyncLocal<ISpan?>();
-        private AsyncLocal<ISpan?> _spanConnection = new AsyncLocal<ISpan?>();
-        private AsyncLocal<ISpan?> _spanContext = new AsyncLocal<ISpan?>();
+        internal const string EFContextInitializedKey = "Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized";
+        internal const string EFContextDisposedKey = "EntityFrameworkCore.Infrastructure.ContextDisposed";
+        internal const string EFConnectionOpening = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionOpening";
+        internal const string EFConnectionClosed = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionClosed";
+        internal const string EFCommandExecuting = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionClosed";
+        internal const string EFCommandExecuted = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted";
+
         public void OnCompleted() { }
 
         public void OnError(Exception error) { }
 
         public void OnNext(KeyValuePair<string, object?> value)
         {
-            if (value.Key == "Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized")
+            if (value.Key == EFContextInitializedKey)
             {
-                _spanContext.Value = SentrySdk.GetSpan()?.StartChild("ef.core", "context");
+                SentrySdk.GetSpan()?.StartChild("ef.core", "Opening EF Core context.");
             }
-            else if (value.Key == "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionOpening")
+            else if (value.Key == EFConnectionOpening)
             {
-                _spanConnection.Value = StartChildrenFromSpanOrTransaction(_spanContext.Value, "connection");
+                SentrySdk.GetSpan()?.StartChild("db", "connection");
             }
-            else if (value.Key == "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionClosed")
+            else if (value.Key == EFCommandExecuting)
             {
-                _spanConnection.Value?.Finish();
-                _spanContext.Value?.Finish();
+                SentrySdk.GetSpan()?.StartChild("db", value.Value?.ToString());
             }
-            else if (value.Key == "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting")
-            {
+            else if (value.Key == EFCommandExecuted &&
+                     SentrySdk.GetSpan() is { } querySpan &&
+                     querySpan.Operation == "db" &&
+                     querySpan.Description != "connection")
 
-                _span.Value = StartChildrenFromSpanOrTransaction(_spanConnection.Value, GetLimitedQuery(value.Value?.ToString()));
-            }
-            else if (value.Key == "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted")
             {
-                _span.Value?.Finish(status: SpanStatus.Ok);
+                querySpan.Finish(status: SpanStatus.Ok);
+            }
+            else if (value.Key == EFConnectionClosed &&
+                     SentrySdk.GetSpan() is { } connectionSpan &&
+                     connectionSpan.Operation == "db" &&
+                     connectionSpan.Description == "connection"
+                )
+            {
+                connectionSpan.Finish();
+            }
+            else if (value.Key == EFContextDisposedKey &&
+                     SentrySdk.GetSpan() is { } contextSpan &&
+                     contextSpan.Operation == "ef.core"
+                )
+            {
+                contextSpan.Finish();
             }
         }
-
-        private string? GetLimitedQuery(string? value)
-            => value?.Length > 512 ? value.Substring(0, 512) + "..." : value;
-
-        private ISpan? StartChildrenFromSpanOrTransaction(ISpan? span, string? description)
-            => span?.StartChild("db", description) ?? SentrySdk.GetSpan()?.StartChild("db", description);
     }
+    /// <summary>
+    /// Class that subscribes to specific listeners from DiagnosticListener.
+    /// </summary>
     public class SentryDiagnosticListener : IObserver<DiagnosticListener>
     {
         private readonly NoLockInterceptor _noLockInterceptor = new NoLockInterceptor();
@@ -64,4 +77,3 @@ namespace Sentry.Extensions.Logging
         }
     }
 }
-#endif
