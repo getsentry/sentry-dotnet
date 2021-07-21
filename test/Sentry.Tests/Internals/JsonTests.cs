@@ -12,6 +12,17 @@ namespace Sentry.Tests.Internals
 {
     public class JsonTests
     {
+        private class Fixture
+        {
+            public string ToJsonString(object @object)
+            {
+                using var stream = new MemoryStream();
+                var writer = new Utf8JsonWriter(stream);
+                writer.WriteDynamicValue(@object);
+                return Encoding.UTF8.GetString(stream.ToArray());
+            }
+        }
+
         private class DataAndNonSerializableObject<T>
         {
             /// <summary>
@@ -38,87 +49,88 @@ namespace Sentry.Tests.Internals
             /// A class containing three objects that can be serialized.
             /// </summary>
             /// <param name="obj">The object.</param>
-            public DataWithSerializableObject(T obj) : base(obj){ }
+            public DataWithSerializableObject(T obj) : base(obj) { }
         }
 
-    [Fact]
-    public void WriteDynamicValue_ExceptionParameter_NullOutput()
-    {
-        //Assert
-        using var stream = new MemoryStream();
-        var writer = new Utf8JsonWriter(stream);
-        var ex = new Exception();
+        private readonly Fixture _fixture = new();
 
-        //Act
-        writer.WriteDynamicValue(ex);
+        [Fact]
+        public void WriteDynamicValue_ExceptionParameter_NullOutput()
+        {
+            //Assert
+            var ex = new Exception();
 
-        //Assert
-        Assert.Equal("null", Encoding.UTF8.GetString(stream.ToArray()));
+            //Act
+            var serializedString = _fixture.ToJsonString(ex);
+
+            //Assert
+            Assert.Equal("null", serializedString);
+        }
+
+        [Fact]
+        public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithNullException()
+        {
+            //Assert
+            var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
+            var data = new DataAndNonSerializableObject<Exception>(new Exception("my error"));
+
+            //Act
+            var serializedString = _fixture.ToJsonString(data);
+
+            //Assert
+            Assert.Equal(expectedSerializedData, serializedString);
+        }
+
+        [Fact]
+        public void WriteDynamicValue_TypeParameter_NullOutput()
+        {
+            //Assert
+            var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
+            var data = new DataAndNonSerializableObject<Type>(typeof(List<>).GetGenericArguments()[0]);
+
+            //Act
+            var serializedString = _fixture.ToJsonString(data);
+
+            //Assert
+            Assert.Equal(expectedSerializedData, serializedString);
+        }
+
+        [Fact]
+        public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
+        {
+            //Assert
+            var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
+            var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies().First());
+
+            //Act
+            var serializedString = _fixture.ToJsonString(data);
+
+            //Assert
+            Assert.Equal(expectedSerializedData, serializedString);
+        }
+
+        [Fact]
+        public void WriteDynamicValue_ClassWithTimeZone_SerializedClassWithTimeZoneInfo()
+        {
+            //Assert
+            var timeZone = TimeZoneInfo.CreateCustomTimeZone(
+            "tz_id",
+                TimeSpan.FromHours(2),
+                "my timezone",
+                "my timezone"
+            );
+            var expectedSerializedData = new[] {
+                "\"Id\":tz_id,\"Data\":\"1234\"",
+                "\"DisplayName\":\"my timezone\"",
+                "\"StandardName\":\"my timezone\"",
+                "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0.08333333333333333,\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
+            };
+            var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
+            //Act
+            var serializedString = _fixture.ToJsonString(data);
+
+            //Assert
+            Assert.All(expectedSerializedData, p => p.Contains(serializedString));
+        }
     }
-
-    [Fact]
-    public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithNullException()
-    {
-        //Assert
-        using var stream = new MemoryStream();
-        var writer = new Utf8JsonWriter(stream);
-        var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
-        var data = new DataAndNonSerializableObject<Exception>(new Exception("my error"));
-
-        //Act
-        writer.WriteDynamicValue(data);
-
-        //Assert
-        Assert.Equal(expectedSerializedData, Encoding.UTF8.GetString(stream.ToArray()));
-    }
-
-    [Fact]
-    public void WriteDynamicValue_TypeParameter_NullOutput()
-    {
-        //Assert
-        using var stream = new MemoryStream();
-        var writer = new Utf8JsonWriter(stream);
-        var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
-        var data = new DataAndNonSerializableObject<Type>(typeof(List<>).GetGenericArguments()[0]);
-
-        //Act
-        writer.WriteDynamicValue(data);
-
-        //Assert
-        Assert.Equal(expectedSerializedData, Encoding.UTF8.GetString(stream.ToArray()));
-    }
-
-    [Fact]
-    public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
-    {
-        //Assert
-        using var stream = new MemoryStream();
-        var writer = new Utf8JsonWriter(stream);
-        var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
-        var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies().First());
-
-        //Act
-        writer.WriteDynamicValue(data);
-
-        //Assert
-        Assert.Equal(expectedSerializedData, Encoding.UTF8.GetString(stream.ToArray()));
-    }
-
-    [Fact]
-    public void WriteDynamicValue_ClassWithTimeZone_SerializedClassWithTimeZoneInfo()
-    {
-        //Assert
-        using var stream = new MemoryStream();
-        var writer = new Utf8JsonWriter(stream);
-        var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":{\"Id\":\"UTC\",\"DisplayName\":\"(UTC) Coordinated Universal Time\",\"StandardName\":\"Coordinated Universal Time\",\"DaylightName\":\"Coordinated Universal Time\",\"BaseUtcOffset\":{\"Ticks\":0,\"Days\":0,\"Hours\":0,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0,\"TotalHours\":0,\"TotalMilliseconds\":0,\"TotalMinutes\":0,\"TotalSeconds\":0},\"SupportsDaylightSavingTime\":false}}";
-        var data = new DataWithSerializableObject<TimeZoneInfo>(TimeZoneInfo.Utc);
-
-        //Act
-        writer.WriteDynamicValue(data);
-        var x = Encoding.UTF8.GetString(stream.ToArray());
-
-        //Assert
-        Assert.Equal(expectedSerializedData, Encoding.UTF8.GetString(stream.ToArray()));
-    }
-}
 }
