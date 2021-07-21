@@ -281,7 +281,7 @@ namespace Sentry.Internal.Extensions
             {
                 writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
             }
-            else if (value is Type _)
+            else if (value is Type)
             {
                 writer.WriteNullValue();
             }

@@ -10,12 +10,11 @@ namespace Sentry.Internal
     /// <typeparam name="T">The class to be scrubbed</typeparam>
     internal class JsonConverterScrubber<T> : JsonConverter<T?>
     {
-        public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => default;
+        public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            => default;
 
         public override void Write(Utf8JsonWriter writer, T? value, JsonSerializerOptions options)
-        {
-            writer.WriteNullValue();
-        }
+            => writer.WriteNullValue();
     }
 
     /// <summary>
@@ -28,11 +27,10 @@ namespace Sentry.Internal
         public override bool CanConvert(Type typeToConvert)
             => typeToConvert?.FullName?.StartsWith("System.Reflection") == true;
 
-        public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => default;
+        public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            => default;
 
         public override void Write(Utf8JsonWriter writer, T? value, JsonSerializerOptions options)
-        {
-            writer.WriteNullValue();
-        }
+            => writer.WriteNullValue();
     }
 }

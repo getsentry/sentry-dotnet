@@ -119,13 +119,15 @@ namespace Sentry.Tests.Internals
                 "my timezone",
                 "my timezone"
             );
-            var expectedSerializedData = new[] {
+            var expectedSerializedData = new[]
+            {
                 "\"Id\":tz_id,\"Data\":\"1234\"",
                 "\"DisplayName\":\"my timezone\"",
                 "\"StandardName\":\"my timezone\"",
                 "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0.08333333333333333,\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
             };
             var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
+
             //Act
             var serializedString = _fixture.ToJsonString(data);
 
