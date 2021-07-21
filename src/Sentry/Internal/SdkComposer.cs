@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
 
 namespace Sentry.Internal
@@ -58,7 +59,10 @@ namespace Sentry.Internal
 
                 try
                 {
-                    cachingTransport.FlushAsync(timeout.Token).GetAwaiter().GetResult();
+                    // Don't cancel the flush task, just let it linger in the background but don't wait for it to finish
+                    cachingTransport.FlushAsync(CancellationToken.None)
+                        .WithUncooperativeCancellationAsync(timeout.Token)
+                        .GetAwaiter().GetResult();
                 }
                 catch (OperationCanceledException)
                 {
