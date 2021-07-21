@@ -71,7 +71,7 @@ namespace Sentry.Internal
                     else
                     {
                         _options.DiagnosticLogger?.LogInfo(
-                            "Cache flushing is taking longer than configured timeout of {0}. " +
+                            "Cache flushing is taking longer than the configured timeout of {0}. " +
                             "Continuing without waiting for the task to finish.",
                             _options.InitCacheFlushTimeout
                         );
