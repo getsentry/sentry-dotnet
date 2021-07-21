@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Avoid serializing dangerous types ([#1134](https://github.com/getsentry/sentry-dotnet/pull/1134))
+
 ## 3.8.2
 
 ### Fixes
