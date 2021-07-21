@@ -16,6 +16,8 @@ namespace Sentry.Tunnel
     public class SentryTunnelMiddleware : IMiddleware
     {
         private readonly string[] _allowedHosts;
+        private string? _version;
+        private string Version => _version ??= (GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty);
 
         public SentryTunnelMiddleware(string[] allowedHosts)
         {
@@ -36,7 +38,7 @@ namespace Sentry.Tunnel
 
             var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
             var client = httpClientFactory.CreateClient("SentryTunnel");
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET Tunnel", GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET Tunnel", Version));
             var ms = new MemoryStream();
             await context.Request.Body.CopyToAsync(ms);
             ms.Position = 0;
