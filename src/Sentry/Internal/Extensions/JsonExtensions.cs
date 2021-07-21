@@ -15,12 +15,7 @@ namespace Sentry.Internal.Extensions
         /// </summary>
         public static JsonSerializerOptions? SerializerOption => _serializerOption ??= new JsonSerializerOptions()
         {
-            Converters =
-            {
-                new JsonConverterScrubber((type) => typeof(Exception) == type),
-                new JsonConverterScrubber((type)=> typeof(Type) == type),
-                new JsonConverterScrubber((type) =>  type.FullName?.StartsWith("System.Reflection") == true)
-            },
+            Converters = { new SentryJsonConverter() }
         };
 
         public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
@@ -281,9 +276,9 @@ namespace Sentry.Internal.Extensions
             {
                 writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
             }
-            else if (value is Type t)
+            else if (value is Type type)
             {
-                writer.WriteStringValue(t.FullName);
+                writer.WriteStringValue(type.FullName);
             }
             else
             {

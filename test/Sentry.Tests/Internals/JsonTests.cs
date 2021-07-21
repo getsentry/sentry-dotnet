@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Xunit;
 
@@ -23,6 +24,20 @@ namespace Sentry.Tests.Internals
                 }
                 return Encoding.UTF8.GetString(stream.ToArray());
             }
+
+            public Exception GenerateException(string description)
+            {
+                try
+                {
+                    throw new AccessViolationException(description);
+                }
+                catch (Exception ex)
+                {
+                    return ex;
+                }
+            }
+
+            public SentryJsonConverter GetConverter() => new SentryJsonConverter();
         }
 
         private class DataAndNonSerializableObject<T>
@@ -57,30 +72,62 @@ namespace Sentry.Tests.Internals
         private readonly Fixture _fixture = new();
 
         [Fact]
-        public void WriteDynamicValue_ExceptionParameter_NullOutput()
+        public void WriteDynamicValue_ExceptionParameter_SerialziedException()
         {
             //Assert
-            var ex = new Exception();
+            var expectedMessage = "T est";
+            var expectedData = new KeyValuePair<string,string>("a", "b" );
+            var ex = _fixture.GenerateException(expectedMessage);
+            ex.Data.Add(expectedData.Key, expectedData.Value);
+            var expectedStackTrace = _fixture.ToJsonString(ex.StackTrace);
+            var expectedSerializedData = new[]
+            {
+                $"\"Message\":\"{expectedMessage}\"",
+                "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
+                "\"InnerException\":null",
+                "\"Source\":\"Sentry.Tests\"",
+                $"\"StackTrace\":{expectedStackTrace}"
+            };
 
             //Act
             var serializedString = _fixture.ToJsonString(ex);
 
             //Assert
-            Assert.Equal("null", serializedString);
+            Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
 
         [Fact]
-        public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithNullException()
+        public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithException()
         {
             //Assert
-            var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
-            var data = new DataAndNonSerializableObject<Exception>(new Exception("my error"));
+            var expectedMessage = "T est";
+            var expectedData = new KeyValuePair<string, string>("a", "b");
+            var ex = _fixture.GenerateException(expectedMessage);
+            var expectedStackTrace = _fixture.ToJsonString(ex.StackTrace);
+            ex.Data.Add(expectedData.Key, expectedData.Value);
+
+            var expectedSerializedData =
+                "{\"" +
+                "Id\":1," +
+                "\"Data\":\"1234\"" +
+                ",\"Object\":{";
+
+            var expectedSerializedException = new[]
+{
+                $"\"Message\":\"{expectedMessage}\"",
+                "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
+                "\"InnerException\":null",
+                "\"Source\":\"Sentry.Tests\"",
+                $"\"StackTrace\":{expectedStackTrace}"
+            };
+            var data = new DataWithSerializableObject<Exception>(ex);
 
             //Act
             var serializedString = _fixture.ToJsonString(data);
 
             //Assert
-            Assert.Equal(expectedSerializedData, serializedString);
+            Assert.StartsWith(expectedSerializedData, serializedString);
+            Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
 
         [Fact]
@@ -88,7 +135,7 @@ namespace Sentry.Tests.Internals
         {
             //Assert
             var type = typeof(Exception);
-            var expectedValue = $"\"{type.FullName}\"";
+            var expectedValue = $"\"{_fixture.GetConverter().GetTypeString(type)}\"";
 
             //Act
             var serializedString = _fixture.ToJsonString(type);
@@ -98,16 +145,24 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void WriteDynamicValue_ClassWithTypeParameter_NullOutput()
+        public void WriteDynamicValue_ClassWithTypeParameter_ClassFormatted()
         {
             //Assert
-            var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
-            var data = new DataAndNonSerializableObject<Type>(typeof(List<>).GetGenericArguments()[0]);
+            var type = typeof(List<>).GetGenericArguments()[0];
+            var jsonTypeString = _fixture.ToJsonString(_fixture.GetConverter().GetTypeString(type));
+            var data = new DataWithSerializableObject<Type>(type);
+            var expectedSerializedData =
+                "{" +
+                "\"Id\":1," +
+                "\"Data\":\"1234\"," +
+                $"\"Object\":{jsonTypeString}" +
+                "}";
 
             //Act
             var serializedString = _fixture.ToJsonString(data);
 
             //Assert
+            Assert.NotNull(jsonTypeString);
             Assert.Equal(expectedSerializedData, serializedString);
         }
 
@@ -116,7 +171,7 @@ namespace Sentry.Tests.Internals
         {
             //Assert
             var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
-            var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies().First());
+            var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
 
             //Act
             var serializedString = _fixture.ToJsonString(data);
