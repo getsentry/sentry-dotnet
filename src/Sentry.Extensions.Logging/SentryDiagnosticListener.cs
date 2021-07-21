@@ -5,7 +5,10 @@ using System.Threading;
 
 namespace Sentry.Extensions.Logging
 {
-    public class NoLockInterceptor : IObserver<KeyValuePair<string, object?>>
+    /// <summary>
+    /// Class that consumes EntityFrameworkCore events
+    /// </summary>
+    internal class NoLockInterceptor : IObserver<KeyValuePair<string, object?>>
     {
         internal const string EFContextInitializedKey = "Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized";
         internal const string EFContextDisposedKey = "EntityFrameworkCore.Infrastructure.ContextDisposed";
@@ -14,7 +17,7 @@ namespace Sentry.Extensions.Logging
         internal const string EFCommandExecuting = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting";
         internal const string EFCommandExecuted = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted";
 
-        private AsyncLocal<ISpan?> _contextSpan = new AsyncLocal<ISpan?>();
+        private AsyncLocal<ISpan?> _contextSpan = new();
 
         public void OnCompleted() { }
 
@@ -59,9 +62,9 @@ namespace Sentry.Extensions.Logging
     /// <summary>
     /// Class that subscribes to specific listeners from DiagnosticListener.
     /// </summary>
-    public class SentryDiagnosticListener : IObserver<DiagnosticListener>
+    internal class SentryDiagnosticListener : IObserver<DiagnosticListener>
     {
-        private readonly NoLockInterceptor _noLockInterceptor = new NoLockInterceptor();
+        private readonly NoLockInterceptor _noLockInterceptor = new();
 
         public void OnCompleted() { }
 
@@ -71,7 +74,7 @@ namespace Sentry.Extensions.Logging
         {
             if (listener.Name == "Microsoft.EntityFrameworkCore")
             {
-                var x = listener.Subscribe(_noLockInterceptor);
+                listener.Subscribe(_noLockInterceptor);
             }
         }
     }
