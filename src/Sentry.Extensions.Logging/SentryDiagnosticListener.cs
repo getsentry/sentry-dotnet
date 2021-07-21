@@ -55,6 +55,7 @@ namespace Sentry.Extensions.Logging
             }
         }
     }
+
     /// <summary>
     /// Class that subscribes to specific listeners from DiagnosticListener.
     /// </summary>
