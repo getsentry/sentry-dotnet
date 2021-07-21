@@ -121,7 +121,8 @@ namespace Sentry.Tests.Internals
             );
             var expectedSerializedData = new[]
             {
-                "\"Id\":tz_id,\"Data\":\"1234\"",
+                "\"Id\":1,\"Data\":\"1234\"",
+                "\"Id\":\"tz_id\"",
                 "\"DisplayName\":\"my timezone\"",
                 "\"StandardName\":\"my timezone\"",
                 "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0.08333333333333333,\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
@@ -132,7 +133,7 @@ namespace Sentry.Tests.Internals
             var serializedString = _fixture.ToJsonString(data);
 
             //Assert
-            Assert.All(expectedSerializedData, p => p.Contains(serializedString));
+            Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
     }
 }
