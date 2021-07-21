@@ -1,8 +1,6 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
 
 namespace Sentry.Internal
