@@ -5,16 +5,13 @@ using System.Text.Json.Serialization;
 namespace Sentry.Internal
 {
     /// <summary>
-    /// Replace the data value of the T object by null.
+    /// A converter that removes dangerous classes from being serialized,
+    /// and, also formats some classes like Exception and Type.
     /// </summary>
     internal class SentryJsonConverter : JsonConverter<object?>
     {
-        private bool IsAssignedFrom<T>(Type typeToConvert)
-            => typeof(T).IsAssignableFrom(typeToConvert);
-
         public override bool CanConvert(Type typeToConvert) =>
-            IsAssignedFrom<Type>(typeToConvert) ||
-//            IsAssignedFrom<Exception>(typeToConvert) ||
+            typeof(Type).IsAssignableFrom(typeToConvert) ||
             typeToConvert.FullName?.StartsWith("System.Reflection") == true;
 
         public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
