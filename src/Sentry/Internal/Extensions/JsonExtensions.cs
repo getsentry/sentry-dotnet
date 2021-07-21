@@ -10,16 +10,16 @@ namespace Sentry.Internal.Extensions
     {
         private static JsonSerializerOptions? _serializerOption;
         /// <summary>
-        /// The Json options with a preset of rules that will remove dangerous and problematic <br/>
+        /// The Json options with a preset of rules that will remove dangerous and problematic
         /// data from the serialized object.
         /// </summary>
         public static JsonSerializerOptions? SerializerOption => _serializerOption ??= new JsonSerializerOptions()
         {
             Converters =
             {
-                new JsonConverterScrubber<Exception?>(),
-                new JsonConverterScrubber<Type?>(),
-                new JsonConverterFilterReflection<object>(),
+                new JsonConverterScrubber((type) => typeof(Exception) == type),
+                new JsonConverterScrubber((type)=> typeof(Type) == type),
+                new JsonConverterScrubber((type) =>  type.FullName?.StartsWith("System.Reflection") == true)
             },
         };
 
@@ -281,9 +281,9 @@ namespace Sentry.Internal.Extensions
             {
                 writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
             }
-            else if (value is Type)
+            else if (value is Type t)
             {
-                writer.WriteNullValue();
+                writer.WriteStringValue(t.FullName);
             }
             else
             {

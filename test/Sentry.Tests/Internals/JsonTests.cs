@@ -17,8 +17,10 @@ namespace Sentry.Tests.Internals
             public string ToJsonString(object @object)
             {
                 using var stream = new MemoryStream();
-                var writer = new Utf8JsonWriter(stream);
-                writer.WriteDynamicValue(@object);
+                using (var writer = new Utf8JsonWriter(stream))
+                {
+                    writer.WriteDynamicValue(@object);
+                }
                 return Encoding.UTF8.GetString(stream.ToArray());
             }
         }
@@ -82,7 +84,21 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void WriteDynamicValue_TypeParameter_NullOutput()
+        public void WriteDynamicValue_TypeParameter_FullNameTypeOutput()
+        {
+            //Assert
+            var type = typeof(Exception);
+            var expectedValue = $"\"{type.FullName}\"";
+
+            //Act
+            var serializedString = _fixture.ToJsonString(type);
+
+            //Assert
+            Assert.Equal(expectedValue, serializedString);
+        }
+
+        [Fact]
+        public void WriteDynamicValue_ClassWithTypeParameter_NullOutput()
         {
             //Assert
             var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
@@ -125,7 +141,8 @@ namespace Sentry.Tests.Internals
                 "\"Id\":\"tz_id\"",
                 "\"DisplayName\":\"my timezone\"",
                 "\"StandardName\":\"my timezone\"",
-                "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0.08333333333333333,\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
+                "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0",
+                "\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
             };
             var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
 
