@@ -13,6 +13,10 @@ using Microsoft.Net.Http.Headers;
 
 namespace Sentry.Tunnel
 {
+    // <summary>
+    // Middleware that can forward Sentry envelopes.
+    // </summary>
+    // <seealso href="https://docs.sentry.io/platforms/javascript/troubleshooting/#dealing-with-ad-blockers">
     public class SentryTunnelMiddleware : IMiddleware
     {
         private readonly string[] _allowedHosts;
