@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Don't cancel cache flushing on init ([#1139](https://github.com/getsentry/sentry-dotnet/pull/1139))
+
 ## 3.8.2
 
 ### Fixes
