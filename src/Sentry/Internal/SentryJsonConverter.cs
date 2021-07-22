@@ -19,17 +19,15 @@ namespace Sentry.Internal
 
         public override void Write(Utf8JsonWriter writer, object? value, JsonSerializerOptions options)
         {
-            if (value is Type type)
+            if (value is Type type &&
+                type.FullName != null)
             {
-                writer.WriteStringValue(GetTypeString(type));
+                writer.WriteStringValue(type.FullName);
             }
             else
             {
                 writer.WriteNullValue();
             }
         }
-
-        public string GetTypeString(Type type)
-            => type.FullName ?? type.DeclaringType?.FullName ?? type.Name;
     }
 }

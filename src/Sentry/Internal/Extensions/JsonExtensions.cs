@@ -278,7 +278,7 @@ namespace Sentry.Internal.Extensions
             }
             else if (value is Type type)
             {
-                writer.WriteStringValue(type.FullName);
+                writer.WriteStringValue(type.FullName ?? string.Empty);
             }
             else
             {

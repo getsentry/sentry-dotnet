@@ -135,7 +135,7 @@ namespace Sentry.Tests.Internals
         {
             //Assert
             var type = typeof(Exception);
-            var expectedValue = $"\"{_fixture.GetConverter().GetTypeString(type)}\"";
+            var expectedValue = "\"System.Exception\"";
 
             //Act
             var serializedString = _fixture.ToJsonString(type);
@@ -149,20 +149,18 @@ namespace Sentry.Tests.Internals
         {
             //Assert
             var type = typeof(List<>).GetGenericArguments()[0];
-            var jsonTypeString = _fixture.ToJsonString(_fixture.GetConverter().GetTypeString(type));
             var data = new DataWithSerializableObject<Type>(type);
             var expectedSerializedData =
                 "{" +
                 "\"Id\":1," +
                 "\"Data\":\"1234\"," +
-                $"\"Object\":{jsonTypeString}" +
+                $"\"Object\":null" + //This type has no Full Name.
                 "}";
 
             //Act
             var serializedString = _fixture.ToJsonString(data);
 
             //Assert
-            Assert.NotNull(jsonTypeString);
             Assert.Equal(expectedSerializedData, serializedString);
         }
 
