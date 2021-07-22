@@ -30,17 +30,18 @@ namespace Sentry.Extensions.Logging.Tests
                 => (span) => span.Description != "connection" && span.Operation == "db",
                 _ => throw new NotSupportedException()
             };
+
         private class Fixture
         {
             private TransactionTracer _tracer { get; }
 
-            public IReadOnlyCollection<ISpan> Spans => _tracer.Spans;
+            public IReadOnlyCollection<ISpan> Spans => _tracer?.Spans;
             public IHub Hub { get; set; }
             public Fixture()
             {
                 Hub = Substitute.For<IHub>();
                 _tracer = new TransactionTracer(Hub, "foo", "bar");
-                Hub.GetSpan().ReturnsForAnyArgs(_tracer);
+                Hub.GetSpan().ReturnsForAnyArgs((_) => Spans?.LastOrDefault(s => !s.IsFinished) ?? _tracer);
 
             }
         }
@@ -93,6 +94,7 @@ namespace Sentry.Extensions.Logging.Tests
             interceptor.OnNext(new(EFCommandExecuting, null));
             interceptor.OnNext(new(EFCommandExecuted, expectedSql));
             interceptor.OnNext(new(EFConnectionClosed, null));
+            hub.StartTransaction("foo", "bar");
 
             //Assert
             hub.Received(3).GetSpan();

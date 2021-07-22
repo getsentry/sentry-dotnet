@@ -23,6 +23,7 @@ namespace Sentry.Extensions.Logging
         internal const string EFConnectionClosed = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionClosed";
         internal const string EFCommandExecuting = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting";
         internal const string EFCommandExecuted = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted";
+        internal const string EFCommandFailed = "Microsoft.EntityFrameworkCore.Database.Command.CommandError";
 
         private IHub _hub { get; }
         private AsyncLocal<ISpan?> _contextSpan = new();
@@ -72,15 +73,22 @@ namespace Sentry.Extensions.Logging
             {
                 SetSpan(SentryEFSpanType.Connection, _hub.GetSpan()?.StartChild("db", "connection"));
             }
-            else if (value.Key == EFCommandExecuting)
+            else if (value.Key == EFCommandExecuting &&
+                _hub.GetSpan()?.StartChild("db", null) is { } querySpanExecuting)
             {
-                SetSpan(SentryEFSpanType.Query, _hub.GetSpan()?.StartChild("db", null));
+                SetSpan(SentryEFSpanType.Query, querySpanExecuting);
+            }
+            else if (value.Key == EFCommandFailed &&
+                GetSpan(SentryEFSpanType.Query) is { } errorQuerySpan)
+            {
+                errorQuerySpan.Description = value.Value?.ToString();
+                errorQuerySpan.Finish(SpanStatus.InternalError);
             }
             else if (value.Key == EFCommandExecuted &&
-                GetSpan(SentryEFSpanType.Query) is { } querySpan)
+                GetSpan(SentryEFSpanType.Query) is { } executedQuerySpan)
             {
-                querySpan.Description = value.Value?.ToString();
-                querySpan.Finish(SpanStatus.Ok);
+                executedQuerySpan.Description = value.Value?.ToString();
+                executedQuerySpan.Finish(SpanStatus.Ok);
             }
             else if (value.Key == EFConnectionClosed &&
                      GetSpan(SentryEFSpanType.Connection) is { } connectionSpan)
