@@ -276,10 +276,6 @@ namespace Sentry.Internal.Extensions
             {
                 writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
             }
-            else if (value is Type type)
-            {
-                writer.WriteStringValue(type.FullName ?? string.Empty);
-            }
             else
             {
                 JsonSerializer.Serialize(writer, value, SerializerOption);
