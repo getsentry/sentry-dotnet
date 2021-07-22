@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
@@ -69,6 +70,7 @@ namespace Sentry.Extensions.Logging
                 {
                     hub.ConfigureScope(callback);
                 }
+                DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener(hub));
             }
         }
 
