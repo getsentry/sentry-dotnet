@@ -8,19 +8,20 @@ namespace Sentry.Extensions.Logging
     /// </summary>
     internal class SentryDiagnosticListener : IObserver<DiagnosticListener>
     {
-        private readonly SentryEFCoreInterceptor _efInterceptor;
+        private SentryEFCoreInterceptor? _efInterceptor { get; set; }
 
         private IHub _hub { get; }
 
-        public SentryDiagnosticListener(IHub hub) { _hub = hub; _efInterceptor = new(_hub); }
+        public SentryDiagnosticListener(IHub hub) => _hub = hub;
         public void OnCompleted() { }
 
         public void OnError(Exception error) { }
 
         public void OnNext(DiagnosticListener listener)
         {
-            if (listener.Name == "Microsoft.EntityFrameworkCore")
+            if (listener.Name == "Microsoft.EntityFrameworkCore" && _efInterceptor == null)
             {
+                _efInterceptor = new(_hub);
                 listener.Subscribe(_efInterceptor);
             }
         }
