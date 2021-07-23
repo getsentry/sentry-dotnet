@@ -28,6 +28,7 @@ namespace Sentry.Tunnel
             _allowedHosts = new[] {"sentry.io"}.Concat(allowedHosts).ToArray();
         }
 
+        /// <inheritdoc />
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             if (context.Request.Method == "OPTIONS")
