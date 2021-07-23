@@ -1,4 +1,3 @@
-using Sentry.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +12,7 @@ namespace Sentry.Extensions.Logging.Tests
         internal const string EFConnectionOpening = SentryEFCoreInterceptor.EFConnectionOpening;
         internal const string EFCommandExecuting = SentryEFCoreInterceptor.EFCommandExecuting;
         internal const string EFCommandExecuted = SentryEFCoreInterceptor.EFCommandExecuted;
+        internal const string EFCommandFailed = SentryEFCoreInterceptor.EFCommandFailed;
         internal const string EFConnectionClosed = SentryEFCoreInterceptor.EFConnectionClosed;
 
         private Func<ISpan, bool> GetValidator(string type) =>
@@ -26,9 +26,10 @@ namespace Sentry.Extensions.Logging.Tests
                     => (span) => span.Description == "connection" && span.Operation == "db",
                 var x when
                         x == EFCommandExecuting ||
-                        x == EFCommandExecuting
-                => (span) => span.Description != "connection" && span.Operation == "db",
-                _ => throw new NotSupportedException()
+                        x == EFCommandExecuting ||
+                        x == EFCommandFailed
+                    => (span) => span.Description != "connection" && span.Operation == "db",
+                _   => throw new NotSupportedException()
             };
 
         private class Fixture
@@ -94,7 +95,6 @@ namespace Sentry.Extensions.Logging.Tests
             interceptor.OnNext(new(EFCommandExecuting, null));
             interceptor.OnNext(new(EFCommandExecuted, expectedSql));
             interceptor.OnNext(new(EFConnectionClosed, null));
-            hub.StartTransaction("foo", "bar");
 
             //Assert
             hub.Received(3).GetSpan();
@@ -107,6 +107,46 @@ namespace Sentry.Extensions.Logging.Tests
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);
             });
+            //Check connections between spans
+            Assert.Equal(contextSpan.SpanId, connectionSpan.ParentSpanId);
+            Assert.Equal(connectionSpan.ParentSpanId, querySpan.ParentSpanId);
+
+            Assert.Equal(expectedSql, querySpan.Description);
+        }
+
+
+        [Fact]
+        public void OnNext_HappyPathWithError_TransactionWithErroredQuery()
+        {
+            //Arrange
+            var hub = _fixture.Hub;
+            var interceptor = new SentryEFCoreInterceptor(hub);
+            var expectedSql = "SELECT * FROM ...";
+
+            //Act
+            interceptor.OnNext(new(EFContextInitializedKey, null));
+            interceptor.OnNext(new(EFConnectionOpening, null));
+            interceptor.OnNext(new(EFCommandExecuting, null));
+            interceptor.OnNext(new(EFCommandFailed, expectedSql));
+            interceptor.OnNext(new(EFConnectionClosed, null));
+
+            //Assert
+            hub.Received(3).GetSpan();
+            var contextSpan = _fixture.Spans.First(s => GetValidator(EFContextInitializedKey)(s));
+            var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
+            var querySpan = _fixture.Spans.First(s => GetValidator(EFCommandFailed)(s));
+            //Validate if all spans were finished
+            Assert.All(new[] { contextSpan, connectionSpan},
+                (span) =>
+            {
+                Assert.True(span.IsFinished);
+                Assert.Equal(SpanStatus.Ok, span.Status);
+            });
+
+            //Check the failed query
+            Assert.True(querySpan.IsFinished);
+            Assert.Equal(SpanStatus.InternalError, querySpan.Status);
+
             //Check connections between spans
             Assert.Equal(contextSpan.SpanId, connectionSpan.ParentSpanId);
             Assert.Equal(connectionSpan.ParentSpanId, querySpan.ParentSpanId);
