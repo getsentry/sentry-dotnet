@@ -12,6 +12,7 @@ using Sentry.Internal.Extensions;
 namespace Sentry
 {
     // AKA client mode
+    // https://develop.sentry.dev/sdk/sessions
     internal class GlobalSessionManager : ISessionManager
     {
         private const string PersistedSessionFileName = ".session";
