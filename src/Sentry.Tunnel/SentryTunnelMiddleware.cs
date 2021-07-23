@@ -48,7 +48,7 @@ namespace Sentry.Tunnel
             ms.Position = 0;
             using (var reader = new StreamReader(ms))
             {
-                var header = await reader.ReadLineAsync();
+                var header = await reader.ReadLineAsync().ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(header))
                 {
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
