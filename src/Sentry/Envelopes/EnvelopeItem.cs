@@ -19,6 +19,7 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueUserReport = "user_report";
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueSession = "session";
+        private const string TypeValueSessionAggregate = "sessions";
         private const string TypeValueAttachment = "attachment";
         private const string LengthKey = "length";
         private const string FileNameKey = "filename";
@@ -172,6 +173,19 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
+        /// Creates an envelope item from a session aggregate.
+        /// </summary>
+        public static EnvelopeItem FromSessionAggregate(SessionAggregate sessionAggregate)
+        {
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+            {
+                [TypeKey] = TypeValueSessionAggregate
+            };
+
+            return new EnvelopeItem(header, new JsonSerializable(sessionAggregate));
+        }
+
+        /// <summary>
         /// Creates an envelope item from attachment.
         /// </summary>
         public static EnvelopeItem FromAttachment(Attachment attachment)
@@ -266,7 +280,7 @@ namespace Sentry.Protocol.Envelopes
                 return new JsonSerializable(Transaction.FromJson(json));
             }
 
-            // Session
+            // Session update
             if (string.Equals(payloadType, TypeValueSession, StringComparison.OrdinalIgnoreCase))
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
@@ -274,6 +288,16 @@ namespace Sentry.Protocol.Envelopes
                 var json = Json.Parse(buffer);
 
                 return new JsonSerializable(SessionUpdate.FromJson(json));
+            }
+
+            // Session aggregate
+            if (string.Equals(payloadType, TypeValueSessionAggregate, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                var json = Json.Parse(buffer);
+
+                return new JsonSerializable(SessionAggregate.FromJson(json));
             }
 
             // Arbitrary payload

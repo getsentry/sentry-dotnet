@@ -164,6 +164,21 @@ namespace Sentry.Protocol.Envelopes
             return new Envelope(header, items);
         }
 
+        /// <summary>
+        /// Creates an envelope that contains a session aggregate.
+        /// </summary>
+        public static Envelope FromSessionAggregate(SessionAggregate sessionAggregate)
+        {
+            var header = CreateHeader();
+
+            var items = new[]
+            {
+                EnvelopeItem.FromSessionAggregate(sessionAggregate)
+            };
+
+            return new Envelope(header, items);
+        }
+
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
