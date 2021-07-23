@@ -61,7 +61,7 @@ namespace Sentry.Tunnel
                     if (headerJson == null)
                     {
                         context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                        await context.Response.WriteAsync("Invalid DSN JSON supplied");
+                        await context.Response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
                         return;
                     }
                     if (headerJson.TryGetValue("dsn", out var dsnString) && Uri.TryCreate(dsnString.ToString(), UriKind.Absolute, out var dsn) && _allowedHosts.Contains(dsn.Host))
