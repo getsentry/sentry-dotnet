@@ -23,6 +23,10 @@ namespace Sentry.Tunnel
         private string? _version;
         private string Version => _version ??= (GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty);
 
+        /// <summary>
+        /// Middleware that can forward Sentry envelopes.
+        /// </summary>
+        /// <seealso href="https://docs.sentry.io/platforms/javascript/troubleshooting/#dealing-with-ad-blockers"/>
         public SentryTunnelMiddleware(string[] allowedHosts)
         {
             _allowedHosts = new[] {"sentry.io"}.Concat(allowedHosts).ToArray();
