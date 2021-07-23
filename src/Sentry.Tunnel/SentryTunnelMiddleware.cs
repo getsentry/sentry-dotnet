@@ -83,7 +83,7 @@ namespace Sentry.Tunnel
                 catch(ArgumentNullException)
                 {
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await context.Response.WriteAsync("Received empty body");
+                    await context.Response.WriteAsync("Received empty body").ConfigureAwait(false);
                 }
             }
         }
