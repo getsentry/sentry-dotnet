@@ -42,7 +42,7 @@ namespace Sentry.Tunnel
 
             var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
             var client = httpClientFactory.CreateClient("SentryTunnel");
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET Tunnel", Version));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version));
             var ms = new MemoryStream();
             await context.Request.Body.CopyToAsync(ms);
             ms.Position = 0;
