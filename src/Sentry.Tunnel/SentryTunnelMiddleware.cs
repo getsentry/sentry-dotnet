@@ -72,7 +72,7 @@ namespace Sentry.Tunnel
                             new StreamContent(ms)).ConfigureAwait(false);
                         context.Response.Headers["content-type"] = "application/json";
                         context.Response.StatusCode = StatusCodes.Status200OK;
-                        await responseMessage.Content.CopyToAsync(context.Response.Body);
+                        await responseMessage.Content.CopyToAsync(context.Response.Body).ConfigureAwait(false);
                     }
                 }
                 catch(JsonException)
