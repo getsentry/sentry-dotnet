@@ -69,7 +69,7 @@ namespace Sentry.Tunnel
                         var projectId = dsn.AbsolutePath.Trim('/');
                         ms.Position = 0;
                         var responseMessage = await client.PostAsync($"https://{dsn.Host}/api/{projectId}/envelope/",
-                            new StreamContent(ms));
+                            new StreamContent(ms)).ConfigureAwait(false);
                         context.Response.Headers["content-type"] = "application/json";
                         context.Response.StatusCode = StatusCodes.Status200OK;
                         await responseMessage.Content.CopyToAsync(context.Response.Body);
