@@ -78,7 +78,7 @@ namespace Sentry.Tunnel
                 catch(JsonException)
                 {
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await context.Response.WriteAsync("Invalid DSN JSON supplied");
+                    await context.Response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
                 }
                 catch(ArgumentNullException)
                 {
