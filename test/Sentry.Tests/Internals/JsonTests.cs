@@ -113,7 +113,7 @@ namespace Sentry.Tests.Internals
                 ",\"Object\":{";
 
             var expectedSerializedException = new[]
-{
+            {
                 $"\"Message\":\"{expectedMessage}\"",
                 "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
                 "\"InnerException\":null",
