@@ -49,47 +49,45 @@ namespace Sentry.Tunnel
             var client = httpClientFactory.CreateClient("SentryTunnel");
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version));
             var ms = new MemoryStream();
-            await context.Request.Body.CopyToAsync(ms);
+            await context.Request.Body.CopyToAsync(ms).ConfigureAwait(false);
             ms.Position = 0;
-            using (var reader = new StreamReader(ms))
+            using var reader = new StreamReader(ms);
+            var header = await reader.ReadLineAsync().ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(header))
             {
-                var header = await reader.ReadLineAsync().ConfigureAwait(false);
-                if (string.IsNullOrWhiteSpace(header))
-                {
-                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    return;
-                }
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                return;
+            }
 
-                try
-                {
-                    var headerJson = JsonSerializer.Deserialize<Dictionary<string, object>>(header);
-                    if (headerJson == null)
-                    {
-                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                        await context.Response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
-                        return;
-                    }
-                    if (headerJson.TryGetValue("dsn", out var dsnString) && Uri.TryCreate(dsnString.ToString(), UriKind.Absolute, out var dsn) && _allowedHosts.Contains(dsn.Host))
-                    {
-                        var projectId = dsn.AbsolutePath.Trim('/');
-                        ms.Position = 0;
-                        var responseMessage = await client.PostAsync($"https://{dsn.Host}/api/{projectId}/envelope/",
-                            new StreamContent(ms)).ConfigureAwait(false);
-                        context.Response.Headers["content-type"] = "application/json";
-                        context.Response.StatusCode = StatusCodes.Status200OK;
-                        await responseMessage.Content.CopyToAsync(context.Response.Body).ConfigureAwait(false);
-                    }
-                }
-                catch(JsonException)
+            try
+            {
+                var headerJson = JsonSerializer.Deserialize<Dictionary<string, object>>(header);
+                if (headerJson == null)
                 {
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     await context.Response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
+                    return;
                 }
-                catch(ArgumentNullException)
+                if (headerJson.TryGetValue("dsn", out var dsnString) && Uri.TryCreate(dsnString.ToString(), UriKind.Absolute, out var dsn) && _allowedHosts.Contains(dsn.Host))
                 {
-                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await context.Response.WriteAsync("Received empty body").ConfigureAwait(false);
+                    var projectId = dsn.AbsolutePath.Trim('/');
+                    ms.Position = 0;
+                    var responseMessage = await client.PostAsync($"https://{dsn.Host}/api/{projectId}/envelope/",
+                        new StreamContent(ms)).ConfigureAwait(false);
+                    context.Response.Headers["content-type"] = "application/json";
+                    context.Response.StatusCode = StatusCodes.Status200OK;
+                    await responseMessage.Content.CopyToAsync(context.Response.Body).ConfigureAwait(false);
                 }
+            }
+            catch (JsonException)
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
+            }
+            catch (ArgumentNullException)
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsync("Received empty body").ConfigureAwait(false);
             }
         }
     }

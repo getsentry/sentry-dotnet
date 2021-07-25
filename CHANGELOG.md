@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- New package Sentry.Tunnel to proxy Sentry events ([#1133](https://github.com/getsentry/sentry-dotnet/pull/1133))
+
 ### Fixes
 
 - Avoid serializing dangerous types ([#1134](https://github.com/getsentry/sentry-dotnet/pull/1134))
