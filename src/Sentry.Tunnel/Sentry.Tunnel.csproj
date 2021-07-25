@@ -3,9 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
     <PackageTags>$(PackageTags);Sentry Proxy;Envelopes</PackageTags>
-    <PackageId>Sentry.Tunnel</PackageId>
-    <AssemblyName>Sentry.Tunnel</AssemblyName>
-    <RootNamespace>Sentry.Tunnel</RootNamespace>
     <Description>Official Tunnel middleware for Sentry.</Description>
   </PropertyGroup>
 
