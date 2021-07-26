@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- EF Core performance monitoring ([#1112](https://github.com/getsentry/sentry-dotnet/pull/1112))
+
 ## 3.8.3
 
 ### Features
