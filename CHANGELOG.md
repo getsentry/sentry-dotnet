@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Set error status to transaction if http has exception and ok status ([#1143](https://github.com/getsentry/sentry-dotnet/pull/1143))
+
 ## 3.8.3
 
 ### Features
