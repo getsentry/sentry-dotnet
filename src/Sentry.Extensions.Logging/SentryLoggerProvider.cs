@@ -69,7 +69,7 @@ namespace Sentry.Extensions.Logging
                 {
                     hub.ConfigureScope(callback);
                 }
-                DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener(hub));
+                DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener(hub, options));
             }
         }
 

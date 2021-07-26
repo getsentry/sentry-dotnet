@@ -11,8 +11,14 @@ namespace Sentry.Extensions.Logging
         private SentryEFCoreInterceptor? _efInterceptor { get; set; }
 
         private IHub _hub { get; }
+        private SentryOptions _options { get; }
 
-        public SentryDiagnosticListener(IHub hub) => _hub = hub;
+        public SentryDiagnosticListener(IHub hub, SentryOptions options)
+        {
+            _hub = hub;
+            _options = options;
+        }
+
         public void OnCompleted() { }
 
         public void OnError(Exception error) { }
@@ -21,7 +27,7 @@ namespace Sentry.Extensions.Logging
         {
             if (listener.Name == "Microsoft.EntityFrameworkCore" && _efInterceptor == null)
             {
-                _efInterceptor = new(_hub);
+                _efInterceptor = new(_hub, _options);
                 listener.Subscribe(_efInterceptor);
             }
         }
