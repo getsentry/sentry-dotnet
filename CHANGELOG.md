@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.8.3
+
+### Features
+
+- New package Sentry.Tunnel to proxy Sentry events ([#1133](https://github.com/getsentry/sentry-dotnet/pull/1133))
 
 ### Fixes
 
