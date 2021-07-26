@@ -31,9 +31,9 @@ namespace Sentry.Extensions.Logging
 
         private Dictionary<SentryEFSpanType, ISpan?> _spans => _spansLocal.Value ??= new();
 
-        public SentryEFCoreInterceptor(IHub maHub, SentryOptions options)
+        public SentryEFCoreInterceptor(IHub hub, SentryOptions options)
         {
-            _hub = maHub;
+            _hub = hub;
             _options = options;
         }
 
