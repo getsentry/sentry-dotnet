@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
@@ -156,6 +156,10 @@ namespace Sentry.AspNetCore
                     if (exception is null)
                     {
                         transaction.Finish(status);
+                    }
+                    else if (status == SpanStatus.Ok)
+                    {
+                        transaction.Finish(exception);
                     }
                     else
                     {
