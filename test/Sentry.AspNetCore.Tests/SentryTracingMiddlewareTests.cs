@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP2_1
+#if !NETCOREAPP2_1
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -338,7 +338,8 @@ namespace Sentry.AspNetCore.Tests
             await client.GetAsync("/person/13");
 
             // Assert
-            Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out _));
+            Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out var span));
+            Assert.Equal(SpanStatus.InternalError, span.Status);
         }
     }
 }
