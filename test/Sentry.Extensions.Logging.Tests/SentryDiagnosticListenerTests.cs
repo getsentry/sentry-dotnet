@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Xunit;
 
@@ -45,6 +47,9 @@ namespace Sentry.Extensions.Logging.Tests
 
         private class Fixture
         {
+            private readonly DbContextOptions<ItemsContext> contextOptions;
+            private readonly DbConnection connection;
+
             internal TransactionTracer Tracer { get; }
 
             public IReadOnlyCollection<ISpan> Spans => Tracer?.Spans;
@@ -55,6 +60,11 @@ namespace Sentry.Extensions.Logging.Tests
                 Tracer = new TransactionTracer(Hub, "foo", "bar");
                 Hub.GetSpan().ReturnsForAnyArgs((_) => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
 
+                contextOptions = new DbContextOptionsBuilder<ItemsContext>()
+                .UseSqlite(CreateInMemoryDatabase())
+                .Options;
+
+                connection = RelationalOptionsExtension.Extract(this.contextOptions).Connection;
             }
         }
 

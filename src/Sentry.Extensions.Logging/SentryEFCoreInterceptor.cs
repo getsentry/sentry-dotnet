@@ -51,13 +51,12 @@ namespace Sentry.Extensions.Logging
             try
             {
                 //Query compiler Span           
-                if (value.Key == EFQueryCompiling &&
-                    SetSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value)) is { } span)
+                if (value.Key == EFQueryCompiling)
                 {
                     // There are no events when an error happens to the query compiler so we assume it's an errored span
                     // if not compiled. Also, this query doesn't generate any children so this is good to go.
-                    span.Status = SpanStatus.InternalError;
-                    span.Finish();
+                    SetSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value))
+                        ?.Finish(SpanStatus.InternalError);
                 }
                 else if (value.Key == EFQueryCompiled)
                 {
@@ -77,7 +76,7 @@ namespace Sentry.Extensions.Logging
                 //Query Execution Span
                 else if (value.Key == EFCommandExecuting)
                 {
-                    SetSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
+                    SetSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value))?.Finish();
                 }
                 else if (value.Key == EFCommandFailed)
                 {
@@ -109,6 +108,6 @@ namespace Sentry.Extensions.Logging
         {
             var str = value?.ToString();
             return str?.Substring(str.IndexOf('\n') + 1);
-        }        
+        }
     }
 }
