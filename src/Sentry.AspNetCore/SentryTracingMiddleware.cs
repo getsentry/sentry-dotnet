@@ -157,6 +157,9 @@ namespace Sentry.AspNetCore
                     {
                         transaction.Finish(status);
                     }
+                    // Status code not yet changed to 500 but an exception does exist
+                    // so lets avoid passing the misleading 200 down and close only with
+                    // the exception instance that will be inferred as errored.
                     else if (status == SpanStatus.Ok)
                     {
                         transaction.Finish(exception);
