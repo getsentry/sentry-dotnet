@@ -8,7 +8,7 @@ namespace Sentry.Extensions.Logging
     /// </summary>
     internal class SentryDiagnosticListener : IObserver<DiagnosticListener>
     {
-        private SentryEFCoreInterceptor? _efInterceptor { get; set; }
+        private SentryEFCoreObserver? _efInterceptor { get; set; }
 
         private IHub _hub { get; }
         private SentryOptions _options { get; }

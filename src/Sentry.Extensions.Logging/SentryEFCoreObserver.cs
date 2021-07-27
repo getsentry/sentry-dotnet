@@ -7,7 +7,7 @@ namespace Sentry.Extensions.Logging
     /// <summary>
     /// Class that consumes Entity Framework Core events.
     /// </summary>
-    internal class SentryEFCoreInterceptor : IObserver<KeyValuePair<string, object?>>
+    internal class SentryEFCoreObserver : IObserver<KeyValuePair<string, object?>>
     {
         enum SentryEFSpanType
         {
@@ -31,7 +31,7 @@ namespace Sentry.Extensions.Logging
 
         private Dictionary<SentryEFSpanType, ISpan?> _spans => _spansLocal.Value ??= new();
 
-        public SentryEFCoreInterceptor(IHub hub, SentryOptions options)
+        public SentryEFCoreObserver(IHub hub, SentryOptions options)
         {
             _hub = hub;
             _options = options;
@@ -51,7 +51,7 @@ namespace Sentry.Extensions.Logging
             try
             {
                 //Query compiler Span           
-                if (value.Key == EFQueryCompiling)
+                if (value.Key == EFQueryCompiling || value.Key == "Microsoft.EntityFrameworkCore.Query.QueryCompilationStarting")
                 {
                     // There are no events when an error happens to the query compiler so we assume it's an errored span
                     // if not compiled. Also, this query doesn't generate any children so this is good to go.
