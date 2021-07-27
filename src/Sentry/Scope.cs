@@ -226,9 +226,12 @@ namespace Sentry
                 }
             }
 
-            var overflow = Breadcrumbs.Count - Options.MaxBreadcrumbs + 1;
-
-            if (overflow > 0)
+            if (Options.MaxBreadcrumbs <= 0)
+            {
+                //Always drop the breadcrumb.
+                return;
+            }
+            else if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
             {
                 _breadcrumbs.TryDequeue(out _);
             }
