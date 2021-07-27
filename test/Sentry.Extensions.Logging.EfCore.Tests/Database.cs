@@ -8,8 +8,6 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
     public class Database
     {
         public readonly DbContextOptions<ItemsContext> ContextOptions;
-        private readonly DbConnection _connection;
-
 
         public Database()
         {
@@ -17,9 +15,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             .UseSqlite(CreateInMemoryDatabase())
             .Options;
 
-            _connection = RelationalOptionsExtension.Extract(ContextOptions).Connection;
-
-            Seed();
+            _ = RelationalOptionsExtension.Extract(ContextOptions).Connection;
         }
 
         public void Seed()

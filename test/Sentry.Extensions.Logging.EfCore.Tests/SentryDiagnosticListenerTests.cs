@@ -70,7 +70,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             var result = context.Items.FromSqlRaw("SELECT * FROM Items").ToList();
 
             //Assert
-            Assert.Equal(6, result.Count);
+            Assert.Equal(3, result.Count);
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
             Assert.All(spans, (span) => Assert.True(span.IsFinished));
         }
@@ -94,7 +94,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             await Task.WhenAll(result);
 
             //Assert
-            Assert.Equal(6, result[0].Result.Count);
+            Assert.Equal(3, result[0].Result.Count);
             Assert.Equal(5, spans.Count); //1 query compiler, 4 command (same raw sql so it'll only compile once
             Assert.All(spans, (span) => Assert.True(span.IsFinished));
         }
@@ -118,7 +118,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             await Task.WhenAll(result);
 
             //Assert
-            Assert.Equal(6, result[0].Result.Count);
+            Assert.Equal(3, result[0].Result.Count);
             Assert.Equal(8, spans.Count); //4 query compiler, 4 command (same raw sql so it'll only compile once
             Assert.All(spans, (span) => Assert.True(span.IsFinished));
         }
