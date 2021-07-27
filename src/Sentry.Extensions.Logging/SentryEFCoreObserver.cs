@@ -9,7 +9,7 @@ namespace Sentry.Extensions.Logging
     /// </summary>
     internal class SentryEFCoreObserver : IObserver<KeyValuePair<string, object?>>
     {
-        enum SentryEFSpanType
+        private enum SentryEFSpanType
         {
             Connection,
             QueryExecution,
