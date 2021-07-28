@@ -19,7 +19,6 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             private readonly Database _database;
 
             public IHub Hub { get; set; }
-            public ItemsContext Context => new ItemsContext(_database.ContextOptions);
 
             internal SentryScopeManager ScopeManager { get; }
             public Fixture()
@@ -41,6 +40,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
                 _database = new Database();
                 _database.Seed();
             }
+            public ItemsContext NewContext() => new ItemsContext(_database.ContextOptions);
 
             public ISpan GetSpan()
             {
@@ -66,7 +66,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             var hub = _fixture.Hub;
             var transaction = hub.StartTransaction("test", "test");
             var spans = transaction.Spans;
-            var context = _fixture.Context;
+            var context = _fixture.NewContext();
             Exception exception = null;
 
             //Act
@@ -93,7 +93,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             var hub = _fixture.Hub;
             var transaction = hub.StartTransaction("test", "test");
             var spans = transaction.Spans;
-            var context = _fixture.Context;
+            var context = _fixture.NewContext();
 
             //Act
             var result = context.Items.FromSqlRaw("SELECT * FROM Items").ToList();
@@ -107,7 +107,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
         [Fact]
         public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpansWithOneCompiler()
         {
-            var context = _fixture.Context;
+            var context = _fixture.NewContext();
             var commands = new List<int>();
             var totalCommands = 100;
             for (int j = 0; j < totalCommands; j++)
@@ -132,7 +132,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             {
                 await Task.Delay(rand.Next(10, 100));
                 var command = $"SELECT * FROM Items LIMIT {limit}";
-                itemsList.Add(await _fixture.Context.Items.FromSqlRaw(command).ToListAsync());
+                itemsList.Add(await _fixture.NewContext().Items.FromSqlRaw(command).ToListAsync());
             });
             await Task.WhenAll(tasks);
 
@@ -151,18 +151,18 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
         [Fact]
         public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpans()
         {
+            var context = _fixture.NewContext();
             var hub = _fixture.Hub;
             var transaction = hub.StartTransaction("test", "test");
             var spans = transaction.Spans;
-            var context = _fixture.Context;
 
             //Act
             var result = new[]
             {
-                context.Items.FromSqlRaw("SELECT * FROM Items LIMIT 10").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items LIMIT 9").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items LIMIT 8").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items LIMIT 7").ToListAsync(),
+                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 10").ToListAsync(),
+                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 9").ToListAsync(),
+                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 8").ToListAsync(),
+                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 7").ToListAsync(),
             };
             await Task.WhenAll(result);
 
