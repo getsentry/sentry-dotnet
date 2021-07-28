@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -59,6 +60,33 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
         private readonly Fixture _fixture = new();
 
         [Fact]
+        public void EfCoreIntegration_RunSyncronouQueryWithIssue_TransactionWithSpans()
+        {
+            var hub = _fixture.Hub;
+            var transaction = hub.StartTransaction("test", "test");
+            var spans = transaction.Spans;
+            var context = _fixture.Context;
+            Exception exception = null;
+
+            //Act
+            try
+            {
+                _ = context.Items.FromSqlRaw("SELECT * FROM Items :)").ToList();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            //Assert
+            Assert.NotNull(exception);
+            Assert.Equal(2, spans.Count); //1 query compiler, 1 command
+            Assert.All(spans, (span) => Assert.True(span.IsFinished));
+            Assert.Single(spans.Where(s => s.Status == SpanStatus.InternalError && s.Operation == "db.query"));
+            Assert.Single(spans.Where(s => s.Status == SpanStatus.Ok && s.Operation == "db.query_compiler"));
+        }
+
+        [Fact]
         public void EfCoreIntegration_RunSyncronouQuery_TransactionWithSpans()
         {
             var hub = _fixture.Hub;
@@ -95,8 +123,14 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
 
             //Assert
             Assert.Equal(3, result[0].Result.Count);
-            Assert.Equal(5, spans.Count); //1 query compiler, 4 command (same raw sql so it'll only compile once
-            Assert.All(spans, (span) => Assert.True(span.IsFinished));
+            Assert.Equal(4, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Single(spans.Where(s => s.Operation == "db.query_compiler")); //same raw sql so it'll only compile once
+            Assert.All(spans, (span) =>
+            {
+                Assert.True(span.IsFinished);
+                Assert.Equal(SpanStatus.Ok ,span.Status);
+                Assert.Equal(transaction.SpanId, span.ParentSpanId);
+            });
         }
 
         [Fact]
@@ -119,8 +153,14 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
 
             //Assert
             Assert.Equal(3, result[0].Result.Count);
-            Assert.Equal(8, spans.Count); //4 query compiler, 4 command (same raw sql so it'll only compile once
-            Assert.All(spans, (span) => Assert.True(span.IsFinished));
+            Assert.Equal(4, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Equal(4, spans.Where(s => s.Operation == "db.query_compiler").Count());
+            Assert.All(spans, (span) =>
+            {
+                Assert.True(span.IsFinished);
+                Assert.Equal(SpanStatus.Ok, span.Status);
+                Assert.Equal(transaction.SpanId, span.ParentSpanId);
+            });
         }
     }
 }

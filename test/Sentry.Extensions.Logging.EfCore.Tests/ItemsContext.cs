@@ -4,10 +4,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
 {
     public class ItemsContext : DbContext
     {
-        public ItemsContext(DbContextOptions options)
-            : base(options)
-        {
-        }
+        public ItemsContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Item> Items { get; set; }
 

@@ -6,5 +6,4 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
 
         public string Name { get; set; }
     }
-
 }

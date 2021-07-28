@@ -17,6 +17,7 @@ namespace Sentry.Extensions.Logging
         private readonly SentryLoggingOptions _options;
         private readonly IDisposable? _scope;
         private readonly IDisposable? _disposableHub;
+        private readonly IDisposable? _diagnosticListener;
 
         internal IHub Hub { get; }
 
@@ -69,7 +70,7 @@ namespace Sentry.Extensions.Logging
                 {
                     hub.ConfigureScope(callback);
                 }
-                DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener(hub, options));
+                _diagnosticListener = DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener(hub, options));
             }
         }
 
@@ -87,6 +88,7 @@ namespace Sentry.Extensions.Logging
         {
             _scope?.Dispose();
             _disposableHub?.Dispose();
+            _diagnosticListener?.Dispose();
         }
     }
 }

@@ -21,6 +21,16 @@ namespace Sentry.Extensions.Logging
         internal const string EFCommandExecuting = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting";
         internal const string EFCommandExecuted = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted";
         internal const string EFCommandFailed = "Microsoft.EntityFrameworkCore.Database.Command.CommandError";
+
+        /// <summary>
+        /// Used for EF Core 5.X,
+        ///  <a href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreloggerextensions.querycompilationstarting?view=efcore-5.0">See</a>.
+        /// </summary>
+        internal const string EFQueryStartCompiling = "Microsoft.EntityFrameworkCore.Query.QueryCompilationStarting";
+        /// <summary>
+        /// Used for EF Core 2.X and 3.X, 
+        ///  <a href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1">See</a>.
+        /// </summary>
         internal const string EFQueryCompiling = "Microsoft.EntityFrameworkCore.Query.QueryModelCompiling";
         internal const string EFQueryCompiled = "Microsoft.EntityFrameworkCore.Query.QueryExecutionPlanned";
 
@@ -51,7 +61,7 @@ namespace Sentry.Extensions.Logging
             try
             {
                 //Query compiler Span           
-                if (value.Key == EFQueryCompiling || value.Key == "Microsoft.EntityFrameworkCore.Query.QueryCompilationStarting")
+                if (value.Key == EFQueryStartCompiling || value.Key == EFQueryCompiling)
                 {
                     // There are no events when an error happens to the query compiler so we assume it's an errored span
                     // if not compiled. Also, this query doesn't generate any children so this is good to go.
@@ -64,6 +74,7 @@ namespace Sentry.Extensions.Logging
                 }
 
                 //Connection Span
+                //A transaction may or may not show a connection with it.
                 else if (value.Key == EFConnectionOpening)
                 {
                     SetSpan(SentryEFSpanType.Connection, "db.connection", null);

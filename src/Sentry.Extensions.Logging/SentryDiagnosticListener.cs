@@ -25,7 +25,7 @@ namespace Sentry.Extensions.Logging
 
         public void OnNext(DiagnosticListener listener)
         {
-            if (listener.Name == "Microsoft.EntityFrameworkCore" && _efInterceptor == null)
+            if (listener.Name == "Microsoft.EntityFrameworkCore")
             {
                 _efInterceptor = new(_hub, _options);
                 listener.Subscribe(_efInterceptor);
