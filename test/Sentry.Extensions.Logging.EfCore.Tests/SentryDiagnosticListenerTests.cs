@@ -109,7 +109,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
         {
             var context = _fixture.NewContext();
             var commands = new List<int>();
-            var totalCommands = 100;
+            var totalCommands = 50;
             for (int j = 0; j < totalCommands; j++)
             {
                 var i = j + 4;
