@@ -12,6 +12,7 @@ using Xunit;
 
 namespace Sentry.Extensions.Logging.EfCore.Tests
 {
+    [Collection("Sequential.EfCore")]
     public class SentryDiagnosticListenerTests
     {
         private class Fixture
