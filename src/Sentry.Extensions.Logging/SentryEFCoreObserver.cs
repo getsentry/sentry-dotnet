@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -37,9 +38,9 @@ namespace Sentry.Extensions.Logging
         private IHub _hub { get; }
         private SentryOptions _options { get; }
 
-        private AsyncLocal<Dictionary<SentryEFSpanType, ISpan?>> _spansLocal = new();
-
-        private Dictionary<SentryEFSpanType, ISpan?> _spans => _spansLocal.Value ??= new();
+        private AsyncLocal<ConcurrentBag<ISpan>> _spansCompilerLocal = new();
+        private AsyncLocal<ConcurrentBag<ISpan>> _spansQueryLocal = new();
+        private AsyncLocal<ConcurrentBag<ISpan>> _spansConnectionLocal = new();
 
         public SentryEFCoreObserver(IHub hub, SentryOptions options)
         {
@@ -47,10 +48,37 @@ namespace Sentry.Extensions.Logging
             _options = options;
         }
 
-        private ISpan? SetSpan(SentryEFSpanType type, string operation, string? description)
-            => _spans[type] = _hub.GetSpan()?.StartChild(operation, description);
+        private ISpan? AddSpan(SentryEFSpanType type, string operation, string? description)
+        {
+            if (_hub.GetSpan()?.StartChild(operation, description) is { } span)
+            {
+                var bag = type switch
+                {
+                    SentryEFSpanType.QueryCompiler => _spansCompilerLocal.Value ??= new ConcurrentBag<ISpan>(),
+                    SentryEFSpanType.QueryExecution => _spansQueryLocal.Value ??= new ConcurrentBag<ISpan>(),
+                    SentryEFSpanType.Connection => _spansConnectionLocal.Value ??= new ConcurrentBag<ISpan>(),
+                    _ => null
+                };
+                bag?.Add(span);
+                return span;
+            }
+            return null;
+        }
 
-        private ISpan? GetSpan(SentryEFSpanType type) => _spans.GetValueOrDefault(type);
+        private ISpan? TakeSpan(SentryEFSpanType type)
+        {
+            var bag =  type switch
+            {
+                SentryEFSpanType.QueryCompiler => _spansCompilerLocal.Value,
+                SentryEFSpanType.QueryExecution => _spansQueryLocal.Value,
+                SentryEFSpanType.Connection => _spansConnectionLocal.Value,
+                _ => null
+            };
+            ISpan? span = null;
+            bag?.TryTake(out span);
+            return span;
+        }
+
 
         public void OnCompleted() { }
 
@@ -65,37 +93,37 @@ namespace Sentry.Extensions.Logging
                 {
                     // There are no events when an error happens to the query compiler so we assume it's an errored span
                     // if not compiled. Also, this query doesn't generate any children so this is good to go.
-                    SetSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value))
+                    AddSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value))
                         ?.Finish(SpanStatus.InternalError);
                 }
                 else if (value.Key == EFQueryCompiled)
                 {
-                    GetSpan(SentryEFSpanType.QueryCompiler)?.Finish(SpanStatus.Ok);
+                    TakeSpan(SentryEFSpanType.QueryCompiler)?.Finish(SpanStatus.Ok);
                 }
 
                 //Connection Span
                 //A transaction may or may not show a connection with it.
                 else if (value.Key == EFConnectionOpening)
                 {
-                    SetSpan(SentryEFSpanType.Connection, "db.connection", null);
+                    AddSpan(SentryEFSpanType.Connection, "db.connection", null);
                 }
                 else if (value.Key == EFConnectionClosed)
                 {
-                    GetSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
+                    TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
                 }
 
                 //Query Execution Span
                 else if (value.Key == EFCommandExecuting)
                 {
-                    SetSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value))?.Finish();
+                    AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value))?.Finish();
                 }
                 else if (value.Key == EFCommandFailed)
                 {
-                    GetSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
+                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
                 }
                 else if (value.Key == EFCommandExecuted)
                 {
-                    GetSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
+                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
                 }
             }
             catch (Exception ex)

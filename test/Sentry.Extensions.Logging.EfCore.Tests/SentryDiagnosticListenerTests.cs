@@ -109,12 +109,14 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
         {
             var context = _fixture.Context;
             var commands = new List<int>();
-            for (int j = 3; j < 500; j++)
+            var totalCommands = 100;
+            for (int j = 0; j < totalCommands; j++)
             {
-                context.Items.Add(new Item() { Name = $"Number {4 + j}" });
-                context.Items.Add(new Item() { Name = $"Number2 {4 + j}" });
-                context.Items.Add(new Item() { Name = $"Number3 {4 + j}" });
-                commands.Add(j * 2);
+                var i = j + 4;
+                context.Items.Add(new Item() { Name = $"Number {i}" });
+                context.Items.Add(new Item() { Name = $"Number2 {i}" });
+                context.Items.Add(new Item() { Name = $"Number3 {i}" });
+                commands.Add(i * 2);
             }
             //Save before the Transaction cretion to avoid storing junk
             context.SaveChanges();
@@ -135,9 +137,9 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             await Task.WhenAll(tasks);
 
             //Assert
-            Assert.Equal(500, itemsList.Count);
-            Assert.Equal(500, spans.Where(s => s.Operation == "db.query").Count());
-            Assert.Equal(500, spans.Where(s => s.Operation == "db.query_compiler").Count());
+            Assert.Equal(totalCommands, itemsList.Count);
+            Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query_compiler").Count());
             Assert.All(spans, (span) =>
             {
                 Assert.True(span.IsFinished);
