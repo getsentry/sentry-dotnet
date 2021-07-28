@@ -41,6 +41,12 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             var connection = new SqliteConnection("Filename=:memory:");
 
             connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA journal_mode=WAL;";
+                command.ExecuteNonQuery();
+            }
+
 
             return connection;
         }

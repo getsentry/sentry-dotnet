@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -106,29 +107,41 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
         [Fact]
         public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpansWithOneCompiler()
         {
+            var context = _fixture.Context;
+            var commands = new List<int>();
+            for (int j = 3; j < 500; j++)
+            {
+                context.Items.Add(new Item() { Name = $"Number {4 + j}" });
+                context.Items.Add(new Item() { Name = $"Number2 {4 + j}" });
+                context.Items.Add(new Item() { Name = $"Number3 {4 + j}" });
+                commands.Add(j * 2);
+            }
+            //Save before the Transaction cretion to avoid storing junk
+            context.SaveChanges();
+
             var hub = _fixture.Hub;
             var transaction = hub.StartTransaction("test", "test");
             var spans = transaction.Spans;
-            var context = _fixture.Context;
+            var itemsList = new ConcurrentBag<List<Item>>();
+            var rand = new Random();
 
             //Act
-            var result = new[]
+            var tasks = commands.Select(async limit =>
             {
-                context.Items.FromSqlRaw("SELECT * FROM Items").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items").ToListAsync(),
-            };
-            await Task.WhenAll(result);
+                await Task.Delay(rand.Next(10, 100));
+                var command = $"SELECT * FROM Items LIMIT {limit}";
+                itemsList.Add(await _fixture.Context.Items.FromSqlRaw(command).ToListAsync());
+            });
+            await Task.WhenAll(tasks);
 
             //Assert
-            Assert.Equal(3, result[0].Result.Count);
-            Assert.Equal(4, spans.Where(s => s.Operation == "db.query").Count());
-            Assert.Single(spans.Where(s => s.Operation == "db.query_compiler")); //same raw sql so it'll only compile once
+            Assert.Equal(500, itemsList.Count);
+            Assert.Equal(500, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Equal(500, spans.Where(s => s.Operation == "db.query_compiler").Count());
             Assert.All(spans, (span) =>
             {
                 Assert.True(span.IsFinished);
-                Assert.Equal(SpanStatus.Ok ,span.Status);
+                Assert.Equal(SpanStatus.Ok, span.Status);
                 Assert.Equal(transaction.SpanId, span.ParentSpanId);
             });
         }
@@ -162,5 +175,6 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
                 Assert.Equal(transaction.SpanId, span.ParentSpanId);
             });
         }
+
     }
 }
