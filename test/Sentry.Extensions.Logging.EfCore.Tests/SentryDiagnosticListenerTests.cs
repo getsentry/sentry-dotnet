@@ -12,7 +12,6 @@ using Xunit;
 
 namespace Sentry.Extensions.Logging.EfCore.Tests
 {
-    [Collection("Sequential.EfCore")]
     public class SentryDiagnosticListenerTests
     {
         private class Fixture
@@ -26,9 +25,9 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             {
                 var options = new SentryOptions();
                 ScopeManager = new SentryScopeManager(
-                new AsyncLocalScopeStackContainer(),
-                options,
-                Substitute.For<ISentryClient>()
+                    new AsyncLocalScopeStackContainer(),
+                    options,
+                    Substitute.For<ISentryClient>()
                 );
 
                 Hub = Substitute.For<IHub>();
@@ -36,7 +35,7 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
                 Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<IReadOnlyDictionary<string, object>>())
                     .ReturnsForAnyArgs(callinfo => StartTransaction(Hub, callinfo.Arg<ITransactionContext>()));
 
-                DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticListener(Hub, options));
+                DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticSubscriber(Hub, options));
 
                 _database = new Database();
                 _database.Seed();
@@ -131,7 +130,6 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             //Act
             var tasks = commands.Select(async limit =>
             {
-                await Task.Delay(rand.Next(10, 100));
                 var command = $"SELECT * FROM Items LIMIT {limit}";
                 itemsList.Add(await _fixture.NewContext().Items.FromSqlRaw(command).ToListAsync());
             });
@@ -178,6 +176,5 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
                 Assert.Equal(transaction.SpanId, span.ParentSpanId);
             });
         }
-
     }
 }

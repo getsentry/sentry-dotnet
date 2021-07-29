@@ -1,14 +1,14 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using Sentry.Extensibility;
 
 namespace Sentry.Extensions.Logging
 {
     /// <summary>
     /// Class that consumes Entity Framework Core events.
     /// </summary>
-    internal class SentryEFCoreObserver : IObserver<KeyValuePair<string, object?>>
+    internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
     {
         private enum SentryEFSpanType
         {
@@ -24,13 +24,13 @@ namespace Sentry.Extensions.Logging
         internal const string EFCommandFailed = "Microsoft.EntityFrameworkCore.Database.Command.CommandError";
 
         /// <summary>
-        /// Used for EF Core 5.X,
-        ///  <a href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreloggerextensions.querycompilationstarting?view=efcore-5.0">See</a>.
+        /// Used for EF Core 2.X and 3.X. 
+        /// <seealso href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1"></seealso>
         /// </summary>
         internal const string EFQueryStartCompiling = "Microsoft.EntityFrameworkCore.Query.QueryCompilationStarting";
         /// <summary>
-        /// Used for EF Core 2.X and 3.X, 
-        ///  <a href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1">See</a>.
+        /// Used for EF Core 2.X and 3.X.
+        /// <seealso href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1"></seealso>
         /// </summary>
         internal const string EFQueryCompiling = "Microsoft.EntityFrameworkCore.Query.QueryModelCompiling";
         internal const string EFQueryCompiled = "Microsoft.EntityFrameworkCore.Query.QueryExecutionPlanned";
@@ -38,11 +38,11 @@ namespace Sentry.Extensions.Logging
         private IHub _hub { get; }
         private SentryOptions _options { get; }
 
-        private AsyncLocal<ConcurrentBag<ISpan>> _spansCompilerLocal = new();
-        private AsyncLocal<ConcurrentBag<ISpan>> _spansQueryLocal = new();
-        private AsyncLocal<ConcurrentBag<ISpan>> _spansConnectionLocal = new();
+        private AsyncLocal<WeakReference<ISpan>> _spansCompilerLocal = new();
+        private AsyncLocal<WeakReference<ISpan>> _spansQueryLocal = new();
+        private AsyncLocal<WeakReference<ISpan>> _spansConnectionLocal = new();
 
-        public SentryEFCoreObserver(IHub hub, SentryOptions options)
+        public SentryEFCoreListener(IHub hub, SentryOptions options)
         {
             _hub = hub;
             _options = options;
@@ -52,14 +52,16 @@ namespace Sentry.Extensions.Logging
         {
             if (_hub.GetSpan()?.StartChild(operation, description) is { } span)
             {
-                var bag = type switch
+                if (type switch
                 {
-                    SentryEFSpanType.QueryCompiler => _spansCompilerLocal.Value ??= new ConcurrentBag<ISpan>(),
-                    SentryEFSpanType.QueryExecution => _spansQueryLocal.Value ??= new ConcurrentBag<ISpan>(),
-                    SentryEFSpanType.Connection => _spansConnectionLocal.Value ??= new ConcurrentBag<ISpan>(),
+                    SentryEFSpanType.QueryCompiler => _spansCompilerLocal,
+                    SentryEFSpanType.QueryExecution => _spansQueryLocal,
+                    SentryEFSpanType.Connection => _spansConnectionLocal,
                     _ => null
-                };
-                bag?.Add(span);
+                } is { } asyncLocalSpan)
+                {
+                    asyncLocalSpan.Value = new WeakReference<ISpan>(span);
+                }
                 return span;
             }
             return null;
@@ -67,16 +69,18 @@ namespace Sentry.Extensions.Logging
 
         private ISpan? TakeSpan(SentryEFSpanType type)
         {
-            var bag =  type switch
+            if (type switch
             {
                 SentryEFSpanType.QueryCompiler => _spansCompilerLocal.Value,
                 SentryEFSpanType.QueryExecution => _spansQueryLocal.Value,
                 SentryEFSpanType.Connection => _spansConnectionLocal.Value,
                 _ => null
-            };
-            ISpan? span = null;
-            bag?.TryTake(out span);
-            return span;
+            } is { } reference && reference.TryGetTarget(out var span))
+            {
+                return span;
+            }
+            _options.DiagnosticLogger?.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
+            return null;
         }
 
 
@@ -93,8 +97,7 @@ namespace Sentry.Extensions.Logging
                 {
                     // There are no events when an error happens to the query compiler so we assume it's an errored span
                     // if not compiled. Also, this query doesn't generate any children so this is good to go.
-                    AddSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value))
-                        ?.Finish(SpanStatus.InternalError);
+                    AddSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value));
                 }
                 else if (value.Key == EFQueryCompiled)
                 {
@@ -115,7 +118,7 @@ namespace Sentry.Extensions.Logging
                 //Query Execution Span
                 else if (value.Key == EFCommandExecuting)
                 {
-                    AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value))?.Finish();
+                    AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
                 }
                 else if (value.Key == EFCommandFailed)
                 {
@@ -128,7 +131,7 @@ namespace Sentry.Extensions.Logging
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.Log(SentryLevel.Error, "Failed to intercept EF Core event.", ex);
+                _options.DiagnosticLogger?.LogError("Failed to intercept EF Core event.", ex);
             }
         }
 

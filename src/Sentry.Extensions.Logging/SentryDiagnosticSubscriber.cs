@@ -6,14 +6,14 @@ namespace Sentry.Extensions.Logging
     /// <summary>
     /// Class that subscribes to specific listeners from DiagnosticListener.
     /// </summary>
-    internal class SentryDiagnosticListener : IObserver<DiagnosticListener>
+    internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>
     {
-        private SentryEFCoreObserver? _efInterceptor { get; set; }
+        private SentryEFCoreListener? _efInterceptor { get; set; }
 
         private IHub _hub { get; }
         private SentryOptions _options { get; }
 
-        public SentryDiagnosticListener(IHub hub, SentryOptions options)
+        public SentryDiagnosticSubscriber(IHub hub, SentryOptions options)
         {
             _hub = hub;
             _options = options;
