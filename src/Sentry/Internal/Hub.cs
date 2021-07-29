@@ -13,8 +13,6 @@ namespace Sentry.Internal
 {
     internal class Hub : IHub, IDisposable
     {
-        private readonly object _sessionPauseLock = new();
-
         private readonly ISentryClient _ownedClient;
         private readonly ISystemClock _clock;
         private readonly ISessionManager _sessionManager;
@@ -22,8 +20,6 @@ namespace Sentry.Internal
         private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
-
-        private int _isPersistedSessionRecovered;
 
         // Internal for testability
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
@@ -46,18 +42,20 @@ namespace Sentry.Internal
                 options.DiagnosticLogger?.LogFatal(msg);
                 throw new InvalidOperationException(msg);
             }
+
             options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
             _options = options;
             _ownedClient = client ?? new SentryClient(options);
             _clock = clock ?? SystemClock.Clock;
-            _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
             ScopeManager = scopeManager ?? new SentryScopeManager(
                 options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
                 options,
                 _ownedClient
             );
+
+            _sessionManager = sessionManager ?? new GlobalSessionManager(options, _ownedClient, ScopeManager, clock);
 
             _rootScope = options.IsGlobalModeEnabled
                 ? DisabledHub.Instance
@@ -172,34 +170,9 @@ namespace Sentry.Internal
 
         public void StartSession()
         {
-            // Attempt to recover persisted session left over from previous run
-            if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
-            {
-                try
-                {
-                    var recoveredSessionUpdate = _sessionManager.TryRecoverPersistedSession();
-                    if (recoveredSessionUpdate is not null)
-                    {
-                        CaptureSession(recoveredSessionUpdate);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to recover persisted session.",
-                        ex
-                    );
-                }
-            }
-
-            // Start a new session
             try
             {
-                var sessionUpdate = _sessionManager.StartSession();
-                if (sessionUpdate is not null)
-                {
-                    CaptureSession(sessionUpdate);
-                }
+                _sessionManager.StartSession();
             }
             catch (Exception ex)
             {
@@ -212,52 +185,39 @@ namespace Sentry.Internal
 
         public void PauseSession()
         {
-            lock (_sessionPauseLock)
+            try
             {
-                try
-                {
-                    _sessionManager.PauseSession();
-                }
-                catch (Exception ex)
-                {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to pause a session.",
-                        ex
-                    );
-                }
+                _sessionManager.PauseSession();
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to pause a session.",
+                    ex
+                );
             }
         }
 
         public void ResumeSession()
         {
-            lock (_sessionPauseLock)
+            try
             {
-                try
-                {
-                    foreach (var update in _sessionManager.ResumeSession())
-                    {
-                        CaptureSession(update);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to resume a session.",
-                        ex
-                    );
-                }
+                _sessionManager.ResumeSession();
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to resume a session.",
+                    ex
+                );
             }
         }
 
-        private void EndSession(DateTimeOffset timestamp, SessionEndStatus status)
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
         {
             try
             {
-                var sessionUpdate = _sessionManager.EndSession(timestamp, status);
-                if (sessionUpdate is not null)
-                {
-                    CaptureSession(sessionUpdate);
-                }
+                _sessionManager.EndSession(status);
             }
             catch (Exception ex)
             {
@@ -267,9 +227,6 @@ namespace Sentry.Internal
                 );
             }
         }
-
-        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
-            EndSession(_clock.GetUtcNow(), status);
 
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {

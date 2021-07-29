@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -18,31 +17,38 @@ namespace Sentry
         private const string PersistedSessionFileName = ".session";
 
         private readonly object _installationIdLock = new();
+        private readonly object _pauseResumeLock = new();
 
+        private readonly SentryOptions _options;
+        private readonly ISentryClient _client;
+        private readonly IInternalScopeManager _scopeManager;
         private readonly ISystemClock _clock;
         private readonly Func<string, PersistedSessionUpdate> _persistedSessionProvider;
-        private readonly SentryOptions _options;
 
         private readonly string? _persistenceDirectoryPath;
 
         private string? _resolvedInstallationId;
-        private Session? _currentSession;
+        private int _isPersistedSessionRecovered;
         private DateTimeOffset? _lastPauseTimestamp;
 
         // Internal for testing
+        private Session? _currentSession;
         internal Session? CurrentSession => _currentSession;
-
-        public bool IsSessionActive => _currentSession is not null;
 
         public GlobalSessionManager(
             SentryOptions options,
+            ISentryClient client,
+            IInternalScopeManager scopeManager,
             ISystemClock? clock = null,
-            Func<string,PersistedSessionUpdate>? persistedSessionProvider = null)
+            Func<string, PersistedSessionUpdate>? persistedSessionProvider = null)
         {
             _options = options;
+            _client = client;
+            _scopeManager = scopeManager;
             _clock = clock ?? SystemClock.Clock;
-            _persistedSessionProvider = persistedSessionProvider
-                                        ?? (filePath => PersistedSessionUpdate.FromJson(Json.Load(filePath)));
+            _persistedSessionProvider =
+                persistedSessionProvider
+                ?? (filePath => PersistedSessionUpdate.FromJson(Json.Load(filePath)));
 
             // TODO: session file should really be process-isolated, but we
             // don't have a proper mechanism for that right now.
@@ -279,7 +285,7 @@ namespace Sentry
             }
         }
 
-        public SessionUpdate? TryRecoverPersistedSession()
+        private SessionUpdate? TryRecoverPersistedSession()
         {
             _options.DiagnosticLogger?.LogDebug("Attempting to recover persisted session from file.");
 
@@ -334,8 +340,28 @@ namespace Sentry
             }
         }
 
-        public SessionUpdate? StartSession()
+        public void StartSession()
         {
+            // Attempt to recover persisted session left over from previous run
+            if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
+            {
+                try
+                {
+                    var recoveredSessionUpdate = TryRecoverPersistedSession();
+                    if (recoveredSessionUpdate is not null)
+                    {
+                        _client.CaptureSession(recoveredSessionUpdate);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _options.DiagnosticLogger?.LogError(
+                        "Failed to recover persisted session.",
+                        ex
+                    );
+                }
+            }
+
             // Extract release
             var release = ReleaseLocator.Resolve(_options);
             if (string.IsNullOrWhiteSpace(release))
@@ -345,7 +371,7 @@ namespace Sentry
                     "Failed to start a session because there is no release information."
                 );
 
-                return null;
+                return;
             }
 
             // Extract other parameters
@@ -372,28 +398,28 @@ namespace Sentry
                 session.Id, session.DistinctId
             );
 
-            var update = session.CreateUpdate(true, _clock.GetUtcNow());
+            var sessionUpdate = session.CreateUpdate(true, _clock.GetUtcNow());
+            PersistSession(sessionUpdate);
 
-            PersistSession(update);
-
-            return update;
+            _client.CaptureSession(sessionUpdate);
+            _scopeManager.ConfigureScope(scope => scope.SessionUpdate = sessionUpdate);
         }
 
-        private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
+        private void EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
         {
             _options.DiagnosticLogger?.LogInfo(
                 "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
                 session.Id, session.DistinctId, status
             );
 
-            var update = session.CreateUpdate(false, timestamp, status);
-
+            var sessionUpdate = session.CreateUpdate(false, timestamp, status);
             DeletePersistedSession();
 
-            return update;
+            _client.CaptureSession(sessionUpdate);
+            _scopeManager.ConfigureScope(scope => scope.SessionUpdate = null);
         }
 
-        public SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status)
+        public void EndSession(DateTimeOffset timestamp, SessionEndStatus status)
         {
             var session = Interlocked.Exchange(ref _currentSession, null);
             if (session is null)
@@ -402,100 +428,79 @@ namespace Sentry
                     "Failed to end session because there is none active."
                 );
 
-                return null;
+                return;
             }
 
-            return EndSession(session, timestamp, status);
+            EndSession(session, timestamp, status);
         }
 
-        public SessionUpdate? EndSession(SessionEndStatus status) => EndSession(_clock.GetUtcNow(), status);
+        public void EndSession(SessionEndStatus status) => EndSession(_clock.GetUtcNow(), status);
 
         public void PauseSession()
         {
-            if (_currentSession is { } session)
+            lock (_pauseResumeLock)
             {
-                var now = _clock.GetUtcNow();
-                _lastPauseTimestamp = now;
-                PersistSession(session.CreateUpdate(false, now), now);
+                if (_currentSession is { } session)
+                {
+                    var now = _clock.GetUtcNow();
+                    _lastPauseTimestamp = now;
+                    PersistSession(session.CreateUpdate(false, now), now);
+                }
             }
         }
 
-        public IReadOnlyList<SessionUpdate> ResumeSession()
+        public void ResumeSession()
         {
-            // Ensure a session has been paused before
-            if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
+            lock (_pauseResumeLock)
             {
+                // Ensure a session has been paused before
+                if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
+                {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Attempted to resume a session, but the current session hasn't been paused."
+                    );
+
+                    return;
+                }
+
+                // Reset the pause timestamp since the session is about to be resumed
+                _lastPauseTimestamp = null;
+
+                // If the pause duration exceeded tracking interval, start a new session
+                // (otherwise do nothing)
+                var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
+                if (pauseDuration >= _options.AutoSessionTrackingInterval)
+                {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Paused session has been paused for {0}, which is longer than the configured timeout. " +
+                        "Starting a new session instead of resuming this one.",
+                        pauseDuration
+                    );
+
+                    EndSession(sessionPauseTimestamp, SessionEndStatus.Exited);
+                    StartSession();
+                }
+
                 _options.DiagnosticLogger?.LogDebug(
-                    "Attempted to resume a session, but the current session hasn't been paused."
-                );
-
-                return Array.Empty<SessionUpdate>();
-            }
-
-            // Reset the pause timestamp since the session is about to be resumed
-            _lastPauseTimestamp = null;
-
-            // If the pause duration exceeded tracking interval, start a new session
-            // (otherwise do nothing)
-            var pauseDuration = (_clock.GetUtcNow() - sessionPauseTimestamp).Duration();
-            if (pauseDuration >= _options.AutoSessionTrackingInterval)
-            {
-                _options.DiagnosticLogger?.LogDebug(
-                    "Paused session has been paused for {0}, which is longer than the configured timeout. " +
-                    "Starting a new session instead of resuming this one.",
+                    "Paused session has been paused for {0}, which is shorter than the configured timeout.",
                     pauseDuration
                 );
-
-                var updates = new List<SessionUpdate>(2);
-
-                // End current session
-                if (EndSession(sessionPauseTimestamp, SessionEndStatus.Exited) is { } endUpdate)
-                {
-                    updates.Add(endUpdate);
-                }
-
-                // Start a new session
-                if (StartSession() is { } startUpdate)
-                {
-                    updates.Add(startUpdate);
-                }
-
-                return updates;
             }
-
-            _options.DiagnosticLogger?.LogDebug(
-                "Paused session has been paused for {0}, which is shorter than the configured timeout.",
-                pauseDuration
-            );
-
-            return Array.Empty<SessionUpdate>();
         }
 
-        public SessionUpdate? ReportError()
+        public void ReportError()
         {
             if (_currentSession is { } session)
             {
                 session.ReportError();
 
-                // If we already have at least one error reported, the session update is pointless,
-                // so don't return anything.
-                if (session.ErrorCount > 1)
-                {
-                    _options.DiagnosticLogger?.LogDebug(
-                        "Reported an error on a session that already contains errors. Not creating an update."
-                    );
-
-                    return null;
-                }
-
-                return session.CreateUpdate(false, _clock.GetUtcNow());
+                var sessionUpdate = session.CreateUpdate(false, _clock.GetUtcNow());
+                _scopeManager.ConfigureScope(scope => scope.SessionUpdate = sessionUpdate);
             }
 
             _options.DiagnosticLogger?.LogDebug(
                 "Failed to report an error on a session because there is none active."
             );
-
-            return null;
         }
     }
 }

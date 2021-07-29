@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Sentry
+﻿namespace Sentry
 {
     internal interface ISessionManager
     {
-        bool IsSessionActive { get; }
+        void StartSession();
 
-        SessionUpdate? TryRecoverPersistedSession();
-
-        SessionUpdate? StartSession();
-
-        SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
-
-        SessionUpdate? EndSession(SessionEndStatus status);
+        void EndSession(SessionEndStatus status);
 
         void PauseSession();
 
-        IReadOnlyList<SessionUpdate> ResumeSession();
+        void ResumeSession();
 
-        SessionUpdate? ReportError();
+        void ReportError();
     }
 }
