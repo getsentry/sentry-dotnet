@@ -82,10 +82,14 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
 
             // Assert
             Assert.NotNull(exception);
+#if NET461 || NETCOREAPP2_1
+            Assert.Single(spans); //1 command
+#else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
-            Assert.All(spans, (span) => Assert.True(span.IsFinished));
-            Assert.Single(spans.Where(s => s.Status == SpanStatus.InternalError && s.Operation == "db.query"));
             Assert.Single(spans.Where(s => s.Status == SpanStatus.Ok && s.Operation == "db.query_compiler"));
+#endif
+            Assert.Single(spans.Where(s => s.Status == SpanStatus.InternalError && s.Operation == "db.query"));
+            Assert.All(spans, (span) => Assert.True(span.IsFinished));
         }
 
         [Fact]
@@ -102,7 +106,11 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
 
             // Assert
             Assert.Equal(3, result.Count);
+#if NET461 || NETCOREAPP2_1
+            Assert.Single(spans); //1 command
+#else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
+#endif
             Assert.All(spans, (span) => Assert.True(span.IsFinished));
         }
 
@@ -141,7 +149,9 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             // Assert
             Assert.Equal(totalCommands, itemsList.Count);
             Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query").Count());
+#if !NET461 && !NETCOREAPP2_1
             Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query_compiler").Count());
+#endif
             Assert.All(spans, (span) =>
             {
                 Assert.True(span.IsFinished);
@@ -172,7 +182,9 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             // Assert
             Assert.Equal(3, result[0].Result.Count);
             Assert.Equal(4, spans.Where(s => s.Operation == "db.query").Count());
+#if !NET461 && !NETCOREAPP2_1
             Assert.Equal(4, spans.Where(s => s.Operation == "db.query_compiler").Count());
+#endif
             Assert.All(spans, (span) =>
             {
                 Assert.True(span.IsFinished);
