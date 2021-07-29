@@ -91,7 +91,6 @@ namespace Sentry.Extensions.Logging
 
         public void OnNext(KeyValuePair<string, object?> value)
         {
-            System.Diagnostics.Debug.WriteLine($"aaa {value.Key}");
             try
             {
                 //Query compiler Span           
