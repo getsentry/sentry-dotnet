@@ -50,18 +50,10 @@ namespace Sentry.Extensions.Logging
 
         private ISpan? AddSpan(SentryEFSpanType type, string operation, string? description)
         {
-            if (_hub.GetSpan()?.StartChild(operation, description) is { } span)
+            if (_hub.GetSpan()?.StartChild(operation, description) is { } span &&
+                GetSpanBucket(type) is { } asyncLocalSpan)
             {
-                if (type switch
-                {
-                    SentryEFSpanType.QueryCompiler => _spansCompilerLocal,
-                    SentryEFSpanType.QueryExecution => _spansQueryLocal,
-                    SentryEFSpanType.Connection => _spansConnectionLocal,
-                    _ => null
-                } is { } asyncLocalSpan)
-                {
-                    asyncLocalSpan.Value = new WeakReference<ISpan>(span);
-                }
+                asyncLocalSpan.Value = new WeakReference<ISpan>(span);
                 return span;
             }
             return null;
@@ -69,13 +61,7 @@ namespace Sentry.Extensions.Logging
 
         private ISpan? TakeSpan(SentryEFSpanType type)
         {
-            if (type switch
-            {
-                SentryEFSpanType.QueryCompiler => _spansCompilerLocal.Value,
-                SentryEFSpanType.QueryExecution => _spansQueryLocal.Value,
-                SentryEFSpanType.Connection => _spansConnectionLocal.Value,
-                _ => null
-            } is { } reference && reference.TryGetTarget(out var span))
+            if (GetSpanBucket(type)?.Value is { } reference && reference.TryGetTarget(out var span))
             {
                 return span;
             }
@@ -83,6 +69,14 @@ namespace Sentry.Extensions.Logging
             return null;
         }
 
+        private AsyncLocal<WeakReference<ISpan>>? GetSpanBucket(SentryEFSpanType type)
+            => type switch
+            {
+                SentryEFSpanType.QueryCompiler => _spansCompilerLocal,
+                SentryEFSpanType.QueryExecution => _spansQueryLocal,
+                SentryEFSpanType.Connection => _spansConnectionLocal,
+                _ => null
+            };
 
         public void OnCompleted() { }
 
