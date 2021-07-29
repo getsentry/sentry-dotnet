@@ -32,7 +32,6 @@ namespace Sentry.Extensions.Logging
         /// Used for EF Core 2.X and 3.X.
         /// <seealso href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1"></seealso>
         /// </summary>
-        internal const string EFQueryExecutionPlanned = "Microsoft.EntityFrameworkCore.Query.QueryExecutionPlanned";
         internal const string EFQueryCompiling = "Microsoft.EntityFrameworkCore.Query.QueryModelCompiling";
         internal const string EFQueryCompiled = "Microsoft.EntityFrameworkCore.Query.QueryExecutionPlanned";
 
