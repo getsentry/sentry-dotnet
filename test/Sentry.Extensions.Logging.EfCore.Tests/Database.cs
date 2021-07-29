@@ -26,13 +26,10 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
             context.Database.EnsureCreated();
 
             var one = new Item { Name = "ItemOne" };
-
             var two = new Item { Name = "ItemTwo" };
-
             var three = new Item { Name = "ItemThree" };
 
             context.AddRange(one, two, three);
-
             context.SaveChanges();
         }
 
@@ -46,8 +43,6 @@ namespace Sentry.Extensions.Logging.EfCore.Tests
                 command.CommandText = "PRAGMA journal_mode=WAL;";
                 command.ExecuteNonQuery();
             }
-
-
             return connection;
         }
     }

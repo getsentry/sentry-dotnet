@@ -37,10 +37,7 @@ namespace Sentry.Extensions.Logging.Tests
 
         private class ThrowToStringClass
         {
-            public override string ToString()
-            {
-                throw new Exception("ThrowToStringClass");
-            }
+            public override string ToString() => throw new Exception("ThrowToStringClass");
         }
 
         private class Fixture
@@ -67,14 +64,14 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void OnNext_UnknownKey_SpanNotInvoked()
         {
-            //Assert
+            // Assert
             var hub = _fixture.Hub;
             var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
 
-            //Act
+            // Act
             interceptor.OnNext(new("Unknown", null));
 
-            //Assert
+            // Assert
             hub.DidNotReceive().GetSpan();
         }
 
@@ -84,14 +81,14 @@ namespace Sentry.Extensions.Logging.Tests
         [InlineData(EFCommandExecuting, "data")]
         public void OnNext_KnownKey_GetSpanInvoked(string key, string value)
         {
-            //Arrange
+            // Arrange
             var hub = _fixture.Hub;
             var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
 
-            //Act
+            // Act
             interceptor.OnNext(new(key, value));
 
-            //Assert
+            // Assert
             hub.Received(1).GetSpan();
             var child = _fixture.Spans.First(s => GetValidator(key)(s));
         }
@@ -99,13 +96,13 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void OnNext_HappyPath_IsValid()
         {
-            //Arrange
+            // Arrange
             var hub = _fixture.Hub;
             var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
             var expectedSql = "SELECT * FROM ...";
             var efSql = "ef Junk\r\nSELECT * FROM ...";
 
-            //Act
+            // Act
             interceptor.OnNext(new(EFQueryCompiling, efSql));
             interceptor.OnNext(new(EFQueryCompiled, efSql));
             interceptor.OnNext(new(EFConnectionOpening, null));
@@ -113,12 +110,12 @@ namespace Sentry.Extensions.Logging.Tests
             interceptor.OnNext(new(EFCommandExecuted, efSql));
             interceptor.OnNext(new(EFConnectionClosed, efSql));
 
-            //Assert
+            // Assert
             hub.Received(3).GetSpan();
             var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
             var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
             var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
-            //Validate if all spans were finished
+            // Validate if all spans were finished.
             Assert.All(_fixture.Spans, (span) =>
             {
                 Assert.True(span.IsFinished);
@@ -132,7 +129,7 @@ namespace Sentry.Extensions.Logging.Tests
                 }
                 Assert.Equal(SpanStatus.Ok, span.Status);
             });
-            //Check connections between spans
+            // Check connections between spans.
             Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
             Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
             Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
@@ -141,13 +138,13 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void OnNext_HappyPathWithError_TransactionWithErroredCommand()
         {
-            //Arrange
+            // Arrange
             var hub = _fixture.Hub;
             var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
             var expectedSql = "SELECT * FROM ...";
             var efSql = "ef Junk\r\nSELECT * FROM ...";
 
-            //Act
+            // Act
             interceptor.OnNext(new(EFQueryCompiling, efSql));
             interceptor.OnNext(new(EFQueryCompiled, efSql));
             interceptor.OnNext(new(EFConnectionOpening, null));
@@ -155,12 +152,13 @@ namespace Sentry.Extensions.Logging.Tests
             interceptor.OnNext(new(EFCommandFailed, efSql));
             interceptor.OnNext(new(EFConnectionClosed, efSql));
 
-            //Assert
+            // Assert
             hub.Received(3).GetSpan();
             var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
             var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
             var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandFailed)(s));
-            //Validate if all spans were finished
+
+            // Validate if all spans were finished.
             Assert.All(new[] { compilerSpan, connectionSpan },
                 (span) =>
             {
@@ -168,11 +166,11 @@ namespace Sentry.Extensions.Logging.Tests
                 Assert.Equal(SpanStatus.Ok, span.Status);
             });
 
-            //Assert the failed command
+            // Assert the failed command.
             Assert.True(commandSpan.IsFinished);
             Assert.Equal(SpanStatus.InternalError, commandSpan.Status);
 
-            //Check connections between spans
+            // Check connections between spans.
             Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
             Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
             Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
@@ -183,20 +181,19 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void OnNext_HappyPathWithError_TransactionWithErroredCompiler()
         {
-            //Arrange
+            // Arrange
             var hub = _fixture.Hub;
             var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
             var expectedSql = "SELECT * FROM ...";
             var efSql = "ef Junk\r\nSELECT * FROM ...";
 
-            //Act
+            // Act
             interceptor.OnNext(new(EFQueryCompiling, efSql));
             hub.CaptureEvent(new SentryEvent(), null);
 
-            //Assert
+            // Assert
             hub.Received(1).GetSpan();
             var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
-
 
             Assert.True(compilerSpan.IsFinished);
             Assert.Equal(SpanStatus.InternalError, compilerSpan.Status);
@@ -209,11 +206,12 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void OnNext_ThrowsException_ExceptionIsolated()
         {
-            //Arrange
+            // Arrange
             var hub = _fixture.Hub;
             var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
             var exceptionReceived = false;
-            //Act
+
+            // Act
             try
             {
                 interceptor.OnNext(new(EFQueryCompiling, new ThrowToStringClass()));
@@ -223,59 +221,59 @@ namespace Sentry.Extensions.Logging.Tests
                 exceptionReceived = true;
             }
 
-            //Assert
+            // Assert
             Assert.False(exceptionReceived);
         }
 
         [Fact]
         public void FilterNewLineValue_StringWithNewLine_SubStringAfterNewLine()
         {
-            //Arrange
+            // Arrange
             var text = "1234\r\nSELECT *...\n FROM ...";
             var expectedText = "SELECT *...\n FROM ...";
 
-            //Act
+            // Act
             var value = SentryEFCoreListener.FilterNewLineValue(text);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedText, value);
         }
 
         [Fact]
         public void FilterNewLineValue_NullObject_NullString()
         {
-            //Act
+            // Act
             var value = SentryEFCoreListener.FilterNewLineValue(null);
 
-            //Assert
+            // Assert
             Assert.Null(value);
         }
 
         [Fact]
         public void FilterNewLineValue_OneLineString_OneLineString()
         {
-            //Arrange
+            // Arrange
             var text = "1234";
             var expectedText = "1234";
 
-            //Act
+            // Act
             var value = SentryEFCoreListener.FilterNewLineValue(text);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedText, value);
         }
 
         [Fact]
         public void FilterNewLineValue_EmptyString_EmptyString()
         {
-            //Arrange
+            // Arrange
             var text = "";
             var expectedText = "";
 
-            //Act
+            // Act
             var value = SentryEFCoreListener.FilterNewLineValue(text);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedText, value);
         }
     }
