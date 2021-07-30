@@ -47,6 +47,10 @@ namespace Sentry
                 // If no sessions exited or errored, that means none were started during this period
                 if (_exitedCount == 0 && _erroredCount == 0)
                 {
+                    _options.DiagnosticLogger?.LogDebug(
+                        "No sessions to aggregate."
+                    );
+
                     return null;
                 }
 
@@ -56,7 +60,7 @@ namespace Sentry
                 {
                     // Release health without release is just health (useless)
                     _options.DiagnosticLogger?.LogError(
-                        "Failed to flush session aggregate because there is no release information."
+                        "Failed to aggregate sessions because there is no release information."
                     );
 
                     return null;
