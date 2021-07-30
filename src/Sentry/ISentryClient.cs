@@ -48,6 +48,16 @@ namespace Sentry
         void CaptureSession(SessionUpdate sessionUpdate);
 
         /// <summary>
+        /// Captures a session aggregate.
+        /// </summary>
+        /// <remarks>
+        /// Note: this method is NOT meant to be called from user code!
+        /// It will be called automatically by the SDK.
+        /// </remarks>
+        /// <param name="sessionAggregate">The aggregate to send to Sentry.</param>
+        void CaptureSessionAggregate(SessionAggregate sessionAggregate);
+
+        /// <summary>
         /// Flushes events queued up.
         /// </summary>
         /// <param name="timeout">How long to wait for flush to finish.</param>

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
+using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -8,40 +8,44 @@ namespace Sentry
     // https://develop.sentry.dev/sdk/sessions
     internal class ServerSessionManager : ISessionManager
     {
-        private readonly AsyncLocal<Session?> _sessionContainer = new();
+        private readonly SentryOptions _options;
+        private readonly ISentryClient _client;
+        private readonly IInternalScopeManager _scopeManager;
+        private readonly ISystemClock _clock;
 
-        private Session? Session
+        public ServerSessionManager(
+            SentryOptions options,
+            ISentryClient client,
+            IInternalScopeManager scopeManager,
+            ISystemClock clock)
         {
-            get => _sessionContainer.Value;
-            set => _sessionContainer.Value = value;
+            _options = options;
+            _client = client;
+            _scopeManager = scopeManager;
+            _clock = clock;
         }
 
-        public bool IsSessionActive => Session is not null;
-
-        public SessionUpdate? TryRecoverPersistedSession() => null;
-
-        public SessionUpdate? StartSession()
+        public void StartSession()
         {
             throw new NotImplementedException();
         }
 
-        public SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status)
-        {
-            throw new NotImplementedException();
-        }
-
-        public SessionUpdate? EndSession(SessionEndStatus status)
+        public void EndSession(SessionEndStatus status)
         {
             throw new NotImplementedException();
         }
 
         public void PauseSession()
         {
+            // No-op
         }
 
-        public IReadOnlyList<SessionUpdate> ResumeSession() => Array.Empty<SessionUpdate>();
+        public void ResumeSession()
+        {
+            // No-op
+        }
 
-        public SessionUpdate? ReportError()
+        public void ReportError()
         {
             throw new NotImplementedException();
         }
