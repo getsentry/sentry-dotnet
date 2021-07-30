@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Timers;
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 
@@ -6,12 +8,13 @@ namespace Sentry
 {
     // AKA server mode
     // https://develop.sentry.dev/sdk/sessions
-    internal class ServerSessionManager : ISessionManager
+    internal class ServerSessionManager : ISessionManager, IDisposable
     {
         private readonly SentryOptions _options;
         private readonly ISentryClient _client;
         private readonly IInternalScopeManager _scopeManager;
         private readonly ISystemClock _clock;
+        private readonly Timer _timer;
 
         public ServerSessionManager(
             SentryOptions options,
@@ -23,6 +26,24 @@ namespace Sentry
             _client = client;
             _scopeManager = scopeManager;
             _clock = clock;
+
+            _timer = new Timer {Interval = 60 * 1000, Enabled = true, AutoReset = true};
+            _timer.Elapsed += (_, _) => Flush();
+        }
+
+        private void Flush()
+        {
+            try
+            {
+                // TODO: aggregate and flush active sessions
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to flush sessions in server session manager.",
+                    ex
+                );
+            }
         }
 
         public void StartSession()
@@ -49,5 +70,7 @@ namespace Sentry
         {
             throw new NotImplementedException();
         }
+
+        public void Dispose() => _timer.Dispose();
     }
 }
