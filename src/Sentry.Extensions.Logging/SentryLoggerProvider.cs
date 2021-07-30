@@ -2,7 +2,6 @@ using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.Extensions.Logging

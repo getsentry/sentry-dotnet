@@ -4,6 +4,18 @@
 
 ### Fixes
 
+- Set error status to transaction if http has exception and ok status ([#1143](https://github.com/getsentry/sentry-dotnet/pull/1143))
+- Fix max breadcrumbs limit when MaxBreadcrumbs is zero or lower ([#1145](https://github.com/getsentry/sentry-dotnet/pull/1145))
+
+## 3.8.3
+
+### Features
+
+- New package Sentry.Tunnel to proxy Sentry events ([#1133](https://github.com/getsentry/sentry-dotnet/pull/1133))
+
+### Fixes
+
+- Avoid serializing dangerous types ([#1134](https://github.com/getsentry/sentry-dotnet/pull/1134))
 - Don't cancel cache flushing on init ([#1139](https://github.com/getsentry/sentry-dotnet/pull/1139))
 
 ## 3.8.2

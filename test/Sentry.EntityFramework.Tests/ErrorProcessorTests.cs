@@ -77,14 +77,14 @@ namespace Sentry.EntityFramework.Tests
         [Fact]
         public async Task Integration_DbEntityValidationExceptionProcessorAsync()
         {
-            // We use an actual Entity Framework instane since manually generating any EF related data is highly inaccurate
+            // We use an actual Entity Framework instance since manually generating any EF related data is highly inaccurate
             _fixture.DbContext.TestTable.Add(new TestDbContext.TestData());
             try
             {
                 // This will throw a validation exception since TestData has a Required column which we didn't set
                 await _fixture.DbContext.SaveChangesAsync();
             }
-            catch(DbEntityValidationException e)
+            catch (DbEntityValidationException e)
             {
                 Exception assertError = null;
                 // SaveChanges will throw an exception
