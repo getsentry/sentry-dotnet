@@ -69,7 +69,7 @@ namespace Sentry
                 // Extract environment
                 var environment = EnvironmentLocator.Resolve(_options);
 
-                // Get the current minute
+                // Get now rounded down to the current minute (TODO: or should it be last minute?)
                 var now = _clock.GetUtcNow();
                 var startTimestamp = new DateTimeOffset(
                     now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, now.Offset
