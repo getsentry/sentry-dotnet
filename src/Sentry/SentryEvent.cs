@@ -164,6 +164,10 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
+        internal bool HasException => Exception is not null || SentryExceptions?.Any() == true;
+
+        internal bool HasUnhandledException => SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false;
+
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
         /// </summary>
