@@ -75,7 +75,15 @@ namespace Sentry
                     now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, now.Offset
                 );
 
-                return new SessionAggregate(startTimestamp, _exitedCount, _erroredCount, release, environment);
+                var aggregate = new SessionAggregate(
+                    startTimestamp, _exitedCount, _erroredCount, release, environment
+                );
+
+                // Reset values
+                _exitedCount = 0;
+                _erroredCount = 0;
+
+                return aggregate;
             }
         }
 
@@ -86,6 +94,7 @@ namespace Sentry
                 if (TryAggregate() is { } aggregate)
                 {
                     _client.CaptureSessionAggregate(aggregate);
+                    _options.DiagnosticLogger?.LogInfo("Flushed a session aggregate.");
                 }
             }
             catch (Exception ex)
