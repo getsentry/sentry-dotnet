@@ -31,13 +31,11 @@ namespace Sentry.Extensions.Logging
         internal const string SqlMicrosoftWriteConnectionCloseAfterCommand = "Microsoft.Data.SqlClient.WriteConnectionCloseAfter";
         internal const string SqlDataWriteConnectionCloseAfterCommand = "System.Data.SqlClient.WriteConnectionCloseAfter";
 
-
         internal const string SqlDataBeforeExecuteCommand = "System.Data.SqlClient.WriteCommandBefore";
         internal const string SqlMicrosoftBeforeExecuteCommand = "Microsoft.Data.SqlClient.WriteCommandBefore";
 
         internal const string SqlDataAfterExecuteCommand = "System.Data.SqlClient.WriteCommandAfter";
         internal const string SqlMicrosoftAfterExecuteCommand = "Microsoft.Data.SqlClient.WriteCommandAfter";
-
 
         internal const string SqlDataWriteCommandError = "System.Data.SqlClient.WriteCommandError";
         internal const string SqlMicrosoftWriteCommandError = "Microsoft.Data.SqlClient.WriteCommandError";
