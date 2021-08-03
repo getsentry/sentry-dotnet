@@ -22,9 +22,6 @@ namespace Sentry.Extensions.Logging
         internal const string SqlDataWriteConnectionOpenBeforeCommand = "System.Data.SqlClient.WriteConnectionOpenBefore";
         internal const string SqlMicrosoftWriteConnectionOpenBeforeCommand = "Microsoft.Data.SqlClient.WriteConnectionOpenBefore";
 
-        internal const string SqlDataWriteConnectionCloseBeforeCommand = "System.Data.SqlClient.WriteConnectionCloseBefore";
-        internal const string SqlMicrosoftWriteConnectionCloseBeforeCommand = "Microsoft.Data.SqlClient.WriteConnectionCloseBefore";
-
         internal const string SqlMicrosoftWriteConnectionOpenAfterCommand = "Microsoft.Data.SqlClient.WriteConnectionOpenAfter";
         internal const string SqlDataWriteConnectionOpenAfterCommand = "System.Data.SqlClient.WriteConnectionOpenAfter";
 
@@ -143,9 +140,7 @@ namespace Sentry.Extensions.Logging
                 {
                     UpdateConnectionSpan(value.GetProperty<Guid>(OperationKey), value.GetProperty<Guid>(ConnectionKey));
                 }
-                else if ((value.Key == SqlMicrosoftWriteConnectionCloseBeforeCommand ||
-                          value.Key == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                          value.Key == SqlDataWriteConnectionCloseBeforeCommand ||
+                else if ((value.Key == SqlMicrosoftWriteConnectionCloseAfterCommand ||
                           value.Key == SqlDataWriteConnectionCloseAfterCommand) &&
                     GetSpan(SentrySqlSpanType.Connection, null, value.GetProperty<Guid>(ConnectionKey)) is { } connectionSpan)
                 {
