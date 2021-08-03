@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- EF Core performance monitoring ([#1112](https://github.com/getsentry/sentry-dotnet/pull/1112))
+
 ### Fixes
 
 - Set error status to transaction if http has exception and ok status ([#1143](https://github.com/getsentry/sentry-dotnet/pull/1143))
