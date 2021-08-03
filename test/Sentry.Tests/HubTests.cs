@@ -280,6 +280,29 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void CaptureEvent_ExceptionWithOpenSpan_SpanFinishedWithInternalError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            }, client);
+            var scope = new Scope();
+            scope.Transaction = hub.StartTransaction("transaction", "operation");
+
+            var child = scope.Transaction.StartChild("child", "child");
+
+            // Act
+            hub.CaptureEvent(new SentryEvent(new Exception()), scope);
+
+            // Assert
+            Assert.Equal(SpanStatus.InternalError, child.Status);
+            Assert.True(child.IsFinished);
+        }
+
+        [Fact]
         public void CaptureEvent_SessionActive_ExceptionReportsError()
         {
             // Arrange
