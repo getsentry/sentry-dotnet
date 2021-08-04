@@ -302,10 +302,15 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                     evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                } else if (evt.IsErrored() && scope?.LastCreatedSpan() is { } lastSpan && lastSpan?.IsFinished == false) {
+                    // Can still be reset by the owner but lets consider it finished and errored for now.
+                    lastSpan.Finish(SpanStatus.InternalError);
                 }
 
                 actualScope.SessionUpdate = evt switch
                 {
+                    // TODO: Extract both braches as internal extension methods (IsCrashed and IsErrored):
+
                     // Event contains a terminal exception -> end session as crashed
                     var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>
                         _sessionManager.EndSession(SessionEndStatus.Crashed),

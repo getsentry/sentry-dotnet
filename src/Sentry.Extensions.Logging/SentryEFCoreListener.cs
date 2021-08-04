@@ -89,8 +89,6 @@ namespace Sentry.Extensions.Logging
                 //Query compiler Span           
                 if (value.Key == EFQueryStartCompiling || value.Key == EFQueryCompiling)
                 {
-                    // There are no events when an error happens to the query compiler so we assume it's an errored span
-                    // if not compiled. Also, this query doesn't generate any children so this is good to go.
                     AddSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value));
                 }
                 else if (value.Key == EFQueryCompiled)
