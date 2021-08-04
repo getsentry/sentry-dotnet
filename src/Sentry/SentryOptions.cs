@@ -8,6 +8,7 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.Internal.ScopeStack;
 using static Sentry.Internal.Constants;
 using static Sentry.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
@@ -20,6 +21,17 @@ namespace Sentry
     public class SentryOptions
     {
         private Dictionary<string, string>? _defaultTags;
+
+        internal IScopeStackContainer? ScopeStackContainer { get; set; }
+
+        /// <summary>
+        /// Specifies whether to use global scope management mode.
+        /// </summary>
+        public bool IsGlobalModeEnabled
+        {
+            get => ScopeStackContainer is GlobalScopeStackContainer;
+            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
+        }
 
         // Override for tests
         internal ITransport? Transport { get; set; }

@@ -3,9 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
     <PackageTags>$(PackageTags);AspNetCore;MVC</PackageTags>
-    <PackageId>Sentry.AspNetCore</PackageId>
-    <AssemblyName>Sentry.AspNetCore</AssemblyName>
-    <RootNamespace>Sentry.AspNetCore</RootNamespace>
     <Description>Official ASP.NET Core integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 

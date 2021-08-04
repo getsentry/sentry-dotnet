@@ -2,9 +2,44 @@
 
 ## Unreleased
 
+### Features
+
+- EF Core performance monitoring ([#1112](https://github.com/getsentry/sentry-dotnet/pull/1112))
+
 ### Fixes
 
+- Set error status to transaction if http has exception and ok status ([#1143](https://github.com/getsentry/sentry-dotnet/pull/1143))
+- Fix max breadcrumbs limit when MaxBreadcrumbs is zero or lower ([#1145](https://github.com/getsentry/sentry-dotnet/pull/1145))
+
+## 3.8.3
+
+### Features
+
+- New package Sentry.Tunnel to proxy Sentry events ([#1133](https://github.com/getsentry/sentry-dotnet/pull/1133))
+
+### Fixes
+
+- Avoid serializing dangerous types ([#1134](https://github.com/getsentry/sentry-dotnet/pull/1134))
+- Don't cancel cache flushing on init ([#1139](https://github.com/getsentry/sentry-dotnet/pull/1139))
+
+## 3.8.2
+
+### Fixes
+
+- Add IsParentSampled to ITransactionContext ([#1128](https://github.com/getsentry/sentry-dotnet/pull/1128)
+- Avoid warn in global mode ([#1132](https://github.com/getsentry/sentry-dotnet/pull/1132))
+- Fix `ParentSampledId` being reset on `Transaction` ([#1130](https://github.com/getsentry/sentry-dotnet/pull/1130))
+
+## 3.8.1
+
+### Fixes
+
+- Persisted Sessions logging ([#1125](https://github.com/getsentry/sentry-dotnet/pull/1125))
 - Don't log an error when attempting to recover a persisted session but none exists ([#1123](https://github.com/getsentry/sentry-dotnet/pull/1123))
+
+### Features
+
+- Introduce scope stack abstraction to support global scope on desktop and mobile applications and `HttpContext`-backed scoped on legacy ASP.NET ([#1124](https://github.com/getsentry/sentry-dotnet/pull/1124))
 
 ## 3.8.0
 

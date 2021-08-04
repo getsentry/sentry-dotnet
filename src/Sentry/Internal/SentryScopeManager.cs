@@ -1,28 +1,34 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
 {
     internal sealed class SentryScopeManager : IInternalScopeManager, IDisposable
     {
+        // Internal for testing
+        public IScopeStackContainer ScopeStackContainer { get; }
+
         private readonly SentryOptions _options;
-        private readonly AsyncLocal<KeyValuePair<Scope, ISentryClient>[]?> _asyncLocalScope = new();
 
         internal KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
         {
-            get => _asyncLocalScope.Value ?? (_asyncLocalScope.Value = NewStack());
-            set => _asyncLocalScope.Value = value;
+            get => ScopeStackContainer.Stack ??= NewStack();
+            set => ScopeStackContainer.Stack = value;
         }
 
         private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
 
+        private bool IsGlobalMode => ScopeStackContainer is GlobalScopeStackContainer;
+
         public SentryScopeManager(
+            IScopeStackContainer scopeStackContainer,
             SentryOptions options,
             ISentryClient rootClient)
         {
+            ScopeStackContainer = scopeStackContainer;
             _options = options;
             NewStack = () => new [] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
@@ -47,10 +53,16 @@ namespace Sentry.Internal
             return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }
 
-        public IDisposable PushScope() => PushScope<object>(null!); // NRTs don't work well with generics
+        public IDisposable PushScope() => PushScope<object>(null);
 
-        public IDisposable PushScope<TState>(TState state)
+        public IDisposable PushScope<TState>(TState? state)
         {
+            if (IsGlobalMode)
+            {
+                _options.DiagnosticLogger?.LogWarning("Push scope called in global mode, returning.");
+                return DisabledHub.Instance;
+            }
+
             var currentScopeAndClientStack = ScopeAndClientStack;
             var scope = currentScopeAndClientStack[currentScopeAndClientStack.Length - 1];
 
@@ -145,7 +157,7 @@ namespace Sentry.Internal
         public void Dispose()
         {
             _options.DiagnosticLogger?.LogDebug($"Disposing {nameof(SentryScopeManager)}.");
-            _asyncLocalScope.Value = null;
+            ScopeStackContainer.Stack = null;
         }
     }
 }

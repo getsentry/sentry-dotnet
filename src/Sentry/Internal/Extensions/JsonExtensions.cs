@@ -8,6 +8,16 @@ namespace Sentry.Internal.Extensions
 {
     internal static class JsonExtensions
     {
+        private static JsonSerializerOptions? _serializerOption;
+        /// <summary>
+        /// The Json options with a preset of rules that will remove dangerous and problematic
+        /// data from the serialized object.
+        /// </summary>
+        public static JsonSerializerOptions? SerializerOption => _serializerOption ??= new JsonSerializerOptions()
+        {
+            Converters = { new SentryJsonConverter() }
+        };
+
         public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
         {
             name = jsonProperty.Name;
@@ -268,7 +278,7 @@ namespace Sentry.Internal.Extensions
             }
             else
             {
-                JsonSerializer.Serialize(writer, value);
+                JsonSerializer.Serialize(writer, value, SerializerOption);
             }
         }
 

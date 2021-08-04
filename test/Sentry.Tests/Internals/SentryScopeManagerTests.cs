@@ -2,9 +2,11 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.ScopeStack;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -14,8 +16,14 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public SentryOptions SentryOptions { get; set; } = new();
+
             public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
-            public SentryScopeManager GetSut() => new(SentryOptions, Client);
+
+            public SentryScopeManager GetSut() => new(
+                SentryOptions.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
+                SentryOptions,
+                Client
+            );
         }
 
         private readonly Fixture _fixture = new();
@@ -311,6 +319,23 @@ namespace Sentry.Tests.Internals
                 .SelectMany(t => t));
 
             Assert.Equal(root, sut.GetCurrent());
+        }
+
+        [Fact]
+        public void GlobalMode_PushScope_SameScope()
+        {
+            // Arrange
+            _fixture.SentryOptions.ScopeStackContainer = new GlobalScopeStackContainer();
+            var sut = _fixture.GetSut();
+
+            // Act
+            var (scope1, client1) = sut.GetCurrent();
+            using var _ = sut.PushScope();
+            var (scope2, client2) = sut.GetCurrent();
+
+            // Assert
+            scope1.Should().BeSameAs(scope2);
+            client1.Should().BeSameAs(client2);
         }
     }
 }

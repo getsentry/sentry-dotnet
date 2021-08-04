@@ -241,7 +241,7 @@ namespace Sentry.Tests.Protocol
             // Arrange
             var client = Substitute.For<ISentryClient>();
             var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret};
-            var hub = new Hub(client, options);
+            var hub = new Hub(options, client);
 
             var transaction = new TransactionTracer(hub, "my name", "my op");
 
@@ -257,7 +257,7 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
-            var hub = new Hub(client, new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret});
+            var hub = new Hub(new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret}, client);
 
             var transaction = new TransactionTracer(hub, "my name", "my op");
 
@@ -285,7 +285,7 @@ namespace Sentry.Tests.Protocol
             // Arrange
             var client = Substitute.For<ISentryClient>();
             var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret};
-            var hub = new Hub(client, options);
+            var hub = new Hub(options, client);
 
             var exception = new InvalidOperationException();
             var transaction = new TransactionTracer(hub, "my name", "my op");
