@@ -12,9 +12,6 @@ namespace Sentry.Extensions.Logging.Tests
         internal const string SqlDataWriteConnectionOpenBeforeCommand = SentrySqlListener.SqlDataWriteConnectionOpenBeforeCommand;
         internal const string SqlMicrosoftWriteConnectionOpenBeforeCommand = SentrySqlListener.SqlMicrosoftWriteConnectionOpenBeforeCommand;
 
-        internal const string SqlDataWriteConnectionCloseBeforeCommand = SentrySqlListener.SqlDataWriteConnectionCloseBeforeCommand;
-        internal const string SqlMicrosoftWriteConnectionCloseBeforeCommand = SentrySqlListener.SqlMicrosoftWriteConnectionCloseBeforeCommand;
-
         internal const string SqlMicrosoftWriteConnectionOpenAfterCommand = SentrySqlListener.SqlMicrosoftWriteConnectionOpenAfterCommand;
         internal const string SqlDataWriteConnectionOpenAfterCommand = SentrySqlListener.SqlDataWriteConnectionOpenAfterCommand;
 
@@ -38,8 +35,6 @@ namespace Sentry.Extensions.Logging.Tests
                 x == SqlMicrosoftWriteConnectionOpenBeforeCommand ||
                 x == SqlMicrosoftWriteConnectionOpenAfterCommand ||
                 x == SqlDataWriteConnectionOpenAfterCommand ||
-                x == SqlDataWriteConnectionCloseBeforeCommand ||
-                x == SqlMicrosoftWriteConnectionCloseBeforeCommand ||
                 x == SqlMicrosoftWriteConnectionCloseAfterCommand ||
                 x == SqlDataWriteConnectionCloseAfterCommand
             => (span) => span.Description is null && span.Operation == "db.connection",
