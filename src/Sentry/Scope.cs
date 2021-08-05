@@ -113,11 +113,7 @@ namespace Sentry
         /// <inheritdoc />
         public User User
         {
-            get
-            {
-                _user ??= new User() { PropertyChanged = UserChanged };
-                return _user;
-            }
+            get => _user ??= new User() { PropertyChanged = UserChanged };
             set
             {
                 _user = value;

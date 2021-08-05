@@ -6,6 +6,8 @@
 
 ### Features
 
+- Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
+
 ### Fixes
 
 - Set error status to transaction if http has exception and ok status ([#1143](https://github.com/getsentry/sentry-dotnet/pull/1143))
