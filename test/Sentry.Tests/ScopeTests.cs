@@ -303,7 +303,6 @@ namespace Sentry.Tests
             else
             {
                 scope.User.Id = id;
-
             }
 
             // Assert
