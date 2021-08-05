@@ -328,6 +328,20 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void SetUser_ObserverExistWith_ObserverUserChanged()
+        {
+            //Arrange
+            var observer = Substitute.For<IScopeObserver>();
+            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+
+            // Act
+            scope.User = new User() { Email = "1234" };
+
+            // Assert
+            Assert.Equal(scope.User.Email, observer.User.Email);
+        }
+
+        [Fact]
         public void UserChanged_Observernull_Ignored()
         {
             //Arrange
