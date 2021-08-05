@@ -99,13 +99,30 @@ namespace Sentry
             set => _contexts = value;
         }
 
+        // Internal for testing.
+        internal Action UserChanged => () =>
+        {
+            if (Options.ScopeObserver is { } observer)
+            {
+                observer.User = User;
+            }
+        };
+
         private User? _user;
 
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User();
-            set => _user = value;
+            get
+            {
+                _user ??= new User() { PropertyChanged = UserChanged } ;
+                return _user;
+            }
+            set
+            {
+                _user = value;
+                _user.PropertyChanged = UserChanged;
+            }
         }
 
         /// <inheritdoc />
@@ -237,16 +254,29 @@ namespace Sentry
             }
 
             _breadcrumbs.Enqueue(breadcrumb);
+            Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
         }
 
         /// <inheritdoc />
-        public void SetExtra(string key, object? value) => _extra[key] = value;
+        public void SetExtra(string key, object? value)
+        {
+            _extra[key] = value;
+            Options.ScopeObserver?.SetExtra(key, value);
+        }
 
         /// <inheritdoc />
-        public void SetTag(string key, string value) => _tags[key] = value;
+        public void SetTag(string key, string value)
+        {
+            _tags[key] = value;
+            Options.ScopeObserver?.SetTag(key, value);
+        }
 
         /// <inheritdoc />
-        public void UnsetTag(string key) => _tags.TryRemove(key, out _);
+        public void UnsetTag(string key)
+        {
+            _tags.TryRemove(key, out _);
+            Options.ScopeObserver?.UnsetTag(key);
+        }
 
         /// <summary>
         /// Adds an attachment.

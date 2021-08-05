@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using FluentAssertions;
+using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Testing;
 using Xunit;
@@ -278,6 +279,136 @@ namespace Sentry.Tests
 
             //Assert
             Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
+        }
+
+        [Theory]
+        [InlineData("123@123.com", null, null)]
+        [InlineData(null, "my name", null)]
+        [InlineData(null, null, "my id")]
+        public void SetUserEmail_ObserverExist_ObserverUserEmailSet(string email, string username, string id)
+        {
+            //Arrange
+            var observer = NSubstitute.Substitute.For<IScopeObserver>();
+            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+
+            // Act
+            if (email != null)
+            {
+                scope.User.Email = email;
+            }
+            else if (username != null)
+            {
+                scope.User.Username = username;
+            }
+            else
+            {
+                scope.User.Id = id;
+
+            }
+
+            // Assert
+            Assert.Equal(email, observer.User.Email);
+            Assert.Equal(id, observer.User.Id);
+            Assert.Equal(username, observer.User.Username);
+        }
+
+        [Fact]
+        public void SetUserEmail_ObserverExistWithUser_ObserverUserEmailChanged()
+        {
+            //Arrange
+            var observer = Substitute.For<IScopeObserver>();
+            observer.User = new User() { Email = "4321" };
+            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+
+            // Act
+            scope.User.Email = "1234";
+
+            // Assert
+            Assert.Equal(scope.User.Email, observer.User.Email);
+        }
+
+        [Fact]
+        public void UserChanged_Observernull_Ignored()
+        {
+            //Arrange
+            var scope = new Scope();
+            Exception exception = null;
+
+            // Act
+            try
+            {
+                scope.UserChanged.Invoke();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            // Assert
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public void SetTag_ObserverExist_ObserverSetsTag()
+        {
+            //Arrange
+            var observer = Substitute.For<IScopeObserver>();
+            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var expectedKey = "1234";
+            var expectedValue = "5678";
+
+            // Act
+            scope.SetTag(expectedKey, expectedValue);
+
+            // Assert
+            observer.Received(1).SetTag(Arg.Is(expectedKey), Arg.Is(expectedValue));
+        }
+
+        [Fact]
+        public void UnsetTag_ObserverExist_ObserverUnsetsTag()
+        {
+            //Arrange
+            var observer = Substitute.For<IScopeObserver>();
+            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var expectedKey = "1234";
+
+            // Act
+            scope.UnsetTag(expectedKey);
+
+            // Assert
+            observer.Received(1).UnsetTag(Arg.Is(expectedKey));
+        }
+
+        [Fact]
+        public void SetExtra_ObserverExist_ObserverSetsExtra()
+        {
+            //Arrange
+            var observer = Substitute.For<IScopeObserver>();
+            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var expectedKey = "1234";
+            var expectedValue = "5678";
+
+            // Act
+            scope.SetExtra(expectedKey, expectedValue);
+
+            // Assert
+            observer.Received(1).SetExtra(Arg.Is(expectedKey), Arg.Is(expectedValue));
+        }
+
+        [Fact]
+        public void AddBreadcrumb_ObserverExist_ObserverAddsBreadcrumb()
+        {
+            //Arrange
+            var observer = Substitute.For<IScopeObserver>();
+            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var breadcrumb = new Breadcrumb(message: "1234");
+
+            // Act
+            scope.AddBreadcrumb(breadcrumb);
+            scope.AddBreadcrumb(breadcrumb);
+
+            // Assert
+            observer.Received(2).AddBreadcrumb(Arg.Is(breadcrumb));
         }
     }
 }
