@@ -33,6 +33,11 @@ namespace Sentry
             set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
         }
 
+        /// <summary>
+        /// A scope set outside of SentrySDK, if set, the global parameters from the SDK's scope will be sent to the observed scope.
+        /// </summary>
+        public Scope? ScopeObserver { get; set; }
+
         // Override for tests
         internal ITransport? Transport { get; set; }
 
