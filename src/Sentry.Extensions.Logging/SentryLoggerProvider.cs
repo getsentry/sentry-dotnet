@@ -70,7 +70,6 @@ namespace Sentry.Extensions.Logging
                 {
                     hub.ConfigureScope(callback);
                 }
-                _diagnosticListener = DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticSubscriber(hub, options));
             }
         }
 
