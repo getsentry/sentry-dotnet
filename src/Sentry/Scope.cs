@@ -115,7 +115,7 @@ namespace Sentry
         {
             get
             {
-                _user ??= new User() { PropertyChanged = UserChanged } ;
+                _user ??= new User() { PropertyChanged = UserChanged };
                 return _user;
             }
             set

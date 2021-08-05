@@ -33,6 +33,7 @@ namespace Sentry
         }
 
         private string? _id;
+
         /// <summary>
         /// The unique ID of the user.
         /// </summary>
@@ -50,6 +51,7 @@ namespace Sentry
         }
 
         private string? _ipAddress;
+
         /// <summary>
         /// The IP of the user.
         /// </summary>
@@ -66,7 +68,7 @@ namespace Sentry
             }
         }
 
-        internal string? _username;
+        private string? _username;
 
         /// <summary>
         /// The username of the user.

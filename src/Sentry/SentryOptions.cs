@@ -34,7 +34,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// A scope set outside of SentrySDK, if set, the global parameters from the SDK's scope will be sent to the observed scope.
+        /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.
         /// </summary>
         public IScopeObserver? ScopeObserver { get; set; }
 

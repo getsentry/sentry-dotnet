@@ -259,11 +259,11 @@ namespace Sentry.Tests
         [Theory]
         [InlineData(0, -2, 0)]
         [InlineData(0, -1, 0)]
-        [InlineData(0,  0, 0)]
-        [InlineData(0,  1, 1)]
-        [InlineData(0,  2, 1)]
-        [InlineData(1,  2, 2)]
-        [InlineData(2,  2, 2)]
+        [InlineData(0, 0, 0)]
+        [InlineData(0, 1, 1)]
+        [InlineData(0, 2, 1)]
+        [InlineData(1, 2, 2)]
+        [InlineData(2, 2, 2)]
         public void AddBreadcrumb__AddBreadcrumb_RespectLimits(int initialCount, int maxBreadcrumbs, int expectedCount)
         {
             //Arrange
