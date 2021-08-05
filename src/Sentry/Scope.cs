@@ -117,7 +117,10 @@ namespace Sentry
             set
             {
                 _user = value;
-                _user.PropertyChanged = UserChanged;
+                if (_user != null)
+                {
+                    _user.PropertyChanged = UserChanged;
+                }
                 UserChanged.Invoke();
             }
         }
