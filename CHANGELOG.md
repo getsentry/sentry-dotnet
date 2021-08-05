@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-### Features
+### Fixes
 
-- EF Core performance monitoring ([#1112](https://github.com/getsentry/sentry-dotnet/pull/1112))
+### Features
 
 ### Fixes
 
