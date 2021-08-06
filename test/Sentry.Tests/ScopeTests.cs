@@ -224,16 +224,16 @@ namespace Sentry.Tests
         [Fact]
         public void AddAttachment_AddAttachments()
         {
-            //Arrange
+            // Arrange
             var scope = new Scope();
             var attachment = new Attachment(default, default, default, default);
             var attachment2 = new Attachment(default, default, default, default);
 
-            //Act
+            // Act
             scope.AddAttachment(attachment);
             scope.AddAttachment(attachment2);
 
-            //Assert
+            // Assert
             scope.Attachments.Should().Contain(attachment, "Attachment was not found.");
             scope.Attachments.Should().Contain(attachment2, "Attachment2 was not found.");
         }
@@ -241,7 +241,7 @@ namespace Sentry.Tests
         [Fact]
         public void ClearAttachments_HasAttachments_EmptyList()
         {
-            //Arrange
+            // Arrange
             var scope = new Scope();
 
             for (int i = 0; i < 5; i++)
@@ -249,10 +249,10 @@ namespace Sentry.Tests
                 scope.AddAttachment(new MemoryStream(1_000), Guid.NewGuid().ToString());
             }
 
-            //Act
+            // Act
             scope.ClearAttachments();
 
-            //Assert
+            // Assert
             scope.Attachments.Should().BeEmpty();
         }
 
@@ -266,7 +266,7 @@ namespace Sentry.Tests
         [InlineData(2, 2, 2)]
         public void AddBreadcrumb__AddBreadcrumb_RespectLimits(int initialCount, int maxBreadcrumbs, int expectedCount)
         {
-            //Arrange
+            // Arrange
             var scope = new Scope(new SentryOptions() { MaxBreadcrumbs = maxBreadcrumbs });
 
             for (int i = 0; i < initialCount; i++)
@@ -274,10 +274,10 @@ namespace Sentry.Tests
                 scope.AddBreadcrumb(new Breadcrumb());
             }
 
-            //Act
+            // Act
             scope.AddBreadcrumb(new Breadcrumb());
 
-            //Assert
+            // Assert
             Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
         }
 
@@ -290,7 +290,7 @@ namespace Sentry.Tests
         [InlineData(null, null, "my id", false)]
         public void SetUserEmail_ObserverExist_ObserverUserEmailSetIfEnabled(string email, string username, string id, bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var observer = NSubstitute.Substitute.For<IScopeObserver>();
             var scope = new Scope(new SentryOptions()
             {
@@ -316,9 +316,9 @@ namespace Sentry.Tests
             }
 
             // Assert
-                Assert.Equal(expectedEmail, observer.User?.Email);
-                Assert.Equal(expectedid, observer.User?.Id);
-                Assert.Equal(expectedusername, observer.User?.Username);
+            Assert.Equal(expectedEmail, observer.User?.Email);
+            Assert.Equal(expectedid, observer.User?.Id);
+            Assert.Equal(expectedusername, observer.User?.Username);
         }
 
         [Theory]
@@ -326,7 +326,7 @@ namespace Sentry.Tests
         [InlineData("1234", false)]
         public void SetUserEmail_ObserverExistWithUser_ObserverUserEmailChangedIfEnabled(string email, bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var observerEmail = "abcd";
             var observer = Substitute.For<IScopeObserver>();
             observer.User = new User() { Email = observerEmail };
@@ -350,7 +350,7 @@ namespace Sentry.Tests
         [InlineData("1234", false)]
         public void SetUser_ObserverExist_ObserverUserChangedIfEnabled(string email, bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var observer = Substitute.For<IScopeObserver>();
             var scope = new Scope(new SentryOptions()
             {
@@ -371,7 +371,7 @@ namespace Sentry.Tests
         [InlineData(false)]
         public void UserChanged_Observernull_Ignored(bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable});
             Exception exception = null;
 
@@ -394,7 +394,7 @@ namespace Sentry.Tests
         [InlineData(false)]
         public void SetTag_ObserverExist_ObserverSetsTagIfEnabled(bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var observer = Substitute.For<IScopeObserver>();
             var scope = new Scope(new SentryOptions()
             {
@@ -417,7 +417,7 @@ namespace Sentry.Tests
         [InlineData(false)]
         public void UnsetTag_ObserverExist_ObserverUnsetsTagIfEnabled(bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var observer = Substitute.For<IScopeObserver>();
             var scope = new Scope(new SentryOptions()
             {
@@ -439,7 +439,7 @@ namespace Sentry.Tests
         [InlineData(false)]
         public void SetExtra_ObserverExist_ObserverSetsExtraIfEnabled(bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var observer = Substitute.For<IScopeObserver>();
             var scope = new Scope(new SentryOptions()
             {
@@ -462,7 +462,7 @@ namespace Sentry.Tests
         [InlineData(false)]
         public void AddBreadcrumb_ObserverExist_ObserverAddsBreadcrumbIfEnabled(bool observerEnable)
         {
-            //Arrange
+            // Arrange
             var observer = Substitute.For<IScopeObserver>();
             var scope = new Scope(new SentryOptions()
             {
