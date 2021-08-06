@@ -16,6 +16,21 @@
   </ItemGroup>
   <!-- From Ben.Demystifier -->
 
+  <!-- DiagnosticSource Tests -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' and '$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
+    <Compile Include="../Sentry.Diagnostics.DiagnosticSource.Tests/*.cs">
+      <Link>Internals/DiagnosticSource/%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' or '$(TargetFramework)' == 'netcoreapp2.1' or $(TargetFramework.StartsWith('net4'))">
+    <None Include="../Sentry.Diagnostics.DiagnosticSource.Tests/*.cs">
+      <Link>Internals/DiagnosticSource/%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+  <!-- DiagnosticSource -->
+
+
+  
   <ItemGroup>
     <PackageReference Include="Verify.Xunit" Version="8.11.0" />
   </ItemGroup>

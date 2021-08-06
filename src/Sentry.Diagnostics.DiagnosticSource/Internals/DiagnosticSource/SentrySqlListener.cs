@@ -98,7 +98,7 @@ namespace Sentry.Internals.DiagnosticSource
 
         private void UpdateConnectionSpan(Guid operationId, Guid connectionId)
         {
-            _hub.WithScope(scope =>
+            _hub.ConfigureScope(scope =>
             {
                 var span = scope.Transaction?.Spans.FirstOrDefault(span => TryGetKey(span.Extra, OperationExtraKey) is Guid id && id == operationId);
                 span?.SetExtra(ConnectionExtraKey, connectionId);
