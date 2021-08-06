@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\Sentry.Diagnostics.DiagnosticSource\Sentry.Diagnostics.DiagnosticSource.csproj" />
   </ItemGroup>
 
 </Project>

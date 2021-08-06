@@ -137,6 +137,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tunnel.Tests", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Extensions.Logging.EfCore.Tests", "test\Sentry.Extensions.Logging.EfCore.Tests\Sentry.Extensions.Logging.EfCore.Tests.csproj", "{0547A8D6-FE06-424F-979D-0FFA7CCE6E6D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Diagnostics.DiagnosticSource", "src\Sentry.Diagnostics.DiagnosticSource\Sentry.Diagnostics.DiagnosticSource.csproj", "{0BE821AB-88D4-4EB5-B012-C964FF58087A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -307,6 +309,10 @@ Global
 		{0547A8D6-FE06-424F-979D-0FFA7CCE6E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0547A8D6-FE06-424F-979D-0FFA7CCE6E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0547A8D6-FE06-424F-979D-0FFA7CCE6E6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -356,6 +362,7 @@ Global
 		{D2F8BF0E-7749-4C92-A4F1-7B96A9878458} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{BB54EF08-2FA1-498B-827B-32D905FB0F9F} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{0547A8D6-FE06-424F-979D-0FFA7CCE6E6D} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
