@@ -22,19 +22,22 @@
   <!-- Ben.Demystifier -->
 
   <!-- DiagnosticSource -->
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard2')) and !$(TargetFramework.StartsWith('net4'))">
+  <!--  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard2')) and !$(TargetFramework.StartsWith('net4'))"> -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'netcoreapp3.0'">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard2')) and !$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'netcoreapp3.0'">
     <Compile Include="../Sentry.Diagnostics.DiagnosticSource/Internals/**/*.cs">
       <Link>Internal/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2')) or $(TargetFramework.StartsWith('net4'))">
+<!--
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2')) or $(TargetFramework.StartsWith('net4')) and '$(TargetFramework)' != 'netcoreapp3.0'">
     <None Include="../Sentry.Diagnostics.DiagnosticSource/Internals/**/*.cs">
       <Link>Internal/%(RecursiveDir)/%(Filename)%(Extension)</Link>
     </None>
   </ItemGroup>
+  -->
   <!-- DiagnosticSource -->
 
 

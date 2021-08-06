@@ -15,21 +15,6 @@
     </Compile>
   </ItemGroup>
   <!-- From Ben.Demystifier -->
-
-  <!-- DiagnosticSource Tests -->
-  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' and '$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
-    <Compile Include="../Sentry.Diagnostics.DiagnosticSource.Tests/*.cs">
-      <Link>Internals/DiagnosticSource/%(Filename)%(Extension)</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' or '$(TargetFramework)' == 'netcoreapp2.1' or $(TargetFramework.StartsWith('net4'))">
-    <None Include="../Sentry.Diagnostics.DiagnosticSource.Tests/*.cs">
-      <Link>Internals/DiagnosticSource/%(Filename)%(Extension)</Link>
-    </None>
-  </ItemGroup>
-  <!-- DiagnosticSource -->
-
-
   
   <ItemGroup>
     <PackageReference Include="Verify.Xunit" Version="8.11.0" />
@@ -54,8 +39,26 @@
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
 
+  <!-- DiagnosticSource Tests -->
+  <!-- netcoreapp3.0 skipped since it'll target NET standard on Sentry. -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' and'$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
+    <Compile Include="../Sentry.Diagnostics.DiagnosticSource.Tests/*.cs">
+      <Link>Internals/DiagnosticSource/%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="../Sentry.Diagnostics.DiagnosticSource.Tests/Integration/**/*.cs">
+      <Link>Internals/DiagnosticSource/Integration/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </Compile>
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.8" />
+  </ItemGroup>
+
+  
+  <!-- DiagnosticSource -->
+
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
   </ItemGroup>
-
+  
 </Project>
