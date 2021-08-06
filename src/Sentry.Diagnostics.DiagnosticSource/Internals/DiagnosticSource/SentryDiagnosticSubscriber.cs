@@ -30,7 +30,7 @@ namespace Sentry.Internals.DiagnosticSource
                 _efInterceptor = new(_hub, _options);
                 listener.Subscribe(_efInterceptor);
             }
-            else if(listener.Name == "SqlClientDiagnosticListener")
+            else if (listener.Name == "SqlClientDiagnosticListener")
             {
                 _sqlListener = new(_hub, _options);
                 listener.Subscribe(_sqlListener);

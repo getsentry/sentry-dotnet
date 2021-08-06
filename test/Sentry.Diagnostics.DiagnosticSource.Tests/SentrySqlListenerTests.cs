@@ -28,34 +28,36 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
         internal const string SqlDataWriteCommandError = SentrySqlListener.SqlDataWriteCommandError;
         internal const string SqlMicrosoftWriteCommandError = SentrySqlListener.SqlMicrosoftWriteCommandError;
 
-        private Func<ISpan, bool> GetValidator(string type) =>
-    type switch
-    {
-        var x when
-                x == SqlDataWriteConnectionOpenBeforeCommand ||
-                x == SqlMicrosoftWriteConnectionOpenBeforeCommand ||
-                x == SqlMicrosoftWriteConnectionOpenAfterCommand ||
-                x == SqlDataWriteConnectionOpenAfterCommand ||
-                x == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                x == SqlDataWriteConnectionCloseAfterCommand
-            => (span) => span.Description is null && span.Operation == "db.connection",
-        var x when
-                x == SqlDataBeforeExecuteCommand ||
-                x == SqlMicrosoftBeforeExecuteCommand ||
-                x == SqlDataAfterExecuteCommand ||
-                x == SqlMicrosoftAfterExecuteCommand ||
-                x == SqlDataWriteCommandError ||
-                x == SqlMicrosoftWriteCommandError
-            => (span) => span.Operation == "db.query",
-        _ => throw new NotSupportedException()
-    };
+        private Func<ISpan, bool> GetValidator(string type)
+            => type switch
+                {
+                    _ when
+                            type == SqlDataWriteConnectionOpenBeforeCommand ||
+                            type == SqlMicrosoftWriteConnectionOpenBeforeCommand ||
+                            type == SqlMicrosoftWriteConnectionOpenAfterCommand ||
+                            type == SqlDataWriteConnectionOpenAfterCommand ||
+                            type == SqlMicrosoftWriteConnectionCloseAfterCommand ||
+                            type == SqlDataWriteConnectionCloseAfterCommand
+                        => (span) => span.Description is null && span.Operation == "db.connection",
+                    _ when
+                            type == SqlDataBeforeExecuteCommand ||
+                            type == SqlMicrosoftBeforeExecuteCommand ||
+                            type == SqlDataAfterExecuteCommand ||
+                            type == SqlMicrosoftAfterExecuteCommand ||
+                            type == SqlDataWriteCommandError ||
+                            type == SqlMicrosoftWriteCommandError
+                        => (span) => span.Operation == "db.query",
+                    _ => throw new NotSupportedException()
+                };
 
         private class ThrowToOperationClass
         {
             private string _operationId;
-            public string OperationId {
+            public string OperationId
+            {
                 get => throw new Exception();
-                set => _operationId = value; }
+                set => _operationId = value;
+            }
             public string ConnectionId { get; set; }
         }
 
@@ -103,7 +105,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
             // Arrange
             var hub = _fixture.Hub;
             var interceptor = new SentrySqlListener(hub, new SentryOptions());
-            if(addConnectionSpan)
+            if (addConnectionSpan)
             {
                 _fixture.Tracer.StartChild("abc").SetExtra(SentrySqlListener.ConnectionExtraKey, Guid.Empty);
             }
@@ -115,7 +117,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
 
             // Assert
             var spans = _fixture.Spans.Where(s => s.Operation != "abc");
-            Assert.NotEmpty(spans);            
+            Assert.NotEmpty(spans);
             Assert.True(GetValidator(key)(_fixture.Spans.First()));
         }
 

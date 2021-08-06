@@ -17,24 +17,24 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
         internal const string EFCommandFailed = SentryEFCoreListener.EFCommandFailed;
         internal const string EFConnectionClosed = SentryEFCoreListener.EFConnectionClosed;
 
-        private Func<ISpan, bool> GetValidator(string type) =>
-            type switch
-            {
-                var x when
-                        x == EFQueryCompiling ||
-                        x == EFQueryCompiled
-                    => (span) => span.Description != null && span.Operation == "db.query_compiler",
-                var x when
-                        x == EFConnectionOpening ||
-                        x == EFConnectionClosed
-                    => (span) => span.Description == null && span.Operation == "db.connection",
-                var x when
-                        x == EFCommandExecuting ||
-                        x == EFCommandExecuting ||
-                        x == EFCommandFailed
-                    => (span) => span.Description != null && span.Operation == "db.query",
-                _ => throw new NotSupportedException()
-            };
+        private Func<ISpan, bool> GetValidator(string type)
+            => type switch
+                {
+                    _ when
+                            type == EFQueryCompiling ||
+                            type == EFQueryCompiled
+                        => (span) => span.Description != null && span.Operation == "db.query_compiler",
+                    _ when
+                            type == EFConnectionOpening ||
+                            type == EFConnectionClosed
+                        => (span) => span.Description == null && span.Operation == "db.connection",
+                    _ when
+                            type == EFCommandExecuting ||
+                            type == EFCommandExecuting ||
+                            type == EFCommandFailed
+                        => (span) => span.Description != null && span.Operation == "db.query",
+                    _ => throw new NotSupportedException()
+                };
 
         private class ThrowToStringClass
         {

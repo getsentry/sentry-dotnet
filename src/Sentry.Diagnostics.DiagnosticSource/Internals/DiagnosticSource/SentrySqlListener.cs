@@ -47,7 +47,7 @@ namespace Sentry.Internals.DiagnosticSource
 
         private void AddSpan(SentrySqlSpanType type, string operation, string? description, Guid operationId, Guid? connectionId = null)
         {
-            _hub.WithScope(scope =>
+            _hub.ConfigureScope(scope =>
             {
                 if (type == SentrySqlSpanType.Connection &&
                     scope.Transaction?.StartChild(operation, description) is { } connectionSpan)
@@ -68,7 +68,7 @@ namespace Sentry.Internals.DiagnosticSource
         private ISpan? GetSpan(SentrySqlSpanType type, Guid? operationId = null, Guid? connectionId = null)
         {
             ISpan? span = null;
-            _hub.WithScope(scope =>
+            _hub.ConfigureScope(scope =>
             {
                 if (type == SentrySqlSpanType.Execution &&
                     operationId is { } queryId &&
@@ -84,7 +84,7 @@ namespace Sentry.Internals.DiagnosticSource
                 }
                 else
                 {
-                    _options.DiagnosticLogger?.LogWarning("Trying to close a span of type {0} with operation id {1}, but it was not found.", type, operationId);
+                    _options.DiagnosticLogger?.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.", type, operationId);
                 }
             });
             return span;
