@@ -21,6 +21,23 @@
   </ItemGroup>
   <!-- Ben.Demystifier -->
 
+  <!-- DiagnosticSource -->
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard2')) and !$(TargetFramework.StartsWith('net4'))">
+    <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard2')) and !$(TargetFramework.StartsWith('net4'))">
+    <Compile Include="../Sentry.Diagnostics.DiagnosticSource/Internals/**/*.cs">
+      <Link>Internal/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard2')) or $(TargetFramework.StartsWith('net4'))">
+    <None Include="../Sentry.Diagnostics.DiagnosticSource/Internals/**/*.cs">
+      <Link>Internal/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+  <!-- DiagnosticSource -->
+
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <Reference Include="System.Net.Http" />

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Sentry.Extensions
+namespace Sentry.Internal.Extensions
 {
     internal static class KeyValuePairExtensions
     {

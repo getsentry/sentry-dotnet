@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sentry.Extensibility;
-using Sentry.Extensions;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Internals.DiagnosticSource
 {

@@ -24,3 +24,4 @@ docs/docfx.zip
 /samples/Sentry.Samples.Aws.Lambda.AspNetCoreServer/Properties/launchSettings.json
 
 *.received.*
+/src/Sentry/Internal/Extensions/KeyValuePairExtensions.cs
