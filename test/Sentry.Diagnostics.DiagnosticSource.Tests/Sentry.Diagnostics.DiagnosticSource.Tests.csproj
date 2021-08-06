@@ -9,14 +9,14 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or
+             $(TargetFramework.StartsWith('netstandard2')) or
+             $(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('net4'))">
     <ProjectReference Include="../../src/Sentry.Diagnostics.DiagnosticSource/Sentry.Diagnostics.DiagnosticSource.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
 
 </Project>
