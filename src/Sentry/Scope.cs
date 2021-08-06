@@ -102,7 +102,8 @@ namespace Sentry
         // Internal for testing.
         internal Action UserChanged => () =>
         {
-            if (Options.ScopeObserver is { } observer)
+            if (Options.EnableScopeSync &&
+                Options.ScopeObserver is { } observer)
             {
                 observer.User = User;
             }
@@ -254,28 +255,40 @@ namespace Sentry
             }
 
             _breadcrumbs.Enqueue(breadcrumb);
-            Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
+            }
         }
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value)
         {
             _extra[key] = value;
-            Options.ScopeObserver?.SetExtra(key, value);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.SetExtra(key, value);
+            }
         }
 
         /// <inheritdoc />
         public void SetTag(string key, string value)
         {
             _tags[key] = value;
-            Options.ScopeObserver?.SetTag(key, value);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.SetTag(key, value);
+            }
         }
 
         /// <inheritdoc />
         public void UnsetTag(string key)
         {
             _tags.TryRemove(key, out _);
-            Options.ScopeObserver?.UnsetTag(key);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.UnsetTag(key);
+            }
         }
 
         /// <summary>

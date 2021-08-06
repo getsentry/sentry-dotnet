@@ -282,14 +282,24 @@ namespace Sentry.Tests
         }
 
         [Theory]
-        [InlineData("123@123.com", null, null)]
-        [InlineData(null, "my name", null)]
-        [InlineData(null, null, "my id")]
-        public void SetUserEmail_ObserverExist_ObserverUserEmailSet(string email, string username, string id)
+        [InlineData("123@123.com", null, null, true)]
+        [InlineData("123@123.com", null, null, false)]
+        [InlineData(null, "my name", null, true)]
+        [InlineData(null, "my name", null, false)]
+        [InlineData(null, null, "my id", true)]
+        [InlineData(null, null, "my id", false)]
+        public void SetUserEmail_ObserverExist_ObserverUserEmailSetIfEnabled(string email, string username, string id, bool observerEnable)
         {
             //Arrange
             var observer = NSubstitute.Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var scope = new Scope(new SentryOptions()
+            {
+                ScopeObserver = observer,
+                EnableScopeSync = observerEnable
+            });
+            var expectedEmail = observerEnable ? email : null;
+            var expectedusername = observerEnable ? username : null;
+            var expectedid = observerEnable ? id : null;
 
             // Act
             if (email != null)
@@ -306,45 +316,63 @@ namespace Sentry.Tests
             }
 
             // Assert
-            Assert.Equal(email, observer.User.Email);
-            Assert.Equal(id, observer.User.Id);
-            Assert.Equal(username, observer.User.Username);
+                Assert.Equal(expectedEmail, observer.User?.Email);
+                Assert.Equal(expectedid, observer.User?.Id);
+                Assert.Equal(expectedusername, observer.User?.Username);
         }
 
-        [Fact]
-        public void SetUserEmail_ObserverExistWithUser_ObserverUserEmailChanged()
+        [Theory]
+        [InlineData("1234", true)]
+        [InlineData("1234", false)]
+        public void SetUserEmail_ObserverExistWithUser_ObserverUserEmailChangedIfEnabled(string email, bool observerEnable)
+        {
+            //Arrange
+            var observerEmail = "abcd";
+            var observer = Substitute.For<IScopeObserver>();
+            observer.User = new User() { Email = observerEmail };
+            var scope = new Scope(new SentryOptions()
+            {
+                ScopeObserver = observer,
+                EnableScopeSync = observerEnable
+            });
+            var expectedEmail = observerEnable ? email : observerEmail;
+
+            // Act
+            scope.User.Email = email;
+
+            // Assert
+            Assert.Equal(expectedEmail, observer.User.Email);
+
+        }
+
+        [Theory]
+        [InlineData("1234", true)]
+        [InlineData("1234", false)]
+        public void SetUser_ObserverExist_ObserverUserChangedIfEnabled(string email, bool observerEnable)
         {
             //Arrange
             var observer = Substitute.For<IScopeObserver>();
-            observer.User = new User() { Email = "4321" };
-            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var scope = new Scope(new SentryOptions()
+            {
+                ScopeObserver = observer,
+                EnableScopeSync = observerEnable
+            });
+            var expectedEmail = observerEnable ? email : null;
 
             // Act
-            scope.User.Email = "1234";
+            scope.User = new User() { Email = email };
 
             // Assert
-            Assert.Equal(scope.User.Email, observer.User.Email);
+            Assert.Equal(expectedEmail, observer.User?.Email);
         }
 
-        [Fact]
-        public void SetUser_ObserverExistWith_ObserverUserChanged()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void UserChanged_Observernull_Ignored(bool observerEnable)
         {
             //Arrange
-            var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
-
-            // Act
-            scope.User = new User() { Email = "1234" };
-
-            // Assert
-            Assert.Equal(scope.User.Email, observer.User.Email);
-        }
-
-        [Fact]
-        public void UserChanged_Observernull_Ignored()
-        {
-            //Arrange
-            var scope = new Scope();
+            var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable});
             Exception exception = null;
 
             // Act
@@ -361,67 +389,95 @@ namespace Sentry.Tests
             Assert.Null(exception);
         }
 
-        [Fact]
-        public void SetTag_ObserverExist_ObserverSetsTag()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SetTag_ObserverExist_ObserverSetsTagIfEnabled(bool observerEnable)
         {
             //Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var scope = new Scope(new SentryOptions()
+            {
+                ScopeObserver = observer,
+                EnableScopeSync = observerEnable
+            });
             var expectedKey = "1234";
             var expectedValue = "5678";
+            var expectedCount = observerEnable ? 1 : 0;
 
             // Act
             scope.SetTag(expectedKey, expectedValue);
 
             // Assert
-            observer.Received(1).SetTag(Arg.Is(expectedKey), Arg.Is(expectedValue));
+            observer.Received(expectedCount).SetTag(Arg.Is(expectedKey), Arg.Is(expectedValue));
         }
 
-        [Fact]
-        public void UnsetTag_ObserverExist_ObserverUnsetsTag()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void UnsetTag_ObserverExist_ObserverUnsetsTagIfEnabled(bool observerEnable)
         {
             //Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var scope = new Scope(new SentryOptions()
+            {
+                ScopeObserver = observer,
+                EnableScopeSync = observerEnable
+            });
             var expectedKey = "1234";
+            var expectedCount = observerEnable ? 1 : 0;
 
             // Act
             scope.UnsetTag(expectedKey);
 
             // Assert
-            observer.Received(1).UnsetTag(Arg.Is(expectedKey));
+            observer.Received(expectedCount).UnsetTag(Arg.Is(expectedKey));
         }
 
-        [Fact]
-        public void SetExtra_ObserverExist_ObserverSetsExtra()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SetExtra_ObserverExist_ObserverSetsExtraIfEnabled(bool observerEnable)
         {
             //Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var scope = new Scope(new SentryOptions()
+            {
+                ScopeObserver = observer,
+                EnableScopeSync = observerEnable
+            });
             var expectedKey = "1234";
             var expectedValue = "5678";
+            var expectedCount = observerEnable ? 1 : 0;
 
             // Act
             scope.SetExtra(expectedKey, expectedValue);
 
             // Assert
-            observer.Received(1).SetExtra(Arg.Is(expectedKey), Arg.Is(expectedValue));
+            observer.Received(expectedCount).SetExtra(Arg.Is(expectedKey), Arg.Is(expectedValue));
         }
 
-        [Fact]
-        public void AddBreadcrumb_ObserverExist_ObserverAddsBreadcrumb()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void AddBreadcrumb_ObserverExist_ObserverAddsBreadcrumbIfEnabled(bool observerEnable)
         {
             //Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions() { ScopeObserver = observer });
+            var scope = new Scope(new SentryOptions()
+            {
+                ScopeObserver = observer,
+                EnableScopeSync = observerEnable
+            });
             var breadcrumb = new Breadcrumb(message: "1234");
+            var expectedCount = observerEnable ? 2 : 0;
 
             // Act
             scope.AddBreadcrumb(breadcrumb);
             scope.AddBreadcrumb(breadcrumb);
 
             // Assert
-            observer.Received(2).AddBreadcrumb(Arg.Is(breadcrumb));
+            observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
         }
     }
 }

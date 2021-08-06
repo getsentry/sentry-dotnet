@@ -34,9 +34,15 @@ namespace Sentry
         }
 
         /// <summary>
-        /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.
+        /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
+        /// NOTE: EnableScopeSync must be set true for the scope to be synced.
         /// </summary>
         public IScopeObserver? ScopeObserver { get; set; }
+
+        /// <summary>
+        /// If true, the SDK's scope will be synced with the observed scope.
+        /// </summary>
+        public bool EnableScopeSync { get; set; }
 
         // Override for tests
         internal ITransport? Transport { get; set; }
