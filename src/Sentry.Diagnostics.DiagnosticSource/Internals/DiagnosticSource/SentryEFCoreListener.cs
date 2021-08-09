@@ -105,16 +105,13 @@ namespace Sentry.Internals.DiagnosticSource
 
                 //Connection Span
                 //A transaction may or may not show a connection with it.
-                else if (_logConnectionEnabled)
+                if (_logConnectionEnabled && value.Key == EFConnectionOpening)
                 {
-                    if (value.Key == EFConnectionOpening)
-                    {
-                        AddSpan(SentryEFSpanType.Connection, "db.connection", null);
-                    }
-                    else if (value.Key == EFConnectionClosed)
-                    {
-                        TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
-                    }
+                    AddSpan(SentryEFSpanType.Connection, "db.connection", null);
+                }
+                else if (_logConnectionEnabled && value.Key == EFConnectionClosed)
+                {
+                    TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
                 }
 
                 //Query Execution Span
