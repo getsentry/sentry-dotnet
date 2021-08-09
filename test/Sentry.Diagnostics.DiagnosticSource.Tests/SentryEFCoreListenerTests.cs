@@ -94,6 +94,30 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
             var child = _fixture.Spans.First(s => GetValidator(key)(s));
         }
 
+        [Theory]
+        [InlineData(EFConnectionOpening, null)]
+        [InlineData(EFCommandExecuting, "data")]
+        public void OnNext_KnownKeyButDisabled_GetSpanNotInvoked(string key, string value)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            if (key == EFCommandExecuting)
+            {
+                interceptor.DisableQuerySpan();
+            }
+            else
+            {
+                interceptor.DisableConnectionSpan();
+            }
+
+            // Act
+            interceptor.OnNext(new(key, value));
+
+            // Assert
+            hub.Received(0).GetSpan();
+        }
+
         [Fact]
         public void OnNext_HappyPath_IsValid()
         {
