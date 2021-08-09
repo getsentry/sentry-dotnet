@@ -34,6 +34,10 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 _sqlListener = new(_hub, _options);
                 listener.Subscribe(_sqlListener);
+
+                // Duplicated data.
+                _efInterceptor?.DisableConnectionSpan();
+                _efInterceptor?.DisableQuerySpan();
             }
         }
     }

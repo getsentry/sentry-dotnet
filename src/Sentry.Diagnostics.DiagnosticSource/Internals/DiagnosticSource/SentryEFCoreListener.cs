@@ -42,11 +42,18 @@ namespace Sentry.Internals.DiagnosticSource
         private AsyncLocal<WeakReference<ISpan>> _spansQueryLocal = new();
         private AsyncLocal<WeakReference<ISpan>> _spansConnectionLocal = new();
 
+        private bool _logConnectionEnabled = true;
+        private bool _logQueryEnabled = true;
+
         public SentryEFCoreListener(IHub hub, SentryOptions options)
         {
             _hub = hub;
             _options = options;
         }
+
+        internal void DisableConnectionSpan() => _logConnectionEnabled = false;
+
+        internal bool DisableQuerySpan() => _logQueryEnabled = false;
 
         private ISpan? AddSpan(SentryEFSpanType type, string operation, string? description)
         {
@@ -86,7 +93,7 @@ namespace Sentry.Internals.DiagnosticSource
         {
             try
             {
-                //Query compiler Span           
+                //Query compiler Span
                 if (value.Key == EFQueryStartCompiling || value.Key == EFQueryCompiling)
                 {
                     AddSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value));
@@ -98,27 +105,33 @@ namespace Sentry.Internals.DiagnosticSource
 
                 //Connection Span
                 //A transaction may or may not show a connection with it.
-                else if (value.Key == EFConnectionOpening)
+                else if (_logConnectionEnabled)
                 {
-                    AddSpan(SentryEFSpanType.Connection, "db.connection", null);
-                }
-                else if (value.Key == EFConnectionClosed)
-                {
-                    TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
+                    if (value.Key == EFConnectionOpening)
+                    {
+                        AddSpan(SentryEFSpanType.Connection, "db.connection", null);
+                    }
+                    else if (value.Key == EFConnectionClosed)
+                    {
+                        TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
+                    }
                 }
 
                 //Query Execution Span
-                else if (value.Key == EFCommandExecuting)
+                else if (_logQueryEnabled)
                 {
-                    AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
-                }
-                else if (value.Key == EFCommandFailed)
-                {
-                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
-                }
-                else if (value.Key == EFCommandExecuted)
-                {
-                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
+                    if (value.Key == EFCommandExecuting)
+                    {
+                        AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
+                    }
+                    else if (value.Key == EFCommandFailed)
+                    {
+                        TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
+                    }
+                    else if (value.Key == EFCommandExecuted)
+                    {
+                        TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
+                    }
                 }
             }
             catch (Exception ex)
