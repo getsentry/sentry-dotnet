@@ -205,6 +205,10 @@ namespace Sentry.Extensibility
         public void CaptureSession(SessionUpdate sessionUpdate)
             => SentrySdk.CaptureSession(sessionUpdate);
 
+        /// <summary>
+        /// no-op.
+        /// </summary>
+        /// <param name="sessionAggregate"></param>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void CaptureSessionAggregate(SessionAggregate sessionAggregate)

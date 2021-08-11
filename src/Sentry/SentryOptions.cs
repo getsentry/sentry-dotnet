@@ -548,6 +548,9 @@ namespace Sentry
         /// </remarks>
         public bool AutoSessionTracking { get; set; } = false;
 
+        /// <summary>
+        /// Whether the SDK should let the Session manager behave as in a client-mode or server-mode.
+        /// </summary>
         public SessionMode SessionMode { get; set; }
 
         /// <summary>

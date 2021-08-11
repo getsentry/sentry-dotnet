@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -11,10 +11,19 @@ namespace Sentry
     // (Sentry's payload has multiple aggregates, but we can simplify it to only having one)
     public class SessionAggregate : IJsonSerializable
     {
+        /// <summary>
+        /// Timestamp of the group, rounded down to the minute.
+        /// </summary>
         public DateTimeOffset StartTimestamp { get; }
 
+        /// <summary>
+        /// The number of sessions with status "exited" without any errors.
+        /// </summary>
         public int ExitedCount { get; }
 
+        /// <summary>
+        /// The number of sessions with status "exited" that had a non-zero errors count.
+        /// </summary>
         public int ErroredCount { get; }
 
         /// <summary>
@@ -27,7 +36,7 @@ namespace Sentry
         /// </summary>
         public string? Environment { get; }
 
-        public SessionAggregate(
+        internal SessionAggregate(
             DateTimeOffset startTimestamp,
             int exitedCount,
             int erroredCount,
@@ -72,7 +81,7 @@ namespace Sentry
         /// </summary>
         public static SessionAggregate FromJson(JsonElement json)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

@@ -169,6 +169,7 @@ namespace Sentry
             CaptureEnvelope(Envelope.FromSession(sessionUpdate));
         }
 
+        /// <inheritdoc />
         public void CaptureSessionAggregate(SessionAggregate sessionAggregate)
         {
             if (_disposed)
