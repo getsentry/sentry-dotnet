@@ -117,6 +117,10 @@ namespace Sentry.AspNetCore
                     {
                         CaptureException(exceptionFeature.Error, "IExceptionHandlerFeature");
                     }
+                    else
+                    {
+                        hub.EndSession(SessionEndStatus.Exited);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -135,6 +139,7 @@ namespace Sentry.AspNetCore
                     _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 
                     var id = hub.CaptureEvent(evt);
+                    hub.EndSession(status:SessionEndStatus.Crashed);
 
                     _logger.LogInformation("Event '{id}' queued.", id);
                 }
