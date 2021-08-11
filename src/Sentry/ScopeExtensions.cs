@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -159,5 +160,13 @@ namespace Sentry
                     Path.GetFileName(filePath),
                     contentType)
             );
+
+        /// <summary>
+        /// Gets the last opened span.
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <returns>The last span not finished or null.</returns>
+        internal static ISpan? LastCreatedSpan(this Scope scope)
+            => scope.Transaction?.Spans.LastOrDefault(s => s.IsFinished is false);
     }
 }
