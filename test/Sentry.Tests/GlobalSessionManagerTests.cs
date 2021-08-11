@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Testing;
 using Xunit;
@@ -19,6 +20,8 @@ namespace Sentry.Tests
             public InMemoryDiagnosticLogger Logger { get; }
 
             public SentryOptions Options { get; }
+
+            public ISentryClient Client { get; }
 
             public ISystemClock Clock { get; }
 
@@ -37,12 +40,16 @@ namespace Sentry.Tests
                     DiagnosticLogger = Logger
                 };
 
+                Client = Substitute.For<ISentryClient>();
+
                 configureOptions?.Invoke(Options);
             }
 
             public GlobalSessionManager GetSut() =>
                 new(
                     Options,
+                    Client,
+                    Substitute.For<IInternalScopeManager>(),
                     Clock,
                     PersistedSessionProvider);
 
@@ -58,7 +65,9 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            var sessionUpdate = sut.StartSession();
+            sut.StartSession();
+            var sessionUpdate = sut.CurrentSession;
+
 
             // Assert
             sessionUpdate.Should().NotBeNull();
@@ -116,7 +125,9 @@ namespace Sentry.Tests
             // Act
             var sessionUpdates = Enumerable
                 .Range(0, 15)
-                .Select(_ => sut.StartSession())
+                .Select(_ => { sut.StartSession();
+                    return sut.CurrentSession;
+                })
                 .ToArray();
 
             // Assert
@@ -132,27 +143,12 @@ namespace Sentry.Tests
             sut.StartSession();
 
             // Act
-            var sessionUpdate = sut.ReportError();
+            sut.ReportError();
+            var sessionUpdate = sut.CurrentSession;
 
             // Assert
             sessionUpdate.Should().NotBeNull();
             sessionUpdate?.ErrorCount.Should().Be(1);
-        }
-
-        [Fact]
-        public void ReportError_ActiveSessionExistsWithNonZeroErrorCount_DoesNotReturnNewUpdate()
-        {
-            // Arrange
-            var sut = _fixture.GetSut();
-
-            sut.StartSession();
-
-            // Act
-            sut.ReportError();
-            var sessionUpdate = sut.ReportError();
-
-            // Assert
-            sessionUpdate.Should().BeNull();
         }
 
         [Fact]
@@ -181,11 +177,11 @@ namespace Sentry.Tests
             var session = sut.CurrentSession;
 
             // Act
-            var sessionUpdate = sut.EndSession(SessionEndStatus.Exited);
+            sut.EndSession(SessionEndStatus.Exited);
 
             // Assert
             session.Should().NotBeNull();
-            sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
+            _fixture.Client.Received(1).CaptureSession(Arg.Do<SessionUpdate>(sessionUpdate => sessionUpdate.Should().Be(SessionEndStatus.Exited)));
         }
 
         [Fact]
@@ -195,11 +191,10 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             // Act
-            var endedSession = sut.EndSession(SessionEndStatus.Exited);
+            sut.EndSession(SessionEndStatus.Exited);
 
             // Assert
-            endedSession.Should().BeNull();
-
+            _fixture.Client.Received(0).CaptureSession(Arg.Any<SessionUpdate>());
             _fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to end session because there is none active." &&
                 e.Level == SentryLevel.Debug
@@ -256,6 +251,8 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut = new GlobalSessionManager(
                 _fixture.Options,
+                _fixture.Client,
+                Substitute.For<IInternalScopeManager>(),
                 persistedSessionProvider: _ => throw new FileNotFoundException());
 
             // Act
@@ -272,6 +269,8 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut = new GlobalSessionManager(
                 _fixture.Options,
+                _fixture.Client,
+                Substitute.For<IInternalScopeManager>(),
                 persistedSessionProvider: _ => throw new DirectoryNotFoundException());
 
             // Act
@@ -288,6 +287,8 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
             sut = new GlobalSessionManager(
                 _fixture.Options,
+                _fixture.Client,
+                Substitute.For<IInternalScopeManager>(),
                 persistedSessionProvider: _ => throw new EndOfStreamException());
 
             // Act
@@ -296,7 +297,7 @@ namespace Sentry.Tests
             // Assert
             _fixture.Logger.Entries.Should().Contain(e => e.Level == SentryLevel.Error);
         }
-
+        /*
         [Fact]
         public void TryGetPersistentInstallationId_SessionStarted_ReturnsLastSession()
         {
@@ -326,6 +327,7 @@ namespace Sentry.Tests
             persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
             persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
         }
+        */
 
         [Fact]
         public void TryGetPersistentInstallationId_SessionStarted_DidCrashDelegateNotProvided_EndsAsAbnormal()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -285,7 +285,8 @@ namespace Sentry
             }
         }
 
-        private SessionUpdate? TryRecoverPersistedSession()
+        // internal for testing.
+        internal SessionUpdate? TryRecoverPersistedSession()
         {
             _options.DiagnosticLogger?.LogDebug("Attempting to recover persisted session from file.");
 
