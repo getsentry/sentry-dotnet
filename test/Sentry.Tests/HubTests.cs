@@ -910,6 +910,7 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
             var clock = Substitute.For<ISystemClock>();
+            var scopeManager = Substitute.For<IInternalScopeManager>();
 
             var options = new SentryOptions
             {
@@ -921,7 +922,7 @@ namespace NotSentry.Tests
                 options,
                 client,
                 clock: clock,
-                sessionManager: new GlobalSessionManager(options, clock));
+                sessionManager: new GlobalSessionManager(options, client, scopeManager, clock));
 
             clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
@@ -944,6 +945,7 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
             var clock = Substitute.For<ISystemClock>();
+            var scopeManager = Substitute.For<IInternalScopeManager>();
 
             var options = new SentryOptions
             {
@@ -954,7 +956,7 @@ namespace NotSentry.Tests
             var hub = new Hub(
                 options,
                 clock: clock,
-                sessionManager: new GlobalSessionManager(options, clock));
+                sessionManager: new GlobalSessionManager(options, client, scopeManager, clock));
 
             clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
@@ -975,6 +977,7 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
             var clock = Substitute.For<ISystemClock>();
+            var scopeManager = Substitute.For<IInternalScopeManager>();
 
             var options = new SentryOptions
             {
@@ -985,7 +988,7 @@ namespace NotSentry.Tests
             var hub = new Hub(
                 options,
                 clock: clock,
-                sessionManager: new GlobalSessionManager(options, clock));
+                sessionManager: new GlobalSessionManager(options, client, scopeManager, clock));
 
             clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
