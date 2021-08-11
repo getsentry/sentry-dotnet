@@ -135,6 +135,13 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
+        public void CaptureSessionAggregate(SessionAggregate sessionAggregate)
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
         public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
 
         /// <summary>

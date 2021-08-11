@@ -26,6 +26,7 @@ namespace Sentry.AspNet
             // Ignore options.IsGlobalModeEnable, we always want to use HttpContext as backing store here
             options.ScopeStackContainer ??= new HttpContextScopeStackContainer();
 
+            options.SessionMode = SessionMode.Server;
             options.DiagnosticLogger ??= new TraceDiagnosticLogger(options.DiagnosticLevel);
             options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
             options.AddEventProcessor(eventProcessor);

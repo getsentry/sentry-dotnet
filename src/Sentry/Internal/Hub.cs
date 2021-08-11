@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,7 +54,7 @@ namespace Sentry.Internal
                 _ownedClient
             );
 
-            _sessionManager = sessionManager ?? new GlobalSessionManager(options, _ownedClient, ScopeManager, clock);
+            _sessionManager = sessionManager ?? GetSessionManager(options, _clock);
 
             _rootScope = options.IsGlobalModeEnabled
                 ? DisabledHub.Instance
@@ -74,6 +73,10 @@ namespace Sentry.Internal
                 }
             }
         }
+
+        private ISessionManager GetSessionManager(SentryOptions options, ISystemClock clock)
+            => options.SessionMode is SessionMode.Client ? new GlobalSessionManager(options, _ownedClient, ScopeManager, clock) :
+                new ServerSessionManager(options, _ownedClient, clock);
 
         public void ConfigureScope(Action<Scope> configureScope)
         {
@@ -325,6 +328,18 @@ namespace Sentry.Internal
             catch (Exception e)
             {
                 _options.DiagnosticLogger?.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
+            }
+        }
+
+        public void CaptureSessionAggregate(SessionAggregate sessionAggregate)
+        {
+            try
+            {
+                _ownedClient.CaptureSessionAggregate(sessionAggregate);
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Failure to capture session aggregate: {0}", e, sessionAggregate.StartTimestamp);
             }
         }
 

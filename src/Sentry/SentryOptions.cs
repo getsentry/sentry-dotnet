@@ -548,6 +548,8 @@ namespace Sentry
         /// </remarks>
         public bool AutoSessionTracking { get; set; } = false;
 
+        public SessionMode SessionMode { get; set; }
+
         /// <summary>
         /// Delegate which is used to check whether the application crashed during last run.
         /// </summary>

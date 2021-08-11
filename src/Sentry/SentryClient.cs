@@ -169,6 +169,16 @@ namespace Sentry
             CaptureEnvelope(Envelope.FromSession(sessionUpdate));
         }
 
+        public void CaptureSessionAggregate(SessionAggregate sessionAggregate)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(SentryClient));
+            }
+
+            CaptureEnvelope(Envelope.FromSessionAggregate(sessionAggregate));
+        }
+
         /// <summary>
         /// Flushes events asynchronously.
         /// </summary>

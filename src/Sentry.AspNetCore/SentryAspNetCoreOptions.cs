@@ -56,6 +56,7 @@ namespace Sentry.AspNetCore
         {
             // Don't report Environment.UserName as the user.
             IsEnvironmentUser = false;
+            SessionMode = SessionMode.Server;
         }
     }
 }

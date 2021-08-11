@@ -205,6 +205,14 @@ namespace Sentry.Extensibility
         public void CaptureSession(SessionUpdate sessionUpdate)
             => SentrySdk.CaptureSession(sessionUpdate);
 
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void CaptureSessionAggregate(SessionAggregate sessionAggregate)
+        {
+//TODO: Should we expose CaptureSessionAggregate into SentrySDK?
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>
         /// </summary>
