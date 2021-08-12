@@ -329,6 +329,17 @@ namespace Sentry
             => _hub.CaptureSession(sessionUpdate);
 
         /// <summary>
+        /// Captures a session aggregate.
+        /// </summary>
+        /// <remarks>
+        /// Note: this method is NOT meant to be called from user code!
+        /// It will be called automatically by the SDK.
+        /// </remarks>
+        /// <param name="sessionAggregate">The aggregate to send to Sentry.</param>
+        public static void CaptureSessionAggregate(SessionAggregate sessionAggregate)
+            => _hub.CaptureSessionAggregate(sessionAggregate);
+
+        /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]

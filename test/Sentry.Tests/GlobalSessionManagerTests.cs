@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
@@ -171,7 +172,10 @@ namespace Sentry.Tests
         public void EndSession_ActiveSessionExists_EndsSession()
         {
             // Arrange
+            var sessionsUpdate = new List<SessionUpdate>();
             var sut = _fixture.GetSut();
+            _fixture.Client.When(client => client.CaptureSession(Arg.Any<SessionUpdate>()))
+                .Do(callback => sessionsUpdate.Add(callback.Arg<SessionUpdate>()));
 
             sut.StartSession();
             var session = sut.CurrentSession;
@@ -181,7 +185,8 @@ namespace Sentry.Tests
 
             // Assert
             session.Should().NotBeNull();
-            _fixture.Client.Received(1).CaptureSession(Arg.Do<SessionUpdate>(sessionUpdate => sessionUpdate.Should().Be(SessionEndStatus.Exited)));
+            Assert.Equal(2, sessionsUpdate.Count);
+            Assert.Equal(SessionEndStatus.Exited, sessionsUpdate.Last().EndStatus);
         }
 
         [Fact]
