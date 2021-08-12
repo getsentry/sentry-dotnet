@@ -65,6 +65,14 @@ namespace Sentry.Tests.Extensibility
         }
 
         [Fact]
+        public void EndSession_CrashedStatus_MockInvoked()
+        {
+            var expected = SessionEndStatus.Crashed;
+            HubAdapter.Instance.EndSession(expected);
+            Hub.Received(1).EndSession(expected);
+        }
+
+        [Fact]
         public void ConfigureScopeAsync_MockInvoked()
         {
             static Task Expected(Scope _) => default;

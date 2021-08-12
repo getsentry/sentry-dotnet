@@ -126,7 +126,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
-            => SentrySdk.EndSession();
+            => SentrySdk.EndSession(status);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
@@ -212,10 +212,7 @@ namespace Sentry.Extensibility
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void CaptureSessionAggregate(SessionAggregate sessionAggregate)
-        {
-//TODO: Should we expose CaptureSessionAggregate into SentrySDK?
-            throw new NotImplementedException();
-        }
+            => SentrySdk.CaptureSessionAggregate(sessionAggregate);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>
