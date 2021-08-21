@@ -4,7 +4,7 @@
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
-  <!-- <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
   </ItemGroup>
@@ -18,13 +18,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0-preview.6.21352.12" />
-  </ItemGroup> -->
-
-  <!-- using the net6 package for all TFMs until sorted: https://github.com/dotnet/runtime/issues/53454 -->
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0-preview.6.21352.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0-preview.*" />
   </ItemGroup>
 
   <ItemGroup>

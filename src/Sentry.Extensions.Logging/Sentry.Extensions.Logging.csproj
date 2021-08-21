@@ -10,31 +10,25 @@
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
 
-  <!-- using the net6 package for all TFMs until sorted: https://github.com/dotnet/runtime/issues/53454 -->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0-preview.6.21352.12" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0-preview.6.21352.12" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.0" />
   </ItemGroup>
 
-<!--  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">-->
-    <!-- <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.0"/> -->
-<!--    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="2.1.0" />-->
-<!--    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.0" />-->
-<!--  </ItemGroup>-->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.0" />
+  </ItemGroup>
 
-<!--  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">-->
-<!--    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0" />-->
-<!--    <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.0" />-->
-<!--  </ItemGroup>-->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
+  </ItemGroup>
 
-<!--  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">-->
-<!--    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="5.0.0" />-->
-<!--    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />-->
-<!--  </ItemGroup>-->
-
-<!--  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">-->
-<!--    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0-preview.6.21352.12" />-->
-<!--    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0-preview.6.21352.12" />-->
-<!--  </ItemGroup>-->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0-preview.*" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0-preview.*" />
+  </ItemGroup>
 
 </Project>
