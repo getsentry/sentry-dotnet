@@ -2,14 +2,14 @@
 
 ## Unreleased
 
-### Fixes
-
 ### Features
 
 - Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
 
 ### Fixes
 
+- Fix end session from Hub adapter not being passed to SentrySDK ([#1158](https://github.com/getsentry/sentry-dotnet/pull/1158))
+- Installation id catches dir not exist([#1159](https://github.com/getsentry/sentry-dotnet/pull/1159))
 - Set error status to transaction if http has exception and ok status ([#1143](https://github.com/getsentry/sentry-dotnet/pull/1143))
 - Fix max breadcrumbs limit when MaxBreadcrumbs is zero or lower ([#1145](https://github.com/getsentry/sentry-dotnet/pull/1145))
 
