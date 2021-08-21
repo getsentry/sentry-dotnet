@@ -33,8 +33,8 @@ namespace Sentry.AspNet.Tests
         {
             // Arrange
             using var _ = SentrySdk.UseHub(new Sentry.Internal.Hub(
-                Substitute.For<ISentryClient>(),
-                new SentryOptions {Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"}
+                new SentryOptions {Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"},
+                Substitute.For<ISentryClient>()
             ));
 
             var context = new HttpContext(
@@ -58,8 +58,8 @@ namespace Sentry.AspNet.Tests
         {
             // Arrange
             using var _ = SentrySdk.UseHub(new Sentry.Internal.Hub(
-                Substitute.For<ISentryClient>(),
-                new SentryOptions {Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"}
+                new SentryOptions {Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"},
+                Substitute.For<ISentryClient>()
             ));
 
             var context = new HttpContext(

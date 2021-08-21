@@ -301,7 +301,9 @@ namespace Serilog
 
             if (reportAssemblies.HasValue)
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 sentrySerilogOptions.ReportAssemblies = reportAssemblies.Value;
+#pragma warning restore CS0618 // Type or member is obsolete
             }
 
             if (deduplicateMode.HasValue)

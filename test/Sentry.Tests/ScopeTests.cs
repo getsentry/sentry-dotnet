@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using FluentAssertions;
 using Sentry.Extensibility;
 using Sentry.Testing;
@@ -217,6 +218,66 @@ namespace Sentry.Tests
 
             // Assert
             span.Should().Be(activeSpan);
+        }
+
+        [Fact]
+        public void AddAttachment_AddAttachments()
+        {
+            //Arrange
+            var scope = new Scope();
+            var attachment = new Attachment(default, default, default, default);
+            var attachment2 = new Attachment(default, default, default, default);
+
+            //Act
+            scope.AddAttachment(attachment);
+            scope.AddAttachment(attachment2);
+
+            //Assert
+            scope.Attachments.Should().Contain(attachment, "Attachment was not found.");
+            scope.Attachments.Should().Contain(attachment2, "Attachment2 was not found.");
+        }
+
+        [Fact]
+        public void ClearAttachments_HasAttachments_EmptyList()
+        {
+            //Arrange
+            var scope = new Scope();
+
+            for (int i = 0; i < 5; i++)
+            {
+                scope.AddAttachment(new MemoryStream(1_000), Guid.NewGuid().ToString());
+            }
+
+            //Act
+            scope.ClearAttachments();
+
+            //Assert
+            scope.Attachments.Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData(0, -2, 0)]
+        [InlineData(0, -1, 0)]
+        [InlineData(0,  0, 0)]
+        [InlineData(0,  1, 1)]
+        [InlineData(0,  2, 1)]
+        [InlineData(1,  2, 2)]
+        [InlineData(2,  2, 2)]
+        public void AddBreadcrumb__AddBreadcrumb_RespectLimits(int initialCount, int maxBreadcrumbs, int expectedCount)
+        {
+            //Arrange
+            var scope = new Scope(new SentryOptions() { MaxBreadcrumbs = maxBreadcrumbs });
+
+            for (int i = 0; i < initialCount; i++)
+            {
+                scope.AddBreadcrumb(new Breadcrumb());
+            }
+
+            //Act
+            scope.AddBreadcrumb(new Breadcrumb());
+
+            //Assert
+            Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
         }
     }
 }

@@ -54,6 +54,19 @@ namespace Sentry
         void StartSession();
 
         /// <summary>
+        /// Pauses an active session.
+        /// </summary>
+        void PauseSession();
+
+        /// <summary>
+        /// Resumes an active session.
+        /// If the session has been paused for longer than the duration of time specified in
+        /// <see cref="SentryOptions.AutoSessionTrackingInterval"/> then the paused session is
+        /// ended and a new one is started instead.
+        /// </summary>
+        void ResumeSession();
+
+        /// <summary>
         /// Ends the currently active session.
         /// </summary>
         void EndSession(SessionEndStatus status = SessionEndStatus.Exited);

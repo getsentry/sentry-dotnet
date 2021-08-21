@@ -89,6 +89,23 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task InvokeAsync_ExceptionThrown_HandledSetFalse()
+        {
+            var expected = new Exception("test");
+            _fixture.RequestDelegate = _ => throw expected;
+
+            _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
+                .Do(c => Assert.False((bool)c.Arg<SentryEvent>().Exception.Data[Mechanism.HandledKey]));
+
+            var sut = _fixture.GetSut();
+
+            var actual = await Assert.ThrowsAsync<Exception>(
+                async () => await sut.InvokeAsync(_fixture.HttpContext));
+
+            Assert.Same(expected, actual);
+        }
+
+        [Fact]
         public async Task InvokeAsync_FeatureFoundWithNoError_DoesNotCapturesEvent()
         {
             var feature = Substitute.For<IExceptionHandlerFeature>();
@@ -100,6 +117,21 @@ namespace Sentry.AspNetCore.Tests
             await sut.InvokeAsync(_fixture.HttpContext);
 
             _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        }
+
+        [Fact]
+        public async Task InvokeAsync_FeatureFoundWithError_CapturesEvent()
+        {
+            var exception = new Exception();
+            var feature = Substitute.For<IExceptionHandlerFeature>();
+            _ = feature.Error.Returns(exception);
+            _ = _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
+            var sut = _fixture.GetSut();
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            _ = _fixture.Hub.Received().CaptureEvent(Arg.Any<SentryEvent>());
+            Assert.Equal("IExceptionHandlerFeature", exception.Data[Mechanism.MechanismKey]);
         }
 
         [Fact]

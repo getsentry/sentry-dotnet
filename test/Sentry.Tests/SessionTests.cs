@@ -26,13 +26,12 @@ namespace Sentry.Tests
             session.ReportError();
             session.ReportError();
 
-            session.End(SessionEndStatus.Crashed);
-
             var sessionUpdate = new SessionUpdate(
                 session,
                 true,
                 DateTimeOffset.Parse("2020-01-02T00:00:00+00:00", CultureInfo.InvariantCulture),
-                5
+                5,
+                SessionEndStatus.Crashed
             );
 
             // Act
@@ -75,9 +74,9 @@ namespace Sentry.Tests
             );
 
             // Act
-            var sessionUpdate1 = session.CreateUpdate(true);
-            var sessionUpdate2 = session.CreateUpdate(false);
-            var sessionUpdate3 = session.CreateUpdate(false);
+            var sessionUpdate1 = session.CreateUpdate(true, DateTimeOffset.Now);
+            var sessionUpdate2 = session.CreateUpdate(false, DateTimeOffset.Now);
+            var sessionUpdate3 = session.CreateUpdate(false, DateTimeOffset.Now);
 
             // Assert
             sessionUpdate1.SequenceNumber.Should().Be(0);

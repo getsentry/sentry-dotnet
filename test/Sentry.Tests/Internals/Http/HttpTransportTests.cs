@@ -425,7 +425,7 @@ namespace Sentry.Tests.Internals.Http
             await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
 
             // Send session update with init=true
-            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true)));
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
             // Pretend the rate limit has already passed
             foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -436,7 +436,7 @@ namespace Sentry.Tests.Internals.Http
             // Act
 
             // Send another update with init=false (should get promoted)
-            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(false)));
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(false, DateTimeOffset.Now)));
 
             var lastRequest = httpHandler.GetRequests().Last();
             var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
@@ -469,7 +469,7 @@ namespace Sentry.Tests.Internals.Http
             await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
 
             // Send session update with init=true
-            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true)));
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
             // Pretend the rate limit has already passed
             foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -481,7 +481,7 @@ namespace Sentry.Tests.Internals.Http
 
             // Send an update for different session with init=false (should NOT get promoted)
             var nextSession = new Session("foo2", "bar2", "baz2");
-            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, nextSession.CreateUpdate(false)));
+            await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
 
             var lastRequest = httpHandler.GetRequests().Last();
             var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();

@@ -6,6 +6,7 @@ using FluentAssertions;
 using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
@@ -150,11 +151,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub( new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
-            });
+            }, client);
 
             var exception = new Exception("error");
 
@@ -179,11 +180,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
-            });
+            }, client);
 
             var exception = new Exception("error");
 
@@ -209,11 +210,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 0
-            });
+            }, client);
 
             var exception = new Exception("error");
 
@@ -239,11 +240,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
-            });
+            }, client);
 
             // Act
             hub.CaptureException(new Exception("error"));
@@ -263,10 +264,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
-            });
+            }, client);
 
             hub.StartSession();
 
@@ -279,15 +280,38 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void CaptureEvent_ExceptionWithOpenSpan_SpanFinishedWithInternalError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            }, client);
+            var scope = new Scope();
+            scope.Transaction = hub.StartTransaction("transaction", "operation");
+
+            var child = scope.Transaction.StartChild("child", "child");
+
+            // Act
+            hub.CaptureEvent(new SentryEvent(new Exception()), scope);
+
+            // Assert
+            Assert.Equal(SpanStatus.InternalError, child.Status);
+            Assert.True(child.IsFinished);
+        }
+
+        [Fact]
         public void CaptureEvent_SessionActive_ExceptionReportsError()
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
-            });
+            }, client);
 
             hub.StartSession();
 
@@ -303,12 +327,11 @@ namespace NotSentry.Tests
         public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
         {
             // Arrange
-            var client = Substitute.For<ISentryClient>();
+            var worker = Substitute.For<IBackgroundWorker>();
 
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret};
+            var client = new SentryClient(options, worker);
+            var hub = new Hub(options, client);
 
             hub.StartSession();
 
@@ -319,7 +342,17 @@ namespace NotSentry.Tests
             });
 
             // Assert
-            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Crashed));
+            worker.Received().EnqueueEnvelope(
+                Arg.Is<Envelope>(e =>
+                    e.Items
+                        .Select(i => i.Payload)
+                        .OfType<JsonSerializable>()
+                        .Select(i => i.Source)
+                        .OfType<SessionUpdate>()
+                        .Single()
+                        .EndStatus == SessionEndStatus.Crashed
+                )
+            );
         }
 
         [Fact]
@@ -690,10 +723,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             var transaction = hub.StartTransaction("foo", "bar");
 
@@ -728,10 +761,10 @@ namespace NotSentry.Tests
         public void Dispose_CalledSecondTime_ClientDisposedOnce()
         {
             var client = Substitute.For<ISentryClient, IDisposable>();
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             // Act
             hub.Dispose();
@@ -747,10 +780,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             // Act
             hub.StartSession();
@@ -765,10 +798,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             hub.StartSession();
 
@@ -777,6 +810,194 @@ namespace NotSentry.Tests
 
             // Assert
             client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
+        }
+
+        [Fact]
+        public void Ctor_AutoSessionTrackingEnabled_StartsSession()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            // Act
+            _ = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTracking = true
+            }, client);
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        }
+
+        [Fact]
+        public void Ctor_GlobalModeTrue_DoesNotPushScope()
+        {
+            // Arrange
+            var scopeManager = Substitute.For<IInternalScopeManager>();
+
+            // Act
+            _ = new Hub(new SentryOptions
+            {
+                IsGlobalModeEnabled = true,
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            }, scopeManager: scopeManager);
+
+            // Assert
+            scopeManager.DidNotReceiveWithAnyArgs().PushScope();
+        }
+
+        [Fact]
+        public void Ctor_GlobalModeFalse_DoesPushScope()
+        {
+            // Arrange
+            var scopeManager = Substitute.For<IInternalScopeManager>();
+
+            // Act
+            _ = new Hub(new SentryOptions
+            {
+                IsGlobalModeEnabled = false,
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            }, scopeManager: scopeManager);
+
+            // Assert
+            scopeManager.Received(1).PushScope();
+        }
+
+        [Fact]
+        public void Dispose_AutoSessionTrackingEnabled_EndsSession()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTracking = true
+            }, client);
+
+            // Act
+            hub.Dispose();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
+        }
+
+        [Fact]
+        public void ResumeSession_WithinAutoTrackingInterval_ContinuesSameSession()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
+            }, client);
+
+            hub.StartSession();
+            hub.PauseSession();
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+        }
+
+        [Fact]
+        public void ResumeSession_BeyondAutoTrackingInterval_EndsPreviousSessionAndStartsANewOne()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var clock = Substitute.For<ISystemClock>();
+
+            var options = new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            };
+
+            var hub = new Hub(
+                options,
+                client,
+                clock: clock,
+                sessionManager: new GlobalSessionManager(options, clock));
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now);
+
+            hub.StartSession();
+            hub.PauseSession();
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
+            client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        }
+
+        [Fact]
+        public void ResumeSession_NoActiveSession_DoesNothing()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var clock = Substitute.For<ISystemClock>();
+
+            var options = new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            };
+
+            var hub = new Hub(
+                options,
+                clock: clock,
+                sessionManager: new GlobalSessionManager(options, clock));
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now);
+
+            hub.PauseSession();
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.DidNotReceive().CaptureSession(Arg.Any<SessionUpdate>());
+        }
+
+        [Fact]
+        public void ResumeSession_NoPausedSession_DoesNothing()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+            var clock = Substitute.For<ISystemClock>();
+
+            var options = new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            };
+
+            var hub = new Hub(
+                options,
+                clock: clock,
+                sessionManager: new GlobalSessionManager(options, clock));
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now);
+
+            hub.StartSession();
+
+            clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+            // Act
+            hub.ResumeSession();
+
+            // Assert
+            client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
         }
     }
 }

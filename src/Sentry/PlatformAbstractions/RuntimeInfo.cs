@@ -21,13 +21,16 @@ namespace Sentry.PlatformAbstractions
             runtime ??= GetFromMonoRuntime();
 
             runtime ??= GetFromEnvironmentVariable();
+            return runtime;
+        }
 
+        internal static void SetAdditionalParameters(Runtime runtime)
+        {
 #if NET461
             SetNetFxReleaseAndVersion(runtime);
 #else
             SetNetCoreVersion(runtime);
 #endif
-            return runtime;
         }
 
         internal static Runtime? Parse(string rawRuntimeDescription, string? name = null)

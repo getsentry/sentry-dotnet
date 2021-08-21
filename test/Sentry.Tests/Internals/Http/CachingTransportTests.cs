@@ -32,6 +32,7 @@ namespace Sentry.Tests.Internals.Http
             using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path
             };
@@ -63,6 +64,7 @@ namespace Sentry.Tests.Internals.Http
             using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path
             };
@@ -91,6 +93,7 @@ namespace Sentry.Tests.Internals.Http
             using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path,
                 MaxCacheItems = 2
@@ -124,6 +127,7 @@ namespace Sentry.Tests.Internals.Http
             using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path
             };
@@ -167,6 +171,7 @@ namespace Sentry.Tests.Internals.Http
             using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path
             };
@@ -213,6 +218,7 @@ namespace Sentry.Tests.Internals.Http
             using var cacheDirectory = new TempDirectory();
             var options = new SentryOptions
             {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path
             };

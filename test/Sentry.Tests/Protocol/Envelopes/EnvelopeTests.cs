@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Sentry.Protocol;
@@ -474,7 +475,7 @@ namespace Sentry.Tests.Protocol.Envelopes
                 null
             );
 
-            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false);
+            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
 
             using var envelope = Envelope.FromEvent(@event, new[] {attachment}, sessionUpdate);
 
@@ -539,7 +540,7 @@ namespace Sentry.Tests.Protocol.Envelopes
         public async Task Roundtrip_WithSession_Success()
         {
             // Arrange
-            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(true);
+            var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(true, DateTimeOffset.Now);
 
             using var envelope = Envelope.FromSession(sessionUpdate);
 
@@ -607,6 +608,25 @@ namespace Sentry.Tests.Protocol.Envelopes
             await Assert.ThrowsAnyAsync<Exception>(
                 async () => await Envelope.DeserializeAsync(input)
             );
+        }
+
+        [Fact]
+        public void FromEvent_Header_IncludesSdkInformation()
+        {
+            // Act
+            var envelope = Envelope.FromEvent(new SentryEvent());
+
+            // Assert
+            envelope.Header.Any(kvp =>
+            {
+                var (key, value) = kvp;
+
+                return
+                    key == "sdk" &&
+                    value is IReadOnlyDictionary<string, string> nested &&
+                    nested["name"] == SdkVersion.Instance.Name &&
+                    nested["version"] == SdkVersion.Instance.Version;
+            }).Should().BeTrue();
         }
     }
 }

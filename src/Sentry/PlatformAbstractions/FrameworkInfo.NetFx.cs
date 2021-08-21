@@ -10,6 +10,8 @@ namespace Sentry.PlatformAbstractions
     /// </summary>
     public static partial class FrameworkInfo
     {
+        internal const string NetFxNdpRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\";
+        internal const string NetFxNdpFullRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
         /// <summary>
         /// Get the latest Framework installation for the specified CLR
         /// </summary>
@@ -85,8 +87,7 @@ namespace Sentry.PlatformAbstractions
         /// <returns>Enumeration of installations</returns>
         public static IEnumerable<FrameworkInstallation> GetInstallations()
         {
-            using var ndpKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, string.Empty)
-                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\");
+            using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpRegistryKey, false);
             if (ndpKey == null)
             {
                 yield break;
@@ -160,15 +161,14 @@ namespace Sentry.PlatformAbstractions
                 },
                 Version = version,
                 ServicePack = subKey.GetInt("SP"),
-                Release = hasRelease ? release : null as int?
+                Release = hasRelease ? release : null
             };
         }
 
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
         internal static int? Get45PlusLatestInstallationFromRegistry()
         {
-            using var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32)
-                .OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\");
+            using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpFullRegistryKey, false);
             return ndpKey?.GetInt("Release");
         }
 

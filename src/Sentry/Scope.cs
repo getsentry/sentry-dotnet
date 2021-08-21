@@ -184,7 +184,12 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags;
 
+#if NETSTANDARD2_0 || NET461
+        private ConcurrentBag<Attachment> _attachments = new();
+#else
         private readonly ConcurrentBag<Attachment> _attachments = new();
+        
+#endif
 
         /// <summary>
         /// Attachments.
@@ -221,9 +226,12 @@ namespace Sentry
                 }
             }
 
-            var overflow = Breadcrumbs.Count - Options.MaxBreadcrumbs + 1;
-
-            if (overflow > 0)
+            if (Options.MaxBreadcrumbs <= 0)
+            {
+                //Always drop the breadcrumb.
+                return;
+            }
+            else if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
             {
                 _breadcrumbs.TryDequeue(out _);
             }
@@ -244,6 +252,19 @@ namespace Sentry
         /// Adds an attachment.
         /// </summary>
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
+
+
+        /// <summary>
+        /// Clear all Attachments.
+        /// </summary>
+        public void ClearAttachments()
+        {
+#if NETSTANDARD2_0 || NET461
+            Interlocked.Exchange(ref _attachments, new());
+#else
+            _attachments.Clear();
+#endif
+        }
 
         /// <summary>
         /// Applies the data from this scope to another event-like object.

@@ -99,7 +99,7 @@ namespace Sentry.Protocol
         public string? GraphicsShaderLevel { get; set; }
 
         /// <summary>
-        /// Is audio available on the device?
+        /// Is GPU draw call instancing supported?
         /// </summary>
         public bool? SupportsDrawCallInstancing { get; set; }
 
