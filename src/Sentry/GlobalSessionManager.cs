@@ -206,25 +206,18 @@ namespace Sentry
 
                 _options.DiagnosticLogger?.LogDebug(
                     "Created persistence directory for session file '{0}'.",
-                    _persistenceDirectoryPath
-                );
+                    _persistenceDirectoryPath);
 
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
                 var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
                 persistedSessionUpdate.WriteToFile(filePath);
 
-                _options.DiagnosticLogger?.LogInfo(
-                    "Persisted session to a file '{0}'.",
-                    filePath
-                );
+                _options.DiagnosticLogger?.LogDebug("Persisted session to a file '{0}'.", filePath);
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to persist session on the file system.",
-                    ex
-                );
+                _options.DiagnosticLogger?.LogError("Failed to persist session on the file system.", ex);
             }
         }
 
@@ -368,8 +361,7 @@ namespace Sentry
 
             _options.DiagnosticLogger?.LogInfo(
                 "Started new session (SID: {0}; DID: {1}).",
-                session.Id, session.DistinctId
-            );
+                session.Id, session.DistinctId);
 
             var update = session.CreateUpdate(true, _clock.GetUtcNow());
 
@@ -382,8 +374,7 @@ namespace Sentry
         {
             _options.DiagnosticLogger?.LogInfo(
                 "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
-                session.Id, session.DistinctId, status
-            );
+                session.Id, session.DistinctId, status);
 
             var update = session.CreateUpdate(false, timestamp, status);
 
@@ -464,8 +455,7 @@ namespace Sentry
 
             _options.DiagnosticLogger?.LogDebug(
                 "Paused session has been paused for {0}, which is shorter than the configured timeout.",
-                pauseDuration
-            );
+                pauseDuration);
 
             return Array.Empty<SessionUpdate>();
         }
@@ -491,8 +481,7 @@ namespace Sentry
             }
 
             _options.DiagnosticLogger?.LogDebug(
-                "Failed to report an error on a session because there is none active."
-            );
+                "Failed to report an error on a session because there is none active.");
 
             return null;
         }

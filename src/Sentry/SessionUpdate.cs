@@ -192,8 +192,7 @@ namespace Sentry
                 isInitial,
                 timestamp,
                 sequenceNumber,
-                endStatus
-            );
+                endStatus);
         }
     }
 }

@@ -17,13 +17,11 @@ namespace Sentry.Tests.Internals.ScopeStack
 
             var scope1 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             var scope2 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             // Act & assert
             var task1 = Task.Run(async () =>
@@ -68,13 +66,11 @@ namespace Sentry.Tests.Internals.ScopeStack
 
             var scope1 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             var scope2 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             // Act & assert
             await Task.Run(async () =>
@@ -117,13 +113,11 @@ namespace Sentry.Tests.Internals.ScopeStack
 
             var scope1 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             var scope2 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             // Act & assert
             await Task.Run(async () =>

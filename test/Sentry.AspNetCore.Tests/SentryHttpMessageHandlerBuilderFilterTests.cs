@@ -74,11 +74,10 @@ namespace Sentry.AspNetCore.Tests
                                 .GetRequiredService<IHttpClientFactory>()
                                 .CreateClient();
 
-                            await httpClient.GetAsync("https://example.com");
+                            await httpClient.GetAsync("https://fake.tld");
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 

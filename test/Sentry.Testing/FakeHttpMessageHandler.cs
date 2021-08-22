@@ -25,8 +25,7 @@ namespace Sentry.Testing
             return Task.FromResult(
                 _getResponse is not null
                     ? _getResponse(request)
-                    : new HttpResponseMessage(HttpStatusCode.OK)
-            );
+                    : new HttpResponseMessage(HttpStatusCode.OK));
         }
     }
 }

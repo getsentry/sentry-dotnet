@@ -48,8 +48,7 @@ namespace Sentry.Protocol.Tests.Context
                 "\"supports_ray_tracing\":false," +
                 "\"supports_compute_shaders\":true," +
                 "\"supports_geometry_shaders\":true}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

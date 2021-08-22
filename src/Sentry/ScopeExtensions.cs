@@ -130,8 +130,7 @@ namespace Sentry
                     type,
                     new StreamAttachmentContent(stream),
                     fileName,
-                    contentType)
-            );
+                    contentType));
         }
 
         /// <summary>
@@ -158,8 +157,7 @@ namespace Sentry
                     type,
                     new FileAttachmentContent(filePath),
                     Path.GetFileName(filePath),
-                    contentType)
-            );
+                    contentType));
 
         /// <summary>
         /// Gets the last opened span.

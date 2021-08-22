@@ -19,8 +19,7 @@ namespace Sentry.Tests
                 "release123",
                 "env123",
                 "192.168.0.1",
-                "Google Chrome"
-            );
+                "Google Chrome");
 
             session.ReportError();
             session.ReportError();
@@ -31,8 +30,7 @@ namespace Sentry.Tests
                 true,
                 DateTimeOffset.Parse("2020-01-02T00:00:00+00:00", CultureInfo.InvariantCulture),
                 5,
-                SessionEndStatus.Crashed
-            );
+                SessionEndStatus.Crashed);
 
             // Act
             var json = sessionUpdate.ToJsonString();
@@ -55,8 +53,7 @@ namespace Sentry.Tests
                 "\"ip_address\":\"192.168.0.1\"," +
                 "\"user_agent\":\"Google Chrome\"" +
                 "}" +
-                "}"
-            );
+                "}");
         }
 
         [Fact]
@@ -70,8 +67,7 @@ namespace Sentry.Tests
                 "release123",
                 "env123",
                 "192.168.0.1",
-                "Google Chrome"
-            );
+                "Google Chrome");
 
             // Act
             var sessionUpdate1 = session.CreateUpdate(true, DateTimeOffset.Now);

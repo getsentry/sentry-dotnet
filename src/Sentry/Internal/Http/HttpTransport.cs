@@ -169,11 +169,17 @@ namespace Sentry.Internal.Http
                 return;
             }
 
-            _options.DiagnosticLogger?.LogDebug(
-                "Envelope {0} successfully received by Sentry.",
-                processedEnvelope.TryGetEventId()
-            );
-
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
+            {
+                _options.DiagnosticLogger?.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
+                    envelope.TryGetEventId(),
+                    await envelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+            }
+            else
+            {
+                _options.DiagnosticLogger?.LogInfo("Envelope '{0}' successfully received by Sentry.",
+                    processedEnvelope.TryGetEventId());
+            }
         }
 
         private async Task HandleFailureAsync(
@@ -182,7 +188,7 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             // Spare the overhead if level is not enabled
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true)
             {
                 if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json",
                     StringComparison.OrdinalIgnoreCase))
@@ -220,11 +226,19 @@ namespace Sentry.Internal.Http
                         responseString
                     );
                 }
+
+                // If debug level, dump the whole envelope to the logger
+                if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
+                {
+                    _options.DiagnosticLogger?.LogDebug("Failed envelope '{0}' has payload:\n{1}",
+                        processedEnvelope.TryGetEventId(),
+                        await processedEnvelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+                }
             }
 
             // SDK is in debug mode, and envelope was too large. To help troubleshoot:
             const string persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) == true
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true
                 && response.StatusCode == HttpStatusCode.RequestEntityTooLarge
                 && _getEnvironmentVariable(persistLargeEnvelopePathEnvVar) is { } destinationDirectory)
             {

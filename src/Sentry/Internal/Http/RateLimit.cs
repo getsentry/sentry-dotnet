@@ -29,8 +29,7 @@ namespace Sentry.Internal.Http
 
             return new RateLimit(
                 categories,
-                retryAfter
-            );
+                retryAfter);
         }
 
         public static IEnumerable<RateLimit> ParseMany(string rateLimitsEncoded) =>

@@ -39,8 +39,7 @@ namespace Sentry.Tests.Protocol.Exceptions
                 "\"thread_id\":1," +
                 "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
                 "\"mechanism\":{\"description\":\"Description\"}}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

@@ -61,8 +61,7 @@ namespace Sentry.Tests.Protocol
                 "type",
                 new Dictionary<string, string> {{"data-key", "data-value"}},
                 "category",
-                BreadcrumbLevel.Warning)
-            );
+                BreadcrumbLevel.Warning));
 
             transaction.SetExtra("extra_key", "extra_value");
             transaction.Fingerprint = new[] {"fingerprint"};
@@ -275,8 +274,7 @@ namespace Sentry.Tests.Protocol
                     t.Spans.Any(s => s.Operation == "op1") &&
                     t.Spans.All(s => s.Operation != "op2") &&
                     t.Spans.Any(s => s.Operation == "op3")
-                )
-            );
+                ));
         }
 
         [Fact]

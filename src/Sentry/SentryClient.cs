@@ -143,8 +143,7 @@ namespace Sentry
             // Sampling decision MUST have been made at this point
             Debug.Assert(
                 transaction.IsSampled != null,
-                "Attempt to capture transaction without sampling decision."
-            );
+                "Attempt to capture transaction without sampling decision.");
 
             if (transaction.IsSampled != true)
             {
@@ -256,14 +255,13 @@ namespace Sentry
         {
             if (Worker.EnqueueEnvelope(envelope))
             {
-                _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
+                _options.DiagnosticLogger?.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId());
                 return true;
             }
 
             _options.DiagnosticLogger?.LogWarning(
                 "The attempt to queue the event failed. Items in queue: {0}",
-                Worker.QueuedItems
-            );
+                Worker.QueuedItems);
 
             return false;
         }
@@ -287,7 +285,7 @@ namespace Sentry
                 {
                     {"message", e.Message}
                 };
-                if(e.StackTrace is not null)
+                if (e.StackTrace is not null)
                 {
                     data.Add("stackTrace", e.StackTrace);
                 }

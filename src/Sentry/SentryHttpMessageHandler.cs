@@ -70,8 +70,7 @@ namespace Sentry
             var span = _hub.GetSpan()?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
-                $"{requestMethod} {url}"
-            );
+                $"{requestMethod} {url}");
 
             try
             {

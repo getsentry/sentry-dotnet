@@ -280,13 +280,11 @@ namespace Sentry.Tests
             // Assert
             sampledInEventsCount.Should().BeCloseTo(
                 (int)(0.5 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
+                (uint)(allowedRelativeDeviation * eventIds.Length));
 
             sampledOutEventsCount.Should().BeCloseTo(
                 (int)(0.5 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
+                (uint)(allowedRelativeDeviation * eventIds.Length));
         }
 
         [Fact]
@@ -315,13 +313,11 @@ namespace Sentry.Tests
             // Assert
             sampledInEventsCount.Should().BeCloseTo(
                 (int)(0.25 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
+                (uint)(allowedRelativeDeviation * eventIds.Length));
 
             sampledOutEventsCount.Should().BeCloseTo(
                 (int)(0.75 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
+                (uint)(allowedRelativeDeviation * eventIds.Length));
         }
 
         [Fact]
@@ -350,13 +346,11 @@ namespace Sentry.Tests
             // Assert
             sampledInEventsCount.Should().BeCloseTo(
                 (int)(0.75 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
+                (uint)(allowedRelativeDeviation * eventIds.Length));
 
             sampledOutEventsCount.Should().BeCloseTo(
                 (int)(0.25 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
+                (uint)(allowedRelativeDeviation * eventIds.Length));
         }
 
         [Fact]
@@ -403,8 +397,7 @@ namespace Sentry.Tests
 
             //Act
             sut.CaptureUserFeedback(
-                new UserFeedback(SentryId.Empty, "name", "email", "comment")
-            );
+                new UserFeedback(SentryId.Empty, "name", "email", "comment"));
 
             //Assert
             _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -418,8 +411,7 @@ namespace Sentry.Tests
 
             //Act
             sut.CaptureUserFeedback(
-                new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment")
-            );
+                new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment"));
 
             //Assert
             _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
@@ -482,8 +474,7 @@ namespace Sentry.Tests
                 {
                     IsSampled = true,
                     EndTimestamp = DateTimeOffset.Now // finished
-                }
-            );
+                });
 
             // Assert
             _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
@@ -528,8 +519,7 @@ namespace Sentry.Tests
                 {
                     IsSampled = true,
                     EndTimestamp = DateTimeOffset.Now // finished
-                }
-            );
+                });
 
             // Assert
             _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -550,8 +540,7 @@ namespace Sentry.Tests
                 {
                     IsSampled = true,
                     EndTimestamp = DateTimeOffset.Now // finished
-                }
-            );
+                });
 
             // Assert
             _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -572,8 +561,7 @@ namespace Sentry.Tests
                 {
                     IsSampled = true,
                     EndTimestamp = null // not finished
-                }
-            );
+                });
 
             // Assert
             _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());

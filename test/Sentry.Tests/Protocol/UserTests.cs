@@ -29,8 +29,7 @@ namespace Sentry.Tests.Protocol
                 "\"username\":\"user-name\"," +
                 "\"other\":{\"testCustomValueKey\":\"testCustomValue\"}" +
                 "}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

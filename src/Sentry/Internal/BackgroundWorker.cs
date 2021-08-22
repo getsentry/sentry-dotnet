@@ -201,8 +201,7 @@ namespace Sentry.Internal
             var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
                 timeoutSource.Token,
                 _shutdownSource.Token,
-                flushSuccessSource.Token
-            );
+                flushSuccessSource.Token);
 
             var counter = 0;
             var depth = int.MaxValue;

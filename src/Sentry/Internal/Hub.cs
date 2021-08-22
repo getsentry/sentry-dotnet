@@ -56,8 +56,7 @@ namespace Sentry.Internal
             ScopeManager = scopeManager ?? new SentryScopeManager(
                 options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
                 options,
-                _ownedClient
-            );
+                _ownedClient);
 
             _rootScope = options.IsGlobalModeEnabled
                 ? DisabledHub.Instance

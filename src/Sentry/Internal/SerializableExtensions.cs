@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Protocol.Envelopes;
 
-namespace Sentry.Tests.Helpers
+namespace Sentry.Internal
 {
     internal static class SerializableExtensions
     {
@@ -12,10 +12,10 @@ namespace Sentry.Tests.Helpers
             this ISerializable serializable,
             CancellationToken cancellationToken = default)
         {
-#if !NET461 && !NETCOREAPP2_1
+#if !NET461 && !NETSTANDARD2_0
             await
 #endif
-            using var stream = new MemoryStream();
+                using var stream = new MemoryStream();
             await serializable.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
             return Encoding.UTF8.GetString(stream.ToArray());
         }
