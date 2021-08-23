@@ -99,13 +99,31 @@ namespace Sentry
             set => _contexts = value;
         }
 
+        // Internal for testing.
+        internal Action<User?> UserChanged => (user) =>
+        {
+            if (Options.EnableScopeSync &&
+                Options.ScopeObserver is { } observer)
+            {
+                observer.SetUser(user);
+            }
+        };
+
         private User? _user;
 
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User();
-            set => _user = value;
+            get => _user ??= new User { PropertyChanged = UserChanged };
+            set
+            {
+                _user = value;
+                if (_user is not null)
+                {
+                    _user.PropertyChanged = UserChanged;
+                }
+                UserChanged.Invoke(_user);
+            }
         }
 
         /// <inheritdoc />
@@ -237,16 +255,41 @@ namespace Sentry
             }
 
             _breadcrumbs.Enqueue(breadcrumb);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
+            }
         }
 
         /// <inheritdoc />
-        public void SetExtra(string key, object? value) => _extra[key] = value;
+        public void SetExtra(string key, object? value)
+        {
+            _extra[key] = value;
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.SetExtra(key, value);
+            }
+        }
 
         /// <inheritdoc />
-        public void SetTag(string key, string value) => _tags[key] = value;
+        public void SetTag(string key, string value)
+        {
+            _tags[key] = value;
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.SetTag(key, value);
+            }
+        }
 
         /// <inheritdoc />
-        public void UnsetTag(string key) => _tags.TryRemove(key, out _);
+        public void UnsetTag(string key)
+        {
+            _tags.TryRemove(key, out _);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.UnsetTag(key);
+            }
+        }
 
         /// <summary>
         /// Adds an attachment.

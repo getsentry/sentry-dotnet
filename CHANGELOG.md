@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
+
 ### Fixes
 
 - Fix end session from Hub adapter not being passed to SentrySDK ([#1158](https://github.com/getsentry/sentry-dotnet/pull/1158))
