@@ -100,12 +100,12 @@ namespace Sentry
         }
 
         // Internal for testing.
-        internal Action UserChanged => () =>
+        internal Action<User?> UserChanged => (user) =>
         {
             if (Options.EnableScopeSync &&
                 Options.ScopeObserver is { } observer)
             {
-                observer.User = User;
+                observer.SetUser(user);
             }
         };
 
@@ -122,7 +122,7 @@ namespace Sentry
                 {
                     _user.PropertyChanged = UserChanged;
                 }
-                UserChanged.Invoke();
+                UserChanged.Invoke(_user);
             }
         }
 

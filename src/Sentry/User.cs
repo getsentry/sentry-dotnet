@@ -12,7 +12,7 @@ namespace Sentry
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
     public sealed class User : IJsonSerializable
     {
-        internal Action? PropertyChanged { get; set; }
+        internal Action<User>? PropertyChanged { get; set; }
 
         private string? _email;
 
@@ -28,7 +28,7 @@ namespace Sentry
             set
             {
                 _email = value;
-                PropertyChanged?.Invoke();
+                PropertyChanged?.Invoke(this);
             }
         }
 
@@ -46,7 +46,7 @@ namespace Sentry
             set
             {
                 _id = value;
-                PropertyChanged?.Invoke();
+                PropertyChanged?.Invoke(this);
             }
         }
 
@@ -64,7 +64,7 @@ namespace Sentry
             set
             {
                 _ipAddress = value;
-                PropertyChanged?.Invoke();
+                PropertyChanged?.Invoke(this);
             }
         }
 
@@ -82,7 +82,7 @@ namespace Sentry
             set
             {
                 _username = value;
-                PropertyChanged?.Invoke();
+                PropertyChanged?.Invoke(this);
             }
         }
 

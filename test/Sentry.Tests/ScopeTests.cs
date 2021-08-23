@@ -288,7 +288,7 @@ namespace Sentry.Tests
         [InlineData(null, "my name", null, false)]
         [InlineData(null, null, "my id", true)]
         [InlineData(null, null, "my id", false)]
-        public void SetUserEmail_ObserverExist_ObserverUserEmailSetIfEnabled(string email, string username, string id, bool observerEnable)
+        public void SetUser_ObserverExist_ObserverUserInvokedIfEnabled(string email, string username, string id, bool observerEnable)
         {
             // Arrange
             var observer = NSubstitute.Substitute.For<IScopeObserver>();
@@ -300,7 +300,7 @@ namespace Sentry.Tests
             var expectedEmail = observerEnable ? email : null;
             var expectedusername = observerEnable ? username : null;
             var expectedid = observerEnable ? id : null;
-
+            var expectedCount = observerEnable ? 1 : 0;
             // Act
             if (email != null)
             {
@@ -316,54 +316,9 @@ namespace Sentry.Tests
             }
 
             // Assert
-            Assert.Equal(expectedEmail, observer.User?.Email);
-            Assert.Equal(expectedid, observer.User?.Id);
-            Assert.Equal(expectedusername, observer.User?.Username);
-        }
-
-        [Theory]
-        [InlineData("1234", true)]
-        [InlineData("1234", false)]
-        public void SetUserEmail_ObserverExistWithUser_ObserverUserEmailChangedIfEnabled(string email, bool observerEnable)
-        {
-            // Arrange
-            var observerEmail = "abcd";
-            var observer = Substitute.For<IScopeObserver>();
-            observer.User = new User() { Email = observerEmail };
-            var scope = new Scope(new SentryOptions()
-            {
-                ScopeObserver = observer,
-                EnableScopeSync = observerEnable
-            });
-            var expectedEmail = observerEnable ? email : observerEmail;
-
-            // Act
-            scope.User.Email = email;
-
-            // Assert
-            Assert.Equal(expectedEmail, observer.User.Email);
-
-        }
-
-        [Theory]
-        [InlineData("1234", true)]
-        [InlineData("1234", false)]
-        public void SetUser_ObserverExist_ObserverUserChangedIfEnabled(string email, bool observerEnable)
-        {
-            // Arrange
-            var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions()
-            {
-                ScopeObserver = observer,
-                EnableScopeSync = observerEnable
-            });
-            var expectedEmail = observerEnable ? email : null;
-
-            // Act
-            scope.User = new User() { Email = email };
-
-            // Assert
-            Assert.Equal(expectedEmail, observer.User?.Email);
+            observer.Received(expectedCount).SetUser(Arg.Is<User>((user)=> user.Email == expectedEmail));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Id == expectedid));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Username == expectedusername));
         }
 
         [Theory]
@@ -378,7 +333,7 @@ namespace Sentry.Tests
             // Act
             try
             {
-                scope.UserChanged.Invoke();
+                scope.UserChanged.Invoke(null);
             }
             catch (Exception ex)
             {

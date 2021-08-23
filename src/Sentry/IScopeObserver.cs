@@ -8,22 +8,6 @@ namespace Sentry
     public interface IScopeObserver
     {
         /// <summary>
-        /// A trail of events which happened prior to an issue.
-        /// </summary>
-        /// <seealso href="https://docs.sentry.io/platforms/dotnet/enriching-events/breadcrumbs/"/>
-        IReadOnlyCollection<Breadcrumb> Breadcrumbs { get; }
-
-        /// <summary>
-        /// Arbitrary key-value for this event.
-        /// </summary>
-        IReadOnlyDictionary<string, string> Tags { get; }
-
-        /// <summary>
-        /// An arbitrary mapping of additional metadata to store with the event.
-        /// </summary>
-        IReadOnlyDictionary<string, object?> Extra { get; }
-
-        /// <summary>
         /// Adds a breadcrumb.
         /// </summary>
         void AddBreadcrumb(Breadcrumb breadcrumb);
@@ -44,11 +28,8 @@ namespace Sentry
         void UnsetTag(string key);
 
         /// <summary>
-        /// Gets the user information.
+        /// Sets the user information.
         /// </summary>
-        /// <value>
-        /// The user.
-        /// </value>
-        User User { get; set; }
+        void SetUser(User? user);
     }
 }
