@@ -5,6 +5,7 @@
 ### Features
 
 - EF Core and SQLClient performance monitoring integration ([#1154](https://github.com/getsentry/sentry-dotnet/pull/1154))
+- Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
 
 ### Fixes
 
