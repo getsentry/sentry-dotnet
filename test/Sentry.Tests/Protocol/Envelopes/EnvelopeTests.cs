@@ -508,9 +508,9 @@ namespace Sentry.Tests.Protocol.Envelopes
             // Arrange
             var feedback = new UserFeedback(
                 SentryId.Create(),
-                "Donald J. Trump",
+                "Someone Nice",
                 "foo@bar.com",
-                "Everything sucks"
+                "Everything is great!"
             );
 
             using var envelope = Envelope.FromUserFeedback(feedback);
