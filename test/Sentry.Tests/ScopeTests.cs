@@ -324,7 +324,7 @@ namespace Sentry.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void UserChanged_Observernull_Ignored(bool observerEnable)
+        public void UserChanged_ObserverNull_Ignored(bool observerEnable)
         {
             // Arrange
             var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable});

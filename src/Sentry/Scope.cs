@@ -114,13 +114,13 @@ namespace Sentry
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User() { PropertyChanged = UserChanged };
+            get => _user ??= new User { PropertyChanged = UserChanged };
             set
             {
                 _user = value;
-                if (_user != null)
+                if (_user is not null)
                 {
-                    _user.PropertyChanged = UserChanged;
+                    user.PropertyChanged = UserChanged;
                 }
                 UserChanged.Invoke(_user);
             }
