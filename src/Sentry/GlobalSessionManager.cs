@@ -81,6 +81,14 @@ namespace Sentry
                         filePath
                     );
                 }
+                catch (DirectoryNotFoundException)
+                {
+                    // on PS4 we're seeing CreateDirectory work but ReadAllText throw DirectoryNotFoundException
+                    _options.DiagnosticLogger?.LogDebug(
+                        "Directory containing installation ID does not exist ({0}).",
+                        filePath
+                    );
+                }
 
                 // Generate new installation ID and store it in a file
                 var id = Guid.NewGuid().ToString();
