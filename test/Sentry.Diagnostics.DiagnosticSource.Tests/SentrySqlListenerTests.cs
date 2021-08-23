@@ -74,7 +74,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
                 _scope = new Scope();
                 _scope.Transaction = Tracer;
                 Hub = Substitute.For<IHub>();
-                Hub.When(x => x.ConfigureScope(Arg.Any<Action<Scope>>()))
+                Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
             }
         }

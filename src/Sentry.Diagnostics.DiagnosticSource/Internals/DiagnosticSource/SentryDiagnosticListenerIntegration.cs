@@ -8,6 +8,7 @@ namespace Sentry.Internals.DiagnosticSource
     {
         private SentryDiagnosticSubscriber? _subscriber;
         private IDisposable? _diagnosticListener { get; set; }
+
         public void Register(IHub hub, SentryOptions options)
         {
             _subscriber = new SentryDiagnosticSubscriber(hub, options);

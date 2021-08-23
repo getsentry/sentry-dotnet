@@ -91,9 +91,9 @@ namespace Sentry.AspNetCore
                        "Microsoft.AspNetCore.Server.Kestrel",
                        StringComparison.Ordinal));
 
-            #if NETSTANDARD2_0
+#if NETSTANDARD2_0
             options.AddDiagnosticListeners();
-            #endif
+#endif
         }
     }
 }
