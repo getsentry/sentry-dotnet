@@ -256,7 +256,7 @@ namespace Sentry
             Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
-        public ISpan? GetLastActiveSpan() => 
+        public ISpan? GetLastActiveSpan() =>
             // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
             Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
@@ -264,7 +264,6 @@ namespace Sentry
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
     }
 }

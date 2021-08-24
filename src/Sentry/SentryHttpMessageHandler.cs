@@ -54,8 +54,7 @@ namespace Sentry
             {
                 request.Headers.Add(
                     SentryTraceHeader.HttpHeaderName,
-                    traceHeader.ToString()
-                );
+                    traceHeader.ToString());
             }
 
             // Prevent null reference exception in the following call
@@ -86,8 +85,7 @@ namespace Sentry
 
                 // This will handle unsuccessful status codes as well
                 span?.Finish(
-                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode)
-                );
+                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode));
 
                 return response;
             }

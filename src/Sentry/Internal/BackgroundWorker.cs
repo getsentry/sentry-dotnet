@@ -249,8 +249,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogDebug(flushSuccessSource.IsCancellationRequested
                     ? "Successfully flushed all events up to call to FlushAsync."
-                    : "Timeout when trying to flush queue."
-                );
+                    : "Timeout when trying to flush queue.");
             }
             finally
             {
@@ -299,8 +298,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogWarning(
                     "Worker stopped while {0} were still in the queue.",
-                    _queue.Count
-                );
+                    _queue.Count);
             }
         }
     }

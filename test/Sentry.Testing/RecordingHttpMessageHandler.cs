@@ -22,7 +22,7 @@ namespace Sentry.Testing
             // Clone the request to avoid ObjectDisposedException
             _requests.Add(await request.CloneAsync());
 
-            InnerHandler ??= new HttpClientHandler();
+            InnerHandler ??= new FakeHttpMessageHandler();
 
             return await base.SendAsync(request, cancellationToken);
         }

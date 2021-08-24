@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sentry.Testing
 {
-    public class FakeHttpMessageHandler : HttpMessageHandler
+    public class FakeHttpMessageHandler : DelegatingHandler
     {
         private readonly Func<HttpRequestMessage, HttpResponseMessage> _getResponse;
 

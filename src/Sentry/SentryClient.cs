@@ -112,8 +112,7 @@ namespace Sentry
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Transaction dropped due to empty id."
-                );
+                    "Transaction dropped due to empty id.");
 
                 return;
             }
@@ -122,8 +121,7 @@ namespace Sentry
                 string.IsNullOrWhiteSpace(transaction.Operation))
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Transaction discarded due to one or more required fields missing."
-                );
+                    "Transaction discarded due to one or more required fields missing.");
 
                 return;
             }
@@ -136,8 +134,7 @@ namespace Sentry
                 _options.DiagnosticLogger?.LogWarning(
                     "Capturing a transaction which has not been finished. " +
                     "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
-                    "to properly finalize the transaction and send it to Sentry."
-                );
+                    "to properly finalize the transaction and send it to Sentry.");
             }
 
             // Sampling decision MUST have been made at this point
@@ -148,8 +145,7 @@ namespace Sentry
             if (transaction.IsSampled != true)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Transaction dropped by sampling."
-                );
+                    "Transaction dropped by sampling.");
 
                 return;
             }

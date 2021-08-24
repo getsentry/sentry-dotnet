@@ -494,8 +494,7 @@ namespace Sentry.Tests.Protocol.Envelopes
                 SentryId.Create(),
                 "Someone Nice",
                 "foo@bar.com",
-                "Everything is great!"
-            );
+                "Everything is great!");
 
             using var envelope = Envelope.FromUserFeedback(feedback);
 

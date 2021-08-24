@@ -27,8 +27,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Using ISentryHttpClientFactory set through options: {0}.",
-                    _options.SentryHttpClientFactory.GetType().Name
-                );
+                    _options.SentryHttpClientFactory.GetType().Name);
             }
 
             var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
@@ -50,8 +49,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Flushing existing cache during transport activation up to {0}.",
-                    _options.InitCacheFlushTimeout
-                );
+                    _options.InitCacheFlushTimeout);
 
                 try
                 {

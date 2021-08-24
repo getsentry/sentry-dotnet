@@ -26,7 +26,7 @@ namespace Sentry.Tests
             using var client = new HttpClient(sentryHandler);
 
             // Act
-            await client.GetAsync("https://fake.tld/");
+            await client.GetAsync("https://localhost/");
 
             using var request = innerHandler.GetRequests().Single();
 
@@ -52,7 +52,7 @@ namespace Sentry.Tests
             client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
 
             // Act
-            await client.GetAsync("https://fake.tld/");
+            await client.GetAsync("https://localhost/");
 
             using var request = innerHandler.GetRequests().Single();
 
@@ -80,12 +80,12 @@ namespace Sentry.Tests
             using var client = new HttpClient(sentryHandler);
 
             // Act
-            await client.GetAsync("https://fake.tld/");
+            await client.GetAsync("https://localhost/");
 
             // Assert
             transaction.Spans.Should().Contain(span =>
                 span.Operation == "http.client" &&
-                span.Description == "GET https://fake.tld/" &&
+                span.Description == "GET https://localhost/" &&
                 span.IsFinished);
         }
 
@@ -109,7 +109,7 @@ namespace Sentry.Tests
             using var client = new HttpClient(sentryHandler);
 
             // Act
-            await Assert.ThrowsAsync<Exception>(() => client.GetAsync("https://fake.tld/"));
+            await Assert.ThrowsAsync<Exception>(() => client.GetAsync("https://localhost/"));
 
             // Assert
             hub.Received(1).BindException(exception, Arg.Any<ISpan>()); // second argument is an implicitly created span
@@ -124,7 +124,7 @@ namespace Sentry.Tests
                 hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
                    .Do(c => c.Arg<Action<Scope>>()(scope));
 
-            var url = "https://fake.tld/";
+            var url = "https://localhost/";
 
             var urlKey = "url";
             var methodKey = "method";

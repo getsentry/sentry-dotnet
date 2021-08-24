@@ -88,8 +88,7 @@ namespace Sentry.AspNetCore
                 _options.DiagnosticLogger?.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",
                     transaction.SpanId,
-                    transaction.TraceId
-                );
+                    transaction.TraceId);
 
                 return transaction;
             }

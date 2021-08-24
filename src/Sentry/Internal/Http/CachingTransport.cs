@@ -153,8 +153,7 @@ namespace Sentry.Internal.Http
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Reading cached envelope: {0}",
-                    envelopeFilePath
-                );
+                    envelopeFilePath);
 
                 try
                 {
@@ -317,8 +316,7 @@ namespace Sentry.Internal.Http
                 // Don't throw inside dispose
                 _options.DiagnosticLogger?.LogError(
                     "Error stopping worker during dispose.",
-                    ex
-                );
+                    ex);
             }
 
             _workerSignal.Dispose();
