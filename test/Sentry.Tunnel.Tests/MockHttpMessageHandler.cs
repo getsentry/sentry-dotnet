@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Sentry.Tunnel.Tests
 {
-    public class MockHttpMessageHandler : HttpMessageHandler
+    public class MockHttpMessageHandler : DelegatingHandler
     {
         private readonly string _response;
         private readonly HttpStatusCode _statusCode;
