@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Timers;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
@@ -23,8 +23,10 @@ namespace Sentry
         private readonly ISystemClock _clock;
         private readonly Timer _timer;
 
-        private int _exitedCount;
-        private int _erroredCount;
+        // Internal for testing.
+        internal int ExitedCount { get; private set; }
+        // Internal for testing.
+        internal int ErroredCount { get; private set; }
 
         public ServerSessionManager(
             SentryOptions options,
@@ -45,7 +47,7 @@ namespace Sentry
             lock (_lock)
             {
                 // If no sessions exited or errored, that means none were started during this period
-                if (_exitedCount == 0 && _erroredCount == 0)
+                if (ExitedCount == 0 && ErroredCount == 0)
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "No sessions to aggregate."
@@ -76,18 +78,19 @@ namespace Sentry
                 );
 
                 var aggregate = new SessionAggregate(
-                    startTimestamp, _exitedCount, _erroredCount, release, environment
+                    startTimestamp, ExitedCount, ErroredCount, release, environment
                 );
 
                 // Reset values
-                _exitedCount = 0;
-                _erroredCount = 0;
+                ExitedCount = 0;
+                ErroredCount = 0;
 
                 return aggregate;
             }
         }
 
-        private void Flush()
+        // Internal for testing.
+        internal void Flush()
         {
             try
             {
@@ -122,11 +125,11 @@ namespace Sentry
                 // Should we respect ReportError() somehow?
                 if (status == SessionEndStatus.Exited)
                 {
-                    _exitedCount++;
+                    ExitedCount++;
                 }
                 else
                 {
-                    _erroredCount++;
+                    ErroredCount++;
                 }
             }
         }
