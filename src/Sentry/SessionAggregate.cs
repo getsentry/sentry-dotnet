@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -11,6 +12,7 @@ namespace Sentry
     // (Sentry's payload has multiple aggregates, but we can simplify it to only having one)
     public class SessionAggregate : IJsonSerializable
     {
+        internal const string MissingRequiredKeysMessage = "Failed to deserialize an aggregated session due to one or more required properties were missing";
         /// <summary>
         /// Timestamp of the group, rounded down to the minute.
         /// </summary>
@@ -81,7 +83,22 @@ namespace Sentry
         /// </summary>
         public static SessionAggregate FromJson(JsonElement json)
         {
-            throw new NotImplementedException();
+            if (json.TryGetProperty("aggregates", out var aggregateArray) &&
+                aggregateArray.EnumerateArray().FirstOrDefault() is { } aggregate &&
+                json.TryGetProperty("attrs", out var attributes) &&
+                attributes.TryGetProperty("release", out var releaseProperty) &&
+                releaseProperty.GetString() is { } release)
+            {
+                var dateStarted = aggregate.GetProperty("started").GetDateTimeOffset();
+                var exited = aggregate.GetProperty("exited").GetInt32();
+                var errored = aggregate.GetProperty("errored").GetInt32();
+
+                var environment = attributes.GetProperty("environment").GetString();
+                return new SessionAggregate(dateStarted, exited, errored, release, environment);
+            }
+
+            // Aggregate is missing one or more required properties, throw exception?
+            throw new MissingMethodException(MissingRequiredKeysMessage);
         }
     }
 }
