@@ -230,7 +230,7 @@ namespace Sentry.Internal.Http
                 // If debug level, dump the whole envelope to the logger
                 if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
                 {
-                    _options.DiagnosticLogger?.LogDebug("Failed envelope '{0}' has payload:\n{1}",
+                    _options.DiagnosticLogger?.LogDebug("Failed envelope '{0}' has payload:\n{1}\n",
                         processedEnvelope.TryGetEventId(),
                         await processedEnvelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
                 }

@@ -206,7 +206,7 @@ namespace Sentry.Internal.Http
         // from disk could raise an IOException related to Disk I/O.
         // For that reason, we're not retrying IOException, to avoid any disk related exception from retrying.
         private static bool IsRetryable(Exception exception) =>
-            exception is OperationCanceledException
+            exception is OperationCanceledException // Timed-out or Shutdown triggered
                 or HttpRequestException
                 or SocketException; // Network related
 
