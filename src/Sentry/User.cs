@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -11,13 +12,27 @@ namespace Sentry
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
     public sealed class User : IJsonSerializable
     {
+        internal Action<User>? PropertyChanged { get; set; }
+
+        private string? _email;
+
         /// <summary>
         /// The email address of the user.
         /// </summary>
         /// <value>
         /// The user's email address.
         /// </value>
-        public string? Email { get; set; }
+        public string? Email
+        {
+            get => _email;
+            set
+            {
+                _email = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        private string? _id;
 
         /// <summary>
         /// The unique ID of the user.
@@ -25,7 +40,17 @@ namespace Sentry
         /// <value>
         /// The unique identifier.
         /// </value>
-        public string? Id { get; set; }
+        public string? Id
+        {
+            get => _id;
+            set
+            {
+                _id = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        private string? _ipAddress;
 
         /// <summary>
         /// The IP of the user.
@@ -33,7 +58,17 @@ namespace Sentry
         /// <value>
         /// The user's IP address.
         /// </value>
-        public string? IpAddress { get; set; }
+        public string? IpAddress
+        {
+            get => _ipAddress;
+            set
+            {
+                _ipAddress = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        private string? _username;
 
         /// <summary>
         /// The username of the user.
@@ -41,7 +76,15 @@ namespace Sentry
         /// <value>
         /// The user's username.
         /// </value>
-        public string? Username { get; set; }
+        public string? Username
+        {
+            get => _username;
+            set
+            {
+                _username = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
 
         internal IDictionary<string, string>? InternalOther { get; private set; }
 
