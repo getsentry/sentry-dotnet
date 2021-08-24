@@ -4,7 +4,7 @@
 
 ### Features
 
-- Server side release health ([#1144](https://github.com/getsentry/sentry-dotnet/pull/1144)) --> change me :D
+- Server-side release health ([#1162](https://github.com/getsentry/sentry-dotnet/pull/1162))```
 - Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
 
 ### Fixes
