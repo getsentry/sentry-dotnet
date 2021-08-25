@@ -12,6 +12,9 @@ using Sentry.Internal.ScopeStack;
 using static Sentry.Constants;
 using static Sentry.Internal.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
+#if HAS_DIAGNOSTIC_INTEGRATION
+using Sentry.Internals.DiagnosticSource;
+#endif
 
 namespace Sentry
 {
@@ -598,6 +601,9 @@ namespace Sentry
                 new TaskUnobservedTaskExceptionIntegration(),
 #if NET461
                 new NetFxInstallationsIntegration(),
+#endif
+#if HAS_DIAGNOSTIC_INTEGRATION
+                new SentryDiagnosticListenerIntegration(),
 #endif
             };
 

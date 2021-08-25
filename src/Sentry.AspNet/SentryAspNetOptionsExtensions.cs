@@ -1,3 +1,4 @@
+using System;
 using System.Web;
 using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
@@ -28,6 +29,7 @@ namespace Sentry.AspNet
             options.DiagnosticLogger ??= new TraceDiagnosticLogger(options.DiagnosticLevel);
             options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
             options.AddEventProcessor(eventProcessor);
+            options.AddDiagnosticListeners();
         }
     }
 }
