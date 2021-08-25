@@ -66,7 +66,7 @@ namespace Sentry.Tests.PlatformAbstractions
         {
             //Arrange
             var frameworkInstallation = new FrameworkInstallation();
-            frameworkInstallation.Version = new Version(1,2);
+            frameworkInstallation.Version = new Version(1, 2);
 
             //Act
             var version = frameworkInstallation.GetVersionNumber();

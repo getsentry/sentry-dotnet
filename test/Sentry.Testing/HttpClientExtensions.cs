@@ -29,7 +29,7 @@ namespace Sentry
 
         public static async Task<HttpRequestMessage> CloneAsync(this HttpRequestMessage source)
         {
-            var clone = new HttpRequestMessage(source.Method, source.RequestUri) {Version = source.Version};
+            var clone = new HttpRequestMessage(source.Method, source.RequestUri) { Version = source.Version };
 
             // Headers
             foreach (var (key, value) in source.Headers)

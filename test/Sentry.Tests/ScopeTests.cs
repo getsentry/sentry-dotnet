@@ -315,7 +315,7 @@ namespace Sentry.Tests
             }
 
             // Assert
-            observer.Received(expectedCount).SetUser(Arg.Is<User>((user)=> user.Email == expectedEmail));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Email == expectedEmail));
             observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Id == expectedid));
             observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Username == expectedusername));
         }
@@ -326,7 +326,7 @@ namespace Sentry.Tests
         public void UserChanged_ObserverNull_Ignored(bool observerEnable)
         {
             // Arrange
-            var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable});
+            var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable });
             Exception exception = null;
 
             // Act

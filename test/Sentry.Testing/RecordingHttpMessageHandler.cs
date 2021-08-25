@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace Sentry.Testing
     {
         private readonly List<HttpRequestMessage> _requests = new();
 
-        public RecordingHttpMessageHandler() {}
+        public RecordingHttpMessageHandler() { }
 
         public RecordingHttpMessageHandler(HttpMessageHandler innerHandler) =>
             InnerHandler = innerHandler;

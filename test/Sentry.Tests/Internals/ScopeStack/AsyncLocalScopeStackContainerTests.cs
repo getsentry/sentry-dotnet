@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
@@ -37,20 +37,20 @@ namespace Sentry.Tests.Internals.ScopeStack
             {
                 container.Stack.Should().BeNull();
 
-                container.Stack = new[] {scope1};
+                container.Stack = new[] { scope1 };
                 await Task.Yield();
 
-                container.Stack.Should().BeEquivalentTo(new[] {scope1});
+                container.Stack.Should().BeEquivalentTo(new[] { scope1 });
             });
 
             var task3 = Task.Run(async () =>
             {
                 container.Stack.Should().BeNull();
 
-                container.Stack = new[] {scope2};
+                container.Stack = new[] { scope2 };
                 await Task.Yield();
 
-                container.Stack.Should().BeEquivalentTo(new[] {scope2});
+                container.Stack.Should().BeEquivalentTo(new[] { scope2 });
             });
 
             await Task.WhenAll(task1, task2, task3);
@@ -86,20 +86,20 @@ namespace Sentry.Tests.Internals.ScopeStack
             {
                 container.Stack.Should().BeNull();
 
-                container.Stack = new[] {scope1};
+                container.Stack = new[] { scope1 };
                 await Task.Yield();
 
-                container.Stack.Should().BeEquivalentTo(new[] {scope1});
+                container.Stack.Should().BeEquivalentTo(new[] { scope1 });
             });
 
             await Task.Run(async () =>
             {
                 container.Stack.Should().BeNull();
 
-                container.Stack = new[] {scope2};
+                container.Stack = new[] { scope2 };
                 await Task.Yield();
 
-                container.Stack.Should().BeEquivalentTo(new[] {scope2});
+                container.Stack.Should().BeEquivalentTo(new[] { scope2 });
             });
 
             container.Stack.Should().BeNull();
@@ -132,19 +132,19 @@ namespace Sentry.Tests.Internals.ScopeStack
                 {
                     container.Stack.Should().BeNull();
 
-                    container.Stack = new[] {scope1};
+                    container.Stack = new[] { scope1 };
                     await Task.Yield();
 
-                    container.Stack.Should().BeEquivalentTo(new[] {scope1});
+                    container.Stack.Should().BeEquivalentTo(new[] { scope1 });
 
                     await Task.Run(async () =>
                     {
-                        container.Stack.Should().BeEquivalentTo(new[] {scope1});
+                        container.Stack.Should().BeEquivalentTo(new[] { scope1 });
 
                         await Task.Yield();
-                        container.Stack = new[] {scope2};
+                        container.Stack = new[] { scope2 };
 
-                        container.Stack.Should().BeEquivalentTo(new[] {scope2});
+                        container.Stack.Should().BeEquivalentTo(new[] { scope2 });
                     }).ConfigureAwait(false);
                 }).ConfigureAwait(false);
             });

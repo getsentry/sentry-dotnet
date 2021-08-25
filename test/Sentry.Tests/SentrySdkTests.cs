@@ -13,8 +13,8 @@ using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Xunit;
 using Xunit.Abstractions;
-using static Sentry.Internal.Constants;
 using static Sentry.DsnSamples;
+using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests
 {

@@ -102,7 +102,7 @@ namespace Sentry.Protocol.Tests.Context
             // Arrange
             var contexts = new Contexts
             {
-                ["foo"] = new {Bar = 42, Baz = "kek"}
+                ["foo"] = new { Bar = 42, Baz = "kek" }
             };
 
             // Act

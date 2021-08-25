@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
@@ -28,13 +28,13 @@ namespace Sentry.Tests.Internals.ScopeStack
             {
                 container.Stack.Should().BeNull();
 
-                container.Stack = new[] {scope1, scope2};
+                container.Stack = new[] { scope1, scope2 };
                 await Task.Yield();
 
-                container.Stack.Should().BeEquivalentTo(new[] {scope1, scope2});
+                container.Stack.Should().BeEquivalentTo(new[] { scope1, scope2 });
             });
 
-            container.Stack.Should().BeEquivalentTo(new[] {scope1, scope2});
+            container.Stack.Should().BeEquivalentTo(new[] { scope1, scope2 });
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -36,7 +36,7 @@ namespace Sentry
         public GlobalSessionManager(
             SentryOptions options,
             ISystemClock? clock = null,
-            Func<string,PersistedSessionUpdate>? persistedSessionProvider = null)
+            Func<string, PersistedSessionUpdate>? persistedSessionProvider = null)
         {
             _options = options;
             _clock = clock ?? SystemClock.Clock;

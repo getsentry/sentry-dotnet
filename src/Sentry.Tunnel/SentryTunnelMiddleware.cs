@@ -29,7 +29,7 @@ namespace Sentry.Tunnel
         /// <seealso href="https://docs.sentry.io/platforms/javascript/troubleshooting/#dealing-with-ad-blockers"/>
         public SentryTunnelMiddleware(string[] allowedHosts)
         {
-            _allowedHosts = new[] {"sentry.io"}.Concat(allowedHosts).ToArray();
+            _allowedHosts = new[] { "sentry.io" }.Concat(allowedHosts).ToArray();
         }
 
         /// <inheritdoc />
@@ -37,10 +37,10 @@ namespace Sentry.Tunnel
         {
             if (context.Request.Method == "OPTIONS")
             {
-                context.Response.Headers.Add("Access-Control-Allow-Origin", new[] {(string) context.Request.Headers["Origin"]});
-                context.Response.Headers.Add("Access-Control-Allow-Headers", new[] {"Origin, X-Requested-With, Content-Type, Accept"});
-                context.Response.Headers.Add("Access-Control-Allow-Methods", new[] {"POST, OPTIONS"});
-                context.Response.Headers.Add("Access-Control-Allow-Credentials", new[] {"true"});
+                context.Response.Headers.Add("Access-Control-Allow-Origin", new[] { (string)context.Request.Headers["Origin"] });
+                context.Response.Headers.Add("Access-Control-Allow-Headers", new[] { "Origin, X-Requested-With, Content-Type, Accept" });
+                context.Response.Headers.Add("Access-Control-Allow-Methods", new[] { "POST, OPTIONS" });
+                context.Response.Headers.Add("Access-Control-Allow-Credentials", new[] { "true" });
                 context.Response.StatusCode = 200;
                 return;
             }

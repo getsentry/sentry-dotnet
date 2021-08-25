@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using FluentAssertions;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
@@ -23,7 +23,7 @@ namespace Sentry.Tests.Internals.Http
             var category = new RateLimitCategory(categoryName);
 
             var envelopeItem = new EnvelopeItem(
-                new Dictionary<string, object> {["type"] = itemType},
+                new Dictionary<string, object> { ["type"] = itemType },
                 new EmptySerializable());
 
             // Act
@@ -43,7 +43,7 @@ namespace Sentry.Tests.Internals.Http
             var category = new RateLimitCategory(categoryName);
 
             var envelopeItem = new EnvelopeItem(
-                new Dictionary<string, object> {["type"] = itemType},
+                new Dictionary<string, object> { ["type"] = itemType },
                 new EmptySerializable());
 
             // Act
