@@ -151,7 +151,7 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub( new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
@@ -325,7 +325,7 @@ namespace NotSentry.Tests
             // Arrange
             var worker = Substitute.For<IBackgroundWorker>();
 
-            var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret};
+            var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
             var client = new SentryClient(options, worker);
             var hub = new Hub(options, client);
 
@@ -334,7 +334,7 @@ namespace NotSentry.Tests
             // Act
             hub.CaptureEvent(new SentryEvent
             {
-                SentryExceptions = new[] {new SentryException {Mechanism = new Mechanism {Handled = false}}}
+                SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
             });
 
             // Assert
@@ -614,7 +614,7 @@ namespace NotSentry.Tests
             // Act
             var transaction = hub.StartTransaction(
                 new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "zzz"});
+                new Dictionary<string, object> { ["xxx"] = "zzz" });
 
             // Assert
             transaction.IsSampled.Should().BeTrue();
@@ -633,7 +633,7 @@ namespace NotSentry.Tests
             // Act
             var transaction = hub.StartTransaction(
                 new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "yyy"});
+                new Dictionary<string, object> { ["xxx"] = "yyy" });
 
             // Assert
             transaction.IsSampled.Should().BeFalse();

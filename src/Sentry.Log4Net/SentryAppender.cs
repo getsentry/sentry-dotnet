@@ -86,12 +86,12 @@ namespace Sentry.Log4Net
                 Level = loggingEvent.ToSentryLevel()
             };
 
-            if (evt.Sdk is {} sdk)
+            if (evt.Sdk is { } sdk)
             {
                 sdk.Name = Constants.SdkName;
                 sdk.Version = NameAndVersion.Version;
 
-                if (NameAndVersion.Version is {} version)
+                if (NameAndVersion.Version is { } version)
                 {
                     sdk.AddPackage(ProtocolPackageName, version);
                 }

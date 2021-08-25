@@ -18,7 +18,7 @@ namespace Sentry.Testing
             {
                 _random.NextBytes(buffer);
 
-                var bytesToCopy = (int) Math.Min(remainingLength, buffer.Length);
+                var bytesToCopy = (int)Math.Min(remainingLength, buffer.Length);
                 await stream.WriteAsync(buffer, 0, bytesToCopy);
 
                 remainingLength -= bytesToCopy;

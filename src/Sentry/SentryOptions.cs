@@ -9,8 +9,8 @@ using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.ScopeStack;
-using static Sentry.Internal.Constants;
 using static Sentry.Constants;
+using static Sentry.Internal.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry
@@ -395,7 +395,7 @@ namespace Sentry
         /// <summary>
         /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
         /// </summary>
-        [Obsolete("Use ReportAssembliesMode instead", error : false)]
+        [Obsolete("Use ReportAssembliesMode instead", error: false)]
         public bool ReportAssemblies
         {
             // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode

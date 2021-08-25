@@ -63,7 +63,7 @@ namespace Sentry.Internal.Http
                         envelopeItem.TryGetType());
 
                     // Check if session update with init=true
-                    if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
+                    if (envelopeItem.Payload is JsonSerializable { Source: SessionUpdate { IsInitial: true } discardedSessionUpdate })
                     {
                         _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
 
@@ -89,7 +89,7 @@ namespace Sentry.Internal.Http
 
                 // If it's a session update (not discarded) with init=false, check if it continues
                 // a session with previously dropped init and, if so, promote this update to init=true.
-                if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
+                if (envelopeItem.Payload is JsonSerializable { Source: SessionUpdate { IsInitial: false } sessionUpdate } &&
                     string.Equals(sessionUpdate.Id.ToString(), Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
                         StringComparison.Ordinal))
                 {
@@ -275,7 +275,7 @@ namespace Sentry.Internal.Http
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
-                Headers = {{"X-Sentry-Auth", authHeader}},
+                Headers = { { "X-Sentry-Auth", authHeader } },
                 Content = new EnvelopeHttpContent(envelope)
             };
         }

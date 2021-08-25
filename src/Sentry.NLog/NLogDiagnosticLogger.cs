@@ -1,7 +1,6 @@
 using System;
-using Sentry.Extensibility;
-
 using NLog.Common;
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
 
 namespace Sentry.NLog

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
@@ -51,7 +51,7 @@ namespace Sentry.Internal
         {
             // Make sure we don't read beyond allowed range
             var actualCount = _length != null
-                ? (int) Math.Min(count, _length.Value - Position)
+                ? (int)Math.Min(count, _length.Value - Position)
                 : count;
 
             if (actualCount <= 0)
@@ -71,7 +71,7 @@ namespace Sentry.Internal
 
             if (_length != null)
             {
-                read = (int) Math.Min(read, _length.Value - Position);
+                read = (int)Math.Min(read, _length.Value - Position);
             }
 
             Position += read;

@@ -54,8 +54,8 @@ namespace Sentry.Tests.Protocol
             yield return new object[] { (new SdkVersion { Name = "some name" }, "{\"name\":\"some name\"}") };
             yield return new object[] { (new SdkVersion { Version = "some version" }, "{\"version\":\"some version\"}") };
             var sdk = new SdkVersion();
-            sdk.AddPackage("b","2");
-            sdk.AddPackage("a","1");
+            sdk.AddPackage("b", "2");
+            sdk.AddPackage("a", "1");
             yield return new object[] { (sdk, "{\"packages\":[{\"name\":\"a\",\"version\":\"1\"},{\"name\":\"b\",\"version\":\"2\"}]}") };
         }
     }

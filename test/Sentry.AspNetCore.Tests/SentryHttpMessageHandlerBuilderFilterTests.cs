@@ -1,4 +1,4 @@
-﻿#if NET5_0 || NETCOREAPP3_1
+#if NET5_0 || NETCOREAPP3_1
 using System;
 using System.Collections.Generic;
 using System.Linq;

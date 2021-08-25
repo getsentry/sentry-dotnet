@@ -33,9 +33,9 @@ namespace Sentry.Tests.Protocol
             {
                 Description = "desc123",
                 Status = SpanStatus.Aborted,
-                User = new User {Id = "user-id"},
-                Request = new Request {Method = "POST"},
-                Sdk = new SdkVersion {Name = "SDK-test", Version = "1.1.1"},
+                User = new User { Id = "user-id" },
+                Request = new Request { Method = "POST" },
+                Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
                 Environment = "environment",
                 Level = SentryLevel.Fatal,
                 Contexts =
@@ -59,12 +59,12 @@ namespace Sentry.Tests.Protocol
                 timestamp,
                 "message",
                 "type",
-                new Dictionary<string, string> {{"data-key", "data-value"}},
+                new Dictionary<string, string> { { "data-key", "data-value" } },
                 "category",
                 BreadcrumbLevel.Warning));
 
             transaction.SetExtra("extra_key", "extra_value");
-            transaction.Fingerprint = new[] {"fingerprint"};
+            transaction.Fingerprint = new[] { "fingerprint" };
             transaction.SetTag("tag_key", "tag_value");
 
             var child1 = transaction.StartChild("child_op123", "child_desc123");
@@ -239,7 +239,7 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
-            var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret};
+            var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret };
             var hub = new Hub(options, client);
 
             var transaction = new TransactionTracer(hub, "my name", "my op");
@@ -256,7 +256,7 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
-            var hub = new Hub(new SentryOptions{Dsn = DsnSamples.ValidDsnWithoutSecret}, client);
+            var hub = new Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret }, client);
 
             var transaction = new TransactionTracer(hub, "my name", "my op");
 
@@ -282,7 +282,7 @@ namespace Sentry.Tests.Protocol
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
-            var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret};
+            var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret };
             var hub = new Hub(options, client);
 
             var exception = new InvalidOperationException();
