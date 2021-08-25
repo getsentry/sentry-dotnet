@@ -37,7 +37,7 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 _sqlListener = new(_hub, _options);
                 _disposableListeners.Add(listener.Subscribe(_sqlListener));
-                _options.DiagnosticLogger?.Log(SentryLevel.Debug, "Registered integration with SQL Client.");
+                _options.DiagnosticLogger?.LogDebug("Registered integration with SQL Client.");
 
                 // Duplicated data.
                 _efInterceptor?.DisableConnectionSpan();

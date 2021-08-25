@@ -39,6 +39,7 @@ namespace Sentry.Internals.DiagnosticSource
 
         private IHub _hub { get; }
         private SentryOptions _options { get; }
+
         public SentrySqlListener(IHub hub, SentryOptions options)
         {
             _hub = hub;

@@ -25,7 +25,7 @@
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net461' and !$(TargetFramework.StartsWith('netstandard'))">
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
     <Compile Include="../Sentry.Diagnostics.DiagnosticSource/Internals/**/*.cs">
       <Link>Internal/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>

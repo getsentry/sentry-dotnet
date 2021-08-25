@@ -41,7 +41,7 @@
 
   <!-- DiagnosticSource Tests -->
   <!-- netcoreapp3.0 skipped since it'll target NET standard on Sentry. -->
-  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' and'$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' and '$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
     <Compile Include="../Sentry.Diagnostics.DiagnosticSource.Tests/*.cs">
       <Link>Internals/DiagnosticSource/%(Filename)%(Extension)</Link>
     </Compile>
