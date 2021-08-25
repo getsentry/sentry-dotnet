@@ -30,7 +30,7 @@ namespace Sentry.Internal
         {
             ScopeStackContainer = scopeStackContainer;
             _options = options;
-            NewStack = () => new [] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
+            NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
 
         public KeyValuePair<Scope, ISentryClient> GetCurrent()

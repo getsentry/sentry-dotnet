@@ -121,8 +121,8 @@ namespace Sentry.Tests
             // Arrange
             var scope = new Scope();
             var hub = Substitute.For<IHub>();
-                hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                   .Do(c => c.Arg<Action<Scope>>()(scope));
+            hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
+               .Do(c => c.Arg<Action<Scope>>()(scope));
 
             var url = "https://localhost/";
 

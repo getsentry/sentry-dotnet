@@ -16,7 +16,7 @@ namespace Sentry.Tests.Protocol
                 Email = "test@sentry.io",
                 IpAddress = "::1",
                 Username = "user-name",
-                Other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}}
+                Other = new Dictionary<string, string> { { "testCustomValueKey", "testCustomValue" } }
             };
 
             var actual = sut.ToJsonString();

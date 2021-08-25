@@ -49,7 +49,7 @@ namespace Sentry.Google.Cloud.Functions.Tests
                     // Based on: https://github.com/GoogleCloudPlatform/functions-framework-dotnet/blob/a8a34526053c40e84ff096a43b1d357ea4d3be6c/src/Google.Cloud.Functions.Hosting.Tests/FunctionsStartupTest.cs#L117
                     .UseFunctionsStartup(new SentryStartup())
                     .Configure((context, app) => app.UseFunctionsFramework(context))
-                    .ConfigureAppConfiguration(c => c.AddInMemoryCollection(new []
+                    .ConfigureAppConfiguration(c => c.AddInMemoryCollection(new[]
                     {
                         new KeyValuePair<string, string>("Sentry:Dsn", "https://key@sentry.io/project")
                     }))

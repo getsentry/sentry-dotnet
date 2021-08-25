@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Http;
 
 namespace Sentry.Extensions.Logging

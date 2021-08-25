@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -14,9 +14,9 @@ namespace Sentry.Testing
             _getResponse = getResponse;
 
         public FakeHttpMessageHandler(Func<HttpResponseMessage> getResponse)
-            : this(_ => getResponse()) {}
+            : this(_ => getResponse()) { }
 
-        public FakeHttpMessageHandler() {}
+        public FakeHttpMessageHandler() { }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,

@@ -16,7 +16,7 @@ namespace Sentry.AspNet
         public static void AddAspNet(this SentryOptions options, RequestSize maxRequestBodySize = RequestSize.None)
         {
             var payloadExtractor = new RequestBodyExtractionDispatcher(
-                new IRequestPayloadExtractor[] {new FormRequestPayloadExtractor(), new DefaultRequestPayloadExtractor()},
+                new IRequestPayloadExtractor[] { new FormRequestPayloadExtractor(), new DefaultRequestPayloadExtractor() },
                 options,
                 () => maxRequestBodySize);
 

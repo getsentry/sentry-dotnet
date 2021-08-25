@@ -271,7 +271,7 @@ namespace Sentry.Tests
             // Act
             var eventIds = Enumerable
                 .Range(0, 1_000)
-                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
+                .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
                 .ToArray();
 
             var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
@@ -304,7 +304,7 @@ namespace Sentry.Tests
             // Act
             var eventIds = Enumerable
                 .Range(0, 1_000)
-                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
+                .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
                 .ToArray();
 
             var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
@@ -337,7 +337,7 @@ namespace Sentry.Tests
             // Act
             var eventIds = Enumerable
                 .Range(0, 1_000)
-                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
+                .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
                 .ToArray();
 
             var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);

@@ -1,4 +1,4 @@
-﻿namespace Sentry
+namespace Sentry
 {
     /// <summary>
     /// Transaction metadata.
@@ -13,6 +13,6 @@
         /// <summary>
         /// Whether the parent transaction of this transaction has been sampled.
         /// </summary>
-        bool? IsParentSampled { get; }        
+        bool? IsParentSampled { get; }
     }
 }

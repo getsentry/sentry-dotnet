@@ -20,7 +20,8 @@ namespace Sentry.Tests.Protocol
             {
                 User = new User { Id = "user-id" },
                 Request = new Request { Method = "POST" },
-                Contexts = new Contexts {
+                Contexts = new Contexts
+                {
                     ["context_key"] = "context_value",
                     [".NET Framework"] = new Dictionary<string, string>
                     {
@@ -40,7 +41,7 @@ namespace Sentry.Tests.Protocol
                 },
                 Modules = { { "module_key", "module_value" } },
                 Release = "release",
-                SentryExceptions = new[] { new SentryException { Value = "exception_value"} },
+                SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
                 SentryThreads = new[] { new SentryThread { Crashed = true } },
                 ServerName = "server_name",
                 TransactionName = "transaction",
@@ -52,12 +53,12 @@ namespace Sentry.Tests.Protocol
                 timestamp,
                 "message",
                 "type",
-                new Dictionary<string, string> {{"data-key","data-value"}},
+                new Dictionary<string, string> { { "data-key", "data-value" } },
                 "category",
                 BreadcrumbLevel.Warning));
 
             sut.SetExtra("extra_key", "extra_value");
-            sut.Fingerprint = new[] {"fingerprint"};
+            sut.Fingerprint = new[] { "fingerprint" };
             sut.SetTag("tag_key", "tag_value");
 
             var actualString = sut.ToJsonString();
