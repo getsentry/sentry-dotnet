@@ -10,6 +10,27 @@ namespace Sentry.Samples.Maui
         public App()
         {
             InitializeComponent();
+
+            // App.Handler.MauiContext.Services.GetService<...>()
+
+            BindingContextChanged += (sender, args) => { };
+            PropertyChanging += (sender, args) => { };
+            PropertyChanged += (sender, args) => { };
+            ParentChanging += (sender, args) => { };
+            ParentChanged += (sender, args) => { };
+            HandlerChanging += (sender, args) => { };
+            HandlerChanged += (sender, args) => { };
+            DescendantRemoved += (sender, args) => { };
+            DescendantAdded += (sender, args) => { };
+            ChildRemoved += (sender, args) => { };
+            ChildAdded += (sender, args) => { };
+            RequestedThemeChanged += (sender, args) => { };
+            PageDisappearing += (sender, args) => { };
+            PageAppearing += (sender, args) => { };
+            ModalPushing += (sender, args) => { };
+            ModalPopping += (sender, args) => { };
+            ModalPopped += (sender, args) => { };
+            ModalPushed += (sender, args) => { };
         }
 
         protected override IWindow CreateWindow(IActivationState activationState)
