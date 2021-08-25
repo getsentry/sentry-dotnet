@@ -97,8 +97,7 @@ namespace Sentry
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)

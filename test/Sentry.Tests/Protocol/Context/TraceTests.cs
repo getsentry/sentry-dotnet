@@ -46,8 +46,7 @@ namespace Sentry.Tests.Protocol.Context
                 "\"op\":\"op123\"," +
                 "\"status\":\"aborted\"" +
                 "}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

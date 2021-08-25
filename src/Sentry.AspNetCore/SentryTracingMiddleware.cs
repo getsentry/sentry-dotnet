@@ -88,8 +88,7 @@ namespace Sentry.AspNetCore
                 _options.DiagnosticLogger?.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",
                     transaction.SpanId,
-                    transaction.TraceId
-                );
+                    transaction.TraceId);
 
                 return transaction;
             }
@@ -145,8 +144,7 @@ namespace Sentry.AspNetCore
                             _options.DiagnosticLogger?.LogDebug(
                                 "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
                                 transaction.Name,
-                                transactionName
-                            );
+                                transactionName);
                         }
 
                         transaction.Name = transactionName;

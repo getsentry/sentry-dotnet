@@ -116,7 +116,6 @@ namespace Sentry
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
     }
 }

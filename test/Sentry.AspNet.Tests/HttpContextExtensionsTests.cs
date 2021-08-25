@@ -17,8 +17,7 @@ namespace Sentry.AspNet.Tests
                 {
                     RequestType = "GET"
                 },
-                new HttpResponse(TextWriter.Null)
-            );
+                new HttpResponse(TextWriter.Null));
 
             // Act
             var transaction = context.StartSentryTransaction();
@@ -42,8 +41,7 @@ namespace Sentry.AspNet.Tests
                 {
                     RequestType = "GET"
                 },
-                new HttpResponse(TextWriter.Null)
-            );
+                new HttpResponse(TextWriter.Null));
 
             // Act
             var transaction = context.StartSentryTransaction();
@@ -70,8 +68,7 @@ namespace Sentry.AspNet.Tests
                 new HttpResponse(TextWriter.Null)
                 {
                     StatusCode = 404
-                }
-            );
+                });
 
             // Act
             var transaction = context.StartSentryTransaction();

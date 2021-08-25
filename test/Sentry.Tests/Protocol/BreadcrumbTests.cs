@@ -40,8 +40,7 @@ namespace Sentry.Tests.Protocol
                 "\"data\":{\"key\":\"val\"}," +
                 "\"category\":\"category1\"," +
                 "\"level\":\"warning\"}",
-                actual
-            );
+                actual);
         }
 
         [Theory]

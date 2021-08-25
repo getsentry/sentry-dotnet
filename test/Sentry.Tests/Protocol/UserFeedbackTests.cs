@@ -27,8 +27,7 @@ namespace Sentry.Tests.Protocol
                 "\"name\":\"myName\"," +
                 "\"email\":\"myEmail@service.com\"," +
                 "\"comments\":\"my comment\"" +
-                "}"
-            );
+                "}");
         }
     }
 }

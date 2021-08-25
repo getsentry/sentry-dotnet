@@ -19,8 +19,7 @@ namespace Sentry.AspNet
             var payloadExtractor = new RequestBodyExtractionDispatcher(
                 new IRequestPayloadExtractor[] {new FormRequestPayloadExtractor(), new DefaultRequestPayloadExtractor()},
                 options,
-                () => maxRequestBodySize
-            );
+                () => maxRequestBodySize);
 
             var eventProcessor = new SystemWebRequestEventProcessor(payloadExtractor, options);
 

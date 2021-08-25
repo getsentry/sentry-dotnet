@@ -467,8 +467,7 @@ namespace Sentry
                 if (value < 0 || value > 1)
                 {
                     throw new InvalidOperationException(
-                        $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1."
-                    );
+                        $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1.");
                 }
 
                 _tracesSampleRate = value;

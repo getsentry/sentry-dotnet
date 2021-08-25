@@ -117,8 +117,7 @@ namespace Sentry
             {
                 scope.Options.DiagnosticLogger?.LogWarning(
                     "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
-                    fileName
-                );
+                    fileName);
 
                 return;
             }
@@ -130,8 +129,7 @@ namespace Sentry
                     type,
                     new StreamAttachmentContent(stream),
                     fileName,
-                    contentType)
-            );
+                    contentType));
         }
 
         /// <summary>
@@ -158,8 +156,7 @@ namespace Sentry
                     type,
                     new FileAttachmentContent(filePath),
                     Path.GetFileName(filePath),
-                    contentType)
-            );
+                    contentType));
 
         /// <summary>
         /// Gets the last opened span.

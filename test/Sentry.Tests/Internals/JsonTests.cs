@@ -186,8 +186,7 @@ namespace Sentry.Tests.Internals
             "tz_id",
                 TimeSpan.FromHours(2),
                 "my timezone",
-                "my timezone"
-            );
+                "my timezone");
             var expectedSerializedData = new[]
             {
                 "\"Id\":1,\"Data\":\"1234\"",

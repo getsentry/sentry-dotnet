@@ -27,8 +27,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Using ISentryHttpClientFactory set through options: {0}.",
-                    _options.SentryHttpClientFactory.GetType().Name
-                );
+                    _options.SentryHttpClientFactory.GetType().Name);
             }
 
             var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
@@ -50,8 +49,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogDebug(
                     "Flushing existing cache during transport activation up to {0}.",
-                    _options.InitCacheFlushTimeout
-                );
+                    _options.InitCacheFlushTimeout);
 
                 try
                 {
@@ -73,16 +71,14 @@ namespace Sentry.Internal
                         _options.DiagnosticLogger?.LogInfo(
                             "Cache flushing is taking longer than the configured timeout of {0}. " +
                             "Continuing without waiting for the task to finish.",
-                            _options.InitCacheFlushTimeout
-                        );
+                            _options.InitCacheFlushTimeout);
                     }
                 }
                 catch (Exception ex)
                 {
                     _options.DiagnosticLogger?.LogError(
                         "Cache flushing failed.",
-                        ex
-                    );
+                        ex);
                 }
             }
 

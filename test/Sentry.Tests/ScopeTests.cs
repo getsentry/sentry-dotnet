@@ -58,8 +58,7 @@ namespace Sentry.Tests
             // Assert
             logger.Entries.Should().Contain(entry =>
                 entry.Message == "Failed invoking event handler." &&
-                entry.Exception == exception
-            );
+                entry.Exception == exception);
         }
 
         [Fact]

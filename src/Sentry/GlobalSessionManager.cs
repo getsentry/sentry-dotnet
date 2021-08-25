@@ -57,15 +57,13 @@ namespace Sentry
                     ?? Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                         "Sentry",
-                        _options.Dsn!.GetHashString()
-                    );
+                        _options.Dsn!.GetHashString());
 
                 Directory.CreateDirectory(directoryPath);
 
                 _options.DiagnosticLogger?.LogDebug(
                     "Created directory for installation ID file ({0}).",
-                    directoryPath
-                );
+                    directoryPath);
 
                 var filePath = Path.Combine(directoryPath, ".installation");
 
@@ -78,16 +76,14 @@ namespace Sentry
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "File containing installation ID does not exist ({0}).",
-                        filePath
-                    );
+                        filePath);
                 }
                 catch (DirectoryNotFoundException)
                 {
                     // on PS4 we're seeing CreateDirectory work but ReadAllText throw DirectoryNotFoundException
                     _options.DiagnosticLogger?.LogDebug(
                         "Directory containing installation ID does not exist ({0}).",
-                        filePath
-                    );
+                        filePath);
                 }
 
                 // Generate new installation ID and store it in a file
@@ -96,8 +92,7 @@ namespace Sentry
 
                 _options.DiagnosticLogger?.LogDebug(
                     "Saved installation ID '{0}' to file '{1}'.",
-                    id, filePath
-                );
+                    id, filePath);
 
                 return id;
             }
@@ -107,8 +102,7 @@ namespace Sentry
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to resolve persistent installation ID.",
-                    ex
-                );
+                    ex);
 
                 return null;
             }
@@ -130,8 +124,7 @@ namespace Sentry
                 if (string.IsNullOrWhiteSpace(installationId))
                 {
                     _options.DiagnosticLogger?.LogError(
-                        "Failed to find an appropriate network interface for installation ID."
-                    );
+                        "Failed to find an appropriate network interface for installation ID.");
 
                     return null;
                 }
@@ -142,8 +135,7 @@ namespace Sentry
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to resolve hardware installation ID.",
-                    ex
-                );
+                    ex);
 
                 return null;
             }
@@ -182,14 +174,12 @@ namespace Sentry
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "Resolved installation ID '{0}'.",
-                        id
-                    );
+                        id);
                 }
                 else
                 {
                     _options.DiagnosticLogger?.LogDebug(
-                        "Failed to resolve installation ID."
-                    );
+                        "Failed to resolve installation ID.");
                 }
 
                 return _resolvedInstallationId = id;
@@ -214,25 +204,18 @@ namespace Sentry
 
                 _options.DiagnosticLogger?.LogDebug(
                     "Created persistence directory for session file '{0}'.",
-                    _persistenceDirectoryPath
-                );
+                    _persistenceDirectoryPath);
 
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
                 var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
                 persistedSessionUpdate.WriteToFile(filePath);
 
-                _options.DiagnosticLogger?.LogInfo(
-                    "Persisted session to a file '{0}'.",
-                    filePath
-                );
+                _options.DiagnosticLogger?.LogDebug("Persisted session to a file '{0}'.", filePath);
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to persist session on the file system.",
-                    ex
-                );
+                _options.DiagnosticLogger?.LogError("Failed to persist session on the file system.", ex);
             }
         }
 
@@ -256,16 +239,14 @@ namespace Sentry
                     {
                         _options.DiagnosticLogger?.LogDebug(
                             "Deleting persisted session file with contents: {0}",
-                            File.ReadAllText(filePath)
-                        );
+                            File.ReadAllText(filePath));
                     }
                     catch (Exception ex)
                     {
                         _options.DiagnosticLogger?.LogError(
                             "Failed to read the contents of persisted session file '{0}'.",
                             ex,
-                            filePath
-                        );
+                            filePath);
                     }
                 }
 
@@ -273,16 +254,14 @@ namespace Sentry
 
                 _options.DiagnosticLogger?.LogInfo(
                     "Deleted persisted session file '{0}'.",
-                    filePath
-                );
+                    filePath);
             }
             catch (Exception ex)
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to delete persisted session from the file system: '{0}'",
                     ex,
-                    filePath
-                );
+                    filePath);
             }
         }
 
@@ -316,16 +295,14 @@ namespace Sentry
                         _ when recoveredUpdate.PauseTimestamp is not null => SessionEndStatus.Exited,
                         { } crashedLastRun => crashedLastRun() ? SessionEndStatus.Crashed : SessionEndStatus.Abnormal,
                         _ => SessionEndStatus.Abnormal
-                    }
-                );
+                    });
             }
             catch (IOException ioEx) when (ioEx is FileNotFoundException or DirectoryNotFoundException)
             {
                 // Not a notable error
                 _options.DiagnosticLogger?.LogDebug(
                     "A persisted session does not exist at {0}.",
-                    filePath
-                );
+                    filePath);
 
                 return null;
             }
@@ -334,8 +311,7 @@ namespace Sentry
                 _options.DiagnosticLogger?.LogError(
                     "Failed to recover persisted session from the file system '{0}'.",
                     ex,
-                    filePath
-                );
+                    filePath);
 
                 return null;
             }
@@ -349,8 +325,7 @@ namespace Sentry
             {
                 // Release health without release is just health (useless)
                 _options.DiagnosticLogger?.LogError(
-                    "Failed to start a session because there is no release information."
-                );
+                    "Failed to start a session because there is no release information.");
 
                 return null;
             }
@@ -367,8 +342,7 @@ namespace Sentry
             if (previousSession is not null)
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Starting a new session while an existing one is still active."
-                );
+                    "Starting a new session while an existing one is still active.");
 
                 // End previous session
                 EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
@@ -376,8 +350,7 @@ namespace Sentry
 
             _options.DiagnosticLogger?.LogInfo(
                 "Started new session (SID: {0}; DID: {1}).",
-                session.Id, session.DistinctId
-            );
+                session.Id, session.DistinctId);
 
             var update = session.CreateUpdate(true, _clock.GetUtcNow());
 
@@ -390,8 +363,7 @@ namespace Sentry
         {
             _options.DiagnosticLogger?.LogInfo(
                 "Ended session (SID: {0}; DID: {1}) with status '{2}'.",
-                session.Id, session.DistinctId, status
-            );
+                session.Id, session.DistinctId, status);
 
             var update = session.CreateUpdate(false, timestamp, status);
 
@@ -406,8 +378,7 @@ namespace Sentry
             if (session is null)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Failed to end session because there is none active."
-                );
+                    "Failed to end session because there is none active.");
 
                 return null;
             }
@@ -433,8 +404,7 @@ namespace Sentry
             if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Attempted to resume a session, but the current session hasn't been paused."
-                );
+                    "Attempted to resume a session, but the current session hasn't been paused.");
 
                 return Array.Empty<SessionUpdate>();
             }
@@ -450,8 +420,7 @@ namespace Sentry
                 _options.DiagnosticLogger?.LogDebug(
                     "Paused session has been paused for {0}, which is longer than the configured timeout. " +
                     "Starting a new session instead of resuming this one.",
-                    pauseDuration
-                );
+                    pauseDuration);
 
                 var updates = new List<SessionUpdate>(2);
 
@@ -472,8 +441,7 @@ namespace Sentry
 
             _options.DiagnosticLogger?.LogDebug(
                 "Paused session has been paused for {0}, which is shorter than the configured timeout.",
-                pauseDuration
-            );
+                pauseDuration);
 
             return Array.Empty<SessionUpdate>();
         }
@@ -489,8 +457,7 @@ namespace Sentry
                 if (session.ErrorCount > 1)
                 {
                     _options.DiagnosticLogger?.LogDebug(
-                        "Reported an error on a session that already contains errors. Not creating an update."
-                    );
+                        "Reported an error on a session that already contains errors. Not creating an update.");
 
                     return null;
                 }
@@ -499,8 +466,7 @@ namespace Sentry
             }
 
             _options.DiagnosticLogger?.LogDebug(
-                "Failed to report an error on a session because there is none active."
-            );
+                "Failed to report an error on a session because there is none active.");
 
             return null;
         }

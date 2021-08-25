@@ -17,8 +17,7 @@ namespace Sentry.Tests.Protocol
             Assert.Equal(
                 "{\"name\":\"nuget:Sentry\"," +
                 "\"version\":\"1.0.0-preview\"}",
-                actual
-            );
+                actual);
         }
 
         [Theory]
