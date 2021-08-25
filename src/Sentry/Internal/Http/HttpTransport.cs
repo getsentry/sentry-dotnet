@@ -60,8 +60,7 @@ namespace Sentry.Internal.Http
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "Envelope item of type {0} was discarded because it's rate-limited.",
-                        envelopeItem.TryGetType()
-                    );
+                        envelopeItem.TryGetType());
 
                     // Check if session update with init=true
                     if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
@@ -70,8 +69,7 @@ namespace Sentry.Internal.Http
 
                         _options.DiagnosticLogger?.LogDebug(
                             "Discarded envelope item containing initial session update (SID: {0}).",
-                            discardedSessionUpdate.Id
-                        );
+                            discardedSessionUpdate.Id);
                     }
 
                     continue;
@@ -84,8 +82,7 @@ namespace Sentry.Internal.Http
                     _options.DiagnosticLogger?.LogWarning(
                         "Attachment '{0}' dropped because it's too large ({1} bytes).",
                         envelopeItem.TryGetFileName(),
-                        envelopeItem.TryGetLength()
-                    );
+                        envelopeItem.TryGetLength());
 
                     continue;
                 }
@@ -98,15 +95,13 @@ namespace Sentry.Internal.Http
                 {
                     var modifiedEnvelopeItem = new EnvelopeItem(
                         envelopeItem.Header,
-                        new JsonSerializable(new SessionUpdate(sessionUpdate, true))
-                    );
+                        new JsonSerializable(new SessionUpdate(sessionUpdate, true)));
 
                     envelopeItems.Add(modifiedEnvelopeItem);
 
                     _options.DiagnosticLogger?.LogDebug(
                         "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
-                        sessionUpdate.Id
-                    );
+                        sessionUpdate.Id);
                 }
                 else
                 {
@@ -150,8 +145,7 @@ namespace Sentry.Internal.Http
             {
                 _options.DiagnosticLogger?.LogInfo(
                     "Envelope {0} was discarded because all contained items are rate-limited.",
-                    envelope.TryGetEventId()
-                );
+                    envelope.TryGetEventId());
 
                 return;
             }
@@ -169,11 +163,17 @@ namespace Sentry.Internal.Http
                 return;
             }
 
-            _options.DiagnosticLogger?.LogDebug(
-                "Envelope {0} successfully received by Sentry.",
-                processedEnvelope.TryGetEventId()
-            );
-
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
+            {
+                _options.DiagnosticLogger?.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
+                    envelope.TryGetEventId(),
+                    await envelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+            }
+            else
+            {
+                _options.DiagnosticLogger?.LogInfo("Envelope '{0}' successfully received by Sentry.",
+                    processedEnvelope.TryGetEventId());
+            }
         }
 
         private async Task HandleFailureAsync(
@@ -182,7 +182,7 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             // Spare the overhead if level is not enabled
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) == true)
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true)
             {
                 if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json",
                     StringComparison.OrdinalIgnoreCase))
@@ -204,8 +204,7 @@ namespace Sentry.Internal.Http
                         processedEnvelope.TryGetEventId(),
                         response.StatusCode,
                         errorMessage,
-                        string.Join(", ", errorCauses)
-                    );
+                        string.Join(", ", errorCauses));
                 }
                 else
                 {
@@ -217,14 +216,21 @@ namespace Sentry.Internal.Http
                         null,
                         processedEnvelope.TryGetEventId(),
                         response.StatusCode,
-                        responseString
-                    );
+                        responseString);
+                }
+
+                // If debug level, dump the whole envelope to the logger
+                if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
+                {
+                    _options.DiagnosticLogger?.LogDebug("Failed envelope '{0}' has payload:\n{1}\n",
+                        processedEnvelope.TryGetEventId(),
+                        await processedEnvelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
                 }
             }
 
             // SDK is in debug mode, and envelope was too large. To help troubleshoot:
             const string persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) == true
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true
                 && response.StatusCode == HttpStatusCode.RequestEntityTooLarge
                 && _getEnvironmentVariable(persistLargeEnvelopePathEnvVar) is { } destinationDirectory)
             {

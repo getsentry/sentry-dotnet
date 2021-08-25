@@ -48,8 +48,7 @@ namespace Sentry.PlatformAbstractions
                 return new Runtime(
                     name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                     match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
-                    raw: rawRuntimeDescription
-                );
+                    raw: rawRuntimeDescription);
             }
 
             return new Runtime(name, raw: rawRuntimeDescription);

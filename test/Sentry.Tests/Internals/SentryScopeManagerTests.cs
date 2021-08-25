@@ -22,8 +22,7 @@ namespace Sentry.Tests.Internals
             public SentryScopeManager GetSut() => new(
                 SentryOptions.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
                 SentryOptions,
-                Client
-            );
+                Client);
         }
 
         private readonly Fixture _fixture = new();

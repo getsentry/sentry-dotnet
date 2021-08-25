@@ -76,8 +76,7 @@ namespace Sentry.Tests
                 _fixture.Options.CacheDirectoryPath!,
                 "Sentry",
                 _fixture.Options.Dsn!.GetHashString(),
-                ".installation"
-            );
+                ".installation");
 
             // Act
             sut.StartSession();
@@ -97,8 +96,7 @@ namespace Sentry.Tests
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Sentry",
                 _fixture.Options.Dsn!.GetHashString(),
-                ".installation"
-            );
+                ".installation");
 
             // Act
             sut.StartSession();
@@ -167,8 +165,7 @@ namespace Sentry.Tests
             // Assert
             _fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to report an error on a session because there is none active." &&
-                e.Level == SentryLevel.Debug
-            );
+                e.Level == SentryLevel.Debug);
         }
 
         [Fact]
@@ -202,8 +199,7 @@ namespace Sentry.Tests
 
             _fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to end session because there is none active." &&
-                e.Level == SentryLevel.Debug
-            );
+                e.Level == SentryLevel.Debug);
         }
 
         [Fact]
@@ -368,8 +364,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             using var fixture = new Fixture(o =>
-                o.CrashedLastRun = () => true
-            );
+                o.CrashedLastRun = () => true);
 
             sut.StartSession();
 

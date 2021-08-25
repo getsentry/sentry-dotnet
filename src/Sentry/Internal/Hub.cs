@@ -56,8 +56,7 @@ namespace Sentry.Internal
             ScopeManager = scopeManager ?? new SentryScopeManager(
                 options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
                 options,
-                _ownedClient
-            );
+                _ownedClient);
 
             _rootScope = options.IsGlobalModeEnabled
                 ? DisabledHub.Instance
@@ -131,8 +130,7 @@ namespace Sentry.Internal
             {
                 var samplingContext = new TransactionSamplingContext(
                     context,
-                    customSamplingContext
-                );
+                    customSamplingContext);
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
@@ -187,8 +185,7 @@ namespace Sentry.Internal
                 {
                     _options.DiagnosticLogger?.LogError(
                         "Failed to recover persisted session.",
-                        ex
-                    );
+                        ex);
                 }
             }
 
@@ -205,8 +202,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to start a session.",
-                    ex
-                );
+                    ex);
             }
         }
 
@@ -222,8 +218,7 @@ namespace Sentry.Internal
                 {
                     _options.DiagnosticLogger?.LogError(
                         "Failed to pause a session.",
-                        ex
-                    );
+                        ex);
                 }
             }
         }
@@ -243,8 +238,7 @@ namespace Sentry.Internal
                 {
                     _options.DiagnosticLogger?.LogError(
                         "Failed to resume a session.",
-                        ex
-                    );
+                        ex);
                 }
             }
         }
@@ -263,8 +257,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to end a session.",
-                    ex
-                );
+                    ex);
             }
         }
 

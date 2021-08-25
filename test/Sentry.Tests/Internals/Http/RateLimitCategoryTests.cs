@@ -24,8 +24,7 @@ namespace Sentry.Tests.Internals.Http
 
             var envelopeItem = new EnvelopeItem(
                 new Dictionary<string, object> {["type"] = itemType},
-                new EmptySerializable()
-            );
+                new EmptySerializable());
 
             // Act
             var matches = category.Matches(envelopeItem);
@@ -45,8 +44,7 @@ namespace Sentry.Tests.Internals.Http
 
             var envelopeItem = new EnvelopeItem(
                 new Dictionary<string, object> {["type"] = itemType},
-                new EmptySerializable()
-            );
+                new EmptySerializable());
 
             // Act
             var matches = category.Matches(envelopeItem);

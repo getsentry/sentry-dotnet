@@ -54,8 +54,7 @@ namespace Sentry.AspNetCore.Tests
                             await ctx.Response.WriteAsync($"Person #{id}");
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -65,8 +64,7 @@ namespace Sentry.AspNetCore.Tests
 
             // Assert
             sentryClient.Received(2).CaptureTransaction(
-                Arg.Is<Transaction>(transaction => transaction.Name == "GET /person/{id}")
-            );
+                Arg.Is<Transaction>(transaction => transaction.Name == "GET /person/{id}"));
         }
 
         [Fact]
@@ -105,8 +103,7 @@ namespace Sentry.AspNetCore.Tests
                             return Task.CompletedTask;
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -149,8 +146,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => Task.CompletedTask);
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -208,8 +204,7 @@ namespace Sentry.AspNetCore.Tests
                             return Task.CompletedTask;
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -265,8 +260,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => Task.CompletedTask);
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -329,8 +323,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => throw exception);
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 

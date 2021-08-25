@@ -440,8 +440,7 @@ namespace Sentry.Tests
                                .Single()
                                .Breadcrumbs
                                .Single()
-                               .Message == expected)
-                );
+                               .Message == expected));
             }
         }
 

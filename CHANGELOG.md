@@ -4,6 +4,7 @@
 
 ### Features
 
+- Improved SDK diagnostic logs ([#1161](https://github.com/getsentry/sentry-dotnet/pull/1161))
 - Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
 
 ### Fixes

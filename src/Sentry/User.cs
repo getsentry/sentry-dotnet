@@ -124,8 +124,7 @@ namespace Sentry
 
             user.InternalOther ??= InternalOther?.ToDictionary(
                 entry => entry.Key,
-                entry => entry.Value
-            );
+                entry => entry.Value);
         }
 
         /// <inheritdoc />

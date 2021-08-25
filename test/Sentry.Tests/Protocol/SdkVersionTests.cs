@@ -36,8 +36,7 @@ namespace Sentry.Tests.Protocol
                 "{\"packages\":[{\"name\":\"Sentry\",\"version\":\"1.0\"},{\"name\":\"Sentry.AspNetCore\",\"version\":\"2.0\"}]," +
                 "\"name\":\"Sentry.Test.SDK\"," +
                 "\"version\":\"0.0.1-preview1\"}",
-                actual
-            );
+                actual);
         }
 
         [Theory]

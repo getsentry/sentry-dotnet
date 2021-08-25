@@ -30,8 +30,7 @@ namespace Sentry.Protocol.Tests.Exceptions
                 "\"description\":\"mechanism description\"," +
                 "\"help_link\":\"https://helplink\"," +
                 "\"handled\":true}",
-                actual
-            );
+                actual);
         }
 
         [Theory]

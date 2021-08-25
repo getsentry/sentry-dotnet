@@ -19,7 +19,6 @@ namespace Sentry.Testing
             SentryLevel Level,
             string Message,
             Exception Exception,
-            object[] Args
-        );
+            object[] Args);
     }
 }
