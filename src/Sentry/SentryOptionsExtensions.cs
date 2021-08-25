@@ -12,7 +12,9 @@ using Sentry.Internal.Extensions;
 #if NET461
 using Sentry.PlatformAbstractions;
 #endif
-
+#if !NET461 && !NETSTANDARD
+using Sentry.Internals.DiagnosticSource;
+#endif
 namespace Sentry
 {
     /// <summary>
@@ -40,6 +42,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) =>
             options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
+
+#if !NET461 && !NETSTANDARD
+        /// <summary>
+        /// Disables the integrations with Diagnostic listener.
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableDiagnosticListenerIntegration(this SentryOptions options)
+            => options.Integrations =
+                options.Integrations?.Where(p => p.GetType() != typeof(SentryDiagnosticListenerIntegration)).ToArray();
+#endif
 
         /// <summary>
         /// Disables the capture of errors through <see cref="TaskScheduler.UnobservedTaskException"/>.
