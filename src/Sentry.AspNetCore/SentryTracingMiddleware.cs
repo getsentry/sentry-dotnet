@@ -144,8 +144,7 @@ namespace Sentry.AspNetCore
                             _options.DiagnosticLogger?.LogDebug(
                                 "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
                                 transaction.Name,
-                                transactionName
-                            );
+                                transactionName);
                         }
 
                         transaction.Name = transactionName;

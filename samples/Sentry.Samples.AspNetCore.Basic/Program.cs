@@ -64,8 +64,7 @@ namespace Sentry.Samples.AspNetCore.Basic
                             // will include the Log messages and any custom scope modifications
                             // as exemplified above.
                             throw new Exception(
-                                exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline"
-                            );
+                                exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline");
                         });
                     });
                 })

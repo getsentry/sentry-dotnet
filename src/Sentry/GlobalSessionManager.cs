@@ -57,8 +57,7 @@ namespace Sentry
                     ?? Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                         "Sentry",
-                        _options.Dsn!.GetHashString()
-                    );
+                        _options.Dsn!.GetHashString());
 
                 Directory.CreateDirectory(directoryPath);
 
@@ -77,16 +76,14 @@ namespace Sentry
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "File containing installation ID does not exist ({0}).",
-                        filePath
-                    );
+                        filePath);
                 }
                 catch (DirectoryNotFoundException)
                 {
                     // on PS4 we're seeing CreateDirectory work but ReadAllText throw DirectoryNotFoundException
                     _options.DiagnosticLogger?.LogDebug(
                         "Directory containing installation ID does not exist ({0}).",
-                        filePath
-                    );
+                        filePath);
                 }
 
                 // Generate new installation ID and store it in a file
@@ -127,8 +124,7 @@ namespace Sentry
                 if (string.IsNullOrWhiteSpace(installationId))
                 {
                     _options.DiagnosticLogger?.LogError(
-                        "Failed to find an appropriate network interface for installation ID."
-                    );
+                        "Failed to find an appropriate network interface for installation ID.");
 
                     return null;
                 }
@@ -178,14 +174,12 @@ namespace Sentry
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "Resolved installation ID '{0}'.",
-                        id
-                    );
+                        id);
                 }
                 else
                 {
                     _options.DiagnosticLogger?.LogDebug(
-                        "Failed to resolve installation ID."
-                    );
+                        "Failed to resolve installation ID.");
                 }
 
                 return _resolvedInstallationId = id;
@@ -245,16 +239,14 @@ namespace Sentry
                     {
                         _options.DiagnosticLogger?.LogDebug(
                             "Deleting persisted session file with contents: {0}",
-                            File.ReadAllText(filePath)
-                        );
+                            File.ReadAllText(filePath));
                     }
                     catch (Exception ex)
                     {
                         _options.DiagnosticLogger?.LogError(
                             "Failed to read the contents of persisted session file '{0}'.",
                             ex,
-                            filePath
-                        );
+                            filePath);
                     }
                 }
 
@@ -465,8 +457,7 @@ namespace Sentry
                 if (session.ErrorCount > 1)
                 {
                     _options.DiagnosticLogger?.LogDebug(
-                        "Reported an error on a session that already contains errors. Not creating an update."
-                    );
+                        "Reported an error on a session that already contains errors. Not creating an update.");
 
                     return null;
                 }

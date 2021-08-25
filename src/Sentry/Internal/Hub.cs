@@ -185,8 +185,7 @@ namespace Sentry.Internal
                 {
                     _options.DiagnosticLogger?.LogError(
                         "Failed to recover persisted session.",
-                        ex
-                    );
+                        ex);
                 }
             }
 
@@ -219,8 +218,7 @@ namespace Sentry.Internal
                 {
                     _options.DiagnosticLogger?.LogError(
                         "Failed to pause a session.",
-                        ex
-                    );
+                        ex);
                 }
             }
         }
@@ -240,8 +238,7 @@ namespace Sentry.Internal
                 {
                     _options.DiagnosticLogger?.LogError(
                         "Failed to resume a session.",
-                        ex
-                    );
+                        ex);
                 }
             }
         }

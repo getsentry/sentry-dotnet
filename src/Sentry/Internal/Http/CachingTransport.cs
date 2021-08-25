@@ -126,8 +126,7 @@ namespace Sentry.Internal.Http
                     // File has already been deleted (unexpected but not critical)
                     _options.DiagnosticLogger?.LogWarning(
                         "Cached envelope '{0}' has already been deleted.",
-                        filePath
-                    );
+                        filePath);
                 }
             }
         }
@@ -189,8 +188,7 @@ namespace Sentry.Internal.Http
                     _options.DiagnosticLogger?.LogError(
                         "Failed to send cached envelope: {0}, discarding cached envelope.",
                         ex,
-                        envelopeFilePath
-                    );
+                        envelopeFilePath);
                 }
 
                 // Envelope & file stream must be disposed prior to reaching this point

@@ -60,8 +60,7 @@ namespace Sentry.Internal.Http
                 {
                     _options.DiagnosticLogger?.LogDebug(
                         "Envelope item of type {0} was discarded because it's rate-limited.",
-                        envelopeItem.TryGetType()
-                    );
+                        envelopeItem.TryGetType());
 
                     // Check if session update with init=true
                     if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: true} discardedSessionUpdate})
@@ -70,8 +69,7 @@ namespace Sentry.Internal.Http
 
                         _options.DiagnosticLogger?.LogDebug(
                             "Discarded envelope item containing initial session update (SID: {0}).",
-                            discardedSessionUpdate.Id
-                        );
+                            discardedSessionUpdate.Id);
                     }
 
                     continue;
@@ -84,8 +82,7 @@ namespace Sentry.Internal.Http
                     _options.DiagnosticLogger?.LogWarning(
                         "Attachment '{0}' dropped because it's too large ({1} bytes).",
                         envelopeItem.TryGetFileName(),
-                        envelopeItem.TryGetLength()
-                    );
+                        envelopeItem.TryGetLength());
 
                     continue;
                 }
@@ -98,15 +95,13 @@ namespace Sentry.Internal.Http
                 {
                     var modifiedEnvelopeItem = new EnvelopeItem(
                         envelopeItem.Header,
-                        new JsonSerializable(new SessionUpdate(sessionUpdate, true))
-                    );
+                        new JsonSerializable(new SessionUpdate(sessionUpdate, true)));
 
                     envelopeItems.Add(modifiedEnvelopeItem);
 
                     _options.DiagnosticLogger?.LogDebug(
                         "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
-                        sessionUpdate.Id
-                    );
+                        sessionUpdate.Id);
                 }
                 else
                 {
@@ -209,8 +204,7 @@ namespace Sentry.Internal.Http
                         processedEnvelope.TryGetEventId(),
                         response.StatusCode,
                         errorMessage,
-                        string.Join(", ", errorCauses)
-                    );
+                        string.Join(", ", errorCauses));
                 }
                 else
                 {
@@ -222,8 +216,7 @@ namespace Sentry.Internal.Http
                         null,
                         processedEnvelope.TryGetEventId(),
                         response.StatusCode,
-                        responseString
-                    );
+                        responseString);
                 }
 
                 // If debug level, dump the whole envelope to the logger
