@@ -6,9 +6,9 @@
 
 _Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us [<kbd>**Check out our open positions**</kbd>](https://sentry.io/careers/)_
 
-Sentry Diagnostic Source Adds additional logging capabilities to the main SDK, such as, transactions with richer contexts, including database measurements, by integrating Entity Framework Core and SQLClient.
-
 ### About Sentry Diagnostic source
+
+Sentry Diagnostic Source Adds additional logging capabilities to the main SDK, such as, transactions with richer contexts, including database measurements, by integrating Entity Framework Core and SQLClient.
 
 This package will automatically enable and set it up if your application runs on .NET 5 or greater. It'll also be enabled by default if you are using Sentry's ASP.NET and ASP.NET Core SDK.
 
@@ -48,6 +48,6 @@ You will not need to include this package into your project if your project matc
 
 ### Screenshots
 
-![Transaction with database events that came from the Diagnostic Source integration](".assets/transaction_with_ds_integration.png")
-![Query compiler span](".assets/db_query_compiler.png")
-![Query](".assets/db_query.png")
+![Transaction with database events that came from the Diagnostic Source integration](.assets/transaction_with_ds_integration.png)
+![Query compiler span](.assets/db_query_compiler.png")
+![Query](.assets/db_query.png)
