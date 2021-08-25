@@ -92,7 +92,7 @@ namespace Sentry.AspNetCore
                        StringComparison.Ordinal));
 
 #if NETSTANDARD2_0
-            options.AddDiagnosticListeners();
+            options.AddDiagnosticSourceIntegration();
 #endif
         }
     }
