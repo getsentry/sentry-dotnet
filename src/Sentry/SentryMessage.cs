@@ -39,7 +39,7 @@ namespace Sentry
         public string? Formatted { get; set; }
 
         /// <summary>
-        /// Coerces <see cref="System.String"/> into <see cref="SentryMessage"/>.
+        /// Coerces <see cref="string"/> into <see cref="SentryMessage"/>.
         /// </summary>
         public static implicit operator SentryMessage(string? message) => new() { Message = message };
 
