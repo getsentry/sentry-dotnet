@@ -49,5 +49,5 @@ You will not need to include this package into your project if your project matc
 ### Screenshots
 
 ![Transaction with database events that came from the Diagnostic Source integration](.assets/transaction_with_ds_integration.png)
-![Query compiler span](.assets/db_query_compiler.png")
+![Query compiler span](.assets/db_query_compiler.png)
 ![Query](.assets/db_query.png)
