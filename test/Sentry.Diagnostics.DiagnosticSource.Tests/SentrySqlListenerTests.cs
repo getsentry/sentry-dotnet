@@ -30,25 +30,25 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
 
         private Func<ISpan, bool> GetValidator(string type)
             => type switch
-                {
-                    _ when
-                            type == SqlDataWriteConnectionOpenBeforeCommand ||
-                            type == SqlMicrosoftWriteConnectionOpenBeforeCommand ||
-                            type == SqlMicrosoftWriteConnectionOpenAfterCommand ||
-                            type == SqlDataWriteConnectionOpenAfterCommand ||
-                            type == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                            type == SqlDataWriteConnectionCloseAfterCommand
-                        => (span) => span.Description is null && span.Operation == "db.connection",
-                    _ when
-                            type == SqlDataBeforeExecuteCommand ||
-                            type == SqlMicrosoftBeforeExecuteCommand ||
-                            type == SqlDataAfterExecuteCommand ||
-                            type == SqlMicrosoftAfterExecuteCommand ||
-                            type == SqlDataWriteCommandError ||
-                            type == SqlMicrosoftWriteCommandError
-                        => (span) => span.Operation == "db.query",
-                    _ => throw new NotSupportedException()
-                };
+            {
+                _ when
+                        type == SqlDataWriteConnectionOpenBeforeCommand ||
+                        type == SqlMicrosoftWriteConnectionOpenBeforeCommand ||
+                        type == SqlMicrosoftWriteConnectionOpenAfterCommand ||
+                        type == SqlDataWriteConnectionOpenAfterCommand ||
+                        type == SqlMicrosoftWriteConnectionCloseAfterCommand ||
+                        type == SqlDataWriteConnectionCloseAfterCommand
+                    => (span) => span.Description is null && span.Operation == "db.connection",
+                _ when
+                        type == SqlDataBeforeExecuteCommand ||
+                        type == SqlMicrosoftBeforeExecuteCommand ||
+                        type == SqlDataAfterExecuteCommand ||
+                        type == SqlMicrosoftAfterExecuteCommand ||
+                        type == SqlDataWriteCommandError ||
+                        type == SqlMicrosoftWriteCommandError
+                    => (span) => span.Operation == "db.query",
+                _ => throw new NotSupportedException()
+            };
 
         private class ThrowToOperationClass
         {

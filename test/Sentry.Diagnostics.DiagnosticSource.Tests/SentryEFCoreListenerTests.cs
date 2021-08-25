@@ -19,22 +19,22 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
 
         private Func<ISpan, bool> GetValidator(string type)
             => type switch
-                {
-                    _ when
-                            type == EFQueryCompiling ||
-                            type == EFQueryCompiled
-                        => (span) => span.Description != null && span.Operation == "db.query_compiler",
-                    _ when
-                            type == EFConnectionOpening ||
-                            type == EFConnectionClosed
-                        => (span) => span.Description == null && span.Operation == "db.connection",
-                    _ when
-                            type == EFCommandExecuting ||
-                            type == EFCommandExecuting ||
-                            type == EFCommandFailed
-                        => (span) => span.Description != null && span.Operation == "db.query",
-                    _ => throw new NotSupportedException()
-                };
+            {
+                _ when
+                        type == EFQueryCompiling ||
+                        type == EFQueryCompiled
+                    => (span) => span.Description != null && span.Operation == "db.query_compiler",
+                _ when
+                        type == EFConnectionOpening ||
+                        type == EFConnectionClosed
+                    => (span) => span.Description == null && span.Operation == "db.connection",
+                _ when
+                        type == EFCommandExecuting ||
+                        type == EFCommandExecuting ||
+                        type == EFCommandFailed
+                    => (span) => span.Description != null && span.Operation == "db.query",
+                _ => throw new NotSupportedException()
+            };
 
         private class ThrowToStringClass
         {
