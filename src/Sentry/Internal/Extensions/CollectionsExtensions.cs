@@ -10,7 +10,7 @@ namespace Sentry.Internal.Extensions
             this ConcurrentDictionary<string, object> dictionary,
             string key)
             where TValue : class, new()
-            => (TValue) dictionary.GetOrAdd(key, _ => new TValue());
+            => (TValue)dictionary.GetOrAdd(key, _ => new TValue());
 
         public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
             where TKey : notnull

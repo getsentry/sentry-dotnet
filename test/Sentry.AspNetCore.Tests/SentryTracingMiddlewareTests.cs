@@ -153,7 +153,7 @@ namespace Sentry.AspNetCore.Tests
             // Act
             using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
             {
-                Headers = {{"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"}}
+                Headers = { { "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0" } }
             };
 
             await client.SendAsync(request);
@@ -211,7 +211,7 @@ namespace Sentry.AspNetCore.Tests
             // Act
             using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
             {
-                Headers = {{"foo", "bar"}}
+                Headers = { { "foo", "bar" } }
             };
 
             await client.SendAsync(request);
@@ -282,7 +282,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub( new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampler = ctx =>

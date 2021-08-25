@@ -35,7 +35,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public override string ToString() => IsSampled is {} isSampled
+        public override string ToString() => IsSampled is { } isSampled
             ? $"{TraceId}-{SpanId}-{(isSampled ? 1 : 0)}"
             : $"{TraceId}-{SpanId}";
 

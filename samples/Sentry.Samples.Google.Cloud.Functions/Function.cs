@@ -1,8 +1,8 @@
-﻿using System;
-using Google.Cloud.Functions.Framework;
-using Microsoft.AspNetCore.Http;
+using System;
 using System.Threading.Tasks;
+using Google.Cloud.Functions.Framework;
 using Google.Cloud.Functions.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 [assembly: FunctionsStartup(typeof(SentryStartup))]

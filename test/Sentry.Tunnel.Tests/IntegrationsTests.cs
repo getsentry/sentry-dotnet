@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -58,7 +58,7 @@ namespace Sentry.Tunnel.Tests
 {""type"":""session""}
 {""sid"":""fda00e933162466c849962eaea0cfaff""}");
             var responseMessage = await _server.CreateClient().SendAsync(requestMessage);
-            
+
             Assert.Equal(0, _httpMessageHander.NumberOfCalls);
         }
 
@@ -72,7 +72,7 @@ namespace Sentry.Tunnel.Tests
 {""type"":""session""}
 {""sid"":""fda00e933162466c849962eaea0cfaff""}");
                 var responseMessage = await _server.CreateClient().SendAsync(requestMessage);
-                
+
                 Assert.Equal(0, _httpMessageHander.NumberOfCalls);
             }
         }
@@ -87,7 +87,7 @@ namespace Sentry.Tunnel.Tests
 {""type"":""session""}
 {""sid"":""fda00e933162466c849962eaea0cfaff""}");
                 var responseMessage = await _server.CreateClient().SendAsync(requestMessage);
-                
+
                 Assert.Equal(1, _httpMessageHander.NumberOfCalls);
             }
         }

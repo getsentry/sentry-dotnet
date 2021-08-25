@@ -57,7 +57,7 @@ namespace Sentry.Extensions.Logging
                         sdk.Name = Constants.SdkName;
                         sdk.Version = NameAndVersion.Version;
 
-                        if (NameAndVersion.Version is {} version)
+                        if (NameAndVersion.Version is { } version)
                         {
                             sdk.AddPackage(ProtocolPackageName, version);
                         }
