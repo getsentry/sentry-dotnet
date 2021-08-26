@@ -10,7 +10,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Internals
         [Fact]
         public void DisableDiagnosticListnerIntegration_RemovesDiagnosticSourceIntegration()
         {
-            Sut.DisableDiagnosticListenerIntegration();
+            Sut.DisableDiagnosticSourceIntegration();
             Assert.DoesNotContain(Sut.Integrations!,
                 p => p.GetType() == typeof(SentryDiagnosticListenerIntegration));
         }

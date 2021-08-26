@@ -10,20 +10,30 @@ _Bad software is everywhere, and we're tired of it. Sentry is on a mission to he
 
 Sentry Diagnostic Source Adds additional logging capabilities to the main SDK, such as, transactions with richer contexts, including database measurements, by integrating Entity Framework Core and SQLClient.
 
-This package will automatically enable and set it up if your application runs on .NET Core 3.0 or greater. It'll also be enabled by default if you are using Sentry's ASP.NET and ASP.NET Core SDK.
+### When shouldn't I include this package
 
-In case of your application doesn't use any of the ASP.NET SDKs and relies on a .NET version older than .NET Core 3, you'll be able to use this integration by including its nuget package in your project and enabling it during Sentry's initialization.
+You will not need to include this package into your project if your project matches one of the following criteria:
+
+* Your project Targets .NET Core 3 or greater.
+* Your project includes the nuget [Sentry.AspNetCore](https://www.nuget.org/packages/Sentry.AspNetCore) version 3.9.0 or greater.
+* Your project includes the nuget [Sentry.AspNet](https://www.nuget.org/packages/Sentry.AspNet) version 3.9.0 or greater.
+
+### Using Sentry Diagnostric source
+
+To enable it, you'll need to call `AddDiagnosticSourceIntegration` During the SDK initialization:
 
 ```csharp
 using Sentry;
 
 SentrySdk.Init( option => {
     option.Dsn = "YOUR_DSN";
-    option.AddDiagnosticListeners(); //Enables the diagnostic source integration.
+    option.AddDiagnosticSourceIntegration(); //Enables the diagnostic source integration.
 });
 
 ```
-NOTE: This setup is not required if your project targets .NET 5 or Greater and if your project includes Sentry.ASP.NET or Sentry.ASP.NET.Core Nuget.
+NOTE: This setup is not required if your project targets .NET Core 3 or Greater (such as .NET 5 or higher) and if your project includes `Sentry.AspNet` or `Sentry.AspNetCore` NuGet.
+
+After initializing the SDK, it will subscribe to the currently implemented integrations and start creating spans once metrified events starts to get invoked.
 
 ## Disabling
 
@@ -36,15 +46,6 @@ SentrySdk.Init( option => {
     option.DisableDiagnosticListenerIntegration();
 });
 ```
-
-### When shouldn't I include this package
-
-You will not need to include this package into your project if your project matches one of the following criteria:
-
-* Your project Targets .NET Core 3 or greater.
-* Your project includes the nuget [Sentry.AspNetCore](https://www.nuget.org/packages/Sentry.AspNetCore) version 3.9.0 or greater.
-* Your project includes the nuget [Sentry.AspNet](https://www.nuget.org/packages/Sentry.AspNet) version 3.9.0 or greater.
-
 
 ### Screenshots
 
