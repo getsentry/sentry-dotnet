@@ -10,9 +10,9 @@ _Bad software is everywhere, and we're tired of it. Sentry is on a mission to he
 
 Sentry Diagnostic Source Adds additional logging capabilities to the main SDK, such as, transactions with richer contexts, including database measurements, by integrating Entity Framework Core and SQLClient.
 
-This package will automatically enable and set it up if your application runs on .NET 5 or greater. It'll also be enabled by default if you are using Sentry's ASP.NET and ASP.NET Core SDK.
+This package will automatically enable and set it up if your application runs on .NET Core 3.0 or greater. It'll also be enabled by default if you are using Sentry's ASP.NET and ASP.NET Core SDK.
 
-In case of your application doesn't use any of the ASP.NET SDKs and relies on a .NET version older than .NET 5, you'll be able to use this integration by including its nuget package in your project and enabling it during Sentry's initialization.
+In case of your application doesn't use any of the ASP.NET SDKs and relies on a .NET version older than .NET Core 3, you'll be able to use this integration by including its nuget package in your project and enabling it during Sentry's initialization.
 
 ```csharp
 using Sentry;
@@ -41,9 +41,9 @@ SentrySdk.Init( option => {
 
 You will not need to include this package into your project if your project matches one of the following criteria:
 
-* Your project Targets .NET 5 or greater.
-* Your project includes the nuget [Sentry.AspNetCore](https://www.nuget.org/packages/Sentry.AspNetCore) version 3.8.4 or greater.
-* Your project includes the nuget [Sentry.AspNet](https://www.nuget.org/packages/Sentry.AspNet) version 3.8.4 or greater.
+* Your project Targets .NET Core 3 or greater.
+* Your project includes the nuget [Sentry.AspNetCore](https://www.nuget.org/packages/Sentry.AspNetCore) version 3.9.0 or greater.
+* Your project includes the nuget [Sentry.AspNet](https://www.nuget.org/packages/Sentry.AspNet) version 3.9.0 or greater.
 
 
 ### Screenshots

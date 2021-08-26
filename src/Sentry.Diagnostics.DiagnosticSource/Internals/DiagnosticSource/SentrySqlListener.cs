@@ -161,7 +161,7 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 if (statistics["SelectRows"] is long selectRows)
                 {
-                    span.SetExtra("rows_send", selectRows);
+                    span.SetExtra("rows_sent", selectRows);
                 }
                 if (statistics["BytesReceived"] is long bytesReceived)
                 {
@@ -169,7 +169,7 @@ namespace Sentry.Internals.DiagnosticSource
                 }
                 if (statistics["BytesSent"] is long bytesSent)
                 {
-                    span.SetExtra("bytes_send ", bytesSent);
+                    span.SetExtra("bytes_sent ", bytesSent);
                 }
             }
         }
