@@ -35,18 +35,6 @@ NOTE: This setup is not required if your project targets .NET Core 3 or Greater 
 
 After initializing the SDK, it will subscribe to the currently implemented integrations and start creating spans once metrified events starts to get invoked.
 
-## Disabling
-
-You can easily disable it during the Sentry's Initialization by calling the SentryOption's extension  DisableDiagnosticListenerIntegration:
-```csharp
-using Sentry;
-
-SentrySdk.Init( option => {
-    option.Dsn = "YOUR_DSN";
-    option.DisableDiagnosticListenerIntegration();
-});
-```
-
 ### Screenshots
 
 ![Transaction with database events that came from the Diagnostic Source integration](.assets/transaction_with_ds_integration.png)
