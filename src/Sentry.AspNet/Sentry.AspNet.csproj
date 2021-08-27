@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
-    <ProjectReference Include="..\Sentry.Diagnostics.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
+    <ProjectReference Include="..\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
   </ItemGroup>
 
 </Project>

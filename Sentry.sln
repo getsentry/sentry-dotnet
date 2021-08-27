@@ -135,9 +135,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tunnel", "src\Sentry
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tunnel.Tests", "test\Sentry.Tunnel.Tests\Sentry.Tunnel.Tests.csproj", "{BB54EF08-2FA1-498B-827B-32D905FB0F9F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource", "src\Sentry.Diagnostics.DiagnosticSource\Sentry.DiagnosticSource.csproj", "{0BE821AB-88D4-4EB5-B012-C964FF58087A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource", "src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj", "{0BE821AB-88D4-4EB5-B012-C964FF58087A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.Tests", "test\Sentry.Diagnostics.DiagnosticSource.Tests\Sentry.DiagnosticSource.Tests.csproj", "{D870B028-16ED-4551-8B0F-5529479D04C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.Tests", "test\Sentry.DiagnosticSource.Tests\Sentry.DiagnosticSource.Tests.csproj", "{D870B028-16ED-4551-8B0F-5529479D04C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
