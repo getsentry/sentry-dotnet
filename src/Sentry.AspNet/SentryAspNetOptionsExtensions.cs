@@ -29,7 +29,7 @@ namespace Sentry.AspNet
             options.DiagnosticLogger ??= new TraceDiagnosticLogger(options.DiagnosticLevel);
             options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
             options.AddEventProcessor(eventProcessor);
-            options.AddDiagnosticListeners();
+            options.AddDiagnosticSourceIntegration();
         }
     }
 }

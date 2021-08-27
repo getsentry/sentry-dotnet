@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or $(TargetFramework.StartsWith('netstandard2')) or $(TargetFramework.StartsWith('net4'))">
-    <ProjectReference Include="../../src/Sentry.Diagnostics.DiagnosticSource/Sentry.Diagnostics.DiagnosticSource.csproj" />
+    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">

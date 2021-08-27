@@ -45,10 +45,10 @@ namespace Sentry
 
 #if HAS_DIAGNOSTIC_INTEGRATION
         /// <summary>
-        /// Disables the integrations with Diagnostic listener.
+        /// Disables the integrations with Diagnostic source.
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
-        public static void DisableDiagnosticListenerIntegration(this SentryOptions options)
+        public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
             => options.Integrations =
                 options.Integrations?.Where(p => p.GetType() != typeof(SentryDiagnosticListenerIntegration)).ToArray();
 #endif
