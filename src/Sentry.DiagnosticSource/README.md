@@ -31,7 +31,7 @@ SentrySdk.Init( option => {
 });
 
 ```
-NOTE: This setup is not required if your project targets .NET Core 3 or Greater (such as .NET 5 or higher) and if your project includes `Sentry.AspNet` or `Sentry.AspNetCore` NuGet.
+NOTE: This setup is not required if your project targets .NET Core 3 or Greater (such as .NET 5 or higher) or if your project includes `Sentry.AspNet` or `Sentry.AspNetCore` NuGet.
 
 After initializing the SDK, it will subscribe to the currently implemented integrations and start creating spans once metrified events starts to get invoked.
 
