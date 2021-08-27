@@ -6,7 +6,7 @@
 
 _Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us [<kbd>**Check out our open positions**</kbd>](https://sentry.io/careers/)_
 
-### About Sentry Diagnostic source
+### About Sentry DiagnosticSource
 
 Sentry Diagnostic Source Adds additional logging capabilities to the main SDK, such as, transactions with richer contexts, including database measurements, by integrating Entity Framework Core and SQLClient.
 
@@ -18,7 +18,7 @@ You will not need to include this package into your project if your project matc
 * Your project includes the nuget [Sentry.AspNetCore](https://www.nuget.org/packages/Sentry.AspNetCore) version 3.9.0 or greater.
 * Your project includes the nuget [Sentry.AspNet](https://www.nuget.org/packages/Sentry.AspNet) version 3.9.0 or greater.
 
-### Using Sentry Diagnostric source
+### Using Sentry DiagnosticSource
 
 To enable it, you'll need to call `AddDiagnosticSourceIntegration` During the SDK initialization:
 
