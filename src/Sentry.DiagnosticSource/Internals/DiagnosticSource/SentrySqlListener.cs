@@ -64,7 +64,7 @@ namespace Sentry.Internals.DiagnosticSource
                     else if (type == SentrySqlSpanType.Execution && connectionId != null)
                     {
                         var span = TryStartChild(
-                            TryGetConnectionSpan(scope, connectionId.Value) ?? scope.Transaction,
+                            TryGetConnectionSpan(scope, connectionId.Value) ?? transaction,
                             operation,
                             description);
                         span?.SetExtra(OperationExtraKey, operationId);
