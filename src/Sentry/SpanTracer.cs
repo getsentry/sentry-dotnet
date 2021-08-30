@@ -16,7 +16,7 @@ namespace Sentry
         public SpanId SpanId { get; }
 
         /// <inheritdoc />
-        public SpanId? ParentSpanId { get; }
+        public SpanId? ParentSpanId { get; internal set; }
 
         /// <inheritdoc />
         public SentryId TraceId { get; }
