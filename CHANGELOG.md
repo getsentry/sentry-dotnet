@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix SQLClient unplanned behaviors ([#1179](https://github.com/getsentry/sentry-dotnet/pull/1179))
+
 ## 3.9.0
 
 ### Features
