@@ -121,9 +121,17 @@ namespace Sentry.Internals.DiagnosticSource
         {
             _hub.ConfigureScope(scope =>
             {
-                if (TryGetConnectionSpan(scope, connectionId) is null)
+                // We may have multiple Spans with different Operations for the same connection.
+                // So lets set the connection Id only if there are no connection spans with the same connectionId.
+                var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection");
+                if (connectionSpans?.Any(span =>
+                        TryGetKey(span.Extra, ConnectionExtraKey) is Guid id &&
+                        id == connectionId)
+                    is false)
                 {
-                    var span = scope.Transaction?.Spans.FirstOrDefault(span => TryGetKey(span.Extra, OperationExtraKey) is Guid id && id == operationId);
+                    var span = connectionSpans.FirstOrDefault(span =>
+                        TryGetKey(span.Extra, OperationExtraKey) is Guid id &&
+                        id == operationId);
                     span?.SetExtra(ConnectionExtraKey, connectionId);
                 }
             });
@@ -174,6 +182,8 @@ namespace Sentry.Internals.DiagnosticSource
                 else if ((value.Key is SqlMicrosoftWriteTransactionCommitAfter || value.Key is SqlDataWriteTransactionCommitAfter) &&
                     GetSpan(SentrySqlSpanType.Connection, null, value.GetSubProperty<Guid>("Connection", "ClientConnectionId")) is { } connectionSpan2)
                 {
+                    // If some query makes changes to the Database data, CloseAfterCommand event will not be invoked,
+                    // instead, TransactionCommitAfter is invoked.
                     connectionSpan2.Finish(SpanStatus.Ok);
                 }
             }
