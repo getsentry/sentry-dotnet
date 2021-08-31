@@ -112,8 +112,7 @@ namespace Sentry
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Transaction dropped due to empty id."
-                );
+                    "Transaction dropped due to empty id.");
 
                 return;
             }
@@ -122,8 +121,7 @@ namespace Sentry
                 string.IsNullOrWhiteSpace(transaction.Operation))
             {
                 _options.DiagnosticLogger?.LogWarning(
-                    "Transaction discarded due to one or more required fields missing."
-                );
+                    "Transaction discarded due to one or more required fields missing.");
 
                 return;
             }
@@ -136,21 +134,18 @@ namespace Sentry
                 _options.DiagnosticLogger?.LogWarning(
                     "Capturing a transaction which has not been finished. " +
                     "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
-                    "to properly finalize the transaction and send it to Sentry."
-                );
+                    "to properly finalize the transaction and send it to Sentry.");
             }
 
             // Sampling decision MUST have been made at this point
             Debug.Assert(
                 transaction.IsSampled != null,
-                "Attempt to capture transaction without sampling decision."
-            );
+                "Attempt to capture transaction without sampling decision.");
 
             if (transaction.IsSampled != true)
             {
                 _options.DiagnosticLogger?.LogDebug(
-                    "Transaction dropped by sampling."
-                );
+                    "Transaction dropped by sampling.");
 
                 return;
             }
@@ -267,14 +262,13 @@ namespace Sentry
         {
             if (Worker.EnqueueEnvelope(envelope))
             {
-                _options.DiagnosticLogger?.LogDebug("Envelope queued up.");
+                _options.DiagnosticLogger?.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId());
                 return true;
             }
 
             _options.DiagnosticLogger?.LogWarning(
                 "The attempt to queue the event failed. Items in queue: {0}",
-                Worker.QueuedItems
-            );
+                Worker.QueuedItems);
 
             return false;
         }
@@ -298,7 +292,7 @@ namespace Sentry
                 {
                     {"message", e.Message}
                 };
-                if(e.StackTrace is not null)
+                if (e.StackTrace is not null)
                 {
                     data.Add("stackTrace", e.StackTrace);
                 }

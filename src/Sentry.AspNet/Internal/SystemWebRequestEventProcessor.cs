@@ -123,8 +123,7 @@ namespace Sentry.AspNet.Internal
             {
                 @event.Sdk.AddPackage(
                     $"nuget:{SdkVersion.Name}",
-                    SdkVersion.Version
-                );
+                    SdkVersion.Version);
             }
 
             return @event;

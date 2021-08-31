@@ -1,10 +1,12 @@
 # Changelog
 
-## Unreleased
+## 3.9.0
 
 ### Features
 
 - Server-side release health ([#1162](https://github.com/getsentry/sentry-dotnet/pull/1162))```
+- EF Core and SQLClient performance monitoring integration ([#1154](https://github.com/getsentry/sentry-dotnet/pull/1154))
+- Improved SDK diagnostic logs ([#1161](https://github.com/getsentry/sentry-dotnet/pull/1161))
 - Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
 
 ### Fixes

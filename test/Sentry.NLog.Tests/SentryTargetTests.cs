@@ -354,7 +354,7 @@ namespace Sentry.NLog.Tests
         public void Log_AdditionalGroupingKeyProperty_OverrideDefaultFingerprint()
         {
             var expectedGroupingKey = "someGroupingKey";
-            var expectedFingerprint = new []
+            var expectedFingerprint = new[]
             {
                 "{{ default }}",
                 expectedGroupingKey

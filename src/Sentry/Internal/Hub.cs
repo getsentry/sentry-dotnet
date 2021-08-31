@@ -51,8 +51,7 @@ namespace Sentry.Internal
             ScopeManager = scopeManager ?? new SentryScopeManager(
                 options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
                 options,
-                _ownedClient
-            );
+                _ownedClient);
 
             _sessionManager = sessionManager ?? GetSessionManager(options, _clock);
 
@@ -132,8 +131,7 @@ namespace Sentry.Internal
             {
                 var samplingContext = new TransactionSamplingContext(
                     context,
-                    customSamplingContext
-                );
+                    customSamplingContext);
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
@@ -181,8 +179,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to start a session.",
-                    ex
-                );
+                    ex);
             }
         }
 
@@ -196,8 +193,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to pause a session.",
-                    ex
-                );
+                    ex);
             }
         }
 
@@ -211,8 +207,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to resume a session.",
-                    ex
-                );
+                    ex);
             }
         }
 
@@ -226,8 +221,7 @@ namespace Sentry.Internal
             {
                 _options.DiagnosticLogger?.LogError(
                     "Failed to end a session.",
-                    ex
-                );
+                    ex);
             }
         }
 
@@ -241,7 +235,7 @@ namespace Sentry.Internal
             }
 
             // Otherwise just get the currently active span on the scope (unless it's sampled out)
-            if (scope.GetSpan() is {IsSampled: not false} span)
+            if (scope.GetSpan() is { IsSampled: not false } span)
             {
                 return span;
             }
@@ -262,7 +256,9 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                     evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
-                } else if (evt.IsErrored() && scope?.LastCreatedSpan() is { } lastSpan && lastSpan?.IsFinished == false) {
+                }
+                else if (evt.IsErrored() && scope?.LastCreatedSpan() is { } lastSpan && lastSpan?.IsFinished == false)
+                {
                     // Can still be reset by the owner but lets consider it finished and errored for now.
                     lastSpan.Finish(SpanStatus.InternalError);
                 }

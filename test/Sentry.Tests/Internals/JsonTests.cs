@@ -76,7 +76,7 @@ namespace Sentry.Tests.Internals
         {
             //Assert
             var expectedMessage = "T est";
-            var expectedData = new KeyValuePair<string,string>("a", "b" );
+            var expectedData = new KeyValuePair<string, string>("a", "b");
             var ex = _fixture.GenerateException(expectedMessage);
             ex.Data.Add(expectedData.Key, expectedData.Value);
             var expectedStackTrace = _fixture.ToJsonString(ex.StackTrace);
@@ -186,8 +186,7 @@ namespace Sentry.Tests.Internals
             "tz_id",
                 TimeSpan.FromHours(2),
                 "my timezone",
-                "my timezone"
-            );
+                "my timezone");
             var expectedSerializedData = new[]
             {
                 "\"Id\":1,\"Data\":\"1234\"",

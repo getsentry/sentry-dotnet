@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Web;
 using FluentAssertions;
 using NSubstitute;
@@ -17,8 +17,7 @@ namespace Sentry.AspNet.Tests
                 {
                     RequestType = "GET"
                 },
-                new HttpResponse(TextWriter.Null)
-            );
+                new HttpResponse(TextWriter.Null));
 
             // Act
             var transaction = context.StartSentryTransaction();
@@ -33,7 +32,7 @@ namespace Sentry.AspNet.Tests
         {
             // Arrange
             using var _ = SentrySdk.UseHub(new Sentry.Internal.Hub(
-                new SentryOptions {Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"},
+                new SentryOptions { Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647" },
                 Substitute.For<ISentryClient>()
             ));
 
@@ -42,8 +41,7 @@ namespace Sentry.AspNet.Tests
                 {
                     RequestType = "GET"
                 },
-                new HttpResponse(TextWriter.Null)
-            );
+                new HttpResponse(TextWriter.Null));
 
             // Act
             var transaction = context.StartSentryTransaction();
@@ -58,7 +56,7 @@ namespace Sentry.AspNet.Tests
         {
             // Arrange
             using var _ = SentrySdk.UseHub(new Sentry.Internal.Hub(
-                new SentryOptions {Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"},
+                new SentryOptions { Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647" },
                 Substitute.For<ISentryClient>()
             ));
 
@@ -70,8 +68,7 @@ namespace Sentry.AspNet.Tests
                 new HttpResponse(TextWriter.Null)
                 {
                     StatusCode = 404
-                }
-            );
+                });
 
             // Act
             var transaction = context.StartSentryTransaction();

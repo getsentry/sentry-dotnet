@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
@@ -17,26 +17,24 @@ namespace Sentry.Tests.Internals.ScopeStack
 
             var scope1 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             var scope2 = new KeyValuePair<Scope, ISentryClient>(
                 Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>()
-            );
+                Substitute.For<ISentryClient>());
 
             // Act & assert
             await Task.Run(async () =>
             {
                 container.Stack.Should().BeNull();
 
-                container.Stack = new[] {scope1, scope2};
+                container.Stack = new[] { scope1, scope2 };
                 await Task.Yield();
 
-                container.Stack.Should().BeEquivalentTo(new[] {scope1, scope2});
+                container.Stack.Should().BeEquivalentTo(new[] { scope1, scope2 });
             });
 
-            container.Stack.Should().BeEquivalentTo(new[] {scope1, scope2});
+            container.Stack.Should().BeEquivalentTo(new[] { scope1, scope2 });
         }
     }
 }

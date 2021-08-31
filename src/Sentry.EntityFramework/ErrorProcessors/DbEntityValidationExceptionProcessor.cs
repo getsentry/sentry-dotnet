@@ -18,7 +18,7 @@ namespace Sentry.EntityFramework.ErrorProcessors
         protected override void ProcessException(DbEntityValidationException exception, SentryEvent sentryEvent)
         {
             var errorList = new Dictionary<string, List<string>>();
-            foreach (var error in exception.EntityValidationErrors.SelectMany(x=>x.ValidationErrors))
+            foreach (var error in exception.EntityValidationErrors.SelectMany(x => x.ValidationErrors))
             {
                 if (errorList.TryGetValue(error.PropertyName, out var list))
                 {

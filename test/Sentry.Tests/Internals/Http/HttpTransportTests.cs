@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
+using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
@@ -32,13 +33,11 @@ namespace Sentry.Tests.Internals.Http
                 .Returns(_ => SentryResponses.GetOkResponse());
 
             var httpTransport = new HttpTransport(
-                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient(httpHandler)
-            );
+                new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+                new HttpClient(httpHandler));
 
             var envelope = Envelope.FromEvent(
-                new SentryEvent(eventId: SentryResponses.ResponseId)
-            );
+                new SentryEvent(eventId: SentryResponses.ResponseId));
 
 #if NET5_0
             await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
@@ -59,7 +58,7 @@ namespace Sentry.Tests.Internals.Http
             // Arrange
             const HttpStatusCode expectedCode = HttpStatusCode.BadGateway;
             const string expectedMessage = "Bad Gateway!";
-            var expectedCauses = new[] {"invalid file", "wrong arguments"};
+            var expectedCauses = new[] { "invalid file", "wrong arguments" };
             var expectedCausesFormatted = string.Join(", ", expectedCauses);
 
             var httpHandler = Substitute.For<MockableHttpMessageHandler>();
@@ -76,8 +75,7 @@ namespace Sentry.Tests.Internals.Http
                     Debug = true,
                     DiagnosticLogger = logger
                 },
-                new HttpClient(httpHandler)
-            );
+                new HttpClient(httpHandler));
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -219,8 +217,7 @@ namespace Sentry.Tests.Internals.Http
                     Debug = true,
                     DiagnosticLogger = logger
                 },
-                new HttpClient(httpHandler)
-            );
+                new HttpClient(httpHandler));
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -258,8 +255,7 @@ namespace Sentry.Tests.Internals.Http
                     Debug = true,
                     DiagnosticLogger = logger
                 },
-                new HttpClient(httpHandler)
-            );
+                new HttpClient(httpHandler));
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -285,16 +281,14 @@ namespace Sentry.Tests.Internals.Http
             using var httpHandler = new RecordingHttpMessageHandler(
                 new FakeHttpMessageHandler(
                     () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
-                )
-            );
+                ));
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
                 {
                     Dsn = DsnSamples.ValidDsnWithSecret
                 },
-                new HttpClient(httpHandler)
-            );
+                new HttpClient(httpHandler));
 
             // First request always goes through
             await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -318,8 +312,7 @@ namespace Sentry.Tests.Internals.Http
                     new EnvelopeItem(
                         new Dictionary<string, object> {["type"] = "other"},
                         new EmptySerializable())
-                }
-            );
+                });
 
             var expectedEnvelope = new Envelope(
                 new Dictionary<string, object>(),
@@ -328,8 +321,7 @@ namespace Sentry.Tests.Internals.Http
                     new EnvelopeItem(
                         new Dictionary<string, object> {["type"] = "other"},
                         new EmptySerializable())
-                }
-            );
+                });
 
             var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync();
 
@@ -348,8 +340,7 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             using var httpHandler = new RecordingHttpMessageHandler(
-                new FakeHttpMessageHandler()
-            );
+                new FakeHttpMessageHandler());
 
             var logger = new InMemoryDiagnosticLogger();
 
@@ -361,27 +352,23 @@ namespace Sentry.Tests.Internals.Http
                     DiagnosticLogger = logger,
                     Debug = true
                 },
-                new HttpClient(httpHandler)
-            );
+                new HttpClient(httpHandler));
 
             var attachmentNormal = new Attachment(
                 AttachmentType.Default,
-                new StreamAttachmentContent(new MemoryStream(new byte[] {1})),
+                new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
                 "test1.txt",
-                null
-            );
+                null);
 
             var attachmentTooBig = new Attachment(
                 AttachmentType.Default,
-                new StreamAttachmentContent(new MemoryStream(new byte[] {1, 2, 3, 4, 5})),
+                new StreamAttachmentContent(new MemoryStream(new byte[] { 1, 2, 3, 4, 5 })),
                 "test2.txt",
-                null
-            );
+                null);
 
             using var envelope = Envelope.FromEvent(
                 new SentryEvent(),
-                new[] {attachmentNormal, attachmentTooBig}
-            );
+                new[] { attachmentNormal, attachmentTooBig });
 
             // Act
             await httpTransport.SendEnvelopeAsync(envelope);
@@ -395,8 +382,7 @@ namespace Sentry.Tests.Internals.Http
             logger.Entries.Should().Contain(e =>
                 e.Message == "Attachment '{0}' dropped because it's too large ({1} bytes)." &&
                 e.Args[0].ToString() == "test2.txt" &&
-                e.Args[1].ToString() == "5"
-            );
+                e.Args[1].ToString() == "5");
 
             actualEnvelopeSerialized.Should().NotContain("test2.txt");
         }
@@ -408,16 +394,14 @@ namespace Sentry.Tests.Internals.Http
             using var httpHandler = new RecordingHttpMessageHandler(
                 new FakeHttpMessageHandler(
                     () => SentryResponses.GetRateLimitResponse("1:session")
-                )
-            );
+                ));
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
                 {
                     Dsn = DsnSamples.ValidDsnWithSecret
                 },
-                new HttpClient(httpHandler)
-            );
+                new HttpClient(httpHandler));
 
             var session = new Session("foo", "bar", "baz");
 
@@ -452,16 +436,14 @@ namespace Sentry.Tests.Internals.Http
             using var httpHandler = new RecordingHttpMessageHandler(
                 new FakeHttpMessageHandler(
                     () => SentryResponses.GetRateLimitResponse("1:session")
-                )
-            );
+                ));
 
             var httpTransport = new HttpTransport(
                 new SentryOptions
                 {
                     Dsn = DsnSamples.ValidDsnWithSecret
                 },
-                new HttpClient(httpHandler)
-            );
+                new HttpClient(httpHandler));
 
             var session = new Session("foo", "bar", "baz");
 
@@ -495,9 +477,8 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             var httpTransport = new HttpTransport(
-                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient()
-            );
+                new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+                new HttpClient());
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -514,9 +495,8 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             var httpTransport = new HttpTransport(
-                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient()
-            );
+                new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+                new HttpClient());
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -532,9 +512,8 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             var httpTransport = new HttpTransport(
-                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient()
-            );
+                new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+                new HttpClient());
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -552,9 +531,8 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             var httpTransport = new HttpTransport(
-                new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret},
-                new HttpClient()
-            );
+                new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+                new HttpClient());
 
             var envelope = Envelope.FromEvent(new SentryEvent());
 

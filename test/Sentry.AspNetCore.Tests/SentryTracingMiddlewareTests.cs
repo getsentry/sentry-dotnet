@@ -54,8 +54,7 @@ namespace Sentry.AspNetCore.Tests
                             await ctx.Response.WriteAsync($"Person #{id}");
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -65,8 +64,7 @@ namespace Sentry.AspNetCore.Tests
 
             // Assert
             sentryClient.Received(2).CaptureTransaction(
-                Arg.Is<Transaction>(transaction => transaction.Name == "GET /person/{id}")
-            );
+                Arg.Is<Transaction>(transaction => transaction.Name == "GET /person/{id}"));
         }
 
         [Fact]
@@ -105,8 +103,7 @@ namespace Sentry.AspNetCore.Tests
                             return Task.CompletedTask;
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -149,15 +146,14 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => Task.CompletedTask);
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
             // Act
             using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
             {
-                Headers = {{"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"}}
+                Headers = { { "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0" } }
             };
 
             await client.SendAsync(request);
@@ -208,15 +204,14 @@ namespace Sentry.AspNetCore.Tests
                             return Task.CompletedTask;
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
             // Act
             using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
             {
-                Headers = {{"foo", "bar"}}
+                Headers = { { "foo", "bar" } }
             };
 
             await client.SendAsync(request);
@@ -265,8 +260,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => Task.CompletedTask);
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -288,7 +282,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub( new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampler = ctx =>
@@ -329,8 +323,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => throw exception);
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 

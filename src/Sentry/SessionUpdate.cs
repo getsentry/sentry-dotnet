@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -192,8 +192,7 @@ namespace Sentry
                 isInitial,
                 timestamp,
                 sequenceNumber,
-                endStatus
-            );
+                endStatus);
         }
     }
 }

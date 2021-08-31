@@ -1,4 +1,4 @@
-﻿using Sentry.Protocol;
+using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -46,8 +46,7 @@ namespace Sentry.Tests.Protocol.Context
                 "\"op\":\"op123\"," +
                 "\"status\":\"aborted\"" +
                 "}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

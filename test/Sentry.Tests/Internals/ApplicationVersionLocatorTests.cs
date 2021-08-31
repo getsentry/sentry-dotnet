@@ -30,8 +30,7 @@ namespace Sentry.Tests.Internals
             // Arrange
             var asm = AssemblyCreationHelper.CreateWithInformationalVersion(
                 "app@1.0.0",
-                new AssemblyName("dynamic-assembly")
-            );
+                new AssemblyName("dynamic-assembly"));
 
             // Act
             var version = ApplicationVersionLocator.GetCurrent(asm);

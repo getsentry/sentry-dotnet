@@ -83,7 +83,7 @@ namespace Sentry.Extensibility
             {
                 StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => p as StackFrame),
                 _ => stackTrace.GetFrames()
-// error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
+                // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
 #if NETCOREAPP3_0
                                             .Where(f => f is not null)
 #endif

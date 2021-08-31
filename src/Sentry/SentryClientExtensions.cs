@@ -41,8 +41,7 @@ namespace Sentry
                     {
                         Message = message,
                         Level = level
-                    }
-                );
+                    });
         }
 
         /// <summary>
