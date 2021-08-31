@@ -11,7 +11,7 @@ using Sentry.Internal.ScopeStack;
 using Sentry.Internals.DiagnosticSource;
 using Xunit;
 
-namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
+namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 {
     public class SentryDiagnosticListenerTests
     {

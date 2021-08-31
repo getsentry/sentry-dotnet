@@ -6,7 +6,7 @@ using NSubstitute;
 using Sentry.Internals.DiagnosticSource;
 using Xunit;
 
-namespace Sentry.Diagnostics.DiagnosticSource.Tests
+namespace Sentry.DiagnosticSource.Tests
 {
     public class SentrySqlListenerTests
     {
@@ -28,6 +28,9 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
         internal const string SqlDataWriteCommandError = SentrySqlListener.SqlDataWriteCommandError;
         internal const string SqlMicrosoftWriteCommandError = SentrySqlListener.SqlMicrosoftWriteCommandError;
 
+        internal const string SqlDataWriteTransactionCommitAfter = SentrySqlListener.SqlDataWriteTransactionCommitAfter;
+        internal const string SqlMicrosoftWriteTransactionCommitAfter = SentrySqlListener.SqlMicrosoftWriteTransactionCommitAfter;
+
         private Func<ISpan, bool> GetValidator(string type)
             => type switch
             {
@@ -37,7 +40,9 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
                         type == SqlMicrosoftWriteConnectionOpenAfterCommand ||
                         type == SqlDataWriteConnectionOpenAfterCommand ||
                         type == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                        type == SqlDataWriteConnectionCloseAfterCommand
+                        type == SqlDataWriteConnectionCloseAfterCommand ||
+                        type == SqlDataWriteTransactionCommitAfter ||
+                        type == SqlMicrosoftWriteTransactionCommitAfter
                     => (span) => span.Description is null && span.Operation == "db.connection",
                 _ when
                         type == SqlDataBeforeExecuteCommand ||
@@ -121,8 +126,10 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
             Assert.True(GetValidator(key)(_fixture.Spans.First()));
         }
 
-        [Fact]
-        public void OnNext_HappyPath_IsValid()
+        [Theory]
+        [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand, SqlMicrosoftBeforeExecuteCommand, SqlMicrosoftAfterExecuteCommand)]
+        [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand, SqlDataBeforeExecuteCommand, SqlDataAfterExecuteCommand)]
+        public void OnNext_HappyPathsWithoutTransaction_IsValid(string connectionOpenKey, string connectionUpdateKey, string connectionCloseKey, string queryStartKey, string queryEndKey)
         {
             // Arrange
             var hub = _fixture.Hub;
@@ -135,25 +142,126 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
 
             // Act
             interceptor.OnNext(
-                new(SqlMicrosoftWriteConnectionOpenBeforeCommand,
+                new(connectionOpenKey,
                 new { OperationId = connectionOperationId }));
             interceptor.OnNext(
-                new(SqlMicrosoftWriteConnectionOpenAfterCommand,
+                new(connectionUpdateKey,
                 new { OperationId = connectionOperationId, ConnectionId = connectionId }));
             interceptor.OnNext(
-                new(SqlMicrosoftBeforeExecuteCommand,
+                new(queryStartKey,
                 new { OperationId = queryOperationId, ConnectionId = connectionId }));
             interceptor.OnNext(
-                new(SqlMicrosoftAfterExecuteCommand,
+                new(queryEndKey,
                 new { OperationId = queryOperationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
             interceptor.OnNext(
-                new(SqlMicrosoftWriteConnectionCloseAfterCommand,
+                new(connectionCloseKey,
                  new { OperationId = connectionOperationIdClosed, ConnectionId = connectionId }));
+            //Connection", "ClientConnectionId
+            // Assert
+            _fixture.Spans.Should().HaveCount(2);
+            var connectionSpan = _fixture.Spans.First(s => GetValidator(connectionOpenKey)(s));
+            var commandSpan = _fixture.Spans.First(s => GetValidator(queryStartKey)(s));
+
+            // Validate if all spans were finished.
+            Assert.All(_fixture.Spans, (span) =>
+            {
+                Assert.True(span.IsFinished);
+                Assert.Equal(SpanStatus.Ok, span.Status);
+            });
+            // Check connections between spans.
+            Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
+            Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+
+            Assert.Equal(query, commandSpan.Description);
+        }
+
+        [Theory]
+        [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteTransactionCommitAfter, SqlMicrosoftBeforeExecuteCommand, SqlMicrosoftAfterExecuteCommand)]
+        [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteTransactionCommitAfter, SqlDataBeforeExecuteCommand, SqlDataAfterExecuteCommand)]
+        public void OnNext_HappyPathsWithTransaction_IsValid(string connectionOpenKey, string connectionUpdateKey, string connectionCloseKey, string queryStartKey, string queryEndKey)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            var interceptor = new SentrySqlListener(hub, new SentryOptions());
+            var query = "SELECT * FROM ...";
+            var connectionId = Guid.NewGuid();
+            var connectionOperationId = Guid.NewGuid();
+            var connectionOperationIdClosed = Guid.NewGuid();
+            var queryOperationId = Guid.NewGuid();
+
+            // Act
+            interceptor.OnNext(
+                new(connectionOpenKey,
+                new { OperationId = connectionOperationId }));
+            interceptor.OnNext(
+                new(connectionUpdateKey,
+                new { OperationId = connectionOperationId, ConnectionId = connectionId }));
+            interceptor.OnNext(
+                new(queryStartKey,
+                new { OperationId = queryOperationId, ConnectionId = connectionId }));
+            interceptor.OnNext(
+                new(queryEndKey,
+                new { OperationId = queryOperationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
+            interceptor.OnNext(
+                new(connectionCloseKey,
+                 new { OperationId = connectionOperationIdClosed, Connection = new { ClientConnectionId = connectionId } }));
 
             // Assert
             _fixture.Spans.Should().HaveCount(2);
-            var connectionSpan = _fixture.Spans.First(s => GetValidator(SqlMicrosoftWriteConnectionOpenBeforeCommand)(s));
-            var commandSpan = _fixture.Spans.First(s => GetValidator(SqlMicrosoftBeforeExecuteCommand)(s));
+            var connectionSpan = _fixture.Spans.First(s => GetValidator(connectionOpenKey)(s));
+            var commandSpan = _fixture.Spans.First(s => GetValidator(queryStartKey)(s));
+
+            // Validate if all spans were finished.
+            Assert.All(_fixture.Spans, (span) =>
+            {
+                Assert.True(span.IsFinished);
+                Assert.Equal(SpanStatus.Ok, span.Status);
+            });
+            // Check connections between spans.
+            Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
+            Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+
+            Assert.Equal(query, commandSpan.Description);
+        }
+
+
+        [Theory]
+        [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand, SqlMicrosoftBeforeExecuteCommand, SqlMicrosoftAfterExecuteCommand)]
+        [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand, SqlDataBeforeExecuteCommand, SqlDataAfterExecuteCommand)]
+        public void OnNext_ExecuteQueryCalledBeforeConnectionId_ExecuteParentIsConnectionSpan(string connectionBeforeKey, string connectionUpdate, string connctionClose, string executeBeforeKey, string executeAfterKey)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            var interceptor = new SentrySqlListener(hub, new SentryOptions());
+            var query = "SELECT * FROM ...";
+            var connectionId = Guid.NewGuid();
+            var connectionOperationId = Guid.NewGuid();
+            var queryOperationId = Guid.NewGuid();
+
+            // Act
+            interceptor.OnNext(
+                new(connectionBeforeKey,
+                new { OperationId = connectionOperationId }));
+            // Connection span has no connection ID and query will temporarily have Transaction as parent.
+            interceptor.OnNext(
+                new(executeBeforeKey,
+                new { OperationId = queryOperationId, ConnectionId = connectionId }));
+            // Connection Id is set.
+            interceptor.OnNext(
+                new(connectionUpdate,
+                new { OperationId = connectionOperationId, ConnectionId = connectionId }));
+            // Query sets ParentId to ConnectionId.
+            interceptor.OnNext(
+                new(executeAfterKey,
+                new { OperationId = queryOperationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
+            interceptor.OnNext(
+                new(connctionClose,
+                 new { OperationId = connectionOperationId, ConnectionId = connectionId }));
+
+            // Assert
+            _fixture.Spans.Should().HaveCount(2);
+            var connectionSpan = _fixture.Spans.First(s => GetValidator(connectionBeforeKey)(s));
+            var commandSpan = _fixture.Spans.First(s => GetValidator(executeBeforeKey)(s));
 
             // Validate if all spans were finished.
             Assert.All(_fixture.Spans, (span) =>
