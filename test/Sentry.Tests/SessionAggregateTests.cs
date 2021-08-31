@@ -129,7 +129,7 @@ namespace Sentry.Tests
             // Act
             try
             {
-                 var aggregate = SessionAggregate.FromJson(jsonElement);
+                var aggregate = SessionAggregate.FromJson(jsonElement);
 
             }
             // Assert

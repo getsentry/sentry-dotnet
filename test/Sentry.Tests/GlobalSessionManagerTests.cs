@@ -124,7 +124,9 @@ namespace Sentry.Tests
             // Act
             var sessionUpdates = Enumerable
                 .Range(0, 15)
-                .Select(_ => { sut.StartSession();
+                .Select(_ =>
+                {
+                    sut.StartSession();
                     return sut.CurrentSession;
                 })
                 .ToArray();

@@ -38,7 +38,7 @@ namespace Sentry
             _clock = clock;
 
             // TODO: timer should be synced to run *on the minute*
-            _timer = new Timer {Interval = 60 * 1000, Enabled = true, AutoReset = true};
+            _timer = new Timer { Interval = 60 * 1000, Enabled = true, AutoReset = true };
             _timer.Elapsed += (_, _) => Flush();
         }
 
