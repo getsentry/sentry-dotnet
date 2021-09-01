@@ -18,7 +18,7 @@ namespace Sentry.DiagnosticSource.Tests
                 SentrySqlListener.SqlMicrosoftWriteConnectionOpenBeforeCommand,
             new { OperationId = operation }));
 
-        public static void OpenConnectionFinish(this SentrySqlListener listener, Guid operationId, Guid connectionId)
+        public static void OpenConnectionStarted(this SentrySqlListener listener, Guid operationId, Guid connectionId)
             => listener.OnNext(new KeyValuePair<string, object>(
                 SentrySqlListener.SqlMicrosoftWriteConnectionOpenAfterCommand,
             new { OperationId = operationId, ConnectionId = connectionId }));
@@ -318,16 +318,17 @@ namespace Sentry.DiagnosticSource.Tests
             // Arrange
             var hub = _fixture.Hub;
             var interceptor = new SentrySqlListener(hub, new SentryOptions());
-            int maxItems = 20;
+            int maxItems = 11;
             var query = "SELECT * FROM ...";
-            var connectionsId = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
-            var connectionOperationsId = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
-            var connectionOperations2Id = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
-            var queryOperationsId = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var connectionsIds = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var connectionOperationsIds = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var connectionOperations2Ids = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var queryOperationsIds = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var queryOperations2Ids = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
             var evt = new ManualResetEvent(false);
             var ready = new ManualResetEvent(false);
             int counter = 0;
-            Trace.WriteLine($"TraceId is {_fixture.Tracer.SpanId}");
+
             // Act
             var taskList = Enumerable.Range(1, maxItems).Select((_) => Task.Run(() =>
             {
@@ -336,42 +337,42 @@ namespace Sentry.DiagnosticSource.Tests
                 {
                     ready.Set();
                 }
-                // 2 repeated connections  with 2 queries where the first query will start before connection span gets the connectionId.
                 evt.WaitOne();
-                interceptor.OpenConnectionStart(connectionOperationsId[threadId]);
-                interceptor.ExecuteQueryStart(queryOperationsId[threadId], connectionsId[threadId]);
-                interceptor.OpenConnectionFinish(connectionOperationsId[threadId], connectionsId[threadId]);
-                interceptor.ExecuteQueryFinish(queryOperationsId[threadId], connectionsId[threadId], query);
-                interceptor.OpenConnectionClose(queryOperationsId[threadId], connectionsId[threadId]);
-
-                // Next Connection Span will have the same Connection ID but different OperationId.
-                interceptor.OpenConnectionStart(connectionOperations2Id[threadId]);
-                interceptor.ExecuteQueryStart(queryOperationsId[threadId], connectionsId[threadId]);
-                interceptor.OpenConnectionFinish(connectionOperations2Id[threadId], connectionsId[threadId]);
-                interceptor.ExecuteQueryFinish(queryOperationsId[threadId], connectionsId[threadId], query);
-                interceptor.OpenConnectionClose(connectionOperations2Id[threadId], connectionsId[threadId]);
+                // 2 repeated connections  with 2 queries where the first query will start before connection span gets the connectionId.
+                void SimulateDbRequest(List<Guid> connnectionOperationIds, List<Guid> queryOperationIds)
+                {
+                    interceptor.OpenConnectionStart(connnectionOperationIds[threadId]);
+                    interceptor.ExecuteQueryStart(queryOperationIds[threadId], connectionsIds[threadId]);
+                    interceptor.OpenConnectionStarted(connnectionOperationIds[threadId], connectionsIds[threadId]);
+                    interceptor.ExecuteQueryFinish(queryOperationIds[threadId], connectionsIds[threadId], query);
+                    interceptor.OpenConnectionClose(connnectionOperationIds[threadId], connectionsIds[threadId]);
+                }
+                SimulateDbRequest(connectionOperationsIds, queryOperationsIds);
+                SimulateDbRequest(connectionOperations2Ids, queryOperations2Ids);
             })).ToList();
             ready.WaitOne();
             evt.Set();
             await Task.WhenAll(taskList);
 
             // Assert
-            _fixture.Spans.Should().HaveCount(4 * maxItems);
+            // 1 connection span and 1 query span, executed twice for 11 threads.
+            _fixture.Spans.Should().HaveCount(2 * 2 * maxItems);
 
             var openSpans = _fixture.Spans.Where(span => span.IsFinished is false);
             var closedSpans = _fixture.Spans.Where(span => span.IsFinished is true);
             var connectionSpans = _fixture.Spans.Where(span => span.Operation is "db.connection");
             var closedConnectionSpans = connectionSpans.Where(span => span.IsFinished);
             var querySpans = _fixture.Spans.Where(span => span.Operation is "db.query");
+            // Open Spans should not have any Connection key.
             Assert.All(openSpans, (span) => Assert.False(span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey)));
             Assert.All(closedSpans, (span) => Assert.Equal(SpanStatus.Ok, span.Status));
             // Assert that all connectionIds will belong to a single connection Span and ParentId set to Trace.
-            Assert.All(connectionsId, (connectionId) =>
+            Assert.All(connectionsIds, (connectionId) =>
             {
                 var connectionSpan = Assert.Single(closedConnectionSpans.Where(span => (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey] == connectionId));
                 Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
             });
-            // Assert all Query spans have the correct ParentId Set
+            // Assert all Query spans have the correct ParentId Set and not the Transaction Id.
             Assert.All(querySpans, (querySpan) =>
             {
                 Assert.True(querySpan.IsFinished);
