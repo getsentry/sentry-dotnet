@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Internals.DiagnosticSource;
@@ -8,6 +10,39 @@ using Xunit;
 
 namespace Sentry.DiagnosticSource.Tests
 {
+    internal static class SentrySqlListenerExtensions
+    {
+        public static void OpenConnectionStart(this SentrySqlListener listener, Guid operation)
+            => listener.OnNext(new KeyValuePair<string, object>(
+                SentrySqlListener.SqlMicrosoftWriteConnectionOpenBeforeCommand,
+            new { OperationId = operation }));
+
+        public static void OpenConnectionFinish(this SentrySqlListener listener, Guid operationId, Guid connectionId)
+            => listener.OnNext(new KeyValuePair<string, object>(
+                SentrySqlListener.SqlMicrosoftWriteConnectionOpenAfterCommand,
+            new { OperationId = operationId, ConnectionId = connectionId }));
+
+        public static void OpenConnectionClose(this SentrySqlListener listener, Guid operationId, Guid connectionId)
+            => listener.OnNext(new KeyValuePair<string, object>(
+                SentrySqlListener.SqlMicrosoftWriteConnectionCloseAfterCommand,
+            new { OperationId = operationId, ConnectionId = connectionId }));
+
+        public static void ExecuteQueryStart(this SentrySqlListener listener, Guid operationId, Guid connectionId)
+            => listener.OnNext(new KeyValuePair<string, object>(
+                SentrySqlListener.SqlDataBeforeExecuteCommand,
+            new { OperationId = operationId, ConnectionId = connectionId }));
+
+        public static void ExecuteQueryFinish(this SentrySqlListener listener, Guid operationId, Guid connectionId, string query)
+            => listener.OnNext(new KeyValuePair<string, object>(
+                SentrySqlListener.SqlDataAfterExecuteCommand,
+            new { OperationId = operationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
+
+        public static void ExecuteQueryFinishWithError(this SentrySqlListener listener, Guid operationId, Guid connectionId, string query)
+            => listener.OnNext(new KeyValuePair<string, object>(
+                SentrySqlListener.SqlDataWriteCommandError,
+            new { OperationId = operationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
+    }
+
     public class SentrySqlListenerTests
     {
         internal const string SqlDataWriteConnectionOpenBeforeCommand = SentrySqlListener.SqlDataWriteConnectionOpenBeforeCommand;
@@ -274,6 +309,76 @@ namespace Sentry.DiagnosticSource.Tests
             Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
 
             Assert.Equal(query, commandSpan.Description);
+        }
+
+        [Fact]
+        public async Task OnNext_ParallelExecution_IsValid()
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            var interceptor = new SentrySqlListener(hub, new SentryOptions());
+            int maxItems = 20;
+            var query = "SELECT * FROM ...";
+            var connectionsId = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
+            var connectionOperationsId = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
+            var connectionOperations2Id = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
+            var queryOperationsId = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
+            var evt = new ManualResetEvent(false);
+            var ready = new ManualResetEvent(false);
+            int counter = 0;
+
+            // Act
+            var threads = Enumerable.Range(1, maxItems).Select((_) => Task.Run(() =>
+            {
+                var threadId = Interlocked.Increment(ref counter) - 1;
+                if (threadId == maxItems - 1)
+                {
+                    ready.Set();
+                }
+                // 2 repeated connections  with 2 queries where the first query will start before connection span gets the connectionId.
+                evt.WaitOne();
+                interceptor.OpenConnectionStart(connectionOperationsId[threadId]);
+                interceptor.ExecuteQueryStart(queryOperationsId[threadId], connectionsId[threadId]);
+                interceptor.OpenConnectionFinish(connectionOperationsId[threadId], connectionsId[threadId]);
+                interceptor.ExecuteQueryFinish(queryOperationsId[threadId], connectionsId[threadId], query);
+                interceptor.OpenConnectionClose(queryOperationsId[threadId], connectionsId[threadId]);
+
+                // Next Connection Span will have the same Connection ID but different OperationId.
+                interceptor.OpenConnectionStart(connectionOperations2Id[threadId]);
+                interceptor.ExecuteQueryStart(queryOperationsId[threadId], connectionsId[threadId]);
+                interceptor.OpenConnectionFinish(connectionOperations2Id[threadId], connectionsId[threadId]);
+                interceptor.ExecuteQueryFinish(queryOperationsId[threadId], connectionsId[threadId], query);
+                interceptor.OpenConnectionClose(connectionOperations2Id[threadId], connectionsId[threadId]);
+            })).ToList();
+            ready.WaitOne();
+            evt.Set();
+            await Task.WhenAll(threads);
+
+            // Assert
+            _fixture.Spans.Should().HaveCount(4 * maxItems);
+
+            var openSpans = _fixture.Spans.Where(span => span.IsFinished is false);
+            var closedSpans = _fixture.Spans.Where(span => span.IsFinished is true);
+            var connectionSpans = _fixture.Spans.Where(span => span.Operation is "db.connection");
+            var closedConnectionSpans = connectionSpans.Where(span => span.IsFinished);
+            var querySpans = _fixture.Spans.Where(span => span.Operation is "db.query");
+            Assert.All(openSpans, (span) => Assert.False(span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey)));
+            Assert.All(closedSpans, (span) => Assert.Equal(SpanStatus.Ok, span.Status));
+            // Assert that all connectionIds will belong to a single connection Span and ParentId set to Trace.
+            Assert.All(connectionsId, (connectionId) =>
+            {
+                var connectionSpan = Assert.Single(closedConnectionSpans.Where(span => (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey] == connectionId));
+                Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
+            });
+            // Assert all Query spans have the correct ParentId Set
+            Assert.All(querySpans, (querySpan) =>
+            {
+                Assert.True(querySpan.IsFinished);
+                var connectionId = (Guid)querySpan.Extra[SentrySqlListener.ConnectionExtraKey];
+                var connectionSpan = connectionSpans.Where(span => span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey) && (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey] == connectionId);
+                Assert.Single(connectionSpan);
+                Assert.Equal(connectionSpan.First().SpanId, querySpan.ParentSpanId);
+            });
         }
 
         [Fact]
