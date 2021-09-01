@@ -326,10 +326,10 @@ namespace Sentry.DiagnosticSource.Tests
             var evt = new ManualResetEvent(false);
             var ready = new ManualResetEvent(false);
             int counter = 0;
-
             // Act
-            var threads = Enumerable.Range(1, maxItems).Select((_) => Task.Run(() =>
+            var taskList = Enumerable.Range(1, maxItems).Select((_) => Task.Run(async () =>
             {
+                await Task.Delay(0);
                 var threadId = Interlocked.Increment(ref counter) - 1;
                 if (threadId == maxItems - 1)
                 {
@@ -352,7 +352,7 @@ namespace Sentry.DiagnosticSource.Tests
             })).ToList();
             ready.WaitOne();
             evt.Set();
-            await Task.WhenAll(threads);
+            await Task.WhenAll(taskList.AsParallel().Select(async task => await task));
 
             // Assert
             _fixture.Spans.Should().HaveCount(4 * maxItems);
