@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -326,10 +327,10 @@ namespace Sentry.DiagnosticSource.Tests
             var evt = new ManualResetEvent(false);
             var ready = new ManualResetEvent(false);
             int counter = 0;
+            Trace.WriteLine($"TraceId is {_fixture.Tracer.SpanId}");
             // Act
-            var taskList = Enumerable.Range(1, maxItems).Select((_) => Task.Run(async () =>
+            var taskList = Enumerable.Range(1, maxItems).Select((_) => Task.Run(() =>
             {
-                await Task.Delay(0);
                 var threadId = Interlocked.Increment(ref counter) - 1;
                 if (threadId == maxItems - 1)
                 {
@@ -352,7 +353,7 @@ namespace Sentry.DiagnosticSource.Tests
             })).ToList();
             ready.WaitOne();
             evt.Set();
-            await Task.WhenAll(taskList.AsParallel().Select(async task => await task));
+            await Task.WhenAll(taskList);
 
             // Assert
             _fixture.Spans.Should().HaveCount(4 * maxItems);
