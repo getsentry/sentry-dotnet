@@ -319,10 +319,10 @@ namespace Sentry.DiagnosticSource.Tests
             var interceptor = new SentrySqlListener(hub, new SentryOptions());
             int maxItems = 20;
             var query = "SELECT * FROM ...";
-            var connectionsId = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
-            var connectionOperationsId = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
-            var connectionOperations2Id = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
-            var queryOperationsId = Enumerable.Range(1, maxItems ).Select((_) => Guid.NewGuid()).ToList();
+            var connectionsId = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var connectionOperationsId = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var connectionOperations2Id = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var queryOperationsId = Enumerable.Range(1, maxItems).Select((_) => Guid.NewGuid()).ToList();
             var evt = new ManualResetEvent(false);
             var ready = new ManualResetEvent(false);
             int counter = 0;
