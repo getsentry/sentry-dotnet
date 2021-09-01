@@ -86,9 +86,10 @@ namespace Sentry.Internals.DiagnosticSource
                     span = querySpan;
 
                     if (span.ParentSpanId == scope.Transaction?.SpanId &&
-                        span.Extra[ConnectionExtraKey] is Guid spanConnectionId &&
+                        span.Extra.TryGetValue(ConnectionExtraKey, out var spanConnectionId) &&
+                        spanConnectionId is Guid spanConnectionGuid &&
                         span is SpanTracer executionTracer &&
-                        TryGetConnectionSpan(scope, spanConnectionId) is { } spanConnectionRef)
+                        TryGetConnectionSpan(scope, spanConnectionGuid) is { } spanConnectionRef)
                     {
                         // Connection Span exist but wasn't set as the parent of the current Span.
                         executionTracer.ParentSpanId = spanConnectionRef.SpanId;
