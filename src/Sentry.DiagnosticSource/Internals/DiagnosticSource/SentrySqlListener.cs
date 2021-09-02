@@ -154,7 +154,7 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 // We may have multiple Spans with different Operations for the same connection.
                 // So lets set the connection Id only if there are no connection spans with the same connectionId.
-                var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection");
+                var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection").ToList();
                 if (connectionSpans?.Any(span => TryGetConnectionId(span) == connectionId) is false &&
                     connectionSpans.FirstOrDefault(span => TryGetOperationId(span) == operationId) is { } span)
                 {
