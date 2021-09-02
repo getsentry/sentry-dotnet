@@ -8,10 +8,30 @@ namespace Sentry.AspNet.Internal
     {
         private const string FieldName = "__SentryScopeStack";
 
+        //Internal for testing
+        internal KeyValuePair<Scope, ISentryClient>[]? FallbackStack;
+
         public KeyValuePair<Scope, ISentryClient>[]? Stack
         {
-            get => HttpContext.Current.Items[FieldName] as KeyValuePair<Scope, ISentryClient>[];
-            set => HttpContext.Current.Items[FieldName] = value;
+            get
+            {
+                if (HttpContext.Current is { } currentContext)
+                {
+                    return currentContext.Items[FieldName] as KeyValuePair<Scope, ISentryClient>[];
+                }
+                return FallbackStack;
+            }
+            set
+            {
+                if (HttpContext.Current is { } currentContext)
+                {
+                    currentContext.Items[FieldName] = value;
+                }
+                else
+                {
+                    FallbackStack = value;
+                }
+            }
         }
     }
 }
