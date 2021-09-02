@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix SQLClient unplanned behaviors ([#1179](https://github.com/getsentry/sentry-dotnet/pull/1179))
+- Add fallback to Scope Stack from AspNet ([#1180](https://github.com/getsentry/sentry-dotnet/pull/1180))
 
 ## 3.9.0
 
