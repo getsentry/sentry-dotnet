@@ -11,7 +11,7 @@ namespace Sentry.Tests
         [InlineData("{}", "")]
         [InlineData("{OriginalFormat}", "OriginalFormat")]
         [InlineData("OriginalFormat", "OriginalFormat")]
-        public void Apply_KeyValuePairObjectWithBrackets_TagAddedWithoutBacket(string key, string expectedKey)
+        public void Apply_KeyValuePairObjectWithBraces_TagAddedWithoutBraces(string key, string expectedKey)
         {
             // Arrange
             var expectedValue = "some string";
