@@ -11,7 +11,6 @@ namespace Sentry
     /// </summary>
     public class DefaultSentryScopeStateProcessor : ISentryScopeStateProcessor
     {
-
         private char[] _trimFilter = new char[] { '{', '}' };
 
         /// <summary>
