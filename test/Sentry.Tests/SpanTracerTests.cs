@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using Xunit;
@@ -17,16 +18,27 @@ namespace Sentry.Tests
                 // Arrange
                 var hub = Substitute.For<IHub>();
                 var transaction = new SpanTracer(hub, null, null, SentryId.Empty, "");
-
+                var evt = new ManualResetEvent(false);
+                var ready = new ManualResetEvent(false);
+                int counter = 0;
                 // Act
                 var tasks = Enumerable.Range(1, 4).Select((_) => Task.Run(() =>
                 {
+                    var threadId = Interlocked.Increment(ref counter);
+
+                    if (threadId == 4)
+                    {
+                        ready.Set();
+                    }
+                    evt.WaitOne();
+
                     for (int i = 0; i < amount; i++)
                     {
-
                         transaction.SetExtra(Guid.NewGuid().ToString(), Guid.NewGuid());
                     }
-                }));
+                })).ToList();
+                ready.WaitOne();
+                evt.Set();
                 await Task.WhenAll(tasks);
 
                 // Arrange
