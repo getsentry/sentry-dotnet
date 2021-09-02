@@ -49,6 +49,34 @@ namespace Sentry.Internals.DiagnosticSource
             _options = options;
         }
 
+        private void SetConnectionId(ISpan span, Guid? connectionId)
+        {
+            span.SetExtra(ConnectionExtraKey, connectionId);
+        }
+
+        private void SetOperationId(ISpan span, Guid? operationId)
+        {
+            span.SetExtra(OperationExtraKey, operationId);
+        }
+
+        private Guid? TryGetOperationId(ISpan span)
+        {
+            if (span.Extra.TryGetValue(OperationExtraKey, out var key) && key is Guid guid)
+            {
+                return guid;
+            }
+            return null;
+        }
+
+        private Guid? TryGetConnectionId(ISpan span)
+        {
+            if (span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid)
+            {
+                return guid;
+            }
+            return null;
+        }
+
         private void AddSpan(SentrySqlSpanType type, string operation, string? description, Guid operationId, Guid? connectionId = null)
         {
             _hub.ConfigureScope(scope =>
@@ -58,8 +86,7 @@ namespace Sentry.Internals.DiagnosticSource
                     if (type == SentrySqlSpanType.Connection &&
                         transaction?.StartChild(operation, description) is { } connectionSpan)
                     {
-                        connectionSpan.SetExtra(OperationExtraKey, operationId);
-                        // ConnectionId is set afterwards.
+                        SetOperationId(connectionSpan, operationId);
                     }
                     else if (type == SentrySqlSpanType.Execution && connectionId != null)
                     {
@@ -67,8 +94,11 @@ namespace Sentry.Internals.DiagnosticSource
                             TryGetConnectionSpan(scope, connectionId.Value) ?? transaction,
                             operation,
                             description);
-                        span?.SetExtra(OperationExtraKey, operationId);
-                        span?.SetExtra(ConnectionExtraKey, connectionId);
+                        if (span is not null)
+                        {
+                            SetOperationId(span, operationId);
+                            SetConnectionId(span, connectionId);
+                        }
                     }
                 }
             });
@@ -86,7 +116,7 @@ namespace Sentry.Internals.DiagnosticSource
                     span = querySpan;
 
                     if (span.ParentSpanId == scope.Transaction?.SpanId &&
-                        span.Extra.TryGetValue(ConnectionExtraKey, out var spanConnectionId) &&
+                        TryGetConnectionId(span) is { } spanConnectionId &&
                         spanConnectionId is Guid spanConnectionGuid &&
                         span is SpanTracer executionTracer &&
                         TryGetConnectionSpan(scope, spanConnectionGuid) is { } spanConnectionRef)
@@ -113,10 +143,10 @@ namespace Sentry.Internals.DiagnosticSource
             => parent?.StartChild(operation, description);
 
         private ISpan? TryGetConnectionSpan(Scope scope, Guid connectionId)
-            => scope.Transaction?.Spans.FirstOrDefault(span => span.Operation is "db.connection" && TryGetKey(span.Extra, ConnectionExtraKey) is Guid id && id == connectionId);
+            => scope.Transaction?.Spans.FirstOrDefault(span => span.Operation is "db.connection" && TryGetConnectionId(span) == connectionId);
 
         private ISpan? TryGetQuerySpan(Scope scope, Guid operationId)
-            => scope.Transaction?.Spans.FirstOrDefault(span => TryGetKey(span.Extra, OperationExtraKey) is Guid id && id == operationId);
+            => scope.Transaction?.Spans.FirstOrDefault(span => TryGetOperationId(span) == operationId);
 
         private void UpdateConnectionSpan(Guid operationId, Guid connectionId)
         {
@@ -125,15 +155,10 @@ namespace Sentry.Internals.DiagnosticSource
                 // We may have multiple Spans with different Operations for the same connection.
                 // So lets set the connection Id only if there are no connection spans with the same connectionId.
                 var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection");
-                if (connectionSpans?.Any(span =>
-                        TryGetKey(span.Extra, ConnectionExtraKey) is Guid id &&
-                        id == connectionId)
-                    is false)
+                if (connectionSpans?.Any(span => TryGetConnectionId(span) == connectionId) is false &&
+                    connectionSpans.FirstOrDefault(span => TryGetOperationId(span) == operationId) is { } span)
                 {
-                    var span = connectionSpans.FirstOrDefault(span =>
-                        TryGetKey(span.Extra, OperationExtraKey) is Guid id &&
-                        id == operationId);
-                    span?.SetExtra(ConnectionExtraKey, connectionId);
+                    SetConnectionId(span, connectionId);
                 }
             });
         }
@@ -211,12 +236,6 @@ namespace Sentry.Internals.DiagnosticSource
                     span.SetExtra("bytes_sent ", bytesSent);
                 }
             }
-        }
-
-        private static object? TryGetKey(IReadOnlyDictionary<string, object?> dictionary, string key)
-        {
-            var found = dictionary.TryGetValue(key, out var result);
-            return found ? result : null;
         }
     }
 }

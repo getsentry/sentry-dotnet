@@ -55,14 +55,14 @@ namespace Sentry
         public void UnsetTag(string key) =>
             (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
-        private ConcurrentDictionary<string, object?>? _data;
+        private ConcurrentDictionary<string, object?> _data = new();
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => _data;
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value) =>
-            (_data ??= new ConcurrentDictionary<string, object?>())[key] = value;
+            _data[key] = value;
 
         /// <summary>
         /// Initializes an instance of <see cref="SpanTracer"/>.
