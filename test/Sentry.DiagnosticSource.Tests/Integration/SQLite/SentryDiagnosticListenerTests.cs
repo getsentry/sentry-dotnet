@@ -62,7 +62,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
         private readonly Fixture _fixture = new();
 
         [Fact]
-        public void EfCoreIntegration_RunSyncronouQueryWithIssue_TransactionWithSpans()
+        public void EfCoreIntegration_RunSynchronousQueryWithIssue_TransactionWithSpans()
         {
             // Arrange
             var hub = _fixture.Hub;
@@ -94,7 +94,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
         }
 
         [Fact]
-        public void EfCoreIntegration_RunSyncronouQuery_TransactionWithSpans()
+        public void EfCoreIntegration_RunSynchronousQuery_TransactionWithSpans()
         {
             // Arrange
             var hub = _fixture.Hub;
@@ -130,7 +130,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
                 context.Items.Add(new Item() { Name = $"Number3 {i}" });
                 commands.Add(i * 2);
             }
-            // Save before the Transaction cretion to avoid storing junk.
+            // Save before the Transaction creation to avoid storing junk.
             context.SaveChanges();
 
             var hub = _fixture.Hub;

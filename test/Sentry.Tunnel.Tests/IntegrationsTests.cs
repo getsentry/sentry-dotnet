@@ -19,7 +19,7 @@ namespace Sentry.Tunnel.Tests
     {
         private readonly TestServer _server;
         private HttpClient _httpClient;
-        private MockHttpMessageHandler _httpMessageHander;
+        private MockHttpMessageHandler _httpMessageHandler;
 
         public IntegrationsTests()
         {
@@ -27,8 +27,8 @@ namespace Sentry.Tunnel.Tests
                 .ConfigureServices(s =>
                 {
                     s.AddSentryTunneling("sentry.mywebsite.com");
-                    _httpMessageHander = new MockHttpMessageHandler("{}", HttpStatusCode.OK);
-                    _httpClient = new HttpClient(_httpMessageHander);
+                    _httpMessageHandler = new MockHttpMessageHandler("{}", HttpStatusCode.OK);
+                    _httpClient = new HttpClient(_httpMessageHandler);
                     var factory = Substitute.For<IHttpClientFactory>();
                     factory.CreateClient(Arg.Any<string>()).Returns(_httpClient);
                     s.AddSingleton<IHttpClientFactory>(factory);
@@ -47,7 +47,7 @@ namespace Sentry.Tunnel.Tests
 {""sid"":""fda00e933162466c849962eaea0cfaff""}");
             var responseMessage = await _server.CreateClient().SendAsync(requestMessage);
 
-            Assert.Equal(1, _httpMessageHander.NumberOfCalls);
+            Assert.Equal(1, _httpMessageHandler.NumberOfCalls);
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace Sentry.Tunnel.Tests
 {""sid"":""fda00e933162466c849962eaea0cfaff""}");
             var responseMessage = await _server.CreateClient().SendAsync(requestMessage);
 
-            Assert.Equal(0, _httpMessageHander.NumberOfCalls);
+            Assert.Equal(0, _httpMessageHandler.NumberOfCalls);
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace Sentry.Tunnel.Tests
 {""sid"":""fda00e933162466c849962eaea0cfaff""}");
                 var responseMessage = await _server.CreateClient().SendAsync(requestMessage);
 
-                Assert.Equal(0, _httpMessageHander.NumberOfCalls);
+                Assert.Equal(0, _httpMessageHandler.NumberOfCalls);
             }
         }
 
@@ -88,7 +88,7 @@ namespace Sentry.Tunnel.Tests
 {""sid"":""fda00e933162466c849962eaea0cfaff""}");
                 var responseMessage = await _server.CreateClient().SendAsync(requestMessage);
 
-                Assert.Equal(1, _httpMessageHander.NumberOfCalls);
+                Assert.Equal(1, _httpMessageHandler.NumberOfCalls);
             }
         }
     }
