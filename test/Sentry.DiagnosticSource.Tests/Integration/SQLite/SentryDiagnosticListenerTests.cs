@@ -149,9 +149,9 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.Equal(totalCommands, itemsList.Count);
-            Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query"));
 #if !NET461 && !NETCOREAPP2_1
-            Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query_compiler").Count());
+            Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
             Assert.All(spans, (span) =>
             {
@@ -182,9 +182,9 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.Equal(3, result[0].Result.Count);
-            Assert.Equal(4, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Equal(4, spans.Count(s => s.Operation == "db.query"));
 #if !NET461 && !NETCOREAPP2_1
-            Assert.Equal(4, spans.Where(s => s.Operation == "db.query_compiler").Count());
+            Assert.Equal(4, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
             Assert.All(spans, (span) =>
             {
