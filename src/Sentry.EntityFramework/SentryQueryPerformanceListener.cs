@@ -48,7 +48,8 @@ namespace Sentry.EntityFramework
         private void CreateOrUpdateSpan(string key, string? command)
         {
             var span = SentrySdk.GetSpan();
-            if (_mySpans.ContainsKey(key) && _mySpans[key] is ISpan oldSpan) {
+            if (_mySpans.ContainsKey(key) && _mySpans[key] is ISpan oldSpan)
+            {
                 oldSpan.Finish();
             }
             _mySpans[key] = span?.StartChild("db", command ?? key);
@@ -56,7 +57,7 @@ namespace Sentry.EntityFramework
 
         private void Finish(string key)
         {
-            var span =  _mySpans[key];
+            var span = _mySpans[key];
             _mySpans[key] = null;
             span?.Finish();
         }

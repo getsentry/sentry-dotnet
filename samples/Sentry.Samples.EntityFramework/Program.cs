@@ -29,7 +29,7 @@ ISpan manualSpan;
 
 
 //Populate the database
-for (int j=0; j < 10; j++)
+for (int j = 0; j < 10; j++)
 {
     manualSpan = SentrySdk.GetSpan().StartChild("manual - create item");
     _ = db.Users.Add(new SampleUser() { Id = j, RequiredColumn = "123" });
