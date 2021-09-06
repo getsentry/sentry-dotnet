@@ -15,7 +15,7 @@ namespace Sentry.AspNet.Internal
             if (context.ApplicationInstance?.GetType() is { } type)
             {
                 // Usually the type is ASP.global_asax and the BaseType is the Web Application.
-                while (type is {Namespace: "ASP"})
+                while (type is { Namespace: "ASP" })
                 {
                     type = type.BaseType;
                 }

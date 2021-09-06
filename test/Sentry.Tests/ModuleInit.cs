@@ -24,7 +24,7 @@ namespace Sentry.Tests
                             }
                             else
                             {
-                                dictionary[pair.Key] = pair.Value.Replace('\\','/');
+                                dictionary[pair.Key] = pair.Value.Replace('\\', '/');
                             }
                         }
                         return dictionary;

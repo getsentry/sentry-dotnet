@@ -24,10 +24,10 @@ namespace Sentry.Testing
         public static HttpResponseMessage GetJsonErrorResponse(HttpStatusCode code, string detail, string[] causes = null)
         {
             var responseContent = causes != null
-                ? JsonSerializer.Serialize(new {detail, causes})
-                : JsonSerializer.Serialize(new {detail});
+                ? JsonSerializer.Serialize(new { detail, causes })
+                : JsonSerializer.Serialize(new { detail });
 
-            return new HttpResponseMessage(code) {Content = new StringContent(responseContent, Encoding.UTF8, "application/json") };
+            return new HttpResponseMessage(code) { Content = new StringContent(responseContent, Encoding.UTF8, "application/json") };
         }
 
         public static HttpResponseMessage GetTextErrorResponse(HttpStatusCode code, string detail)
@@ -40,7 +40,7 @@ namespace Sentry.Testing
         {
             return new((HttpStatusCode)429)
             {
-                Headers = {{"X-Sentry-Rate-Limits", rateLimitHeaderValue}}
+                Headers = { { "X-Sentry-Rate-Limits", rateLimitHeaderValue } }
             };
         }
     }

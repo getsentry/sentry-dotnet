@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FluentAssertions;
 using Sentry.Internal.Http;
 using Xunit;
@@ -18,7 +18,7 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             rateLimit.Should().BeEquivalentTo(new RateLimit(
-                new[] {new RateLimitCategory("transaction")},
+                new[] { new RateLimitCategory("transaction") },
                 TimeSpan.FromSeconds(60)
             ));
         }
@@ -34,7 +34,7 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             rateLimit.Should().BeEquivalentTo(new RateLimit(
-                new[] {new RateLimitCategory("transaction")},
+                new[] { new RateLimitCategory("transaction") },
                 TimeSpan.FromSeconds(60)
             ));
         }

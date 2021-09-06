@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
@@ -59,7 +59,7 @@ namespace Sentry.Internal.Http
                 return false;
             }
 
-            return Equals((RateLimitCategory) obj);
+            return Equals((RateLimitCategory)obj);
         }
 
         public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Name);

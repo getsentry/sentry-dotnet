@@ -514,8 +514,7 @@ namespace Sentry.Tests.Protocol
                 expectedStream,
                 expectedFileName,
                 expectedType,
-                expectedContentType
-            );
+                expectedContentType);
 
             // Assert
             var attachment = Assert.Single(scope.Attachments);
@@ -546,8 +545,7 @@ namespace Sentry.Tests.Protocol
             Assert.Empty(scope.Attachments);
             Assert.Contains(logger.Entries, e =>
                 e.Message == "Cannot evaluate the size of attachment '{0}' because the stream is not seekable." &&
-                e.Args[0].ToString() == "example.html"
-            );
+                e.Args[0].ToString() == "example.html");
         }
 
         [Fact]

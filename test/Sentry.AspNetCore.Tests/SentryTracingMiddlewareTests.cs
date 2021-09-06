@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP2_1
+#if !NETCOREAPP2_1
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -25,11 +25,11 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampleRate = 1
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -54,8 +54,7 @@ namespace Sentry.AspNetCore.Tests
                             await ctx.Response.WriteAsync($"Person #{id}");
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -65,8 +64,7 @@ namespace Sentry.AspNetCore.Tests
 
             // Assert
             sentryClient.Received(2).CaptureTransaction(
-                Arg.Is<Transaction>(transaction => transaction.Name == "GET /person/{id}")
-            );
+                Arg.Is<Transaction>(transaction => transaction.Name == "GET /person/{id}"));
         }
 
         [Fact]
@@ -77,10 +75,10 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -105,8 +103,7 @@ namespace Sentry.AspNetCore.Tests
                             return Task.CompletedTask;
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -122,134 +119,13 @@ namespace Sentry.AspNetCore.Tests
         public async Task Transaction_is_started_automatically_from_incoming_trace_header()
         {
             // Arrange
-            ITransactionData transaction = null;
-
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampleRate = 1
-            });
-
-            var server = new TestServer(new WebHostBuilder()
-                .UseDefaultServiceProvider(di => di.EnableValidation())
-                .UseSentry()
-                .ConfigureServices(services =>
-                {
-                    services.AddRouting();
-
-                    services.RemoveAll(typeof(Func<IHub>));
-                    services.AddSingleton<Func<IHub>>(() => hub);
-                })
-                .Configure(app =>
-                {
-                    app.UseRouting();
-                    app.UseSentryTracing();
-
-                    app.UseEndpoints(routes =>
-                    {
-                        routes.Map("/person/{id}", _ =>
-                        {
-                            transaction = hub.GetSpan() as ITransactionData;
-                            return Task.CompletedTask;
-                        });
-                    });
-                })
-            );
-
-            var client = server.CreateClient();
-
-            // Act
-            using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
-            {
-                Headers = {{"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"}}
-            };
-
-            await client.SendAsync(request);
-
-            // Assert
-            transaction.Should().NotBeNull();
-            transaction?.Name.Should().Be("GET /person/{id}");
-            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
-            transaction.ParentSpanId.Should().Be(SpanId.Parse("1000000000000000"));
-            transaction.IsSampled.Should().BeFalse();
-        }
-
-        [Fact]
-        public async Task Transaction_is_automatically_populated_with_request_data()
-        {
-            // Arrange
-            ITransactionData transaction = null;
-
-            var sentryClient = Substitute.For<ISentryClient>();
-
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithoutSecret,
-                TracesSampleRate = 1
-            });
-
-            var server = new TestServer(new WebHostBuilder()
-                .UseDefaultServiceProvider(di => di.EnableValidation())
-                .UseSentry()
-                .ConfigureServices(services =>
-                {
-                    services.AddRouting();
-
-                    services.RemoveAll(typeof(Func<IHub>));
-                    services.AddSingleton<Func<IHub>>(() => hub);
-                })
-                .Configure(app =>
-                {
-                    app.UseRouting();
-                    app.UseSentryTracing();
-
-                    app.UseEndpoints(routes =>
-                    {
-                        routes.Map("/person/{id}", _ =>
-                        {
-                            transaction = hub.GetSpan() as ITransactionData;
-                            return Task.CompletedTask;
-                        });
-                    });
-                })
-            );
-
-            var client = server.CreateClient();
-
-            // Act
-            using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
-            {
-                Headers = {{"foo", "bar"}}
-            };
-
-            await client.SendAsync(request);
-
-            // Assert
-            transaction.Should().NotBeNull();
-            transaction?.Request.Method.Should().Be("GET");
-            transaction?.Request.Url.Should().Be("http://localhost/person/13");
-            transaction?.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
-        }
-
-        [Fact]
-        public async Task Transaction_sampling_context_contains_HTTP_context_data()
-        {
-            // Arrange
-            TransactionSamplingContext samplingContext = null;
-
-            var sentryClient = Substitute.For<ISentryClient>();
-
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithoutSecret,
-                TracesSampler = ctx =>
-                {
-                    samplingContext = ctx;
-                    return 1;
-                }
-            });
+            }, sentryClient);
 
             var server = new TestServer(new WebHostBuilder()
                 .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -270,8 +146,121 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => Task.CompletedTask);
                     });
+                }));
+
+            var client = server.CreateClient();
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+            {
+                Headers = { { "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0" } }
+            };
+
+            await client.SendAsync(request);
+
+            // Assert
+            sentryClient.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
+                t.Name == "GET /person/{id}" &&
+                t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
+                t.ParentSpanId == SpanId.Parse("1000000000000000") &&
+                t.IsSampled == false
+            ));
+        }
+
+        [Fact]
+        public async Task Transaction_is_automatically_populated_with_request_data()
+        {
+            // Arrange
+            ITransactionData transaction = null;
+
+            var sentryClient = Substitute.For<ISentryClient>();
+
+            var hub = new Internal.Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampleRate = 1
+            }, sentryClient);
+
+            var server = new TestServer(new WebHostBuilder()
+                .UseDefaultServiceProvider(di => di.EnableValidation())
+                .UseSentry()
+                .ConfigureServices(services =>
+                {
+                    services.AddRouting();
+
+                    services.RemoveAll(typeof(Func<IHub>));
+                    services.AddSingleton<Func<IHub>>(() => hub);
                 })
-            );
+                .Configure(app =>
+                {
+                    app.UseRouting();
+                    app.UseSentryTracing();
+
+                    app.UseEndpoints(routes =>
+                    {
+                        routes.Map("/person/{id}", _ =>
+                        {
+                            transaction = hub.GetSpan() as ITransactionData;
+                            return Task.CompletedTask;
+                        });
+                    });
+                }));
+
+            var client = server.CreateClient();
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+            {
+                Headers = { { "foo", "bar" } }
+            };
+
+            await client.SendAsync(request);
+
+            // Assert
+            transaction.Should().NotBeNull();
+            transaction?.Request.Method.Should().Be("GET");
+            transaction?.Request.Url.Should().Be("http://localhost/person/13");
+            transaction?.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
+        }
+
+        [Fact]
+        public async Task Transaction_sampling_context_contains_HTTP_context_data()
+        {
+            // Arrange
+            TransactionSamplingContext samplingContext = null;
+
+            var sentryClient = Substitute.For<ISentryClient>();
+
+            var hub = new Internal.Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                TracesSampler = ctx =>
+                {
+                    samplingContext = ctx;
+                    return 1;
+                }
+            }, sentryClient);
+
+            var server = new TestServer(new WebHostBuilder()
+                .UseDefaultServiceProvider(di => di.EnableValidation())
+                .UseSentry()
+                .ConfigureServices(services =>
+                {
+                    services.AddRouting();
+
+                    services.RemoveAll(typeof(Func<IHub>));
+                    services.AddSingleton<Func<IHub>>(() => hub);
+                })
+                .Configure(app =>
+                {
+                    app.UseRouting();
+                    app.UseSentryTracing();
+
+                    app.UseEndpoints(routes =>
+                    {
+                        routes.Map("/person/{id}", _ => Task.CompletedTask);
+                    });
+                }));
 
             var client = server.CreateClient();
 
@@ -293,7 +282,7 @@ namespace Sentry.AspNetCore.Tests
 
             var sentryClient = Substitute.For<ISentryClient>();
 
-            var hub = new Internal.Hub(sentryClient, new SentryOptions
+            var hub = new Internal.Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 TracesSampler = ctx =>
@@ -301,7 +290,7 @@ namespace Sentry.AspNetCore.Tests
                     samplingContext = ctx;
                     return 1;
                 }
-            });
+            }, sentryClient);
             var exception = new Exception();
 
             var server = new TestServer(new WebHostBuilder()
@@ -334,8 +323,7 @@ namespace Sentry.AspNetCore.Tests
                     {
                         routes.Map("/person/{id}", _ => throw exception);
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 
@@ -343,7 +331,8 @@ namespace Sentry.AspNetCore.Tests
             await client.GetAsync("/person/13");
 
             // Assert
-            Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out _));
+            Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out var span));
+            Assert.Equal(SpanStatus.InternalError, span.Status);
         }
     }
 }

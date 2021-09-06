@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Sentry
 {
@@ -12,6 +12,12 @@ namespace Sentry
         /// </summary>
         // 'new' because it adds a setter
         new string Name { get; set; }
+
+        /// <summary>
+        /// Whether the parent transaction of this transaction has been sampled.
+        /// </summary>
+        // 'new' because it adds a setter
+        new bool? IsParentSampled { get; set; }
 
         /// <summary>
         /// Flat list of spans within this transaction.

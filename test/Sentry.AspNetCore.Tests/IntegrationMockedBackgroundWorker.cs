@@ -3,21 +3,21 @@ using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Testing;
-using Xunit;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Tests;
+using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Protocol.Envelopes;
+using Sentry.Testing;
+using Xunit;
 
 // ReSharper disable once CheckNamespace - To test Logger emitting events:
 // It filters events coming from 'Sentry.' namespace.

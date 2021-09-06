@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +38,9 @@ namespace Sentry
 
         /// <inheritdoc cref="ITransaction.Name" />
         public string Name { get; set; }
+
+        /// <inheritdoc cref="ITransaction.IsParentSampled" />
+        public bool? IsParentSampled { get; set; }
 
         /// <inheritdoc />
         public string? Platform { get; set; } = Constants.Platform;
@@ -253,7 +256,7 @@ namespace Sentry
             Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
-        public ISpan? GetLastActiveSpan() => 
+        public ISpan? GetLastActiveSpan() =>
             // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
             Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
@@ -261,7 +264,6 @@ namespace Sentry
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
     }
 }

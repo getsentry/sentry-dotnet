@@ -27,8 +27,7 @@ namespace Sentry.Protocol.Tests.Context
                 "tz_id",
                 TimeSpan.FromHours(2),
                 "my timezone",
-                "my timezone"
-            );
+                "my timezone");
 
             var sut = new Device
             {

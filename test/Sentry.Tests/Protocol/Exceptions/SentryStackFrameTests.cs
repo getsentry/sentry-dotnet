@@ -55,8 +55,7 @@ namespace Sentry.Tests.Protocol.Exceptions
                 "\"instruction_addr\":\"0xffffffff\"," +
                 "\"instruction_offset\":5" +
                 "}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

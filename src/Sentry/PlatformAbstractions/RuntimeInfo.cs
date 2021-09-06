@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Sentry.PlatformAbstractions
 {
@@ -21,13 +21,16 @@ namespace Sentry.PlatformAbstractions
             runtime ??= GetFromMonoRuntime();
 
             runtime ??= GetFromEnvironmentVariable();
+            return runtime;
+        }
 
+        internal static void SetAdditionalParameters(Runtime runtime)
+        {
 #if NET461
             SetNetFxReleaseAndVersion(runtime);
 #else
             SetNetCoreVersion(runtime);
 #endif
-            return runtime;
         }
 
         internal static Runtime? Parse(string rawRuntimeDescription, string? name = null)
@@ -45,8 +48,7 @@ namespace Sentry.PlatformAbstractions
                 return new Runtime(
                     name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                     match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
-                    raw: rawRuntimeDescription
-                );
+                    raw: rawRuntimeDescription);
             }
 
             return new Runtime(name, raw: rawRuntimeDescription);

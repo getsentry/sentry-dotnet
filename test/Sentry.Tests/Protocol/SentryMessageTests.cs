@@ -23,8 +23,7 @@ namespace Sentry.Tests.Protocol
                 "{\"message\":\"Message {eventId} {name}\"," +
                 "\"params\":[100,\"test-name\"]," +
                 "\"formatted\":\"Message 100 test-name\"}",
-                actual
-            );
+                actual);
         }
 
         [Theory]

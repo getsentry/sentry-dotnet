@@ -1,5 +1,79 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Add fallback to Scope Stack from AspNet ([#1180](https://github.com/getsentry/sentry-dotnet/pull/1180))
+
+## 3.9.0
+
+### Features
+
+- EF Core and SQLClient performance monitoring integration ([#1154](https://github.com/getsentry/sentry-dotnet/pull/1154))
+- Improved SDK diagnostic logs ([#1161](https://github.com/getsentry/sentry-dotnet/pull/1161))
+- Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
+
+### Fixes
+
+- Fix end session from Hub adapter not being passed to SentrySDK ([#1158](https://github.com/getsentry/sentry-dotnet/pull/1158))
+- Installation id catches dir not exist([#1159](https://github.com/getsentry/sentry-dotnet/pull/1159))
+- Set error status to transaction if http has exception and ok status ([#1143](https://github.com/getsentry/sentry-dotnet/pull/1143))
+- Fix max breadcrumbs limit when MaxBreadcrumbs is zero or lower ([#1145](https://github.com/getsentry/sentry-dotnet/pull/1145))
+
+## 3.8.3
+
+### Features
+
+- New package Sentry.Tunnel to proxy Sentry events ([#1133](https://github.com/getsentry/sentry-dotnet/pull/1133))
+
+### Fixes
+
+- Avoid serializing dangerous types ([#1134](https://github.com/getsentry/sentry-dotnet/pull/1134))
+- Don't cancel cache flushing on init ([#1139](https://github.com/getsentry/sentry-dotnet/pull/1139))
+
+## 3.8.2
+
+### Fixes
+
+- Add IsParentSampled to ITransactionContext ([#1128](https://github.com/getsentry/sentry-dotnet/pull/1128)
+- Avoid warn in global mode ([#1132](https://github.com/getsentry/sentry-dotnet/pull/1132))
+- Fix `ParentSampledId` being reset on `Transaction` ([#1130](https://github.com/getsentry/sentry-dotnet/pull/1130))
+
+## 3.8.1
+
+### Fixes
+
+- Persisted Sessions logging ([#1125](https://github.com/getsentry/sentry-dotnet/pull/1125))
+- Don't log an error when attempting to recover a persisted session but none exists ([#1123](https://github.com/getsentry/sentry-dotnet/pull/1123))
+
+### Features
+
+- Introduce scope stack abstraction to support global scope on desktop and mobile applications and `HttpContext`-backed scoped on legacy ASP.NET ([#1124](https://github.com/getsentry/sentry-dotnet/pull/1124))
+
+## 3.8.0
+
+### Fixes
+
+- ASP.NET Core: fix handled not being set for Handled exceptions ([#1111](https://github.com/getsentry/sentry-dotnet/pull/1111))
+
+### Features
+
+- File system persistence for sessions ([#1105](https://github.com/getsentry/sentry-dotnet/pull/1105))
+
+## 3.7.0
+
+### Features
+
+- Add HTTP request breadcrumb ([#1113](https://github.com/getsentry/sentry-dotnet/pull/1113))
+- Integration for Google Cloud Functions ([#1085](https://github.com/getsentry/sentry-dotnet/pull/1085)) 
+- Add ClearAttachments to Scope ([#1104](https://github.com/getsentry/sentry-dotnet/pull/1104))
+- Add additional logging and additional fallback for installation ID ([#1103](https://github.com/getsentry/sentry-dotnet/pull/1103))
+
+### Fixes
+
+- Avoid Unhandled Exception on .NET 461 if the Registry Access threw an exception ([#1101](https://github.com/getsentry/sentry-dotnet/pull/1101))
+
 ## 3.6.1
 
 ### Fixes
