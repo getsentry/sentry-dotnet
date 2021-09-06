@@ -1,64 +1,61 @@
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
+using Sentry.Extensibility;
+using Sentry.EntityFramework.Internals.Extensions;
 
 namespace Sentry.EntityFramework
 {
     internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     {
-        //AsyncLocal
-        private Dictionary<string, ISpan?> _mySpans = new Dictionary<string, ISpan?>();
-        public void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
+        internal const string SentryUserStateKey = "SentrySpanRef";
+
+        private SentryOptions _options { get; }
+        private IHub _hub { get; }
+
+        internal SentryQueryPerformanceListener(IHub hub, SentryOptions options)
         {
-            Console.WriteLine("ReaderExecuting");
-            CreateOrUpdateSpan("Reader", command.CommandText);
+            _hub = hub;
+            _options = options;
         }
+
+        public void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
+            => CreateOrUpdateSpan("ef.reader", command.CommandText, interceptionContext);
 
         public void ReaderExecuted(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
-        {
-            Console.WriteLine("ReaderExecuted", command.CommandText);
-            Finish("Reader");
-        }
+            => Finish("ef.reader", interceptionContext);
 
         public void NonQueryExecuting(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
-        {
-            Console.WriteLine("NonQueryExecuting");
-            CreateOrUpdateSpan("NonQuery", command.CommandText);
-        }
+            => CreateOrUpdateSpan("ef.non-query", command.CommandText, interceptionContext);
 
         public void NonQueryExecuted(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
-        {
-            Console.WriteLine("NonQueryExecuted");
-            Finish("NonQuery");
-        }
+            => Finish("ef.non-query", interceptionContext);
 
         public void ScalarExecuting(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
-        {
-            Console.WriteLine("ScalarExecuting");
-            CreateOrUpdateSpan("Scalar", command.CommandText);
-        }
+            => CreateOrUpdateSpan("ef.scalar", command.CommandText, interceptionContext);
 
         public void ScalarExecuted(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
-        {
-            Console.WriteLine("ScalarExecuted");
-            Finish("Scalar");
-        }
+            => Finish("ef.scalar", interceptionContext);
 
-        private void CreateOrUpdateSpan(string key, string? command)
+        private void CreateOrUpdateSpan<T>(string key, string? command,
+            DbCommandInterceptionContext<T> interceptionContext)
         {
-            var span = SentrySdk.GetSpan();
-            if (_mySpans.ContainsKey(key) && _mySpans[key] is ISpan oldSpan) {
-                oldSpan.Finish();
+            if (_hub.GetSpan()?.StartChild(key, command) is { } span)
+            {
+                interceptionContext.AttachSpan(span);
             }
-            _mySpans[key] = span?.StartChild("db", command ?? key);
         }
 
-        private void Finish(string key)
+        private void Finish<T>(string key, DbCommandInterceptionContext<T> interceptionContext)
         {
-            var span =  _mySpans[key];
-            _mySpans[key] = null;
-            span?.Finish();
+            //Recover direct reference of the Span.
+            if (interceptionContext.GetSpanFromContext() is {} span)
+            {
+                span.Finish();
+            }
+            else
+            {
+                _options.DiagnosticLogger?.LogWarning("Span with key {0} was not found on interceptionContext.", key);
+            }
         }
     }
 }

@@ -65,7 +65,7 @@ Console.WriteLine($"Found {query.Count}");
 Console.WriteLine("Text SQL Search");
 transaction = SentrySdk.StartTransaction("Text SQL Search", "Create");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-var query2 = db.Users.SqlQuery("SELECT * FROM Sample User where Id > 5").ToList();
+var query2 = db.Users.Where(user => user.Id > 5).ToList();
 transaction.Finish();
 Console.WriteLine($"Found {query2.Count}");
 
