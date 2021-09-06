@@ -1,7 +1,7 @@
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
-using Sentry.Extensibility;
 using Sentry.EntityFramework.Internals.Extensions;
+using Sentry.Extensibility;
 
 namespace Sentry.EntityFramework
 {
@@ -48,7 +48,7 @@ namespace Sentry.EntityFramework
         private void Finish<T>(string key, DbCommandInterceptionContext<T> interceptionContext)
         {
             //Recover direct reference of the Span.
-            if (interceptionContext.GetSpanFromContext() is {} span)
+            if (interceptionContext.GetSpanFromContext() is { } span)
             {
                 span.Finish();
             }
