@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
@@ -88,8 +88,7 @@ namespace Sentry.AspNetCore
                 _options.DiagnosticLogger?.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",
                     transaction.SpanId,
-                    transaction.TraceId
-                );
+                    transaction.TraceId);
 
                 return transaction;
             }
@@ -145,8 +144,7 @@ namespace Sentry.AspNetCore
                             _options.DiagnosticLogger?.LogDebug(
                                 "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
                                 transaction.Name,
-                                transactionName
-                            );
+                                transactionName);
                         }
 
                         transaction.Name = transactionName;
@@ -156,6 +154,13 @@ namespace Sentry.AspNetCore
                     if (exception is null)
                     {
                         transaction.Finish(status);
+                    }
+                    // Status code not yet changed to 500 but an exception does exist
+                    // so lets avoid passing the misleading 200 down and close only with
+                    // the exception instance that will be inferred as errored.
+                    else if (status == SpanStatus.Ok)
+                    {
+                        transaction.Finish(exception);
                     }
                     else
                     {

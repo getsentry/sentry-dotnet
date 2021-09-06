@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
 namespace Sentry
 {
@@ -6,11 +7,17 @@ namespace Sentry
     {
         bool IsSessionActive { get; }
 
+        SessionUpdate? TryRecoverPersistedSession();
+
         SessionUpdate? StartSession();
 
         SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
 
         SessionUpdate? EndSession(SessionEndStatus status);
+
+        void PauseSession();
+
+        IReadOnlyList<SessionUpdate> ResumeSession();
 
         SessionUpdate? ReportError();
     }

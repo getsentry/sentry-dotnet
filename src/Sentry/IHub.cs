@@ -27,8 +27,7 @@ namespace Sentry
         /// </summary>
         ITransaction StartTransaction(
             ITransactionContext context,
-            IReadOnlyDictionary<string, object?> customSamplingContext
-        );
+            IReadOnlyDictionary<string, object?> customSamplingContext);
 
         /// <summary>
         /// Binds specified exception the specified span.

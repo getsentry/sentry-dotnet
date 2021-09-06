@@ -13,7 +13,7 @@ namespace Sentry.Benchmarks
         public HttpClient Create(SentryOptions options) => new(new FakeMessageHandler());
     }
 
-    internal class FakeMessageHandler : HttpMessageHandler
+    internal class FakeMessageHandler : DelegatingHandler
     {
         private readonly Task<HttpResponseMessage> _result;
 

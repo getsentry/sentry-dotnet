@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -116,8 +117,7 @@ namespace Sentry
             {
                 scope.Options.DiagnosticLogger?.LogWarning(
                     "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
-                    fileName
-                );
+                    fileName);
 
                 return;
             }
@@ -129,8 +129,7 @@ namespace Sentry
                     type,
                     new StreamAttachmentContent(stream),
                     fileName,
-                    contentType)
-            );
+                    contentType));
         }
 
         /// <summary>
@@ -157,7 +156,14 @@ namespace Sentry
                     type,
                     new FileAttachmentContent(filePath),
                     Path.GetFileName(filePath),
-                    contentType)
-            );
+                    contentType));
+
+        /// <summary>
+        /// Gets the last opened span.
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <returns>The last span not finished or null.</returns>
+        internal static ISpan? LastCreatedSpan(this Scope scope)
+            => scope.Transaction?.Spans.LastOrDefault(s => s.IsFinished is false);
     }
 }

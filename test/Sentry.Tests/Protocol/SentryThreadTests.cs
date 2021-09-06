@@ -33,8 +33,7 @@ namespace Sentry.Tests.Protocol
                 "\"crashed\":true," +
                 "\"current\":true," +
                 "\"stacktrace\":{\"frames\":[{\"filename\":\"test\"}]}}",
-                actual
-            );
+                actual);
         }
 
         [Theory]

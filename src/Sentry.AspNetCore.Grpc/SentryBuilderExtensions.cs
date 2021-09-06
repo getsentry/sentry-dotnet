@@ -29,7 +29,6 @@ namespace Sentry.AspNetCore.Grpc
             return builder;
         }
 
-
         private class SentryGrpcEventProcessor : ISentryEventProcessor
         {
             private static readonly SdkVersion NameAndVersion

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -118,13 +118,21 @@ namespace Sentry
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionUpdate(SessionUpdate sessionUpdate, bool isInitial)
+        public SessionUpdate(SessionUpdate sessionUpdate, bool isInitial, SessionEndStatus? endStatus)
             : this(
                 sessionUpdate,
                 isInitial,
                 sessionUpdate.Timestamp,
                 sessionUpdate.SequenceNumber,
-                sessionUpdate.EndStatus)
+                endStatus)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SessionUpdate"/>.
+        /// </summary>
+        public SessionUpdate(SessionUpdate sessionUpdate, bool isInitial)
+            : this(sessionUpdate, isInitial, sessionUpdate.EndStatus)
         {
         }
 
@@ -184,8 +192,7 @@ namespace Sentry
                 isInitial,
                 timestamp,
                 sequenceNumber,
-                endStatus
-            );
+                endStatus);
         }
     }
 }

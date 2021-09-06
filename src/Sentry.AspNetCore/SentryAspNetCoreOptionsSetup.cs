@@ -13,16 +13,25 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 
 namespace Sentry.AspNetCore
 {
-    internal class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
+    /// <summary>
+    /// Sets up ASP.NET Core option for Sentry.
+    /// </summary>
+    public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
     {
         private readonly IHostingEnvironment _hostingEnvironment;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
+        /// </summary>
         public SentryAspNetCoreOptionsSetup(
             ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider> providerConfiguration,
             IHostingEnvironment hostingEnvironment)
             : base(providerConfiguration.Configuration)
             => _hostingEnvironment = hostingEnvironment;
 
+        /// <summary>
+        /// Configures the <see cref="SentryAspNetCoreOptions"/>.
+        /// </summary>
         public override void Configure(SentryAspNetCoreOptions options)
         {
             base.Configure(options);
@@ -81,6 +90,10 @@ namespace Sentry.AspNetCore
                        category,
                        "Microsoft.AspNetCore.Server.Kestrel",
                        StringComparison.Ordinal));
+
+#if NETSTANDARD2_0
+            options.AddDiagnosticSourceIntegration();
+#endif
         }
     }
 }

@@ -151,11 +151,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
-            });
+            }, client);
 
             var exception = new Exception("error");
 
@@ -170,8 +170,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -180,11 +179,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
-            });
+            }, client);
 
             var exception = new Exception("error");
 
@@ -200,8 +199,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -210,11 +208,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 0
-            });
+            }, client);
 
             var exception = new Exception("error");
 
@@ -230,8 +228,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -240,11 +237,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
-            });
+            }, client);
 
             // Act
             hub.CaptureException(new Exception("error"));
@@ -254,8 +251,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -264,10 +260,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
-            });
+            }, client);
 
             hub.StartSession();
 
@@ -280,15 +276,38 @@ namespace NotSentry.Tests
         }
 
         [Fact]
+        public void CaptureEvent_ExceptionWithOpenSpan_SpanFinishedWithInternalError()
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            }, client);
+            var scope = new Scope();
+            scope.Transaction = hub.StartTransaction("transaction", "operation");
+
+            var child = scope.Transaction.StartChild("child", "child");
+
+            // Act
+            hub.CaptureEvent(new SentryEvent(new Exception()), scope);
+
+            // Assert
+            Assert.Equal(SpanStatus.InternalError, child.Status);
+            Assert.True(child.IsFinished);
+        }
+
+        [Fact]
         public void CaptureEvent_SessionActive_ExceptionReportsError()
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
-            });
+            }, client);
 
             hub.StartSession();
 
@@ -306,16 +325,16 @@ namespace NotSentry.Tests
             // Arrange
             var worker = Substitute.For<IBackgroundWorker>();
 
-            var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret};
+            var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
             var client = new SentryClient(options, worker);
-            var hub = new Hub(client, options);
+            var hub = new Hub(options, client);
 
             hub.StartSession();
 
             // Act
             hub.CaptureEvent(new SentryEvent
             {
-                SentryExceptions = new[] {new SentryException {Mechanism = new Mechanism {Handled = false}}}
+                SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
             });
 
             // Assert
@@ -328,8 +347,7 @@ namespace NotSentry.Tests
                         .OfType<SessionUpdate>()
                         .Single()
                         .EndStatus == SessionEndStatus.Crashed
-                )
-            );
+                ));
         }
 
         [Fact]
@@ -363,8 +381,7 @@ namespace NotSentry.Tests
             var traceHeader = new SentryTraceHeader(
                 SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 SpanId.Parse("2000000000000000"),
-                true
-            );
+                true);
 
             // Act
             var transaction = hub.StartTransaction("name", "operation", traceHeader);
@@ -388,8 +405,7 @@ namespace NotSentry.Tests
             var traceHeader = new SentryTraceHeader(
                 SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 SpanId.Parse("2000000000000000"),
-                true
-            );
+                true);
 
             // Act
             var transaction = hub.StartTransaction("name", "operation", traceHeader);
@@ -412,8 +428,7 @@ namespace NotSentry.Tests
             var traceHeader = new SentryTraceHeader(
                 SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 SpanId.Parse("2000000000000000"),
-                true
-            );
+                true);
 
             // Act
             var transaction = hub.StartTransaction("foo", "bar", traceHeader);
@@ -481,13 +496,11 @@ namespace NotSentry.Tests
             // Assert
             transactionsSampledIn.Length.Should().BeCloseTo(
                 (int)(0.5 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
 
             transactionsSampledOut.Length.Should().BeCloseTo(
                 (int)(0.5 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
         }
 
         [Fact]
@@ -515,13 +528,11 @@ namespace NotSentry.Tests
             // Assert
             transactionsSampledIn.Length.Should().BeCloseTo(
                 (int)(0.25 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
 
             transactionsSampledOut.Length.Should().BeCloseTo(
                 (int)(0.75 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
         }
 
         [Fact]
@@ -549,13 +560,11 @@ namespace NotSentry.Tests
             // Assert
             transactionsSampledIn.Length.Should().BeCloseTo(
                 (int)(0.75 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
 
             transactionsSampledOut.Length.Should().BeCloseTo(
                 (int)(0.25 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
         }
 
         [Fact]
@@ -605,8 +614,7 @@ namespace NotSentry.Tests
             // Act
             var transaction = hub.StartTransaction(
                 new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "zzz"}
-            );
+                new Dictionary<string, object> { ["xxx"] = "zzz" });
 
             // Assert
             transaction.IsSampled.Should().BeTrue();
@@ -625,8 +633,7 @@ namespace NotSentry.Tests
             // Act
             var transaction = hub.StartTransaction(
                 new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "yyy"}
-            );
+                new Dictionary<string, object> { ["xxx"] = "yyy" });
 
             // Assert
             transaction.IsSampled.Should().BeFalse();
@@ -700,10 +707,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             var transaction = hub.StartTransaction("foo", "bar");
 
@@ -738,10 +745,10 @@ namespace NotSentry.Tests
         public void Dispose_CalledSecondTime_ClientDisposedOnce()
         {
             var client = Substitute.For<ISentryClient, IDisposable>();
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             // Act
             hub.Dispose();
@@ -757,10 +764,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             // Act
             hub.StartSession();
@@ -775,10 +782,10 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            }, client);
 
             hub.StartSession();
 
@@ -796,14 +803,48 @@ namespace NotSentry.Tests
             var client = Substitute.For<ISentryClient>();
 
             // Act
-            _ = new Hub(client, new SentryOptions
+            _ = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 AutoSessionTracking = true
-            });
+            }, client);
 
             // Assert
             client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        }
+
+        [Fact]
+        public void Ctor_GlobalModeTrue_DoesNotPushScope()
+        {
+            // Arrange
+            var scopeManager = Substitute.For<IInternalScopeManager>();
+
+            // Act
+            _ = new Hub(new SentryOptions
+            {
+                IsGlobalModeEnabled = true,
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            }, scopeManager: scopeManager);
+
+            // Assert
+            scopeManager.DidNotReceiveWithAnyArgs().PushScope();
+        }
+
+        [Fact]
+        public void Ctor_GlobalModeFalse_DoesPushScope()
+        {
+            // Arrange
+            var scopeManager = Substitute.For<IInternalScopeManager>();
+
+            // Act
+            _ = new Hub(new SentryOptions
+            {
+                IsGlobalModeEnabled = false,
+                Dsn = DsnSamples.ValidDsnWithSecret,
+            }, scopeManager: scopeManager);
+
+            // Assert
+            scopeManager.Received(1).PushScope();
         }
 
         [Fact]
@@ -812,11 +853,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 AutoSessionTracking = true
-            });
+            }, client);
 
             // Act
             hub.Dispose();
@@ -831,11 +872,11 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub(client, new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
-            });
+            }, client);
 
             hub.StartSession();
             hub.PauseSession();
@@ -860,7 +901,11 @@ namespace NotSentry.Tests
                 AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
             };
 
-            var hub = new Hub(client, clock, new GlobalSessionManager(options, clock), options);
+            var hub = new Hub(
+                options,
+                client,
+                clock: clock,
+                sessionManager: new GlobalSessionManager(options, clock));
 
             clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
@@ -890,7 +935,10 @@ namespace NotSentry.Tests
                 AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
             };
 
-            var hub = new Hub(client, clock, new GlobalSessionManager(options, clock), options);
+            var hub = new Hub(
+                options,
+                clock: clock,
+                sessionManager: new GlobalSessionManager(options, clock));
 
             clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
@@ -918,7 +966,10 @@ namespace NotSentry.Tests
                 AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
             };
 
-            var hub = new Hub(client, clock, new GlobalSessionManager(options, clock), options);
+            var hub = new Hub(
+                options,
+                clock: clock,
+                sessionManager: new GlobalSessionManager(options, clock));
 
             clock.GetUtcNow().Returns(DateTimeOffset.Now);
 

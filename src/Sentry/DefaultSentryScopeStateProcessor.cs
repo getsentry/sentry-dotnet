@@ -27,17 +27,17 @@ namespace Sentry
                         .Where(kv => !string.IsNullOrEmpty(kv.Value)));
                     break;
                 case IEnumerable<KeyValuePair<string, object>> keyValStringObject:
-                {
-                    scope.SetTags(keyValStringObject
-                        .Where(kv => !string.IsNullOrEmpty(kv.Value as string))
-                        .Select(k => new KeyValuePair<string, string>(
-                            k.Key,
-                            // TODO: Candidate for serialization instead. Likely Contexts is a better fit.
-                            k.Value.ToString()!)));
+                    {
+                        scope.SetTags(keyValStringObject
+                            .Where(kv => !string.IsNullOrEmpty(kv.Value as string))
+                            .Select(k => new KeyValuePair<string, string>(
+                                k.Key,
+                                // TODO: Candidate for serialization instead. Likely Contexts is a better fit.
+                                k.Value.ToString()!)));
 
 
-                    break;
-                }
+                        break;
+                    }
 #if !NET461
                 case ValueTuple<string, string> tupleStringString:
                     if (!string.IsNullOrEmpty(tupleStringString.Item2))

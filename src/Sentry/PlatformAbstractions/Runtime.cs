@@ -12,7 +12,18 @@ namespace Sentry.PlatformAbstractions
         /// <value>
         /// The current runtime.
         /// </value>
-        public static Runtime Current => _runtime ??= RuntimeInfo.GetRuntime();
+        public static Runtime Current
+        {
+            get
+            {
+                if (_runtime is null)
+                {
+                    _runtime = RuntimeInfo.GetRuntime();
+                    RuntimeInfo.SetAdditionalParameters(_runtime);
+                }
+                return _runtime;
+            }
+        }
         /// <summary>
         /// The name of the runtime
         /// </summary>
@@ -91,8 +102,10 @@ namespace Sentry.PlatformAbstractions
         /// <returns>True if the instances are equal by reference or its state.</returns>
         public bool Equals(Runtime other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
             return string.Equals(Name, other.Name)
                    && string.Equals(Version, other.Version)
 #if NET461
@@ -108,10 +121,13 @@ namespace Sentry.PlatformAbstractions
         /// <returns>True if the instances are equal by reference or its state.</returns>
         public override bool Equals(object? obj)
         {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Runtime) obj);
+            if (obj is null)
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != GetType())
+                return false;
+            return Equals((Runtime)obj);
         }
 
         /// <summary>

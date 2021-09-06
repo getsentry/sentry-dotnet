@@ -40,7 +40,7 @@ namespace Sentry.Reflection
             // TODO: Lets change this in a new major to return the Version as fallback
             asmVersion ??= asmName.Version?.ToString();
 
-            return new SdkVersion {Name = name, Version = asmVersion };
+            return new SdkVersion { Name = name, Version = asmVersion };
         }
     }
 }

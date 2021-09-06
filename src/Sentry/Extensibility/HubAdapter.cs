@@ -126,7 +126,7 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
-            => SentrySdk.EndSession();
+            => SentrySdk.EndSession(status);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.

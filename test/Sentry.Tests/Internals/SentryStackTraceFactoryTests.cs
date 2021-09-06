@@ -43,15 +43,13 @@ namespace Other.Tests.Internals
 
             Assert.Equal(
                 nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithOriginalMode_CurrentStackTrace),
-                stackTrace.Frames.Last().Function
-            );
+                stackTrace.Frames.Last().Function);
 
             Assert.DoesNotContain(stackTrace.Frames, p =>
                 p.Function?.StartsWith(
                     nameof(SentryStackTraceFactory.CreateFrame) + '(',
                     StringComparison.Ordinal
-                ) == true
-            );
+                ) == true);
         }
 
         [Fact]
@@ -70,15 +68,13 @@ namespace Other.Tests.Internals
                 $"{GetType().Name}" +
                 $".{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}" +
                 "()",
-                stackTrace.Frames.Last().Function
-            );
+                stackTrace.Frames.Last().Function);
 
             Assert.DoesNotContain(stackTrace.Frames, p =>
                 p.Function?.StartsWith(
                     nameof(SentryStackTraceFactory.CreateFrame) + '(',
                     StringComparison.Ordinal
-                ) == true
-            );
+                ) == true);
         }
 
         [Fact]
