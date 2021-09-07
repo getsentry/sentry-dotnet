@@ -9,7 +9,7 @@ namespace Sentry.EntityFramework
     {
         internal const string SentryUserStateKey = "SentrySpanRef";
         internal const string DbReaderKey = "db.query";
-        internal const string DbNonQueryKey = "db.sql-statement";
+        internal const string DbNonQueryKey = "db.execute";
         internal const string DbScalarKey = "db.query-scalar";
 
         private SentryOptions _options { get; }
