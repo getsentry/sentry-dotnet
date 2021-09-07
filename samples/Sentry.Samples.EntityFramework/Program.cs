@@ -2,8 +2,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
-using Sentry;
 using System.Linq;
+using Sentry;
 
 _ = SentrySdk.Init(o =>
 {

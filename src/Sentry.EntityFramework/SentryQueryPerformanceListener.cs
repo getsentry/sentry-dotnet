@@ -59,7 +59,7 @@ namespace Sentry.EntityFramework
             //Recover direct reference of the Span.
             if (interceptionContext.GetSpanFromContext() is { } span)
             {
-                span.Finish(interceptionContext.Exception is null? SpanStatus.Ok : SpanStatus.InternalError);
+                span.Finish(interceptionContext.Exception is null ? SpanStatus.Ok : SpanStatus.InternalError);
             }
             else
             {
