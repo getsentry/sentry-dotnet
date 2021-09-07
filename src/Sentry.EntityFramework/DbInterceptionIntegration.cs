@@ -11,7 +11,6 @@ namespace Sentry.EntityFramework
         {
             SqlInterceptor = new SentryQueryPerformanceListener(hub, options);
             DbInterception.Add(SqlInterceptor);
-
         }
 
         public void Unregister(IHub _) => DbInterception.Remove(SqlInterceptor);

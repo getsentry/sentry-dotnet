@@ -14,8 +14,6 @@ namespace Sentry.EntityFramework.Internals.Extensions
         }
 
         internal static void AttachSpan<T>(this DbCommandInterceptionContext<T> interceptionContext, ISpan span)
-        {
-            interceptionContext.SetUserState(SentryQueryPerformanceListener.SentryUserStateKey, span);
-        }
+            => interceptionContext.SetUserState(SentryQueryPerformanceListener.SentryUserStateKey, span);
     }
 }

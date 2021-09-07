@@ -74,14 +74,8 @@ SentrySdk.ConfigureScope(scope =>
 
 public class SampleUser : IDisposable
 {
-    private int _id { get; set; }
-
     [Key]
-    public int Id
-    {
-        get => _id;
-        set => _id = value;
-    }
+    public int Id { get; set; }
     [Required]
     public string RequiredColumn { get; set; }
 
