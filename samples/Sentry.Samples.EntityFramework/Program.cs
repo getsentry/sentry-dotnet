@@ -1,13 +1,11 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity;
-using System.Linq;
-using System.Threading.Tasks;
 using Sentry;
+using System.Linq;
 
-var _ = SentrySdk.Init(o =>
+_ = SentrySdk.Init(o =>
 {
     o.Debug = true; // To see SDK logs on the console
     o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
@@ -18,57 +16,60 @@ var _ = SentrySdk.Init(o =>
 
 var dbConnection = Effort.DbConnectionFactory.CreateTransient();
 dbConnection.SetConnectionTimeout(60);
-using var db = new SampleDbContext(dbConnection, true);
+var db = new SampleDbContext(dbConnection, true);
 
 // ========================= Insert Requests ==================
 //
 // ============================================================
-var transaction = SentrySdk.StartTransaction("Some Http Post request", "Create");
 Console.WriteLine("Some Http Post request");
-SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-ISpan manualSpan;
-
-
-//Populate the database
-for (int j = 0; j < 10; j++)
+SentrySdk.ConfigureScope(scope =>
 {
-    manualSpan = SentrySdk.GetSpan().StartChild("manual - create item");
-    _ = db.Users.Add(new SampleUser() { Id = j, RequiredColumn = "123" });
+    scope.Transaction = SentrySdk.StartTransaction("/Start", "Create");
+
+
+    var manualSpan = scope.Transaction.StartChild("Database Fill");
+
+    //Populate the database
+    for (var j = 0; j < 10; j++)
+    {
+        _ = db.Users.Add(new SampleUser { Id = j, RequiredColumn = "123" });
+    }
+    db.Users.Add(new SampleUser { Id = 52, RequiredColumn = "Bill" });
     manualSpan.Finish();
-}
-manualSpan = SentrySdk.GetSpan().StartChild("manual - create item");
-db.Users.Add(new SampleUser() { Id = 52, RequiredColumn = "Bill" });
-manualSpan.Finish();
 
-
-// This will throw a DbEntityValidationException and crash the app
-// But Sentry will capture the error.
-manualSpan = SentrySdk.GetSpan().StartChild("manual - save changes");
-db.SaveChanges();
-manualSpan.Finish();
-transaction.Finish();
+    // This will throw a DbEntityValidationException and crash the app
+    // But Sentry will capture the error.
+    manualSpan = scope.Transaction.StartChild("Save changes");
+    db.SaveChanges();
+    manualSpan.Finish();
+    scope.Transaction.Finish();
+});
 
 // ========================= Search Request ===================
 //
 // ============================================================
-transaction = SentrySdk.StartTransaction("Some Http Search", "Create");
-Console.WriteLine("Some Http Search");
-SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+SentrySdk.ConfigureScope(scope =>
+{
+    scope.Transaction = SentrySdk.StartTransaction("/Users?name=Bill", "GET");
+    Console.WriteLine("Searching for users named Bill");
 
-manualSpan = SentrySdk.GetSpan().StartChild("manual - search");
-var query = db.Users
+    var manualSpan = scope.Transaction.StartChild("manual - search");
+    var query = db.Users
         .Where(s => s.RequiredColumn == "Bill")
         .ToList();
-manualSpan.Finish();
-transaction.Finish();
-Console.WriteLine($"Found {query.Count}");
+    manualSpan.Finish();
+    scope.Transaction.Finish();
+    Console.WriteLine($"Found {query.Count} users.");
+});
 
-Console.WriteLine("Text SQL Search");
-transaction = SentrySdk.StartTransaction("Text SQL Search", "Create");
-SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-var query2 = db.Users.Where(user => user.Id > 5).ToList();
-transaction.Finish();
-Console.WriteLine($"Found {query2.Count}");
+SentrySdk.ConfigureScope(scope =>
+{
+    Console.WriteLine("Searching for users with Id higher than 5...");
+    scope.Transaction = SentrySdk.StartTransaction("/Users?id>5", "GET");
+    var query2 = db.Users.Where(user => user.Id > 5).ToList();
+    scope.Transaction.Finish();
+    Console.WriteLine($"Found {query2.Count} users.");
+});
 
 
 public class SampleUser : IDisposable
@@ -78,15 +79,8 @@ public class SampleUser : IDisposable
     [Key]
     public int Id
     {
-        get
-        {
-            Task.Delay(150).Wait();
-            return _id;
-        }
-        set
-        {
-            _id = value;
-        }
+        get => _id;
+        set => _id = value;
     }
     [Required]
     public string RequiredColumn { get; set; }

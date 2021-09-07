@@ -1,7 +1,6 @@
 using System.Data.Entity.Infrastructure.Interception;
 using Sentry.Integrations;
 
-
 namespace Sentry.EntityFramework
 {
     class DbInterceptionIntegration : ISdkIntegration

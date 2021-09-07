@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using System.Data.Entity.Infrastructure.Interception;
 using Sentry.EntityFramework;
 using Sentry.EntityFramework.ErrorProcessors;
 using Sentry.Extensibility;

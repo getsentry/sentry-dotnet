@@ -8,6 +8,9 @@ namespace Sentry.EntityFramework
     internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     {
         internal const string SentryUserStateKey = "SentrySpanRef";
+        internal const string DbReaderKey = "db.query";
+        internal const string DbNonQueryKey = "db.sql-statement";
+        internal const string DbScalarKey = "db.query-scalar";
 
         private SentryOptions _options { get; }
         private IHub _hub { get; }
@@ -19,24 +22,24 @@ namespace Sentry.EntityFramework
         }
 
         public void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
-            => CreateOrUpdateSpan("ef.reader", command.CommandText, interceptionContext);
+            => CreateSpan(DbReaderKey, command.CommandText, interceptionContext);
 
         public void ReaderExecuted(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
-            => Finish("ef.reader", interceptionContext);
+            => Finish(DbReaderKey, interceptionContext);
 
         public void NonQueryExecuting(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
-            => CreateOrUpdateSpan("ef.non-query", command.CommandText, interceptionContext);
+            => CreateSpan(DbNonQueryKey, command.CommandText, interceptionContext);
 
         public void NonQueryExecuted(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
-            => Finish("ef.non-query", interceptionContext);
+            => Finish(DbNonQueryKey, interceptionContext);
 
         public void ScalarExecuting(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
-            => CreateOrUpdateSpan("ef.scalar", command.CommandText, interceptionContext);
+            => CreateSpan(DbScalarKey, command.CommandText, interceptionContext);
 
         public void ScalarExecuted(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
-            => Finish("ef.scalar", interceptionContext);
+            => Finish(DbScalarKey, interceptionContext);
 
-        private void CreateOrUpdateSpan<T>(string key, string? command,
+        private void CreateSpan<T>(string key, string? command,
             DbCommandInterceptionContext<T> interceptionContext)
         {
             if (_hub.GetSpan()?.StartChild(key, command) is { } span)
@@ -45,12 +48,18 @@ namespace Sentry.EntityFramework
             }
         }
 
+        /// <summary>
+        /// Finishes the span contained on interceptionContext.
+        /// </summary>
+        /// <typeparam name="T">The TResult from the Interception (unused)</typeparam>
+        /// <param name="key">The key operation, used for logging.</param>
+        /// <param name="interceptionContext">The data that must contain a Span reference.</param>
         private void Finish<T>(string key, DbCommandInterceptionContext<T> interceptionContext)
         {
             //Recover direct reference of the Span.
             if (interceptionContext.GetSpanFromContext() is { } span)
             {
-                span.Finish();
+                span.Finish(interceptionContext.Exception is null? SpanStatus.Ok : SpanStatus.InternalError);
             }
             else
             {

@@ -6,6 +6,10 @@
 
 - Add fallback to Scope Stack from AspNet ([#1180](https://github.com/getsentry/sentry-dotnet/pull/1180))
 
+### Features
+
+- Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
+
 ## 3.9.0
 
 ### Features
