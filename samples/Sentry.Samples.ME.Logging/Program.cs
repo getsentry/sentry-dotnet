@@ -26,7 +26,7 @@ internal class Program
                 o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
 
                 // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
-                o.AddLogEntryFilter((_, level, _, exception)
+                o.AddLogEntryFilter((category, level, eventId, exception)
                     => level < LogLevel.Critical && exception?.GetType() == typeof(DivideByZeroException));
 
                 o.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
