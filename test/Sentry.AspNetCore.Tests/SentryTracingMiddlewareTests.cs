@@ -306,7 +306,7 @@ namespace Sentry.AspNetCore.Tests
                 .Configure(app =>
                 {
                     app.UseRouting();
-                    app.Use(async (r, c) =>
+                    app.Use(async (_, c) =>
                     {
                         try
                         {

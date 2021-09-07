@@ -97,7 +97,7 @@ internal static class Program
             // Example customizing the HttpClientHandlers created
             o.CreateHttpClientHandler = () => new HttpClientHandler
             {
-                ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+                ServerCertificateCustomValidationCallback = (_, certificate, _, _) =>
                     !certificate.Archived
             };
 
