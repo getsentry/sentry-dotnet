@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Sentry;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 using Xunit;
 
 // ReSharper disable once CheckNamespace

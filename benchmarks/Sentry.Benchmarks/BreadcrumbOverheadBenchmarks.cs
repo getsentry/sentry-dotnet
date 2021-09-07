@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
-using Sentry.Protocol;
 
 namespace Sentry.Benchmarks
 {

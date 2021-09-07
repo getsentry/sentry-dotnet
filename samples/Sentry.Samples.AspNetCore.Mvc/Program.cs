@@ -2,7 +2,6 @@ using System;
 using System.Net;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Sentry;
 
 namespace Samples.AspNetCore.Mvc
 {

@@ -1,9 +1,7 @@
 #if NET5_0 || NETCOREAPP3_1
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Builder;

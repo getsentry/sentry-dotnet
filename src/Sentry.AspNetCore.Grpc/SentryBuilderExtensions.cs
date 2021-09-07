@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore.Grpc

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using FluentAssertions;
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
