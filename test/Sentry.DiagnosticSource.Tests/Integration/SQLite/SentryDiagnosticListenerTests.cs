@@ -32,7 +32,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
                 );
 
                 Hub = Substitute.For<IHub>();
-                Hub.GetSpan().ReturnsForAnyArgs((_) => GetSpan());
+                Hub.GetSpan().ReturnsForAnyArgs(_ => GetSpan());
                 Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<IReadOnlyDictionary<string, object>>())
                     .ReturnsForAnyArgs(callinfo => StartTransaction(Hub, callinfo.Arg<ITransactionContext>()));
 
@@ -90,7 +90,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
             Assert.Single(spans.Where(s => s.Status == SpanStatus.Ok && s.Operation == "db.query_compiler"));
 #endif
             Assert.Single(spans.Where(s => s.Status == SpanStatus.InternalError && s.Operation == "db.query"));
-            Assert.All(spans, (span) => Assert.True(span.IsFinished));
+            Assert.All(spans, span => Assert.True(span.IsFinished));
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 #else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
 #endif
-            Assert.All(spans, (span) => Assert.True(span.IsFinished));
+            Assert.All(spans, span => Assert.True(span.IsFinished));
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 #if !NET461 && !NETCOREAPP2_1
             Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
-            Assert.All(spans, (span) =>
+            Assert.All(spans, span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);
@@ -186,7 +186,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 #if !NET461 && !NETCOREAPP2_1
             Assert.Equal(4, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
-            Assert.All(spans, (span) =>
+            Assert.All(spans, span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);
