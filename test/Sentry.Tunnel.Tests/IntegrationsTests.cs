@@ -26,7 +26,7 @@ namespace Sentry.Tunnel.Tests
                     _httpClient = new HttpClient(_httpMessageHandler);
                     var factory = Substitute.For<IHttpClientFactory>();
                     factory.CreateClient(Arg.Any<string>()).Returns(_httpClient);
-                    s.AddSingleton<IHttpClientFactory>(factory);
+                    s.AddSingleton(factory);
                 })
                 .Configure(app => { app.UseSentryTunneling(); });
             _server = new TestServer(builder);
