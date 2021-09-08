@@ -79,7 +79,7 @@ namespace Sentry.DiagnosticSource.Tests
                         type == SqlDataWriteConnectionCloseAfterCommand ||
                         type == SqlDataWriteTransactionCommitAfter ||
                         type == SqlMicrosoftWriteTransactionCommitAfter
-                    => (span) => span.Description is null && span.Operation == "db.connection",
+                    => span => span.Description is null && span.Operation == "db.connection",
                 _ when
                         type == SqlDataBeforeExecuteCommand ||
                         type == SqlMicrosoftBeforeExecuteCommand ||
@@ -87,7 +87,7 @@ namespace Sentry.DiagnosticSource.Tests
                         type == SqlMicrosoftAfterExecuteCommand ||
                         type == SqlDataWriteCommandError ||
                         type == SqlMicrosoftWriteCommandError
-                    => (span) => span.Operation == "db.query",
+                    => span => span.Operation == "db.query",
                 _ => throw new NotSupportedException()
             };
 
@@ -311,7 +311,7 @@ namespace Sentry.DiagnosticSource.Tests
             var commandSpan = _fixture.Spans.First(s => GetValidator(executeBeforeKey)(s));
 
             // Validate if all spans were finished.
-            Assert.All(_fixture.Spans, (span) =>
+            Assert.All(_fixture.Spans, span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);

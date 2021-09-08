@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using Sentry;
-using Sentry.Extensibility;
 using Sentry.Internal;
 using Xunit;
 

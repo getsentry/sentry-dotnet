@@ -1,11 +1,8 @@
 using System;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests.Internals

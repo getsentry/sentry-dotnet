@@ -124,7 +124,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
             var isInvoked = false;
 
-            await sut.ConfigureScopeAsync(scope =>
+            await sut.ConfigureScopeAsync(_ =>
             {
                 isInvoked = true;
                 return default;
@@ -314,7 +314,7 @@ namespace Sentry.Tests.Internals
 
             await Task.WhenAll(Enumerable.Range(1, 5)
                 .Select(_ => Enumerable.Range(1, 5)
-                    .Select(__ => Test(1)))
+                    .Select(_ => Test(1)))
                 .SelectMany(t => t));
 
             Assert.Equal(root, sut.GetCurrent());

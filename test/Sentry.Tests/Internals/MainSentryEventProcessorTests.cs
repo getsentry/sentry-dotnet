@@ -452,7 +452,7 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void Process_DiffentCultureInfoAndCultureUiInfo_CultureInfoAndCultureUiInfoSet()
+        public void Process_DifferentCultureInfoAndCultureUiInfo_CultureInfoAndCultureUiInfoSet()
         {
             //Arrange
             var sut = _fixture.GetSut();

@@ -1,6 +1,5 @@
 using Sentry;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Samples.AspNetCore.Mvc
 {

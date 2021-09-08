@@ -4,7 +4,6 @@ using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Infrastructure;
-using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace
 // Ensures 'AddSentry' can be found without: 'using Sentry;'
