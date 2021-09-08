@@ -54,7 +54,9 @@ namespace Sentry.EntityFramework
         /// </summary>
         public virtual void Log<T>(DbCommand command, DbCommandInterceptionContext<T> interceptionContext)
         {
-            if (interceptionContext.Exception != null)
+            if (string.IsNullOrEmpty(command.CommandText))
+            { }
+            else if (interceptionContext.Exception != null)
             {
                 _queryLogger.Log(command.CommandText, BreadcrumbLevel.Error);
             }
