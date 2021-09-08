@@ -51,7 +51,7 @@ namespace Sentry.EntityFramework
         /// <summary>
         /// Finishes the span contained on interceptionContext.
         /// </summary>
-        /// <typeparam name="T">The TResult from the Interception (unused)</typeparam>
+        /// <typeparam name="T">(unused) The TResult from the Interception.</typeparam>
         /// <param name="key">The key operation, used for logging.</param>
         /// <param name="interceptionContext">The data that must contain a Span reference.</param>
         private void Finish<T>(string key, DbCommandInterceptionContext<T> interceptionContext)
