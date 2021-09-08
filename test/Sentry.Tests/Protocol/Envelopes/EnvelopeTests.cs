@@ -559,7 +559,7 @@ namespace Sentry.Tests.Protocol.Envelopes
 
             // Act & assert
             await Assert.ThrowsAnyAsync<Exception>(
-                async () => await Envelope.DeserializeAsync(input));
+                () => Envelope.DeserializeAsync(input));
         }
 
         [Fact]
@@ -573,7 +573,7 @@ namespace Sentry.Tests.Protocol.Envelopes
 
             // Act & assert
             await Assert.ThrowsAnyAsync<Exception>(
-                async () => await Envelope.DeserializeAsync(input));
+                () => Envelope.DeserializeAsync(input));
         }
 
         [Fact]
@@ -587,7 +587,7 @@ namespace Sentry.Tests.Protocol.Envelopes
 
             // Act & assert
             await Assert.ThrowsAnyAsync<Exception>(
-                async () => await Envelope.DeserializeAsync(input));
+                () => Envelope.DeserializeAsync(input));
         }
 
         [Fact]

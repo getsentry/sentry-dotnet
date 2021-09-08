@@ -83,7 +83,7 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
 
             var actual = await Assert.ThrowsAsync<Exception>(
-                async () => await sut.InvokeAsync(_fixture.HttpContext));
+                () => sut.InvokeAsync(_fixture.HttpContext));
 
             Assert.Same(expected, actual);
         }
@@ -100,7 +100,7 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
 
             var actual = await Assert.ThrowsAsync<Exception>(
-                async () => await sut.InvokeAsync(_fixture.HttpContext));
+                () => sut.InvokeAsync(_fixture.HttpContext));
 
             Assert.Same(expected, actual);
         }
@@ -214,7 +214,7 @@ namespace Sentry.AspNetCore.Tests
             var sut = _fixture.GetSut();
 
             _ = await Assert.ThrowsAsync<Exception>(
-                    async () => await sut.InvokeAsync(_fixture.HttpContext));
+                    () => sut.InvokeAsync(_fixture.HttpContext));
 
             _ = _fixture.Hub.Received(1).PushScope();
             disposable.Received(1).Dispose();

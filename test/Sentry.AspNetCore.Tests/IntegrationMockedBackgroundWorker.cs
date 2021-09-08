@@ -227,10 +227,10 @@ namespace Else.AspNetCore.Tests
             Configure = o => o.SendDefaultPii = true; // Sentry package will set to Environment.UserName
             ConfigureApp = app =>
             {
-                _ = app.Use(async (context, next) =>
+                _ = app.Use((context, next) =>
                 {
                     context.User = new GenericPrincipal(new GenericIdentity(expectedName), Array.Empty<string>());
-                    await next();
+                    return next();
                 });
             };
             Build();

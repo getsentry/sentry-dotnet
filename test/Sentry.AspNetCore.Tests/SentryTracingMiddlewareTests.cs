@@ -48,10 +48,10 @@ namespace Sentry.AspNetCore.Tests
 
                     app.UseEndpoints(routes =>
                     {
-                        routes.Map("/person/{id}", async ctx =>
+                        routes.Map("/person/{id}", ctx =>
                         {
                             var id = ctx.GetRouteValue("id") as string;
-                            await ctx.Response.WriteAsync($"Person #{id}");
+                            return ctx.Response.WriteAsync($"Person #{id}");
                         });
                     });
                 }));

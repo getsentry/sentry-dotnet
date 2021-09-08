@@ -42,6 +42,6 @@ namespace Sentry.Tests.Extensibility
         public void Dispose_NoOp() => DisabledHub.Instance.Dispose();
 
         [Fact]
-        public async Task FlushAsync_NoOp() => await DisabledHub.Instance.FlushAsync(TimeSpan.FromDays(1));
+        public Task FlushAsync_NoOp() => DisabledHub.Instance.FlushAsync(TimeSpan.FromDays(1));
     }
 }

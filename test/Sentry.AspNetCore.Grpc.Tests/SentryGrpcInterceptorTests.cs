@@ -73,7 +73,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             var sut = _fixture.GetSut();
 
             var actual = await Assert.ThrowsAsync<Exception>(
-                async () => await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
+                () => sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
 
             Assert.Same(expected, actual);
         }
@@ -92,7 +92,7 @@ namespace Sentry.AspNetCore.Grpc.Tests
             var sut = _fixture.GetSut();
 
             _ = await Assert.ThrowsAsync<Exception>(
-                async () => await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
+                () => sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
 
             _ = _fixture.Hub.Received(1).PushScope();
             disposable.Received(1).Dispose();

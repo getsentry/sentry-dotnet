@@ -78,10 +78,10 @@ namespace Sentry.Protocol.Envelopes
             await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task SerializeHeaderAsync(
+        private Task SerializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default) =>
-            await SerializeHeaderAsync(stream, Header, cancellationToken).ConfigureAwait(false);
+            SerializeHeaderAsync(stream, Header, cancellationToken);
 
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)

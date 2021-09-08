@@ -41,7 +41,7 @@ namespace Sentry.Samples.AspNetCore.Serilog
                 {
                     // An example ASP.NET Core middleware that throws an
                     // exception when serving a request to path: /throw
-                    a.Use(async (context, next) =>
+                    a.Use((context, next) =>
                     {
                         // See MinimumBreadcrumbLevel set at the Serilog configuration above
                         Log.Logger.Debug("Static Serilog logger debug log stored as breadcrumbs.");
@@ -74,7 +74,7 @@ namespace Sentry.Samples.AspNetCore.Serilog
                             throw new Exception("An exception thrown from the ASP.NET Core pipeline");
                         }
 
-                        await next();
+                        return next();
                     });
                 })
                 .Build();

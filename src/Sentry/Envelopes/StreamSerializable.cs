@@ -21,8 +21,8 @@ namespace Sentry.Protocol.Envelopes
         public StreamSerializable(Stream source) => Source = source;
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
-            await Source.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+        public Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) =>
+             Source.CopyToAsync(stream, cancellationToken);
 
         /// <inheritdoc />
         public void Dispose() => Source.Dispose();

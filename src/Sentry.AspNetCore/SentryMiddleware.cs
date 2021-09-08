@@ -88,10 +88,10 @@ namespace Sentry.AspNetCore
 
                 if (_options.FlushOnCompletedRequest)
                 {
-                    context.Response.OnCompleted(async () =>
+                    context.Response.OnCompleted(() =>
                     {
                         // Serverless environments flush the queue at the end of each request
-                        await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
+                        return hub.FlushAsync(timeout: _options.FlushTimeout);
                     });
                 }
 

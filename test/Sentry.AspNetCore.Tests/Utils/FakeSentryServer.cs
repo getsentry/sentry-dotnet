@@ -17,11 +17,11 @@ namespace Sentry.AspNetCore.Tests.Utils
                 .UseDefaultServiceProvider(di => di.EnableValidation())
                 .Configure(app =>
                 {
-                    app.Use(async (context, next) =>
+                    app.Use((context, next) =>
                     {
                         var handler = handlers.FirstOrDefault(p => p.Path == context.Request.Path);
 
-                        await (handler?.Handler(context) ?? next());
+                        return handler?.Handler(context) ?? next();
                     });
                 });
 

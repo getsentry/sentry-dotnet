@@ -281,26 +281,26 @@ namespace Sentry.Internal.Http
         internal int GetCacheLength() => GetCacheFilePaths().Count();
 
         // This method asynchronously blocks until the envelope is written to cache, but not until it's sent
-        public async Task SendEnvelopeAsync(
+        public Task SendEnvelopeAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
             // Store the envelope in a file without actually sending it anywhere.
             // The envelope will get picked up by the background thread eventually.
-            await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
+            return StoreToCacheAsync(envelope, cancellationToken);
         }
 
-        public async Task StopWorkerAsync()
+        public Task StopWorkerAsync()
         {
             // Stop worker and wait until it finishes
             _workerCts.Cancel();
-            await _worker.ConfigureAwait(false);
+            return _worker;
         }
 
-        public async Task FlushAsync(CancellationToken cancellationToken = default)
+        public Task FlushAsync(CancellationToken cancellationToken = default)
         {
             _options.DiagnosticLogger?.LogDebug("External FlushAsync invocation: flushing cached envelopes.");
-            await ProcessCacheAsync(cancellationToken).ConfigureAwait(false);
+            return ProcessCacheAsync(cancellationToken);
         }
 
         public async ValueTask DisposeAsync()
