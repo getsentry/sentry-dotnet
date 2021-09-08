@@ -137,7 +137,6 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
             var transaction = hub.StartTransaction("test", "test");
             var spans = transaction.Spans;
             var itemsList = new ConcurrentBag<List<Item>>();
-            var rand = new Random();
 
             // Act
             var tasks = commands.Select(async limit =>
