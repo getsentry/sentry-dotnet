@@ -16,7 +16,7 @@ namespace Sentry.Samples.AspNetCore.Serilog
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
 
-                .UseSerilog((h, c) =>
+                .UseSerilog((_, c) =>
                     c.Enrich.FromLogContext()
                     .MinimumLevel.Debug()
                     .WriteTo.Console()

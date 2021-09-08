@@ -27,7 +27,7 @@ namespace Sentry.Google.Cloud.Functions.Tests
                 HostingEnvironment = HostingEnvironment
             };
             LoggingBuilder = new TestLoggingBuilder();
-            LoggingBuilder.Services.AddSingleton<IWebHostEnvironment>(HostingEnvironment);
+            LoggingBuilder.Services.AddSingleton(HostingEnvironment);
 
         }
 
