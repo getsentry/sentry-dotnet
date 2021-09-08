@@ -265,7 +265,7 @@ namespace Sentry.Tests.Internals
         }
 
         [Fact]
-        public void Process_HasUnsuportedExceptionValue_ValueSetAsExtra()
+        public void Process_HasUnsupportedExceptionValue_ValueSetAsExtra()
         {
             //Assert
             var sut = _fixture.GetSut();

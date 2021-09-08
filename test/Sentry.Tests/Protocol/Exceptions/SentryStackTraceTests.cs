@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests.Protocol.Exceptions

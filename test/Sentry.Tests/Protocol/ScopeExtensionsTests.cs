@@ -2,10 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using FluentAssertions;
-using Sentry.Protocol;
 using Sentry.Testing;
 using Xunit;
 

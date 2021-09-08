@@ -26,7 +26,7 @@ namespace Sentry.Samples.AspNetCore.Blazor.Wasm
                 // Captures logError and higher as events
                 builder.Logging.AddSentry(o => o.InitializeSdk = false);
 
-                builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+                builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
                 await builder.Build().RunAsync();
             }

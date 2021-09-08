@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using Sentry.Protocol;
 
 namespace Sentry.Extensions.Logging
 {

@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests
