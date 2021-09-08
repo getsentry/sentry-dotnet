@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -72,7 +71,7 @@ namespace Sentry.Tests.Internals
         private readonly Fixture _fixture = new();
 
         [Fact]
-        public void WriteDynamicValue_ExceptionParameter_SerialziedException()
+        public void WriteDynamicValue_ExceptionParameter_SerializedException()
         {
             //Assert
             var expectedMessage = "T est";

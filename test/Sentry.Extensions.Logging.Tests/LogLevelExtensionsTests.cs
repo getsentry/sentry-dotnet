@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests

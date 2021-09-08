@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {
