@@ -1,7 +1,7 @@
 using Sentry.Internals.DiagnosticSource;
 using Xunit;
 
-namespace Sentry.Diagnostics.DiagnosticSource.Internals
+namespace Sentry.DiagnosticSource.Internals
 {
     public class DiagnosticsSentryOptionsExtensionsTests
     {
