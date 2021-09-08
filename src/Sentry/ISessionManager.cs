@@ -1,6 +1,8 @@
+using System;
+
 namespace Sentry
 {
-    internal interface ISessionManager
+    internal interface ISessionManager : IDisposable
     {
         void StartSession();
 

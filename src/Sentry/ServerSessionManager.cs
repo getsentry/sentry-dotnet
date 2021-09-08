@@ -14,7 +14,7 @@ namespace Sentry
 
     // AKA server mode
     // https://develop.sentry.dev/sdk/sessions
-    internal class ServerSessionManager : ISessionManager, IDisposable
+    internal class ServerSessionManager : ISessionManager
     {
         private readonly object _lock = new();
 
@@ -36,9 +36,7 @@ namespace Sentry
             _options = options;
             _client = client;
             _clock = clock;
-
-            // TODO: timer should be synced to run *on the minute*
-            _timer = new Timer { Interval = 60 * 1000, Enabled = true, AutoReset = true };
+            _timer = new Timer { Interval = TimeSpan.FromMinutes(1).TotalMilliseconds, Enabled = true, AutoReset = true };
             _timer.Elapsed += (_, _) => Flush();
         }
 
@@ -71,7 +69,7 @@ namespace Sentry
                 // Extract environment
                 var environment = EnvironmentLocator.Resolve(_options);
 
-                // Get now rounded down to the current minute (TODO: or should it be last minute?)
+                // Get now rounded down to the current minute
                 var now = _clock.GetUtcNow();
                 var startTimestamp = new DateTimeOffset(
                     now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, now.Offset
@@ -122,7 +120,6 @@ namespace Sentry
                 // Need to make sure status is correctly set.
                 // Session aggregates don't discern between Crashed and Abnormal.
                 // So we just count them both as errored.
-                // Should we respect ReportError() somehow?
                 if (status == SessionEndStatus.Exited)
                 {
                     ExitedCount++;
@@ -149,6 +146,10 @@ namespace Sentry
             // No-op
         }
 
-        public void Dispose() => _timer.Dispose();
+        public void Dispose()
+        {
+            _timer.Elapsed -= (_, _) => Flush();
+            _timer.Dispose();
+        }
     }
 }

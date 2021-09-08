@@ -378,6 +378,7 @@ namespace Sentry.Internal
             (_ownedClient as IDisposable)?.Dispose();
             _rootScope.Dispose();
             ScopeManager.Dispose();
+            _sessionManager.Dispose();
         }
 
         public SentryId LastEventId

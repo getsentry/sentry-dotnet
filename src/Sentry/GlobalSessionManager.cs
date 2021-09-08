@@ -478,5 +478,10 @@ namespace Sentry
             _options.DiagnosticLogger?.LogDebug(
                 "Failed to report an error on a session because there is none active.");
         }
+
+        public void Dispose()
+        {
+            // No-op. TODO: perhaps end session?
+        }
     }
 }
