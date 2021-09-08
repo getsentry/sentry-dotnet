@@ -1,5 +1,4 @@
 using System.Linq;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests.Protocol

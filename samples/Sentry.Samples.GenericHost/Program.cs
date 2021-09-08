@@ -17,7 +17,7 @@ internal static class Program
                 c.SetBasePath(Directory.GetCurrentDirectory());
                 c.AddJsonFile("appsettings.json", optional: false);
             })
-            .ConfigureServices((c, s) => { s.AddHostedService<SampleHostedService>(); })
+            .ConfigureServices((_, s) => { s.AddHostedService<SampleHostedService>(); })
             .ConfigureLogging((c, l) =>
             {
                 l.AddConfiguration(c.Configuration);

@@ -304,7 +304,7 @@ namespace Sentry.Internal
 
                 actualScope.SessionUpdate = evt switch
                 {
-                    // TODO: Extract both braches as internal extension methods (IsCrashed and IsErrored):
+                    // TODO: Extract both branches as internal extension methods (IsCrashed and IsErrored):
 
                     // Event contains a terminal exception -> end session as crashed
                     var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>

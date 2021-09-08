@@ -2,7 +2,6 @@ using System;
 using log4net;
 using log4net.Core;
 using NSubstitute;
-using Sentry.Protocol;
 using Sentry.Reflection;
 using Xunit;
 

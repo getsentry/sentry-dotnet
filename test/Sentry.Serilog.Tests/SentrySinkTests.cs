@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Reflection;
 using Serilog.Events;
 using Serilog.Formatting.Display;

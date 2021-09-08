@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Testing;
 using Xunit;
 
