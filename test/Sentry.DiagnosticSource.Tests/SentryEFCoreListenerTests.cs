@@ -5,7 +5,7 @@ using NSubstitute;
 using Sentry.Internals.DiagnosticSource;
 using Xunit;
 
-namespace Sentry.Diagnostics.DiagnosticSource.Tests
+namespace Sentry.DiagnosticSource.Tests
 {
     public class SentryEFCoreListenerTests
     {
