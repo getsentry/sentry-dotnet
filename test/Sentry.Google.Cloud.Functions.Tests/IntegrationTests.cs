@@ -36,7 +36,7 @@ namespace Sentry.Google.Cloud.Functions.Tests
 
             var host = Host.CreateDefaultBuilder()
                 .ConfigureWebHost(webHostBuilder => webHostBuilder
-                    .ConfigureServices((context, services) =>
+                    .ConfigureServices((_, services) =>
                     {
                         services.Configure<SentryAspNetCoreOptions>(o =>
                         {

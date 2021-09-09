@@ -11,7 +11,7 @@ using Sentry.Internal.ScopeStack;
 using Sentry.Internals.DiagnosticSource;
 using Xunit;
 
-namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
+namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 {
     public class SentryDiagnosticListenerTests
     {
@@ -32,7 +32,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
                 );
 
                 Hub = Substitute.For<IHub>();
-                Hub.GetSpan().ReturnsForAnyArgs((_) => GetSpan());
+                Hub.GetSpan().ReturnsForAnyArgs(_ => GetSpan());
                 Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<IReadOnlyDictionary<string, object>>())
                     .ReturnsForAnyArgs(callinfo => StartTransaction(Hub, callinfo.Arg<ITransactionContext>()));
 
@@ -62,7 +62,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
         private readonly Fixture _fixture = new();
 
         [Fact]
-        public void EfCoreIntegration_RunSyncronouQueryWithIssue_TransactionWithSpans()
+        public void EfCoreIntegration_RunSynchronousQueryWithIssue_TransactionWithSpans()
         {
             // Arrange
             var hub = _fixture.Hub;
@@ -90,11 +90,11 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
             Assert.Single(spans.Where(s => s.Status == SpanStatus.Ok && s.Operation == "db.query_compiler"));
 #endif
             Assert.Single(spans.Where(s => s.Status == SpanStatus.InternalError && s.Operation == "db.query"));
-            Assert.All(spans, (span) => Assert.True(span.IsFinished));
+            Assert.All(spans, span => Assert.True(span.IsFinished));
         }
 
         [Fact]
-        public void EfCoreIntegration_RunSyncronouQuery_TransactionWithSpans()
+        public void EfCoreIntegration_RunSynchronousQuery_TransactionWithSpans()
         {
             // Arrange
             var hub = _fixture.Hub;
@@ -112,7 +112,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 #else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
 #endif
-            Assert.All(spans, (span) => Assert.True(span.IsFinished));
+            Assert.All(spans, span => Assert.True(span.IsFinished));
         }
 
         [Fact]
@@ -130,14 +130,13 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
                 context.Items.Add(new Item() { Name = $"Number3 {i}" });
                 commands.Add(i * 2);
             }
-            // Save before the Transaction cretion to avoid storing junk.
+            // Save before the Transaction creation to avoid storing junk.
             context.SaveChanges();
 
             var hub = _fixture.Hub;
             var transaction = hub.StartTransaction("test", "test");
             var spans = transaction.Spans;
             var itemsList = new ConcurrentBag<List<Item>>();
-            var rand = new Random();
 
             // Act
             var tasks = commands.Select(async limit =>
@@ -149,11 +148,11 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.Equal(totalCommands, itemsList.Count);
-            Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query"));
 #if !NET461 && !NETCOREAPP2_1
-            Assert.Equal(totalCommands, spans.Where(s => s.Operation == "db.query_compiler").Count());
+            Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
-            Assert.All(spans, (span) =>
+            Assert.All(spans, span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);
@@ -182,11 +181,11 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.Equal(3, result[0].Result.Count);
-            Assert.Equal(4, spans.Where(s => s.Operation == "db.query").Count());
+            Assert.Equal(4, spans.Count(s => s.Operation == "db.query"));
 #if !NET461 && !NETCOREAPP2_1
-            Assert.Equal(4, spans.Where(s => s.Operation == "db.query_compiler").Count());
+            Assert.Equal(4, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
-            Assert.All(spans, (span) =>
+            Assert.All(spans, span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);

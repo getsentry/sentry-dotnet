@@ -10,7 +10,6 @@ using NLog.Targets;
 
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.NLog

@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Sentry.Diagnostics.DiagnosticSource.Tests.Integration.SQLite
+namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 {
     public class Database
     {

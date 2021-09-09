@@ -315,9 +315,9 @@ namespace Sentry.Tests
             }
 
             // Assert
-            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Email == expectedEmail));
-            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Id == expectedid));
-            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Username == expectedusername));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Email == expectedEmail));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedid));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedusername));
         }
 
         [Theory]

@@ -1,4 +1,3 @@
-using Sentry.Protocol;
 using Serilog.Events;
 
 namespace Sentry.Serilog

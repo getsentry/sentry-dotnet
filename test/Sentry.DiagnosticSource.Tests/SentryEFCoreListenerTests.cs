@@ -5,7 +5,7 @@ using NSubstitute;
 using Sentry.Internals.DiagnosticSource;
 using Xunit;
 
-namespace Sentry.Diagnostics.DiagnosticSource.Tests
+namespace Sentry.DiagnosticSource.Tests
 {
     public class SentryEFCoreListenerTests
     {
@@ -23,16 +23,16 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
                 _ when
                         type == EFQueryCompiling ||
                         type == EFQueryCompiled
-                    => (span) => span.Description != null && span.Operation == "db.query_compiler",
+                    => span => span.Description != null && span.Operation == "db.query_compiler",
                 _ when
                         type == EFConnectionOpening ||
                         type == EFConnectionClosed
-                    => (span) => span.Description == null && span.Operation == "db.connection",
+                    => span => span.Description == null && span.Operation == "db.connection",
                 _ when
                         type == EFCommandExecuting ||
                         type == EFCommandExecuting ||
                         type == EFCommandFailed
-                    => (span) => span.Description != null && span.Operation == "db.query",
+                    => span => span.Description != null && span.Operation == "db.query",
                 _ => throw new NotSupportedException()
             };
 
@@ -51,8 +51,8 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
             {
                 Hub = Substitute.For<IHub>();
                 Tracer = new TransactionTracer(Hub, "foo", "bar");
-                Hub.GetSpan().ReturnsForAnyArgs((_) => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
-                Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns((_) =>
+                Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
+                Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
                 {
                     Spans.LastOrDefault(s => s.IsFinished is false)?.Finish(SpanStatus.InternalError);
                     return SentryId.Empty;
@@ -141,7 +141,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
             var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
             var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
             // Validate if all spans were finished.
-            Assert.All(_fixture.Spans, (span) =>
+            Assert.All(_fixture.Spans, span =>
             {
                 Assert.True(span.IsFinished);
                 if (span.Operation == "db.connection")
@@ -185,7 +185,7 @@ namespace Sentry.Diagnostics.DiagnosticSource.Tests
 
             // Validate if all spans were finished.
             Assert.All(new[] { compilerSpan, connectionSpan },
-                (span) =>
+                span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);

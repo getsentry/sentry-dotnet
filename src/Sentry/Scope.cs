@@ -100,7 +100,7 @@ namespace Sentry
         }
 
         // Internal for testing.
-        internal Action<User?> UserChanged => (user) =>
+        internal Action<User?> UserChanged => user =>
         {
             if (Options.EnableScopeSync &&
                 Options.ScopeObserver is { } observer)
