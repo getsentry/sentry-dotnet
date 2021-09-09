@@ -16,7 +16,10 @@ namespace Sentry.AspNetCore.Extensions
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
             var routePattern = endpoint?.RoutePattern.RawText;
 
-            if (!string.IsNullOrWhiteSpace(routePattern))
+            // Skip route pattern and use legacy Mvc route e.g.
+            // {controller=Home}/{action=Index}/{id?}
+            if (!string.IsNullOrWhiteSpace(routePattern) &&
+                routePattern.StartsWith("{controller=") is false)
             {
                 return routePattern;
             }
