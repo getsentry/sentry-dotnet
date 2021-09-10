@@ -7,6 +7,7 @@ namespace Sentry.AspNetCore.Tests.Extensions
 {
     public class HttpContextExtensionsTests
     {
+#if !NETCOREAPP2_1
         private static void AddRouteValuesIfNotNull(RouteValueDictionary route, string key, string value)
         {
             if (value is not null)
@@ -37,6 +38,6 @@ namespace Sentry.AspNetCore.Tests.Extensions
             // Assert
             Assert.Equal(assertOutput, filteredRoute);
         }
-
+#endif
     }
 }
