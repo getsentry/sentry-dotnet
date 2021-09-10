@@ -35,7 +35,7 @@ namespace Sentry.Tests
         }
 
         [Fact]
-        public void LastEventId_StartsOfFalse()
+        public void LastEventId_NoEventsCaptured_IsEmpty()
         {
             Assert.Equal(default, SentrySdk.LastEventId);
         }
@@ -51,6 +51,24 @@ namespace Sentry.Tests
                     using (SentrySdk.Init())
                     {
                         var id = SentrySdk.CaptureMessage("test");
+                        Assert.Equal(id, SentrySdk.LastEventId);
+                    }
+                });
+        }
+
+        [Fact]
+        public void LastEventId_Transaction_DoesNotReset()
+        {
+            EnvironmentVariableGuard.WithVariable(
+                DsnEnvironmentVariable,
+                ValidDsnWithSecret,
+                () =>
+                {
+                    using (SentrySdk.Init(o => o.TracesSampleRate = 1.0))
+                    {
+                        var id = SentrySdk.CaptureMessage("test");
+                        var transaction = SentrySdk.StartTransaction("test", "test");
+                        transaction.Finish();
                         Assert.Equal(id, SentrySdk.LastEventId);
                     }
                 });
