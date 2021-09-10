@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
@@ -11,17 +12,17 @@ namespace Sentry.AspNetCore.Extensions
     {
         public static string? TryGetRouteTemplate(this HttpContext context)
         {
+            
 #if !NETSTANDARD2_0 // endpoint routing is only supported after ASP.NET Core 3.0
             // Requires .UseRouting()/.UseEndpoints()
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
             var routePattern = endpoint?.RoutePattern.RawText;
 
-            // Skip route pattern if it resembles to a MVC route or null  e.g.
-            // {controller=Home}/{action=Index}/{id?}
-            if (!string.IsNullOrWhiteSpace(routePattern) &&
-                routePattern.StartsWith("{controller=") is false)
+            if (!string.IsNullOrWhiteSpace(routePattern))
             {
-                return routePattern;
+                // Skip route pattern if it resembles to a MVC route or null  e.g.
+                // {controller=Home}/{action=Index}/{id?}
+                return routePattern.StartsWith('{') ? ReplaceMcvParameters(routePattern, context) : routePattern;
             }
 #endif
 
@@ -44,6 +45,31 @@ namespace Sentry.AspNetCore.Extensions
             // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
             // then there is no way for us to extract anything that resembles a route template.
             return null;
+        }
+
+        // Internal for testing.
+        internal static string ReplaceMcvParameters(string route, HttpContext? context)
+        {
+            // Return RouteData or Null, marking the HttpContext as nullable since the output doesn't
+            // shows the nullable output.
+            var routeData = context?.GetRouteData();
+
+            if (routeData?.Values["controller"]?.ToString() is { } controller)
+            {
+                route = Regex.Replace(route, "\\{controller=[^\\}]+\\}", controller);
+            }
+
+            if (routeData?.Values["action"]?.ToString() is { } action)
+            {
+                route = Regex.Replace(route, "\\{action=[^\\}]+\\}", action);
+            }
+
+            if (routeData?.Values["area"]?.ToString() is { } area)
+            {
+                route = Regex.Replace(route, "\\{area=[^\\}]+\\}", area);
+            }
+
+            return route;
         }
 
         public static string? TryGetTransactionName(this HttpContext context)
