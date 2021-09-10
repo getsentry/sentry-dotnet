@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.9.1
 
 ### Fixes
 
+- Removed braces from tag keys on DefaultSentryScopeStateProcessor ([#1183](https://github.com/getsentry/sentry-dotnet/pull/1183))
 - Fix SQLClient unplanned behaviors ([#1179](https://github.com/getsentry/sentry-dotnet/pull/1179))
 - Add fallback to Scope Stack from AspNet ([#1180](https://github.com/getsentry/sentry-dotnet/pull/1180))
 

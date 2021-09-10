@@ -11,6 +11,8 @@ namespace Sentry
     /// </summary>
     public class DefaultSentryScopeStateProcessor : ISentryScopeStateProcessor
     {
+        private static readonly char[] TrimFilter = { '{', '}' };
+
         /// <summary>
         /// Applies state onto a scope.
         /// </summary>
@@ -31,11 +33,9 @@ namespace Sentry
                         scope.SetTags(keyValStringObject
                             .Where(kv => !string.IsNullOrEmpty(kv.Value as string))
                             .Select(k => new KeyValuePair<string, string>(
-                                k.Key,
+                                k.Key.Trim(TrimFilter),
                                 // TODO: Candidate for serialization instead. Likely Contexts is a better fit.
                                 k.Value.ToString()!)));
-
-
                         break;
                     }
 #if !NET461
