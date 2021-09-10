@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Exceptions from UnhandledExceptionIntegration were not marking sessions as crashed ([#1193](https://github.com/getsentry/sentry-dotnet/pull/1193))
+
 ## 3.9.1
 
 ### Fixes
