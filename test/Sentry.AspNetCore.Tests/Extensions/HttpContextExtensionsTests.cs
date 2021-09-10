@@ -1,3 +1,4 @@
+#if !NETCOREAPP2_1
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sentry.AspNetCore.Extensions;
@@ -7,7 +8,6 @@ namespace Sentry.AspNetCore.Tests.Extensions
 {
     public class HttpContextExtensionsTests
     {
-#if !NETCOREAPP2_1
         private static void AddRouteValuesIfNotNull(RouteValueDictionary route, string key, string value)
         {
             if (value is not null)
@@ -35,7 +35,7 @@ namespace Sentry.AspNetCore.Tests.Extensions
             AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "area", area);
 
             // Act
-            var filteredRoute = HttpContextExtensions.ReplaceMcvParameters(routeInput, httpContext);
+            var filteredRoute = HttpContextExtensions.ReplaceMvcParameters(routeInput, httpContext);
 
             // Assert
             Assert.Equal(assertOutput, filteredRoute);
@@ -67,6 +67,6 @@ namespace Sentry.AspNetCore.Tests.Extensions
             // Assert
             Assert.False(HttpContextExtensions.RouteHasMvcParameters(route));
         }
-#endif
     }
 }
+#endif

@@ -22,7 +22,7 @@ namespace Sentry.AspNetCore.Extensions
             {
                 // Skip route pattern if it resembles to a MVC route or null  e.g.
                 // {controller=Home}/{action=Index}/{id?}
-                return RouteHasMvcParameters(routePattern) ? ReplaceMcvParameters(routePattern, context) : routePattern;
+                return RouteHasMvcParameters(routePattern) ? ReplaceMvcParameters(routePattern, context) : routePattern;
             }
 #endif
 
@@ -48,7 +48,7 @@ namespace Sentry.AspNetCore.Extensions
         }
 
         // Internal for testing.
-        internal static string ReplaceMcvParameters(string route, HttpContext? context)
+        internal static string ReplaceMvcParameters(string route, HttpContext? context)
         {
             // Return RouteData or Null, marking the HttpContext as nullable since the output doesn't
             // shows the nullable output.
@@ -75,6 +75,7 @@ namespace Sentry.AspNetCore.Extensions
         // Internal for testing.
         internal static bool RouteHasMvcParameters(string route)
             => route.Contains("{controller=") || route.Contains("{action=") || route.Contains("{area=");
+
         public static string? TryGetTransactionName(this HttpContext context)
         {
             var route = context.TryGetRouteTemplate();
