@@ -6,6 +6,12 @@
 
 - Use fallback if route pattern is MVC ([#1188](https://github.com/getsentry/sentry-dotnet/pull/1188))
 
+## 3.9.2
+
+### Fixes
+
+- Exceptions from UnhandledExceptionIntegration were not marking sessions as crashed ([#1193](https://github.com/getsentry/sentry-dotnet/pull/1193))
+
 ## 3.9.1
 
 ### Fixes
