@@ -32,8 +32,8 @@ namespace Sentry.AspNetCore.Tests.Extensions
             AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "action", action);
             AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "area", area);
 
-        // Act
-        var filteredRoute = HttpContextExtensions.ReplaceMcvParameters(routeInput, httpContext);
+            // Act
+            var filteredRoute = HttpContextExtensions.ReplaceMcvParameters(routeInput, httpContext);
 
             // Assert
             Assert.Equal(assertOutput, filteredRoute);
