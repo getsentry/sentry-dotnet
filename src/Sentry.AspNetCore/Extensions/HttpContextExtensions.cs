@@ -22,7 +22,7 @@ namespace Sentry.AspNetCore.Extensions
             {
                 // Skip route pattern if it resembles to a MVC route or null  e.g.
                 // {controller=Home}/{action=Index}/{id?}
-                return RouteHasMvcParameters(routePattern) 
+                return RouteHasMvcParameters(routePattern)
                     ? ReplaceMvcParameters(routePattern, context)
                     : routePattern;
             }
