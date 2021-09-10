@@ -304,15 +304,13 @@ namespace Sentry.Internal
 
                 actualScope.SessionUpdate = evt switch
                 {
-                    // TODO: Extract both branches as internal extension methods (IsCrashed and IsErrored):
-
                     // Event contains a terminal exception -> end session as crashed
-                    var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>
+                    var e when e.HasUnhandledException =>
                         _sessionManager.EndSession(SessionEndStatus.Crashed),
 
                     // Event contains a non-terminal exception -> report error
                     // (this might return null if the session has already reported errors before)
-                    var e when e.Exception is not null || e.SentryExceptions?.Any() == true =>
+                    var e when e.HasException =>
                         _sessionManager.ReportError(),
 
                     // Event doesn't contain any kind of exception -> no reason to attach session update

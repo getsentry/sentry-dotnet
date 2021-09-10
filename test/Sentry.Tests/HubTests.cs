@@ -7,6 +7,7 @@ using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
@@ -336,6 +337,38 @@ namespace NotSentry.Tests
             {
                 SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
             });
+
+            // Assert
+            worker.Received().EnqueueEnvelope(
+                Arg.Is<Envelope>(e =>
+                    e.Items
+                        .Select(i => i.Payload)
+                        .OfType<JsonSerializable>()
+                        .Select(i => i.Source)
+                        .OfType<SessionUpdate>()
+                        .Single()
+                        .EndStatus == SessionEndStatus.Crashed
+                ));
+        }
+
+        [Fact]
+        public void AppDomainUnhandledExceptionIntegration_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+        {
+            // Arrange
+            var worker = Substitute.For<IBackgroundWorker>();
+
+            var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
+            var client = new SentryClient(options, worker);
+            var hub = new Hub(options, client);
+
+            var integration = new AppDomainUnhandledExceptionIntegration(Substitute.For<IAppDomain>());
+            integration.Register(hub, options);
+
+            hub.StartSession();
+
+            // Act
+            // Simulate a terminating exception
+            integration.Handle(this, new UnhandledExceptionEventArgs(new Exception("test"), true));
 
             // Assert
             worker.Received().EnqueueEnvelope(
