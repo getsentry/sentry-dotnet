@@ -1,4 +1,3 @@
-#if !NETCOREAPP2_1
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sentry.AspNetCore.Extensions;
