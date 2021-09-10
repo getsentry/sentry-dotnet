@@ -167,8 +167,8 @@ namespace Sentry
         internal bool HasException => Exception is not null || SentryExceptions?.Any() == true;
 
         internal bool HasUnhandledException => (SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
-                                                // Before event is processed by the client and SentryExceptions created.
-                                                // See: AppDomainUnhandledExceptionIntegration
+                                               // Before event is processed by the client and SentryExceptions created.
+                                               // See: AppDomainUnhandledExceptionIntegration
                                                || Exception?.Data[Mechanism.HandledKey] is false;
 
         /// <summary>
