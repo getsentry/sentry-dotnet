@@ -4,6 +4,18 @@
 
 ### Fixes
 
+- Use fallback if route pattern is MVC ([#1188](https://github.com/getsentry/sentry-dotnet/pull/1188))
+
+## 3.9.2
+
+### Fixes
+
+- Exceptions from UnhandledExceptionIntegration were not marking sessions as crashed ([#1193](https://github.com/getsentry/sentry-dotnet/pull/1193))
+
+## 3.9.1
+
+### Fixes
+
 - Removed braces from tag keys on DefaultSentryScopeStateProcessor ([#1183](https://github.com/getsentry/sentry-dotnet/pull/1183))
 - Fix SQLClient unplanned behaviors ([#1179](https://github.com/getsentry/sentry-dotnet/pull/1179))
 - Add fallback to Scope Stack from AspNet ([#1180](https://github.com/getsentry/sentry-dotnet/pull/1180))

@@ -41,6 +41,7 @@ namespace Sentry.Samples.NLog
             using (MappedDiagnosticsLogicalContext.SetScoped("id", "myId"))
             using (MappedDiagnosticsLogicalContext.SetScoped("username", "userNumberOne"))
             using (MappedDiagnosticsLogicalContext.SetScoped("email", "theCoolest@sample.com"))
+            using (MappedDiagnosticsLogicalContext.SetScoped("ipAddress", "127.0.0.1"))
             {
                 // Minimum Breadcrumb and Event log levels are set to levels higher than Trace.
                 // In this case, Trace messages are ignored
@@ -123,6 +124,7 @@ namespace Sentry.Samples.NLog
                         Id = "${mdlc:item=id}",
                         Username = "${mdlc:item=username}",
                         Email = "${mdlc:item=email}",
+                        IpAddress = "${mdlc:item=ipAddress}",
                         Other =
                         {
                             new TargetPropertyWithContext("mood", "joyous")
