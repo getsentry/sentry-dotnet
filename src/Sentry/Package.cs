@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -56,6 +58,29 @@ namespace Sentry
             var version = json.GetProperty("version").GetStringOrThrow();
 
             return new Package(name, version);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Name.GetHashCode() * 397) ^ Version.GetHashCode();
+            }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj is Package package)
+            {
+                return Name == package.Name && Version == package.Version;
+            }
+
+            return false;
         }
     }
 }

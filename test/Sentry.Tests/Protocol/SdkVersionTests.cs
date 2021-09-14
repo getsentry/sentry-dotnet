@@ -57,5 +57,26 @@ namespace Sentry.Tests.Protocol
             sdk.AddPackage("a", "1");
             yield return new object[] { (sdk, "{\"packages\":[{\"name\":\"a\",\"version\":\"1\"},{\"name\":\"b\",\"version\":\"2\"}]}") };
         }
+
+        [Fact]
+        public void SerializeObject_IgnoresDuplicatePackages()
+        {
+            var sdkVersion = new SdkVersion
+            {
+                Name = "Sentry.Test.SDK",
+                Version = "3.9.2"
+            };
+            sdkVersion.AddPackage("nuget:Sentry.Extensions.Logging", "3.9.2");
+            sdkVersion.AddPackage("nuget:Sentry", "3.9.2");
+            sdkVersion.AddPackage("nuget:Sentry.Extensions.Logging", "3.9.2");
+            sdkVersion.AddPackage("nuget:Sentry", "3.9.2");
+            var actual = sdkVersion.ToJsonString();
+            Assert.Equal(
+                "{\"packages\":[{\"name\":\"nuget:Sentry.Extensions.Logging\",\"version\":\"3.9.2\"},{\"name\":\"nuget:Sentry\",\"version\":\"3.9.2\"}]," +
+                "\"name\":\"Sentry.Test.SDK\"," +
+                "\"version\":\"3.9.2\"}",
+                actual);
+
+        }
     }
 }
