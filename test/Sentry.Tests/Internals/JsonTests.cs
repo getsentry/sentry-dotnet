@@ -123,7 +123,8 @@ namespace Sentry.Tests.Internals
                 "\"InnerException\":null," +
                 "\"HelpLink\":null," +
                 "\"Source\":\"Sentry.Tests\"," +
-                "\"HResult\":-2147467261}" +
+                "\"HResult\":" + ex.HResult +
+                "}" +
                 "}";
 
             // Assert
