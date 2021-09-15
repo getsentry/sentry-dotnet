@@ -20,7 +20,7 @@ namespace Sentry.AspNetCore.Extensions
             // Requires .UseRouting()/.UseEndpoints()
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
             var routePattern = endpoint?.RoutePattern.RawText;
-            
+
             if (NewRouteFormat(routePattern, context) is { } formattedRoute)
             {
                 return formattedRoute;
