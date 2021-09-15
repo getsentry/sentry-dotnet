@@ -105,28 +105,29 @@ namespace Sentry.Tests.Internals
             var expectedStackTrace = _fixture.ToJsonString(ex.StackTrace);
             ex.Data.Add(expectedData.Key, expectedData.Value);
 
-            var expectedSerializedData =
-                "{\"" +
-                "Id\":1," +
-                "\"Data\":\"1234\"" +
-                ",\"Object\":{";
-
-            var expectedSerializedException = new[]
-            {
-                $"\"Message\":\"{expectedMessage}\"",
-                "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
-                "\"InnerException\":null",
-                "\"Source\":\"Sentry.Tests\"",
-                $"\"StackTrace\":{expectedStackTrace}"
-            };
             var data = new DataWithSerializableObject<Exception>(ex);
 
             // Act
             var serializedString = _fixture.ToJsonString(data);
 
+            var exptectedSerializedException =
+                "{" +
+                "\"Id\":1," +
+                "\"Data\":\"1234\"," +
+                "\"Object\":" +
+                "{" +
+                "\"TargetSite\":null," +
+                "\"StackTrace\":" +
+                expectedStackTrace +
+                ",\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," +
+                "\"InnerException\":null," +
+                "\"HelpLink\":null," +
+                "\"Source\":\"Sentry.Tests\"," +
+                "\"HResult\":-2147467261}" +
+                "}";
+
             // Assert
-            Assert.StartsWith(expectedSerializedData, serializedString);
-            Assert.All(expectedSerializedException, expectedData => Assert.Contains(expectedData, serializedString));
+            Assert.Equal(exptectedSerializedException, serializedString);
         }
 
         [Fact]
