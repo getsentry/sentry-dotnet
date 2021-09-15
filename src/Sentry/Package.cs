@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -60,6 +58,7 @@ namespace Sentry
             return new Package(name, version);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             unchecked
@@ -68,6 +67,7 @@ namespace Sentry
             }
         }
 
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (ReferenceEquals(this, obj))

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Prevent duplicate package reporting ([#1197](https://github.com/getsentry/sentry-dotnet/pull/1197))
 
 ### Fixes
 
