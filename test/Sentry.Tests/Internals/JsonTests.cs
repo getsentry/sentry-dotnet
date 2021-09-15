@@ -132,7 +132,7 @@ namespace Sentry.Tests.Internals
                 "}}";
             //#endif
 
-            // Assert
+            // Assert2
             Assert.NotNull(expectedStackTrace);
             Assert.Equal(exptectedSerializedException, serializedString);
         }
