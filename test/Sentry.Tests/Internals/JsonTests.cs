@@ -109,23 +109,26 @@ namespace Sentry.Tests.Internals
 
             // Act
             var serializedString = _fixture.ToJsonString(data);
-            System.Diagnostics.Trace.WriteLine(serializedString);
-            var exptectedSerializedException =
-                "{" +
-                "\"Id\":1," +
-                "\"Data\":\"1234\"," +
-                "\"Object\":" +
-                "{" +
-                "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," +
-                "\"InnerException\":null," +
-                "\"TargetSite\":null," +
-                    "\"StackTrace\":" + expectedStackTrace + "," +
 
-                "\"HelpLink\":null," +
-                "\"Source\":\"Sentry.Tests\"," +
-                "\"HResult\":" + ex.HResult +
-                "}" +
-                "}";
+            //Json Serialization of a exception serializes things on a different order, if built on release or not.
+            var exptectedSerializedException =
+#if RELEASE
+                "{" +
+                "\"Id\":1," + "\"Data\":\"1234\"," + "\"Object\":" +
+                "{" +
+                "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," + "\"InnerException\":null," +
+                "\"TargetSite\":null," + "\"StackTrace\":" + expectedStackTrace + "," +
+                "\"HelpLink\":null," + "\"Source\":\"Sentry.Tests\"," + "\"HResult\":" + ex.HResult +
+                "}}";
+#else
+                "{" +
+                "\"Id\":1," + "\"Data\":\"1234\"," + "\"Object\":" +
+                "{" +
+                "\"TargetSite\":null," + "\"StackTrace\":" + expectedStackTrace + "," +
+                "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," + "\"InnerException\":null," + "\"HelpLink\":null," +
+                "\"Source\":\"Sentry.Tests\"," + "\"HResult\":" + ex.HResult +
+                "}}";
+#endif
 
             // Assert
             Assert.NotNull(expectedStackTrace);
