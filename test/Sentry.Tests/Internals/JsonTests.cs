@@ -112,6 +112,7 @@ namespace Sentry.Tests.Internals
 
             //Json Serialization of a exception serializes things on a different order, if built on release or not.
             var exptectedSerializedException =
+                /*
 #if RELEASE
                 "{" +
                 "\"Id\":1," + "\"Data\":\"1234\"," + "\"Object\":" +
@@ -121,6 +122,7 @@ namespace Sentry.Tests.Internals
                 "\"HelpLink\":null," + "\"Source\":\"Sentry.Tests\"," + "\"HResult\":" + ex.HResult +
                 "}}";
 #else
+                */
                 "{" +
                 "\"Id\":1," + "\"Data\":\"1234\"," + "\"Object\":" +
                 "{" +
@@ -128,7 +130,7 @@ namespace Sentry.Tests.Internals
                 "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," + "\"InnerException\":null," + "\"HelpLink\":null," +
                 "\"Source\":\"Sentry.Tests\"," + "\"HResult\":" + ex.HResult +
                 "}}";
-#endif
+//#endif
 
             // Assert
             Assert.NotNull(expectedStackTrace);
