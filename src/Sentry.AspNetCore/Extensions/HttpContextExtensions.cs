@@ -75,11 +75,6 @@ namespace Sentry.AspNetCore.Extensions
                     .Append('.')
                     .Append(action)
                     .ToString();
-                /*
-                return !string.IsNullOrWhiteSpace(area)
-                    ? $"{area}.{controller}.{action}"
-                    : $"{controller}.{action}";
-                */
             }
 
             // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
