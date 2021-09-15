@@ -55,20 +55,16 @@ namespace Sentry.AspNetCore.Extensions
             // despite the annotations claiming otherwise.
             var routeData = context.GetRouteData();
 
-            var language = routeData?.Values["language"]?.ToString();
             var controller = routeData?.Values["controller"]?.ToString();
             var action = routeData?.Values["action"]?.ToString();
             var area = routeData?.Values["area"]?.ToString();
 
             if (!string.IsNullOrWhiteSpace(action))
             {
-                var hasLanguage = !string.IsNullOrWhiteSpace(language);
                 var hasArea = !string.IsNullOrWhiteSpace(area);
                 return new StringBuilder()
                     .AppendIf(context.Request.PathBase.HasValue, context.Request.PathBase.Value?.TrimStart('/'))
                     .AppendIf(context.Request.PathBase.HasValue, '.')
-                    .AppendIf(hasLanguage, language)
-                    .AppendIf(hasLanguage, '.')
                     .AppendIf(hasArea, area)
                     .AppendIf(hasArea, '.')
                     .Append(controller)

@@ -8,7 +8,6 @@ namespace Sentry.AspNetCore.Tests.Extensions
 {
     public class HttpContextExtensionsTests
     {
-
         private class Fixture
         {
             public HttpContext GetSut(string pathBase = null)
@@ -22,8 +21,8 @@ namespace Sentry.AspNetCore.Tests.Extensions
                 return httpContext;
             }
 
-            public HttpContext GetMvcSut(string area = null, string controller = null, string action = null,
-                string language = null, string pathBase = null)
+            public HttpContext GetMvcSut(string area = null, string controller = null, string action = null
+                , string pathBase = null)
             {
                 var httpContext = new DefaultHttpContext();
                 if (pathBase is not null)
@@ -32,7 +31,6 @@ namespace Sentry.AspNetCore.Tests.Extensions
                     httpContext.Request.PathBase = new PathString(pathBase);
                 }
 
-                AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "language", language);
                 AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "controller", controller);
                 AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "action", action);
                 AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "area", area);
@@ -161,16 +159,14 @@ namespace Sentry.AspNetCore.Tests.Extensions
         }
 
         [Theory]
-        [InlineData("myPath.en-US.myArea.myController.myAction", "/myPath", "myController", "myAction", "myArea", "en-US")]
-        [InlineData("myPath.myArea.myController.myAction", "/myPath", "myController", "myAction", "myArea", null)]
-        [InlineData("en-US.myArea.myController.myAction", null, "myController", "myAction", "myArea", "en-US")]
-        [InlineData("myArea.myController.myAction", null, "myController", "myAction", "myArea", null)]
-        [InlineData("myController.myAction", null, "myController", "myAction", null, null)]
-        [InlineData(null, null, null, null, null, null)]
-        public void LegacyRouteFormat_WithPathBaseOrLanguage_MatchesExcpectedRoute(string expectedRoute, string pathBase, string controller, string action, string area, string language)
+        [InlineData("myPath.myArea.myController.myAction", "/myPath", "myController", "myAction", "myArea")]
+        [InlineData("myArea.myController.myAction", null, "myController", "myAction", "myArea")]
+        [InlineData("myController.myAction", null, "myController", "myAction", null)]
+        [InlineData(null, null, null, null, null)]
+        public void LegacyRouteFormat_WithPathBase_MatchesExcpectedRoute(string expectedRoute, string pathBase, string controller, string action, string area)
         {
             // Arrange
-            var httpContext = _fixture.GetMvcSut(area, controller, action, language, pathBase);
+            var httpContext = _fixture.GetMvcSut(area, controller, action, pathBase);
 
             // Act
             var filteredRoute = HttpContextExtensions.LegacyRouteFormat(httpContext);
@@ -186,7 +182,7 @@ namespace Sentry.AspNetCore.Tests.Extensions
         public void LegacyRouteFormat_ValidRoutes_MatchPreviousImplementationResult(string controller, string action, string area)
         {
             // Arrange
-            var httpContext = _fixture.GetMvcSut(area: area, controller: controller, action: action);
+            var httpContext = _fixture.GetMvcSut(area, controller, action);
 
             // Act
             var filteredRoute = HttpContextExtensions.LegacyRouteFormat(httpContext);
