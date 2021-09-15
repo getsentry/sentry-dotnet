@@ -130,7 +130,7 @@ namespace Sentry.Tests.Internals
                 "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," + "\"InnerException\":null," + "\"HelpLink\":null," +
                 "\"Source\":\"Sentry.Tests\"," + "\"HResult\":" + ex.HResult +
                 "}}";
-//#endif
+            //#endif
 
             // Assert
             Assert.NotNull(expectedStackTrace);
