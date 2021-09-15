@@ -1,9 +1,7 @@
-using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Sentry.Internal.Extensions;
 
 #if !NETSTANDARD2_0
 using Microsoft.AspNetCore.Http.Features;
