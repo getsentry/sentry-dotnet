@@ -116,9 +116,11 @@ namespace Sentry.Tests.Internals
                 "\"Data\":\"1234\"," +
                 "\"Object\":" +
                 "{" +
-                "\"TargetSite\":null," +
-                "\"StackTrace\":" +
-                expectedStackTrace +
+                (serializedString.Contains("TargetSite") ? "\"TargetSite\":null," : null) +
+                (serializedString.Contains("StackTrace") ?
+                  "\"StackTrace\":" +
+                  expectedStackTrace
+                  : null) +
                 ",\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," +
                 "\"InnerException\":null," +
                 "\"HelpLink\":null," +
@@ -128,6 +130,7 @@ namespace Sentry.Tests.Internals
                 "}";
 
             // Assert
+            Assert.NotNull(expectedStackTrace);
             Assert.Equal(exptectedSerializedException, serializedString);
         }
 
