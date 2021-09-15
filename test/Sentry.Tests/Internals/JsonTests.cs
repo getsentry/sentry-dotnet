@@ -73,7 +73,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void WriteDynamicValue_ExceptionParameter_SerializedException()
         {
-            //Assert
+            // Arrange
             var expectedMessage = "T est";
             var expectedData = new KeyValuePair<string, string>("a", "b");
             var ex = _fixture.GenerateException(expectedMessage);
@@ -88,17 +88,17 @@ namespace Sentry.Tests.Internals
                 $"\"StackTrace\":{expectedStackTrace}"
             };
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(ex);
 
-            //Assert
+            // Assert
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithException()
         {
-            //Assert
+            // Arrange
             var expectedMessage = "T est";
             var expectedData = new KeyValuePair<string, string>("a", "b");
             var ex = _fixture.GenerateException(expectedMessage);
@@ -121,32 +121,32 @@ namespace Sentry.Tests.Internals
             };
             var data = new DataWithSerializableObject<Exception>(ex);
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Assert
+            // Assert
             Assert.StartsWith(expectedSerializedData, serializedString);
-            Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
+            Assert.All(expectedSerializedException, expectedData => Assert.Contains(expectedData, serializedString));
         }
 
         [Fact]
         public void WriteDynamicValue_TypeParameter_FullNameTypeOutput()
         {
-            //Assert
+            // Arrange
             var type = typeof(Exception);
             var expectedValue = "\"System.Exception\"";
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(type);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedValue, serializedString);
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithTypeParameter_ClassFormatted()
         {
-            //Assert
+            // Arrange
             var type = typeof(List<>).GetGenericArguments()[0];
             var data = new DataWithSerializableObject<Type>(type);
             var expectedSerializedData =
@@ -156,31 +156,31 @@ namespace Sentry.Tests.Internals
                 $"\"Object\":null" + //This type has no Full Name.
                 "}";
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedSerializedData, serializedString);
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
         {
-            //Assert
+            // Arrange
             var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
             var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedSerializedData, serializedString);
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithTimeZone_SerializedClassWithTimeZoneInfo()
         {
-            //Assert
+            // Arrange
             var timeZone = TimeZoneInfo.CreateCustomTimeZone(
             "tz_id",
                 TimeSpan.FromHours(2),
@@ -197,10 +197,10 @@ namespace Sentry.Tests.Internals
             };
             var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Assert
+            // Assert
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
     }
