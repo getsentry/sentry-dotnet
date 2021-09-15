@@ -109,20 +109,18 @@ namespace Sentry.Tests.Internals
 
             // Act
             var serializedString = _fixture.ToJsonString(data);
-
+            System.Diagnostics.Trace.WriteLine(serializedString);
             var exptectedSerializedException =
                 "{" +
                 "\"Id\":1," +
                 "\"Data\":\"1234\"," +
                 "\"Object\":" +
                 "{" +
-                (serializedString.Contains("TargetSite") ? "\"TargetSite\":null," : null) +
-                (serializedString.Contains("StackTrace") ?
-                  "\"StackTrace\":" +
-                  expectedStackTrace
-                  : null) +
-                ",\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," +
+                "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," +
                 "\"InnerException\":null," +
+                "\"TargetSite\":null," +
+                    "\"StackTrace\":" + expectedStackTrace + "," +
+
                 "\"HelpLink\":null," +
                 "\"Source\":\"Sentry.Tests\"," +
                 "\"HResult\":" + ex.HResult +
