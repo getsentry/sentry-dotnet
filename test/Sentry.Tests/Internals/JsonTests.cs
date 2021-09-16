@@ -126,8 +126,8 @@ namespace Sentry.Tests.Internals
 
             // Act
             var serializedString = _fixture.ToJsonString(data);
-
             var exceptionDeserialized = JsonSerializer.Deserialize<ExceptionMock>(serializedString);
+
             // Assert
             Assert.NotNull(exceptionDeserialized);
             Assert.Equal(1, exceptionDeserialized.Id);
