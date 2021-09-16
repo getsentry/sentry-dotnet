@@ -59,6 +59,25 @@ namespace Sentry.Tests.Internals
             public T @Object { get; set; }
         }
 
+        private class ExceptionMock
+        {
+            public int Id { get; set; }
+            public string Data { get; set; }
+            public ExceptionObjectMock Object { get; set; }
+        }
+
+        private class ExceptionObjectMock
+        {
+            public object TargetSite { get; set; }
+            public string StackTrace { get; set; }
+            public string Message { get; set; }
+            public Dictionary<string, string> Data { get; set; }
+            public object InnerException { get; set; }
+            public string HelpLink { get; set; }
+            public string Source { get; set; }
+            public int? HResult { get; set; }
+        }
+
         private class DataWithSerializableObject<T> : DataAndNonSerializableObject<T>
         {
             /// <summary>
@@ -102,39 +121,26 @@ namespace Sentry.Tests.Internals
             var expectedMessage = "T est";
             var expectedData = new KeyValuePair<string, string>("a", "b");
             var ex = _fixture.GenerateException(expectedMessage);
-            var expectedStackTrace = _fixture.ToJsonString(ex.StackTrace);
             ex.Data.Add(expectedData.Key, expectedData.Value);
-
             var data = new DataWithSerializableObject<Exception>(ex);
 
             // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Json Serialization of a exception serializes things on a different order, if built on release or not.
-            var exptectedSerializedException =
-                /*
-#if RELEASE
-                "{" +
-                "\"Id\":1," + "\"Data\":\"1234\"," + "\"Object\":" +
-                "{" +
-                "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," + "\"InnerException\":null," +
-                "\"TargetSite\":null," + "\"StackTrace\":" + expectedStackTrace + "," +
-                "\"HelpLink\":null," + "\"Source\":\"Sentry.Tests\"," + "\"HResult\":" + ex.HResult +
-                "}}";
-#else
-                */
-                "{" +
-                "\"Id\":1," + "\"Data\":\"1234\"," + "\"Object\":" +
-                "{" +
-                "\"TargetSite\":null," + "\"StackTrace\":" + expectedStackTrace + "," +
-                "\"Message\":\"T est\",\"Data\":{\"a\":\"b\"}," + "\"InnerException\":null," + "\"HelpLink\":null," +
-                "\"Source\":\"Sentry.Tests\"," + "\"HResult\":" + ex.HResult +
-                "}}";
-            //#endif
-
-            // Assert2
-            Assert.NotNull(expectedStackTrace);
-            Assert.Equal(exptectedSerializedException, serializedString);
+            var exceptionDeserialized = JsonSerializer.Deserialize<ExceptionMock>(serializedString);
+            // Assert
+            Assert.NotNull(exceptionDeserialized);
+            Assert.Equal(1, exceptionDeserialized.Id);
+            Assert.Equal("1234", exceptionDeserialized.Data);
+            Assert.NotNull(exceptionDeserialized.Object.StackTrace);
+            Assert.Equal(ex.StackTrace, exceptionDeserialized.Object.StackTrace);
+            Assert.Null(exceptionDeserialized.Object.TargetSite);
+            Assert.Equal(expectedMessage, exceptionDeserialized.Object.Message);
+            Assert.Contains(expectedData, exceptionDeserialized.Object.Data);
+            Assert.Null(exceptionDeserialized.Object.InnerException);
+            Assert.Null(exceptionDeserialized.Object.HelpLink);
+            Assert.Equal(ex.Source, exceptionDeserialized.Object.Source);
+            Assert.Equal(ex.HResult, exceptionDeserialized.Object.HResult);
         }
 
         [Fact]
