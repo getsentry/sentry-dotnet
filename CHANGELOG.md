@@ -5,6 +5,7 @@
 ### Fixes
 
 - Use fallback if route pattern is MVC ([#1188](https://github.com/getsentry/sentry-dotnet/pull/1188))
+- Make UseSentryTracing discoverable ([#1196](https://github.com/getsentry/sentry-dotnet/issues/1196))
 
 ## 3.9.2
 
