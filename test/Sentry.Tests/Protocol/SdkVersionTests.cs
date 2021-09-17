@@ -69,6 +69,8 @@ namespace Sentry.Tests.Protocol
             };
             sdkVersion.AddPackage("Foo", "Alpha");
             sdkVersion.AddPackage("Bar", "Beta");
+            sdkVersion.AddPackage("Foo", "Alpha");
+            sdkVersion.AddPackage("Bar", "Beta");
             var actual = sdkVersion.ToJsonString();
             var expected = TrimJson(@"
 {
