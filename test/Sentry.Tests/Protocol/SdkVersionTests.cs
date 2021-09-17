@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -66,17 +67,32 @@ namespace Sentry.Tests.Protocol
                 Name = "Sentry.Test.SDK",
                 Version = "3.9.2"
             };
-            sdkVersion.AddPackage("nuget:Sentry.Extensions.Logging", "3.9.2");
-            sdkVersion.AddPackage("nuget:Sentry", "3.9.2");
-            sdkVersion.AddPackage("nuget:Sentry.Extensions.Logging", "3.9.2");
-            sdkVersion.AddPackage("nuget:Sentry", "3.9.2");
+            sdkVersion.AddPackage("Foo", "Alpha");
+            sdkVersion.AddPackage("Bar", "Beta");
             var actual = sdkVersion.ToJsonString();
-            Assert.Equal(
-                "{\"packages\":[{\"name\":\"nuget:Sentry.Extensions.Logging\",\"version\":\"3.9.2\"},{\"name\":\"nuget:Sentry\",\"version\":\"3.9.2\"}]," +
-                "\"name\":\"Sentry.Test.SDK\"," +
-                "\"version\":\"3.9.2\"}",
-                actual);
+            var expected = TrimJson(@"
+{
+   ""packages"": [
+        {
+            ""name"": ""Bar"",
+            ""version"": ""Beta""
+        },
+        {
+            ""name"": ""Foo"",
+            ""version"": ""Alpha""
+        }
+    ],
+    ""name"": ""Sentry.Test.SDK"",
+    ""version"": ""3.9.2""
+}");
+            Assert.Equal(expected, actual);
 
         }
+
+        private static string TrimJson(string json)
+        {
+            return Regex.Replace(json, @"\s", "");
+        }
+
     }
 }
