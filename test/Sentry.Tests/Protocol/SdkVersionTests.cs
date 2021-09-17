@@ -88,7 +88,6 @@ namespace Sentry.Tests.Protocol
     ""version"": ""3.9.2""
 }");
             Assert.Equal(expected, actual);
-
         }
 
         private static string TrimJson(string json)
