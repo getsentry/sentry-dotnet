@@ -6,7 +6,8 @@ For big feature it's advised to raise an issue to discuss it first.
 ## TLDR: 
 
 * Install [the .NET Core SDK](https://dot.net/) 
-* run `dotnet build` 
+* To quickly get up and running, you can just run `dotnet build`
+* To run a full build, test, and run all the validation logic locally before pushing, run `./build.sh` or `./buld.ps1`
 
 ## Dependencies
 
