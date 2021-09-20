@@ -35,9 +35,13 @@ namespace Sentry.AspNetCore.Extensions
                 return null;
             }
 
-            var builder = new StringBuilder()
-                .AppendIf(context.Request.PathBase.HasValue, context.Request.PathBase.Value?.TrimStart('/'))
-                .AppendIf(context.Request.PathBase.HasValue, '/');
+            var builder = new StringBuilder();
+            if (context.Request.PathBase.HasValue)
+            {
+                builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                    .Append('/');
+            }
+
             // Skip route pattern if it resembles to a MVC route or null  e.g.
             // {controller=Home}/{action=Index}/{id?}
             return RouteHasMvcParameters(routePattern)
@@ -57,18 +61,25 @@ namespace Sentry.AspNetCore.Extensions
             var action = routeData?.Values["action"]?.ToString();
             var area = routeData?.Values["area"]?.ToString();
 
-            if (!string.IsNullOrWhiteSpace(action))
+            if (string.IsNullOrWhiteSpace(action) is false)
             {
-                var hasArea = !string.IsNullOrWhiteSpace(area);
-                return new StringBuilder()
-                    .AppendIf(context.Request.PathBase.HasValue, context.Request.PathBase.Value?.TrimStart('/'))
-                    .AppendIf(context.Request.PathBase.HasValue, '.')
-                    .AppendIf(hasArea, area)
-                    .AppendIf(hasArea, '.')
-                    .Append(controller)
+                var builder = new StringBuilder();
+                if (context.Request.PathBase.HasValue)
+                {
+                    builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                        .Append('.');
+                }
+
+                if (string.IsNullOrWhiteSpace(area) is false)
+                {
+                    builder.Append(area)
+                        .Append('.');
+                }
+
+                builder.Append(controller)
                     .Append('.')
-                    .Append(action)
-                    .ToString();
+                    .Append(action);
+                return builder.ToString();
             }
 
             // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
