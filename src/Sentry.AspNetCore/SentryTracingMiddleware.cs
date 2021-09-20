@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
@@ -175,6 +174,11 @@ namespace Sentry.AspNetCore
             }
         }
     }
+}
+
+namespace Microsoft.AspNetCore.Builder
+{
+    using Sentry.AspNetCore;
 
     /// <summary>
     /// Extensions for enabling <see cref="SentryTracingMiddleware"/>.
