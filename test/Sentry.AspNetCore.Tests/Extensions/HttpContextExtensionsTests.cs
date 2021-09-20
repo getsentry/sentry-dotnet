@@ -178,7 +178,6 @@ namespace Sentry.AspNetCore.Tests.Extensions
             Assert.Equal(expectedRoute, filteredRoute);
         }
 
-
         [Theory]
         [InlineData("myController", "myAction", "myArea")]
         [InlineData("myController", "myAction", null)]
@@ -193,7 +192,6 @@ namespace Sentry.AspNetCore.Tests.Extensions
             // Assert
             Assert.Equal(LegacyFormat(controller, action, area), filteredRoute);
         }
-
     }
 }
 #endif
