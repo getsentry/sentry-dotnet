@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -57,5 +58,42 @@ namespace Sentry.Tests.Protocol
             sdk.AddPackage("a", "1");
             yield return new object[] { (sdk, "{\"packages\":[{\"name\":\"a\",\"version\":\"1\"},{\"name\":\"b\",\"version\":\"2\"}]}") };
         }
+
+        [Fact]
+        public void SerializeObject_IgnoresDuplicatePackages()
+        {
+            var sdkVersion = new SdkVersion
+            {
+                Name = "Sentry.Test.SDK",
+                Version = "3.9.2"
+            };
+            sdkVersion.AddPackage("Foo", "Alpha");
+            sdkVersion.AddPackage("Bar", "Beta");
+            sdkVersion.AddPackage("Foo", "Alpha");
+            sdkVersion.AddPackage("Bar", "Beta");
+            var actual = sdkVersion.ToJsonString();
+            var expected = TrimJson(@"
+{
+   ""packages"": [
+        {
+            ""name"": ""Bar"",
+            ""version"": ""Beta""
+        },
+        {
+            ""name"": ""Foo"",
+            ""version"": ""Alpha""
+        }
+    ],
+    ""name"": ""Sentry.Test.SDK"",
+    ""version"": ""3.9.2""
+}");
+            Assert.Equal(expected, actual);
+        }
+
+        private static string TrimJson(string json)
+        {
+            return Regex.Replace(json, @"\s", "");
+        }
+
     }
 }
