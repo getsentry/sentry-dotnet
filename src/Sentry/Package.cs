@@ -57,5 +57,30 @@ namespace Sentry
 
             return new Package(name, version);
         }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Name.GetHashCode() * 397) ^ Version.GetHashCode();
+            }
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj is Package package)
+            {
+                return Name == package.Name && Version == package.Version;
+            }
+
+            return false;
+        }
     }
 }
