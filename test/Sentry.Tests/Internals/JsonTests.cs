@@ -59,6 +59,25 @@ namespace Sentry.Tests.Internals
             public T @Object { get; set; }
         }
 
+        private class ExceptionMock
+        {
+            public int Id { get; set; }
+            public string Data { get; set; }
+            public ExceptionObjectMock Object { get; set; }
+        }
+
+        private class ExceptionObjectMock
+        {
+            public object TargetSite { get; set; }
+            public string StackTrace { get; set; }
+            public string Message { get; set; }
+            public Dictionary<string, string> Data { get; set; }
+            public object InnerException { get; set; }
+            public string HelpLink { get; set; }
+            public string Source { get; set; }
+            public int? HResult { get; set; }
+        }
+
         private class DataWithSerializableObject<T> : DataAndNonSerializableObject<T>
         {
             /// <summary>
@@ -73,7 +92,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void WriteDynamicValue_ExceptionParameter_SerializedException()
         {
-            //Assert
+            // Arrange
             var expectedMessage = "T est";
             var expectedData = new KeyValuePair<string, string>("a", "b");
             var ex = _fixture.GenerateException(expectedMessage);
@@ -88,65 +107,60 @@ namespace Sentry.Tests.Internals
                 $"\"StackTrace\":{expectedStackTrace}"
             };
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(ex);
 
-            //Assert
+            // Assert
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithException()
         {
-            //Assert
+            // Arrange
             var expectedMessage = "T est";
             var expectedData = new KeyValuePair<string, string>("a", "b");
             var ex = _fixture.GenerateException(expectedMessage);
-            var expectedStackTrace = _fixture.ToJsonString(ex.StackTrace);
             ex.Data.Add(expectedData.Key, expectedData.Value);
-
-            var expectedSerializedData =
-                "{\"" +
-                "Id\":1," +
-                "\"Data\":\"1234\"" +
-                ",\"Object\":{";
-
-            var expectedSerializedException = new[]
-            {
-                $"\"Message\":\"{expectedMessage}\"",
-                "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
-                "\"InnerException\":null",
-                "\"Source\":\"Sentry.Tests\"",
-                $"\"StackTrace\":{expectedStackTrace}"
-            };
             var data = new DataWithSerializableObject<Exception>(ex);
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
+            var exceptionDeserialized = JsonSerializer.Deserialize<ExceptionMock>(serializedString);
 
-            //Assert
-            Assert.StartsWith(expectedSerializedData, serializedString);
-            Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
+            // Assert
+            Assert.NotNull(exceptionDeserialized);
+            Assert.Equal(1, exceptionDeserialized.Id);
+            Assert.Equal("1234", exceptionDeserialized.Data);
+            Assert.NotNull(exceptionDeserialized.Object.StackTrace);
+            Assert.Equal(ex.StackTrace, exceptionDeserialized.Object.StackTrace);
+            Assert.Null(exceptionDeserialized.Object.TargetSite);
+            Assert.Equal(expectedMessage, exceptionDeserialized.Object.Message);
+            Assert.Contains(expectedData, exceptionDeserialized.Object.Data);
+            Assert.Null(exceptionDeserialized.Object.InnerException);
+            Assert.Null(exceptionDeserialized.Object.HelpLink);
+            Assert.Equal(ex.Source, exceptionDeserialized.Object.Source);
+            Assert.Equal(ex.HResult, exceptionDeserialized.Object.HResult);
         }
 
         [Fact]
         public void WriteDynamicValue_TypeParameter_FullNameTypeOutput()
         {
-            //Assert
+            // Arrange
             var type = typeof(Exception);
             var expectedValue = "\"System.Exception\"";
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(type);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedValue, serializedString);
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithTypeParameter_ClassFormatted()
         {
-            //Assert
+            // Arrange
             var type = typeof(List<>).GetGenericArguments()[0];
             var data = new DataWithSerializableObject<Type>(type);
             var expectedSerializedData =
@@ -156,31 +170,31 @@ namespace Sentry.Tests.Internals
                 $"\"Object\":null" + //This type has no Full Name.
                 "}";
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedSerializedData, serializedString);
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
         {
-            //Assert
+            // Arrange
             var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
             var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Assert
+            // Assert
             Assert.Equal(expectedSerializedData, serializedString);
         }
 
         [Fact]
         public void WriteDynamicValue_ClassWithTimeZone_SerializedClassWithTimeZoneInfo()
         {
-            //Assert
+            // Arrange
             var timeZone = TimeZoneInfo.CreateCustomTimeZone(
             "tz_id",
                 TimeSpan.FromHours(2),
@@ -197,10 +211,10 @@ namespace Sentry.Tests.Internals
             };
             var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
 
-            //Act
+            // Act
             var serializedString = _fixture.ToJsonString(data);
 
-            //Assert
+            // Assert
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
     }
