@@ -1,11 +1,11 @@
 # Changelog
 
 ## Unreleased
-- Prevent duplicate package reporting ([#1197](https://github.com/getsentry/sentry-dotnet/pull/1197))
 
 ### Fixes
 
 - Use fallback if route pattern is MVC ([#1188](https://github.com/getsentry/sentry-dotnet/pull/1188))
+- Prevent duplicate package reporting ([#1197](https://github.com/getsentry/sentry-dotnet/pull/1197))
 
 ## 3.9.2
 
