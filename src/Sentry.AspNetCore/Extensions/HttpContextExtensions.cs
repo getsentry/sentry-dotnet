@@ -61,7 +61,7 @@ namespace Sentry.AspNetCore.Extensions
             var action = routeData?.Values["action"]?.ToString();
             var area = routeData?.Values["area"]?.ToString();
 
-            if (string.IsNullOrWhiteSpace(action) is false)
+            if (!string.IsNullOrWhiteSpace(action))
             {
                 var builder = new StringBuilder();
                 if (context.Request.PathBase.HasValue)
