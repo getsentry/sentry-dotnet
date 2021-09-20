@@ -24,8 +24,8 @@ namespace Sentry.AspNetCore.Tests.Extensions
             public HttpContext GetMvcSut(
                 string area = null,
                 string controller = null,
-                string action = null
-                , string pathBase = null)
+                string action = null,
+                string pathBase = null)
             {
                 var httpContext = new DefaultHttpContext();
                 if (pathBase is not null)
