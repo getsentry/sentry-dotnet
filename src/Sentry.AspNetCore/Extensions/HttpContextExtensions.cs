@@ -70,7 +70,7 @@ namespace Sentry.AspNetCore.Extensions
                         .Append('.');
                 }
 
-                if (string.IsNullOrWhiteSpace(area) is false)
+                if (!string.IsNullOrWhiteSpace(area))
                 {
                     builder.Append(area)
                         .Append('.');
