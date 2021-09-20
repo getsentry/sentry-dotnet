@@ -66,7 +66,7 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            writer.WriteArrayIfNotEmpty("packages", InternalPackages);
+            writer.WriteArrayIfNotEmpty("packages", InternalPackages.Distinct());
             writer.WriteStringIfNotWhiteSpace("name", Name);
             writer.WriteStringIfNotWhiteSpace("version", Version);
 
