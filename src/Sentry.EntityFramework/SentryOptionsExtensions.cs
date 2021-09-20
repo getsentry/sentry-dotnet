@@ -13,6 +13,8 @@ namespace Sentry
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryOptionsExtensions
     {
+        private static DbInterceptionIntegration? _dbIntegration { get; set; }
+
         /// <summary>
         /// Adds the entity framework integration.
         /// </summary>
@@ -32,12 +34,15 @@ namespace Sentry
                     .LogError("Failed to configure EF breadcrumbs. Make sure to init Sentry before EF.", e);
             }
 
-            sentryOptions.AddIntegration(new DbInterceptionIntegration());
+            _dbIntegration = new DbInterceptionIntegration();
+            sentryOptions.AddIntegration(_dbIntegration);
 
             sentryOptions.AddExceptionProcessor(new DbEntityValidationExceptionProcessor());
             // DbConcurrencyExceptionProcessor is untested due to problems with testing it, so it might not be production ready
             //sentryOptions.AddExceptionProcessor(new DbConcurrencyExceptionProcessor());
             return sentryOptions;
         }
+        public static void DisableDbInterceptionIntegration()
+            => _dbIntegration?.Unregister();
     }
 }

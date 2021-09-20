@@ -73,14 +73,12 @@ var user = new SampleUser();
 db.Users.Add(user);
 db.SaveChanges();
 
-public class SampleUser : IDisposable
+public class SampleUser
 {
     [Key]
     public int Id { get; set; }
     [Required]
     public string RequiredColumn { get; set; }
-
-    public void Dispose() { }
 }
 
 public class SampleDbContext : DbContext

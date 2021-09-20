@@ -3,7 +3,7 @@ using Sentry.Integrations;
 
 namespace Sentry.EntityFramework
 {
-    class DbInterceptionIntegration : ISdkIntegration
+    internal class DbInterceptionIntegration : ISdkIntegration
     {
         private IDbInterceptor? SqlInterceptor { get; set; }
 
@@ -13,6 +13,6 @@ namespace Sentry.EntityFramework
             DbInterception.Add(SqlInterceptor);
         }
 
-        public void Unregister(IHub _) => DbInterception.Remove(SqlInterceptor);
+        public void Unregister() => DbInterception.Remove(SqlInterceptor);
     }
 }

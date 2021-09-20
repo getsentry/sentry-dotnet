@@ -142,7 +142,7 @@ namespace Sentry.EntityFramework.Tests
             var span = _fixture.Spans.First();
             Assert.Equal(expected.Query, span.Description);
             Assert.Equal(expectedOperation, span.Operation);
-            span.Received(1).Finish(Arg.Is<SpanStatus>(status => status == SpanStatus.InternalError));
+            span.Received(1).Finish(Arg.Any<Exception>(), Arg.Is<SpanStatus>(status => status == SpanStatus.InternalError));
         }
 
         [Theory]
@@ -224,7 +224,7 @@ namespace Sentry.EntityFramework.Tests
             {
                 span.Received(1).Finish(Arg.Is<SpanStatus>(status => SpanStatus.Ok == status));
             });
-            integration.Unregister(_fixture.Hub);
+            integration.Unregister();
         }
 
     }
