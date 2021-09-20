@@ -42,7 +42,13 @@ namespace Sentry
             //sentryOptions.AddExceptionProcessor(new DbConcurrencyExceptionProcessor());
             return sentryOptions;
         }
-        public static void DisableDbInterceptionIntegration()
-            => _dbIntegration?.Unregister();
+
+
+        /// <summary>
+        /// Disables the integrations with DbInterception.
+        /// </summary>
+        /// <param name="options">The SentryOptions to remove the integration from.</param>
+        public static void DisableDbInterceptionIntegration(this SentryOptions options)
+        => _dbIntegration?.Unregister();
     }
 }
