@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.9.3
 
 ### Fixes
 
+- Add missing PathBase from ASP.NET Core ([#1198](https://github.com/getsentry/sentry-dotnet/pull/1198))
 - Use fallback if route pattern is MVC ([#1188](https://github.com/getsentry/sentry-dotnet/pull/1188))
 - Move UseSentryTracing to different namespace ([#1200](https://github.com/getsentry/sentry-dotnet/pull/1200))
 - Prevent duplicate package reporting ([#1197](https://github.com/getsentry/sentry-dotnet/pull/1197))
