@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -18,16 +19,39 @@ namespace Sentry.AspNetCore.Extensions
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
             var routePattern = endpoint?.RoutePattern.RawText;
 
-            if (!string.IsNullOrWhiteSpace(routePattern))
+            if (NewRouteFormat(routePattern, context) is { } formattedRoute)
             {
-                // Skip route pattern if it resembles to a MVC route or null  e.g.
-                // {controller=Home}/{action=Index}/{id?}
-                return RouteHasMvcParameters(routePattern)
-                    ? ReplaceMvcParameters(routePattern, context)
-                    : routePattern;
+                return formattedRoute;
             }
 #endif
+            return LegacyRouteFormat(context);
+        }
 
+        // Internal for testing.
+        internal static string? NewRouteFormat(string? routePattern, HttpContext context)
+        {
+            if (string.IsNullOrWhiteSpace(routePattern))
+            {
+                return null;
+            }
+
+            var builder = new StringBuilder();
+            if (context.Request.PathBase.HasValue)
+            {
+                builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                    .Append('/');
+            }
+
+            // Skip route pattern if it resembles to a MVC route or null  e.g.
+            // {controller=Home}/{action=Index}/{id?}
+            return RouteHasMvcParameters(routePattern)
+                ? builder.Append(ReplaceMvcParameters(routePattern, context)).ToString()
+                : builder.Append(routePattern).ToString();
+        }
+
+        // Internal for testing.
+        internal static string? LegacyRouteFormat(HttpContext context)
+        {
             // Fallback for legacy .UseMvc().
             // Uses context.Features.Get<IRoutingFeature?>() under the hood and CAN be null,
             // despite the annotations claiming otherwise.
@@ -39,9 +63,23 @@ namespace Sentry.AspNetCore.Extensions
 
             if (!string.IsNullOrWhiteSpace(action))
             {
-                return !string.IsNullOrWhiteSpace(area)
-                    ? $"{area}.{controller}.{action}"
-                    : $"{controller}.{action}";
+                var builder = new StringBuilder();
+                if (context.Request.PathBase.HasValue)
+                {
+                    builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                        .Append('.');
+                }
+
+                if (!string.IsNullOrWhiteSpace(area))
+                {
+                    builder.Append(area)
+                        .Append('.');
+                }
+
+                builder.Append(controller)
+                    .Append('.')
+                    .Append(action);
+                return builder.ToString();
             }
 
             // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
