@@ -7,7 +7,7 @@ namespace Sentry.Extensibility
     /// <summary>
     /// A worker that queues envelopes synchronously and flushes async.
     /// </summary>
-    internal interface IBackgroundWorker
+    public interface IBackgroundWorker
     {
         /// <summary>
         /// Attempts to queue the envelope with the worker.

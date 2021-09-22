@@ -5,10 +5,19 @@ using Sentry.Internal.Http;
 
 namespace Sentry.Internal
 {
-    internal class SdkComposer
+    /// <summary>
+    /// Composer
+    /// </summary>
+    public class SdkComposer
     {
         private readonly SentryOptions _options;
 
+        /// <summary>
+        /// ctr
+        /// </summary>
+        /// <param name="options"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public SdkComposer(SentryOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
@@ -16,7 +25,10 @@ namespace Sentry.Internal
                 throw new ArgumentException("No DSN defined in the SentryOptions");
         }
 
-        private ITransport CreateTransport()
+        /// <summary>
+        /// Creates a transport.
+        /// </summary>
+        public ITransport CreateTransport()
         {
             // Override for tests
             if (_options.Transport is not null)
@@ -86,7 +98,7 @@ namespace Sentry.Internal
             return cachingTransport;
         }
 
-        public IBackgroundWorker CreateBackgroundWorker()
+        internal IBackgroundWorker CreateBackgroundWorker()
         {
             if (_options.BackgroundWorker is { } worker)
             {

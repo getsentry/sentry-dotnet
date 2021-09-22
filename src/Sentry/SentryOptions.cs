@@ -47,8 +47,10 @@ namespace Sentry
         /// </summary>
         public bool EnableScopeSync { get; set; }
 
-        // Override for tests
-        internal ITransport? Transport { get; set; }
+        /// <summary>
+        /// The transport used to communicate with Sentry.
+        /// </summary>
+        public ITransport? Transport { get; set; }
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
@@ -83,7 +85,10 @@ namespace Sentry
 
         internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
-        internal IBackgroundWorker? BackgroundWorker { get; set; }
+        /// <summary>
+        /// The worker which takes events from the client and passes to the transport.
+        /// </summary>
+        public IBackgroundWorker? BackgroundWorker { get; set; }
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
