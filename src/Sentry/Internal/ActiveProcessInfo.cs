@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Sentry.Internal
 {
-    internal sealed class ActiveProcessInfo: IActiveProcessInfo
+    internal sealed class ActiveProcessInfo : IActiveProcessInfo
     {
         public static IActiveProcessInfo Instance { get; } = new ActiveProcessInfo();
 

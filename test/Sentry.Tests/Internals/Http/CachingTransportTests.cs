@@ -264,7 +264,7 @@ namespace Sentry.Tests.Internals.Http
         {
             // Arrange
             using var cacheDirectory = new TempDirectory();
-             var options = new SentryOptions
+            var options = new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
