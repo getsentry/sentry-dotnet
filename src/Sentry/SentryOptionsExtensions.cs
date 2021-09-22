@@ -268,10 +268,5 @@ namespace Sentry
             return Path.Combine(options.CacheDirectoryPath, "Sentry", dsn.GetHashString());
         }
 
-        internal static string? TryGetProcessSpecificCacheDirectoryPath(this SentryOptions options)
-        {
-            // In the future, this will most likely contain process ID
-            return options.TryGetDsnSpecificCacheDirectoryPath();
-        }
     }
 }

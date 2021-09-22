@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
@@ -256,6 +257,70 @@ namespace Sentry.Tests.Internals.Http
             // Assert
             Assert.Equal(exception, receivedException);
             Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
+        }
+
+        [Fact(Timeout = 7000)]
+        public async Task IsolatesCacheDirectories()
+        {
+            // Arrange
+            using var cacheDirectory = new TempDirectory();
+             var options = new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                DiagnosticLogger = _logger,
+                CacheDirectoryPath = cacheDirectory.Path,
+                EnableProcessIsolationForCaching = true
+            };
+
+            var fileSystem = Substitute.ForPartsOf<FileSystemStub>();
+            fileSystem.When(f => f.DeleteFile(Arg.Any<string>())).DoNotCallBase();
+            fileSystem.When(f => f.DeleteDirectory(Arg.Any<string>())).DoNotCallBase();
+
+            // Act
+            // Send some envelopes with a failing transport to make sure they all stay in cache
+            {
+                using var initialInnerTransport = new FakeTransport();
+                var processInfo = Substitute.For<IActiveProcessInfo>();
+                processInfo.GetCurrentProcessId().Returns(1);
+                processInfo.IsProcessActive(0).ReturnsForAnyArgs(true);
+
+                await using var initialTransport = new CachingTransport(initialInnerTransport, options, processInfo, fileSystem);
+
+                // Shutdown the worker immediately so nothing gets processed
+                await initialTransport.StopWorkerAsync();
+
+                for (var i = 0; i < 3; i++)
+                {
+                    using var envelope = Envelope.FromEvent(new SentryEvent());
+                    await initialTransport.SendEnvelopeAsync(envelope);
+                }
+            }
+
+            using var innerTransport = new FakeTransport();
+            var processInfo2 = Substitute.For<IActiveProcessInfo>();
+            processInfo2.GetCurrentProcessId().Returns(2);
+            processInfo2.IsProcessActive(1).ReturnsForAnyArgs(false);
+            processInfo2.IsProcessActive(2).ReturnsForAnyArgs(true);
+            await using var transport = new CachingTransport(innerTransport, options, processInfo2, fileSystem);
+            for (var i = 0; i < 3; i++)
+            {
+                using var envelope = Envelope.FromEvent(new SentryEvent());
+                await transport.SendEnvelopeAsync(envelope);
+            }
+
+            // Assert
+
+            fileSystem.Received(6).CreateFile(Arg.Any<string>());
+
+            var dsnDir = Directory.EnumerateDirectories(Path.Combine(cacheDirectory.Path, "Sentry")).Single();
+            var processDirectories = Directory.EnumerateDirectories(dsnDir).ToList();
+
+            var envelopeFiles = Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).ToList();
+
+            processDirectories.Should().HaveCount(2);
+
+            envelopeFiles.Should().HaveCount(6);
+
         }
     }
 }

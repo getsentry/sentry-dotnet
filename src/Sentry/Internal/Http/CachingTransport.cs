@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -14,9 +15,14 @@ namespace Sentry.Internal.Http
     internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
     {
         private const string EnvelopeFileExt = "envelope";
+        private const string ProcessingDirName = "__processing";
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
+        private readonly IActiveProcessInfo _processInfo;
+        private readonly IFileSystem _fileSystem;
+
+        private readonly string _dsnCacheDirectoryPath;
         private readonly string _isolatedCacheDirectoryPath;
         private readonly int _keepCount;
 
@@ -37,23 +43,120 @@ namespace Sentry.Internal.Http
 
         private readonly CancellationTokenSource _workerCts = new();
         private readonly Task _worker;
+        private string TryGetProcessSpecificCacheDirectoryPath(SentryOptions options)
+        {
+            // In the future, this will most likely contain process ID
+            var dsnDirectory = options.TryGetDsnSpecificCacheDirectoryPath();
+            if (string.IsNullOrWhiteSpace(dsnDirectory))
+            {
+                throw new InvalidOperationException("Cache directory or DSN is not set.");
+            }
 
-        public CachingTransport(ITransport innerTransport, SentryOptions options)
+            if (!options.EnableProcessIsolationForCaching)
+            {
+                return dsnDirectory;
+            }
+            return Path.Combine(dsnDirectory, _processInfo.GetCurrentProcessId().ToString());
+        }
+
+        public CachingTransport(ITransport innerTransport, SentryOptions options, IActiveProcessInfo? processInfo = null, IFileSystem? fileSystem = null)
         {
             _innerTransport = innerTransport;
             _options = options;
+            _processInfo = processInfo ?? ActiveProcessInfo.Instance;
+            _fileSystem = fileSystem ?? FileSystemStub.Instance;
 
             _keepCount = _options.MaxCacheItems >= 1
                 ? _options.MaxCacheItems - 1
                 : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
-
+            _dsnCacheDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath() ??
+                                     throw new InvalidOperationException("Cache directory or DSN is not set.");
             _isolatedCacheDirectoryPath =
-                options.TryGetProcessSpecificCacheDirectoryPath() ??
-                throw new InvalidOperationException("Cache directory or DSN is not set.");
+                TryGetProcessSpecificCacheDirectoryPath(options);
 
-            _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+            _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingDirName);
 
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+        }
+
+        private void MoveAbandonedCacheFiles()
+        {
+            // Identify abandoned cache directories of other processes which exited before
+            // they could fully flush their cache, and snatch their files into our own cache
+            // directory to finish the job.
+            try
+            {
+                foreach (var dirPath in _fileSystem.EnumerateDirectories(_dsnCacheDirectoryPath))
+                {
+                    var dirName = Path.GetFileName(dirPath);
+
+                    // Attempt to get process ID from the directory name
+                    if (!int.TryParse(dirName, NumberStyles.Integer, CultureInfo.InvariantCulture, out var processId))
+                    {
+                        // There might be unrelated directories
+                        continue;
+                    }
+
+                    // Skip processes that are still alive
+                    if (_processInfo.IsProcessActive(processId))
+                    {
+                        continue;
+                    }
+
+
+                    // Move all files from that cache directory into our current cache directory
+                    foreach (var filePath in _fileSystem.EnumerateFiles(dirPath, "*", SearchOption.AllDirectories))
+                    {
+                        try
+                        {
+                            _fileSystem.CreateDirectory(_isolatedCacheDirectoryPath);
+
+                            _fileSystem.MoveFile(
+                                filePath,
+                                Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
+                            );
+                        }
+                        // Might fail if another process already snatched that file before us
+                        catch (Exception ex)
+                        {
+                            _options.DiagnosticLogger?.LogError(
+                                "Failed to move cache file of an exited process: '{0}'.",
+                                ex,
+                                filePath
+                            );
+                        }
+                    }
+
+                    // Attempt to delete the directory
+                    try
+                    {
+                        _fileSystem.DeleteDirectory(dirPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        _options.DiagnosticLogger?.LogError(
+                            "Failed to delete cache directory of an exited process: '{0}'.",
+                            ex,
+                            dirPath
+                        );
+                    }
+                }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // No cache directories, that's fine
+                _options.DiagnosticLogger?.LogDebug(
+                    "Cache directory doesn't exist yet. Not scanning for leftover cache files."
+                );
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to scan cache directory for leftover files.",
+                    ex
+                );
+
+            }
         }
 
         private async Task CachedTransportBackgroundTaskAsync()
@@ -63,18 +166,34 @@ namespace Sentry.Internal.Http
                 // Processing directory may already contain some files left from previous session
                 // if the worker has been terminated unexpectedly.
                 // Move everything from that directory back to cache directory.
-                if (Directory.Exists(_processingDirectoryPath))
+                if (_fileSystem.DirectoryExists(_processingDirectoryPath))
                 {
-                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+                    foreach (var filePath in _fileSystem.EnumerateFiles(_processingDirectoryPath))
                     {
                         var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
                         _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
                             filePath, destinationPath);
 
-                        File.Move(filePath, destinationPath);
+                        _fileSystem.MoveFile(filePath, destinationPath);
                     }
                 }
-
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // No cache directories, that's fine
+                _options.DiagnosticLogger?.LogDebug(
+                    "Cache directory doesn't exist yet. Not scanning for leftover cache files."
+                );
+            }
+            catch (Exception ex)
+            {
+                _options.DiagnosticLogger?.LogError(
+                    "Failed to scan cache directory for leftover files.",
+                    ex
+                );
+            }
+            try
+            {
                 while (!_workerCts.IsCancellationRequested)
                 {
                     try
@@ -105,6 +224,7 @@ namespace Sentry.Internal.Http
 
         private void EnsureFreeSpaceInCache()
         {
+            MoveAbandonedCacheFiles();
             // Trim files, leaving only (X - 1) of the newest ones.
             // X-1 because we need at least 1 empty space for an envelope we're about to add.
             // Example:
@@ -118,7 +238,7 @@ namespace Sentry.Internal.Http
             {
                 try
                 {
-                    File.Delete(filePath);
+                    _fileSystem.DeleteFile(filePath);
                     _options.LogDebug("Deleted cached file {0}.", filePath);
                 }
                 catch (FileNotFoundException)
@@ -135,8 +255,8 @@ namespace Sentry.Internal.Http
         {
             try
             {
-                return Directory
-                    .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                return _fileSystem
+                    .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}", SearchOption.AllDirectories)
                     .OrderBy(f => new FileInfo(f).CreationTimeUtc);
             }
             catch (DirectoryNotFoundException)
@@ -179,7 +299,7 @@ namespace Sentry.Internal.Http
                 // Envelope & file stream must be disposed prior to reaching this point
 
                 // Delete the envelope file and move on to the next one
-                File.Delete(envelopeFilePath);
+                _fileSystem.DeleteFile(envelopeFilePath);
             }
         }
 
@@ -232,19 +352,14 @@ namespace Sentry.Internal.Http
             var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
 
             // Ensure that the processing directory exists
-            Directory.CreateDirectory(_processingDirectoryPath);
+            _fileSystem.CreateDirectory(_processingDirectoryPath);
 
             // Move the file to processing.
             // We move with overwrite just in case a file with the same name
             // already exists in the output directory.
             // That should never happen under normal workflows because the filenames
             // have high variance.
-#if NETCOREAPP3_0_OR_GREATER
-            File.Move(filePath, targetFilePath, true);
-#else
-            File.Copy(filePath, targetFilePath, true);
-            File.Delete(filePath);
-#endif
+            _fileSystem.MoveFile(filePath, targetFilePath);
 
             return targetFilePath;
         }
@@ -271,8 +386,8 @@ namespace Sentry.Internal.Http
 
             EnsureFreeSpaceInCache();
 
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
-            var stream = File.Create(envelopeFilePath);
+            _fileSystem.CreateDirectory(_isolatedCacheDirectoryPath);
+            var stream = _fileSystem.CreateFile(envelopeFilePath);
 #if NET461 || NETSTANDARD2_0
             using(stream)
 #else

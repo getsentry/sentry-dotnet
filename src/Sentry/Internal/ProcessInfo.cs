@@ -103,5 +103,6 @@ namespace Sentry.Internal
             using var proc = Process.GetCurrentProcess();
             return proc.StartTime.ToUniversalTime();
         }
+
     }
 }
