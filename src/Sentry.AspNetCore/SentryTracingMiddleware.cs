@@ -14,7 +14,7 @@ namespace Sentry.AspNetCore
     /// </summary>
     internal class SentryTracingMiddleware
     {
-        private const string UnknownRouteTransactionName = "Unknown Route";
+        internal const string UnknownRouteTransactionName = "Unknown Route";
         private const string OperationName = "http.server";
 
         private readonly RequestDelegate _next;

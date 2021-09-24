@@ -87,7 +87,14 @@ namespace Sentry.AspNetCore
                     scope.SetTag("route.area", area);
                 }
 
-                scope.TransactionName = context.TryGetTransactionName();
+                // TransactionName refers to Transaction.Name, so skip this code if Transaction is null.
+                if (scope.Transaction != null &&
+                    scope.TransactionName is SentryTracingMiddleware.UnknownRouteTransactionName or null)
+                {
+                    scope.TransactionName =
+                        context.TryGetTransactionName()
+                        ?? SentryTracingMiddleware.UnknownRouteTransactionName;
+                }
             }
             catch (Exception e)
             {
