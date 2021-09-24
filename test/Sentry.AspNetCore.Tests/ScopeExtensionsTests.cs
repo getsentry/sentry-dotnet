@@ -55,7 +55,7 @@ namespace Sentry.AspNetCore.Tests
             {
                 var routeFeature = new RoutingFeature
                 {
-                    RouteData = new RouteData{ Values = {} }
+                    RouteData = new RouteData { Values = { } }
                 };
                 var features = new FeatureCollection();
                 features.Set<IRoutingFeature>(routeFeature);
@@ -65,7 +65,7 @@ namespace Sentry.AspNetCore.Tests
             }
         }
 
-       private readonly Fixture _fixture = new();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Populate_Request_Method_SetToScope()
