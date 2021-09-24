@@ -74,7 +74,7 @@ namespace Sentry.AspNetCore.Tests
             }
         }
 
-       private readonly Fixture _fixture = new();
+        private readonly Fixture _fixture = new();
 
         [Fact]
         public void Populate_Request_Method_SetToScope()
