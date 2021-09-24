@@ -65,7 +65,7 @@ namespace Sentry.AspNetCore.Tests
                 {
                     RouteData = new RouteData
                     {
-                        Values = { {"", null} }
+                        Values = { { "", null } }
                     }
                 };
                 var features = new FeatureCollection();
