@@ -89,7 +89,8 @@ namespace Sentry.AspNetCore
 
                 // TransactionName refers to Transaction.Name, so skip this code if Transaction is null.
                 if (scope.Transaction != null &&
-                    scope.TransactionName is SentryTracingMiddleware.UnknownRouteTransactionName or null)
+                    (scope.TransactionName is SentryTracingMiddleware.UnknownRouteTransactionName ||
+                    string.IsNullOrEmpty(scope.TransactionName)))
                 {
                     scope.TransactionName =
                         context.TryGetTransactionName()
