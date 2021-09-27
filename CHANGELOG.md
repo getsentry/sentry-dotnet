@@ -1,5 +1,11 @@
 # Changelog
 
+## Unchanged
+
+### Fixes
+
+- Avoid replacing Transaction Name  on ASP.NET Core by null or empty ([#1215](https://github.com/getsentry/sentry-dotnet/pull/1215))
+
 ## 3.9.3
 
 ### Fixes
