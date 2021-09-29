@@ -3,8 +3,4 @@
         https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
   <Import Project="..\Directory.Build.props" />
 
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-
 </Project>

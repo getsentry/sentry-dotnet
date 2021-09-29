@@ -4,7 +4,6 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
-    <IsPackable>false</IsPackable>
     <!-- https://github.com/tonerdo/coverlet/issues/33#issuecomment-382748414 -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IsTestProject>true</IsTestProject>
