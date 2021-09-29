@@ -183,9 +183,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to recover persisted session.",
-                        ex);
+                    _options.DiagnosticLogger?.LogError("Failed to recover persisted session.", ex);
                 }
             }
 
@@ -200,9 +198,7 @@ namespace Sentry.Internal
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to start a session.",
-                    ex);
+                _options.DiagnosticLogger?.LogError("Failed to start a session.", ex);
             }
         }
 
@@ -216,9 +212,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to pause a session.",
-                        ex);
+                    _options.DiagnosticLogger?.LogError("Failed to pause a session.", ex);
                 }
             }
         }
@@ -236,9 +230,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to resume a session.",
-                        ex);
+                    _options.DiagnosticLogger?.LogError("Failed to resume a session.", ex);
                 }
             }
         }
@@ -255,9 +247,7 @@ namespace Sentry.Internal
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to end a session.",
-                    ex);
+                _options.DiagnosticLogger?.LogError("Failed to end a session.", ex);
             }
         }
 
