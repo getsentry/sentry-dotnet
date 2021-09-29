@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>3.9.4</Version>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>9</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
