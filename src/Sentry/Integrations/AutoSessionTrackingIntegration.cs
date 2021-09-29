@@ -1,4 +1,4 @@
-﻿using Sentry.Internal;
+using Sentry.Internal;
 
 namespace Sentry.Integrations
 {

@@ -11,6 +11,8 @@ targets:
       nuget:Sentry.AspNetCore.Grpc:
       nuget:Sentry.AspNet:
       nuget:Sentry.EntityFramework:
+      nuget:Sentry.DiagnosticSource:
       nuget:Sentry.Log4Net:
       nuget:Sentry.Serilog:
       nuget:Sentry.NLog:
+      nuget:Sentry.Google.Cloud.Functions:

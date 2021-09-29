@@ -1,9 +1,8 @@
-using System;
-using Sentry.Internal;
 using System.Runtime.ExceptionServices;
 using System.Security;
-using Sentry.Protocol;
 using System.Threading.Tasks;
+using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry.Integrations
 {

@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using Sentry.Internal.Extensions;
 
@@ -97,8 +96,7 @@ namespace Sentry
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer)

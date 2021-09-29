@@ -1,9 +1,40 @@
 # Changelog
 
-## Unreleased
+## 3.9.4
+
+### Fixes
+
+- Unity Android support: check for native crashes before closing session as Abnormal ([#1222](https://github.com/getsentry/sentry-dotnet/pull/1222))
+
+## 3.9.3
+
+### Fixes
+
+- Add missing PathBase from ASP.NET Core ([#1198](https://github.com/getsentry/sentry-dotnet/pull/1198))
+- Use fallback if route pattern is MVC ([#1188](https://github.com/getsentry/sentry-dotnet/pull/1188))
+- Move UseSentryTracing to different namespace ([#1200](https://github.com/getsentry/sentry-dotnet/pull/1200))
+- Prevent duplicate package reporting ([#1197](https://github.com/getsentry/sentry-dotnet/pull/1197))
+
+## 3.9.2
+
+### Fixes
+
+- Exceptions from UnhandledExceptionIntegration were not marking sessions as crashed ([#1193](https://github.com/getsentry/sentry-dotnet/pull/1193))
+
+## 3.9.1
+
+### Fixes
+
+- Removed braces from tag keys on DefaultSentryScopeStateProcessor ([#1183](https://github.com/getsentry/sentry-dotnet/pull/1183))
+- Fix SQLClient unplanned behaviors ([#1179](https://github.com/getsentry/sentry-dotnet/pull/1179))
+- Add fallback to Scope Stack from AspNet ([#1180](https://github.com/getsentry/sentry-dotnet/pull/1180))
+
+## 3.9.0
 
 ### Features
 
+- EF Core and SQLClient performance monitoring integration ([#1154](https://github.com/getsentry/sentry-dotnet/pull/1154))
+- Improved SDK diagnostic logs ([#1161](https://github.com/getsentry/sentry-dotnet/pull/1161))
 - Add Scope observer to SentryOptions ([#1153](https://github.com/getsentry/sentry-dotnet/pull/1153))
 
 ### Fixes

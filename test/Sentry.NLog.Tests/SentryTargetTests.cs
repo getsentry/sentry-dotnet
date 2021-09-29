@@ -12,7 +12,6 @@ using NLog.Targets.Wrappers;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 using Xunit;
@@ -354,7 +353,7 @@ namespace Sentry.NLog.Tests
         public void Log_AdditionalGroupingKeyProperty_OverrideDefaultFingerprint()
         {
             var expectedGroupingKey = "someGroupingKey";
-            var expectedFingerprint = new []
+            var expectedFingerprint = new[]
             {
                 "{{ default }}",
                 expectedGroupingKey

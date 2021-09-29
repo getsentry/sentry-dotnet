@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Sentry.Extensibility;
 
@@ -19,7 +19,6 @@ namespace Sentry.Testing
             SentryLevel Level,
             string Message,
             Exception Exception,
-            object[] Args
-        );
+            object[] Args);
     }
 }

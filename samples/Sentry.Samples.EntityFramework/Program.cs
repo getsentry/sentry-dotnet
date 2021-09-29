@@ -1,9 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Configuration;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using Sentry;
-using Sentry.EntityFramework;
 
 var _ = SentrySdk.Init(o =>
 {

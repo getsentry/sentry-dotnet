@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sentry.Testing
 {
-    public class FakeHttpMessageHandler : HttpMessageHandler
+    public class FakeHttpMessageHandler : DelegatingHandler
     {
         private readonly Func<HttpRequestMessage, HttpResponseMessage> _getResponse;
 
@@ -14,9 +14,9 @@ namespace Sentry.Testing
             _getResponse = getResponse;
 
         public FakeHttpMessageHandler(Func<HttpResponseMessage> getResponse)
-            : this(_ => getResponse()) {}
+            : this(_ => getResponse()) { }
 
-        public FakeHttpMessageHandler() {}
+        public FakeHttpMessageHandler() { }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -25,8 +25,7 @@ namespace Sentry.Testing
             return Task.FromResult(
                 _getResponse is not null
                     ? _getResponse(request)
-                    : new HttpResponseMessage(HttpStatusCode.OK)
-            );
+                    : new HttpResponseMessage(HttpStatusCode.OK));
         }
     }
 }

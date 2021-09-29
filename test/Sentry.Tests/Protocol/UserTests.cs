@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -16,7 +15,7 @@ namespace Sentry.Tests.Protocol
                 Email = "test@sentry.io",
                 IpAddress = "::1",
                 Username = "user-name",
-                Other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}}
+                Other = new Dictionary<string, string> { { "testCustomValueKey", "testCustomValue" } }
             };
 
             var actual = sut.ToJsonString();
@@ -29,8 +28,7 @@ namespace Sentry.Tests.Protocol
                 "\"username\":\"user-name\"," +
                 "\"other\":{\"testCustomValueKey\":\"testCustomValue\"}" +
                 "}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

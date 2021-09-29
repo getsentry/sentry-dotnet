@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Web;
 using Sentry.Extensibility;
@@ -123,8 +122,7 @@ namespace Sentry.AspNet.Internal
             {
                 @event.Sdk.AddPackage(
                     $"nuget:{SdkVersion.Name}",
-                    SdkVersion.Version
-                );
+                    SdkVersion.Version);
             }
 
             return @event;

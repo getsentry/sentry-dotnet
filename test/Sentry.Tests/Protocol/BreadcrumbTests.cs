@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -23,11 +22,11 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
         {
-            var sut =  new Breadcrumb(
+            var sut = new Breadcrumb(
                 DateTimeOffset.MaxValue,
                 "message1",
                 "type1",
-                new Dictionary<string, string> { {"key", "val"} },
+                new Dictionary<string, string> { { "key", "val" } },
                 "category1",
                 BreadcrumbLevel.Warning);
 
@@ -40,8 +39,7 @@ namespace Sentry.Tests.Protocol
                 "\"data\":{\"key\":\"val\"}," +
                 "\"category\":\"category1\"," +
                 "\"level\":\"warning\"}",
-                actual
-            );
+                actual);
         }
 
         [Theory]
@@ -60,12 +58,12 @@ namespace Sentry.Tests.Protocol
             var expectedTimestampString = "9999-12-31T23:59:59.999Z";
             var timestampString = $"\"timestamp\":\"{expectedTimestampString}\"";
 
-            yield return new object[] { (new Breadcrumb (expectedTimestamp), $"{{{timestampString}}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, "message"), $"{{{timestampString},\"message\":\"message\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, type: "type"), $"{{{timestampString},\"type\":\"type\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, data: new Dictionary<string, string> { { "key", "val" }}), $"{{{timestampString},\"data\":{{\"key\":\"val\"}}}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, category: "category"), $"{{{timestampString},\"category\":\"category\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, level: BreadcrumbLevel.Critical), $"{{{timestampString},\"level\":\"critical\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp), $"{{{timestampString}}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, "message"), $"{{{timestampString},\"message\":\"message\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, type: "type"), $"{{{timestampString},\"type\":\"type\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, data: new Dictionary<string, string> { { "key", "val" } }), $"{{{timestampString},\"data\":{{\"key\":\"val\"}}}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, category: "category"), $"{{{timestampString},\"category\":\"category\"}}") };
+            yield return new object[] { (new Breadcrumb(expectedTimestamp, level: BreadcrumbLevel.Critical), $"{{{timestampString},\"level\":\"critical\"}}") };
         }
     }
 }

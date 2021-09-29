@@ -3,8 +3,8 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Sentry.AspNetCore;
 
 namespace Sentry.Samples.AspNetCore.Basic
@@ -64,8 +64,7 @@ namespace Sentry.Samples.AspNetCore.Basic
                             // will include the Log messages and any custom scope modifications
                             // as exemplified above.
                             throw new Exception(
-                                exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline"
-                            );
+                                exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline");
                         });
                     });
                 })

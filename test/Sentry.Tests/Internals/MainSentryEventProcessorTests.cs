@@ -17,7 +17,7 @@ namespace Sentry.Tests.Internals
         private class Fixture
         {
             public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-            public SentryOptions SentryOptions { get; set; } = new() {Release = "release-123"};
+            public SentryOptions SentryOptions { get; set; } = new() { Release = "release-123" };
             public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
         }
 
@@ -414,7 +414,7 @@ namespace Sentry.Tests.Internals
             var sut = _fixture.GetSut();
 
             Thread.CurrentThread.Name = "second";
-            var evt = new SentryEvent { SentryThreads = new []{ new SentryThread { Name = "first" }}};
+            var evt = new SentryEvent { SentryThreads = new[] { new SentryThread { Name = "first" } } };
             _ = sut.Process(evt);
 
             Assert.Equal(2, evt.SentryThreads.Count());
@@ -448,10 +448,11 @@ namespace Sentry.Tests.Internals
 
             //Assert
             Assert.False(evt.Contexts.ContainsKey(MainSentryEventProcessor.CurrentUiCultureKey));
-            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));        }
+            Assert.True(evt.Contexts.ContainsKey(MainSentryEventProcessor.CultureInfoKey));
+        }
 
         [Fact]
-        public void Process_DiffentCultureInfoAndCultureUiInfo_CultureInfoAndCultureUiInfoSet()
+        public void Process_DifferentCultureInfoAndCultureUiInfo_CultureInfoAndCultureUiInfoSet()
         {
             //Arrange
             var sut = _fixture.GetSut();
@@ -514,8 +515,8 @@ namespace Sentry.Tests.Internals
                 // No event tags, single default.
                 {
                     null, // No event tags.
-                    new Dictionary<string, string>{ { "key-1", "value-1" } }, // 1x default tags.
-                    new Dictionary<string, string>{ { "key-1", "value-1" } }  // No event tags, so expect just the default tags.
+                    new Dictionary<string, string> { { "key-1", "value-1" } }, // 1x default tags.
+                    new Dictionary<string, string> { { "key-1", "value-1" } }  // No event tags, so expect just the default tags.
                 },
 
                 // No event tags, multiple defaults.
@@ -537,8 +538,8 @@ namespace Sentry.Tests.Internals
 
                 // 1x event tags, 1x default tag (which is not the same as the event tag)
                 {
-                    new Dictionary<string, string>{ { "key-1", "value-1" } }, // 1x event tags.
-                    new Dictionary<string, string>{ { "key-2", "value-2" } }, // 1x default tags.
+                    new Dictionary<string, string> { { "key-1", "value-1" } }, // 1x event tags.
+                    new Dictionary<string, string> { { "key-2", "value-2" } }, // 1x default tags.
                     new Dictionary<string, string>
                     {
                         { "key-1", "value-1" },
@@ -590,7 +591,7 @@ namespace Sentry.Tests.Internals
                         { "key-4", "value-4" }  // Default tag.
                     }
                 }
-        };
+            };
 
         [Theory]
         [MemberData(nameof(AppliesDefaultTagTheoryData))]
@@ -607,7 +608,7 @@ namespace Sentry.Tests.Internals
                 evt.SetTags(eventTags);
             }
 
-            foreach(var defaultTag in defaultTags)
+            foreach (var defaultTag in defaultTags)
             {
                 _fixture.SentryOptions.DefaultTags[defaultTag.Key] = defaultTag.Value;
             }
@@ -618,7 +619,7 @@ namespace Sentry.Tests.Internals
             _ = sut.Process(evt);
 
             //Assert
-            foreach(var expectedTag in expectedTags)
+            foreach (var expectedTag in expectedTags)
             {
                 Assert.Equal(expectedTag.Value, evt.Tags[expectedTag.Key]);
             }

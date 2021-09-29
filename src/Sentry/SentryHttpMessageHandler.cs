@@ -35,13 +35,13 @@ namespace Sentry
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
         /// </summary>
         public SentryHttpMessageHandler(HttpMessageHandler innerHandler)
-            : this(innerHandler, HubAdapter.Instance) {}
+            : this(innerHandler, HubAdapter.Instance) { }
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
         /// </summary>
         public SentryHttpMessageHandler()
-            : this(HubAdapter.Instance) {}
+            : this(HubAdapter.Instance) { }
 
         /// <inheritdoc />
         protected override async Task<HttpResponseMessage> SendAsync(
@@ -50,12 +50,11 @@ namespace Sentry
         {
             // Set trace header if it hasn't already been set
             if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) &&
-                _hub.GetTraceHeader() is {} traceHeader)
+                _hub.GetTraceHeader() is { } traceHeader)
             {
                 request.Headers.Add(
                     SentryTraceHeader.HttpHeaderName,
-                    traceHeader.ToString()
-                );
+                    traceHeader.ToString());
             }
 
             // Prevent null reference exception in the following call
@@ -70,8 +69,7 @@ namespace Sentry
             var span = _hub.GetSpan()?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
-                $"{requestMethod} {url}"
-            );
+                $"{requestMethod} {url}");
 
             try
             {
@@ -87,8 +85,7 @@ namespace Sentry
 
                 // This will handle unsuccessful status codes as well
                 span?.Finish(
-                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode)
-                );
+                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode));
 
                 return response;
             }

@@ -7,6 +7,7 @@ using NSubstitute;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
@@ -151,7 +152,7 @@ namespace NotSentry.Tests
             // Arrange
             var client = Substitute.For<ISentryClient>();
 
-            var hub = new Hub( new SentryOptions
+            var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 TracesSampleRate = 1
@@ -170,8 +171,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -200,8 +200,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == transaction.TraceId &&
                     evt.Contexts.Trace.SpanId == transaction.SpanId),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -230,8 +229,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -254,8 +252,7 @@ namespace NotSentry.Tests
                 Arg.Is<SentryEvent>(evt =>
                     evt.Contexts.Trace.TraceId == default &&
                     evt.Contexts.Trace.SpanId == default),
-                Arg.Any<Scope>()
-            );
+                Arg.Any<Scope>());
         }
 
         [Fact]
@@ -329,7 +326,7 @@ namespace NotSentry.Tests
             // Arrange
             var worker = Substitute.For<IBackgroundWorker>();
 
-            var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithSecret};
+            var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
             var client = new SentryClient(options, worker);
             var hub = new Hub(options, client);
 
@@ -338,7 +335,7 @@ namespace NotSentry.Tests
             // Act
             hub.CaptureEvent(new SentryEvent
             {
-                SentryExceptions = new[] {new SentryException {Mechanism = new Mechanism {Handled = false}}}
+                SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
             });
 
             // Assert
@@ -351,8 +348,39 @@ namespace NotSentry.Tests
                         .OfType<SessionUpdate>()
                         .Single()
                         .EndStatus == SessionEndStatus.Crashed
-                )
-            );
+                ));
+        }
+
+        [Fact]
+        public void AppDomainUnhandledExceptionIntegration_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+        {
+            // Arrange
+            var worker = Substitute.For<IBackgroundWorker>();
+
+            var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
+            var client = new SentryClient(options, worker);
+            var hub = new Hub(options, client);
+
+            var integration = new AppDomainUnhandledExceptionIntegration(Substitute.For<IAppDomain>());
+            integration.Register(hub, options);
+
+            hub.StartSession();
+
+            // Act
+            // Simulate a terminating exception
+            integration.Handle(this, new UnhandledExceptionEventArgs(new Exception("test"), true));
+
+            // Assert
+            worker.Received().EnqueueEnvelope(
+                Arg.Is<Envelope>(e =>
+                    e.Items
+                        .Select(i => i.Payload)
+                        .OfType<JsonSerializable>()
+                        .Select(i => i.Source)
+                        .OfType<SessionUpdate>()
+                        .Single()
+                        .EndStatus == SessionEndStatus.Crashed
+                ));
         }
 
         [Fact]
@@ -386,8 +414,7 @@ namespace NotSentry.Tests
             var traceHeader = new SentryTraceHeader(
                 SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 SpanId.Parse("2000000000000000"),
-                true
-            );
+                true);
 
             // Act
             var transaction = hub.StartTransaction("name", "operation", traceHeader);
@@ -411,8 +438,7 @@ namespace NotSentry.Tests
             var traceHeader = new SentryTraceHeader(
                 SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 SpanId.Parse("2000000000000000"),
-                true
-            );
+                true);
 
             // Act
             var transaction = hub.StartTransaction("name", "operation", traceHeader);
@@ -435,8 +461,7 @@ namespace NotSentry.Tests
             var traceHeader = new SentryTraceHeader(
                 SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
                 SpanId.Parse("2000000000000000"),
-                true
-            );
+                true);
 
             // Act
             var transaction = hub.StartTransaction("foo", "bar", traceHeader);
@@ -504,13 +529,11 @@ namespace NotSentry.Tests
             // Assert
             transactionsSampledIn.Length.Should().BeCloseTo(
                 (int)(0.5 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
 
             transactionsSampledOut.Length.Should().BeCloseTo(
                 (int)(0.5 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
         }
 
         [Fact]
@@ -538,13 +561,11 @@ namespace NotSentry.Tests
             // Assert
             transactionsSampledIn.Length.Should().BeCloseTo(
                 (int)(0.25 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
 
             transactionsSampledOut.Length.Should().BeCloseTo(
                 (int)(0.75 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
         }
 
         [Fact]
@@ -572,13 +593,11 @@ namespace NotSentry.Tests
             // Assert
             transactionsSampledIn.Length.Should().BeCloseTo(
                 (int)(0.75 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
 
             transactionsSampledOut.Length.Should().BeCloseTo(
                 (int)(0.25 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+                (uint)(allowedRelativeDeviation * transactions.Length));
         }
 
         [Fact]
@@ -628,8 +647,7 @@ namespace NotSentry.Tests
             // Act
             var transaction = hub.StartTransaction(
                 new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "zzz"}
-            );
+                new Dictionary<string, object> { ["xxx"] = "zzz" });
 
             // Assert
             transaction.IsSampled.Should().BeTrue();
@@ -648,8 +666,7 @@ namespace NotSentry.Tests
             // Act
             var transaction = hub.StartTransaction(
                 new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "yyy"}
-            );
+                new Dictionary<string, object> { ["xxx"] = "yyy" });
 
             // Assert
             transaction.IsSampled.Should().BeFalse();

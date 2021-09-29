@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using log4net.Appender;
 using log4net.Core;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.Log4Net
@@ -86,12 +85,12 @@ namespace Sentry.Log4Net
                 Level = loggingEvent.ToSentryLevel()
             };
 
-            if (evt.Sdk is {} sdk)
+            if (evt.Sdk is { } sdk)
             {
                 sdk.Name = Constants.SdkName;
                 sdk.Version = NameAndVersion.Version;
 
-                if (NameAndVersion.Version is {} version)
+                if (NameAndVersion.Version is { } version)
                 {
                     sdk.AddPackage(ProtocolPackageName, version);
                 }

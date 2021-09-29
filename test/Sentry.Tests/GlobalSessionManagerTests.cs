@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using NSubstitute;
 using Sentry.Infrastructure;
 using Sentry.Internal.Extensions;
 using Sentry.Testing;
@@ -22,7 +21,7 @@ namespace Sentry.Tests
 
             public ISystemClock Clock { get; }
 
-            public Func<string, PersistedSessionUpdate> PersistedSessionProvider { get; }
+            public Func<string, PersistedSessionUpdate> PersistedSessionProvider { get; set; }
 
             public Fixture(Action<SentryOptions> configureOptions = null)
             {
@@ -76,8 +75,7 @@ namespace Sentry.Tests
                 _fixture.Options.CacheDirectoryPath!,
                 "Sentry",
                 _fixture.Options.Dsn!.GetHashString(),
-                ".installation"
-            );
+                ".installation");
 
             // Act
             sut.StartSession();
@@ -97,8 +95,7 @@ namespace Sentry.Tests
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Sentry",
                 _fixture.Options.Dsn!.GetHashString(),
-                ".installation"
-            );
+                ".installation");
 
             // Act
             sut.StartSession();
@@ -167,8 +164,7 @@ namespace Sentry.Tests
             // Assert
             _fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to report an error on a session because there is none active." &&
-                e.Level == SentryLevel.Debug
-            );
+                e.Level == SentryLevel.Debug);
         }
 
         [Fact]
@@ -202,8 +198,7 @@ namespace Sentry.Tests
 
             _fixture.Logger.Entries.Should().Contain(e =>
                 e.Message == "Failed to end session because there is none active." &&
-                e.Level == SentryLevel.Debug
-            );
+                e.Level == SentryLevel.Debug);
         }
 
         [Fact]
@@ -361,6 +356,71 @@ namespace Sentry.Tests
         }
 
         [Fact]
+        public void TryGetPersistentInstallationId_CrashDelegateReturnsTrueWithPauseTimestamp_EndsAsCrashed()
+        {
+            // Arrange
+            _fixture.Options.CrashedLastRun = () => true;
+            // Session was paused before persisted:
+            var pausedTimestamp = DateTimeOffset.Now;
+            _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+                AnySessionUpdate(),
+                pausedTimestamp);
+
+            var sut = _fixture.GetSut();
+
+            // Act
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Crashed);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_CrashDelegateIsNullWithPauseTimestamp_EndsAsExited()
+        {
+            // Arrange
+            _fixture.Options.CrashedLastRun = null;
+            // Session was paused before persisted:
+            var pausedTimestamp = DateTimeOffset.Now;
+            _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+                AnySessionUpdate(),
+                pausedTimestamp);
+
+            var sut = _fixture.GetSut();
+
+            // Act
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Exited);
+        }
+
+        [Fact]
+        public void TryGetPersistentInstallationId_CrashDelegateIsNullWithoutPauseTimestamp_EndsAsAbnormal()
+        {
+            // Arrange
+            _fixture.Options.CrashedLastRun = null;
+            var pausedTimestamp = DateTimeOffset.Now;
+            _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+                AnySessionUpdate(),
+                // No pause timestamp:
+                null);
+
+            var sut = _fixture.GetSut();
+
+            sut.StartSession();
+
+            // Act
+            var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+            // Assert
+            persistedSessionUpdate.Should().NotBeNull();
+            persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Abnormal);
+        }
+
+        [Fact]
         public void TryGetPersistentInstallationId_SessionStarted_CrashDelegateReturnsTrue_EndsAsCrashed()
         {
             // Arrange
@@ -368,8 +428,7 @@ namespace Sentry.Tests
             var sut = _fixture.GetSut();
 
             using var fixture = new Fixture(o =>
-                o.CrashedLastRun = () => true
-            );
+                o.CrashedLastRun = () => true);
 
             sut.StartSession();
 
@@ -413,5 +472,21 @@ namespace Sentry.Tests
             // Assert
             persistedSessionUpdate.Should().BeNull();
         }
+
+        // A session update (of which the state doesn't matter for the test):
+        private static SessionUpdate AnySessionUpdate()
+            => new(
+                SentryId.Create(),
+                "did",
+                DateTimeOffset.Now,
+                "release",
+                "env",
+                "ip",
+                "ua",
+                0,
+                true,
+                DateTimeOffset.Now,
+                1,
+                null);
     }
 }

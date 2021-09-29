@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Data.Entity.Validation;
-using System.Linq;
 using System.Threading.Tasks;
 using Sentry.EntityFramework.ErrorProcessors;
 using Xunit;
@@ -54,7 +52,7 @@ namespace Sentry.EntityFramework.Tests
                 // This will throw a validation exception since TestData has a Required column which we didn't set
                 await _fixture.DbContext.SaveChangesAsync();
             }
-            catch(DbEntityValidationException e)
+            catch (DbEntityValidationException e)
             {
                 // SaveChanges will throw an exception
 

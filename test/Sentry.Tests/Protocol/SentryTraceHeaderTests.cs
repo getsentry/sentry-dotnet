@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Sentry.Protocol;
+using FluentAssertions;
 using Xunit;
 
 namespace Sentry.Tests.Protocol

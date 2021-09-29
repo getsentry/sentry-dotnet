@@ -1,11 +1,8 @@
 using System;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Tests.Internals
@@ -36,7 +33,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public async Task Ctor_StartupTimeDetectionModeNone_NoDateTimeSet()
         {
-            var options = new SentryOptions {DetectStartupTime = StartupTimeDetectionMode.None};
+            var options = new SentryOptions { DetectStartupTime = StartupTimeDetectionMode.None };
 
             var sut = new ProcessInfo(options);
             await sut.PreciseAppStartupTask;
@@ -48,7 +45,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public async Task Ctor_StartupTimeDetectionModeFast_TimeSet()
         {
-            var options = new SentryOptions {DetectStartupTime = StartupTimeDetectionMode.Fast};
+            var options = new SentryOptions { DetectStartupTime = StartupTimeDetectionMode.Fast };
 
             var sut = new ProcessInfo(options);
             await sut.PreciseAppStartupTask;
@@ -69,7 +66,7 @@ namespace Sentry.Tests.Internals
             // Not passing a mock callback here so this is 'an integration test' with GetCurrentProcess()
             var logger = Substitute.For<IDiagnosticLogger>();
             var now = DateTimeOffset.UtcNow;
-            var sut = new ProcessInfo(new SentryOptions {DiagnosticLogger = logger});
+            var sut = new ProcessInfo(new SentryOptions { DiagnosticLogger = logger });
             var initialTime = sut.StartupTime;
             await sut.PreciseAppStartupTask;
 
@@ -97,7 +94,7 @@ namespace Sentry.Tests.Internals
             StartupTimeDetectionMode mode,
             bool fastCallbackInvoked)
         {
-            var options = new SentryOptions {DetectStartupTime = mode};
+            var options = new SentryOptions { DetectStartupTime = mode };
             var check = new Func<DateTimeOffset>(() => DateTimeOffset.MaxValue);
 
             var sut = new ProcessInfo(options, check);

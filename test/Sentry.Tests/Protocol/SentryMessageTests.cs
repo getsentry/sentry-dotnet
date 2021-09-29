@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -23,8 +22,7 @@ namespace Sentry.Tests.Protocol
                 "{\"message\":\"Message {eventId} {name}\"," +
                 "\"params\":[100,\"test-name\"]," +
                 "\"formatted\":\"Message 100 test-name\"}",
-                actual
-            );
+                actual);
         }
 
         [Theory]

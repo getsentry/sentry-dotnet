@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Sentry.Protocol;
 using VerifyTests;
 
 namespace Sentry.Tests
@@ -24,7 +23,7 @@ namespace Sentry.Tests
                             }
                             else
                             {
-                                dictionary[pair.Key] = pair.Value.Replace('\\','/');
+                                dictionary[pair.Key] = pair.Value.Replace('\\', '/');
                             }
                         }
                         return dictionary;

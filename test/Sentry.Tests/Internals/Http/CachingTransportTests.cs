@@ -184,8 +184,7 @@ namespace Sentry.Tests.Internals.Http
                 .Returns(_ =>
                     isFailing
                         ? Task.FromException(new InvalidOperationException())
-                        : Task.CompletedTask
-                );
+                        : Task.CompletedTask);
 
             await using var transport = new CachingTransport(innerTransport, options);
 
@@ -229,7 +228,7 @@ namespace Sentry.Tests.Internals.Http
 
             innerTransport
                 .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-                .Returns(_ =>  Task.FromException(exception));
+                .Returns(_ => Task.FromException(exception));
 
             await using var transport = new CachingTransport(innerTransport, options);
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
@@ -88,8 +87,7 @@ namespace Sentry.AspNetCore
                 _options.DiagnosticLogger?.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",
                     transaction.SpanId,
-                    transaction.TraceId
-                );
+                    transaction.TraceId);
 
                 return transaction;
             }
@@ -145,8 +143,7 @@ namespace Sentry.AspNetCore
                             _options.DiagnosticLogger?.LogDebug(
                                 "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
                                 transaction.Name,
-                                transactionName
-                            );
+                                transactionName);
                         }
 
                         transaction.Name = transactionName;
@@ -177,6 +174,11 @@ namespace Sentry.AspNetCore
             }
         }
     }
+}
+
+namespace Microsoft.AspNetCore.Builder
+{
+    using Sentry.AspNetCore;
 
     /// <summary>
     /// Extensions for enabling <see cref="SentryTracingMiddleware"/>.

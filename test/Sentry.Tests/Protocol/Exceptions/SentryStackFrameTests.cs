@@ -1,4 +1,3 @@
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -55,8 +54,7 @@ namespace Sentry.Tests.Protocol.Exceptions
                 "\"instruction_addr\":\"0xffffffff\"," +
                 "\"instruction_offset\":5" +
                 "}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

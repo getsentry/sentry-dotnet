@@ -21,6 +21,17 @@
   </ItemGroup>
   <!-- Ben.Demystifier -->
 
+  <!-- DiagnosticSource -->
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
+    <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
+    <Compile Include="../Sentry.DiagnosticSource/Internals/**/*.cs">
+      <Link>Internal/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- DiagnosticSource -->
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <Reference Include="System.Net.Http" />

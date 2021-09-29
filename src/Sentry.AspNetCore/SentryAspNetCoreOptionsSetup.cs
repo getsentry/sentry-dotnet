@@ -90,6 +90,10 @@ namespace Sentry.AspNetCore
                        category,
                        "Microsoft.AspNetCore.Server.Kestrel",
                        StringComparison.Ordinal));
+
+#if NETSTANDARD2_0
+            options.AddDiagnosticSourceIntegration();
+#endif
         }
     }
 }

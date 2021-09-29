@@ -30,8 +30,7 @@ namespace Sentry.Protocol.Tests.Context
                 "\"build\":\"14393\"," +
                 "\"kernel_version\":\"who knows\"," +
                 "\"rooted\":true}",
-                actual
-            );
+                actual);
         }
 
         [Fact]

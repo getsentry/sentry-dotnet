@@ -1,5 +1,4 @@
 using System;
-using Sentry.Protocol;
 using Serilog.Events;
 using Serilog.Formatting;
 

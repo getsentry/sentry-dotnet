@@ -120,8 +120,7 @@ namespace Sentry
 
             writer.WriteString(
                 "timestamp",
-                Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffZ", DateTimeFormatInfo.InvariantInfo)
-            );
+                Timestamp.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffZ", DateTimeFormatInfo.InvariantInfo));
 
             writer.WriteStringIfNotWhiteSpace("message", Message);
             writer.WriteStringIfNotWhiteSpace("type", Type);

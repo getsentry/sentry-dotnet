@@ -10,7 +10,6 @@ using NLog.Targets;
 
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.NLog
@@ -333,12 +332,12 @@ namespace Sentry.NLog
                     User = GetUser(logEvent) ?? new User(),
                 };
 
-                if (evt.Sdk is {} sdk)
+                if (evt.Sdk is { } sdk)
                 {
                     sdk.Name = Constants.SdkName;
                     sdk.Version = NameAndVersion.Version;
 
-                    if (NameAndVersion.Version is {} version)
+                    if (NameAndVersion.Version is { } version)
                     {
                         sdk.AddPackage(ProtocolPackageName, version);
                     }
@@ -405,7 +404,7 @@ namespace Sentry.NLog
                         data ??= new Dictionary<string, string>(contextProps.Count);
                         foreach (var contextProp in contextProps)
                         {
-                            if (contextProp.Value?.ToString() is {} value)
+                            if (contextProp.Value?.ToString() is { } value)
                             {
                                 data.Add(contextProp.Key, value);
                             }
@@ -442,7 +441,7 @@ namespace Sentry.NLog
                 user.Other = new Dictionary<string, string>(User.Other.Count);
                 for (var i = 0; i < User.Other.Count; ++i)
                 {
-                    if (User.Other[i].Layout?.Render(logEvent) is {} value)
+                    if (User.Other[i].Layout?.Render(logEvent) is { } value)
                     {
                         if (!string.IsNullOrEmpty(value) || User.Other[i].IncludeEmptyValue)
                         {
@@ -463,7 +462,7 @@ namespace Sentry.NLog
                 {
                     foreach (var kv in logEvent.Properties)
                     {
-                        if (kv.Value?.ToString() is {} value)
+                        if (kv.Value?.ToString() is { } value)
                         {
                             yield return new KeyValuePair<string, string>(kv.Key?.ToString() ?? "", value);
                         }

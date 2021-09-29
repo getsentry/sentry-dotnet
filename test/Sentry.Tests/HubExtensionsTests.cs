@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using NSubstitute;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests

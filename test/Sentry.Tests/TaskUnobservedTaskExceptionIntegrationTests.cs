@@ -1,9 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Xunit;
-using System.Threading.Tasks;
 
 namespace Sentry.Tests
 {
@@ -34,7 +34,7 @@ namespace Sentry.Tests
             _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
         }
 
-// Only triggers in release mode.
+        // Only triggers in release mode.
 #if RELEASE
         [Fact] // Integration test.
         public void Handle_UnobservedTaskException_CaptureEvent()

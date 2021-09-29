@@ -16,8 +16,7 @@ namespace Sentry
     public sealed class SdkVersion : IJsonSerializable
     {
         private static readonly Lazy<SdkVersion> InstanceLazy = new(
-            () => typeof(ISentryClient).Assembly.GetNameAndVersion()
-        );
+            () => typeof(ISentryClient).Assembly.GetNameAndVersion());
 
         internal static SdkVersion Instance => InstanceLazy.Value;
 
@@ -67,7 +66,7 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            writer.WriteArrayIfNotEmpty("packages", InternalPackages);
+            writer.WriteArrayIfNotEmpty("packages", InternalPackages.Distinct());
             writer.WriteStringIfNotWhiteSpace("name", Name);
             writer.WriteStringIfNotWhiteSpace("version", Version);
 

@@ -56,8 +56,7 @@ namespace Sentry.Internal
             ScopeManager = scopeManager ?? new SentryScopeManager(
                 options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
                 options,
-                _ownedClient
-            );
+                _ownedClient);
 
             _rootScope = options.IsGlobalModeEnabled
                 ? DisabledHub.Instance
@@ -131,8 +130,7 @@ namespace Sentry.Internal
             {
                 var samplingContext = new TransactionSamplingContext(
                     context,
-                    customSamplingContext
-                );
+                    customSamplingContext);
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
@@ -185,10 +183,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to recover persisted session.",
-                        ex
-                    );
+                    _options.DiagnosticLogger?.LogError("Failed to recover persisted session.", ex);
                 }
             }
 
@@ -203,10 +198,7 @@ namespace Sentry.Internal
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to start a session.",
-                    ex
-                );
+                _options.DiagnosticLogger?.LogError("Failed to start a session.", ex);
             }
         }
 
@@ -220,10 +212,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to pause a session.",
-                        ex
-                    );
+                    _options.DiagnosticLogger?.LogError("Failed to pause a session.", ex);
                 }
             }
         }
@@ -241,10 +230,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to resume a session.",
-                        ex
-                    );
+                    _options.DiagnosticLogger?.LogError("Failed to resume a session.", ex);
                 }
             }
         }
@@ -261,10 +247,7 @@ namespace Sentry.Internal
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to end a session.",
-                    ex
-                );
+                _options.DiagnosticLogger?.LogError("Failed to end a session.", ex);
             }
         }
 
@@ -281,7 +264,7 @@ namespace Sentry.Internal
             }
 
             // Otherwise just get the currently active span on the scope (unless it's sampled out)
-            if (scope.GetSpan() is {IsSampled: not false} span)
+            if (scope.GetSpan() is { IsSampled: not false } span)
             {
                 return span;
             }
@@ -302,22 +285,22 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                     evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
-                } else if (evt.IsErrored() && scope?.LastCreatedSpan() is { } lastSpan && lastSpan?.IsFinished == false) {
+                }
+                else if (evt.IsErrored() && scope?.LastCreatedSpan() is { } lastSpan && lastSpan?.IsFinished == false)
+                {
                     // Can still be reset by the owner but lets consider it finished and errored for now.
                     lastSpan.Finish(SpanStatus.InternalError);
                 }
 
                 actualScope.SessionUpdate = evt switch
                 {
-                    // TODO: Extract both braches as internal extension methods (IsCrashed and IsErrored):
-
                     // Event contains a terminal exception -> end session as crashed
-                    var e when e.SentryExceptions?.Any(x => !(x.Mechanism?.Handled ?? true)) ?? false =>
+                    var e when e.HasUnhandledException =>
                         _sessionManager.EndSession(SessionEndStatus.Crashed),
 
                     // Event contains a non-terminal exception -> report error
                     // (this might return null if the session has already reported errors before)
-                    var e when e.Exception is not null || e.SentryExceptions?.Any() == true =>
+                    var e when e.HasException =>
                         _sessionManager.ReportError(),
 
                     // Event doesn't contain any kind of exception -> no reason to attach session update

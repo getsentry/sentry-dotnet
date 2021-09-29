@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Reflection;
 using Serilog.Core;
 using Serilog.Events;
@@ -92,12 +90,12 @@ namespace Sentry.Serilog
                     Level = logEvent.Level.ToSentryLevel()
                 };
 
-                if (evt.Sdk is {} sdk)
+                if (evt.Sdk is { } sdk)
                 {
                     sdk.Name = Constants.SdkName;
                     sdk.Version = NameAndVersion.Version;
 
-                    if (NameAndVersion.Version is {} version)
+                    if (NameAndVersion.Version is { } version)
                     {
                         sdk.AddPackage(ProtocolPackageName, version);
                     }
@@ -111,7 +109,7 @@ namespace Sentry.Serilog
             // Even if it was sent as event, add breadcrumb so next event includes it
             if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
             {
-                Dictionary<string, string> ?data = null;
+                Dictionary<string, string>? data = null;
                 if (exception != null && !string.IsNullOrWhiteSpace(formatted))
                 {
                     // Exception.Message won't be used as Breadcrumb message

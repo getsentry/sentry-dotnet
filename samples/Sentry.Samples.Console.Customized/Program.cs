@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Xml.Xsl;
 using Sentry;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 // One of the ways to set your DSN is via an attribute:
 // It could be set via AssemblyInfo.cs and patched via CI.
@@ -98,7 +97,7 @@ internal static class Program
             // Example customizing the HttpClientHandlers created
             o.CreateHttpClientHandler = () => new HttpClientHandler
             {
-                ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+                ServerCertificateCustomValidationCallback = (_, certificate, _, _) =>
                     !certificate.Archived
             };
 
@@ -195,7 +194,7 @@ internal static class Program
             evt.AddBreadcrumb("Breadcrumb directly to the event");
             evt.User.Username = "some@user";
             // Group all events with the following fingerprint:
-            evt.SetFingerprint(new [] { "NewClientDebug"});
+            evt.SetFingerprint(new[] { "NewClientDebug" });
             evt.Level = SentryLevel.Debug;
             SentrySdk.CaptureEvent(evt);
 

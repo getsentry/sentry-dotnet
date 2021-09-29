@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.8.3</Version>
-    <LangVersion>latest</LangVersion>
+    <Version>3.9.4</Version>
+    <LangVersion>9</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -14,7 +14,7 @@
 
   <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->
   <!-- there's no reason to cause friction to a consumer that for some reason is stuck on an unsupported version. -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+  <PropertyGroup>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 

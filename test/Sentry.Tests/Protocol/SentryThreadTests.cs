@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -33,8 +32,7 @@ namespace Sentry.Tests.Protocol
                 "\"crashed\":true," +
                 "\"current\":true," +
                 "\"stacktrace\":{\"frames\":[{\"filename\":\"test\"}]}}",
-                actual
-            );
+                actual);
         }
 
         [Theory]

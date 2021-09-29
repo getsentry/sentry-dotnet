@@ -1,5 +1,4 @@
 using System;
-using Sentry.Protocol;
 using Xunit;
 
 namespace Sentry.Tests.Protocol
@@ -296,8 +295,10 @@ namespace Sentry.Tests.Protocol
 
         private static void AssertEqual(DsnTestCase @case, Dsn dsn)
         {
-            if (@case == null) throw new ArgumentNullException(nameof(@case));
-            if (dsn == null) throw new ArgumentNullException(nameof(dsn));
+            if (@case == null)
+                throw new ArgumentNullException(nameof(@case));
+            if (dsn == null)
+                throw new ArgumentNullException(nameof(dsn));
 
             var uri = dsn.GetStoreEndpointUri();
 

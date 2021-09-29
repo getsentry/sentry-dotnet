@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry.AspNetCore
 {
@@ -90,7 +89,7 @@ namespace Sentry.AspNetCore
 
                 scope.TransactionName = context.TryGetTransactionName();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // Suppress the error here; we expect an ArgumentNullException if httpContext.Request.RouteValues is null from GetRouteData()
                 // TODO: Consider adding a bool to the Sentry options to make route data extraction optional in case they don't use a routing middleware?

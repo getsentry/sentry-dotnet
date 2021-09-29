@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using FluentAssertions;
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
 using Xunit;
 
@@ -27,8 +26,7 @@ namespace Sentry.Tests.Protocol
                 "\"name\":\"myName\"," +
                 "\"email\":\"myEmail@service.com\"," +
                 "\"comments\":\"my comment\"" +
-                "}"
-            );
+                "}");
         }
     }
 }

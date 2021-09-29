@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Hosting;
@@ -27,7 +27,7 @@ namespace Sentry.Google.Cloud.Functions.Tests
                 HostingEnvironment = HostingEnvironment
             };
             LoggingBuilder = new TestLoggingBuilder();
-            LoggingBuilder.Services.AddSingleton<IWebHostEnvironment>(HostingEnvironment);
+            LoggingBuilder.Services.AddSingleton(HostingEnvironment);
 
         }
 

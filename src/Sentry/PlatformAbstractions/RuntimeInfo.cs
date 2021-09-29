@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Sentry.PlatformAbstractions
 {
@@ -48,8 +48,7 @@ namespace Sentry.PlatformAbstractions
                 return new Runtime(
                     name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                     match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
-                    raw: rawRuntimeDescription
-                );
+                    raw: rawRuntimeDescription);
             }
 
             return new Runtime(name, raw: rawRuntimeDescription);
@@ -103,7 +102,7 @@ namespace Sentry.PlatformAbstractions
 
         internal static Runtime? GetFromRuntimeInformation()
         {
-            // Prefered API: netstandard2.0
+            // Preferred API: netstandard2.0
             // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
             // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs
             // e.g: .NET Framework 4.7.2633.0, .NET Native, WebAssembly

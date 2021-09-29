@@ -58,8 +58,7 @@ namespace Sentry.Tests
             // Assert
             logger.Entries.Should().Contain(entry =>
                 entry.Message == "Failed invoking event handler." &&
-                entry.Exception == exception
-            );
+                entry.Exception == exception);
         }
 
         [Fact]
@@ -316,9 +315,9 @@ namespace Sentry.Tests
             }
 
             // Assert
-            observer.Received(expectedCount).SetUser(Arg.Is<User>((user)=> user.Email == expectedEmail));
-            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Id == expectedid));
-            observer.Received(expectedCount).SetUser(Arg.Is<User>((user) => user.Username == expectedusername));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Email == expectedEmail));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedid));
+            observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedusername));
         }
 
         [Theory]
@@ -327,7 +326,7 @@ namespace Sentry.Tests
         public void UserChanged_ObserverNull_Ignored(bool observerEnable)
         {
             // Arrange
-            var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable});
+            var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable });
             Exception exception = null;
 
             // Act

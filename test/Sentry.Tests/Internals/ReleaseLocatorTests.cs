@@ -44,8 +44,7 @@ namespace Sentry.Tests.Internals
                 {
                     Assert.Equal(
                         $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
-                        ReleaseLocator.LocateFromEnvironment()
-                    );
+                        ReleaseLocator.LocateFromEnvironment());
                 });
         }
     }

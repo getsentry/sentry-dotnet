@@ -1,4 +1,4 @@
-name: build
+name: check vulnerable nuget packages
 
 on: [push, pull_request]
 
