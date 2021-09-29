@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Unity Android support: check for native crashes before closing session as Abnormal ([#1222](https://github.com/getsentry/sentry-dotnet/pull/1222))
+
 ## 3.9.3
 
 ### Fixes
