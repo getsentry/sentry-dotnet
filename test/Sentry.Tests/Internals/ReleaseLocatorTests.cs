@@ -24,18 +24,10 @@ namespace Sentry.Tests.Internals
                 });
         }
 
-
-#if NET461
-        [SkippableFact]
-#else
         [Fact]
-#endif
         public void ResolveFromEnvironment_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
-#if NET461
-            Skip.If(Runtime.Current.IsMono(), "GetEntryAssembly returning null on Mono.");
-#endif
-            var ass = Assembly.GetEntryAssembly();
+            var ass = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly() ;
 
             EnvironmentVariableGuard.WithVariable(
                 Sentry.Internal.Constants.ReleaseEnvironmentVariable,
