@@ -1,8 +1,5 @@
 using System.Reflection;
 using Sentry.Internal;
-#if NET461
-using Sentry.PlatformAbstractions;
-#endif
 using Sentry.Reflection;
 using Sentry.Testing;
 using Xunit;
@@ -24,7 +21,6 @@ namespace Sentry.Tests.Internals
                 });
         }
 
-
 #if NET461
         [SkippableFact]
 #else
@@ -32,10 +28,10 @@ namespace Sentry.Tests.Internals
 #endif
         public void ResolveFromEnvironment_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
-#if NET461
-            Skip.If(Runtime.Current.IsMono(), "GetEntryAssembly returning null on Mono.");
-#endif
             var ass = Assembly.GetEntryAssembly();
+#if NET461
+            Skip.If(ass == null, "GetEntryAssembly can return null on net461. eg on Mono or in certain test runners.");
+#endif
 
             EnvironmentVariableGuard.WithVariable(
                 Sentry.Internal.Constants.ReleaseEnvironmentVariable,
