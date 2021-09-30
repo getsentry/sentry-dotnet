@@ -27,7 +27,7 @@ namespace Sentry.Tests.Internals
         [Fact]
         public void ResolveFromEnvironment_WithoutEnvironmentVariable_VersionOfEntryAssembly()
         {
-            var ass = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly() ;
+            var ass = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
 
             EnvironmentVariableGuard.WithVariable(
                 Sentry.Internal.Constants.ReleaseEnvironmentVariable,
