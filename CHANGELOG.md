@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- .NET 6 specific targets ([#939](https://github.com/getsentry/sentry-dotnet/pull/939))
+
 ## 3.9.4
 
 ### Fixes
