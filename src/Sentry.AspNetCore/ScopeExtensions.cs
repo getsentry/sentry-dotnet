@@ -67,9 +67,7 @@ namespace Sentry.AspNetCore
             // Extract the route data
             try
             {
-                if (context.GetRouteData() is { } routeData)
-                {
-
+                    var routeData = context.GetRouteData();
                     var controller = routeData.Values["controller"]?.ToString();
                     var action = routeData.Values["action"]?.ToString();
                     var area = routeData.Values["area"]?.ToString();
@@ -88,7 +86,6 @@ namespace Sentry.AspNetCore
                     {
                         scope.SetTag("route.area", area);
                     }
-                }
 
                 // Transaction Name may only be available afterward the creation of the Transaction.
                 // In this case, the event will update the transaction name if captured during the

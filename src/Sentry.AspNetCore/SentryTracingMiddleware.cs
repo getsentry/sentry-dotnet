@@ -61,17 +61,13 @@ namespace Sentry.AspNetCore
                 // Attempt to start a transaction from the trace header if it exists
                 var traceHeader = TryGetSentryTraceHeader(context);
 
-                // It's important to try and set the transaction name
-                // to some value here so that it's available for use
-                // in sampling.
                 // At a later stage, we will try to get the transaction name
                 // again, to account for the other middlewares that may have
                 // ran after ours.
-                var transactionName = context.TryGetTransactionName() ;
 
                 var transactionContext = traceHeader is not null
-                    ? new TransactionContext(transactionName ?? string.Empty, OperationName, traceHeader)
-                    : new TransactionContext(transactionName ?? string.Empty, OperationName);
+                    ? new TransactionContext(string.Empty, OperationName, traceHeader)
+                    : new TransactionContext(string.Empty, OperationName);
 
                 var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
                 {
@@ -110,17 +106,12 @@ namespace Sentry.AspNetCore
             }
 
             var transaction = TryStartTransaction(context);
-            var transactionName1 = context.TryGetTransactionName();
+
             // Expose the transaction on the scope so that the user
             // can retrieve it and start child spans off of it.
             hub.ConfigureScope(scope =>
             {
                 scope.Transaction = transaction;
-                // This overwrites the Transaction name with its own name, but also sets the private
-                // value of TransactionName reference.
-                //scope.TransactionName = transaction?.Name;
-                scope.OnEvaluating += (_, _) => scope.Populate(context, _options);
-
             });
 
             Exception? exception = null;
@@ -134,7 +125,6 @@ namespace Sentry.AspNetCore
             }
             finally
             {
-                var transactionName2 = context.TryGetTransactionName();
                 if (transaction is not null)
                 {
                     // The Transaction name was altered during the pipeline execution,
@@ -147,32 +137,19 @@ namespace Sentry.AspNetCore
                             transaction.SpanId,
                             transaction.Name);
                     }
-                    // The routing middleware may have ran after ours, so
-                    // try to get the transaction name again.
+                    // try to get the transaction name.
                     else if (context.TryGetTransactionName() is { } transactionName &&
-                             !string.Equals(transaction.Name, transactionName, StringComparison.Ordinal))
+                             !string.IsNullOrEmpty(transactionName))
                     {
                         _options.DiagnosticLogger?.LogDebug(
-                            "transaction '{0}', name set to '{1}' after request pipeline executed.",
+                            "Changed transaction '{0}', name from  to '{1}' after request pipeline executed.",
                             transaction.SpanId,
                             transactionName);
 
                         transaction.Name = transactionName;
                     }
 
-                    var aaa = transactionName1 +
-                              transactionName2 +
-                              transaction.Name;
                     var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
-
-                    // Update Scope TransactionName.
-                    hub.ConfigureScope(scope =>
-                    {
-                        if (scope.Transaction?.SpanId == transaction.SpanId)
-                        {
-                            scope.TransactionName = transaction.Name;
-                        }
-                    });
 
                     // If no Name was found for Transaction, fallback to UnknownRoute name.
                     if (transaction.Name == string.Empty)
