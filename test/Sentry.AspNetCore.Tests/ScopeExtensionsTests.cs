@@ -37,9 +37,13 @@ namespace Sentry.AspNetCore.Tests
             public readonly Scope Scope = new(new SentryOptions());
             public HttpContext HttpContext { get; } = Substitute.For<HttpContext>();
 
-            public Fixture GetSut()
+            public Fixture GetSut(bool addTransaction = true)
             {
-                Scope.Transaction = Substitute.For<ITransaction>();
+                if (addTransaction)
+                {
+                    Scope.Transaction = Substitute.For<ITransaction>();
+                }
+
                 var routeFeature = new RoutingFeature
                 {
                     RouteData = new RouteData
@@ -58,9 +62,12 @@ namespace Sentry.AspNetCore.Tests
                 return this;
             }
 
-            public Fixture GetSutWithEmptyRoute()
+            public Fixture GetSutWithEmptyRoute(bool addTransaction = true)
             {
-                Scope.Transaction = Substitute.For<ITransaction>();
+                if (addTransaction)
+                {
+                    Scope.Transaction = Substitute.For<ITransaction>();
+                }
                 var routeFeature = new RoutingFeature
                 {
                     RouteData = new RouteData
@@ -320,7 +327,6 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
             const string controller = "Ctrl";
             const string action = "Actn";
-            _sut.Transaction = Substitute.For<ITransaction>();
             var routeFeature = new RoutingFeature()
             {
                 RouteData = new RouteData() { Values = { { "controller", controller }, { "action", action }, } }
@@ -419,12 +425,11 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void Populate_TransactionNameIsNull_TransactionNameReplaced()
+        public void Populate_TransactionAndTransactionNameIsNull_TransactionNameReplaced()
         {
             // Arrange
-            var sut = _fixture.GetSut();
+            var sut = _fixture.GetSut(addTransaction: false);
             var scope = sut.Scope;
-            scope.Transaction.Name = null;
             var expectedTransactionName = $"GET {Fixture.ControllerName}.{Fixture.ActionName}";
 
             // Act
@@ -435,34 +440,17 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
-        public void Populate_TransactionNameIsNullAndRouteNotFound_TransactionNameAsUnknownRoute()
+        public void Populate_TransactionIsNullAndRouteNotFound_TransactionNameAsNull()
         {
             // Arrange
-            var sut = _fixture.GetSutWithEmptyRoute();
+            var sut = _fixture.GetSutWithEmptyRoute(addTransaction: false);
             var scope = sut.Scope;
-            scope.Transaction.Name = null;
 
             // Act
             scope.Populate(_fixture.HttpContext, SentryAspNetCoreOptions);
 
             // Assert
-            Assert.Equal(SentryTracingMiddleware.UnknownRouteTransactionName, scope.TransactionName);
-        }
-
-        [Fact]
-        public void Populate_TransactionNameIsUnknown_TransactionNameReplaced()
-        {
-            // Arrange
-            var sut = _fixture.GetSut();
-            var scope = sut.Scope;
-            scope.Transaction.Name = SentryTracingMiddleware.UnknownRouteTransactionName;
-            var expectedTransactionName = $"GET {Fixture.ControllerName}.{Fixture.ActionName}";
-
-            // Act
-            scope.Populate(_fixture.HttpContext, SentryAspNetCoreOptions);
-
-            // Assert
-            Assert.Equal(expectedTransactionName, scope.TransactionName);
+            Assert.Null(scope.TransactionName);
         }
 
         [Fact]

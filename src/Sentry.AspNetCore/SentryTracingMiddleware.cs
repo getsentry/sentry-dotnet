@@ -67,13 +67,11 @@ namespace Sentry.AspNetCore
                 // At a later stage, we will try to get the transaction name
                 // again, to account for the other middlewares that may have
                 // ran after ours.
-                var transactionName =
-                    context.TryGetTransactionName() ??
-                    UnknownRouteTransactionName;
+                var transactionName = context.TryGetTransactionName() ;
 
                 var transactionContext = traceHeader is not null
-                    ? new TransactionContext(transactionName, OperationName, traceHeader)
-                    : new TransactionContext(transactionName, OperationName);
+                    ? new TransactionContext(transactionName ?? string.Empty, OperationName, traceHeader)
+                    : new TransactionContext(transactionName ?? string.Empty, OperationName);
 
                 var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
                 {
@@ -112,13 +110,17 @@ namespace Sentry.AspNetCore
             }
 
             var transaction = TryStartTransaction(context);
-
+            var transactionName1 = context.TryGetTransactionName();
             // Expose the transaction on the scope so that the user
             // can retrieve it and start child spans off of it.
             hub.ConfigureScope(scope =>
             {
                 scope.Transaction = transaction;
+                // This overwrites the Transaction name with its own name, but also sets the private
+                // value of TransactionName reference.
+                //scope.TransactionName = transaction?.Name;
                 scope.OnEvaluating += (_, _) => scope.Populate(context, _options);
+
             });
 
             Exception? exception = null;
@@ -132,24 +134,52 @@ namespace Sentry.AspNetCore
             }
             finally
             {
+                var transactionName2 = context.TryGetTransactionName();
                 if (transaction is not null)
                 {
+                    // The Transaction name was altered during the pipeline execution,
+                    // That could be done by user interference or by some Event Capture
+                    // That triggers ScopeExtensions.Populate.
+                    if (!string.IsNullOrEmpty(transaction.Name))
+                    {
+                        _options.DiagnosticLogger?.LogDebug(
+                            "transaction '{0}', name set to '{1}' during request pipeline execution.",
+                            transaction.SpanId,
+                            transaction.Name);
+                    }
                     // The routing middleware may have ran after ours, so
                     // try to get the transaction name again.
-                    if (context.TryGetTransactionName() is { } transactionName)
+                    else if (context.TryGetTransactionName() is { } transactionName &&
+                             !string.Equals(transaction.Name, transactionName, StringComparison.Ordinal))
                     {
-                        if (!string.Equals(transaction.Name, transactionName, StringComparison.Ordinal))
-                        {
-                            _options.DiagnosticLogger?.LogDebug(
-                                "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
-                                transaction.Name,
-                                transactionName);
-                        }
+                        _options.DiagnosticLogger?.LogDebug(
+                            "transaction '{0}', name set to '{1}' after request pipeline executed.",
+                            transaction.SpanId,
+                            transactionName);
 
                         transaction.Name = transactionName;
                     }
 
+                    var aaa = transactionName1 +
+                              transactionName2 +
+                              transaction.Name;
                     var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
+
+                    // Update Scope TransactionName.
+                    hub.ConfigureScope(scope =>
+                    {
+                        if (scope.Transaction?.SpanId == transaction.SpanId)
+                        {
+                            scope.TransactionName = transaction.Name;
+                        }
+                    });
+
+                    // If no Name was found for Transaction, fallback to UnknownRoute name.
+                    if (transaction.Name == string.Empty)
+                    {
+                        transaction.Name = UnknownRouteTransactionName;
+                    }
+
                     if (exception is null)
                     {
                         transaction.Finish(status);

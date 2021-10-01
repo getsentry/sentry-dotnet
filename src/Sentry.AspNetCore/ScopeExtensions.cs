@@ -67,34 +67,36 @@ namespace Sentry.AspNetCore
             // Extract the route data
             try
             {
-                var routeData = context.GetRouteData();
-                var controller = routeData.Values["controller"]?.ToString();
-                var action = routeData.Values["action"]?.ToString();
-                var area = routeData.Values["area"]?.ToString();
-
-                if (controller != null)
+                if (context.GetRouteData() is { } routeData)
                 {
-                    scope.SetTag("route.controller", controller);
+
+                    var controller = routeData.Values["controller"]?.ToString();
+                    var action = routeData.Values["action"]?.ToString();
+                    var area = routeData.Values["area"]?.ToString();
+
+                    if (controller != null)
+                    {
+                        scope.SetTag("route.controller", controller);
+                    }
+
+                    if (action != null)
+                    {
+                        scope.SetTag("route.action", action);
+                    }
+
+                    if (area != null)
+                    {
+                        scope.SetTag("route.area", area);
+                    }
                 }
 
-                if (action != null)
+                // Transaction Name may only be available afterward the creation of the Transaction.
+                // In this case, the event will update the transaction name if captured during the
+                // pipeline execution, allowing it to match the correct transaction name as the current
+                // active transaction.
+                if (string.IsNullOrEmpty(scope.TransactionName))
                 {
-                    scope.SetTag("route.action", action);
-                }
-
-                if (area != null)
-                {
-                    scope.SetTag("route.area", area);
-                }
-
-                // TransactionName refers to Transaction.Name, so skip this code if Transaction is null.
-                if (scope.Transaction != null &&
-                    (scope.TransactionName is SentryTracingMiddleware.UnknownRouteTransactionName ||
-                    string.IsNullOrEmpty(scope.TransactionName)))
-                {
-                    scope.TransactionName =
-                        context.TryGetTransactionName()
-                        ?? SentryTracingMiddleware.UnknownRouteTransactionName;
+                   scope.TransactionName = context.TryGetTransactionName();
                 }
             }
             catch (Exception e)
