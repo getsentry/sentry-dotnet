@@ -1,10 +1,10 @@
-[
+﻿[
   {
     Timestamp: DateTimeOffset_1,
     Message: BeforeSend callback failed.,
     Data: {
       message: Exception message!,
-      stackTrace: 
+      stackTrace:
 at Sentry.Tests.SentryClientTests.<>c__DisplayClass21_0.<CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb>b__0(...)
 at Sentry.SentryClient.BeforeSend(...)
     },
