@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
+using Sentry.Extensibility;
 using Sentry.Internals.DiagnosticSource;
 using Xunit;
 
@@ -44,19 +45,35 @@ namespace Sentry.DiagnosticSource.Tests
         private class Fixture
         {
             internal TransactionTracer Tracer { get; }
-
+            public SentryOptions Options { get; }
             public IReadOnlyCollection<ISpan> Spans => Tracer?.Spans;
             public IHub Hub { get; set; }
+            private Scope _scope { get; }
             public Fixture()
             {
                 Hub = Substitute.For<IHub>();
-                Tracer = new TransactionTracer(Hub, "foo", "bar");
+                Tracer = new TransactionTracer(Hub, "foo", "bar")
+                {
+                    IsSampled = true
+                };
+                _scope = new Scope();
+                _scope.Transaction = Tracer;
+
+                var logger = Substitute.For<IDiagnosticLogger>();
+                logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+
+                Options = new SentryOptions { TracesSampleRate = 1.0 };
+                Options.Debug = true;
+                Options.DiagnosticLogger = logger;
                 Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
                 Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
                 {
                     Spans.LastOrDefault(s => s.IsFinished is false)?.Finish(SpanStatus.InternalError);
                     return SentryId.Empty;
                 });
+                Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
+
             }
         }
 
@@ -67,13 +84,13 @@ namespace Sentry.DiagnosticSource.Tests
         {
             // Assert
             var hub = _fixture.Hub;
-            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
 
             // Act
             interceptor.OnNext(new("Unknown", null));
 
             // Assert
-            hub.DidNotReceive().GetSpan();
+            hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
         [Theory]
@@ -83,14 +100,12 @@ namespace Sentry.DiagnosticSource.Tests
         public void OnNext_KnownKey_GetSpanInvoked(string key, string value)
         {
             // Arrange
-            var hub = _fixture.Hub;
-            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            var interceptor = new SentryEFCoreListener(_fixture.Hub, _fixture.Options);
 
             // Act
             interceptor.OnNext(new(key, value));
 
             // Assert
-            hub.Received(1).GetSpan();
             var child = _fixture.Spans.First(s => GetValidator(key)(s));
         }
 
@@ -101,7 +116,7 @@ namespace Sentry.DiagnosticSource.Tests
         {
             // Arrange
             var hub = _fixture.Hub;
-            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
             if (key == EFCommandExecuting)
             {
                 interceptor.DisableQuerySpan();
@@ -115,7 +130,49 @@ namespace Sentry.DiagnosticSource.Tests
             interceptor.OnNext(new(key, value));
 
             // Assert
-            hub.Received(0).GetSpan();
+            hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
+        }
+
+        [Theory]
+        [InlineData(EFConnectionOpening, null)]
+        [InlineData(EFCommandExecuting, "data")]
+        public void OnNext_KnownKeyButNotSampled_SpanNotCreated(string key, string value)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            _fixture.Tracer.IsSampled = false;
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+
+            // Act
+            interceptor.OnNext(new(key, value));
+
+            // Assert
+            hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
+            Assert.Empty(_fixture.Tracer.Spans);
+        }
+
+        [Theory]
+        [InlineData(EFConnectionClosed, null)]
+        [InlineData(EFQueryCompiled, "data")]
+        [InlineData(EFCommandFailed, "data")]
+        [InlineData(EFCommandExecuted, "data")]
+        public void OnNext_TakeSpanButNotSampled_LogWarningNotInvoked(string key, string value)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            _fixture.Tracer.IsSampled = false;
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+
+            // Act
+            interceptor.OnNext(new(key, value));
+
+            // Assert
+            hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
+            _fixture.Options.DiagnosticLogger.DidNotReceive().Log(
+                Arg.Any<SentryLevel>(),
+                Arg.Any<string>(),
+                Arg.Any<Exception>(),
+                Arg.Any<object[]>());
         }
 
         [Fact]
@@ -123,7 +180,7 @@ namespace Sentry.DiagnosticSource.Tests
         {
             // Arrange
             var hub = _fixture.Hub;
-            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
             var expectedSql = "SELECT * FROM ...";
             var efSql = "ef Junk\r\nSELECT * FROM ...";
 
@@ -136,7 +193,6 @@ namespace Sentry.DiagnosticSource.Tests
             interceptor.OnNext(new(EFConnectionClosed, efSql));
 
             // Assert
-            hub.Received(3).GetSpan();
             var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
             var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
             var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
@@ -165,7 +221,7 @@ namespace Sentry.DiagnosticSource.Tests
         {
             // Arrange
             var hub = _fixture.Hub;
-            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
             var expectedSql = "SELECT * FROM ...";
             var efSql = "ef Junk\r\nSELECT * FROM ...";
 
@@ -178,7 +234,6 @@ namespace Sentry.DiagnosticSource.Tests
             interceptor.OnNext(new(EFConnectionClosed, efSql));
 
             // Assert
-            hub.Received(3).GetSpan();
             var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
             var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
             var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandFailed)(s));
@@ -208,7 +263,7 @@ namespace Sentry.DiagnosticSource.Tests
         {
             // Arrange
             var hub = _fixture.Hub;
-            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
             var expectedSql = "SELECT * FROM ...";
             var efSql = "ef Junk\r\nSELECT * FROM ...";
 
@@ -217,7 +272,6 @@ namespace Sentry.DiagnosticSource.Tests
             hub.CaptureEvent(new SentryEvent(), null);
 
             // Assert
-            hub.Received(1).GetSpan();
             var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
 
             Assert.True(compilerSpan.IsFinished);
@@ -233,7 +287,7 @@ namespace Sentry.DiagnosticSource.Tests
         {
             // Arrange
             var hub = _fixture.Hub;
-            var interceptor = new SentryEFCoreListener(hub, new SentryOptions());
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
             var exceptionReceived = false;
 
             // Act

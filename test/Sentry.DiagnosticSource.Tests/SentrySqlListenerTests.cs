@@ -116,13 +116,18 @@ namespace Sentry.DiagnosticSource.Tests
             public Fixture()
             {
                 Logger = new InMemoryDiagnosticLogger();
+
                 Options = new SentryOptions()
                 {
                     Debug = true,
                     DiagnosticLogger = Logger,
-                    DiagnosticLevel = SentryLevel.Debug
+                    DiagnosticLevel = SentryLevel.Debug,
+                    TracesSampleRate = 1.0,
                 };
-                Tracer = new TransactionTracer(Hub, "foo", "bar");
+                Tracer = new TransactionTracer(Hub, "foo", "bar")
+                {
+                    IsSampled = true
+                };
                 _scope = new Scope();
                 _scope.Transaction = Tracer;
                 Hub = Substitute.For<IHub>();
@@ -171,6 +176,33 @@ namespace Sentry.DiagnosticSource.Tests
             var spans = _fixture.Spans.Where(s => s.Operation != "abc");
             Assert.NotEmpty(spans);
             Assert.True(GetValidator(key)(_fixture.Spans.First()));
+        }
+
+        [Theory]
+        [InlineData(SqlMicrosoftBeforeExecuteCommand, true)]
+        [InlineData(SqlDataBeforeExecuteCommand, true)]
+        [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, false)]
+        [InlineData(SqlDataWriteConnectionOpenBeforeCommand, false)]
+        public void OnNext_KnownKeyAndTracingNotSampled_SpanNotCreated(string key, bool addConnectionSpan)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            _fixture.Tracer.IsSampled = false;
+            var interceptor = new SentrySqlListener(hub, new SentryOptions());
+            if (addConnectionSpan)
+            {
+                _fixture.Tracer.StartChild("abc").SetExtra(SentrySqlListener.ConnectionExtraKey, Guid.Empty);
+            }
+
+            // Act
+            interceptor.OnNext(
+                new(key,
+                new { OperationId = Guid.Empty, ConnectionId = Guid.Empty, Command = new { CommandText = "" } }));
+
+            // Assert
+            var spans = _fixture.Spans.Where(s => s.Operation != "abc");
+            Assert.Empty(spans);
+            _fixture.Logger.Entries.Should().BeEmpty();
         }
 
         [Theory]

@@ -57,23 +57,36 @@ namespace Sentry.Internals.DiagnosticSource
 
         private ISpan? AddSpan(SentryEFSpanType type, string operation, string? description)
         {
-            if (_hub.GetSpan()?.StartChild(operation, description) is { } span &&
-                GetSpanBucket(type) is { } asyncLocalSpan)
+            ISpan? span = null;
+            _hub.ConfigureScope(scope =>
             {
-                asyncLocalSpan.Value = new WeakReference<ISpan>(span);
-                return span;
-            }
-            return null;
+                if (scope.Transaction?.IsSampled == true &&
+                    scope.GetSpan()?.StartChild(operation, description) is { } startedChild &&
+                    GetSpanBucket(type) is { } asyncLocalSpan)
+                {
+                    asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
+                    span = startedChild;
+                }
+            });
+            return span;
         }
 
         private ISpan? TakeSpan(SentryEFSpanType type)
         {
-            if (GetSpanBucket(type)?.Value is { } reference && reference.TryGetTarget(out var span))
+            ISpan? span = null;
+            _hub.ConfigureScope(scope =>
             {
-                return span;
-            }
-            _options.DiagnosticLogger?.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
-            return null;
+                if (scope.Transaction?.IsSampled == true)
+                {
+                    if (GetSpanBucket(type)?.Value is { } reference &&
+                        reference.TryGetTarget(out var startedSpan))
+                    {
+                        span = startedSpan;
+                    }
+                    _options.DiagnosticLogger?.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
+                }
+            });
+            return span;
         }
 
         private AsyncLocal<WeakReference<ISpan>>? GetSpanBucket(SentryEFSpanType type)
@@ -105,7 +118,7 @@ namespace Sentry.Internals.DiagnosticSource
 
                 //Connection Span
                 //A transaction may or may not show a connection with it.
-                if (_logConnectionEnabled && value.Key == EFConnectionOpening)
+                else if (_logConnectionEnabled && value.Key == EFConnectionOpening)
                 {
                     AddSpan(SentryEFSpanType.Connection, "db.connection", null);
                 }
