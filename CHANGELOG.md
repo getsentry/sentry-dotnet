@@ -4,7 +4,8 @@
 
 ### Fixes
 
-- Remove remove Microsoft.Bcl.AsyncInterfaces reference ([#1235](https://github.com/getsentry/sentry-dotnet/pull/1235))
+- Remove remove Microsoft.Bcl.AsyncInterfaces dependency ([#1235](https://github.com/getsentry/sentry-dotnet/pull/1235))
+- Remove remove System.Threading.Tasks.Extensions dependency ([#1235](https://github.com/getsentry/sentry-dotnet/pull/1235))
 
 ## 3.9.4
 
