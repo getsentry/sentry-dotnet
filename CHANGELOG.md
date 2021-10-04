@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.9.5
+
+### Fixes
+
+- Remove remove Microsoft.Bcl.AsyncInterfaces reference ([#1235](https://github.com/getsentry/sentry-dotnet/pull/1235))
+
 ## 3.9.4
 
 ### Fixes
