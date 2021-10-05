@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Ignore DiagnosticSource Integration if no Sampling available ([#1238](https://github.com/getsentry/sentry-dotnet/pull/1238))
+- Ignore DiagnosticSource Integration if no Sampling available ([#1238](https://github.com/getsentry/sentry-dotnet/pull/1238)) 
 
 ## 3.9.4
 
