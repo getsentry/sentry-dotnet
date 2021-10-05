@@ -73,7 +73,6 @@ namespace Sentry.DiagnosticSource.Tests
                 });
                 Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
-
             }
         }
 
