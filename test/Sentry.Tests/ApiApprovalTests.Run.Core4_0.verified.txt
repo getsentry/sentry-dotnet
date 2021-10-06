@@ -1,5 +1,5 @@
-﻿[assembly: System.CLSCompliant(true)]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
+[assembly: System.CLSCompliant(true)]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
 namespace Sentry
 {
     [System.Diagnostics.DebuggerDisplay("{FileName}")]
@@ -491,7 +491,6 @@ namespace Sentry
         public static void ApplyDefaultTags(this Sentry.SentryOptions options, Sentry.IHasTags hasTags) { }
         public static void DisableAppDomainProcessExitFlush(this Sentry.SentryOptions options) { }
         public static void DisableAppDomainUnhandledExceptionCapture(this Sentry.SentryOptions options) { }
-        public static void DisableDiagnosticSourceIntegration(this Sentry.SentryOptions options) { }
         public static void DisableDuplicateEventDetection(this Sentry.SentryOptions options) { }
         public static void DisableTaskUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }

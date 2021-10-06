@@ -1,5 +1,5 @@
-﻿[assembly: System.CLSCompliant(true)]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
+[assembly: System.CLSCompliant(true)]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.6.1", FrameworkDisplayName=".NET Framework 4.6.1")]
 namespace Sentry
 {
     [System.Diagnostics.DebuggerDisplay("{FileName}")]
@@ -98,7 +98,6 @@ namespace Sentry
     }
     public static class HasBreadcrumbsExtensions
     {
-        public static void AddBreadcrumb(this Sentry.IHasBreadcrumbs hasBreadcrumbs, string message, string? category, string? type, System.ValueTuple<string, string>? dataPair = default, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(this Sentry.IHasBreadcrumbs hasBreadcrumbs, string message, string? category = null, string? type = null, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(this Sentry.IHasBreadcrumbs hasBreadcrumbs, System.DateTimeOffset? timestamp, string message, string? category = null, string? type = null, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
     }
@@ -491,8 +490,8 @@ namespace Sentry
         public static void ApplyDefaultTags(this Sentry.SentryOptions options, Sentry.IHasTags hasTags) { }
         public static void DisableAppDomainProcessExitFlush(this Sentry.SentryOptions options) { }
         public static void DisableAppDomainUnhandledExceptionCapture(this Sentry.SentryOptions options) { }
-        public static void DisableDiagnosticSourceIntegration(this Sentry.SentryOptions options) { }
         public static void DisableDuplicateEventDetection(this Sentry.SentryOptions options) { }
+        public static void DisableNetFxInstallationsIntegration(this Sentry.SentryOptions options) { }
         public static void DisableTaskUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }
@@ -1077,7 +1076,7 @@ namespace Sentry.PlatformAbstractions
     {
         public static System.Collections.Generic.IReadOnlyDictionary<int, string> NetFxReleaseVersionMap { get; }
         public static System.Collections.Generic.IEnumerable<Sentry.PlatformAbstractions.FrameworkInstallation> GetInstallations() { }
-        public static Sentry.PlatformAbstractions.FrameworkInstallation? GetLatest(int clr) { }
+        public static Sentry.PlatformAbstractions.FrameworkInstallation? GetLatest(int clrVersion) { }
     }
     public class FrameworkInstallation
     {
@@ -1096,7 +1095,8 @@ namespace Sentry.PlatformAbstractions
     }
     public class Runtime
     {
-        public Runtime(string? name = null, string? version = null, string? raw = null) { }
+        public Runtime(string? name = null, string? version = null, Sentry.PlatformAbstractions.FrameworkInstallation? frameworkInstallation = null, string? raw = null) { }
+        public Sentry.PlatformAbstractions.FrameworkInstallation FrameworkInstallation { get; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }

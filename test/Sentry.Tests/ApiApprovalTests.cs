@@ -8,6 +8,9 @@ namespace Sentry.Tests
     public class ApiApprovalTests
     {
         [Fact]
-        public Task Run() => typeof(SentrySdk).Assembly.CheckApproval();
+        public Task Run()
+        {
+            return typeof(SentrySdk).Assembly.CheckApproval();
+        }
     }
 }
