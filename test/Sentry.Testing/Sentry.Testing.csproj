@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    <PackageReference Include="Verify.Xunit" Version="13.0.3" />
+    <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.1' OR $(TargetFramework) == 'net461'">
