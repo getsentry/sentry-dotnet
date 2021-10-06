@@ -77,7 +77,7 @@ namespace Sentry.Protocol.Envelopes
             ["name"] = SdkVersion.Instance.Name,
             ["version"] = SdkVersion.Instance.Version
         };
-        
+
         static IReadOnlyDictionary<string, object?> defaultHeader = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["sdk"] = sdkHeader
