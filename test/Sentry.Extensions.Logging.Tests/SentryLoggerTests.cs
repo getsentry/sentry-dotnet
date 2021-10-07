@@ -83,7 +83,7 @@ namespace Sentry.Extensions.Logging.Tests
                 new("fooString", "bar"),
                 new("fooInteger", 1234),
                 new("fooDouble", (double)1234),
-                new("fooFloat", (float)1234.1234),
+                new("fooFloat", (float)1234.123),
                 new("fooGuid", guidValue)
             };
             var sut = _fixture.GetSut();
@@ -95,7 +95,7 @@ namespace Sentry.Extensions.Logging.Tests
                         e => e.Tags["fooString"] == "bar" &&
                         e.Tags["fooInteger"] == "1234" &&
                         e.Tags["fooDouble"] == "1234" &&
-                        e.Tags["fooFloat"] == "1234.1234" &&
+                        e.Tags["fooFloat"] == "1234.123" &&
                         e.Tags["fooGuid"] == guidValue.ToString()));
         }
 
