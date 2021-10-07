@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add `Log*` extensoins to `SentryOptions` ([#1245](https://github.com/getsentry/sentry-dotnet/pull/1245))
+
 ## 3.9.4
 
 ### Fixes
