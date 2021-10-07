@@ -10,6 +10,18 @@ namespace Sentry.Extensibility
     /// </remarks>
     public static class DiagnosticLoggerExtensions
     {
+        
+        /// <summary>
+        /// Log an internal SDK message.
+        /// </summary>
+        public static void Log(
+            this SentryOptions options,
+            SentryLevel logLevel,
+            string message,
+            Exception? exception = null,
+            params object?[] args)
+            => options.DiagnosticLogger?.Log(logLevel, message, exception, args);
+
         /// <summary>
         /// Log a debug message.
         /// </summary>

@@ -44,12 +44,12 @@ namespace Microsoft.Extensions.Logging
             {
                 if (SentrySdk.IsEnabled && options.Dsn is null)
                 {
-                    options.DiagnosticLogger?.LogWarning("Not calling Init from {0} because SDK is already enabled and no DSN was provided to the integration", nameof(SentryLoggerFactoryExtensions));
+                    options.LogWarning("Not calling Init from {0} because SDK is already enabled and no DSN was provided to the integration", nameof(SentryLoggerFactoryExtensions));
                     hub = HubAdapter.Instance;
                 }
                 else
                 {
-                    options.DiagnosticLogger?.LogDebug("Initializing from {0} and swapping current Hub.", nameof(SentryLoggerFactoryExtensions));
+                    options.LogDebug("Initializing from {0} and swapping current Hub.", nameof(SentryLoggerFactoryExtensions));
                     hub = SentrySdk.InitHub(options);
                     SentrySdk.UseHub(hub);
                 }

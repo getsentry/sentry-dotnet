@@ -32,7 +32,7 @@ namespace Sentry.Internal
 
         public SentryEvent Process(SentryEvent @event)
         {
-            _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
+            _options.LogDebug("Running main event processor on: Event {0}", @event.EventId);
 
             if (TimeZoneInfo.Local is { } timeZoneInfo)
             {
