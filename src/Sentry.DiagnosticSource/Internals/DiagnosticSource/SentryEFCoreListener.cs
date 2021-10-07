@@ -60,13 +60,23 @@ namespace Sentry.Internals.DiagnosticSource
             ISpan? span = null;
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction?.IsSampled == true &&
-                    scope.GetSpan()?.StartChild(operation, description) is { } startedChild &&
-                    GetSpanBucket(type) is { } asyncLocalSpan)
+                if (scope.Transaction?.IsSampled != true)
                 {
-                    asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
-                    span = startedChild;
+                    return;
                 }
+
+                if (scope.GetSpan()?.StartChild(operation, description) is not { } startedChild)
+                {
+                    return;
+                }
+
+                if (GetSpanBucket(type) is not { } asyncLocalSpan)
+                {
+                    return;
+                }
+
+                asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
+                span = startedChild;
             });
             return span;
         }
