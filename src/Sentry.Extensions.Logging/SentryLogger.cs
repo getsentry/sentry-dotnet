@@ -72,9 +72,25 @@ namespace Sentry.Extensions.Logging
                             continue;
                         }
 
-                        if (property.Value is string tagValue)
+                        if (property.Value is string stringTagValue)
                         {
-                            @event.SetTag(property.Key, tagValue);
+                            @event.SetTag(property.Key, stringTagValue);
+                        }
+                        else if (property.Value is int integerTagValue)
+                        {
+                            @event.SetTag(property.Key, integerTagValue.ToString());
+                        }
+                        else if (property.Value is float floatTagValue)
+                        {
+                            @event.SetTag(property.Key, floatTagValue.ToString());
+                        }
+                        else if (property.Value is double doubleTagValue)
+                        {
+                            @event.SetTag(property.Key, doubleTagValue.ToString());
+                        }
+                        else if (property.Value is Guid guidTagValue)
+                        {
+                            @event.SetTag(property.Key, guidTagValue.ToString());
                         }
                     }
                 }

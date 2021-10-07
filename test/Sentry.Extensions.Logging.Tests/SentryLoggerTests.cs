@@ -76,9 +76,15 @@ namespace Sentry.Extensions.Logging.Tests
         [Fact]
         public void Log_WithProperties_SetsTagsInEvent()
         {
+            var guidValue = Guid.NewGuid();
+
             var props = new List<KeyValuePair<string, object>>
             {
-                new("foo", "bar")
+                new("fooString", "bar"),
+                new("fooInteger", 1234),
+                new("fooDouble", (double)1234),
+                new("fooFloat", (float)1234.1234),
+                new("fooGuid", guidValue)
             };
             var sut = _fixture.GetSut();
 
@@ -86,7 +92,11 @@ namespace Sentry.Extensions.Logging.Tests
 
             _ = _fixture.Hub.Received(1)
                     .CaptureEvent(Arg.Is<SentryEvent>(
-                        e => e.Tags["foo"] == "bar"));
+                        e => e.Tags["fooString"] == "bar" &&
+                        e.Tags["fooInteger"] == "1234" &&
+                        e.Tags["fooDouble"] == "1234" &&
+                        e.Tags["fooFloat"] == "1234.1234" &&
+                        e.Tags["fooGuid"] == guidValue.ToString()));
         }
 
         [Fact]
