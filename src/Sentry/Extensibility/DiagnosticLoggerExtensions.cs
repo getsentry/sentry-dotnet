@@ -10,7 +10,7 @@ namespace Sentry.Extensibility
     /// </remarks>
     public static class DiagnosticLoggerExtensions
     {
-        
+
         /// <summary>
         /// Log an internal SDK message.
         /// </summary>
