@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add additional primitive values as tags on SentryLogger ([#1246](https://github.com/getsentry/sentry-dotnet/pull/1246))
+
+
 ## 3.9.4
 
 ### Fixes
