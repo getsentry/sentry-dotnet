@@ -6,6 +6,10 @@
 
 - Add additional primitive values as tags on SentryLogger ([#1246](https://github.com/getsentry/sentry-dotnet/pull/1246))
 
+### Fixes
+
+- Events are now sent on Google Gloud Functions Integration ([#1249](https://github.com/getsentry/sentry-dotnet/pull/1249))
+
 ## 3.9.4
 
 ### Fixes
