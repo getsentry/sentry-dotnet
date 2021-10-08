@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add additional primitive values as tags on SentryLogger ([#1246](https://github.com/getsentry/sentry-dotnet/pull/1246))
+
 ### Fixes
 
 - Cache envelope headers ([#1242](https://github.com/getsentry/sentry-dotnet/pull/1242))
