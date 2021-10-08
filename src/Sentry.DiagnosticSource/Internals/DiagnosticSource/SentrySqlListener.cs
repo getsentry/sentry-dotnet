@@ -81,7 +81,7 @@ namespace Sentry.Internals.DiagnosticSource
         {
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction is { } transaction && transaction.IsSampled == true)
+                if (scope.Transaction is { } transaction)
                 {
                     if (type == SentrySqlSpanType.Connection &&
                         transaction?.StartChild(operation) is { } connectionSpan)
@@ -109,7 +109,7 @@ namespace Sentry.Internals.DiagnosticSource
             ISpan? span = null;
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction?.IsSampled != true)
+                if (scope.Transaction == null)
                 {
                     return;
                 }

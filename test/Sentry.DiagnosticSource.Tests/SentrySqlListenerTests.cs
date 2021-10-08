@@ -179,33 +179,6 @@ namespace Sentry.DiagnosticSource.Tests
         }
 
         [Theory]
-        [InlineData(SqlMicrosoftBeforeExecuteCommand, true)]
-        [InlineData(SqlDataBeforeExecuteCommand, true)]
-        [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, false)]
-        [InlineData(SqlDataWriteConnectionOpenBeforeCommand, false)]
-        public void OnNext_KnownKeyAndTracingNotSampled_SpanNotCreated(string key, bool addConnectionSpan)
-        {
-            // Arrange
-            var hub = _fixture.Hub;
-            _fixture.Tracer.IsSampled = false;
-            var interceptor = new SentrySqlListener(hub, new SentryOptions());
-            if (addConnectionSpan)
-            {
-                _fixture.Tracer.StartChild("abc").SetExtra(SentrySqlListener.ConnectionExtraKey, Guid.Empty);
-            }
-
-            // Act
-            interceptor.OnNext(
-                new(key,
-                new { OperationId = Guid.Empty, ConnectionId = Guid.Empty, Command = new { CommandText = "" } }));
-
-            // Assert
-            var spans = _fixture.Spans.Where(s => s.Operation != "abc");
-            Assert.Empty(spans);
-            _fixture.Logger.Entries.Should().BeEmpty();
-        }
-
-        [Theory]
         [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand, SqlMicrosoftBeforeExecuteCommand, SqlMicrosoftAfterExecuteCommand)]
         [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand, SqlDataBeforeExecuteCommand, SqlDataAfterExecuteCommand)]
         public void OnNext_HappyPathsWithoutTransaction_IsValid(string connectionOpenKey, string connectionUpdateKey, string connectionCloseKey, string queryStartKey, string queryEndKey)
