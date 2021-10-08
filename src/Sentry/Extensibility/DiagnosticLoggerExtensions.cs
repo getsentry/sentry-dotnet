@@ -13,7 +13,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log an internal SDK message.
         /// </summary>
-        public static void Log(
+        internal static void Log(
             this SentryOptions options,
             SentryLevel logLevel,
             string message,
@@ -33,7 +33,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a debug message.
         /// </summary>
-        public static void LogDebug<TArg>(
+        internal static void LogDebug<TArg>(
             this SentryOptions options,
             string message,
             TArg arg)
@@ -52,7 +52,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a debug message.
         /// </summary>
-        public static void LogDebug<TArg, TArg2>(
+        internal static void LogDebug<TArg, TArg2>(
             this SentryOptions options,
             string message,
             TArg arg,
@@ -70,7 +70,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a debug message.
         /// </summary>
-        public static void LogDebug(
+        internal static void LogDebug(
             this SentryOptions options,
             string message)
             => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Debug, null, message);
@@ -86,7 +86,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a info message.
         /// </summary>
-        public static void LogInfo(
+        internal static void LogInfo(
             this SentryOptions options,
             string message)
             => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Info, null, message);
@@ -103,7 +103,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a info message.
         /// </summary>
-        public static void LogInfo<TArg>(
+        internal static void LogInfo<TArg>(
             this SentryOptions options,
             string message,
             TArg arg)
@@ -122,7 +122,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a info message.
         /// </summary>
-        public static void LogInfo<TArg, TArg2>(
+        internal static void LogInfo<TArg, TArg2>(
             this SentryOptions options,
             string message,
             TArg arg,
@@ -143,7 +143,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a info message.
         /// </summary>
-        public static void LogInfo<TArg, TArg2, TArg3>(
+        internal static void LogInfo<TArg, TArg2, TArg3>(
             this SentryOptions options,
             string message,
             TArg arg,
@@ -162,7 +162,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a warning message.
         /// </summary>
-        public static void LogWarning(
+        internal static void LogWarning(
             this SentryOptions options,
             string message)
             => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, null, message);
@@ -179,7 +179,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a warning message.
         /// </summary>
-        public static void LogWarning<TArg>(
+        internal static void LogWarning<TArg>(
             this SentryOptions options,
             string message,
             TArg arg)
@@ -198,7 +198,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a warning message.
         /// </summary>
-        public static void LogWarning<TArg, TArg2>(
+        internal static void LogWarning<TArg, TArg2>(
             this SentryOptions options,
             string message,
             TArg arg,
@@ -217,7 +217,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a error message.
         /// </summary>
-        public static void LogError(
+        internal static void LogError(
             this SentryOptions options,
             string message,
             Exception? exception = null)
@@ -236,7 +236,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a error message.
         /// </summary>
-        public static void LogError<TArg>(
+        internal static void LogError<TArg>(
             this SentryOptions options,
             string message,
             Exception exception,
@@ -257,7 +257,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a error message.
         /// </summary>
-        public static void LogError<TArg, TArg2>(
+        internal static void LogError<TArg, TArg2>(
             this SentryOptions options,
             string message,
             Exception exception,
@@ -281,7 +281,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a error message.
         /// </summary>
-        public static void LogError<TArg, TArg2, TArg3, TArg4>(
+        internal static void LogError<TArg, TArg2, TArg3, TArg4>(
             this SentryOptions options,
             string message,
             Exception exception,
@@ -306,7 +306,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log an error message.
         /// </summary>
-        public static void LogError<TArg, TArg2, TArg3>(
+        internal static void LogError<TArg, TArg2, TArg3>(
             this SentryOptions options,
             Exception exception,
             string message,
@@ -327,7 +327,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Log a warning message.
         /// </summary>
-        public static void LogFatal(
+        internal static void LogFatal(
             this SentryOptions options,
             string message,
             Exception? exception = null)
