@@ -38,6 +38,15 @@ namespace Sentry
         public SentryId EventId { get; }
 
         /// <summary>
+        /// The unique identifier of this event.
+        /// </summary>
+        /// <remarks>
+        /// Hexadecimal string representing a uuid4 value.
+        /// The length is exactly 32 characters (no dashes!).
+        /// </remarks>
+        public SentryId EventId2 { get; }
+
+        /// <summary>
         /// Indicates when the event was created.
         /// </summary>
         /// <example>2018-04-03T17:41:36</example>
