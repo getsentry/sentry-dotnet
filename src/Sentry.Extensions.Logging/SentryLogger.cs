@@ -88,7 +88,8 @@ namespace Sentry.Extensions.Logging
                         {
                             @event.SetTag(property.Key, doubleTagValue.ToString());
                         }
-                        else if (property.Value is Guid guidTagValue)
+                        else if (property.Value is Guid guidTagValue &&
+                                 guidTagValue != Guid.Empty)
                         {
                             @event.SetTag(property.Key, guidTagValue.ToString());
                         }

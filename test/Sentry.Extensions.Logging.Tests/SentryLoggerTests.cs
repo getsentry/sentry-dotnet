@@ -100,6 +100,22 @@ namespace Sentry.Extensions.Logging.Tests
         }
 
         [Fact]
+        public void Log_WithEmptyGuidProperty_DoesntSetTagInEvent()
+        {
+            var props = new List<KeyValuePair<string, object>>
+            {
+                new("fooGuid", Guid.Empty)
+            };
+            var sut = _fixture.GetSut();
+
+            sut.Log<object>(LogLevel.Critical, default, props, null, null);
+
+            _ = _fixture.Hub.Received(1)
+                    .CaptureEvent(Arg.Is<SentryEvent>(
+                        e => e.Tags.Count == 0));
+        }
+
+        [Fact]
         public void Log_WithEventId_EventIdAsBreadcrumbData()
         {
             var expectedEventId = new EventId(10, "EventId-!@#$%^&*(");
