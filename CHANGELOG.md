@@ -6,6 +6,10 @@
 
 - Avoid replacing Transaction Name on ASP.NET Core by null or empty ([#1215](https://github.com/getsentry/sentry-dotnet/pull/1215))
 
+### Features
+
+- Add additional primitive values as tags on SentryLogger ([#1246](https://github.com/getsentry/sentry-dotnet/pull/1246))
+
 ## 3.9.4
 
 ### Fixes
