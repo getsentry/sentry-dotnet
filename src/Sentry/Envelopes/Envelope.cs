@@ -72,7 +72,7 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() => Items.DisposeAll();
 
         // limited SDK information (no packages)
-        static IReadOnlyDictionary<string, string?> sdkHeader = new Dictionary<string, string?>(StringComparer.Ordinal)
+        static IReadOnlyDictionary<string, string?> sdkHeader = new Dictionary<string, string?>(2, StringComparer.Ordinal)
         {
             ["name"] = SdkVersion.Instance.Name,
             ["version"] = SdkVersion.Instance.Version
