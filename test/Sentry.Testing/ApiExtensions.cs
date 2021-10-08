@@ -10,11 +10,10 @@ namespace Sentry.Tests
     {
         public static Task CheckApproval(this Assembly assembly, [CallerFilePath] string filePath = "")
         {
-            var assemblyImageRuntimeVersion = assembly.ImageRuntimeVersion;
             var generatorOptions = new ApiGeneratorOptions { WhitelistedNamespacePrefixes = new[] { "Sentry" } };
             var apiText = assembly.GeneratePublicApi(generatorOptions);
             return Verifier.Verify(apiText, null, filePath)
-                .UniqueForRuntimeAndVersion()
+                .UniqueForTargetFrameworkAndVersion()
                 .ScrubEmptyLines()
                 .ScrubLines(l =>
                     l.StartsWith("[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(") ||
