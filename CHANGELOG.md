@@ -13,6 +13,7 @@
 ### Fixes
 
 - Events are now sent on Google Gloud Functions Integration ([#1249](https://github.com/getsentry/sentry-dotnet/pull/1249))
+- Cache envelope headers ([#1242](https://github.com/getsentry/sentry-dotnet/pull/1242))
 
 ## 3.9.4
 

@@ -154,7 +154,7 @@ namespace Sentry.Internals.DiagnosticSource
                 }
                 else
                 {
-                    _options.DiagnosticLogger?.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
+                    _options.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
                         type,
                         value.GetProperty<Guid>(OperationKey));
                 }
@@ -238,7 +238,7 @@ namespace Sentry.Internals.DiagnosticSource
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Failed to intercept SQL event.", ex);
+                _options.LogError("Failed to intercept SQL event.", ex);
             }
         }
 

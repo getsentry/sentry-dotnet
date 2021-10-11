@@ -41,7 +41,7 @@ namespace Sentry
             // from anywhere else, return a disabled hub.
             if (Dsn.IsDisabled(dsn))
             {
-                options.DiagnosticLogger?.LogWarning(
+                options.LogWarning(
                     "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
 
                 return DisabledHub.Instance;
