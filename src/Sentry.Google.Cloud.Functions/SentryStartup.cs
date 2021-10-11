@@ -32,7 +32,7 @@ namespace Google.Cloud.Functions.Framework
             logging.Services.Configure<SentryAspNetCoreOptions>(options =>
             {
                 // Make sure all events are flushed out
-                options.FlushOnCompletedRequest = true;
+                options.FlushBeforeRequestCompleted = true;
             });
 
             logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();

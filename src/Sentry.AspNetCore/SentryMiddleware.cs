@@ -117,12 +117,27 @@ namespace Sentry.AspNetCore
                     {
                         CaptureException(exceptionFeature.Error, "IExceptionHandlerFeature");
                     }
+                    if (_options.FlushBeforeRequestCompleted)
+                    {
+                        await FlushBeforeCompleted().ConfigureAwait(false);
+                    }
                 }
                 catch (Exception e)
                 {
                     CaptureException(e, "SentryMiddleware.UnhandledException");
+                    if (_options.FlushBeforeRequestCompleted)
+                    {
+                        await FlushBeforeCompleted().ConfigureAwait(false);
+                    }
 
                     ExceptionDispatchInfo.Capture(e).Throw();
+                }
+
+                async Task FlushBeforeCompleted()
+                {
+                    // Some environments disables the application after sending a request,
+                    // making the OnCompleted flush to not work.
+                    await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
                 }
 
                 void CaptureException(Exception e, string mechanism)
