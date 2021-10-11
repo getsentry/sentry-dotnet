@@ -37,7 +37,7 @@ namespace Sentry.AspNet.Internal
             }
             catch (HttpException)
             {
-                _options.DiagnosticLogger?.LogDebug("HttpException not available to retrieve context.");
+                _options.LogDebug("HttpException not available to retrieve context.");
                 return @event;
             }
 
@@ -53,7 +53,7 @@ namespace Sentry.AspNet.Internal
             {
                 // Ignored since it can throw on WCF on the first event.
                 // See #390
-                _options.DiagnosticLogger?.LogDebug("Ignored NRE thrown on System.Web.HttpContext.Request.QueryString");
+                _options.LogDebug("Ignored NRE thrown on System.Web.HttpContext.Request.QueryString");
             }
 
             foreach (var key in context.Request.Headers.AllKeys)
