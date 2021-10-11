@@ -44,7 +44,7 @@ namespace Sentry.Google.Cloud.Functions.Tests
 
             var provider = LoggingBuilder.Services.BuildServiceProvider();
             var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
-            Assert.True(option.Value.FlushOnCompletedRequest);
+            Assert.True(option.Value.FlushBeforeRequestCompleted);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]

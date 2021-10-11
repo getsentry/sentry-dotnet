@@ -457,10 +457,26 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task InvokeAsync_FlushBeforeRequestCompletedWhenFalse_DoesNotCallFlushAsync()
+        {
+            var sut = _fixture.GetSut();
+            _fixture.Options.FlushBeforeRequestCompleted = false;
+            var response = Substitute.For<HttpResponse>();
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
+        }
+
+        [Fact]
         public async Task InvokeAsync_DisabledHub_DoesNotCallFlushAsync()
         {
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;
+            _fixture.Options.FlushBeforeRequestCompleted = true;
             _ = _fixture.Hub.IsEnabled.Returns(false);
             var response = Substitute.For<HttpResponse>();
             _ = _fixture.HttpContext.Response.Returns(response);
@@ -478,6 +494,23 @@ namespace Sentry.AspNetCore.Tests
             var timeout = TimeSpan.FromSeconds(10);
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;
+            _fixture.Options.FlushTimeout = timeout;
+            var response = Substitute.For<HttpResponse>();
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            await _fixture.Hub.Received(1).FlushAsync(timeout);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_FlushBeforeRequestCompletedTrue_RespectsTimeout()
+        {
+            var timeout = TimeSpan.FromSeconds(10);
+            var sut = _fixture.GetSut();
+            _fixture.Options.FlushBeforeRequestCompleted = true;
             _fixture.Options.FlushTimeout = timeout;
             var response = Substitute.For<HttpResponse>();
             _ = _fixture.HttpContext.Response.Returns(response);
