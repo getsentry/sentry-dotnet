@@ -71,24 +71,30 @@ namespace Sentry.Protocol.Envelopes
         /// <inheritdoc />
         public void Dispose() => Items.DisposeAll();
 
-        private static Dictionary<string, object?> CreateHeader(SentryId? eventId = null)
+        // limited SDK information (no packages)
+        static IReadOnlyDictionary<string, string?> sdkHeader = new Dictionary<string, string?>(2, StringComparer.Ordinal)
         {
-            var header = new Dictionary<string, object?>(2, StringComparer.Ordinal)
-            {
-                // Include limited SDK information (no packages)
-                ["sdk"] = new Dictionary<string, string?>(2, StringComparer.Ordinal)
-                {
-                    ["name"] = SdkVersion.Instance.Name,
-                    ["version"] = SdkVersion.Instance.Version
-                }
-            };
+            ["name"] = SdkVersion.Instance.Name,
+            ["version"] = SdkVersion.Instance.Version
+        };
 
-            if (eventId is not null)
+        static IReadOnlyDictionary<string, object?> defaultHeader = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            ["sdk"] = sdkHeader
+        };
+
+        private static IReadOnlyDictionary<string, object?> CreateHeader(SentryId? eventId = null)
+        {
+            if (eventId is null)
             {
-                header[EventIdKey] = eventId.Value.ToString();
+                return defaultHeader;
             }
 
-            return header;
+            return new Dictionary<string, object?>(2, StringComparer.Ordinal)
+            {
+                ["sdk"] = sdkHeader,
+                [EventIdKey] = eventId.Value.ToString()
+            };
         }
 
         /// <summary>
