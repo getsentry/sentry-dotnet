@@ -116,13 +116,18 @@ namespace Sentry.DiagnosticSource.Tests
             public Fixture()
             {
                 Logger = new InMemoryDiagnosticLogger();
+
                 Options = new SentryOptions()
                 {
                     Debug = true,
                     DiagnosticLogger = Logger,
-                    DiagnosticLevel = SentryLevel.Debug
+                    DiagnosticLevel = SentryLevel.Debug,
+                    TracesSampleRate = 1.0,
                 };
-                Tracer = new TransactionTracer(Hub, "foo", "bar");
+                Tracer = new TransactionTracer(Hub, "foo", "bar")
+                {
+                    IsSampled = true
+                };
                 _scope = new Scope();
                 _scope.Transaction = Tracer;
                 Hub = Substitute.For<IHub>();
