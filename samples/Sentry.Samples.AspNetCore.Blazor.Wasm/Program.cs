@@ -12,7 +12,7 @@ namespace Sentry.Samples.AspNetCore.Blazor.Wasm
 #pragma warning disable IDE1006 // Naming Styles
         public static async Task Main(string[] args)
         {
-// Capture blazor bootstrapping errors
+            // Capture blazor bootstrapping errors
             using var sdk = SentrySdk.Init(o =>
             {
                 o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
