@@ -61,9 +61,14 @@ namespace Sentry.AspNetCore
                 // Attempt to start a transaction from the trace header if it exists
                 var traceHeader = TryGetSentryTraceHeader(context);
 
+                // It's important to try and set the transaction name
+                // to some value here so that it's available for use
+                // in sampling.
                 // At a later stage, we will try to get the transaction name
                 // again, to account for the other middlewares that may have
                 // ran after ours.
+                var transactionName =
+                    context.TryGetTransactionName();
 
                 var transactionContext = traceHeader is not null
                     ? new TransactionContext(string.Empty, OperationName, traceHeader)
@@ -106,6 +111,7 @@ namespace Sentry.AspNetCore
             }
 
             var transaction = TryStartTransaction(context);
+            var initialName = transaction?.Name;
 
             // Expose the transaction on the scope so that the user
             // can retrieve it and start child spans off of it.
@@ -130,11 +136,11 @@ namespace Sentry.AspNetCore
                     // The Transaction name was altered during the pipeline execution,
                     // That could be done by user interference or by some Event Capture
                     // That triggers ScopeExtensions.Populate.
-                    if (!string.IsNullOrEmpty(transaction.Name))
+                    if (transaction.Name != initialName)
                     {
                         _options.LogDebug(
-                            "transaction '{0}', name set to '{1}' during request pipeline execution.",
-                            transaction.SpanId,
+                            "transaction name set from '{0}' to '{1}' during request pipeline execution.",
+                            initialName,
                             transaction.Name);
                     }
                     // try to get the transaction name.
@@ -142,7 +148,7 @@ namespace Sentry.AspNetCore
                              !string.IsNullOrEmpty(transactionName))
                     {
                         _options.LogDebug(
-                            "Changed transaction '{0}', name from  to '{1}' after request pipeline executed.",
+                            "Changed transaction '{0}', name set to '{1}' after request pipeline executed.",
                             transaction.SpanId,
                             transactionName);
 
