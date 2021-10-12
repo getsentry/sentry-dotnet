@@ -127,7 +127,7 @@ namespace Sentry.Tests.Internals
             await sut.ConfigureScopeAsync(_ =>
             {
                 isInvoked = true;
-                return default;
+                return Task.CompletedTask;
             });
 
             Assert.True(isInvoked);
