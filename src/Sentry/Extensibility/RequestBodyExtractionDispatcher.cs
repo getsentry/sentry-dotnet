@@ -47,7 +47,7 @@ namespace Sentry.Extensibility
                 case RequestSize.Small when request.ContentLength < 1_000:
                 case RequestSize.Medium when request.ContentLength < 10_000:
                 case RequestSize.Always:
-                    _options.DiagnosticLogger?.LogDebug("Attempting to read request body of size: {0}, configured max: {1}.",
+                    _options.LogDebug("Attempting to read request body of size: {0}, configured max: {1}.",
                         request.ContentLength, size);
 
                     foreach (var extractor in Extractors)
@@ -66,11 +66,11 @@ namespace Sentry.Extensibility
                     break;
                 // Request body extraction is opt-in
                 case RequestSize.None:
-                    _options.DiagnosticLogger?.LogDebug("Skipping request body extraction.");
+                    _options.LogDebug("Skipping request body extraction.");
                     return null;
             }
 
-            _options.DiagnosticLogger?.LogWarning("Ignoring request with Size {0} and configuration RequestSize {1}",
+            _options.LogWarning("Ignoring request with Size {0} and configuration RequestSize {1}",
                 request.ContentLength, size);
 
             return null;

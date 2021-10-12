@@ -51,7 +51,7 @@ namespace Sentry.AspNetCore.Grpc
                 case RequestSize.Small when request.ContentLength < 1_000:
                 case RequestSize.Medium when request.ContentLength < 10_000:
                 case RequestSize.Always:
-                    _options.DiagnosticLogger?.Log(SentryLevel.Debug,
+                    _options.Log(SentryLevel.Debug,
                         "Attempting to read request body of size: {0}, configured max: {1}.",
                         null, request.ContentLength, size);
 
@@ -70,11 +70,11 @@ namespace Sentry.AspNetCore.Grpc
                     break;
                 // Request body extraction is opt-in
                 case RequestSize.None:
-                    _options.DiagnosticLogger?.Log(SentryLevel.Debug, "Skipping request body extraction.");
+                    _options.Log(SentryLevel.Debug, "Skipping request body extraction.");
                     return null;
             }
 
-            _options.DiagnosticLogger?.Log(SentryLevel.Warning,
+            _options.Log(SentryLevel.Warning,
                 "Ignoring request with Size {0} and configuration RequestSize {1}", null, request.ContentLength, size);
 
             return null;

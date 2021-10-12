@@ -209,11 +209,11 @@ namespace Sentry.AspNetCore.Grpc
         {
             var evt = new SentryEvent(e);
 
-            _options.DiagnosticLogger?.LogDebug("Sending event '{SentryEvent}' to Sentry.", evt);
+            _options.LogDebug("Sending event '{SentryEvent}' to Sentry.", evt);
 
             var id = hub.CaptureEvent(evt);
 
-            _options.DiagnosticLogger?.LogInfo("Event '{id}' queued.", id);
+            _options.LogInfo("Event '{id}' queued.", id);
         }
     }
 }
