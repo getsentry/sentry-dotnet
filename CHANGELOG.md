@@ -5,10 +5,16 @@
 ### Fixes
 
 - Avoid replacing Transaction Name on ASP.NET Core by null or empty ([#1215](https://github.com/getsentry/sentry-dotnet/pull/1215))
+- Ignore DiagnosticSource Integration if no Sampling available ([#1238](https://github.com/getsentry/sentry-dotnet/pull/1238)) 
 
 ### Features
 
 - Add additional primitive values as tags on SentryLogger ([#1246](https://github.com/getsentry/sentry-dotnet/pull/1246))
+
+### Fixes
+
+- Events are now sent on Google Gloud Functions Integration ([#1249](https://github.com/getsentry/sentry-dotnet/pull/1249))
+- Cache envelope headers ([#1242](https://github.com/getsentry/sentry-dotnet/pull/1242))
 
 ## 3.9.4
 

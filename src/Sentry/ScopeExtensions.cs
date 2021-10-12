@@ -115,7 +115,7 @@ namespace Sentry
             var length = stream.TryGetLength();
             if (length is null)
             {
-                scope.Options.DiagnosticLogger?.LogWarning(
+                scope.Options.LogWarning(
                     "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
                     fileName);
 

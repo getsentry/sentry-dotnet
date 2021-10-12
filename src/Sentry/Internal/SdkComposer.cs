@@ -26,7 +26,7 @@ namespace Sentry.Internal
 
             if (_options.SentryHttpClientFactory is { })
             {
-                _options.DiagnosticLogger?.LogDebug(
+                _options.LogDebug(
                     "Using ISentryHttpClientFactory set through options: {0}.",
                     _options.SentryHttpClientFactory.GetType().Name);
             }
@@ -48,7 +48,7 @@ namespace Sentry.Internal
             // If configured, flush existing cache
             if (_options.InitCacheFlushTimeout > TimeSpan.Zero)
             {
-                _options.DiagnosticLogger?.LogDebug(
+                _options.LogDebug(
                     "Flushing existing cache during transport activation up to {0}.",
                     _options.InitCacheFlushTimeout);
 
@@ -69,7 +69,7 @@ namespace Sentry.Internal
                     // If flush timed out, log and continue
                     else
                     {
-                        _options.DiagnosticLogger?.LogInfo(
+                        _options.LogInfo(
                             "Cache flushing is taking longer than the configured timeout of {0}. " +
                             "Continuing without waiting for the task to finish.",
                             _options.InitCacheFlushTimeout);
@@ -77,7 +77,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
+                    _options.LogError(
                         "Cache flushing failed.",
                         ex);
                 }
@@ -90,7 +90,7 @@ namespace Sentry.Internal
         {
             if (_options.BackgroundWorker is { } worker)
             {
-                _options.DiagnosticLogger?.LogDebug("Using IBackgroundWorker set through options: {0}.",
+                _options.LogDebug("Using IBackgroundWorker set through options: {0}.",
                     worker.GetType().Name);
 
                 return worker;

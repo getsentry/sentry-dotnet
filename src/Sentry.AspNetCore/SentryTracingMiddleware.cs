@@ -39,7 +39,7 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogDebug("Received Sentry trace header '{0}'.", value);
+            _options.LogDebug("Received Sentry trace header '{0}'.", value);
 
             try
             {
@@ -47,7 +47,7 @@ namespace Sentry.AspNetCore
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+                _options.LogError("Invalid Sentry trace header '{0}'.", ex, value);
                 return null;
             }
         }
@@ -78,7 +78,7 @@ namespace Sentry.AspNetCore
 
                 var transaction = hub.StartTransaction(transactionContext, customSamplingContext);
 
-                _options.DiagnosticLogger?.LogInfo(
+                _options.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",
                     transaction.SpanId,
                     transaction.TraceId);
@@ -87,7 +87,7 @@ namespace Sentry.AspNetCore
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Failed to start transaction.", ex);
+                _options.LogError("Failed to start transaction.", ex);
                 return null;
             }
         }
@@ -132,7 +132,7 @@ namespace Sentry.AspNetCore
                     // That triggers ScopeExtensions.Populate.
                     if (!string.IsNullOrEmpty(transaction.Name))
                     {
-                        _options.DiagnosticLogger?.LogDebug(
+                        _options.LogDebug(
                             "transaction '{0}', name set to '{1}' during request pipeline execution.",
                             transaction.SpanId,
                             transaction.Name);
@@ -141,7 +141,7 @@ namespace Sentry.AspNetCore
                     else if (context.TryGetTransactionName() is { } transactionName &&
                              !string.IsNullOrEmpty(transactionName))
                     {
-                        _options.DiagnosticLogger?.LogDebug(
+                        _options.LogDebug(
                             "Changed transaction '{0}', name from  to '{1}' after request pipeline executed.",
                             transaction.SpanId,
                             transactionName);
