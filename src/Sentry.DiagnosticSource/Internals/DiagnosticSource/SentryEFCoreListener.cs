@@ -93,7 +93,7 @@ namespace Sentry.Internals.DiagnosticSource
                     {
                         span = startedSpan;
                     }
-                    _options.DiagnosticLogger?.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
+                    _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
                 }
             });
             return span;
@@ -156,7 +156,7 @@ namespace Sentry.Internals.DiagnosticSource
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Failed to intercept EF Core event.", ex);
+                _options.LogError("Failed to intercept EF Core event.", ex);
             }
         }
 
