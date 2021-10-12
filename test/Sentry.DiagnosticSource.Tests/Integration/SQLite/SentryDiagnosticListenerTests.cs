@@ -24,7 +24,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             internal SentryScopeManager ScopeManager { get; }
             public Fixture()
             {
-                var options = new SentryOptions()
+                var options = new SentryOptions
                 {
                     TracesSampleRate = 1.0
                 };
