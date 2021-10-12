@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.AspNetCore.Blazor.Wasm
 {
-    public static class Program
+    internal static class Program
     {
 #pragma warning disable IDE1006 // Naming Styles
         public static async Task Main(string[] args)

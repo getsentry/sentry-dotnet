@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Ignore DiagnosticSource Integration if no Sampling available ([#1238](https://github.com/getsentry/sentry-dotnet/pull/1238)) 
+
 ### Features
 
 - Add additional primitive values as tags on SentryLogger ([#1246](https://github.com/getsentry/sentry-dotnet/pull/1246))
