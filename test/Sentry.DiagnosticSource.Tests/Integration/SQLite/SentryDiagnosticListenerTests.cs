@@ -24,7 +24,10 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             internal SentryScopeManager ScopeManager { get; }
             public Fixture()
             {
-                var options = new SentryOptions();
+                var options = new SentryOptions
+                {
+                    TracesSampleRate = 1.0
+                };
                 ScopeManager = new SentryScopeManager(
                     new AsyncLocalScopeStackContainer(),
                     options,
@@ -35,6 +38,8 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
                 Hub.GetSpan().ReturnsForAnyArgs(_ => GetSpan());
                 Hub.StartTransaction(Arg.Any<ITransactionContext>(), Arg.Any<IReadOnlyDictionary<string, object>>())
                     .ReturnsForAnyArgs(callinfo => StartTransaction(Hub, callinfo.Arg<ITransactionContext>()));
+                Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+                    .Do(callback => callback.Arg<Action<Scope>>().Invoke(ScopeManager.GetCurrent().Key));
 
                 DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticSubscriber(Hub, options));
 
