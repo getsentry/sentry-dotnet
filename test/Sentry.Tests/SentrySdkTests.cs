@@ -418,7 +418,7 @@ namespace Sentry.Tests
             await SentrySdk.ConfigureScopeAsync(_ =>
             {
                 invoked = true;
-                return default;
+                return Task.CompletedTask;
             });
             Assert.False(invoked);
         }

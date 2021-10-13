@@ -13,7 +13,7 @@ namespace Sentry.Benchmarks
         private class FakeTransport : ITransport
         {
             public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
-                => default;
+                => Task.CompletedTask;
         }
 
         private IBackgroundWorker _backgroundWorker;
