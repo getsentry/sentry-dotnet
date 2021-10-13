@@ -1,7 +1,9 @@
 using System;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Sentry.AspNetCore;
 
 namespace Samples.AspNetCore.Mvc
 {
@@ -12,14 +14,17 @@ namespace Samples.AspNetCore.Mvc
             BuildWebHost(args).Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IWebHost BuildWebHost(string[] args)
+        {
+            SentryAspNetCoreOptions opt = null;
+            var x=  WebHost.CreateDefaultBuilder(args)
                 .UseShutdownTimeout(TimeSpan.FromSeconds(10))
                 .UseStartup<Startup>()
 
                 // Example integration with advanced configuration scenarios:
                 .UseSentry(options =>
                 {
+                    opt = options;
                     // The parameter 'options' here has values populated through the configuration system.
                     // That includes 'appsettings.json', environment variables and anything else
                     // defined on the ConfigurationBuilder.
@@ -40,9 +45,25 @@ namespace Samples.AspNetCore.Mvc
                     options.MaxQueueItems = 100;
                     options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
+                    options.DefaultTags.Add("a", "b");
+                    int i = 0;
                     // Configures the root scope
-                    options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
+                    options.ConfigureScope(s =>
+                    {
+                        s.SetTag("Always sent", i++.ToString());
+/*
+                        Task.Run(async () =>
+                        { 
+                            await Task.Delay(1000);
+                            opt.ConfigureScope(a => a.SetTag("c", "d"));
+                        });
+*/
+                    });
                 })
                 .Build();
+
+            opt.ConfigureScope(a => a.SetTag("c", "d"));
+            return x;
+        }
     }
 }

@@ -22,6 +22,8 @@ namespace Samples.AspNetCore.Mvc.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            SentrySdk.ConfigureScope(a => a.SetTag("e", "f"));
+            SentrySdk.CaptureMessage("Hello World");
             return View();
         }
 

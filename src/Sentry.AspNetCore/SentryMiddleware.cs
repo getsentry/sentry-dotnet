@@ -24,6 +24,7 @@ namespace Sentry.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _getHub;
+        private IHub? _lastActiveHub;
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
@@ -56,13 +57,16 @@ namespace Sentry.AspNetCore
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _getHub = getHub ?? throw new ArgumentNullException(nameof(getHub));
             _options = options.Value;
+            _hostingEnvironment = hostingEnvironment;
+            _logger = logger;
+            _lastActiveHub = null;
+            /*
             var hub = _getHub();
             foreach (var callback in _options.ConfigureScopeCallbacks)
             {
                 hub.ConfigureScope(callback);
             }
-            _hostingEnvironment = hostingEnvironment;
-            _logger = logger;
+            */
         }
 
         /// <summary>
@@ -81,6 +85,10 @@ namespace Sentry.AspNetCore
 
             using (hub.PushAndLockScope())
             {
+                if (_lastActiveHub != hub)
+                {
+                    RefreshScopes(hub);
+                }
                 if (_options.MaxRequestBodySize != RequestSize.None)
                 {
                     context.Request.EnableBuffering();
@@ -154,6 +162,15 @@ namespace Sentry.AspNetCore
                     _logger.LogInformation("Event '{id}' queued.", id);
                 }
             }
+        }
+
+        private void RefreshScopes(IHub newHub)
+        {
+            foreach (var callback in _options.ConfigureScopeCallbacks)
+            {
+                newHub.ConfigureScope(callback);
+            }
+            _lastActiveHub = newHub;
         }
 
         internal void PopulateScope(HttpContext context, Scope scope)
