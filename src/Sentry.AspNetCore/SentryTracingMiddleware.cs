@@ -71,8 +71,8 @@ namespace Sentry.AspNetCore
                     context.TryGetTransactionName();
 
                 var transactionContext = traceHeader is not null
-                    ? new TransactionContext(string.Empty, OperationName, traceHeader)
-                    : new TransactionContext(string.Empty, OperationName);
+                    ? new TransactionContext(transactionName ?? string.Empty, OperationName, traceHeader)
+                    : new TransactionContext(transactionName ?? string.Empty , OperationName);
 
                 var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
                 {
