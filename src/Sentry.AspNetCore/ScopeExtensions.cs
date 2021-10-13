@@ -87,7 +87,14 @@ namespace Sentry.AspNetCore
                     scope.SetTag("route.area", area);
                 }
 
-                scope.TransactionName = context.TryGetTransactionName();
+                // Transaction Name may only be available afterward the creation of the Transaction.
+                // In this case, the event will update the transaction name if captured during the
+                // pipeline execution, allowing it to match the correct transaction name as the current
+                // active transaction.
+                if (string.IsNullOrEmpty(scope.TransactionName))
+                {
+                    scope.TransactionName = context.TryGetTransactionName();
+                }
             }
             catch (Exception e)
             {
