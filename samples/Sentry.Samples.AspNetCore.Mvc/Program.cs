@@ -31,6 +31,8 @@ namespace Samples.AspNetCore.Mvc
 
                     options.MaxBreadcrumbs = 200;
 
+                    options.TracesSampleRate = 1.0;
+
                     // Set a proxy for outgoing HTTP connections
                     options.HttpProxy = null; // new WebProxy("https://localhost:3128");
 
