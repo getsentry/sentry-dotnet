@@ -128,7 +128,7 @@ namespace Sentry.Internals.DiagnosticSource
 
                 //Connection Span
                 //A transaction may or may not show a connection with it.
-                if (_logConnectionEnabled && value.Key == EFConnectionOpening)
+                else if (_logConnectionEnabled && value.Key == EFConnectionOpening)
                 {
                     AddSpan(SentryEFSpanType.Connection, "db.connection", null);
                 }
