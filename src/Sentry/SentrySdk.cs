@@ -98,6 +98,8 @@ namespace Sentry
 
         internal static IDisposable UseHub(IHub hub)
         {
+            int i = 1;
+            _ = i;
             var oldHub = Interlocked.Exchange(ref _hub, hub);
             (oldHub as IDisposable)?.Dispose();
             return new DisposeHandle(hub);
