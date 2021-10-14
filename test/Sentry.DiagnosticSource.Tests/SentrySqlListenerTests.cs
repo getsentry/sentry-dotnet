@@ -122,7 +122,7 @@ namespace Sentry.DiagnosticSource.Tests
                     Debug = true,
                     DiagnosticLogger = Logger,
                     DiagnosticLevel = SentryLevel.Debug,
-                    TracesSampleRate = 1.0,
+                    TracesSampleRate = 1,
                 };
                 Tracer = new TransactionTracer(Hub, "foo", "bar")
                 {
