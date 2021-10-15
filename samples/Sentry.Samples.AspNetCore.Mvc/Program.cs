@@ -17,7 +17,7 @@ namespace Samples.AspNetCore.Mvc
         public static IWebHost BuildWebHost(string[] args)
         {
             SentryAspNetCoreOptions opt = null;
-            var x=  WebHost.CreateDefaultBuilder(args)
+            var x = WebHost.CreateDefaultBuilder(args)
                 .UseShutdownTimeout(TimeSpan.FromSeconds(10))
                 .UseStartup<Startup>()
 
@@ -53,13 +53,13 @@ namespace Samples.AspNetCore.Mvc
                     options.ConfigureScope(s =>
                     {
                         s.SetTag("Always sent", i++.ToString());
-/*
-                        Task.Run(async () =>
-                        { 
-                            await Task.Delay(1000);
-                            opt.ConfigureScope(a => a.SetTag("c", "d"));
-                        });
-*/
+                        /*
+                                                Task.Run(async () =>
+                                                { 
+                                                    await Task.Delay(1000);
+                                                    opt.ConfigureScope(a => a.SetTag("c", "d"));
+                                                });
+                        */
                     });
                 })
                 .Build();
