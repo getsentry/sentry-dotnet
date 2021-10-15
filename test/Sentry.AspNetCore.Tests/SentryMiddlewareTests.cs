@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETCOREAPP2_1 || NET461
@@ -520,6 +522,95 @@ namespace Sentry.AspNetCore.Tests
             await sut.InvokeAsync(_fixture.HttpContext);
 
             await _fixture.Hub.Received(1).FlushAsync(timeout);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_ScopeNotPopulated_CopyOptionsToScope()
+        {
+            // Arrange
+            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            _fixture.Options.ConfigureScope(expectedAction);
+            var sut = _fixture.GetSut();
+
+            // Act
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            // Assert
+            _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        }
+
+        [Fact]
+        public async Task InvokeAsync_SameMiddleWareWithSameHubs_CopyOptionsOnce()
+        {
+            // Arrange
+            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            _fixture.Options.ConfigureScope(expectedAction);
+            var sut = _fixture.GetSut();
+
+            // Act
+            await sut.InvokeAsync(_fixture.HttpContext);
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            // Assert
+            _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        }
+
+        [Fact]
+        public async Task InvokeAsync_SameMiddleWareWithDifferentHubs_CopyOptionsToAllHubs()
+        {
+            // Arrange
+            var firstHub = _fixture.Hub;
+            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            _fixture.Options.ConfigureScope(expectedAction);
+            var sut = _fixture.GetSut();
+
+            // Act
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            // Replacing the Hub
+            // Arrange
+            var secondHub = new Fixture().Hub;
+            _fixture.Hub = secondHub;
+
+            // Act
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            // Assert
+            firstHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+            secondHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        }
+
+        [Fact]
+        public async Task InvokeAsync_ParallelRequestsWithSameHub_CopyOptionsOnce()
+        {
+            // Arrange
+            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            _fixture.Options.ConfigureScope(expectedAction);
+            var sut = _fixture.GetSut();
+            var evt = new ManualResetEvent(false);
+            var ready = new ManualResetEvent(false);
+            var total = 10;
+            var current = 0;
+
+            // Act
+            var tasks = Enumerable.Range(1, total).Select((_) => Task.Run(async () =>
+            {
+                var threadId = Interlocked.Increment(ref current);
+                if (threadId == total)
+                {
+                    ready.Set();
+                }
+                evt.WaitOne();
+
+                await sut.InvokeAsync(_fixture.HttpContext).ConfigureAwait(false);
+            })).ToList();
+            ready.WaitOne();
+            evt.Set();
+
+            await Task.WhenAll(tasks);
+
+            // Assert
+            _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
         }
     }
 }

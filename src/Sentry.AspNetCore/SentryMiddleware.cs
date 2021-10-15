@@ -24,7 +24,7 @@ namespace Sentry.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _getHub;
-        private IHub? _lastActiveHub;
+        private IHub? _previousHub;
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
@@ -59,14 +59,7 @@ namespace Sentry.AspNetCore
             _options = options.Value;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
-            _lastActiveHub = null;
-            /*
-            var hub = _getHub();
-            foreach (var callback in _options.ConfigureScopeCallbacks)
-            {
-                hub.ConfigureScope(callback);
-            }
-            */
+            _previousHub = null;
         }
 
         /// <summary>
@@ -85,9 +78,9 @@ namespace Sentry.AspNetCore
 
             using (hub.PushAndLockScope())
             {
-                if (_lastActiveHub != hub)
+                if (hub != _previousHub)
                 {
-                    RefreshScopes(hub);
+                    SyncOptionsScope(hub);
                 }
                 if (_options.MaxRequestBodySize != RequestSize.None)
                 {
@@ -164,13 +157,19 @@ namespace Sentry.AspNetCore
             }
         }
 
-        private void RefreshScopes(IHub newHub)
+        private void SyncOptionsScope(IHub newHub)
         {
-            foreach (var callback in _options.ConfigureScopeCallbacks)
+            lock (this)
             {
-                newHub.ConfigureScope(callback);
+                if (_previousHub != newHub)
+                {
+                    foreach (var callback in _options.ConfigureScopeCallbacks)
+                    {
+                        newHub.ConfigureScope(callback);
+                    }
+                    _previousHub = newHub;
+                }
             }
-            _lastActiveHub = newHub;
         }
 
         internal void PopulateScope(HttpContext context, Scope scope)
