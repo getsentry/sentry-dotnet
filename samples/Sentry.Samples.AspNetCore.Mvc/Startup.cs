@@ -46,6 +46,8 @@ namespace Samples.AspNetCore.Mvc
 
             app.UseStaticFiles();
 
+            app.UseSentryTracing();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
