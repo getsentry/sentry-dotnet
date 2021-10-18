@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Add missing `ConfigureAwaits(false)` for `async using` ([#1276](https://github.com/getsentry/sentry-dotnet/pull/1276))
+ 
 ## 3.10.0
 
 ### Features
