@@ -48,9 +48,17 @@ namespace Sentry.Protocol.Envelopes
 
         private async Task SerializeHeaderAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            await using var writer = new Utf8JsonWriter(stream);
-            writer.WriteDictionaryValue(Header);
-            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            var writer = new Utf8JsonWriter(stream);
+
+#if NET461 || NETSTANDARD2_0
+            using (writer)
+#else
+            await using (writer.ConfigureAwait(false))
+#endif
+            {
+                writer.WriteDictionaryValue(Header);
+                await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         /// <inheritdoc />
