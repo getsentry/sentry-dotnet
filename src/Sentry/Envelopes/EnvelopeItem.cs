@@ -68,7 +68,7 @@ namespace Sentry.Protocol.Envelopes
             return buffer;
         }
 
-        private async Task SerializeHeaderAsync(
+        private static async Task SerializeHeaderAsync(
             Stream stream,
             IReadOnlyDictionary<string, object?> header,
             CancellationToken cancellationToken = default)
