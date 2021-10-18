@@ -53,10 +53,10 @@ namespace Sentry.Internal.Http
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
 
-            _worker = Task.Run(CachedTransportBackgroundTask);
+            _worker = Task.Run(CachedTransportBackgroundTaskAsync);
         }
 
-        private async Task CachedTransportBackgroundTask()
+        private async Task CachedTransportBackgroundTaskAsync()
         {
             try
             {
