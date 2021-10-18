@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- ASP.NET Core: Data from Scope in options should be applied on each request ([#1270](https://github.com/getsentry/sentry-dotnet/pull/1270))
+
 ## 3.10.0
 
 ### Features
