@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETSTANDARD2_0
@@ -28,6 +29,7 @@ namespace Sentry.AspNetCore
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
+        private readonly SemaphoreSlim _toLock = new SemaphoreSlim(1, 1);
 
         internal static readonly SdkVersion NameAndVersion
             = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
@@ -80,7 +82,7 @@ namespace Sentry.AspNetCore
             {
                 if (hub != _previousHub)
                 {
-                    SyncOptionsScope(hub);
+                    await SyncOptionsScope(hub).ConfigureAwait(false);
                 }
                 if (_options.MaxRequestBodySize != RequestSize.None)
                 {
@@ -157,10 +159,11 @@ namespace Sentry.AspNetCore
             }
         }
 
-        private void SyncOptionsScope(IHub newHub)
+        private async Task SyncOptionsScope(IHub newHub)
         {
-            lock (this)
+            try
             {
+                await _toLock.WaitAsync().ConfigureAwait(false);
                 if (_previousHub != newHub)
                 {
                     foreach (var callback in _options.ConfigureScopeCallbacks)
@@ -169,6 +172,10 @@ namespace Sentry.AspNetCore
                     }
                     _previousHub = newHub;
                 }
+            }
+            finally
+            {
+                _toLock.Release();
             }
         }
 
