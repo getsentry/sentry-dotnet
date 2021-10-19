@@ -21,7 +21,7 @@ namespace Sentry.AspNetCore
     /// <summary>
     /// Sentry middleware for ASP.NET Core
     /// </summary>
-    internal class SentryMiddleware
+    internal class SentryMiddleware : IDisposable
     {
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _getHub;
@@ -200,6 +200,11 @@ namespace Sentry.AspNetCore
             {
                 scope.Populate(Activity.Current);
             }
+        }
+
+        public void Dispose()
+        {
+            _toLock.Dispose();
         }
     }
 }
