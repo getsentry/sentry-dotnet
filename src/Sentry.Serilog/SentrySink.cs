@@ -30,8 +30,7 @@ namespace Sentry.Serilog
 
         public SentrySink(
             SentrySerilogOptions options,
-            IDisposable? sdkDisposable,
-            bool handled = true)
+            IDisposable? sdkDisposable)
             : this(
                 options,
                 () => HubAdapter.Instance,
@@ -89,7 +88,7 @@ namespace Sentry.Serilog
                         Formatted = formatted,
                         Message = template
                     },
-                    Level = logEvent.Level.ToSentryLevel(),
+                    Level = logEvent.Level.ToSentryLevel()
                 };
 
                 if (evt.Sdk is { } sdk)
