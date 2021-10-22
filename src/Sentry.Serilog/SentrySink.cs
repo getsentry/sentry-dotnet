@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Protocol;
 using Sentry.Reflection;
 using Serilog.Core;
 using Serilog.Events;
@@ -29,7 +30,8 @@ namespace Sentry.Serilog
 
         public SentrySink(
             SentrySerilogOptions options,
-            IDisposable? sdkDisposable)
+            IDisposable? sdkDisposable,
+            bool handled = true)
             : this(
                 options,
                 () => HubAdapter.Instance,
@@ -79,6 +81,9 @@ namespace Sentry.Serilog
 
             if (logEvent.Level >= _options.MinimumEventLevel)
             {
+                // If the request is logged via the ILogger inside the ASP.NET Core exception handled pipeline, mark it as unhandled, as user code should have already handled it by then otherwise
+                exception.Data[Mechanism.HandledKey] = context == "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware";
+
                 var evt = new SentryEvent(exception)
                 {
                     Logger = context,
@@ -87,7 +92,7 @@ namespace Sentry.Serilog
                         Formatted = formatted,
                         Message = template
                     },
-                    Level = logEvent.Level.ToSentryLevel()
+                    Level = logEvent.Level.ToSentryLevel(),
                 };
 
                 if (evt.Sdk is { } sdk)
