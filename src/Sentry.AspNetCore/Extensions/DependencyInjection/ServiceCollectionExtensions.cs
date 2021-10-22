@@ -21,6 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static ISentryBuilder AddSentry(this IServiceCollection services)
         {
             services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
+            services.AddSingleton<ISentryEventExceptionProcessor, AspNetCoreExceptionProcessor>();
             services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
 
             services

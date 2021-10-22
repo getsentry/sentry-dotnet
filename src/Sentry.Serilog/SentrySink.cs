@@ -81,13 +81,6 @@ namespace Sentry.Serilog
 
             if (logEvent.Level >= _options.MinimumEventLevel)
             {
-                // If the request is logged via the ILogger inside the ASP.NET Core exception handled pipeline, mark it as unhandled, as user code should have already handled it by then otherwise
-                if (context == "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware")
-                {
-                    exception.Data[Mechanism.HandledKey] = false;
-                }
-
-
                 var evt = new SentryEvent(exception)
                 {
                     Logger = context,
