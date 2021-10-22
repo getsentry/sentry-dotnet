@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 using Sentry.Reflection;
 using Serilog.Core;
 using Serilog.Events;
