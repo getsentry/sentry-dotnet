@@ -34,6 +34,8 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <Nullable>annotations</Nullable>
+
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <!-- Use nullability analysis only on frameworks that have annotated BCL -->
@@ -57,7 +59,6 @@
 
   <ItemGroup>
     <PackageReference Include="SIL.ReleaseTasks" Version="2.5.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'"/>
-    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="4.0.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
   </ItemGroup>
 

@@ -38,7 +38,7 @@ namespace Sentry.Internal
             _findPreciseStartupTime = findPreciseStartupTime ?? GetStartupTime;
             if (options.DetectStartupTime == StartupTimeDetectionMode.None)
             {
-                _options.DiagnosticLogger?.LogDebug("Not detecting startup time due to option: {0}",
+                _options.LogDebug("Not detecting startup time due to option: {0}",
                     _options.DetectStartupTime);
                 return;
             }
@@ -64,7 +64,7 @@ namespace Sentry.Internal
                 // ArgumentOutOfRangeException: The added or subtracted value results in an un-representable DateTime.
                 // https://github.com/getsentry/sentry-unity/issues/233
 
-                _options.DiagnosticLogger?.LogError(
+                _options.LogError(
                     "Failed to find BootTime: Now {0}, GetTimestamp {1}, Frequency {2}, TicksPerSecond: {3}",
                     e,
                     now,
@@ -89,7 +89,7 @@ namespace Sentry.Internal
                     }
                     catch (Exception e)
                     {
-                        _options.DiagnosticLogger?.LogError("Failure getting precise App startup time.", e);
+                        _options.LogError("Failure getting precise App startup time.", e);
                         //Ignore any exception and stay with the less-precise DateTime.UtcNow value.
                     }
                 }).ContinueWith(_ =>

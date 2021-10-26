@@ -28,7 +28,7 @@ namespace Sentry.Internal.Http
             if (options.HttpProxy != null)
             {
                 httpClientHandler.Proxy = options.HttpProxy;
-                options.DiagnosticLogger?.LogInfo("Using Proxy: {0}", options.HttpProxy);
+                options.LogInfo("Using Proxy: {0}", options.HttpProxy);
             }
 
             // If the platform supports automatic decompression
@@ -39,7 +39,7 @@ namespace Sentry.Internal.Http
             }
             else
             {
-                options.DiagnosticLogger?.LogDebug("No response compression supported by HttpClientHandler.");
+                options.LogDebug("No response compression supported by HttpClientHandler.");
             }
 
             HttpMessageHandler handler = httpClientHandler;
@@ -49,17 +49,17 @@ namespace Sentry.Internal.Http
                 if (options.RequestBodyCompressionBuffered)
                 {
                     handler = new GzipBufferedRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
-                    options.DiagnosticLogger?.LogDebug("Using 'GzipBufferedRequestBodyHandler' body compression strategy with level {0}.", options.RequestBodyCompressionLevel);
+                    options.LogDebug("Using 'GzipBufferedRequestBodyHandler' body compression strategy with level {0}.", options.RequestBodyCompressionLevel);
                 }
                 else
                 {
                     handler = new GzipRequestBodyHandler(handler, options.RequestBodyCompressionLevel);
-                    options.DiagnosticLogger?.LogDebug("Using 'GzipRequestBodyHandler' body compression strategy with level {0}.", options.RequestBodyCompressionLevel);
+                    options.LogDebug("Using 'GzipRequestBodyHandler' body compression strategy with level {0}.", options.RequestBodyCompressionLevel);
                 }
             }
             else
             {
-                options.DiagnosticLogger?.LogDebug("Using no request body compression strategy.");
+                options.LogDebug("Using no request body compression strategy.");
             }
 
             // Adding retry after last for it to run first in the pipeline
@@ -71,7 +71,7 @@ namespace Sentry.Internal.Http
 
             if (options.ConfigureClient is { } configureClient)
             {
-                options.DiagnosticLogger?.LogDebug("Invoking user-defined HttpClient configuration action.");
+                options.LogDebug("Invoking user-defined HttpClient configuration action.");
                 configureClient.Invoke(client);
             }
 
