@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Sentry.AspNetCore;
@@ -12,6 +13,7 @@ namespace Sentry.Serilog.Tests
     public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
     {
         protected SentryEvent LastEvent;
+        protected List<SentryEvent> Events;
 
         protected Action<SentryAspNetCoreOptions> Configure;
 
@@ -19,10 +21,12 @@ namespace Sentry.Serilog.Tests
         
         protected override void ConfigureBuilder(WebHostBuilder builder)
         {
+            Events = new List<SentryEvent>();
             Configure = options =>
             {
                 options.BeforeSend = @event =>
                 {
+                    Events.Add(@event);
                     LastEvent = @event;
                     return @event;
                 };
@@ -30,7 +34,7 @@ namespace Sentry.Serilog.Tests
 
             ConfigureApp = app =>
             {
-                #if NET5_0 || NETCOREAPP3_1_OR_GREATER
+                #if NET5_0_OR_GREATER || NETCOREAPP3_1_OR_GREATER
                 app.UseExceptionHandler("/error");
                 #endif
             };

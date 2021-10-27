@@ -14,7 +14,7 @@ namespace Sentry.Serilog.Tests
     public class AspNetCoreIntegrationTests : AspNetSentrySdkTestFixture
     {
 
-#if NET5_0 || NETCOREAPP3_1_OR_GREATER
+#if NET5_0_OR_GREATER || NETCOREAPP3_1_OR_GREATER
         [Fact]
         public async Task UnhandledException_MarkedAsUnhandled()
         {
@@ -29,9 +29,8 @@ namespace Sentry.Serilog.Tests
             Build();
             _ = await HttpClient.GetAsync(handler.Path);
 
-            Assert.Equal("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LastEvent?.Logger);
-            Assert.Same(expectedException, LastExceptionFilter.LastException);
-            Assert.Collection(LastEvent.SentryExceptions, x => Assert.False(x.Mechanism?.Handled));
+            Assert.Contains(Events, e => e.Logger == "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware");
+            Assert.Collection(Events, @event => Assert.Collection(@event.SentryExceptions, x => Assert.False(x.Mechanism?.Handled)));
         }
 #endif
     }
