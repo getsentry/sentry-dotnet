@@ -33,9 +33,17 @@ namespace Sentry.AspNetCore.Tests
             public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
+            public Scope Scope { get; set; }
 
             public Fixture()
             {
+                Scope = new();
+                Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(Scope));
+
+                Hub.When(hub => hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
+                .Do(_ => Scope.Evaluate());
+
                 HubAccessor = () => Hub;
                 _ = Hub.IsEnabled.Returns(true);
                 _ = Hub.StartTransaction("", "").ReturnsForAnyArgs(new TransactionTracer(Hub, "test", "test"));
@@ -530,10 +538,15 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
             var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
             _fixture.Options.ConfigureScope(expectedAction);
+            _fixture.RequestDelegate = _ => throw new Exception();
             var sut = _fixture.GetSut();
 
             // Act
-            await sut.InvokeAsync(_fixture.HttpContext);
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch { }
 
             // Assert
             _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
@@ -544,12 +557,21 @@ namespace Sentry.AspNetCore.Tests
         {
             // Arrange
             var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            _fixture.RequestDelegate = _ => throw new Exception();
             _fixture.Options.ConfigureScope(expectedAction);
             var sut = _fixture.GetSut();
 
             // Act
-            await sut.InvokeAsync(_fixture.HttpContext);
-            await sut.InvokeAsync(_fixture.HttpContext);
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch { }
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch { }
 
             // Assert
             _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
@@ -560,57 +582,32 @@ namespace Sentry.AspNetCore.Tests
         {
             // Arrange
             var firstHub = _fixture.Hub;
+            _fixture.RequestDelegate = _ => throw new Exception();
             var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
             _fixture.Options.ConfigureScope(expectedAction);
             var sut = _fixture.GetSut();
 
             // Act
-            await sut.InvokeAsync(_fixture.HttpContext);
-
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch { }
             // Replacing the Hub
             // Arrange
             var secondHub = new Fixture().Hub;
             _fixture.Hub = secondHub;
 
             // Act
-            await sut.InvokeAsync(_fixture.HttpContext);
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch { }
 
             // Assert
             firstHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
             secondHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
-        }
-
-        [Fact]
-        public async Task InvokeAsync_ParallelRequestsWithSameHub_CopyOptionsOnce()
-        {
-            // Arrange
-            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
-            _fixture.Options.ConfigureScope(expectedAction);
-            var sut = _fixture.GetSut();
-            var evt = new ManualResetEvent(false);
-            var ready = new ManualResetEvent(false);
-            var total = 10;
-            var current = 0;
-
-            // Act
-            var tasks = Enumerable.Range(1, total).Select((_) => Task.Run(async () =>
-            {
-                var threadId = Interlocked.Increment(ref current);
-                if (threadId == total)
-                {
-                    ready.Set();
-                }
-                evt.WaitOne();
-
-                await sut.InvokeAsync(_fixture.HttpContext).ConfigureAwait(false);
-            })).ToList();
-            ready.WaitOne();
-            evt.Set();
-
-            await Task.WhenAll(tasks);
-
-            // Assert
-            _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
         }
     }
 }

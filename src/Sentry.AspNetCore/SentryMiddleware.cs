@@ -78,10 +78,6 @@ namespace Sentry.AspNetCore
 
             using (hub.PushAndLockScope())
             {
-                if (hub != _previousHub)
-                {
-                    SyncOptionsScope(hub);
-                }
                 if (_options.MaxRequestBodySize != RequestSize.None)
                 {
                     context.Request.EnableBuffering();
@@ -105,7 +101,16 @@ namespace Sentry.AspNetCore
                     // In case of event, all data made available through the HTTP Context at the time of the
                     // event creation will be sent to Sentry
 
-                    scope.OnEvaluating += (_, _) => PopulateScope(context, scope);
+                    scope.OnEvaluating += (_, _) =>
+                    {
+                        if (!object.ReferenceEquals(hub, _previousHub))
+                        {
+                            SyncOptionsScope(hub);
+                            _previousHub = hub;
+                        }
+
+                        PopulateScope(context, scope);
+                    };
                 });
 
                 try
@@ -159,16 +164,9 @@ namespace Sentry.AspNetCore
 
         private void SyncOptionsScope(IHub newHub)
         {
-            lock (this)
+            foreach (var callback in _options.ConfigureScopeCallbacks)
             {
-                if (_previousHub != newHub)
-                {
-                    foreach (var callback in _options.ConfigureScopeCallbacks)
-                    {
-                        newHub.ConfigureScope(callback);
-                    }
-                    _previousHub = newHub;
-                }
+                newHub.ConfigureScope(callback);
             }
         }
 
