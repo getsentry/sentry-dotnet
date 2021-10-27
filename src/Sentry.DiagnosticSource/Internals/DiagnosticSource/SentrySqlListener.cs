@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
@@ -51,11 +52,15 @@ namespace Sentry.Internals.DiagnosticSource
 
         private void SetConnectionId(ISpan span, Guid? connectionId)
         {
+            Debug.Assert(connectionId != Guid.Empty);
+
             span.SetExtra(ConnectionExtraKey, connectionId);
         }
 
         private void SetOperationId(ISpan span, Guid? operationId)
         {
+            Debug.Assert(operationId != Guid.Empty);
+
             span.SetExtra(OperationExtraKey, operationId);
         }
 
