@@ -538,7 +538,8 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
             var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
             _fixture.Options.ConfigureScope(expectedAction);
-            _fixture.RequestDelegate = _ => throw new Exception();
+            var expectedExceptionMessage = "Expected Exception";
+            _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
             var sut = _fixture.GetSut();
 
             // Act
@@ -546,7 +547,8 @@ namespace Sentry.AspNetCore.Tests
             {
                 await sut.InvokeAsync(_fixture.HttpContext);
             }
-            catch { }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
 
             // Assert
             _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
@@ -557,7 +559,8 @@ namespace Sentry.AspNetCore.Tests
         {
             // Arrange
             var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
-            _fixture.RequestDelegate = _ => throw new Exception();
+            var expectedExceptionMessage = "Expected Exception";
+            _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
             _fixture.Options.ConfigureScope(expectedAction);
             var sut = _fixture.GetSut();
 
@@ -566,12 +569,15 @@ namespace Sentry.AspNetCore.Tests
             {
                 await sut.InvokeAsync(_fixture.HttpContext);
             }
-            catch { }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
+
             try
             {
                 await sut.InvokeAsync(_fixture.HttpContext);
             }
-            catch { }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
 
             // Assert
             _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
@@ -582,7 +588,8 @@ namespace Sentry.AspNetCore.Tests
         {
             // Arrange
             var firstHub = _fixture.Hub;
-            _fixture.RequestDelegate = _ => throw new Exception();
+            var expectedExceptionMessage = "Expected Exception";
+            _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
             var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
             _fixture.Options.ConfigureScope(expectedAction);
             var sut = _fixture.GetSut();
@@ -592,7 +599,9 @@ namespace Sentry.AspNetCore.Tests
             {
                 await sut.InvokeAsync(_fixture.HttpContext);
             }
-            catch { }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
+
             // Replacing the Hub
             // Arrange
             var secondHub = new Fixture().Hub;
