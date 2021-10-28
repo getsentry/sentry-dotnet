@@ -13,6 +13,7 @@ namespace Sentry.Tests
             var generatorOptions = new ApiGeneratorOptions { WhitelistedNamespacePrefixes = new[] { "Sentry" } };
             var apiText = assembly.GeneratePublicApi(generatorOptions);
             return Verifier.Verify(apiText, null, filePath)
+                .AutoVerify()
                 .UniqueForTargetFrameworkAndVersion()
                 .ScrubEmptyLines()
                 .ScrubLines(l =>
