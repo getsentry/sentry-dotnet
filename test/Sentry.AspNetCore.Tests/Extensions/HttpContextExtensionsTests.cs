@@ -1,9 +1,9 @@
 #if !NETCOREAPP2_1
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using NSubstitute;
 using Sentry.AspNetCore.Extensions;
 using Xunit;
-using NSubstitute;
 
 namespace Sentry.AspNetCore.Tests.Extensions
 {
@@ -204,7 +204,7 @@ namespace Sentry.AspNetCore.Tests.Extensions
             var filteredRoute = HttpContextExtensions.TryGetRouteTemplate(httpContext);
 
             // Assert
-           Assert.Null(filteredRoute);
+            Assert.Null(filteredRoute);
         }
 
         [Fact]

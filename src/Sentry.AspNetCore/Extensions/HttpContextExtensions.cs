@@ -12,7 +12,7 @@ namespace Sentry.AspNetCore.Extensions
     internal static class HttpContextExtensions
     {
         public static string? TryGetRouteTemplate(this HttpContext context)
-        {           
+        {
 #if !NETSTANDARD2_0 // endpoint routing is only supported after ASP.NET Core 3.0
             // Requires .UseRouting()/.UseEndpoints()
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
