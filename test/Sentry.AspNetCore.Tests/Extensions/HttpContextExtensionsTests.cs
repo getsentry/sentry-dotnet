@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sentry.AspNetCore.Extensions;
 using Xunit;
+using NSubstitute;
 
 namespace Sentry.AspNetCore.Tests.Extensions
 {
@@ -192,6 +193,37 @@ namespace Sentry.AspNetCore.Tests.Extensions
             // Assert
             Assert.Equal(LegacyFormat(controller, action, area), filteredRoute);
         }
+
+        [Fact]
+        public void TryGetRouteTemplate_NoRoute_NullOutput()
+        {
+            // Arrange
+            var httpContext = _fixture.GetSut();
+
+            // Act
+            var filteredRoute = HttpContextExtensions.TryGetRouteTemplate(httpContext);
+
+            // Assert
+           Assert.Null(filteredRoute);
+        }
+
+        [Fact]
+        public void TryGetRouteTemplate_WithSentryRouteName_RouteName()
+        {
+            // Arrange
+            var sentryRouteName = Substitute.For<ISentryRouteName>();
+            var httpContext = _fixture.GetSut();
+            var expectedName = "abc";
+            sentryRouteName.GetRouteName().Returns(expectedName);
+            httpContext.Features.Set(sentryRouteName);
+
+            // Act
+            var filteredRoute = HttpContextExtensions.TryGetRouteTemplate(httpContext);
+
+            // Assert
+            Assert.Equal(expectedName, filteredRoute);
+        }
+
     }
 }
 #endif
