@@ -38,23 +38,23 @@ namespace Google.Cloud.Functions.Framework
 
             logging.Services.Configure<SentryAspNetCoreOptions>(options =>
             {
-            // Make sure all events are flushed out
-            options.FlushBeforeRequestCompleted = true;
-            options.ConfigureScope(scope =>
-                {
-                    Console.WriteLine("ConfigureScope triggered");
-                    if (!_lazyOptionRevisionSet)
+                // Make sure all events are flushed out
+                options.FlushBeforeRequestCompleted = true;
+                options.ConfigureScope(scope =>
                     {
-                        Console.WriteLine("Lazy not set, setting version...");
-                        _lazyOptionRevisionSet = true;
-                        if (options.Release is null &&
-                            Environment.GetEnvironmentVariable("K_REVISION") is { } revision &&
-                            ReleaseLocator.Resolve(options) is { } version)
+                        Console.WriteLine("ConfigureScope triggered");
+                        if (!_lazyOptionRevisionSet)
                         {
-                            options.Release = $"{version}+{revision}";
+                            Console.WriteLine("Lazy not set, setting version...");
+                            _lazyOptionRevisionSet = true;
+                            if (options.Release is null &&
+                                Environment.GetEnvironmentVariable("K_REVISION") is { } revision &&
+                                ReleaseLocator.Resolve(options) is { } version)
+                            {
+                                options.Release = $"{version}+{revision}";
+                            }
                         }
-                    }
-                });
+                    });
             });
 
             logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
