@@ -20,8 +20,7 @@ namespace Google.Cloud.Functions.Framework
     /// </summary>
     public class SentryStartup : FunctionsStartup
     {
-        private bool _lazyOptionRevisionSet = false;
-
+        
         /// <summary>
         /// Configure Sentry logging.
         /// </summary>
@@ -32,6 +31,17 @@ namespace Google.Cloud.Functions.Framework
 
             logging.Services.AddSingleton<ISentryEventProcessor, SentryGoogleCloudFunctionEventProcessor>();
 
+            ReleaseLocator.FromEnvironmentLazy = new Lazy<string?>(()=>
+            {
+                var environmentRelease = ReleaseLocator.LocateFromEnvironment();
+                if (environmentRelease != null &&
+                    Environment.GetEnvironmentVariable("K_REVISION") is { } revision)
+                {
+                    environmentRelease = $"{environmentRelease}+{revision}";
+                }
+                return environmentRelease;
+            });
+
             // TODO: refactor this with SentryWebHostBuilderExtensions
             var section = context.Configuration.GetSection("Sentry");
             logging.Services.Configure<SentryAspNetCoreOptions>(section);
@@ -40,21 +50,6 @@ namespace Google.Cloud.Functions.Framework
             {
                 // Make sure all events are flushed out
                 options.FlushBeforeRequestCompleted = true;
-                options.ConfigureScope(scope =>
-                    {
-                        Console.WriteLine("ConfigureScope triggered");
-                        if (!_lazyOptionRevisionSet)
-                        {
-                            Console.WriteLine("Lazy not set, setting version...");
-                            _lazyOptionRevisionSet = true;
-                            if (options.Release is null &&
-                                Environment.GetEnvironmentVariable("K_REVISION") is { } revision &&
-                                ReleaseLocator.Resolve(options) is { } version)
-                            {
-                                options.Release = $"{version}+{revision}";
-                            }
-                        }
-                    });
             });
 
             logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
@@ -115,10 +110,7 @@ namespace Google.Cloud.Functions.Framework
         {
             private readonly RequestDelegate _next;
 
-            public SentryGoogleCloudFunctionsMiddleware(RequestDelegate next)
-            {
-                _next = next;
-            }
+            public SentryGoogleCloudFunctionsMiddleware(RequestDelegate next) => _next = next;
 
             /// <summary>
             /// Handles the <see cref="HttpContext"/>.
@@ -132,9 +124,11 @@ namespace Google.Cloud.Functions.Framework
 
         private class SentryGoogleCloudFunctionsRouteName : ISentryRouteName
         {
+            private static readonly Lazy<string?> RouteName = new Lazy<string?>(() => Environment.GetEnvironmentVariable("K_SERVICE"));
+
             // K_SERVICE is where the name of the FAAS is stored.
             // It'll return null. if GCP Function is running locally.
-            public string? GetRouteName() => Environment.GetEnvironmentVariable("K_SERVICE");
+            public string? GetRouteName() => RouteName.Value;
         }
     }
 }

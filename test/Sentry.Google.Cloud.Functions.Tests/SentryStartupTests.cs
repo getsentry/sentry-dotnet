@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sentry.AspNetCore;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Google.Cloud.Functions.Tests
@@ -52,13 +53,7 @@ namespace Sentry.Google.Cloud.Functions.Tests
             var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
 
             Assert.Null(option.Value.Release);
-
-            foreach (var action in option.Value.ConfigureScopeCallbacks)
-            {
-                action.Invoke(scope);
-            }
-
-            Assert.Equal("testhost@16.11.0+1", option.Value.Release);
+            Assert.Equal("testhost@16.11.0+1", ReleaseLocator.Resolve(option.Value));
         }
 
         [Fact]
