@@ -260,7 +260,7 @@ namespace Sentry.Tests.Internals.Http
         }
 
         [Fact(Timeout = 7000)]
-        public async Task IsolatesCacheDirectories()
+        public async Task CreatesIsolatedDirectoriesForDifferentProcesses()
         {
             // Arrange
             using var cacheDirectory = new TempDirectory();
@@ -278,23 +278,17 @@ namespace Sentry.Tests.Internals.Http
 
             // Act
             // Send some envelopes with a failing transport to make sure they all stay in cache
-            {
-                using var initialInnerTransport = new FakeTransport();
-                var processInfo = Substitute.For<IActiveProcessInfo>();
-                processInfo.GetCurrentProcessId().Returns(1);
-                processInfo.IsProcessActive(0).ReturnsForAnyArgs(true);
 
-                await using var initialTransport = new CachingTransport(initialInnerTransport, options, processInfo, fileSystem);
+            using var initialInnerTransport = new FakeTransport();
+            var processInfo = Substitute.For<IActiveProcessInfo>();
+            processInfo.GetCurrentProcessId().Returns(1);
+            processInfo.IsProcessActive(0).ReturnsForAnyArgs(true);
 
-                // Shutdown the worker immediately so nothing gets processed
-                await initialTransport.StopWorkerAsync();
+            await using var initialTransport = new CachingTransport(initialInnerTransport, options, processInfo, fileSystem);
 
-                for (var i = 0; i < 3; i++)
-                {
-                    using var envelope = Envelope.FromEvent(new SentryEvent());
-                    await initialTransport.SendEnvelopeAsync(envelope);
-                }
-            }
+            // Shutdown the worker immediately so nothing gets processed
+            await initialTransport.StopWorkerAsync();
+            await CreateAndSendTransactionsAsync(initialTransport);
 
             using var innerTransport = new FakeTransport();
             var processInfo2 = Substitute.For<IActiveProcessInfo>();
@@ -302,11 +296,7 @@ namespace Sentry.Tests.Internals.Http
             processInfo2.IsProcessActive(1).ReturnsForAnyArgs(false);
             processInfo2.IsProcessActive(2).ReturnsForAnyArgs(true);
             await using var transport = new CachingTransport(innerTransport, options, processInfo2, fileSystem);
-            for (var i = 0; i < 3; i++)
-            {
-                using var envelope = Envelope.FromEvent(new SentryEvent());
-                await transport.SendEnvelopeAsync(envelope);
-            }
+            await CreateAndSendTransactionsAsync(transport);
 
             // Assert
 
@@ -321,6 +311,14 @@ namespace Sentry.Tests.Internals.Http
 
             envelopeFiles.Should().HaveCount(6);
 
+            static async Task CreateAndSendTransactionsAsync(ITransport transport)
+            {
+                for (var i = 0; i < 3; i++)
+                {
+                    using var envelope = Envelope.FromEvent(new SentryEvent());
+                    await transport.SendEnvelopeAsync(envelope);
+                }
+            }
         }
     }
 }

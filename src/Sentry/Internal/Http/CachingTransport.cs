@@ -103,7 +103,6 @@ namespace Sentry.Internal.Http
                         continue;
                     }
 
-
                     // Move all files from that cache directory into our current cache directory
                     foreach (var filePath in _fileSystem.EnumerateFiles(dirPath, "*", SearchOption.AllDirectories))
                     {
