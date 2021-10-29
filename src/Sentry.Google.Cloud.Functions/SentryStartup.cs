@@ -20,7 +20,7 @@ namespace Google.Cloud.Functions.Framework
     /// </summary>
     public class SentryStartup : FunctionsStartup
     {
-        
+
         /// <summary>
         /// Configure Sentry logging.
         /// </summary>
@@ -31,7 +31,7 @@ namespace Google.Cloud.Functions.Framework
 
             logging.Services.AddSingleton<ISentryEventProcessor, SentryGoogleCloudFunctionEventProcessor>();
 
-            ReleaseLocator.FromEnvironmentLazy = new Lazy<string?>(()=>
+            ReleaseLocator.FromEnvironmentLazy = new Lazy<string?>(() =>
             {
                 var environmentRelease = ReleaseLocator.LocateFromEnvironment();
                 if (environmentRelease != null &&
