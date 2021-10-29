@@ -4,7 +4,7 @@
 
 ### Features
 
-- Enhance GCP Integraction with performance monitoring and revision number ([#1286](https://github.com/getsentry/sentry-dotnet/pull/1286))
+- Enhance GCP Integraction with performance monitoring and revision number ([#1286](https://github.com/getsentry/sentry-dotnet/pull/1286)) 
 
 ### Fixes
 
