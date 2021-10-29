@@ -68,14 +68,21 @@ namespace Sentry.Protocol.Envelopes
             return buffer;
         }
 
-        private async Task SerializeHeaderAsync(
+        private static async Task SerializeHeaderAsync(
             Stream stream,
             IReadOnlyDictionary<string, object?> header,
             CancellationToken cancellationToken = default)
         {
-            await using var writer = new Utf8JsonWriter(stream);
-            writer.WriteDictionaryValue(header);
-            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            var writer = new Utf8JsonWriter(stream);
+#if NET461 || NETSTANDARD2_0
+            using (writer)
+#else
+            await using (writer.ConfigureAwait(false))
+#endif
+            {
+                writer.WriteDictionaryValue(header);
+                await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         private async Task SerializeHeaderAsync(
@@ -99,20 +106,23 @@ namespace Sentry.Protocol.Envelopes
             // Length is NOT known (need to calculate)
             else
             {
-#if !NET461 && !NETSTANDARD2_0
-                await
+                var payloadBuffer = await BufferPayloadAsync(cancellationToken).ConfigureAwait(false);
+#if NET461 || NETSTANDARD2_0
+                using (payloadBuffer)
+#else
+                await using (payloadBuffer.ConfigureAwait(false))
 #endif
-                using var payloadBuffer = await BufferPayloadAsync(cancellationToken).ConfigureAwait(false);
+                {
+                    // Header
+                    var headerWithLength = Header.ToDictionary();
+                    headerWithLength[LengthKey] = payloadBuffer.Length;
 
-                // Header
-                var headerWithLength = Header.ToDictionary();
-                headerWithLength[LengthKey] = payloadBuffer.Length;
+                    await SerializeHeaderAsync(stream, headerWithLength, cancellationToken).ConfigureAwait(false);
+                    await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
-                await SerializeHeaderAsync(stream, headerWithLength, cancellationToken).ConfigureAwait(false);
-                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
-
-                // Payload
-                await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+                    // Payload
+                    await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 

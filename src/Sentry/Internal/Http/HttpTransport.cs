@@ -244,14 +244,18 @@ namespace Sentry.Internal.Http
 
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 
-#if !NET461 && !NETSTANDARD2_0
-                await
+                var envelopeFile = File.Create(destination);
+#if NET461 || NETSTANDARD2_0
+                using (envelopeFile)
+#else
+                await using (envelopeFile)
 #endif
-                    using var envelopeFile = File.Create(destination);
-                await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
-                await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
-                _options.LogInfo("Envelope's {0} bytes written to: {1}",
-                    envelopeFile.Length, destination);
+                {
+                    await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
+                    await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    _options.LogInfo("Envelope's {0} bytes written to: {1}",
+                        envelopeFile.Length, destination);
+                }
             }
         }
 
