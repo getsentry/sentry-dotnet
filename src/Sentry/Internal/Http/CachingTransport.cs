@@ -231,7 +231,7 @@ namespace Sentry.Internal.Http
             // [f1] [f2] [f3] [f4] [f5]
             //                |-------| <- keep these ones
             // |------------|           <- delete these ones
-            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(_keepCount).ToArray();
+            var excessCacheFilePaths = GetCacheFilePaths().SkipLast(_keepCount);
 
             foreach (var filePath in excessCacheFilePaths)
             {
@@ -304,7 +304,7 @@ namespace Sentry.Internal.Http
 
         private async Task InnerProcessCacheAsync(CancellationToken cancellationToken, string envelopeFilePath)
         {
-            var envelopeFile = File.OpenRead(envelopeFilePath);
+            var envelopeFile = _fileSystem.OpenReadFile(envelopeFilePath);
 #if NET461 || NETSTANDARD2_0
             using (envelopeFile)
 #else
