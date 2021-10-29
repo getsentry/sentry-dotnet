@@ -340,7 +340,7 @@ namespace Sentry
                 EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
             }
 
-            AddSessionBreadcrumb("Starting Session");
+            AddSessionBreadcrumb("Starting Sentry Session");
             _options.LogInfo("Started new session (SID: {0}; DID: {1}).",
                 session.Id, session.DistinctId);
 
@@ -353,7 +353,7 @@ namespace Sentry
 
         private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
         {
-            AddSessionBreadcrumb("Ending Session");
+            AddSessionBreadcrumb("Ending Sentry Session");
             _options.LogInfo("Ended session (SID: {0}; DID: {1}) with status '{2}'.",
                 session.Id, session.DistinctId, status);
 
@@ -383,7 +383,7 @@ namespace Sentry
         {
             if (_currentSession is { } session)
             {
-                AddSessionBreadcrumb("Pausing Session");
+                AddSessionBreadcrumb("Pausing Sentry Session");
 
                 var now = _clock.GetUtcNow();
                 _lastPauseTimestamp = now;
@@ -402,7 +402,7 @@ namespace Sentry
                 return Array.Empty<SessionUpdate>();
             }
 
-            AddSessionBreadcrumb("Resuming Session");
+            AddSessionBreadcrumb("Resuming Sentry Session");
 
             // Reset the pause timestamp since the session is about to be resumed
             _lastPauseTimestamp = null;
@@ -467,8 +467,6 @@ namespace Sentry
         }
 
         private static void AddSessionBreadcrumb(string message)
-        {
-            SentrySdk.AddBreadcrumb(message, "app.lifecycle", "session");
-        }
+            => SentrySdk.AddBreadcrumb(message, "app.lifecycle", "session");
     }
 }

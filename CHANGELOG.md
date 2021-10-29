@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Sentry Sessions status as Breadcrumbs ([#1263](https://github.com/getsentry/sentry-dotnet/pull/1263))
+
 ### Fixes
 
 - Add missing `ConfigureAwaits(false)` for `async using` ([#1276](https://github.com/getsentry/sentry-dotnet/pull/1276))
