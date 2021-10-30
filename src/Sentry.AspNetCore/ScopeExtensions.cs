@@ -59,7 +59,7 @@ namespace Sentry.AspNetCore
             }
             catch (Exception e)
             {
-                options.DiagnosticLogger?.LogError("Failed to extract body.", e);
+                options.LogError("Failed to extract body.", e);
             }
 
             SetEnv(scope, context, options);
@@ -87,13 +87,20 @@ namespace Sentry.AspNetCore
                     scope.SetTag("route.area", area);
                 }
 
-                scope.TransactionName = context.TryGetTransactionName();
+                // Transaction Name may only be available afterward the creation of the Transaction.
+                // In this case, the event will update the transaction name if captured during the
+                // pipeline execution, allowing it to match the correct transaction name as the current
+                // active transaction.
+                if (string.IsNullOrEmpty(scope.TransactionName))
+                {
+                    scope.TransactionName = context.TryGetTransactionName();
+                }
             }
             catch (Exception e)
             {
                 // Suppress the error here; we expect an ArgumentNullException if httpContext.Request.RouteValues is null from GetRouteData()
                 // TODO: Consider adding a bool to the Sentry options to make route data extraction optional in case they don't use a routing middleware?
-                options.DiagnosticLogger?.LogDebug("Failed to extract route data.", e);
+                options.LogDebug("Failed to extract route data.", e);
             }
 
             // TODO: Get context stuff into scope

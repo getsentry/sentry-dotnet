@@ -12,12 +12,16 @@ namespace Sentry.Internal
             this ISerializable serializable,
             CancellationToken cancellationToken = default)
         {
-#if !NET461 && !NETSTANDARD2_0
-            await
+            var stream = new MemoryStream();
+#if NET461 || NETSTANDARD2_0
+            using (stream)
+#else
+            await using (stream.ConfigureAwait(false))
 #endif
-                using var stream = new MemoryStream();
-            await serializable.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
-            return Encoding.UTF8.GetString(stream.ToArray());
+            {
+                await serializable.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                return Encoding.UTF8.GetString(stream.ToArray());
+            }
         }
     }
 }

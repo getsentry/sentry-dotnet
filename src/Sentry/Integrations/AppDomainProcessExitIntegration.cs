@@ -29,7 +29,7 @@ namespace Sentry.Integrations
 
         internal void HandleProcessExit(object? sender, EventArgs e)
         {
-            _options?.DiagnosticLogger?.LogInfo("AppDomain process exited: Disposing SDK.");
+            _options?.LogInfo("AppDomain process exited: Disposing SDK.");
             (_hub as IDisposable)?.Dispose();
         }
     }

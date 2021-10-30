@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Google.Cloud.Functions.Framework;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sentry.AspNetCore;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Google.Cloud.Functions.Tests
@@ -16,6 +19,8 @@ namespace Sentry.Google.Cloud.Functions.Tests
     {
         public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
         public WebHostBuilderContext WebHostBuilderContext { get; set; }
+
+        public IApplicationBuilder ApplicationBuilder { get; set; } = Substitute.For<IApplicationBuilder>();
 
         public ILoggingBuilder LoggingBuilder { get; set; }
 
@@ -37,6 +42,36 @@ namespace Sentry.Google.Cloud.Functions.Tests
         }
 
         [Fact]
+        public void ConfigureLogging_SentryAspNetCoreOptions_ReleaseOptionsSet()
+        {
+            var sut = new SentryStartup();
+            var scope = new Scope(null);
+            Environment.SetEnvironmentVariable("K_REVISION", "1");
+            sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+            var provider = LoggingBuilder.Services.BuildServiceProvider();
+            var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
+
+            Assert.Null(option.Value.Release);
+            Assert.Equal("testhost@16.11.0+1", ReleaseLocator.Resolve(option.Value));
+        }
+
+        [Fact]
+        public void Configure_TracingMiddlewaresRegistered()
+        {
+            // Arrange
+            var sut = new SentryStartup();
+            var ApplicationBuilder = Substitute.For<IApplicationBuilder>();
+
+            // Act
+            sut.Configure(WebHostBuilderContext, ApplicationBuilder);
+
+            // Assert
+            // AspNetCore and GCP MiddleWare
+            ApplicationBuilder.Received(2).Use(Arg.Any<Func<RequestDelegate, RequestDelegate>>());
+        }
+
+        [Fact]
         public void ConfigureLogging_SentryAspNetCoreOptions_FlushOnCompletedRequestTrue()
         {
             var sut = new SentryStartup();
@@ -44,7 +79,7 @@ namespace Sentry.Google.Cloud.Functions.Tests
 
             var provider = LoggingBuilder.Services.BuildServiceProvider();
             var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
-            Assert.True(option.Value.FlushOnCompletedRequest);
+            Assert.True(option.Value.FlushBeforeRequestCompleted);
         }
 
         [Theory, MemberData(nameof(ExpectedServices))]
