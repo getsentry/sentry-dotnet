@@ -5,6 +5,7 @@
 ### Features
 
 - .NET 6 specific targets ([#939](https://github.com/getsentry/sentry-dotnet/pull/939))
+- Sentry Sessions status as Breadcrumbs ([#1263](https://github.com/getsentry/sentry-dotnet/pull/1263))
 - Enhance GCP Integraction with performance monitoring and revision number ([#1286](https://github.com/getsentry/sentry-dotnet/pull/1286))
 
 ### Fixes
