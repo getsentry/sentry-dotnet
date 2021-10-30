@@ -6,8 +6,6 @@ on:
       - main
       - release/*
   pull_request:
-    paths-ignore:
-      - 'CHANGELOG.md'
 jobs:
   build:
     name: ${{ matrix.os }}
