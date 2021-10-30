@@ -8,8 +8,6 @@
     <SignAssembly>true</SignAssembly>
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
-    <!-- After preview 7 it'll be opt-in again -->
-    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
   </PropertyGroup>
 
   <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->
