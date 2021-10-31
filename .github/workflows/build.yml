@@ -47,6 +47,9 @@ jobs:
           with:
             dotnet-version: '6.0.100-rc.2.21505.57'
 
+        - name: Install .NET Android workload
+          run: dotnet workload install android
+
         - name: Run build script
           run: ${{ matrix.build_script }}
 
