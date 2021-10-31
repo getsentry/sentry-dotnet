@@ -7,21 +7,7 @@
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(TargetFramework.EndsWith('android'))">
-    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
-    <!-- BINDINGSGENERATOR : warning BG8604: Could not find top ancestor type 'LifecycleWatcher' for nested type 'Sentry.Android.LifecycleWatcher._1' -->
-    <!-- BG8604 Results in a missing API and for as long as we don't need that (and all Java/Android SDK is internal to this lib), it just doesn't matter: -->
-    <NoWarn>$(NoWarn);BG8604</NoWarn>
-  </PropertyGroup>
-  <ItemGroup Condition="$(TargetFramework.EndsWith('android'))">
-    <None Remove="Android/Transforms/*.xml" />
-    <TransformFile Include="Android/Transforms/*.xml" />
-    <!-- Gson will be dropped on sentry-android version 6.0.0 -->
-    <PackageReference Include="GoogleGson" Version="2.8.5" />
-    <AndroidLibrary Include="$(MSBuildThisFileDirectory)../../libs/Android/sentry-5.2.4.jar" />
-    <AndroidLibrary Include="$(MSBuildThisFileDirectory)../../libs/Android/sentry-android-core-release.aar" />
-    <AndroidLibrary Include="$(MSBuildThisFileDirectory)../../libs/Android/sentry-android-ndk-release.aar" />
-  </ItemGroup>
+  <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Sentry.Android.proj"/>
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">
@@ -63,5 +49,4 @@
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
-
 </Project>
