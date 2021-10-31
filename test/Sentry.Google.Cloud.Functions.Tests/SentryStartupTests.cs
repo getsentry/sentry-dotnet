@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sentry.AspNetCore;
 using Sentry.Internal;
+using Sentry.Testing;
 using Xunit;
 
 namespace Sentry.Google.Cloud.Functions.Tests
@@ -19,8 +20,6 @@ namespace Sentry.Google.Cloud.Functions.Tests
     {
         public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
         public WebHostBuilderContext WebHostBuilderContext { get; set; }
-
-        public IApplicationBuilder ApplicationBuilder { get; set; } = Substitute.For<IApplicationBuilder>();
 
         public ILoggingBuilder LoggingBuilder { get; set; }
 
@@ -42,18 +41,19 @@ namespace Sentry.Google.Cloud.Functions.Tests
         }
 
         [Fact]
-        public void ConfigureLogging_SentryAspNetCoreOptions_ReleaseOptionsSet()
+        public void ConfigureLogging_ModifiesReleaseLocatorAndReadsKRevisionEnvVar_AppendsToRelease()
         {
             var sut = new SentryStartup();
-            var scope = new Scope(null);
-            Environment.SetEnvironmentVariable("K_REVISION", "1");
-            sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+            EnvironmentVariableGuard.WithVariable("K_REVISION", "9", () =>
+            {
+                sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
 
-            var provider = LoggingBuilder.Services.BuildServiceProvider();
-            var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
+                var provider = LoggingBuilder.Services.BuildServiceProvider();
+                var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
 
-            Assert.Null(option.Value.Release);
-            Assert.Equal("testhost@16.11.0+1", ReleaseLocator.Resolve(option.Value));
+                Assert.Null(option.Value.Release);
+                Assert.EndsWith("+9", ReleaseLocator.Resolve(option.Value));
+            });
         }
 
         [Fact]
