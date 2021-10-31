@@ -32,7 +32,7 @@ namespace Sentry.Samples.Android
 
             var captureException = (Button)base.FindViewById(Resource.Id.captureException)!;
             var throwUnhandledException = (Button)base.FindViewById(Resource.Id.throwUnhandledException)!;
-            captureException.Click += (s, a) => 
+            captureException.Click += (s, a) =>
             {
                 try
                 {
