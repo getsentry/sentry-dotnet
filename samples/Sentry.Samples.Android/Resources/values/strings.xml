@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Sentry .NET Android Sample</string>
+    <string name="capture_exception">Try/catch/capture</string>
+    <string name="throw_unhandled_exception">Throw unhandled</string>
+</resources>
