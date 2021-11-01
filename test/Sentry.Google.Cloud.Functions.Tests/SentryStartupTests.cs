@@ -25,11 +25,16 @@ namespace Sentry.Google.Cloud.Functions.Tests
 
         public SentryStartupTests()
         {
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>())
+                .Build();
+
             WebHostBuilderContext = new WebHostBuilderContext
             {
-                Configuration = Substitute.For<IConfiguration>(),
+                Configuration = configuration,
                 HostingEnvironment = HostingEnvironment
             };
+
             LoggingBuilder = new TestLoggingBuilder();
             LoggingBuilder.Services.AddSingleton(HostingEnvironment);
 
