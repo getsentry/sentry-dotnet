@@ -102,7 +102,6 @@ namespace Sentry.AspNetCore
                     scope.OnEvaluating += (_, _) =>
                     {
                         SyncOptionsScope(hub);
-
                         PopulateScope(context, scope);
                     };
                 });
