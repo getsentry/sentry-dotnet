@@ -14,7 +14,7 @@ namespace Sentry.Serilog.Tests
     public class AspNetCoreIntegrationTests : AspNetSentrySdkTestFixture
     {
 
-#if NET5_0_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP3_1_OR_GREATER
         [Fact]
         public async Task UnhandledException_MarkedAsUnhandled()
         {

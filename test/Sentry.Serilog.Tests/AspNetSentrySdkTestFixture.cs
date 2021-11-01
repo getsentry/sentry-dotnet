@@ -34,9 +34,9 @@ namespace Sentry.Serilog.Tests
 
             ConfigureApp = app =>
             {
-                #if NET5_0_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP3_1_OR_GREATER
                 app.UseExceptionHandler("/error");
-                #endif
+#endif
             };
 
             var sentry = FakeSentryServer.CreateServer();
