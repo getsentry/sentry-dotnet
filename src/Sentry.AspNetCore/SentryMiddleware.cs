@@ -103,11 +103,8 @@ namespace Sentry.AspNetCore
 
                     scope.OnEvaluating += (_, _) =>
                     {
-                        if (!object.ReferenceEquals(hub, _previousHub))
-                        {
-                            SyncOptionsScope(hub);
-                            _previousHub = hub;
-                        }
+                        SyncOptionsScope(hub);
+                        _previousHub = hub;
 
                         PopulateScope(context, scope);
                     };
