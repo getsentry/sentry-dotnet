@@ -18,7 +18,7 @@ namespace Sentry.Serilog.Tests
         protected Action<SentryAspNetCoreOptions> Configure;
 
         protected Action<WebHostBuilder> AfterConfigureBuilder;
-        
+
         protected override void ConfigureBuilder(WebHostBuilder builder)
         {
             Events = new List<SentryEvent>();

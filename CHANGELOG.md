@@ -11,6 +11,7 @@
 ### Fixes
 
 - Add missing `ConfigureAwaits(false)` for `async using` ([#1276](https://github.com/getsentry/sentry-dotnet/pull/1276))
+- Fix missing handled tag when events are logged via an ASP.NET Core pipeline logger ([#1284](getsentry/sentry-dotnet/pull/1284))
  
 ## 3.10.0
 
