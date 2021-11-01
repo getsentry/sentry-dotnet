@@ -33,6 +33,10 @@ namespace Sentry.Internal
         public const string DebugEnvironmentSetting = "debug";
 
         // See: https://github.com/getsentry/sentry-release-registry
+#if NET6_0_ANDROID_OR_GREATER
+        public const string SdkName = "sentry.dotnet.android";
+#else
         public const string SdkName = "sentry.dotnet";
+#endif
     }
 }

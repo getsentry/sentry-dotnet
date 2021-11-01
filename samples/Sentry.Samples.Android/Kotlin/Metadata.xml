@@ -1,0 +1,6 @@
+<metadata>
+
+  <attr path="/api/package[@name='io.sentry.samples.android.kotlin']" name="managedName">Sentry.Samples.Android.Kotlin</attr>
+  <remove-node path="/api/package[starts-with(@name, 'kotlin')]" />
+
+</metadata>

@@ -14,5 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <TransformFile Include="Kotlin/Metadata.xml" />
+    <AndroidLibrary Include="Kotlin/buggy.jar" />
   </ItemGroup>
 </Project>

@@ -18,7 +18,7 @@ namespace Sentry
     /// It allows safe static access to a client and scope management.
     /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
     /// </remarks>
-    public static class SentrySdk
+    public static partial class SentrySdk
     {
         private static IHub _hub = DisabledHub.Instance;
 
@@ -41,17 +41,19 @@ namespace Sentry
             // from anywhere else, return a disabled hub.
             if (Dsn.IsDisabled(dsn))
             {
-                options.LogWarning(
-                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-
+                options.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
                 return DisabledHub.Instance;
             }
 
             // Validate DSN for an early exception in case it's malformed
             _ = Dsn.Parse(dsn);
 
-            return new Hub(options);
+            var hub = new Hub(options);
+            InitNative(hub);
+            return hub;
         }
+
+        static partial void InitNative(IHub hub);
 
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN.
