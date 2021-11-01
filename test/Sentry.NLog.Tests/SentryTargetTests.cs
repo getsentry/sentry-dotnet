@@ -393,26 +393,6 @@ namespace Sentry.NLog.Tests
                     && p.Message.Message == expectedMessage));
         }
 
-        [Fact(Skip = "Flaky (after review)")]
-        public void Log_SourceContextMatchesSentry_NoScopeConfigured()
-        {
-            var sut = _fixture.GetLogger();
-
-            sut.Error("message {SourceContext}", "Sentry.NLog");
-
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
-        }
-
-        [Fact(Skip = "Flaky (after review)")]
-        public void Log_SourceContextContainsSentry_NoScopeConfigured()
-        {
-            var sut = _fixture.GetLogger();
-
-            sut.Error("message {SourceContext}", "Sentry");
-
-            _fixture.Hub.DidNotReceive().ConfigureScope(Arg.Any<Action<Scope>>());
-        }
-
         [Fact]
         public void Log_WithCustomBreadcrumbLayout_RendersCorrectly()
         {

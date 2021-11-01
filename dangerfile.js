@@ -9,7 +9,7 @@ const CHANGELOG_END_BODY = `If none of the above apply, you can opt out of this 
 
 function getCleanTitleWithPrLink() {
   const title = danger.github.pr.title;
-  return title.split(": ").slice(-1)[0].trim().replace(/\.+$/, "") + PR_LINK;
+  return title.split(": ").slice(-1)[0].trim().replace(/\.+$/, "") + ` ` + PR_LINK;
 }
 
 function getChangelogDetailsHtml() {
@@ -51,7 +51,7 @@ async function containsChangelog(path) {
 
 async function checkChangelog() {
   const skipChangelog =
-    danger.github && (danger.github.pr.body + "").includes("#skip-changelog");
+    danger.github && (danger.github.pr.body + "").toLowerCase().includes("#skip-changelog");
   if (skipChangelog) {
     return;
   }

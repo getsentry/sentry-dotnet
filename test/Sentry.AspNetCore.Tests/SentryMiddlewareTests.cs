@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETCOREAPP2_1 || NET461
@@ -31,9 +33,17 @@ namespace Sentry.AspNetCore.Tests
             public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
             public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
             public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
+            public Scope Scope { get; set; }
 
             public Fixture()
             {
+                Scope = new();
+                Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(Scope));
+
+                Hub.When(hub => hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
+                .Do(_ => Scope.Evaluate());
+
                 HubAccessor = () => Hub;
                 _ = Hub.IsEnabled.Returns(true);
                 _ = Hub.StartTransaction("", "").ReturnsForAnyArgs(new TransactionTracer(Hub, "test", "test"));
@@ -457,10 +467,26 @@ namespace Sentry.AspNetCore.Tests
         }
 
         [Fact]
+        public async Task InvokeAsync_FlushBeforeRequestCompletedWhenFalse_DoesNotCallFlushAsync()
+        {
+            var sut = _fixture.GetSut();
+            _fixture.Options.FlushBeforeRequestCompleted = false;
+            var response = Substitute.For<HttpResponse>();
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
+        }
+
+        [Fact]
         public async Task InvokeAsync_DisabledHub_DoesNotCallFlushAsync()
         {
             var sut = _fixture.GetSut();
             _fixture.Options.FlushOnCompletedRequest = true;
+            _fixture.Options.FlushBeforeRequestCompleted = true;
             _ = _fixture.Hub.IsEnabled.Returns(false);
             var response = Substitute.For<HttpResponse>();
             _ = _fixture.HttpContext.Response.Returns(response);
@@ -487,6 +513,110 @@ namespace Sentry.AspNetCore.Tests
             await sut.InvokeAsync(_fixture.HttpContext);
 
             await _fixture.Hub.Received(1).FlushAsync(timeout);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_FlushBeforeRequestCompletedTrue_RespectsTimeout()
+        {
+            var timeout = TimeSpan.FromSeconds(10);
+            var sut = _fixture.GetSut();
+            _fixture.Options.FlushBeforeRequestCompleted = true;
+            _fixture.Options.FlushTimeout = timeout;
+            var response = Substitute.For<HttpResponse>();
+            _ = _fixture.HttpContext.Response.Returns(response);
+            _ = response.HttpContext.Returns(_fixture.HttpContext);
+            response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
+
+            await sut.InvokeAsync(_fixture.HttpContext);
+
+            await _fixture.Hub.Received(1).FlushAsync(timeout);
+        }
+
+        [Fact]
+        public async Task InvokeAsync_ScopeNotPopulated_CopyOptionsToScope()
+        {
+            // Arrange
+            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            _fixture.Options.ConfigureScope(expectedAction);
+            var expectedExceptionMessage = "Expected Exception";
+            _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
+            var sut = _fixture.GetSut();
+
+            // Act
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
+
+            // Assert
+            _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        }
+
+        [Fact]
+        public async Task InvokeAsync_SameMiddleWareWithSameHubs_CopyOptionsOnce()
+        {
+            // Arrange
+            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            var expectedExceptionMessage = "Expected Exception";
+            _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
+            _fixture.Options.ConfigureScope(expectedAction);
+            var sut = _fixture.GetSut();
+
+            // Act
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
+
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
+
+            // Assert
+            _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        }
+
+        [Fact]
+        public async Task InvokeAsync_SameMiddleWareWithDifferentHubs_CopyOptionsToAllHubs()
+        {
+            // Arrange
+            var firstHub = _fixture.Hub;
+            var expectedExceptionMessage = "Expected Exception";
+            _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
+            var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+            _fixture.Options.ConfigureScope(expectedAction);
+            var sut = _fixture.GetSut();
+
+            // Act
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch (Exception ex) when (ex.Message == expectedExceptionMessage)
+            { }
+
+            // Replacing the Hub
+            // Arrange
+            var secondHub = new Fixture().Hub;
+            _fixture.Hub = secondHub;
+
+            // Act
+            try
+            {
+                await sut.InvokeAsync(_fixture.HttpContext);
+            }
+            catch { }
+
+            // Assert
+            firstHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+            secondHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
         }
     }
 }
