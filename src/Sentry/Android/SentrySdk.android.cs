@@ -21,9 +21,9 @@ namespace Sentry
             options.AddEventProcessor(new DelegateEventProcessor(evt =>
             {
 #pragma warning disable 618
-                    evt.Contexts.Device.Architecture = Build.CpuAbi;
+                evt.Contexts.Device.Architecture = Build.CpuAbi;
 #pragma warning restore 618
-                    evt.Contexts.Device.Manufacturer = Build.Manufacturer;
+                evt.Contexts.Device.Manufacturer = Build.Manufacturer;
                 return evt;
             }));
 
