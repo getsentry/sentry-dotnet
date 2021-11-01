@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+- Sentry Sessions status as Breadcrumbs ([#1263](https://github.com/getsentry/sentry-dotnet/pull/1263))
+- Enhance GCP Integraction with performance monitoring and revision number ([#1286](https://github.com/getsentry/sentry-dotnet/pull/1286))
+- Bump Ben.Demystifier to support .NET 6 ([#1290](https://github.com/getsentry/sentry-dotnet/pull/1290))
+
 ### Fixes
 
 - ASP.NET Core: Data from Scope in options should be applied on each request ([#1270](https://github.com/getsentry/sentry-dotnet/pull/1270))
