@@ -24,7 +24,6 @@ namespace Sentry.AspNetCore
     {
         private readonly RequestDelegate _next;
         private readonly Func<IHub> _getHub;
-        private IHub? _previousHub;
         private readonly SentryAspNetCoreOptions _options;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ILogger<SentryMiddleware> _logger;
@@ -59,7 +58,6 @@ namespace Sentry.AspNetCore
             _options = options.Value;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
-            _previousHub = null;
         }
 
         /// <summary>
@@ -104,7 +102,6 @@ namespace Sentry.AspNetCore
                     scope.OnEvaluating += (_, _) =>
                     {
                         SyncOptionsScope(hub);
-                        _previousHub = hub;
 
                         PopulateScope(context, scope);
                     };
