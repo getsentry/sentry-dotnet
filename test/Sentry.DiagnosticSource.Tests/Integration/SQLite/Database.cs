@@ -33,7 +33,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             context.SaveChanges();
         }
 
-        DbConnection CreateInMemoryDatabase()
+        private DbConnection CreateInMemoryDatabase()
         {
             var connection = new SqliteConnection("Filename=:memory:");
 
