@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Sentry.Internal.Http
+namespace Sentry.Internal
 {
     internal interface IFileSystem
     {
