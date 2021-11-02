@@ -45,7 +45,7 @@ namespace Sentry.Internal.Http
         private readonly Task _worker;
         private string TryGetProcessSpecificCacheDirectoryPath(SentryOptions options)
         {
-            if (!options.EnableProcessIsolationForCaching)
+            if (!options.CacheProcessIsolationEnabled)
             {
                 return _dsnCacheDirectoryPath;
             }

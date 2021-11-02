@@ -426,10 +426,11 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
-        /// Path to the root directory used for storing events locally for resilience.
-        /// If set to <i>null</i>, caching will not be used.
+        /// Whether to use a different path per running process for caching events.
+        /// Useful for running multiple instances or for sending events after app crashes.
+        /// Defaults to <see langword="true"/>.
         /// </summary>
-        public bool EnableProcessIsolationForCaching { get; set; } = false;
+        public bool CacheProcessIsolationEnabled { get; set; } = true;
 
         /// <summary>
         /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.

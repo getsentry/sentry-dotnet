@@ -269,7 +269,7 @@ namespace Sentry.Tests.Internals.Http
                 Dsn = DsnSamples.ValidDsnWithoutSecret,
                 DiagnosticLogger = _logger,
                 CacheDirectoryPath = cacheDirectory.Path,
-                EnableProcessIsolationForCaching = true
+                CacheProcessIsolationEnabled = true
             };
 
             var fileSystem = Substitute.ForPartsOf<FileSystemStub>();
