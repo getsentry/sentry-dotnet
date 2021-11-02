@@ -1019,9 +1019,9 @@ namespace NotSentry.Tests
 
         private class ErroredMessageFixture
         {
-            public const SpanId SpanId = SpanId.Create();
-            public const SentryId TraceId = SentryId.Create();
-            public const SpanId ParentId = SpanId.Create();
+            public SpanId SpanId = SpanId.Create();
+            public SentryId TraceId = SentryId.Create();
+            public SpanId ParentId = SpanId.Create();
             public Scope Scope { get; }
             public ISpan Span { get; }
             public ITransaction Transaction { get; }
@@ -1040,14 +1040,14 @@ namespace NotSentry.Tests
                 Transaction.ParentSpanId.Returns(SpanId.Empty);
                 Span.SpanId.Returns(SpanId);
                 Span.TraceId.Returns(TraceId);
-                Span.ParentSpanId.Returns(parentId);
+                Span.ParentSpanId.Returns(ParentId);
 
                 Transaction.Spans.Returns(new List<ISpan> { Span });
                 Transaction.GetLastActiveSpan().Returns(Span);
                 ScopeManager.GetCurrent().Returns(new KeyValuePair<Scope, ISentryClient>(Scope, Substitute.For<ISentryClient>()));
             }
 
-            public Hub GetSut() => new Hub(new SentryOptions() { Dsn = DsnSamples.ValidDsnWithSecret }, scopeManager: scopeManager);
+            public Hub GetSut() => new Hub(new SentryOptions() { Dsn = DsnSamples.ValidDsnWithSecret }, scopeManager: ScopeManager);
         }
 
         private readonly ErroredMessageFixture _fixture = new();
