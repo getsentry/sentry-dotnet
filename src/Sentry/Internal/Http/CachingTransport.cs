@@ -110,19 +110,12 @@ namespace Sentry.Internal.Http
                         {
                             _fileSystem.CreateDirectory(_isolatedCacheDirectoryPath);
 
-                            _fileSystem.MoveFile(
-                                filePath,
-                                Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath))
-                            );
+                            _fileSystem.MoveFile(filePath, Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath)));
                         }
                         // Might fail if another process already snatched that file before us
                         catch (Exception ex)
                         {
-                            _options.DiagnosticLogger?.LogError(
-                                "Failed to move cache file of an exited process: '{0}'.",
-                                ex,
-                                filePath
-                            );
+                            _options.DiagnosticLogger?.LogError("Failed to move cache file of an exited process: '{0}'.", ex, filePath);
                         }
                     }
 
@@ -133,26 +126,18 @@ namespace Sentry.Internal.Http
                     }
                     catch (Exception ex)
                     {
-                        _options.DiagnosticLogger?.LogError(
-                            "Failed to delete cache directory of an exited process: '{0}'.",
-                            ex,
-                            dirPath
-                        );
+                        _options.DiagnosticLogger?.LogError("Failed to delete cache directory of an exited process: '{0}'.", ex, dirPath);
                     }
                 }
             }
             catch (DirectoryNotFoundException)
             {
                 // No cache directories, that's fine
-                _options.DiagnosticLogger?.LogDebug(
-                    "Cache directory doesn't exist yet. Not scanning for leftover cache files."
-                );
+                _options.DiagnosticLogger?.LogDebug("Cache directory doesn't exist yet. Not scanning for leftover cache files.");
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to scan cache directory for leftover files.",
-                    ex
+                _options.DiagnosticLogger?.LogError("Failed to scan cache directory for leftover files.", ex
                 );
 
             }
@@ -170,8 +155,7 @@ namespace Sentry.Internal.Http
                     foreach (var filePath in _fileSystem.EnumerateFiles(_processingDirectoryPath))
                     {
                         var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                        _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                            filePath, destinationPath);
+                        _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.", filePath, destinationPath);
 
                         _fileSystem.MoveFile(filePath, destinationPath);
                     }
@@ -180,16 +164,11 @@ namespace Sentry.Internal.Http
             catch (DirectoryNotFoundException)
             {
                 // No cache directories, that's fine
-                _options.DiagnosticLogger?.LogDebug(
-                    "Cache directory doesn't exist yet. Not scanning for leftover cache files."
-                );
+                _options.DiagnosticLogger?.LogDebug("Cache directory doesn't exist yet. Not scanning for leftover cache files.");
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to scan cache directory for leftover files.",
-                    ex
-                );
+                _options.DiagnosticLogger?.LogError("Failed to scan cache directory for leftover files.", ex);
             }
             try
             {
@@ -243,9 +222,7 @@ namespace Sentry.Internal.Http
                 catch (FileNotFoundException)
                 {
                     // File has already been deleted (unexpected but not critical)
-                    _options.LogWarning(
-                        "Cached envelope '{0}' has already been deleted.",
-                        filePath);
+                    _options.LogWarning("Cached envelope '{0}' has already been deleted.", filePath);
                 }
             }
         }
@@ -269,9 +246,7 @@ namespace Sentry.Internal.Http
         {
             while (await TryPrepareNextCacheFileAsync(cancellationToken).ConfigureAwait(false) is { } envelopeFilePath)
             {
-                _options.LogDebug(
-                    "Reading cached envelope: {0}",
-                    envelopeFilePath);
+                _options.LogDebug("Reading cached envelope: {0}", envelopeFilePath);
 
                 try
                 {
@@ -279,20 +254,14 @@ namespace Sentry.Internal.Http
                 }
                 catch (Exception ex) when (IsRetryable(ex))
                 {
-                    _options.LogError(
-                        "Failed to send cached envelope: {0}, retrying after a delay.",
-                        ex,
-                        envelopeFilePath);
+                    _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, envelopeFilePath);
 
                     // Let the worker catch, log, wait a bit and retry.
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _options.LogError(
-                        "Failed to send cached envelope: {0}, discarding cached envelope.",
-                        ex,
-                        envelopeFilePath);
+                    _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope.", ex, envelopeFilePath);
                 }
 
                 // Envelope & file stream must be disposed prior to reaching this point
@@ -314,15 +283,11 @@ namespace Sentry.Internal.Http
                 using var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken)
                     .ConfigureAwait(false);
 
-                _options.LogDebug(
-                    "Sending cached envelope: {0}",
-                    envelope.TryGetEventId());
+                _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
 
                 await _innerTransport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
 
-                _options.LogDebug(
-                    "Successfully sent cached envelope: {0}",
-                    envelope.TryGetEventId());
+                _options.LogDebug("Successfully sent cached envelope: {0}", envelope.TryGetEventId());
             }
         }
 
@@ -388,7 +353,7 @@ namespace Sentry.Internal.Http
             _fileSystem.CreateDirectory(_isolatedCacheDirectoryPath);
             var stream = _fileSystem.CreateFile(envelopeFilePath);
 #if NET461 || NETSTANDARD2_0
-            using(stream)
+            using (stream)
 #else
             await using (stream.ConfigureAwait(false))
 #endif
@@ -436,9 +401,7 @@ namespace Sentry.Internal.Http
             catch (Exception ex)
             {
                 // Don't throw inside dispose
-                _options.LogError(
-                    "Error stopping worker during dispose.",
-                    ex);
+                _options.LogError("Error stopping worker during dispose.", ex);
             }
 
             _workerSignal.Dispose();
