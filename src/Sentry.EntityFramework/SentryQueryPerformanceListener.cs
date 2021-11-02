@@ -65,7 +65,7 @@ namespace Sentry.EntityFramework
                 }
                 else
                 {
-                    span.Finish(interceptionContext.Exception, SpanStatus.InternalError);
+                    span.Finish(interceptionContext.Exception);
                 }
             }
             else
