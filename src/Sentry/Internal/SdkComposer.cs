@@ -43,7 +43,7 @@ namespace Sentry.Internal
             }
 
             // Caching transport
-            var cachingTransport = new CachingTransport(httpTransport, _options, ActiveProcessInfo.Instance);
+            var cachingTransport = new CachingTransport(httpTransport, _options);
 
             // If configured, flush existing cache
             if (_options.InitCacheFlushTimeout > TimeSpan.Zero)
