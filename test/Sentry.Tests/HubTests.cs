@@ -1016,5 +1016,64 @@ namespace NotSentry.Tests
             // Assert
             client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
         }
+
+        private class ErroredMessageFixture
+        {
+            public const SpanId SpanId = SpanId.Create();
+            public const SentryId TraceId = SentryId.Create();
+            public const SpanId ParentId = SpanId.Create();
+            public Scope Scope { get; }
+            public ISpan Span { get; }
+            public ITransaction Transaction { get; }
+            public IInternalScopeManager ScopeManager { get; }
+
+            public ErroredMessageFixture()
+            {
+                Scope = new Scope();
+                Span = Substitute.For<ISpan>();
+                Transaction = Substitute.For<ITransaction>();
+                ScopeManager = Substitute.For<IInternalScopeManager>();
+
+                Scope.Transaction = Transaction;
+                Transaction.SpanId.Returns(ParentId);
+                Transaction.TraceId.Returns(TraceId);
+                Transaction.ParentSpanId.Returns(SpanId.Empty);
+                Span.SpanId.Returns(SpanId);
+                Span.TraceId.Returns(TraceId);
+                Span.ParentSpanId.Returns(parentId);
+
+                Transaction.Spans.Returns(new List<ISpan> { Span });
+                Transaction.GetLastActiveSpan().Returns(Span);
+                ScopeManager.GetCurrent().Returns(new KeyValuePair<Scope, ISentryClient>(Scope, Substitute.For<ISentryClient>()));
+            }
+
+            public Hub GetSut() => new Hub(new SentryOptions() { Dsn = DsnSamples.ValidDsnWithSecret }, scopeManager: scopeManager);
+        }
+
+        private readonly ErroredMessageFixture _fixture = new();
+
+        [Fact]
+        public void CaptureEvent_ErroredMessageWithoutException_ClosesCurrentSpan()
+        {
+            // Arrange
+            var span = _fixture.Span;
+            var hub = _fixture.GetSut();
+
+            var @event = new SentryEvent()
+            {
+                Message = "Errored message",
+                Level = SentryLevel.Error
+            };
+
+            // Act
+            hub.CaptureEvent(@event);
+
+            // Assert
+            Assert.Equal(_fixture.SpanId, @event.Contexts.Trace.SpanId);
+            Assert.Equal(_fixture.TraceId, @event.Contexts.Trace.TraceId);
+            Assert.Equal(_fixture.ParentId, @event.Contexts.Trace.ParentSpanId);
+            Assert.True(span.IsFinished);
+            Assert.Equal(SpanStatus.InternalError, span.Status);
+        }
     }
 }
