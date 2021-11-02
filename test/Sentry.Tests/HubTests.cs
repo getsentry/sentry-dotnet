@@ -1034,24 +1034,11 @@ namespace NotSentry.Tests
                 Span = Transaction.StartChild("Span", "Operation");
                 ScopeManager = Substitute.For<IInternalScopeManager>();
 
-
-
                 Scope.Transaction = Transaction;
                 SpanId = Span.SpanId;
                 ParentId = Transaction.SpanId;
                 TraceId = Transaction.TraceId;
-                /*
-                                Transaction.SpanId.Returns(ParentId);
-                                Transaction.TraceId.Returns(TraceId);
-                                Transaction.ParentSpanId.Returns(SpanId.Empty);
 
-                                Span.SpanId.Returns(SpanId);
-                                Span.TraceId.Returns(TraceId);
-                                Span.ParentSpanId.Returns(ParentId);
-
-                                Transaction.Spans.Returns(new List<ISpan> { Span });
-                                Transaction.GetLastActiveSpan().Returns(Span);
-                */
                 ScopeManager.GetCurrent().Returns(new KeyValuePair<Scope, ISentryClient>(Scope, Substitute.For<ISentryClient>()));
             }
 
