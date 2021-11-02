@@ -45,18 +45,13 @@ namespace Sentry.Internal.Http
         private readonly Task _worker;
         private string TryGetProcessSpecificCacheDirectoryPath(SentryOptions options)
         {
-            // In the future, this will most likely contain process ID
-            var dsnDirectory = options.TryGetDsnSpecificCacheDirectoryPath();
-            if (string.IsNullOrWhiteSpace(dsnDirectory))
-            {
-                throw new InvalidOperationException("Cache directory or DSN is not set.");
-            }
-
             if (!options.EnableProcessIsolationForCaching)
             {
-                return dsnDirectory;
+                return _dsnCacheDirectoryPath;
             }
-            return Path.Combine(dsnDirectory, _processInfo.GetCurrentProcessId().ToString());
+
+            return Path.Combine(_dsnCacheDirectoryPath, _processInfo.GetCurrentProcessId().ToString());
+
         }
 
         public CachingTransport(ITransport innerTransport, SentryOptions options, IActiveProcessInfo? processInfo = null, IFileSystem? fileSystem = null)
@@ -69,10 +64,9 @@ namespace Sentry.Internal.Http
             _keepCount = _options.MaxCacheItems >= 1
                 ? _options.MaxCacheItems - 1
                 : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
-            _dsnCacheDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath() ??
-                                     throw new InvalidOperationException("Cache directory or DSN is not set.");
-            _isolatedCacheDirectoryPath =
-                TryGetProcessSpecificCacheDirectoryPath(options);
+            _dsnCacheDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath() ?? throw new InvalidOperationException("Cache directory or DSN is not set.");
+
+            _isolatedCacheDirectoryPath = TryGetProcessSpecificCacheDirectoryPath(options);
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingDirName);
 
@@ -133,12 +127,11 @@ namespace Sentry.Internal.Http
             catch (DirectoryNotFoundException)
             {
                 // No cache directories, that's fine
-                _options.DiagnosticLogger?.LogDebug("Cache directory doesn't exist yet. Not scanning for leftover cache files.");
+                _options.DiagnosticLogger?.LogDebug("Cache directory '{0}' doesn't exist yet. Not scanning for leftover cache files.", _dsnCacheDirectoryPath);
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Failed to scan cache directory for leftover files.", ex
-                );
+                _options.DiagnosticLogger?.LogError("Failed to scan cache directory '{0}' for leftover files.", ex, _isolatedCacheDirectoryPath);
 
             }
         }
