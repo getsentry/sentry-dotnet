@@ -13,7 +13,7 @@ namespace Sentry
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryOptionsExtensions
     {
-        private static DbInterceptionIntegration? _dbIntegration { get; set; }
+        private static DbInterceptionIntegration? DbIntegration { get; set; }
 
         /// <summary>
         /// Adds the entity framework integration.
@@ -34,8 +34,8 @@ namespace Sentry
                     .LogError("Failed to configure EF breadcrumbs. Make sure to init Sentry before EF.", e);
             }
 
-            _dbIntegration = new DbInterceptionIntegration();
-            sentryOptions.AddIntegration(_dbIntegration);
+            DbIntegration = new DbInterceptionIntegration();
+            sentryOptions.AddIntegration(DbIntegration);
 
             sentryOptions.AddExceptionProcessor(new DbEntityValidationExceptionProcessor());
             // DbConcurrencyExceptionProcessor is untested due to problems with testing it, so it might not be production ready
@@ -49,6 +49,6 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableDbInterceptionIntegration(this SentryOptions options)
-        => _dbIntegration?.Unregister();
+            => DbIntegration?.Unregister();
     }
 }

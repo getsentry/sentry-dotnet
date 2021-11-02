@@ -5,14 +5,14 @@ namespace Sentry.EntityFramework
 {
     internal class DbInterceptionIntegration : ISdkIntegration
     {
-        private IDbInterceptor? SqlInterceptor { get; set; }
+        private IDbInterceptor? _sqlInterceptor { get; set; }
 
         public void Register(IHub hub, SentryOptions options)
         {
-            SqlInterceptor = new SentryQueryPerformanceListener(hub, options);
-            DbInterception.Add(SqlInterceptor);
+            _sqlInterceptor = new SentryQueryPerformanceListener(hub, options);
+            DbInterception.Add(_sqlInterceptor);
         }
 
-        public void Unregister() => DbInterception.Remove(SqlInterceptor);
+        public void Unregister() => DbInterception.Remove(_sqlInterceptor);
     }
 }
