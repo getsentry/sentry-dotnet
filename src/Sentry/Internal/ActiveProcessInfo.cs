@@ -9,8 +9,12 @@ namespace Sentry.Internal
 
         public int GetCurrentProcessId()
         {
+#if NET5_0_OR_GREATER
+            return Environment.ProcessId;
+#else
             using var process = Process.GetCurrentProcess();
             return process.Id;
+#endif
         }
 
         public bool IsProcessActive(int processId)
