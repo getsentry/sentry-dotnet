@@ -25,14 +25,10 @@ namespace Sentry.Internal.Http
         public virtual void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
         public virtual IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
-        {
-            return Directory.EnumerateDirectories(path, searchPattern, searchOption);
-        }
+            => Directory.EnumerateDirectories(path, searchPattern, searchOption);
 
         public virtual IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
-        {
-            return Directory.EnumerateFiles(path, searchPattern, searchOption);
-        }
+            => Directory.EnumerateFiles(path, searchPattern, searchOption);
 
         public virtual bool DirectoryExists(string path) => Directory.Exists(path);
     }
