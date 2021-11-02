@@ -1019,31 +1019,39 @@ namespace NotSentry.Tests
 
         private class ErroredMessageFixture
         {
-            public SpanId SpanId = SpanId.Create();
-            public SentryId TraceId = SentryId.Create();
-            public SpanId ParentId = SpanId.Create();
+            public SpanId SpanId { get; }
+            public SentryId TraceId { get; }
+            public SpanId ParentId { get; }
             public Scope Scope { get; }
             public ISpan Span { get; }
-            public ITransaction Transaction { get; }
+            public TransactionTracer Transaction { get; }
             public IInternalScopeManager ScopeManager { get; }
 
             public ErroredMessageFixture()
             {
                 Scope = new Scope();
-                Span = Substitute.For<ISpan>();
-                Transaction = Substitute.For<ITransaction>();
+                Transaction = new TransactionTracer(Substitute.For<IHub>(), "Tracer", "Operation");
+                Span = Transaction.StartChild("Span", "Operation");
                 ScopeManager = Substitute.For<IInternalScopeManager>();
 
-                Scope.Transaction = Transaction;
-                Transaction.SpanId.Returns(ParentId);
-                Transaction.TraceId.Returns(TraceId);
-                Transaction.ParentSpanId.Returns(SpanId.Empty);
-                Span.SpanId.Returns(SpanId);
-                Span.TraceId.Returns(TraceId);
-                Span.ParentSpanId.Returns(ParentId);
 
-                Transaction.Spans.Returns(new List<ISpan> { Span });
-                Transaction.GetLastActiveSpan().Returns(Span);
+
+                Scope.Transaction = Transaction;
+                SpanId = Span.SpanId;
+                ParentId = Transaction.SpanId;
+                TraceId = Transaction.TraceId;
+                /*
+                                Transaction.SpanId.Returns(ParentId);
+                                Transaction.TraceId.Returns(TraceId);
+                                Transaction.ParentSpanId.Returns(SpanId.Empty);
+
+                                Span.SpanId.Returns(SpanId);
+                                Span.TraceId.Returns(TraceId);
+                                Span.ParentSpanId.Returns(ParentId);
+
+                                Transaction.Spans.Returns(new List<ISpan> { Span });
+                                Transaction.GetLastActiveSpan().Returns(Span);
+                */
                 ScopeManager.GetCurrent().Returns(new KeyValuePair<Scope, ISentryClient>(Scope, Substitute.For<ISentryClient>()));
             }
 
