@@ -291,7 +291,7 @@ namespace Sentry.Internal
                         // Can still be reset by the owner but lets consider it finished and errored for now.
                         linkedSpan.Finish(SpanStatus.InternalError);
                     }
-                    else if(!linkedSpan.IsFinished)
+                    else if (!linkedSpan.IsFinished)
                     {
                         linkedSpan.Finish();
                     }
