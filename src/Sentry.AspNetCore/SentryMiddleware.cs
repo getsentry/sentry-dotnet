@@ -56,11 +56,6 @@ namespace Sentry.AspNetCore
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _getHub = getHub ?? throw new ArgumentNullException(nameof(getHub));
             _options = options.Value;
-            var hub = _getHub();
-            foreach (var callback in _options.ConfigureScopeCallbacks)
-            {
-                hub.ConfigureScope(callback);
-            }
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
         }
@@ -104,7 +99,11 @@ namespace Sentry.AspNetCore
                     // In case of event, all data made available through the HTTP Context at the time of the
                     // event creation will be sent to Sentry
 
-                    scope.OnEvaluating += (_, _) => PopulateScope(context, scope);
+                    scope.OnEvaluating += (_, _) =>
+                    {
+                        SyncOptionsScope(hub);
+                        PopulateScope(context, scope);
+                    };
                 });
 
                 try
@@ -153,6 +152,14 @@ namespace Sentry.AspNetCore
 
                     _logger.LogInformation("Event '{id}' queued.", id);
                 }
+            }
+        }
+
+        private void SyncOptionsScope(IHub newHub)
+        {
+            foreach (var callback in _options.ConfigureScopeCallbacks)
+            {
+                newHub.ConfigureScope(callback);
             }
         }
 
