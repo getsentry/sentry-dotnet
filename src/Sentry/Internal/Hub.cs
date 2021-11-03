@@ -285,11 +285,16 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                     evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
-                }
-                else if (evt.IsErrored() && scope?.LastCreatedSpan() is { } lastSpan && lastSpan?.IsFinished == false)
-                {
-                    // Can still be reset by the owner but lets consider it finished and errored for now.
-                    lastSpan.Finish(SpanStatus.InternalError);
+
+                    if (!linkedSpan.IsFinished && evt.IsErrored())
+                    {
+                        // Can still be reset by the owner but lets consider it finished and errored for now.
+                        linkedSpan.Finish(SpanStatus.InternalError);
+                    }
+                    else if(!linkedSpan.IsFinished)
+                    {
+                        linkedSpan.Finish();
+                    }
                 }
 
                 actualScope.SessionUpdate = evt switch

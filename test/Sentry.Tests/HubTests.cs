@@ -285,6 +285,7 @@ namespace NotSentry.Tests
             var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             }, client);
             var scope = new Scope();
             scope.Transaction = hub.StartTransaction("transaction", "operation");
@@ -1047,8 +1048,10 @@ namespace NotSentry.Tests
 
         private readonly ErroredMessageFixture _fixture = new();
 
-        [Fact]
-        public void CaptureEvent_ErroredMessageWithoutException_ClosesCurrentSpan()
+        [Theory]
+        [InlineData(SentryLevel.Error)]
+        [InlineData(SentryLevel.Fatal)]
+        public void CaptureEvent_ErroredMessageWithoutException_ClosesCurrentSpan(SentryLevel level)
         {
             // Arrange
             var span = _fixture.Span;
@@ -1057,7 +1060,7 @@ namespace NotSentry.Tests
             var @event = new SentryEvent()
             {
                 Message = "Errored message",
-                Level = SentryLevel.Error
+                Level = level
             };
 
             // Act
@@ -1069,6 +1072,33 @@ namespace NotSentry.Tests
             Assert.Equal(_fixture.ParentId, @event.Contexts.Trace.ParentSpanId);
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.InternalError, span.Status);
+        }
+
+        [Theory]
+        [InlineData(SentryLevel.Warning)]
+        [InlineData(SentryLevel.Info)]
+        [InlineData(SentryLevel.Debug)]
+        public void CaptureEvent_InfoMessageWithoutException_ClosesCurrentSpan(SentryLevel level)
+        {
+            // Arrange
+            var span = _fixture.Span;
+            var hub = _fixture.GetSut();
+
+            var @event = new SentryEvent()
+            {
+                Message = "Errored message",
+                Level = level
+            };
+
+            // Act
+            hub.CaptureEvent(@event);
+
+            // Assert
+            Assert.Equal(_fixture.SpanId, @event.Contexts.Trace.SpanId);
+            Assert.Equal(_fixture.TraceId, @event.Contexts.Trace.TraceId);
+            Assert.Equal(_fixture.ParentId, @event.Contexts.Trace.ParentSpanId);
+            Assert.True(span.IsFinished);
+            Assert.Equal(SpanStatus.UnknownError, span.Status);
         }
     }
 }
