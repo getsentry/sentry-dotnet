@@ -22,7 +22,7 @@ namespace Sentry.Tests
                 var ready = new ManualResetEvent(false);
                 int counter = 0;
                 // Act
-                var tasks = Enumerable.Range(1, 4).Select((_) => Task.Run(() =>
+                var tasks = Enumerable.Range(1, 4).Select(_ => Task.Run(() =>
                 {
                     var threadId = Interlocked.Increment(ref counter);
 

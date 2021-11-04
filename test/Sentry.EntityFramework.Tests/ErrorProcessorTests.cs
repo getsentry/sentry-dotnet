@@ -32,7 +32,7 @@ namespace Sentry.EntityFramework.Tests
             {
                 DbConnection = Effort.DbConnectionFactory.CreateTransient();
                 DbContext = new TestDbContext(DbConnection, true);
-                SentryClient = new SentryClient(new SentryOptions()
+                SentryClient = new SentryClient(new SentryOptions
                 {
                     BeforeSend = _beforeSend,
                     Dsn = DsnSamples.ValidDsnWithoutSecret,
