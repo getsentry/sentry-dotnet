@@ -36,7 +36,7 @@ namespace Sentry.Protocol.Tests.Context
         [Fact]
         public void Clone_CopyValues()
         {
-            var sut = new OperatingSystem()
+            var sut = new OperatingSystem
             {
                 Name = "name",
                 KernelVersion = "KernelVersion",
