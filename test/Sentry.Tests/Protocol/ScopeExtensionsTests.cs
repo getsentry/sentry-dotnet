@@ -426,7 +426,7 @@ namespace Sentry.Tests.Protocol
             const string expectedMessage = "original Message";
             const string expectedCategory = "original Category";
             const string expectedType = "original Type";
-            var expectedData = new Dictionary<string, string>() { { "key", "val" } };
+            var expectedData = new Dictionary<string, string> { { "key", "val" } };
             const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
 
             var sut = _fixture.GetSut();
@@ -453,7 +453,7 @@ namespace Sentry.Tests.Protocol
             const string expectedMessage = "original Message";
             const string expectedCategory = "original Category";
             const string expectedType = "original Type";
-            var expectedData = new Dictionary<string, string>() { { "key", "val" } };
+            var expectedData = new Dictionary<string, string> { { "key", "val" } };
             const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
 
             var sut = _fixture.GetSut();
