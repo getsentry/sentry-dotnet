@@ -1,10 +1,20 @@
 # Changelog
 
-## Unreleased
+## 3.11.0
+
+### Features
+
+- Sentry Sessions status as Breadcrumbs ([#1263](https://github.com/getsentry/sentry-dotnet/pull/1263))
+- Enhance GCP Integraction with performance monitoring and revision number ([#1286](https://github.com/getsentry/sentry-dotnet/pull/1286))
+- Bump Ben.Demystifier to support .NET 6 ([#1290](https://github.com/getsentry/sentry-dotnet/pull/1290))
 
 ### Fixes
 
-- Ignore DiagnosticSource Integration if no Sampling available ([#1238](https://github.com/getsentry/sentry-dotnet/pull/1238)) 
+- ASP.NET Core: Data from Scope in options should be applied on each request ([#1270](https://github.com/getsentry/sentry-dotnet/pull/1270))
+- Add missing `ConfigureAwaits(false)` for `async using` ([#1276](https://github.com/getsentry/sentry-dotnet/pull/1276))
+- Fix missing handled tag when events are logged via an ASP.NET Core pipeline logger ([#1284](getsentry/sentry-dotnet/pull/1284))
+
+## 3.10.0
 
 ### Features
 
@@ -14,6 +24,8 @@
 
 - Events are now sent on Google Gloud Functions Integration ([#1249](https://github.com/getsentry/sentry-dotnet/pull/1249))
 - Cache envelope headers ([#1242](https://github.com/getsentry/sentry-dotnet/pull/1242))
+- Avoid replacing Transaction Name on ASP.NET Core by null or empty ([#1215](https://github.com/getsentry/sentry-dotnet/pull/1215))
+- Ignore DiagnosticSource Integration if no Sampling available ([#1238](https://github.com/getsentry/sentry-dotnet/pull/1238))
 
 ## 3.9.4
 

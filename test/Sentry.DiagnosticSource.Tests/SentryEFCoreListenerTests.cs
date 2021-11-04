@@ -10,6 +10,7 @@ namespace Sentry.DiagnosticSource.Tests
 {
     public class SentryEFCoreListenerTests
     {
+        internal const string EFQueryStartCompiling = SentryEFCoreListener.EFQueryStartCompiling;
         internal const string EFQueryCompiling = SentryEFCoreListener.EFQueryCompiling;
         internal const string EFQueryCompiled = SentryEFCoreListener.EFQueryCompiled;
         internal const string EFConnectionOpening = SentryEFCoreListener.EFConnectionOpening;
@@ -172,6 +173,27 @@ namespace Sentry.DiagnosticSource.Tests
                 Arg.Any<string>(),
                 Arg.Any<Exception>(),
                 Arg.Any<object[]>());
+        }
+        [Theory]
+        [InlineData(EFQueryStartCompiling)]
+        [InlineData(EFQueryCompiling)]
+        [InlineData(EFQueryCompiled)]
+        [InlineData(EFConnectionOpening)]
+        [InlineData(EFConnectionClosed)]
+        [InlineData(EFCommandExecuting)]
+        [InlineData(EFCommandFailed)]
+        [InlineData(EFCommandExecuted)]
+        public void OnNext_ConfigureScopeInvokedOnce(string key)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+
+            // Act
+            interceptor.OnNext(new(key, null));
+
+            // Assert
+            hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
         }
 
         [Fact]

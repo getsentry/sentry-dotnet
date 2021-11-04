@@ -48,9 +48,17 @@ namespace Sentry.Protocol.Envelopes
 
         private async Task SerializeHeaderAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            await using var writer = new Utf8JsonWriter(stream);
-            writer.WriteDictionaryValue(Header);
-            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            var writer = new Utf8JsonWriter(stream);
+
+#if NET461 || NETSTANDARD2_0
+            using (writer)
+#else
+            await using (writer.ConfigureAwait(false))
+#endif
+            {
+                writer.WriteDictionaryValue(Header);
+                await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         /// <inheritdoc />
@@ -72,27 +80,27 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() => Items.DisposeAll();
 
         // limited SDK information (no packages)
-        static IReadOnlyDictionary<string, string?> sdkHeader = new Dictionary<string, string?>(2, StringComparer.Ordinal)
+        private static readonly IReadOnlyDictionary<string, string?> SdkHeader = new Dictionary<string, string?>(2, StringComparer.Ordinal)
         {
             ["name"] = SdkVersion.Instance.Name,
             ["version"] = SdkVersion.Instance.Version
         };
 
-        static IReadOnlyDictionary<string, object?> defaultHeader = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        private static readonly IReadOnlyDictionary<string, object?> DefaultHeader = new Dictionary<string, object?>(1, StringComparer.Ordinal)
         {
-            ["sdk"] = sdkHeader
+            ["sdk"] = SdkHeader
         };
 
         private static IReadOnlyDictionary<string, object?> CreateHeader(SentryId? eventId = null)
         {
             if (eventId is null)
             {
-                return defaultHeader;
+                return DefaultHeader;
             }
 
             return new Dictionary<string, object?>(2, StringComparer.Ordinal)
             {
-                ["sdk"] = sdkHeader,
+                ["sdk"] = SdkHeader,
                 [EventIdKey] = eventId.Value.ToString()
             };
         }

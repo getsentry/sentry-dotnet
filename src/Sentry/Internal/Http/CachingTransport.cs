@@ -53,10 +53,10 @@ namespace Sentry.Internal.Http
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
 
-            _worker = Task.Run(CachedTransportBackgroundTask);
+            _worker = Task.Run(CachedTransportBackgroundTaskAsync);
         }
 
-        private async Task CachedTransportBackgroundTask()
+        private async Task CachedTransportBackgroundTaskAsync()
         {
             try
             {
@@ -156,22 +156,7 @@ namespace Sentry.Internal.Http
 
                 try
                 {
-#if !NET461 && !NETSTANDARD2_0
-                    await
-#endif
-                        using var envelopeFile = File.OpenRead(envelopeFilePath);
-                    using var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken)
-                        .ConfigureAwait(false);
-
-                    _options.LogDebug(
-                        "Sending cached envelope: {0}",
-                        envelope.TryGetEventId());
-
-                    await _innerTransport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
-
-                    _options.LogDebug(
-                        "Successfully sent cached envelope: {0}",
-                        envelope.TryGetEventId());
+                    await InnerProcessCacheAsync(cancellationToken, envelopeFilePath).ConfigureAwait(false);
                 }
                 catch (Exception ex) when (IsRetryable(ex))
                 {
@@ -195,6 +180,30 @@ namespace Sentry.Internal.Http
 
                 // Delete the envelope file and move on to the next one
                 File.Delete(envelopeFilePath);
+            }
+        }
+
+        private async Task InnerProcessCacheAsync(CancellationToken cancellationToken, string envelopeFilePath)
+        {
+            var envelopeFile = File.OpenRead(envelopeFilePath);
+#if NET461 || NETSTANDARD2_0
+            using (envelopeFile)
+#else
+            await using (envelopeFile.ConfigureAwait(false))
+#endif
+            {
+                using var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken)
+                    .ConfigureAwait(false);
+
+                _options.LogDebug(
+                    "Sending cached envelope: {0}",
+                    envelope.TryGetEventId());
+
+                await _innerTransport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+
+                _options.LogDebug(
+                    "Successfully sent cached envelope: {0}",
+                    envelope.TryGetEventId());
             }
         }
 
@@ -263,11 +272,12 @@ namespace Sentry.Internal.Http
             EnsureFreeSpaceInCache();
 
             Directory.CreateDirectory(_isolatedCacheDirectoryPath);
-
-#if !NET461 && !NETSTANDARD2_0
-            await
+            var stream = File.Create(envelopeFilePath);
+#if NET461 || NETSTANDARD2_0
+            using(stream)
+#else
+            await using (stream.ConfigureAwait(false))
 #endif
-                using (var stream = File.Create(envelopeFilePath))
             {
                 await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
             }
