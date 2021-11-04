@@ -27,7 +27,7 @@ namespace Sentry.Protocol.Tests.Context
         [Fact]
         public void Clone_CopyValues()
         {
-            var sut = new Browser()
+            var sut = new Browser
             {
                 Name = "name",
                 Version = "version"
