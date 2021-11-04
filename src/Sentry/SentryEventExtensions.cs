@@ -10,7 +10,7 @@ namespace Sentry
         internal static bool IsErrored(this SentryEvent @event)
             => @event.Level >= SentryLevel.Error ||
                @event.Exception is not null ||
-               @event.HasException?.Any() == true;
+               @event.SentryExceptions?.Any() == true;
 
     }
 }
