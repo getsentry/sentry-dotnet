@@ -34,7 +34,7 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void Clone_CopyValues()
         {
-            var sut = new User()
+            var sut = new User
             {
                 Id = "id",
                 Email = "emal@sentry.io",

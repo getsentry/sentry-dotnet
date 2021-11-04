@@ -263,7 +263,7 @@ namespace Sentry.NLog.Tests
 
             var logger = _fixture.GetLogger();
 
-            var evt = new LogEventInfo()
+            var evt = new LogEventInfo
             {
                 Message = DefaultMessage,
                 Level = nlogLevel

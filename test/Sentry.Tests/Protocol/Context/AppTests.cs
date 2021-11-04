@@ -32,7 +32,7 @@ namespace Sentry.Protocol.Tests.Context
         [Fact]
         public void Clone_CopyValues()
         {
-            var sut = new App()
+            var sut = new App
             {
                 Build = "build",
                 BuildType = "build type",
