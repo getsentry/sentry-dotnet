@@ -76,7 +76,11 @@ namespace Sentry.Tunnel
                         Method = HttpMethod.Post,
                         Content = new StreamContent(ms),
                     };
-                    request.Headers.Add("X-Forwarded-For", context.Connection?.RemoteIpAddress?.ToString());
+                    var clientIp = context.Connection?.RemoteIpAddress?.ToString();
+                    if (clientIp != null)
+                    {
+                        request.Headers.Add("X-Forwarded-For", context.Connection?.RemoteIpAddress?.ToString());
+                    }
                     var responseMessage = await client.SendAsync(request).ConfigureAwait(false);
                     // We send the response back to the client, whatever it was
                     context.Response.Headers["content-type"] = "application/json";
