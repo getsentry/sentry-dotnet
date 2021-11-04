@@ -13,7 +13,7 @@ namespace Sentry.Internal.Extensions
         /// The Json options with a preset of rules that will remove dangerous and problematic
         /// data from the serialized object.
         /// </summary>
-        public static JsonSerializerOptions? SerializerOption => _serializerOption ??= new JsonSerializerOptions()
+        public static JsonSerializerOptions? SerializerOption => _serializerOption ??= new JsonSerializerOptions
         {
             Converters = { new SentryJsonConverter() }
         };
