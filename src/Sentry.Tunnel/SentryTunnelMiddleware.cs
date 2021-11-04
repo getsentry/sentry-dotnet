@@ -19,8 +19,7 @@ namespace Sentry.Tunnel
     public class SentryTunnelMiddleware : IMiddleware
     {
         private readonly string[] _allowedHosts;
-        private string? _version;
-        private string Version => _version ??= (GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty);
+        private Lazy<string> Version => new(() => (GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty));
 
         /// <summary>
         /// Middleware that can forward Sentry envelopes.
@@ -46,7 +45,7 @@ namespace Sentry.Tunnel
 
             var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
             var client = httpClientFactory.CreateClient("SentryTunnel");
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version.Value));
             var ms = new MemoryStream();
             await context.Request.Body.CopyToAsync(ms).ConfigureAwait(false);
             ms.Position = 0;
@@ -71,10 +70,17 @@ namespace Sentry.Tunnel
                 {
                     var projectId = dsn.AbsolutePath.Trim('/');
                     ms.Position = 0;
-                    var responseMessage = await client.PostAsync($"https://{dsn.Host}/api/{projectId}/envelope/",
-                        new StreamContent(ms)).ConfigureAwait(false);
+                    var request = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri($"https://{dsn.Host}/api/{projectId}/envelope/"),
+                        Method = HttpMethod.Post,
+                        Content = new StreamContent(ms),
+                    };
+                    request.Headers.Add("X-Forwarded-For", context.Connection?.RemoteIpAddress?.ToString());
+                    var responseMessage = await client.SendAsync(request).ConfigureAwait(false);
+                    // We send the response back to the client, whatever it was
                     context.Response.Headers["content-type"] = "application/json";
-                    context.Response.StatusCode = StatusCodes.Status200OK;
+                    context.Response.StatusCode = (int)responseMessage.StatusCode;
                     await responseMessage.Content.CopyToAsync(context.Response.Body).ConfigureAwait(false);
                 }
             }
