@@ -284,8 +284,7 @@ namespace NotSentry.Tests
 
             var hub = new Hub(new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 1
+                Dsn = DsnSamples.ValidDsnWithSecret
             }, client);
             var scope = new Scope();
             scope.Transaction = hub.StartTransaction("transaction", "operation");
@@ -1018,87 +1017,56 @@ namespace NotSentry.Tests
             client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
         }
 
-        private class ErroredMessageFixture
-        {
-            public SpanId SpanId { get; }
-            public SentryId TraceId { get; }
-            public SpanId ParentId { get; }
-            public Scope Scope { get; }
-            public ISpan Span { get; }
-            public TransactionTracer Transaction { get; }
-            public IInternalScopeManager ScopeManager { get; }
-
-            public ErroredMessageFixture()
-            {
-                Scope = new Scope();
-                Transaction = new TransactionTracer(Substitute.For<IHub>(), "Tracer", "Operation");
-                Span = Transaction.StartChild("Span", "Operation");
-                ScopeManager = Substitute.For<IInternalScopeManager>();
-
-                Scope.Transaction = Transaction;
-                SpanId = Span.SpanId;
-                ParentId = Transaction.SpanId;
-                TraceId = Transaction.TraceId;
-
-                ScopeManager.GetCurrent().Returns(new KeyValuePair<Scope, ISentryClient>(Scope, Substitute.For<ISentryClient>()));
-            }
-
-            public Hub GetSut() => new Hub(new SentryOptions() { Dsn = DsnSamples.ValidDsnWithSecret }, scopeManager: ScopeManager);
-        }
-
-        private readonly ErroredMessageFixture _fixture = new();
-
         [Theory]
         [InlineData(SentryLevel.Error)]
         [InlineData(SentryLevel.Fatal)]
-        public void CaptureEvent_ErroredMessageWithoutException_ClosesCurrentSpan(SentryLevel level)
+        public void CaptureEvent_ErroredMessageWithoutException_ClosesCurrentSpanAsInternalError(SentryLevel level)
         {
             // Arrange
-            var span = _fixture.Span;
-            var hub = _fixture.GetSut();
+            var client = Substitute.For<ISentryClient>();
 
-            var @event = new SentryEvent()
+            var hub = new Hub(new SentryOptions
             {
-                Message = "Errored message",
-                Level = level
-            };
+                Dsn = DsnSamples.ValidDsnWithSecret
+            }, client);
+            var scope = new Scope();
+            scope.Transaction = hub.StartTransaction("transaction", "operation");
+
+            var child = scope.Transaction.StartChild("child", "child");
 
             // Act
-            hub.CaptureEvent(@event);
+            hub.CaptureEvent(new SentryEvent() { Message = "Logger error", Level = level }, scope);
 
             // Assert
-            Assert.Equal(_fixture.SpanId, @event.Contexts.Trace.SpanId);
-            Assert.Equal(_fixture.TraceId, @event.Contexts.Trace.TraceId);
-            Assert.Equal(_fixture.ParentId, @event.Contexts.Trace.ParentSpanId);
-            Assert.True(span.IsFinished);
-            Assert.Equal(SpanStatus.InternalError, span.Status);
+            Assert.Equal(SpanStatus.InternalError, child.Status);
+            Assert.True(child.IsFinished);
+
         }
 
         [Theory]
         [InlineData(SentryLevel.Warning)]
         [InlineData(SentryLevel.Info)]
         [InlineData(SentryLevel.Debug)]
-        public void CaptureEvent_InfoMessageWithoutException_ClosesCurrentSpan(SentryLevel level)
+        public void CaptureEvent_InfoMessageWithoutException_SpanNotChanged(SentryLevel level)
         {
             // Arrange
-            var span = _fixture.Span;
-            var hub = _fixture.GetSut();
+            var client = Substitute.For<ISentryClient>();
 
-            var @event = new SentryEvent()
+            var hub = new Hub(new SentryOptions
             {
-                Message = "Errored message",
-                Level = level
-            };
+                Dsn = DsnSamples.ValidDsnWithSecret
+            }, client);
+            var scope = new Scope();
+            scope.Transaction = hub.StartTransaction("transaction", "operation");
+
+            var child = scope.Transaction.StartChild("child", "child");
 
             // Act
-            hub.CaptureEvent(@event);
+            hub.CaptureEvent(new SentryEvent() { Message = "Logger error", Level = level }, scope);
 
             // Assert
-            Assert.Equal(_fixture.SpanId, @event.Contexts.Trace.SpanId);
-            Assert.Equal(_fixture.TraceId, @event.Contexts.Trace.TraceId);
-            Assert.Equal(_fixture.ParentId, @event.Contexts.Trace.ParentSpanId);
-            Assert.True(span.IsFinished);
-            Assert.Equal(SpanStatus.UnknownError, span.Status);
+            Assert.Null(child.Status);
+            Assert.False(child.IsFinished);
         }
     }
 }
