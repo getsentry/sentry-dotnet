@@ -8,8 +8,8 @@ namespace Sentry
     public static class SentryEventExtensions
     {
         internal static bool IsErrored(this SentryEvent @event)
-            => @event.Level >= SentryLevel.Error ||
-               @event.Exception is not null ||
-               @event.SentryExceptionValues?.Values.Any() == true;
+            => @event.Level >= SentryLevel.Error
+               || @event.Exception is not null
+               || @event.SentryExceptionValues?.Values.Any() == true;
     }
 }
