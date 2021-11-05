@@ -266,7 +266,7 @@ namespace Sentry.Tests
         public void AddBreadcrumb__AddBreadcrumb_RespectLimits(int initialCount, int maxBreadcrumbs, int expectedCount)
         {
             // Arrange
-            var scope = new Scope(new SentryOptions() { MaxBreadcrumbs = maxBreadcrumbs });
+            var scope = new Scope(new SentryOptions { MaxBreadcrumbs = maxBreadcrumbs });
 
             for (int i = 0; i < initialCount; i++)
             {
@@ -291,7 +291,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var observer = NSubstitute.Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions()
+            var scope = new Scope(new SentryOptions
             {
                 ScopeObserver = observer,
                 EnableScopeSync = observerEnable
@@ -326,7 +326,7 @@ namespace Sentry.Tests
         public void UserChanged_ObserverNull_Ignored(bool observerEnable)
         {
             // Arrange
-            var scope = new Scope(new SentryOptions() { EnableScopeSync = observerEnable });
+            var scope = new Scope(new SentryOptions { EnableScopeSync = observerEnable });
             Exception exception = null;
 
             // Act
@@ -350,7 +350,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions()
+            var scope = new Scope(new SentryOptions
             {
                 ScopeObserver = observer,
                 EnableScopeSync = observerEnable
@@ -373,7 +373,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions()
+            var scope = new Scope(new SentryOptions
             {
                 ScopeObserver = observer,
                 EnableScopeSync = observerEnable
@@ -395,7 +395,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions()
+            var scope = new Scope(new SentryOptions
             {
                 ScopeObserver = observer,
                 EnableScopeSync = observerEnable
@@ -418,7 +418,7 @@ namespace Sentry.Tests
         {
             // Arrange
             var observer = Substitute.For<IScopeObserver>();
-            var scope = new Scope(new SentryOptions()
+            var scope = new Scope(new SentryOptions
             {
                 ScopeObserver = observer,
                 EnableScopeSync = observerEnable

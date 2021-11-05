@@ -8,7 +8,7 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void Clone_CopyValues()
         {
-            var sut = new Request()
+            var sut = new Request
             {
                 Url = "https://sentry.io",
                 Method = "OPTIONS",
