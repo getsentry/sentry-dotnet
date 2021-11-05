@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.11.1
+
+### Fixes
+
+- Forward the IP of the client with whe tunnel middleware ([#1310](getsentry/sentry-dotnet/pull/1310))
+
 ## 3.11.0
 
 ### Features
