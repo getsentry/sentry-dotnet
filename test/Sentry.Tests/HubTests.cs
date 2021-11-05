@@ -1040,7 +1040,6 @@ namespace NotSentry.Tests
             // Assert
             Assert.Equal(SpanStatus.InternalError, child.Status);
             Assert.True(child.IsFinished);
-
         }
 
         [Theory]

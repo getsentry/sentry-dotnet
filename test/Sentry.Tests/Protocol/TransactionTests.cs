@@ -235,7 +235,7 @@ namespace Sentry.Tests.Protocol
         }
 
         [Fact]
-        public void Finish_UnfinishedSpansGetsFinished()
+        public void Finish_UnfinishedSpansGetsFinishedWithDeadlineStatus()
         {
             // Arrange
             var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
