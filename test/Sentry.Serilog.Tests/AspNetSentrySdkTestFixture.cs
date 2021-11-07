@@ -40,7 +40,7 @@ namespace Sentry.Serilog.Tests
 #if NET6_0_OR_GREATER
                     AllowStatusCode404Response = true,
 #endif
-                    ExceptionHandlingPath = "/error"                  
+                    ExceptionHandlingPath = "/error"
                 });
 #endif
             };
