@@ -35,7 +35,13 @@ namespace Sentry.Serilog.Tests
             ConfigureApp = app =>
             {
 #if NETCOREAPP3_1_OR_GREATER
-                app.UseExceptionHandler("/error");
+                app.UseExceptionHandler(new ExceptionHandlerOptions
+                {
+#if NET6_0_OR_GREATER
+                    AllowStatusCode404Response = true,
+#endif
+                    ExceptionHandlingPath = "/error"                  
+                });
 #endif
             };
 
