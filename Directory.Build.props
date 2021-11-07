@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.11.1</Version>
+    <Version>3.12.0-alpha.1</Version>
     <LangVersion>9</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets/Sentry.snk</AssemblyOriginatorKeyFile>
