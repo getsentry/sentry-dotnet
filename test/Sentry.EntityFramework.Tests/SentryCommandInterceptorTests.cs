@@ -42,7 +42,7 @@ namespace Sentry.EntityFramework.Tests
 
             var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
-            var command = new EffortCommand()
+            var command = new EffortCommand
             {
                 CommandText = expected.Query
             };
@@ -61,12 +61,12 @@ namespace Sentry.EntityFramework.Tests
 
             var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
-            var command = new EffortCommand()
+            var command = new EffortCommand
             {
                 CommandText = expected.Query
             };
 
-            interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int>() { Exception = new Exception() });
+            interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new Exception() });
             _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
         }
 
@@ -80,7 +80,7 @@ namespace Sentry.EntityFramework.Tests
 
             var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
-            var command = new EffortCommand()
+            var command = new EffortCommand
             {
                 CommandText = expected.Query
             };
@@ -99,12 +99,12 @@ namespace Sentry.EntityFramework.Tests
 
             var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
-            var command = new EffortCommand()
+            var command = new EffortCommand
             {
                 CommandText = expected.Query
             };
 
-            interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>() { Exception = new Exception() });
+            interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() });
             _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
         }
 
@@ -118,7 +118,7 @@ namespace Sentry.EntityFramework.Tests
 
             var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
-            var command = new EffortCommand()
+            var command = new EffortCommand
             {
                 CommandText = expected.Query
             };
@@ -137,12 +137,12 @@ namespace Sentry.EntityFramework.Tests
 
             var interceptor = SentryDatabaseLogging.UseBreadcrumbs(_fixture.QueryLogger, initOnce: false);
 
-            var command = new EffortCommand()
+            var command = new EffortCommand
             {
                 CommandText = expected.Query
             };
 
-            interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object>() { Exception = new Exception() });
+            interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new Exception() });
             _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
         }
 

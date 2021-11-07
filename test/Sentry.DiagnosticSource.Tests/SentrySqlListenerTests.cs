@@ -117,7 +117,7 @@ namespace Sentry.DiagnosticSource.Tests
             {
                 Logger = new InMemoryDiagnosticLogger();
 
-                Options = new SentryOptions()
+                Options = new SentryOptions
                 {
                     Debug = true,
                     DiagnosticLogger = Logger,
@@ -215,7 +215,7 @@ namespace Sentry.DiagnosticSource.Tests
             var commandSpan = _fixture.Spans.First(s => GetValidator(queryStartKey)(s));
 
             // Validate if all spans were finished.
-            Assert.All(_fixture.Spans, (span) =>
+            Assert.All(_fixture.Spans, span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);
@@ -264,7 +264,7 @@ namespace Sentry.DiagnosticSource.Tests
             var commandSpan = _fixture.Spans.First(s => GetValidator(queryStartKey)(s));
 
             // Validate if all spans were finished.
-            Assert.All(_fixture.Spans, (span) =>
+            Assert.All(_fixture.Spans, span =>
             {
                 Assert.True(span.IsFinished);
                 Assert.Equal(SpanStatus.Ok, span.Status);
@@ -356,17 +356,17 @@ namespace Sentry.DiagnosticSource.Tests
             var interceptor = new SentrySqlListener(hub, _fixture.Options);
             int maxItems = 8;
             var query = "SELECT * FROM ...";
-            var connectionsIds = Enumerable.Range(0, maxItems).Select((_) => Guid.NewGuid()).ToList();
-            var connectionOperationsIds = Enumerable.Range(0, maxItems).Select((_) => Guid.NewGuid()).ToList();
-            var connectionOperations2Ids = Enumerable.Range(0, maxItems).Select((_) => Guid.NewGuid()).ToList();
-            var queryOperationsIds = Enumerable.Range(0, maxItems).Select((_) => Guid.NewGuid()).ToList();
-            var queryOperations2Ids = Enumerable.Range(0, maxItems).Select((_) => Guid.NewGuid()).ToList();
+            var connectionsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
+            var connectionOperationsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
+            var connectionOperations2Ids = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
+            var queryOperationsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
+            var queryOperations2Ids = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
             var evt = new ManualResetEvent(false);
             var ready = new ManualResetEvent(false);
             int counter = 0;
 
             // Act
-            var taskList = Enumerable.Range(1, maxItems).Select((_) => Task.Run(() =>
+            var taskList = Enumerable.Range(1, maxItems).Select(_ => Task.Run(() =>
             {
                 var threadId = Interlocked.Increment(ref counter) - 1;
 
@@ -407,16 +407,16 @@ namespace Sentry.DiagnosticSource.Tests
             querySpans.Should().HaveCount(2 * maxItems);
 
             // Open Spans should not have any Connection key.
-            Assert.All(openSpans, (span) => Assert.False(span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey)));
-            Assert.All(closedSpans, (span) => Assert.Equal(SpanStatus.Ok, span.Status));
+            Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey)));
+            Assert.All(closedSpans, span => Assert.Equal(SpanStatus.Ok, span.Status));
             // Assert that all connectionIds will belong to a single connection Span and ParentId set to Trace.
-            Assert.All(connectionsIds, (connectionId) =>
+            Assert.All(connectionsIds, connectionId =>
             {
                 var connectionSpan = Assert.Single(closedConnectionSpans.Where(span => (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey] == connectionId));
                 Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
             });
             // Assert all Query spans have the correct ParentId Set and not the Transaction Id.
-            Assert.All(querySpans, (querySpan) =>
+            Assert.All(querySpans, querySpan =>
             {
                 Assert.True(querySpan.IsFinished);
                 var connectionId = (Guid)querySpan.Extra[SentrySqlListener.ConnectionExtraKey];
