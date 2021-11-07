@@ -1,4 +1,5 @@
 using System;
+using Sentry.Internal;
 using Xunit;
 
 namespace Sentry.Tests.Protocol
@@ -271,8 +272,6 @@ namespace Sentry.Tests.Protocol
         [Fact]
         public void IsDisabled_EmptyStringDsn_True() => Assert.True(Dsn.IsDisabled(string.Empty));
 
-        private static readonly Random Rnd = new();
-
         private class DsnTestCase
         {
             public string Scheme { get; set; } = "https";
@@ -280,8 +279,8 @@ namespace Sentry.Tests.Protocol
             public string SecretKey { get; set; } = Guid.NewGuid().ToString("N");
             public string Host { get; set; } = "sentry.io";
             public string Path { get; set; } = "/some-path";
-            public int? Port { get; set; } = Rnd.Next(1, 65535);
-            public string ProjectId { get; set; } = Rnd.Next().ToString();
+            public int? Port { get; set; } = SynchronizedRandom.Next(1, 65535);
+            public string ProjectId { get; set; } = SynchronizedRandom.Next().ToString();
 
             public string CredentialSeparator { private get; set; } = ":";
             public string UserInfoSeparator { private get; set; } = "@";

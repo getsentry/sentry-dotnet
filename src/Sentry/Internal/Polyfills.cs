@@ -57,7 +57,7 @@ namespace System.Collections.Generic
 }
 #endif
 
-#if !NET5_0
+#if !NET5_0_OR_GREATER
 internal static partial class PolyfillExtensions
 {
     public static Task<string> ReadAsStringAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
