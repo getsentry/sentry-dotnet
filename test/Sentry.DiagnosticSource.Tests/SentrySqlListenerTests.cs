@@ -278,6 +278,44 @@ namespace Sentry.DiagnosticSource.Tests
 
 
         [Theory]
+        [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand)]
+        [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand)]
+        public void OnNext_TwoConnectionSpansWithSameId_FinishBothWithOk(string connectionBeforeKey, string connectionUpdate, string connctionClose)
+        {
+            // Arrange
+            var hub = _fixture.Hub;
+            var interceptor = new SentrySqlListener(hub, new SentryOptions());
+            var connectionId = Guid.NewGuid();
+            var connectionOperationIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+
+            // Act
+            for (var i = 0; i < 2; i++)
+            {
+                interceptor.OnNext(
+                    new(connectionBeforeKey,
+                    new { OperationId = connectionOperationIds[i] }));
+                // Connection Id is set.
+                interceptor.OnNext(
+                    new(connectionUpdate,
+                    new { OperationId = connectionOperationIds[i], ConnectionId = connectionId }));
+                interceptor.OnNext(
+                    new(connctionClose,
+                     new { OperationId = connectionOperationIds[i], ConnectionId = connectionId }));
+            }
+
+            // Assert
+            _fixture.Spans.Should().HaveCount(2);
+
+            // Validate if all spans were finished.
+            Assert.All(_fixture.Spans, span =>
+            {
+                Assert.True(span.IsFinished);
+                Assert.Equal(SpanStatus.Ok, span.Status);
+                Assert.Equal(connectionId, (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey]);
+            });
+        }
+
+        [Theory]
         [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand, SqlMicrosoftBeforeExecuteCommand, SqlMicrosoftAfterExecuteCommand)]
         [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand, SqlDataBeforeExecuteCommand, SqlDataAfterExecuteCommand)]
         public void OnNext_ExecuteQueryCalledBeforeConnectionId_ExecuteParentIsConnectionSpan(string connectionBeforeKey, string connectionUpdate, string connctionClose, string executeBeforeKey, string executeAfterKey)
