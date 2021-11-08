@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 3.12.0-alpha.1
+
+### Features
+
+- .NET 6 specific targets ([#939](https://github.com/getsentry/sentry-dotnet/pull/939))
+
+## 3.11.1
+
+### Fixes
+
+- Forward the IP of the client with whe tunnel middleware ([#1310](getsentry/sentry-dotnet/pull/1310))
+
+## 3.11.0
 
 ### Features
 
@@ -11,8 +23,10 @@
 
 ### Fixes
 
+- ASP.NET Core: Data from Scope in options should be applied on each request ([#1270](https://github.com/getsentry/sentry-dotnet/pull/1270))
 - Add missing `ConfigureAwaits(false)` for `async using` ([#1276](https://github.com/getsentry/sentry-dotnet/pull/1276))
- 
+- Fix missing handled tag when events are logged via an ASP.NET Core pipeline logger ([#1284](getsentry/sentry-dotnet/pull/1284))
+
 ## 3.10.0
 
 ### Features

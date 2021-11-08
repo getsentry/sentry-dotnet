@@ -54,7 +54,7 @@ namespace Sentry.Protocol.Tests.Context
         [Fact]
         public void Clone_CopyValues()
         {
-            var sut = new Gpu()
+            var sut = new Gpu
             {
                 Name = "Sentry.Test.Gpu",
                 Id = 123,
