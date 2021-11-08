@@ -275,7 +275,6 @@ namespace Sentry.Internal.Http
                 (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
                 $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
 
-
             return new HttpRequestMessage
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
