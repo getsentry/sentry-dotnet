@@ -277,7 +277,7 @@ namespace NotSentry.Tests
         }
 
         [Fact]
-        public void CaptureEvent_ExceptionWithOpenSpan_SpanFinishedWithInternalError()
+        public void CaptureEvent_ExceptionWithOpenSpan_SpanLinkedToEventContext()
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
@@ -285,18 +285,21 @@ namespace NotSentry.Tests
             var hub = new Hub(new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
             }, client);
             var scope = new Scope();
+            var evt = new SentryEvent(new Exception());
             scope.Transaction = hub.StartTransaction("transaction", "operation");
 
             var child = scope.Transaction.StartChild("child", "child");
 
             // Act
-            hub.CaptureEvent(new SentryEvent(new Exception()), scope);
+            hub.CaptureEvent(evt, scope);
 
             // Assert
-            Assert.Equal(SpanStatus.InternalError, child.Status);
-            Assert.True(child.IsFinished);
+            Assert.Equal(child.SpanId, evt.Contexts.Trace.SpanId);
+            Assert.Equal(child.TraceId, evt.Contexts.Trace.TraceId);
+            Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
         }
 
         [Fact]
@@ -1015,6 +1018,43 @@ namespace NotSentry.Tests
 
             // Assert
             client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+        }
+
+        [Theory]
+        [InlineData(SentryLevel.Warning)]
+        [InlineData(SentryLevel.Info)]
+        [InlineData(SentryLevel.Debug)]
+        [InlineData(SentryLevel.Error)]
+        [InlineData(SentryLevel.Fatal)]
+        public void CaptureEvent_MessageOnlyEvent_SpanLinkedToEventContext(SentryLevel level)
+        {
+            // Arrange
+            var client = Substitute.For<ISentryClient>();
+
+            var hub = new Hub(new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                TracesSampleRate = 1
+            }, client);
+            var scope = new Scope();
+            var evt = new SentryEvent()
+            {
+                Message = "Logger error",
+                Level = level
+            };
+            scope.Transaction = hub.StartTransaction("transaction", "operation");
+
+            var child = scope.Transaction.StartChild("child", "child");
+
+            // Act
+            hub.CaptureEvent(evt, scope);
+
+            // Assert
+            Assert.Equal(child.SpanId, evt.Contexts.Trace.SpanId);
+            Assert.Equal(child.TraceId, evt.Contexts.Trace.TraceId);
+            Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
+            Assert.False(child.IsFinished);
+            Assert.Null(child.Status);
         }
     }
 }

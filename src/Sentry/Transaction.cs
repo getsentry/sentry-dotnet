@@ -225,7 +225,7 @@ namespace Sentry
             _breadcrumbs = tracer.Breadcrumbs.ToList();
             _extra = tracer.Extra.ToDictionary();
             _tags = tracer.Tags.ToDictionary();
-            _spans = tracer.Spans.Where(s => s.IsFinished).Select(s => new Span(s)).ToArray();
+            _spans = tracer.Spans.Select(s => new Span(s)).ToArray();
         }
 
         /// <inheritdoc />

@@ -6,6 +6,22 @@
 
 - Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
 
+### Fixes
+
+- Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
+
+## 3.12.0-alpha.1
+
+### Features
+
+- .NET 6 specific targets ([#939](https://github.com/getsentry/sentry-dotnet/pull/939))
+
+## 3.11.1
+
+### Fixes
+
+- Forward the IP of the client with whe tunnel middleware ([#1310](getsentry/sentry-dotnet/pull/1310))
+
 ## 3.11.0
 
 ### Features

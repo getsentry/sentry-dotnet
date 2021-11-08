@@ -327,9 +327,9 @@ namespace Sentry.AspNetCore.Tests
             // Arrange
             const string controller = "Ctrl";
             const string action = "Actn";
-            var routeFeature = new RoutingFeature()
+            var routeFeature = new RoutingFeature
             {
-                RouteData = new RouteData() { Values = { { "controller", controller }, { "action", action }, } }
+                RouteData = new RouteData { Values = { { "controller", controller }, { "action", action }, } }
             };
             var features = new FeatureCollection();
             features.Set<IRoutingFeature>(routeFeature);
