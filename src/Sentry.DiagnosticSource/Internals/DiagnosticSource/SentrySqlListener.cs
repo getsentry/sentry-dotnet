@@ -177,19 +177,14 @@ namespace Sentry.Internals.DiagnosticSource
             => scope.Transaction?.Spans.FirstOrDefault(span => TryGetOperationId(span) == operationId);
 
         private void UpdateConnectionSpan(Guid operationId, Guid connectionId)
-        {
-            _hub.ConfigureScope(scope =>
+            => _hub.ConfigureScope(scope =>
             {
-                // We may have multiple Spans with different Operations for the same connection.
-                // So lets set the connection Id only if there are no connection spans with the same connectionId.
                 var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection").ToList();
-                if (/*connectionSpans?.Any(span => TryGetConnectionId(span) == connectionId) is false &&*/
-                    connectionSpans?.FirstOrDefault(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } span)
+                if (connectionSpans?.FirstOrDefault(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } span)
                 {
                     SetConnectionId(span, connectionId);
                 }
             });
-        }
 
         public void OnCompleted() { }
 
