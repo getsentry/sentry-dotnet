@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -488,6 +489,25 @@ namespace Sentry.Tests.Internals.Http
 
             // Assert
             authHeader.Should().NotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public void CreateRequest_AuthHeader_IncludesVersion()
+        {
+            // Arrange
+            var httpTransport = new HttpTransport(
+                new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+                new HttpClient());
+
+            var envelope = Envelope.FromEvent(new SentryEvent());
+
+            // Act
+            using var request = httpTransport.CreateRequest(envelope);
+            var authHeader = request.Headers.GetValues("X-Sentry-Auth").FirstOrDefault();
+
+            // Assert
+            var versionString = Regex.Match(authHeader, @"sentry_client=(\S+),").Groups[1].Value;
+            versionString.Should().Be($"{SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}");
         }
 
         [Fact]

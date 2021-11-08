@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -259,6 +260,22 @@ namespace Sentry.Internal.Http
             }
         }
 
+        private string BuildAuthHeader(Dsn dsn)
+        {
+            var builder = new StringBuilder(100)
+                .AppendFormat("Sentry")
+                .AppendFormat(" sentry_key={0}", dsn.PublicKey)
+                .AppendFormat(", sentry_version={0}", _options.SentryVersion)
+                .AppendFormat(", sentry_client={0}/{1}", SdkVersion.Instance.Name, SdkVersion.Instance.Version)
+                .AppendFormat(", sentry_timestamp={0}", _clock.GetUtcNow().ToUnixTimeSeconds());
+
+            if (dsn.SecretKey is { } secretKey)
+            {
+                builder.AppendFormat(", sentry_secret={0}", secretKey);
+            }
+            return builder.ToString();
+        }
+
         internal HttpRequestMessage CreateRequest(Envelope envelope)
         {
             if (string.IsNullOrWhiteSpace(_options.Dsn))
@@ -267,13 +284,7 @@ namespace Sentry.Internal.Http
             }
 
             var dsn = Dsn.Parse(_options.Dsn);
-
-            var authHeader =
-                $"Sentry sentry_version={_options.SentryVersion}," +
-                $"sentry_client={_options.ClientVersion}," +
-                $"sentry_key={dsn.PublicKey}," +
-                (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
-                $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
+            var authHeader = BuildAuthHeader(dsn);
 
             return new HttpRequestMessage
             {
