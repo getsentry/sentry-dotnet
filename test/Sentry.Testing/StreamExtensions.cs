@@ -2,13 +2,12 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Sentry.Internal;
 
 namespace Sentry.Testing
 {
     public static class StreamExtensions
     {
-        private static readonly Random _random = new();
-
         public static async Task FillWithRandomBytesAsync(this Stream stream, long length)
         {
             var remainingLength = length;
@@ -16,7 +15,7 @@ namespace Sentry.Testing
 
             while (remainingLength > 0)
             {
-                _random.NextBytes(buffer);
+                SynchronizedRandom.NextBytes(buffer);
 
                 var bytesToCopy = (int)Math.Min(remainingLength, buffer.Length);
                 await stream.WriteAsync(buffer, 0, bytesToCopy);
