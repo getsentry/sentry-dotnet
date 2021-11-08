@@ -1026,7 +1026,7 @@ namespace NotSentry.Tests
         [InlineData(SentryLevel.Debug)]
         [InlineData(SentryLevel.Error)]
         [InlineData(SentryLevel.Fatal)]
-       public void CaptureEvent_MessageOnlyEvent_SpanLinkedToEventContext(SentryLevel level)
+        public void CaptureEvent_MessageOnlyEvent_SpanLinkedToEventContext(SentryLevel level)
         {
             // Arrange
             var client = Substitute.For<ISentryClient>();
