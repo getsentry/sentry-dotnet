@@ -4,15 +4,14 @@ using Sentry.Tests;
 using VerifyXunit;
 using Xunit;
 
-namespace Sentry.Google.Cloud.Functions.Tests
+namespace Sentry.Google.Cloud.Functions.Tests;
+
+[UsesVerify]
+public class ApiApprovalTests
 {
-    [UsesVerify]
-    public class ApiApprovalTests
+    [Fact]
+    public Task Run()
     {
-        [Fact]
-        public Task Run()
-        {
-            return typeof(SentryStartup).Assembly.CheckApproval();
-        }
+        return typeof(SentryStartup).Assembly.CheckApproval();
     }
 }

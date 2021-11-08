@@ -7,23 +7,23 @@ using Xunit.Sdk;
 #endif
 using Xunit;
 
-namespace Sentry.Tests
-{
-    public class SentryOptionsTests
-    {
-        [Fact]
-        public void DecompressionMethods_ByDefault_AllBitsSet()
-        {
-            var sut = new SentryOptions();
-            Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
-        }
+namespace Sentry.Tests;
 
-        [Fact]
-        public void RequestBodyCompressionLevel_ByDefault_Optimal()
-        {
-            var sut = new SentryOptions();
-            Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
-        }
+public class SentryOptionsTests
+{
+    [Fact]
+    public void DecompressionMethods_ByDefault_AllBitsSet()
+    {
+        var sut = new SentryOptions();
+        Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
+    }
+
+    [Fact]
+    public void RequestBodyCompressionLevel_ByDefault_Optimal()
+    {
+        var sut = new SentryOptions();
+        Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
+    }
 
 #if NET461
         [SkippableFact(typeof(IsTypeException))]
@@ -44,5 +44,4 @@ namespace Sentry.Tests
             Assert.IsNotType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
         }
 #endif
-    }
 }
