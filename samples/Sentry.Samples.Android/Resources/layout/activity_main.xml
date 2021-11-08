@@ -55,6 +55,19 @@
                     android:layout_marginTop="10dp"/>
 
             </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+            <Button android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/crashInC"
+                    android:text="@string/crash_in_c"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="10dp"/>
+
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

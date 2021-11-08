@@ -16,5 +16,10 @@
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <TransformFile Include="Kotlin/Metadata.xml" />
     <AndroidLibrary Include="Kotlin/buggy.jar" />
+    <!-- TODO Clarify: Only arm64-v8a gets loaded without the reference here? -->
+    <!-- <AndroidNativeLibrary Include="C/arm64-v8a/libbuggy.so" /> -->
+    <AndroidNativeLibrary Include="C/x86/libbuggy.so" />
+    <AndroidNativeLibrary Include="C/x86_64/libbuggy.so" />
+    <AndroidNativeLibrary Include="C/armeabi-v7a/libbuggy.so" />
   </ItemGroup>
 </Project>

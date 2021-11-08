@@ -1,10 +1,13 @@
 using Sentry.Samples.Android.Kotlin;
+using System.Runtime.InteropServices;
 
 namespace Sentry.Samples.Android
 {
     [Activity(Label = "@string/app_name", MainLauncher = true)]
     public class MainActivity : Activity
     {
+        // public MainActivity() => global::Java.Lang.JavaSystem.LoadLibrary("buggy");
+
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             SentrySdk.Init(this, o =>
@@ -36,6 +39,11 @@ namespace Sentry.Samples.Android
             throwKotlinException.Click += (s, a) => Buggy.Throw();
             var throwKotlinExceptionBackgroundThread = (Button)base.FindViewById(Resource.Id.throwKotlinExceptionBackgroundThread)!;
             throwKotlinExceptionBackgroundThread.Click += (s, a) => Buggy.ThrowOnBackgroundThread();
+            var crashInC = (Button)base.FindViewById(Resource.Id.crashInC)!;
+            crashInC.Click += (s, a) => CrashInC();
         }
+
+        [DllImport("libbuggy.so", EntryPoint="crash_in_c")]
+        private static extern void CrashInC();
     }
 }
