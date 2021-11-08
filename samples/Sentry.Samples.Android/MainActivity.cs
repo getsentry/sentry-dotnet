@@ -1,5 +1,5 @@
-using Sentry.Samples.Android.Kotlin;
 using System.Runtime.InteropServices;
+using Sentry.Samples.Android.Kotlin;
 
 namespace Sentry.Samples.Android
 {
@@ -43,7 +43,7 @@ namespace Sentry.Samples.Android
             crashInC.Click += (s, a) => CrashInC();
         }
 
-        [DllImport("libbuggy.so", EntryPoint="crash_in_c")]
+        [DllImport("libbuggy.so", EntryPoint = "crash_in_c")]
         private static extern void CrashInC();
     }
 }
