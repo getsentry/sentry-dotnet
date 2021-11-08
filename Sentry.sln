@@ -46,9 +46,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Benchmarks", "benchmarks\Sentry.Benchmarks\Sentry.Benchmarks.csproj", "{BD43F598-5B20-477D-88C9-55B186542179}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{97EF834D-6BEB-45E8-B69A-1F9B7815B8B4}"
-	ProjectSection(SolutionItems) = preProject
-		benchmarks\Directory.Build.props = benchmarks\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore", "src\Sentry.AspNetCore\Sentry.AspNetCore.csproj", "{EBD057E5-771A-47EC-90E3-3C2625426A05}"
 EndProject
