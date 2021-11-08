@@ -402,28 +402,31 @@ namespace Sentry.DiagnosticSource.Tests
             var closedConnectionSpans = connectionSpans.Where(span => span.IsFinished);
             var querySpans = _fixture.Spans.Where(span => span.Operation is "db.query");
 
-            // We have two connections per thread, but since both share the same ConnectionId, only one will be closed.
-            closedConnectionSpans.Should().HaveCount(maxItems);
+            // We have two connections per thread, despite having the same ConnectionId, both will be closed.
+            closedConnectionSpans.Should().HaveCount(2 * maxItems);
             querySpans.Should().HaveCount(2 * maxItems);
 
             // Open Spans should not have any Connection key.
             Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey)));
             Assert.All(closedSpans, span => Assert.Equal(SpanStatus.Ok, span.Status));
-            // Assert that all connectionIds will belong to a single connection Span and ParentId set to Trace.
-            Assert.All(connectionsIds, connectionId =>
+
+            // Assert that all connectionIds is set and ParentId set to Trace.
+            Assert.All(closedConnectionSpans, connectionSpan =>
             {
-                var connectionSpan = Assert.Single(closedConnectionSpans.Where(span => (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey] == connectionId));
+                Assert.NotNull(connectionSpan.Extra[SentrySqlListener.ConnectionExtraKey]);
+                Assert.NotNull(connectionSpan.Extra[SentrySqlListener.OperationExtraKey]);
                 Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
             });
+
             // Assert all Query spans have the correct ParentId Set and not the Transaction Id.
             Assert.All(querySpans, querySpan =>
             {
                 Assert.True(querySpan.IsFinished);
                 var connectionId = (Guid)querySpan.Extra[SentrySqlListener.ConnectionExtraKey];
-                var connectionSpan = connectionSpans.Where(span => span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey) && (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey] == connectionId);
-                Assert.Single(connectionSpan);
+                var connectionSpan = connectionSpans.First(span => span.SpanId == querySpan.ParentSpanId);
+
                 Assert.NotEqual(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
-                Assert.Equal(connectionSpan.First().SpanId, querySpan.ParentSpanId);
+                Assert.Equal((Guid)connectionSpan.Extra[SentrySqlListener.ConnectionExtraKey], connectionId);
             });
 
             _fixture.Logger.Entries.Should().BeEmpty();

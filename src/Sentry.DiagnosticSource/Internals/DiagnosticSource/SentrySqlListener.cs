@@ -171,7 +171,7 @@ namespace Sentry.Internals.DiagnosticSource
             => parent?.StartChild(operation, description);
 
         private ISpan? TryGetConnectionSpan(Scope scope, Guid connectionId)
-            => scope.Transaction?.Spans.FirstOrDefault(span => span.Operation is "db.connection" && TryGetConnectionId(span) == connectionId);
+            => scope.Transaction?.Spans.FirstOrDefault(span => !span.IsFinished && span.Operation is "db.connection" && TryGetConnectionId(span) == connectionId);
 
         private ISpan? TryGetQuerySpan(Scope scope, Guid operationId)
             => scope.Transaction?.Spans.FirstOrDefault(span => TryGetOperationId(span) == operationId);
@@ -183,8 +183,8 @@ namespace Sentry.Internals.DiagnosticSource
                 // We may have multiple Spans with different Operations for the same connection.
                 // So lets set the connection Id only if there are no connection spans with the same connectionId.
                 var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection").ToList();
-                if (connectionSpans?.Any(span => TryGetConnectionId(span) == connectionId) is false &&
-                    connectionSpans.FirstOrDefault(span => TryGetOperationId(span) == operationId) is { } span)
+                if (/*connectionSpans?.Any(span => TryGetConnectionId(span) == connectionId) is false &&*/
+                    connectionSpans?.FirstOrDefault(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } span)
                 {
                     SetConnectionId(span, connectionId);
                 }
