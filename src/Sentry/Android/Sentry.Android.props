@@ -5,7 +5,7 @@
     <!-- BG8604 Results in a missing API and for as long as we don't need that (and all Java/Android SDK is internal to this lib), it just doesn't matter: -->
     <NoWarn>$(NoWarn);BG8604</NoWarn>
     <SentryAndroidSdkVersion>5.3.0</SentryAndroidSdkVersion>
-    <AndroidLibsDirectory>$(MSBuildThisFileDirectory)../../libs/Android/</AndroidLibsDirectory>
+    <AndroidLibsDirectory>$(MSBuildProjectDirectory)/../../libs/Android/</AndroidLibsDirectory>
     <!-- Should be built in: https://docs.microsoft.com/en-us/dotnet/standard/frameworks#how-to-specify-a-target-framework but isn't available on .NET 6 RC2 -->
     <DefineConstants>$(DefineConstants);NET6_0_ANDROID_OR_GREATER</DefineConstants>
   </PropertyGroup>
@@ -19,9 +19,9 @@
     <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-core-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
   </ItemGroup>
-  <!-- <ItemGroup>
-    <Compile Include="**/*.android.cs" />
-  </ItemGroup> -->
+  <ItemGroup>
+    <Compile Include="Android/*.cs" />
+  </ItemGroup>
   <!-- Update Android SDK: Update SentryAndroidSdkVersion and run:
     dotnet msbuild src/Sentry /t:DownloadSentryAndroidSdk /p:TargetFramework=net6.0-android -->
   <Target Name="DownloadSentryAndroidSdk">

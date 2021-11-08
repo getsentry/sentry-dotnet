@@ -1,4 +1,3 @@
-#if NET6_0_ANDROID_OR_GREATER
 using System;
 using Android.OS;
 using Android.Runtime;
@@ -104,4 +103,3 @@ namespace Sentry
         }
     }
 }
-#endif
