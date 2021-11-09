@@ -26,7 +26,7 @@ public class TransactionTests
             "desc",
             SpanStatus.AlreadyExists,
             null, // sampling isn't serialized and getting FluentAssertions
-            // to ignore that on Spans and contexts isn't really straight forward
+                  // to ignore that on Spans and contexts isn't really straight forward
             true);
 
         var transaction = new TransactionTracer(DisabledHub.Instance, context)
