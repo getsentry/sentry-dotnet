@@ -1,5 +1,4 @@
 using Sentry.AspNetCore;
-using Sentry.Extensibility;
 
 namespace Sentry.Samples.AspNetCore5.Mvc;
 

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Sentry.Samples.AspNetCore3.Mvc.Models;
 

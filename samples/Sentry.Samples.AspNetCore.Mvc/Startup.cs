@@ -1,5 +1,3 @@
-using Sentry.Extensibility;
-
 namespace Samples.AspNetCore.Mvc;
 
 public class Startup
