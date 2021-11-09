@@ -1,14 +1,13 @@
 using Sentry.PlatformAbstractions;
 using Xunit;
 
-namespace Sentry.Tests.PlatformAbstractions
+namespace Sentry.Tests.PlatformAbstractions;
+
+public class RuntimeTests
 {
-    public class RuntimeTests
+    [Fact]
+    public void Current_Equal()
     {
-        [Fact]
-        public void Current_Equal()
-        {
-            Assert.Equal(Runtime.Current, Runtime.Current);
-        }
+        Assert.Equal(Runtime.Current, Runtime.Current);
     }
 }
