@@ -3,15 +3,14 @@ using Sentry.Tests;
 using VerifyXunit;
 using Xunit;
 
-namespace Sentry.AspNetCore.Grpc.Tests
+namespace Sentry.AspNetCore.Grpc.Tests;
+
+[UsesVerify]
+public class ApiApprovalTests
 {
-    [UsesVerify]
-    public class ApiApprovalTests
+    [Fact]
+    public Task Run()
     {
-        [Fact]
-        public Task Run()
-        {
-            return typeof(SentryGrpcInterceptor).Assembly.CheckApproval();
-        }
+        return typeof(SentryGrpcInterceptor).Assembly.CheckApproval();
     }
 }

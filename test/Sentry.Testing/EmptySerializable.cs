@@ -3,10 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Protocol.Envelopes;
 
-namespace Sentry.Testing
+namespace Sentry.Testing;
+
+public class EmptySerializable : ISerializable
 {
-    public class EmptySerializable : ISerializable
-    {
-        public Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    }
+    public Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

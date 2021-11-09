@@ -2,31 +2,30 @@ using System;
 using Sentry.Extensibility;
 using Xunit.Abstractions;
 
-namespace Sentry.Testing
+namespace Sentry.Testing;
+
+public class TestOutputDiagnosticLogger : IDiagnosticLogger
 {
-    public class TestOutputDiagnosticLogger : IDiagnosticLogger
+    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly SentryLevel _minimumLevel;
+
+    public TestOutputDiagnosticLogger(
+        ITestOutputHelper testOutputHelper,
+        SentryLevel minimumLevel = SentryLevel.Debug)
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-        private readonly SentryLevel _minimumLevel;
+        _testOutputHelper = testOutputHelper;
+        _minimumLevel = minimumLevel;
+    }
 
-        public TestOutputDiagnosticLogger(
-            ITestOutputHelper testOutputHelper,
-            SentryLevel minimumLevel = SentryLevel.Debug)
-        {
-            _testOutputHelper = testOutputHelper;
-            _minimumLevel = minimumLevel;
-        }
+    public bool IsEnabled(SentryLevel level) => level >= _minimumLevel;
 
-        public bool IsEnabled(SentryLevel level) => level >= _minimumLevel;
+    public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+    {
+        var formattedMessage = string.Format(message, args);
 
-        public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
-        {
-            var formattedMessage = string.Format(message, args);
-
-            _testOutputHelper.WriteLine($@"
+        _testOutputHelper.WriteLine($@"
 [{logLevel}]: {formattedMessage}
     Exception: {exception?.ToString() ?? "<none>"}
 ".Trim());
-        }
     }
 }

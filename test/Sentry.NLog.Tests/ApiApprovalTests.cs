@@ -3,15 +3,14 @@ using Sentry.Tests;
 using VerifyXunit;
 using Xunit;
 
-namespace Sentry.NLog.Tests
+namespace Sentry.NLog.Tests;
+
+[UsesVerify]
+public class ApiApprovalTests
 {
-    [UsesVerify]
-    public class ApiApprovalTests
+    [Fact]
+    public Task Run()
     {
-        [Fact]
-        public Task Run()
-        {
-            return typeof(SentryTarget).Assembly.CheckApproval();
-        }
+        return typeof(SentryTarget).Assembly.CheckApproval();
     }
 }
