@@ -3,6 +3,7 @@ using System.Net.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
+using System.Text.RegularExpressions;
 
 namespace Sentry.Tests.Internals.Http;
 
@@ -495,7 +496,7 @@ public class HttpTransportTests
 
         // Assert
         var versionString = Regex.Match(authHeader, @"sentry_client=(\S+),").Groups[1].Value;
-        Assert.True(versionString.Contains($"{SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}"));
+        Assert.Contains(versionString, $"{SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}");
     }
 
     [Fact]
