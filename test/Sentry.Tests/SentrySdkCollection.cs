@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Sentry.Tests;
 
 [CollectionDefinition(nameof(SentrySdkCollection))]

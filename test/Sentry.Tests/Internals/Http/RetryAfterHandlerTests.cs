@@ -2,11 +2,8 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using NSubstitute;
-using Sentry.Infrastructure;
 using Sentry.Internal.Http;
 using Sentry.Testing;
-using Xunit;
 using static System.Threading.CancellationToken;
 
 namespace Sentry.Tests.Internals.Http;

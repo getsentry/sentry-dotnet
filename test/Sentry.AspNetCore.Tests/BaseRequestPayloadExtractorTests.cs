@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using NSubstitute;
-using Sentry.Extensibility;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests;
 

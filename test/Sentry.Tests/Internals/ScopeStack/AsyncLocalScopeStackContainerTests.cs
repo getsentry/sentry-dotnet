@@ -1,7 +1,4 @@
-using FluentAssertions;
-using NSubstitute;
 using Sentry.Internal.ScopeStack;
-using Xunit;
 
 namespace Sentry.Tests.Internals.ScopeStack;
 

@@ -1,8 +1,5 @@
-using FluentAssertions;
 using Sentry.Internal.Http;
-using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests.Internals.Http;
 

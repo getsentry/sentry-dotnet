@@ -1,6 +1,3 @@
-using VerifyXunit;
-using Xunit;
-
 namespace Sentry.Tests;
 
 [UsesVerify]

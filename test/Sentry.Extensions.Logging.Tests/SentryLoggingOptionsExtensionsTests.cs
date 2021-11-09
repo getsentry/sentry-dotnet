@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggingOptionsExtensionsTests

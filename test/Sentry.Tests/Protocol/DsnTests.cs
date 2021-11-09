@@ -1,6 +1,3 @@
-using Sentry.Internal;
-using Xunit;
-
 namespace Sentry.Tests.Protocol;
 
 public class DsnTests

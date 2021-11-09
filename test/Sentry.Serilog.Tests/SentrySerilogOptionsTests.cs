@@ -1,5 +1,4 @@
 using Serilog.Events;
-using Xunit;
 
 namespace Sentry.Serilog.Tests;
 

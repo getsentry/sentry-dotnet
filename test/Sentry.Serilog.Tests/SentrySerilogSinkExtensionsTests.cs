@@ -3,7 +3,6 @@ using System.Net;
 using System.Text.Json;
 using Serilog;
 using Serilog.Events;
-using Xunit;
 
 namespace Sentry.Serilog.Tests;
 

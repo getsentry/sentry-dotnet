@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using NSubstitute;
-using Sentry.Extensibility;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests;
 

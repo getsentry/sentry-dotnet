@@ -1,5 +1,3 @@
-using Sentry.Extensibility;
-
 namespace Sentry.Testing;
 
 public class InMemoryDiagnosticLogger : IDiagnosticLogger

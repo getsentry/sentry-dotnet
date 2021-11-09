@@ -1,9 +1,4 @@
-using FluentAssertions;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Tests.Helpers;
-using Xunit;
 
 namespace Sentry.Tests.Protocol;
 

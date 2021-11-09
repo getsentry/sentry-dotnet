@@ -1,9 +1,4 @@
-using FluentAssertions;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests.Protocol.Envelopes;
 

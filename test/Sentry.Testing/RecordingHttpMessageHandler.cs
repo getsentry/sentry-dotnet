@@ -1,5 +1,4 @@
 using System.Net.Http;
-using Sentry.Internal.Extensions;
 
 namespace Sentry.Testing;
 

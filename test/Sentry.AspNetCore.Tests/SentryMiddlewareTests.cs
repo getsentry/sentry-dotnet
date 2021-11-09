@@ -8,11 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using NSubstitute.ReturnsExtensions;
-using Sentry.Extensibility;
-using Sentry.Protocol;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests;
 

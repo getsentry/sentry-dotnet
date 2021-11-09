@@ -1,6 +1,4 @@
 using Sentry.Tests;
-using VerifyXunit;
-using Xunit;
 
 namespace Sentry.Log4Net.Tests;
 

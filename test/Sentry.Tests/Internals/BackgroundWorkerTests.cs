@@ -1,10 +1,5 @@
 using System.Collections.Concurrent;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Sentry.Protocol.Envelopes;
-using Xunit;
 
 namespace Sentry.Tests.Internals;
 

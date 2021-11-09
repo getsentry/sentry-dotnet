@@ -1,11 +1,9 @@
 using System.IO.Compression;
 using System.Net;
 #if NET461
-using Sentry.Internal;
 using Sentry.PlatformAbstractions;
 using Xunit.Sdk;
 #endif
-using Xunit;
 
 namespace Sentry.Tests;
 

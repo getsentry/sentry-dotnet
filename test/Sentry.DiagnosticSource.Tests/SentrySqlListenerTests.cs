@@ -1,8 +1,5 @@
-using FluentAssertions;
-using NSubstitute;
 using Sentry.Internals.DiagnosticSource;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.DiagnosticSource.Tests;
 

@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Sentry.AspNetCore.Tests;
 
 [CollectionDefinition(nameof(AspNetSentrySdkTestFixture))]

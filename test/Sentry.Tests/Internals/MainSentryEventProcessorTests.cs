@@ -1,10 +1,5 @@
 using System.Globalization;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Sentry.Reflection;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests.Internals;
 

@@ -1,9 +1,3 @@
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Xunit;
-
 namespace Sentry.Tests.Internals;
 
 public class MainExceptionProcessorTests

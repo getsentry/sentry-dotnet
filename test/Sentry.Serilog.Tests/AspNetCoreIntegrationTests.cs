@@ -1,12 +1,10 @@
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Serilog.Tests;
 
 [Collection(nameof(SentrySdkCollection))]
 public class AspNetCoreIntegrationTests : AspNetSentrySdkTestFixture
 {
-
 #if NETCOREAPP3_1_OR_GREATER
     [Fact]
     public async Task UnhandledException_MarkedAsUnhandled()

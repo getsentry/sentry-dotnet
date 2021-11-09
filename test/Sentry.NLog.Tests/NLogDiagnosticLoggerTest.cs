@@ -1,6 +1,5 @@
 using NLog;
 using NLog.Common;
-using Xunit;
 
 namespace Sentry.NLog.Tests;
 

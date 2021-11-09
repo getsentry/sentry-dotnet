@@ -1,11 +1,6 @@
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Integrations;
-using Sentry.Internal;
 #if NET461
 using Sentry.PlatformAbstractions;
 #endif
-using Xunit;
 
 namespace Sentry.Tests;
 

@@ -1,5 +1,4 @@
 using Grpc.Core;
-using Xunit;
 
 namespace Sentry.AspNetCore.Grpc.Tests;
 

@@ -1,5 +1,3 @@
-using Sentry.Protocol.Envelopes;
-
 namespace Sentry.Testing;
 
 public class EmptySerializable : ISerializable

@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Sentry.Tests;
 
 public class DefaultSentryScopeStateProcessorTests

@@ -1,6 +1,4 @@
-using FluentAssertions;
 using Sentry.Internal.Http;
-using Xunit;
 
 namespace Sentry.Tests.Internals.Http;
 

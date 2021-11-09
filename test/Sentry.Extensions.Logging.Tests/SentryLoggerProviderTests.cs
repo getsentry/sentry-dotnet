@@ -1,7 +1,3 @@
-using NSubstitute;
-using Sentry.Infrastructure;
-using Xunit;
-
 namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggerProviderTests

@@ -1,6 +1,3 @@
-using FluentAssertions;
-using Xunit;
-
 namespace Sentry.Tests.Protocol;
 
 public class SentryTraceHeaderTests

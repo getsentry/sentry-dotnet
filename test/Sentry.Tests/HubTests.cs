@@ -1,13 +1,4 @@
-using FluentAssertions;
-using NSubstitute;
-using Sentry;
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Integrations;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Sentry.Protocol.Envelopes;
-using Xunit;
+
 
 // ReSharper disable once CheckNamespace
 // Tests code path which excludes frames with namespace Sentry

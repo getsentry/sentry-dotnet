@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using Sentry.Tests.Helpers;
-using Xunit;
 
 namespace Sentry.Tests.Protocol;
 

@@ -1,6 +1,3 @@
-using NSubstitute;
-using Xunit;
-
 namespace Sentry.EntityFramework.Tests;
 
 public class SentryQueryLoggerTests

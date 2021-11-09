@@ -1,8 +1,3 @@
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Xunit;
-
 namespace Sentry.Tests.Internals;
 
 public class ProcessInfoTests

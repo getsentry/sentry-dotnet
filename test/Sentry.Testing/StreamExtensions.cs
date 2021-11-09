@@ -1,6 +1,3 @@
-using System.Text;
-using Sentry.Internal;
-
 namespace Sentry.Testing;
 
 public static class StreamExtensions

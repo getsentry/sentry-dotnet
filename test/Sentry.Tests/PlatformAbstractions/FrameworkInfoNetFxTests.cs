@@ -1,6 +1,5 @@
 #if NET461
 using Sentry.PlatformAbstractions;
-using Xunit;
 
 namespace Sentry.Tests.PlatformAbstractions
 {

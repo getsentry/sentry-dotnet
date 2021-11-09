@@ -1,14 +1,7 @@
 using System.Reflection;
-using FluentAssertions;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
-using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
-using Xunit;
-using Xunit.Abstractions;
 using static Sentry.DsnSamples;
 using static Sentry.Internal.Constants;
 

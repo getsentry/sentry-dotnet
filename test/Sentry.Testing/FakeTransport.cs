@@ -1,7 +1,3 @@
-using Sentry.Extensibility;
-using Sentry.Internal.Extensions;
-using Sentry.Protocol.Envelopes;
-
 namespace Sentry.Testing;
 
 internal class FakeTransport : ITransport, IDisposable

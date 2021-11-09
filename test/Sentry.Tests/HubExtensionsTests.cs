@@ -1,7 +1,4 @@
 using System.Collections.Immutable;
-using NSubstitute;
-using Sentry.Infrastructure;
-using Xunit;
 
 namespace Sentry.Tests;
 

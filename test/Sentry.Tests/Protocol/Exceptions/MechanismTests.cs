@@ -1,5 +1,4 @@
 using Sentry.Tests.Helpers;
-using Xunit;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol.Tests.Exceptions;

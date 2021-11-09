@@ -1,8 +1,5 @@
 using System.Web;
-using NSubstitute;
 using Sentry.AspNet.Internal;
-using Sentry.Extensibility;
-using Xunit;
 
 namespace Sentry.AspNet.Tests.Internal;
 

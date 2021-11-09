@@ -1,9 +1,7 @@
 #if !NETCOREAPP2_1
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using NSubstitute;
 using Sentry.AspNetCore.Extensions;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests.Extensions
 {

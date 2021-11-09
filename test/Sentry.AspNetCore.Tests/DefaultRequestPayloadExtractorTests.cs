@@ -1,6 +1,3 @@
-using Sentry.Extensibility;
-using Xunit;
-
 namespace Sentry.AspNetCore.Tests;
 
 public class DefaultRequestPayloadExtractorTests : BaseRequestPayloadExtractorTests<DefaultRequestPayloadExtractor>

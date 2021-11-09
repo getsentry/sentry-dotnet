@@ -4,12 +4,6 @@ using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Reflection;
-
-using Xunit;
 
 namespace Sentry.NLog.Tests;
 

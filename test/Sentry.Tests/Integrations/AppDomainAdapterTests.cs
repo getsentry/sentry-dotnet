@@ -1,7 +1,6 @@
 #if !NETCOREAPP // Test runner fails when running on netcoreapp
-using Sentry.Internal;
 using Sentry.PlatformAbstractions;
-using Xunit;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.Integrations
 {

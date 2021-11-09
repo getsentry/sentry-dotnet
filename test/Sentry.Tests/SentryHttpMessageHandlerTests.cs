@@ -1,8 +1,5 @@
 using System.Net.Http;
-using FluentAssertions;
-using NSubstitute;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests;
 

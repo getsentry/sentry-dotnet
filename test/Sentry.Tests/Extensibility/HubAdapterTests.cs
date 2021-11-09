@@ -1,9 +1,5 @@
 using System.Collections.Immutable;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests.Extensibility;
 

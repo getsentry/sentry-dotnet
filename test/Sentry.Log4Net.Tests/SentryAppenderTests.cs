@@ -1,8 +1,5 @@
 using log4net;
 using log4net.Core;
-using NSubstitute;
-using Sentry.Reflection;
-using Xunit;
 
 namespace Sentry.Log4Net.Tests;
 

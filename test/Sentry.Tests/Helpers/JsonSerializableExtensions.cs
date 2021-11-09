@@ -1,6 +1,4 @@
-using System.Text;
 using System.Text.Json;
-using Sentry.Internal.Extensions;
 
 namespace Sentry.Tests.Helpers;
 

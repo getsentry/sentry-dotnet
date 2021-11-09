@@ -1,5 +1,3 @@
-using Sentry.Protocol;
-using Xunit;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
 namespace Sentry.AspNetCore.Tests;

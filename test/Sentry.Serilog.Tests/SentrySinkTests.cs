@@ -1,11 +1,7 @@
 using System.Collections;
-using NSubstitute;
-using Sentry.Infrastructure;
-using Sentry.Reflection;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Parsing;
-using Xunit;
 
 namespace Sentry.Serilog.Tests;
 

@@ -1,5 +1,5 @@
 using Sentry.PlatformAbstractions;
-using Xunit;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.PlatformAbstractions;
 
