@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,11 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sentry.AspNetCore;
-using Sentry.Internal;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 

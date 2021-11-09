@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using FluentAssertions;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests.Protocol;
 

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests;
 

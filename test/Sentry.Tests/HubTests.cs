@@ -1,17 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
-using Sentry;
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Integrations;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Sentry.Protocol.Envelopes;
-using Xunit;
+
 
 // ReSharper disable once CheckNamespace
 // Tests code path which excludes frames with namespace Sentry
@@ -1037,7 +1024,7 @@ public class HubTests
             TracesSampleRate = 1
         }, client);
         var scope = new Scope();
-        var evt = new SentryEvent()
+        var evt = new SentryEvent
         {
             Message = "Logger error",
             Level = level

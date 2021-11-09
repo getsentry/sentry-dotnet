@@ -1,7 +1,4 @@
-using System;
-using System.Threading.Tasks;
 using Grpc.Core;
-using Xunit;
 
 namespace Sentry.AspNetCore.Grpc.Tests;
 

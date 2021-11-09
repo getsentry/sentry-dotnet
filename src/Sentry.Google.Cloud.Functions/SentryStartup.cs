@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Google.Cloud.Functions.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

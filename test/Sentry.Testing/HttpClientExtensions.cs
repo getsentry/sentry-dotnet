@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;

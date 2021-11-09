@@ -1,10 +1,7 @@
-using System;
 using System.Data;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Microsoft.Extensions.Logging;
 using Sentry.AspNetCore.Samples.Grpc;
 
 namespace Sentry.Samples.AspNetCore.Grpc;

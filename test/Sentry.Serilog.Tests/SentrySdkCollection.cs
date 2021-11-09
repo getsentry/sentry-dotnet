@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Sentry.Serilog.Tests;
 
 [CollectionDefinition(nameof(AspNetSentrySdkTestFixture))]

@@ -1,19 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
-using Sentry.Internal;
 using Sentry.Internal.Http;
-using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
-using Xunit;
 
 namespace Sentry.Tests.Internals.Http;
 

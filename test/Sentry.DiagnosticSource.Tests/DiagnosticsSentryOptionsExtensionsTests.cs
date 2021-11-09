@@ -1,5 +1,4 @@
 using Sentry.Internals.DiagnosticSource;
-using Xunit;
 
 namespace Sentry.DiagnosticSource.Internals;
 

@@ -1,7 +1,3 @@
-using System;
-using NSubstitute;
-using Xunit;
-
 namespace Sentry.Tests;
 
 public class SentryClientExtensionsTests

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests;
 

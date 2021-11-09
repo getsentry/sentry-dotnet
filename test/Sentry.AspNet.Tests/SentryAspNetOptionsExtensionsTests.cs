@@ -1,7 +1,4 @@
-using System.Linq;
 using Sentry.AspNet.Internal;
-using Sentry.Extensibility;
-using Xunit;
 
 namespace Sentry.AspNet.Tests;
 

@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Sentry.Tests.Protocol;
 
 public abstract class ImmutableTests<TType>

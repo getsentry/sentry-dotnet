@@ -1,8 +1,6 @@
-using System;
 using NLog;
 using NLog.Config;
 using NLog.Layouts;
-using Xunit;
 
 namespace Sentry.NLog.Tests;
 

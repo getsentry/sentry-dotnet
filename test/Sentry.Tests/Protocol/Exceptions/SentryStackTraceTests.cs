@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using Xunit;
-
 namespace Sentry.Tests.Protocol.Exceptions;
 
 public class SentryStackTraceTests

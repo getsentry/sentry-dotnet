@@ -1,6 +1,3 @@
-using System;
-using Xunit;
-
 namespace Sentry.Tests.Protocol;
 
 public class SentryIdTests

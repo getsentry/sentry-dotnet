@@ -1,8 +1,4 @@
-using System;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Sentry.Extensibility;
-using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests;
 

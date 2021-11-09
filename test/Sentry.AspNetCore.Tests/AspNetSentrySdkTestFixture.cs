@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Hosting;
 using Sentry.AspNetCore.Tests.Utils;
 using Sentry.Testing;

@@ -1,8 +1,5 @@
-using System;
 using System.Globalization;
-using FluentAssertions;
 using Sentry.Tests.Helpers;
-using Xunit;
 
 namespace Sentry.Tests;
 

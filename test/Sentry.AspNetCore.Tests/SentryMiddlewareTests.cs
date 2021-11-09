@@ -1,7 +1,4 @@
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETCOREAPP2_1 || NET461
 using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -11,11 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using NSubstitute.ReturnsExtensions;
-using Sentry.Extensibility;
-using Sentry.Protocol;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests;
 

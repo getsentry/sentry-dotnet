@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using NSubstitute;
-using NSubstitute.ReturnsExtensions;
-using Sentry.Extensibility;
-using Xunit;
-
 namespace Sentry.Tests.Extensibility;
 
 public class RequestBodyExtractionDispatcherTests

@@ -1,8 +1,5 @@
-using System;
 using System.Reflection;
-using Sentry.Reflection;
 using Sentry.Tests.Helpers.Reflection;
-using Xunit;
 
 namespace Sentry.Tests.Reflection;
 

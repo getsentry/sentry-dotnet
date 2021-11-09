@@ -1,5 +1,4 @@
 using Sentry.Tests.Helpers.Reflection;
-using Xunit;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry.Tests;

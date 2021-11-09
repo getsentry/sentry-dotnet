@@ -1,7 +1,4 @@
-using System.Threading.Tasks;
 using Sentry.Tests;
-using VerifyXunit;
-using Xunit;
 
 namespace Sentry.NLog.Tests;
 

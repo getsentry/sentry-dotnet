@@ -1,4 +1,3 @@
-using System;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;

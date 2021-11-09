@@ -1,7 +1,5 @@
-using Sentry.Internal;
 using Sentry.Testing;
 using Sentry.Tests.Helpers.Reflection;
-using Xunit;
 using static Sentry.Constants;
 using static Sentry.Internal.Constants;
 

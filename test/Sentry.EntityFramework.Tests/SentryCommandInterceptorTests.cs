@@ -1,10 +1,6 @@
-using System;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
-using System.Linq;
 using Effort.Provider;
-using NSubstitute;
-using Xunit;
 #pragma warning disable 618 // UseBreadcrumbs is obsolete (will be made internal)
 
 namespace Sentry.EntityFramework.Tests;

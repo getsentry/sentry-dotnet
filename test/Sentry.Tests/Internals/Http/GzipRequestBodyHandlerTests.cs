@@ -1,11 +1,6 @@
-using System;
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
-using NSubstitute;
 using Sentry.Internal.Http;
-using Xunit;
 using static System.Threading.CancellationToken;
 
 namespace Sentry.Tests.Internals.Http;

@@ -1,20 +1,9 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using NLog;
 using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Reflection;
-
-using Xunit;
 
 namespace Sentry.NLog.Tests;
 

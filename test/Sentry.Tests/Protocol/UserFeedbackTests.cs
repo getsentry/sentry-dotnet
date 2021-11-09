@@ -1,8 +1,4 @@
-using System;
-using System.IO;
-using FluentAssertions;
 using Sentry.Tests.Helpers;
-using Xunit;
 
 namespace Sentry.Tests.Protocol;
 

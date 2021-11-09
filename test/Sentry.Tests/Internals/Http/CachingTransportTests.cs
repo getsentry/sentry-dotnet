@@ -1,18 +1,7 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
-using Sentry.Extensibility;
 using Sentry.Internal.Http;
-using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Sentry.Tests.Internals.Http;
 

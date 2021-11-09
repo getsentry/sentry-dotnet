@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 #if NETCOREAPP2_1 || NET461
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
@@ -8,8 +6,6 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests;
 

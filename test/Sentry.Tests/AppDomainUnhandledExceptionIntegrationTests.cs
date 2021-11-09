@@ -1,12 +1,3 @@
-using System;
-using System.Linq;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Integrations;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Xunit;
-
 namespace Sentry.Tests;
 
 public class AppDomainUnhandledExceptionIntegrationTests

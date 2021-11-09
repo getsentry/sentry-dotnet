@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using NSubstitute;
-using Sentry.Extensibility;
 using Sentry.Internals.DiagnosticSource;
-using Xunit;
 
 namespace Sentry.DiagnosticSource.Tests;
 

@@ -1,8 +1,4 @@
-using System;
 using System.Diagnostics;
-using Sentry;
-using Sentry.Internal;
-using Xunit;
 
 // ReSharper disable once CheckNamespace
 // Stack trace filters out Sentry frames by namespace

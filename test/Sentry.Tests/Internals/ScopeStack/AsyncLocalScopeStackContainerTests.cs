@@ -1,9 +1,4 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
 using Sentry.Internal.ScopeStack;
-using Xunit;
 
 namespace Sentry.Tests.Internals.ScopeStack;
 

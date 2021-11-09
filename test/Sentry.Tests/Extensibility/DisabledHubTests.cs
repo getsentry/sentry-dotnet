@@ -1,8 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using Sentry.Extensibility;
-using Xunit;
-
 namespace Sentry.Tests.Extensibility;
 
 public class DisabledHubTests

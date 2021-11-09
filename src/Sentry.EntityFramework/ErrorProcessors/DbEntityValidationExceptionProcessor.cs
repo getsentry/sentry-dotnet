@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Data.Entity.Validation;
-using System.Linq;
 using Sentry.Extensibility;
 
 namespace Sentry.EntityFramework.ErrorProcessors;

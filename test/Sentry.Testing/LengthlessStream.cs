@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace Sentry.Testing;
 
 public class LengthlessStream : Stream

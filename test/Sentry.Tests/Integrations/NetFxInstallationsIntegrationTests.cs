@@ -1,7 +1,6 @@
 #if NET461
-using Sentry.Integrations;
 using Sentry.PlatformAbstractions;
-using Xunit;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.Integrations;
 

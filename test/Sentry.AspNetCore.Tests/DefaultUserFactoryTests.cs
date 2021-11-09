@@ -1,12 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.AspNetCore.Http;
-using NSubstitute;
-using NSubstitute.ReturnsExtensions;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests;
 

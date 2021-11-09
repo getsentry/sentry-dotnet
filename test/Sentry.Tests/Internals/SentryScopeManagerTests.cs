@@ -1,13 +1,4 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.ScopeStack;
-using Xunit;
 
 namespace Sentry.Tests.Internals;
 

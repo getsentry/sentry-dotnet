@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Sentry.Tests.Helpers;
-using Xunit;
 
 namespace Sentry.Tests.Protocol;
 

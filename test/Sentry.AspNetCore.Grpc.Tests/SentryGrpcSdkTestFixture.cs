@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Hosting;
 using Sentry.Testing;

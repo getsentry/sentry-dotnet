@@ -1,8 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using PublicApiGenerator;
-using VerifyXunit;
 
 namespace Sentry.Tests;
 

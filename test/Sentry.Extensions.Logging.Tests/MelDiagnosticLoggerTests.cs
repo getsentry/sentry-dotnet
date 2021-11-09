@@ -1,9 +1,6 @@
 #if NETCOREAPP2_1 || NET461
-using System;
 #endif
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
 
 namespace Sentry.Extensions.Logging.Tests;
 

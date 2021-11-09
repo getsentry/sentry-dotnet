@@ -1,7 +1,4 @@
-using NSubstitute;
 using Sentry.AspNet.Internal;
-using Sentry.Internal;
-using Xunit;
 
 namespace Sentry.AspNet.Tests.Internal;
 

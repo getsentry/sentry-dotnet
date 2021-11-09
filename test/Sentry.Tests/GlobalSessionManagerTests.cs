@@ -1,11 +1,4 @@
-using System;
-using System.IO;
-using System.Linq;
-using FluentAssertions;
-using Sentry.Infrastructure;
-using Sentry.Internal.Extensions;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests;
 

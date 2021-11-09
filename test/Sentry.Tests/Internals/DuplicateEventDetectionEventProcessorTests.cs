@@ -1,7 +1,3 @@
-using System;
-using Sentry.Internal;
-using Xunit;
-
 namespace Sentry.Tests.Internals;
 
 public class DuplicateEventDetectionEventProcessorTests

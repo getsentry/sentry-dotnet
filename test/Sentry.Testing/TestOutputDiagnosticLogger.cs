@@ -1,7 +1,3 @@
-using System;
-using Sentry.Extensibility;
-using Xunit.Abstractions;
-
 namespace Sentry.Testing;
 
 public class TestOutputDiagnosticLogger : IDiagnosticLogger

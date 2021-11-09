@@ -1,8 +1,4 @@
-using System.IO;
 using System.Web;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 
 namespace Sentry.AspNet.Tests;
 

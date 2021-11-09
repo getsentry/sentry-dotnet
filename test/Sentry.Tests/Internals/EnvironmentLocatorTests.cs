@@ -1,6 +1,4 @@
-using Sentry.Internal;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests.Internals;
 

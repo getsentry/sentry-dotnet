@@ -1,6 +1,4 @@
-using System;
 using Sentry.PlatformAbstractions;
-using Xunit;
 
 namespace Sentry.Tests.PlatformAbstractions;
 

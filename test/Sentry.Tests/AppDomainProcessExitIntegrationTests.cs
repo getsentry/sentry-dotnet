@@ -1,9 +1,3 @@
-using System;
-using NSubstitute;
-using Sentry.Integrations;
-using Sentry.Internal;
-using Xunit;
-
 namespace Sentry.Tests;
 
 public class AppDomainProcessExitIntegrationTests

@@ -1,14 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Sentry.Reflection;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.Tests.Internals;
 

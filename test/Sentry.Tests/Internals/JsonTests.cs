@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using Sentry.Internal;
-using Sentry.Internal.Extensions;
-using Xunit;
 
 namespace Sentry.Tests.Internals;
 

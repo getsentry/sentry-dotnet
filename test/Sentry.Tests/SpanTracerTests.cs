@@ -1,10 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NSubstitute;
-using Xunit;
-
 namespace Sentry.Tests;
 
 public class SpanTracerTests
