@@ -461,7 +461,7 @@ namespace Sentry.DiagnosticSource.Tests
             {
                 Assert.True(querySpan.IsFinished);
                 var connectionId = (Guid)querySpan.Extra[SentrySqlListener.ConnectionExtraKey];
-                var connectionSpan = connectionSpans.First(span => span.SpanId == querySpan.ParentSpanId);
+                var connectionSpan = connectionSpans.Single(span => span.SpanId == querySpan.ParentSpanId);
 
                 Assert.NotEqual(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
                 Assert.Equal((Guid)connectionSpan.Extra[SentrySqlListener.ConnectionExtraKey], connectionId);
