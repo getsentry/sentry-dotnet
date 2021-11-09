@@ -65,7 +65,7 @@ public class SentryTunnelMiddleware : IMiddleware
             {
                 var projectId = dsn.AbsolutePath.Trim('/');
                 ms.Position = 0;
-                var request = new HttpRequestMessage()
+                var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"https://{dsn.Host}/api/{projectId}/envelope/"),
                     Method = HttpMethod.Post,

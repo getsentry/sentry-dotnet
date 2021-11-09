@@ -199,7 +199,7 @@ namespace Sentry.AspNetCore.Tests.Extensions
             var httpContext = _fixture.GetSut();
 
             // Act
-            var filteredRoute = HttpContextExtensions.TryGetRouteTemplate(httpContext);
+            var filteredRoute = httpContext.TryGetRouteTemplate();
 
             // Assert
             Assert.Null(filteredRoute);
@@ -216,7 +216,7 @@ namespace Sentry.AspNetCore.Tests.Extensions
             httpContext.Features.Set(sentryRouteName);
 
             // Act
-            var filteredRoute = HttpContextExtensions.TryGetRouteTemplate(httpContext);
+            var filteredRoute = httpContext.TryGetRouteTemplate();
 
             // Assert
             Assert.Equal(expectedName, filteredRoute);
