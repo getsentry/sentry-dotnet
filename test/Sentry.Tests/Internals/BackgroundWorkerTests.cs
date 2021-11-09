@@ -1,394 +1,385 @@
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Sentry.Protocol.Envelopes;
-using Xunit;
 
-namespace Sentry.Tests.Internals
+namespace Sentry.Tests.Internals;
+
+public class BackgroundWorkerTests
 {
-    public class BackgroundWorkerTests
+    private class Fixture
     {
-        private class Fixture
-        {
-            public ITransport Transport { get; set; } = Substitute.For<ITransport>();
-            public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
-            public ConcurrentQueue<Envelope> Queue { get; set; } = new();
-            public CancellationTokenSource CancellationTokenSource { get; set; } = new();
-            public SentryOptions SentryOptions { get; set; } = new();
+        public ITransport Transport { get; set; } = Substitute.For<ITransport>();
+        public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
+        public ConcurrentQueue<Envelope> Queue { get; set; } = new();
+        public CancellationTokenSource CancellationTokenSource { get; set; } = new();
+        public SentryOptions SentryOptions { get; set; } = new();
 
-            public Fixture()
+        public Fixture()
+        {
+            _ = Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+            SentryOptions.Debug = true;
+            SentryOptions.DiagnosticLogger = Logger;
+        }
+
+        public BackgroundWorker GetSut()
+            => new(
+                Transport,
+                SentryOptions,
+                CancellationTokenSource,
+                Queue);
+    }
+
+    private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Ctor_Task_Created()
+    {
+        using var sut = _fixture.GetSut();
+        Assert.NotNull(sut.WorkerTask);
+    }
+
+    [Fact]
+    public void Dispose_StopsTask()
+    {
+        var sut = _fixture.GetSut();
+        sut.Dispose();
+
+        Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
+    }
+
+    [Fact]
+    public void Dispose_WhenRequestInFlight_StopsTask()
+    {
+        var signal = new ManualResetEventSlim();
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(_ => signal.Set());
+
+        var sut = _fixture.GetSut();
+        _ = sut.EnqueueEnvelope(envelope);
+
+        Assert.True(signal.Wait(TimeSpan.FromSeconds(3)));
+
+        sut.Dispose();
+
+        Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
+    }
+
+    [Fact]
+    public void Dispose_TokenCancelledWhenRequestInFlight_StopsTask()
+    {
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        _ = _fixture.Transport
+            .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
+            .Throws(new OperationCanceledException());
+
+        var sut = _fixture.GetSut();
+        _ = sut.EnqueueEnvelope(envelope);
+
+        sut.Dispose();
+
+        Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
+    }
+
+    [Fact]
+    public void Dispose_SwallowsException()
+    {
+        _fixture.CancellationTokenSource.Dispose();
+        var sut = _fixture.GetSut();
+
+        _ = Assert.Throws<AggregateException>(() => sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
+        sut.Dispose();
+
+        Assert.Equal(TaskStatus.Faulted, sut.WorkerTask.Status);
+    }
+
+    [Fact]
+    public void Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
+    {
+        _fixture.SentryOptions.ShutdownTimeout = default; // Don't wait
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        using var sut = _fixture.GetSut();
+
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
             {
-                _ = Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-                SentryOptions.Debug = true;
-                SentryOptions.DiagnosticLogger = Logger;
-            }
+                var token = p.ArgAt<CancellationToken>(1);
+                token.ThrowIfCancellationRequested();
 
-            public BackgroundWorker GetSut()
-                => new(
-                    Transport,
-                    SentryOptions,
-                    CancellationTokenSource,
-                    Queue);
-        }
+                _ = sut.EnqueueEnvelope(envelope);
 
-        private readonly Fixture _fixture = new();
+                sut.Dispose(); // Make sure next round awaits with a cancelled token
+            });
 
-        [Fact]
-        public void Ctor_Task_Created()
-        {
-            using var sut = _fixture.GetSut();
-            Assert.NotNull(sut.WorkerTask);
-        }
+        _ = sut.EnqueueEnvelope(envelope);
 
-        [Fact]
-        public void Dispose_StopsTask()
-        {
-            var sut = _fixture.GetSut();
-            sut.Dispose();
+        Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(5)));
 
-            Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
-        }
+        // First event was sent, second hit transport with a cancelled token.
+        // Third never taken from the queue
+        _ = Assert.Single(_fixture.Queue);
+    }
 
-        [Fact]
-        public void Dispose_WhenRequestInFlight_StopsTask()
-        {
-            var signal = new ManualResetEventSlim();
-            var envelope = Envelope.FromEvent(new SentryEvent());
+    [Fact]
+    public void Dispose_EventQueuedDefaultShutdownTimeout_EmptiesQueueBeforeShutdown()
+    {
+        var sync = new AutoResetEvent(false);
 
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(_ => signal.Set());
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-            var sut = _fixture.GetSut();
-            _ = sut.EnqueueEnvelope(envelope);
+        using var sut = _fixture.GetSut();
 
-            Assert.True(signal.Wait(TimeSpan.FromSeconds(3)));
-
-            sut.Dispose();
-
-            Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
-        }
-
-        [Fact]
-        public void Dispose_TokenCancelledWhenRequestInFlight_StopsTask()
-        {
-            var envelope = Envelope.FromEvent(new SentryEvent());
-
-            _ = _fixture.Transport
-                    .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
-                    .Throws(new OperationCanceledException());
-
-            var sut = _fixture.GetSut();
-            _ = sut.EnqueueEnvelope(envelope);
-
-            sut.Dispose();
-
-            Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
-        }
-
-        [Fact]
-        public void Dispose_SwallowsException()
-        {
-            _fixture.CancellationTokenSource.Dispose();
-            var sut = _fixture.GetSut();
-
-            _ = Assert.Throws<AggregateException>(() => sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
-            sut.Dispose();
-
-            Assert.Equal(TaskStatus.Faulted, sut.WorkerTask.Status);
-        }
-
-        [Fact]
-        public void Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
-        {
-            _fixture.SentryOptions.ShutdownTimeout = default; // Don't wait
-
-            var envelope = Envelope.FromEvent(new SentryEvent());
-
-            using var sut = _fixture.GetSut();
-
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
+        var counter = 0;
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
+            {
+                if (++counter == 2)
                 {
                     var token = p.ArgAt<CancellationToken>(1);
-                    token.ThrowIfCancellationRequested();
+                    Assert.True(token.IsCancellationRequested);
+                    throw new OperationCanceledException();
+                }
 
-                    _ = sut.EnqueueEnvelope(envelope);
+                _ = sut.EnqueueEnvelope(envelope);
+                _ = sut.EnqueueEnvelope(envelope);
 
-                    sut.Dispose(); // Make sure next round awaits with a cancelled token
-                });
+                _ = sync.Set();
+                _ = sync.WaitOne();
+            });
 
-            _ = sut.EnqueueEnvelope(envelope);
+        _ = sut.EnqueueEnvelope(envelope);
 
-            Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(5)));
+        Assert.True(sync.WaitOne(TimeSpan.FromSeconds(2)));
+        _fixture.CancellationTokenSource.Cancel(); // Make sure next round awaits with a cancelled token
+        _ = sync.Set();
+        sut.Dispose(); // Since token was already cancelled, it's basically blocking to wait on the task completion
 
-            // First event was sent, second hit transport with a cancelled token.
-            // Third never taken from the queue
-            _ = Assert.Single(_fixture.Queue);
-        }
+        Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
+        Assert.Empty(_fixture.Queue);
+    }
 
-        [Fact]
-        public void Dispose_EventQueuedDefaultShutdownTimeout_EmptiesQueueBeforeShutdown()
-        {
-            var sync = new AutoResetEvent(false);
+    [Fact]
+    public void Create_CancelledTaskAndNoShutdownTimeout_ConsumesNoEvents()
+    {
+        // Arrange
+        _fixture.SentryOptions.ShutdownTimeout = default;
+        _fixture.CancellationTokenSource.Cancel();
 
-            var envelope = Envelope.FromEvent(new SentryEvent());
+        // Act
+        using var sut = _fixture.GetSut();
 
-            using var sut = _fixture.GetSut();
+        // Make sure task has finished
+        Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
 
-            var counter = 0;
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
-                {
-                    if (++counter == 2)
-                    {
-                        var token = p.ArgAt<CancellationToken>(1);
-                        Assert.True(token.IsCancellationRequested);
-                        throw new OperationCanceledException();
-                    }
+        // Assert
+        Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
+        sut.Dispose(); // no-op as task is already finished
+    }
 
-                    _ = sut.EnqueueEnvelope(envelope);
-                    _ = sut.EnqueueEnvelope(envelope);
+    [Fact]
+    public void CaptureEvent_LimitReached_EventDropped()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-                    _ = sync.Set();
-                    _ = sync.WaitOne();
-                });
+        var transportEvent = new ManualResetEvent(false);
+        var eventsQueuedEvent = new ManualResetEvent(false);
 
-            _ = sut.EnqueueEnvelope(envelope);
+        _fixture.SentryOptions.MaxQueueItems = 1;
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
+            {
+                _ = transportEvent.Set(); // Processing first event
+                _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+            });
 
-            Assert.True(sync.WaitOne(TimeSpan.FromSeconds(2)));
-            _fixture.CancellationTokenSource.Cancel(); // Make sure next round awaits with a cancelled token
-            _ = sync.Set();
-            sut.Dispose(); // Since token was already cancelled, it's basically blocking to wait on the task completion
+        using var sut = _fixture.GetSut();
 
-            Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
-            Assert.Empty(_fixture.Queue);
-        }
+        // Act
+        _ = sut.EnqueueEnvelope(envelope);
+        _ = transportEvent.WaitOne(); // Wait first event to be in-flight
 
-        [Fact]
-        public void Create_CancelledTaskAndNoShutdownTimeout_ConsumesNoEvents()
-        {
-            // Arrange
-            _fixture.SentryOptions.ShutdownTimeout = default;
-            _fixture.CancellationTokenSource.Cancel();
+        // in-flight events are kept in queue until completed.
+        var queued = sut.EnqueueEnvelope(envelope);
+        Assert.False(queued); // Fails to queue second
 
-            // Act
-            using var sut = _fixture.GetSut();
+        _ = eventsQueuedEvent.Set();
+    }
 
-            // Make sure task has finished
-            Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
+    [Fact]
+    public void CaptureEvent_DisposedWorker_ThrowsObjectDisposedException()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-            // Assert
-            Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
-            sut.Dispose(); // no-op as task is already finished
-        }
+        using var sut = _fixture.GetSut();
+        sut.Dispose();
 
-        [Fact]
-        public void CaptureEvent_LimitReached_EventDropped()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
+        _ = Assert.Throws<ObjectDisposedException>(() => sut.EnqueueEnvelope(envelope));
+    }
 
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
+    [Fact]
+    public void CaptureEvent_InnerTransportInvoked()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-            _fixture.SentryOptions.MaxQueueItems = 1;
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
-                {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
+        var sut = _fixture.GetSut();
 
-            using var sut = _fixture.GetSut();
+        // Act
+        var queued = sut.EnqueueEnvelope(envelope);
+        sut.Dispose();
 
-            // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+        // Assert
+        Assert.True(queued);
+        _ = _fixture.Transport.Received(1).SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>());
+    }
 
-            // in-flight events are kept in queue until completed.
-            var queued = sut.EnqueueEnvelope(envelope);
-            Assert.False(queued); // Fails to queue second
+    [Fact]
+    public void CaptureEvent_InnerTransportThrows_WorkerSuppresses()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-            _ = eventsQueuedEvent.Set();
-        }
+        _fixture.Transport
+            .When(e => e.SendEnvelopeAsync(envelope))
+            .Do(_ => throw new Exception("Sending to sentry failed."));
 
-        [Fact]
-        public void CaptureEvent_DisposedWorker_ThrowsObjectDisposedException()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
+        using var sut = _fixture.GetSut();
+        // Act
+        var queued = sut.EnqueueEnvelope(envelope);
 
-            using var sut = _fixture.GetSut();
-            sut.Dispose();
+        // Assert
+        Assert.True(queued);
 
-            _ = Assert.Throws<ObjectDisposedException>(() => sut.EnqueueEnvelope(envelope));
-        }
+        // TODO: tap into exception handling (some ILogger or Action<Exception>)
+    }
 
-        [Fact]
-        public void CaptureEvent_InnerTransportInvoked()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
+    [Fact]
+    public void QueuedItems_StartsEmpty()
+    {
+        using var sut = _fixture.GetSut();
+        Assert.Equal(0, sut.QueuedItems);
+    }
 
-            var sut = _fixture.GetSut();
+    [Fact]
+    public void QueuedItems_ReflectsQueue()
+    {
+        _fixture.Queue.Enqueue(null);
+        using var sut = _fixture.GetSut();
+        Assert.Equal(1, sut.QueuedItems);
+    }
 
-            // Act
-            var queued = sut.EnqueueEnvelope(envelope);
-            sut.Dispose();
+    [Fact]
+    public async Task FlushAsync_DisposedWorker_LogsAndReturns()
+    {
+        var sut = _fixture.GetSut();
+        sut.Dispose();
+        await sut.FlushAsync(TimeSpan.MaxValue);
+        _fixture.Logger.Received().Log(SentryLevel.Debug, "Worker disposed. Nothing to flush.");
+    }
 
-            // Assert
-            Assert.True(queued);
-            _ = _fixture.Transport.Received(1).SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>());
-        }
+    [Fact]
+    public async Task FlushAsync_EmptyQueue_LogsAndReturns()
+    {
+        var sut = _fixture.GetSut();
+        await sut.FlushAsync(TimeSpan.MaxValue);
+        _fixture.Logger.Received().Log(SentryLevel.Debug, "No events to flush.");
+    }
 
-        [Fact]
-        public void CaptureEvent_InnerTransportThrows_WorkerSuppresses()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
+    [Fact]
+    public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-            _fixture.Transport
-                .When(e => e.SendEnvelopeAsync(envelope))
-                .Do(_ => throw new Exception("Sending to sentry failed."));
+        var transportEvent = new ManualResetEvent(false);
+        var eventsQueuedEvent = new ManualResetEvent(false);
 
-            using var sut = _fixture.GetSut();
-            // Act
-            var queued = sut.EnqueueEnvelope(envelope);
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
+            {
+                _ = transportEvent.Set(); // Processing first event
+                _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+            });
 
-            // Assert
-            Assert.True(queued);
+        using var sut = _fixture.GetSut();
 
-            // TODO: tap into exception handling (some ILogger or Action<Exception>)
-        }
+        // Act
+        _ = sut.EnqueueEnvelope(envelope);
+        _ = transportEvent.WaitOne(); // Wait first event to be in-flight
 
-        [Fact]
-        public void QueuedItems_StartsEmpty()
-        {
-            using var sut = _fixture.GetSut();
-            Assert.Equal(0, sut.QueuedItems);
-        }
+        var flushTask = sut.FlushAsync(TimeSpan.FromDays(1));
+        _ = Assert.Single(_fixture.Queue); // Event being processed
 
-        [Fact]
-        public void QueuedItems_ReflectsQueue()
-        {
-            _fixture.Queue.Enqueue(null);
-            using var sut = _fixture.GetSut();
-            Assert.Equal(1, sut.QueuedItems);
-        }
+        _ = eventsQueuedEvent.Set();
+        await flushTask;
 
-        [Fact]
-        public async Task FlushAsync_DisposedWorker_LogsAndReturns()
-        {
-            var sut = _fixture.GetSut();
-            sut.Dispose();
-            await sut.FlushAsync(TimeSpan.MaxValue);
-            _fixture.Logger.Received().Log(SentryLevel.Debug, "Worker disposed. Nothing to flush.");
-        }
+        _fixture.Logger.Received().Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
+        Assert.Empty(_fixture.Queue); // Only the item being processed at the blocked callback
+    }
 
-        [Fact]
-        public async Task FlushAsync_EmptyQueue_LogsAndReturns()
-        {
-            var sut = _fixture.GetSut();
-            await sut.FlushAsync(TimeSpan.MaxValue);
-            _fixture.Logger.Received().Log(SentryLevel.Debug, "No events to flush.");
-        }
+    [Fact]
+    public async Task FlushAsync_ZeroTimeout_Accepted()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-        [Fact]
-        public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
+        var transportEvent = new ManualResetEvent(false);
+        var eventsQueuedEvent = new ManualResetEvent(false);
 
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
+            {
+                _ = transportEvent.Set(); // Processing first event
+                _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+            });
 
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
-                {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
+        using var sut = _fixture.GetSut();
 
-            using var sut = _fixture.GetSut();
+        // Act
+        _ = sut.EnqueueEnvelope(envelope);
+        _ = transportEvent.WaitOne(); // Wait first event to be in-flight
 
-            // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+        await sut.FlushAsync(TimeSpan.Zero);
+    }
 
-            var flushTask = sut.FlushAsync(TimeSpan.FromDays(1));
-            _ = Assert.Single(_fixture.Queue); // Event being processed
+    [Fact]
+    public async Task FlushAsync_FullQueue_RespectsTimeout()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
 
-            _ = eventsQueuedEvent.Set();
-            await flushTask;
+        var transportEvent = new ManualResetEvent(false);
+        var eventsQueuedEvent = new ManualResetEvent(false);
 
-            _fixture.Logger.Received().Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
-            Assert.Empty(_fixture.Queue); // Only the item being processed at the blocked callback
-        }
+        _fixture.SentryOptions.MaxQueueItems = 1;
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
+            {
+                _ = transportEvent.Set(); // Processing first event
+                _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+            });
 
-        [Fact]
-        public async Task FlushAsync_ZeroTimeout_Accepted()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
+        using var sut = _fixture.GetSut();
 
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
+        // Act
+        _ = sut.EnqueueEnvelope(envelope);
+        _ = transportEvent.WaitOne(); // Wait first event to be in-flight
 
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
-                {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
+        await sut.FlushAsync(TimeSpan.FromSeconds(1));
 
-            using var sut = _fixture.GetSut();
-
-            // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
-
-            await sut.FlushAsync(TimeSpan.Zero);
-        }
-
-        [Fact]
-        public async Task FlushAsync_FullQueue_RespectsTimeout()
-        {
-            // Arrange
-            var envelope = Envelope.FromEvent(new SentryEvent());
-
-            var transportEvent = new ManualResetEvent(false);
-            var eventsQueuedEvent = new ManualResetEvent(false);
-
-            _fixture.SentryOptions.MaxQueueItems = 1;
-            _fixture.Transport
-                .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-                .Do(p =>
-                {
-                    _ = transportEvent.Set(); // Processing first event
-                    _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
-                });
-
-            using var sut = _fixture.GetSut();
-
-            // Act
-            _ = sut.EnqueueEnvelope(envelope);
-            _ = transportEvent.WaitOne(); // Wait first event to be in-flight
-
-            await sut.FlushAsync(TimeSpan.FromSeconds(1));
-
-            _fixture.Logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
-            _ = Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
-        }
+        _fixture.Logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
+        _ = Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
     }
 }

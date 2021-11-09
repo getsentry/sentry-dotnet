@@ -1,9 +1,5 @@
-#if NET5_0 || NETCOREAPP3_1
-using System;
-using System.Linq;
+#if NETCOREAPP3_1_OR_GREATER
 using System.Net.Http;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -12,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {

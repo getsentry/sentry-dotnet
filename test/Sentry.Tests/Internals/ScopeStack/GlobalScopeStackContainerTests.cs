@@ -1,40 +1,34 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
 using Sentry.Internal.ScopeStack;
-using Xunit;
 
-namespace Sentry.Tests.Internals.ScopeStack
+namespace Sentry.Tests.Internals.ScopeStack;
+
+public class GlobalScopeStackContainerTests
 {
-    public class GlobalScopeStackContainerTests
+    [Fact]
+    public async Task Scopes_are_shared_between_parallel_async_executions()
     {
-        [Fact]
-        public async Task Scopes_are_shared_between_parallel_async_executions()
+        // Arrange
+        var container = new GlobalScopeStackContainer();
+
+        var scope1 = new KeyValuePair<Scope, ISentryClient>(
+            Substitute.For<Scope>(),
+            Substitute.For<ISentryClient>());
+
+        var scope2 = new KeyValuePair<Scope, ISentryClient>(
+            Substitute.For<Scope>(),
+            Substitute.For<ISentryClient>());
+
+        // Act & assert
+        await Task.Run(async () =>
         {
-            // Arrange
-            var container = new GlobalScopeStackContainer();
+            container.Stack.Should().BeNull();
 
-            var scope1 = new KeyValuePair<Scope, ISentryClient>(
-                Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>());
-
-            var scope2 = new KeyValuePair<Scope, ISentryClient>(
-                Substitute.For<Scope>(),
-                Substitute.For<ISentryClient>());
-
-            // Act & assert
-            await Task.Run(async () =>
-            {
-                container.Stack.Should().BeNull();
-
-                container.Stack = new[] { scope1, scope2 };
-                await Task.Yield();
-
-                container.Stack.Should().BeEquivalentTo(new[] { scope1, scope2 });
-            });
+            container.Stack = new[] { scope1, scope2 };
+            await Task.Yield();
 
             container.Stack.Should().BeEquivalentTo(new[] { scope1, scope2 });
-        }
+        });
+
+        container.Stack.Should().BeEquivalentTo(new[] { scope1, scope2 });
     }
 }

@@ -13,7 +13,6 @@ namespace Sentry.AspNetCore.Extensions
     {
         public static string? TryGetRouteTemplate(this HttpContext context)
         {
-
 #if !NETSTANDARD2_0 // endpoint routing is only supported after ASP.NET Core 3.0
             // Requires .UseRouting()/.UseEndpoints()
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
@@ -24,7 +23,14 @@ namespace Sentry.AspNetCore.Extensions
                 return formattedRoute;
             }
 #endif
-            return LegacyRouteFormat(context);
+            if (LegacyRouteFormat(context) is { } legacyFormat)
+            {
+                return legacyFormat;
+            }
+
+            var sentryRouteName = context.Features.Get<ISentryRouteName>();
+
+            return sentryRouteName?.GetRouteName();
         }
 
         // Internal for testing.

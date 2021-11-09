@@ -1,15 +1,14 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sentry.AspNetCore
+namespace Sentry.AspNetCore;
+
+/// <summary>
+/// Allows for further customization of Sentry integration
+/// </summary>
+public interface ISentryBuilder
 {
     /// <summary>
-    /// Allows for further customization of Sentry integration
+    /// Gets the <see cref="IServiceCollection"/> where Sentry services are configured.
     /// </summary>
-    public interface ISentryBuilder
-    {
-        /// <summary>
-        /// Gets the <see cref="IServiceCollection"/> where Sentry services are configured.
-        /// </summary>
-        IServiceCollection Services { get; }
-    }
+    IServiceCollection Services { get; }
 }

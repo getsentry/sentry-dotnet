@@ -2,10 +2,41 @@
 
 ## Unreleased
 
+### Features
+
+- Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
+
 ### Fixes
 
+- Avoid using the same connection Span for the same ConnectionId ([#1317](https://github.com/getsentry/sentry-dotnet/pull/1317))
+- Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
+
+## 3.12.0-alpha.1
+
+### Features
+
+- .NET 6 specific targets ([#939](https://github.com/getsentry/sentry-dotnet/pull/939))
+
+## 3.11.1
+
+### Fixes
+
+- Forward the IP of the client with whe tunnel middleware ([#1310](getsentry/sentry-dotnet/pull/1310))
+
+## 3.11.0
+
+### Features
+
+- Sentry Sessions status as Breadcrumbs ([#1263](https://github.com/getsentry/sentry-dotnet/pull/1263))
+- Enhance GCP Integraction with performance monitoring and revision number ([#1286](https://github.com/getsentry/sentry-dotnet/pull/1286))
+- Bump Ben.Demystifier to support .NET 6 ([#1290](https://github.com/getsentry/sentry-dotnet/pull/1290))
+
+### Fixes
+
+- ASP.NET Core: Data from Scope in options should be applied on each request ([#1270](https://github.com/getsentry/sentry-dotnet/pull/1270))
 - Add missing `ConfigureAwaits(false)` for `async using` ([#1276](https://github.com/getsentry/sentry-dotnet/pull/1276))
- 
+- Fix missing handled tag when events are logged via an ASP.NET Core pipeline logger ([#1284](getsentry/sentry-dotnet/pull/1284))
+
 ## 3.10.0
 
 ### Features

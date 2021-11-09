@@ -1,82 +1,78 @@
-using System;
-using Sentry.Protocol;
-using Xunit;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
-namespace Sentry.AspNetCore.Tests
+namespace Sentry.AspNetCore.Tests;
+
+public class AspNetCoreEventProcessorTests
 {
-    public class AspNetCoreEventProcessorTests
+    private readonly AspNetCoreEventProcessor _sut;
+
+    public AspNetCoreEventProcessorTests()
     {
-        private readonly AspNetCoreEventProcessor _sut;
+        _sut = new AspNetCoreEventProcessor();
+    }
 
-        public AspNetCoreEventProcessorTests()
-        {
-            _sut = new AspNetCoreEventProcessor();
-        }
+    [Fact]
+    public void Process_WithRuntime_MovesToServerRuntime()
+    {
+        var target = new SentryEvent();
+        var expected = target.Contexts.Runtime;
 
-        [Fact]
-        public void Process_WithRuntime_MovesToServerRuntime()
-        {
-            var target = new SentryEvent();
-            var expected = target.Contexts.Runtime;
+        _ = _sut.Process(target);
 
-            _ = _sut.Process(target);
+        Assert.Same(expected, target.Contexts["server-runtime"]);
+    }
+    [Fact]
+    public void Process_WithoutRuntime_NoServerRuntime()
+    {
+        var target = new SentryEvent();
+        _ = target.Contexts.TryRemove(Runtime.Type, out _);
 
-            Assert.Same(expected, target.Contexts["server-runtime"]);
-        }
-        [Fact]
-        public void Process_WithoutRuntime_NoServerRuntime()
-        {
-            var target = new SentryEvent();
-            _ = target.Contexts.TryRemove(Runtime.Type, out _);
+        _ = _sut.Process(target);
 
-            _ = _sut.Process(target);
+        Assert.False(target.Contexts.ContainsKey("server-runtime"));
+    }
 
-            Assert.False(target.Contexts.ContainsKey("server-runtime"));
-        }
+    [Fact]
+    public void Process_WithOperatingSystem_MovesToServerOperatingSystem()
+    {
+        var target = new SentryEvent();
+        var expected = target.Contexts.OperatingSystem;
 
-        [Fact]
-        public void Process_WithOperatingSystem_MovesToServerOperatingSystem()
-        {
-            var target = new SentryEvent();
-            var expected = target.Contexts.OperatingSystem;
+        _ = _sut.Process(target);
 
-            _ = _sut.Process(target);
+        Assert.Same(expected, target.Contexts["server-os"]);
+    }
 
-            Assert.Same(expected, target.Contexts["server-os"]);
-        }
+    [Fact]
+    public void Process_WithoutOperatingSystem_NoServerOperatingSystem()
+    {
+        var target = new SentryEvent();
+        _ = target.Contexts.TryRemove(OperatingSystem.Type, out _);
 
-        [Fact]
-        public void Process_WithoutOperatingSystem_NoServerOperatingSystem()
-        {
-            var target = new SentryEvent();
-            _ = target.Contexts.TryRemove(OperatingSystem.Type, out _);
+        _ = _sut.Process(target);
 
-            _ = _sut.Process(target);
+        Assert.False(target.Contexts.ContainsKey("server-os"));
+    }
 
-            Assert.False(target.Contexts.ContainsKey("server-os"));
-        }
+    [Fact]
+    public void Process_ServerName_NotOverwritten()
+    {
+        var target = new SentryEvent();
+        const string expectedServerName = "original";
+        target.ServerName = expectedServerName;
 
-        [Fact]
-        public void Process_ServerName_NotOverwritten()
-        {
-            var target = new SentryEvent();
-            const string expectedServerName = "original";
-            target.ServerName = expectedServerName;
+        _ = _sut.Process(target);
 
-            _ = _sut.Process(target);
+        Assert.Equal(expectedServerName, target.ServerName);
+    }
 
-            Assert.Equal(expectedServerName, target.ServerName);
-        }
+    [Fact]
+    public void Process_ServerName_SetToEnvironmentMachineName()
+    {
+        var target = new SentryEvent();
 
-        [Fact]
-        public void Process_ServerName_SetToEnvironmentMachineName()
-        {
-            var target = new SentryEvent();
+        _ = _sut.Process(target);
 
-            _ = _sut.Process(target);
-
-            Assert.Equal(Environment.MachineName, target.ServerName);
-        }
+        Assert.Equal(Environment.MachineName, target.ServerName);
     }
 }
