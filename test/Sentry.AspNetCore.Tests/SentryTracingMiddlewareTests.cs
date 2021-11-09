@@ -19,7 +19,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1}, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -65,7 +65,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret}, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -108,7 +108,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1}, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -134,7 +134,7 @@ public class SentryTracingMiddlewareTests
         var client = server.CreateClient();
 
         // Act
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13") {Headers = {{"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"}}};
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13") { Headers = { { "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0" } } };
 
         await client.SendAsync(request);
 
@@ -155,7 +155,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1}, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -185,7 +185,7 @@ public class SentryTracingMiddlewareTests
         var client = server.CreateClient();
 
         // Act
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13") {Headers = {{"foo", "bar"}}};
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13") { Headers = { { "foo", "bar" } } };
 
         await client.SendAsync(request);
 
