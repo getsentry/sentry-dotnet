@@ -7,8 +7,6 @@
     <ImplicitUsings>false</ImplicitUsings>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
-    <!-- TODO: remove the below NoWarn PR merged https://github.com/benaadams/Ben.Demystifier/pull/182-->
-    <NoWarn>$(NoWarn);CS8621</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
