@@ -220,7 +220,7 @@ public class SentryQueryPerformanceListenerTests
         Assert.NotEmpty(_fixture.Spans.Where(
             span => DbReaderKey == span.Operation && span.Description is null));
 
-        Assert.All(_fixture.Spans, (span) =>
+        Assert.All(_fixture.Spans, span =>
         {
             span.Received(1).Finish(Arg.Is<SpanStatus>(status => SpanStatus.Ok == status));
         });
