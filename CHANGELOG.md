@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
+
 ### Fixes
 
 - Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
