@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+### Features
+
+- Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
+
 ### Fixes
 
+- Avoid using the same connection Span for the same ConnectionId ([#1317](https://github.com/getsentry/sentry-dotnet/pull/1317))
 - Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
 - Update X-Sentry-Auth header to include correct sdk name and version ([#1318](https://github.com/getsentry/sentry-dotnet/pull/1318)
 

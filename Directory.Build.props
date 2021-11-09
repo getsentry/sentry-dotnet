@@ -8,6 +8,7 @@
     <SignAssembly>true</SignAssembly>
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
+    <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
   <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->

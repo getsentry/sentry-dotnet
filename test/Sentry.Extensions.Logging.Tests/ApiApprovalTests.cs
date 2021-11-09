@@ -1,17 +1,13 @@
-using System.Threading.Tasks;
 using Sentry.Tests;
-using VerifyXunit;
-using Xunit;
 
-namespace Sentry.Extensions.Logging.Tests
+namespace Sentry.Extensions.Logging.Tests;
+
+[UsesVerify]
+public class ApiApprovalTests
 {
-    [UsesVerify]
-    public class ApiApprovalTests
+    [Fact]
+    public Task Run()
     {
-        [Fact]
-        public Task Run()
-        {
-            return typeof(SentryLogger).Assembly.CheckApproval();
-        }
+        return typeof(SentryLogger).Assembly.CheckApproval();
     }
 }
