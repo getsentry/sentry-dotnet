@@ -1,33 +1,26 @@
-using System;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using Sentry.Internal;
+namespace Sentry.Testing;
 
-namespace Sentry.Testing
+public static class StreamExtensions
 {
-    public static class StreamExtensions
+    public static async Task FillWithRandomBytesAsync(this Stream stream, long length)
     {
-        public static async Task FillWithRandomBytesAsync(this Stream stream, long length)
+        var remainingLength = length;
+        var buffer = new byte[81920];
+
+        while (remainingLength > 0)
         {
-            var remainingLength = length;
-            var buffer = new byte[81920];
+            SynchronizedRandom.NextBytes(buffer);
 
-            while (remainingLength > 0)
-            {
-                SynchronizedRandom.NextBytes(buffer);
+            var bytesToCopy = (int)Math.Min(remainingLength, buffer.Length);
+            await stream.WriteAsync(buffer, 0, bytesToCopy);
 
-                var bytesToCopy = (int)Math.Min(remainingLength, buffer.Length);
-                await stream.WriteAsync(buffer, 0, bytesToCopy);
-
-                remainingLength -= bytesToCopy;
-            }
+            remainingLength -= bytesToCopy;
         }
-
-        public static MemoryStream ToMemoryStream(this string source, Encoding encoding) =>
-            new(encoding.GetBytes(source));
-
-        public static MemoryStream ToMemoryStream(this string source) =>
-            source.ToMemoryStream(Encoding.UTF8);
     }
+
+    public static MemoryStream ToMemoryStream(this string source, Encoding encoding) =>
+        new(encoding.GetBytes(source));
+
+    public static MemoryStream ToMemoryStream(this string source) =>
+        source.ToMemoryStream(Encoding.UTF8);
 }

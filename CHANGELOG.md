@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
+
+### Fixes
+
+- Avoid using the same connection Span for the same ConnectionId ([#1317](https://github.com/getsentry/sentry-dotnet/pull/1317))
+- Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
+
 ## 3.12.0-alpha.1
 
 ### Features

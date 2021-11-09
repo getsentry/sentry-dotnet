@@ -1,17 +1,13 @@
-using System.Threading.Tasks;
 using Sentry.Tests;
-using VerifyXunit;
-using Xunit;
 
-namespace Sentry.Serilog.Tests
+namespace Sentry.Serilog.Tests;
+
+[UsesVerify]
+public class ApiApprovalTests
 {
-    [UsesVerify]
-    public class ApiApprovalTests
+    [Fact]
+    public Task Run()
     {
-        [Fact]
-        public Task Run()
-        {
-            return typeof(SentrySink).Assembly.CheckApproval();
-        }
+        return typeof(SentrySink).Assembly.CheckApproval();
     }
 }

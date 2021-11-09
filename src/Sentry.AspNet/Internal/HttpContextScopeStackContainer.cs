@@ -1,36 +1,34 @@
-using System.Collections.Generic;
 using System.Web;
 using Sentry.Internal.ScopeStack;
 
-namespace Sentry.AspNet.Internal
+namespace Sentry.AspNet.Internal;
+
+internal class HttpContextScopeStackContainer : IScopeStackContainer
 {
-    internal class HttpContextScopeStackContainer : IScopeStackContainer
+    private const string FieldName = "__SentryScopeStack";
+
+    //Internal for testing
+    internal KeyValuePair<Scope, ISentryClient>[]? FallbackStack;
+
+    public KeyValuePair<Scope, ISentryClient>[]? Stack
     {
-        private const string FieldName = "__SentryScopeStack";
-
-        //Internal for testing
-        internal KeyValuePair<Scope, ISentryClient>[]? FallbackStack;
-
-        public KeyValuePair<Scope, ISentryClient>[]? Stack
+        get
         {
-            get
+            if (HttpContext.Current is { } currentContext)
             {
-                if (HttpContext.Current is { } currentContext)
-                {
-                    return currentContext.Items[FieldName] as KeyValuePair<Scope, ISentryClient>[];
-                }
-                return FallbackStack;
+                return currentContext.Items[FieldName] as KeyValuePair<Scope, ISentryClient>[];
             }
-            set
+            return FallbackStack;
+        }
+        set
+        {
+            if (HttpContext.Current is { } currentContext)
             {
-                if (HttpContext.Current is { } currentContext)
-                {
-                    currentContext.Items[FieldName] = value;
-                }
-                else
-                {
-                    FallbackStack = value;
-                }
+                currentContext.Items[FieldName] = value;
+            }
+            else
+            {
+                FallbackStack = value;
             }
         }
     }

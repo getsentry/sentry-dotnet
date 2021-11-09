@@ -225,6 +225,14 @@ namespace Sentry
             Status ??= SpanStatus.UnknownError;
             EndTimestamp = DateTimeOffset.UtcNow;
 
+            foreach (var span in _spans)
+            {
+                if (!span.IsFinished)
+                {
+                    span.Finish(SpanStatus.DeadlineExceeded);
+                }
+            }
+
             // Clear the transaction from the scope
             _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
