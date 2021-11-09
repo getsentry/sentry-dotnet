@@ -2,27 +2,27 @@
 using Sentry.PlatformAbstractions;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
 
-namespace Sentry.Tests.Integrations
+namespace Sentry.Tests.Integrations;
+
+public class AppDomainAdapterTests
 {
-    public class AppDomainAdapterTests
+    [SkippableFact]
+    public void UnhandledException_FiredOnExceptionUnhandledInThread()
     {
-        [SkippableFact]
-        public void UnhandledException_FiredOnExceptionUnhandledInThread()
+        // Test flaky on Mono
+        Skip.If(Runtime.Current.IsMono());
+
+        var evt = new ManualResetEventSlim(false);
+        AppDomainAdapter.Instance.UnhandledException += (_, _) => evt.Set();
+
+        var thread = new Thread(() => throw new Exception())
         {
-            // Test flaky on Mono
-            Skip.If(Runtime.Current.IsMono());
+            IsBackground = false
+        };
 
-            var evt = new ManualResetEventSlim(false);
-            AppDomainAdapter.Instance.UnhandledException += (_, _) => evt.Set();
-
-            var thread = new Thread(() => throw new Exception())
-            {
-                IsBackground = false
-            };
-
-            thread.Start();
-            Assert.True(evt.Wait(TimeSpan.FromSeconds(3)));
-        }
+        thread.Start();
+        Assert.True(evt.Wait(TimeSpan.FromSeconds(3)));
     }
 }
+
 #endif

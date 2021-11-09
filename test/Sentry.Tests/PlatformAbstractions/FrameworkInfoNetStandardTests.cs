@@ -1,23 +1,23 @@
 #if !NET461
 using Sentry.PlatformAbstractions;
 
-namespace Sentry.Tests.PlatformAbstractions
-{
-    public class FrameworkInfoNetStandardTests
-    {
-        [Fact]
-        public void GetLatest_Returns_Null()
-        {
-            var latest = FrameworkInfo.GetLatest(4);
-            Assert.Null(latest);
-        }
+namespace Sentry.Tests.PlatformAbstractions;
 
-        [Fact]
-        public void GetInstallations_Returns_Empty()
-        {
-            var allInstallations = FrameworkInfo.GetInstallations();
-            Assert.Empty(allInstallations);
-        }
+public class FrameworkInfoNetStandardTests
+{
+    [Fact]
+    public void GetLatest_Returns_Null()
+    {
+        var latest = FrameworkInfo.GetLatest(4);
+        Assert.Null(latest);
+    }
+
+    [Fact]
+    public void GetInstallations_Returns_Empty()
+    {
+        var allInstallations = FrameworkInfo.GetInstallations();
+        Assert.Empty(allInstallations);
     }
 }
+
 #endif
