@@ -1,4 +1,3 @@
-using System;
 #if NETCOREAPP2_1 || NET461
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else

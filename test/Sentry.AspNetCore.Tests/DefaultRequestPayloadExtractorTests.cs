@@ -1,4 +1,3 @@
-using System.IO;
 using Sentry.Extensibility;
 using Xunit;
 

@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel;
 using Sentry.EntityFramework;
 using Sentry.EntityFramework.ErrorProcessors;

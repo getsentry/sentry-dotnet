@@ -1,7 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using NSubstitute;
 using Sentry.Infrastructure;
 using Sentry.Reflection;

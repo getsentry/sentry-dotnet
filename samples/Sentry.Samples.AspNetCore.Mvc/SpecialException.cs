@@ -1,5 +1,3 @@
-using System;
-
 namespace Samples.AspNetCore.Mvc;
 
 public class SpecialException : Exception

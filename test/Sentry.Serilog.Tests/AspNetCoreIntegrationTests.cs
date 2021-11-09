@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Sentry.Testing;
 using Xunit;
 
@@ -13,11 +11,10 @@ public class AspNetCoreIntegrationTests : AspNetSentrySdkTestFixture
     [Fact]
     public async Task UnhandledException_MarkedAsUnhandled()
     {
-        var expectedException = new Exception("test");
         var handler = new RequestHandler
         {
             Path = "/throw",
-            Handler = _ => throw expectedException
+            Handler = _ => throw new Exception("test")
         };
 
         Handlers = new[] { handler };

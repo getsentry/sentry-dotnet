@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry;
@@ -1037,7 +1033,7 @@ public class HubTests
             TracesSampleRate = 1
         }, client);
         var scope = new Scope();
-        var evt = new SentryEvent()
+        var evt = new SentryEvent
         {
             Message = "Logger error",
             Level = level

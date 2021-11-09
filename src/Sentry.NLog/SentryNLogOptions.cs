@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 using NLog;
 using NLog.Config;
 using NLog.Layouts;

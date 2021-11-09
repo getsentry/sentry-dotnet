@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using FluentAssertions;
 using Sentry.Internal;

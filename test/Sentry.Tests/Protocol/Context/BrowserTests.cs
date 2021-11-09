@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using FluentAssertions;
 using Sentry.Internal;
 using Sentry.Tests.Helpers;

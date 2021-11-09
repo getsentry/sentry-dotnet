@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Sentry.Extensibility;
 
 namespace Sentry.Testing;

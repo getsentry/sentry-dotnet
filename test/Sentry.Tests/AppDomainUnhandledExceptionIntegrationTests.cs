@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Integrations;

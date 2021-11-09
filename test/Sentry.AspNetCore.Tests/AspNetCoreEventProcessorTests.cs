@@ -1,4 +1,3 @@
-using System;
 using Sentry.Protocol;
 using Xunit;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;

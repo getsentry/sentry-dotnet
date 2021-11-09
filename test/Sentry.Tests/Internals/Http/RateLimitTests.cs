@@ -1,4 +1,3 @@
-using System;
 using FluentAssertions;
 using Sentry.Internal.Http;
 using Xunit;

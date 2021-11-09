@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Sentry;
 using Sentry.Extensibility;
 

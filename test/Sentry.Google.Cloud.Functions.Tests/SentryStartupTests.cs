@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

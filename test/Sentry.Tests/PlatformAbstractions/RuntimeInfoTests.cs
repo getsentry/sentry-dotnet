@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Sentry.PlatformAbstractions;
 using Xunit;
 

@@ -1,7 +1,5 @@
-using System;
 using System.Net;
 using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Grpc;

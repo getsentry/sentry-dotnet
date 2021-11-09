@@ -1,4 +1,3 @@
-using System;
 using NSubstitute;
 using Sentry.Integrations;
 using Sentry.Internal;

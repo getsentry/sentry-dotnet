@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Sentry.Extensibility;

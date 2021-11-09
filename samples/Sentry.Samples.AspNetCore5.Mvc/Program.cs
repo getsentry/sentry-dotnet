@@ -1,6 +1,3 @@
-using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
 

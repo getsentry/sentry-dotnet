@@ -1,4 +1,3 @@
-using System;
 using NSubstitute;
 using Sentry.Extensibility;
 using Xunit;

@@ -1,8 +1,5 @@
 #if NETCOREAPP3_1_OR_GREATER
-using System;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

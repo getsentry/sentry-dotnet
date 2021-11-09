@@ -1,6 +1,4 @@
-using System;
 using System.Runtime.ExceptionServices;
-using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Microsoft.Extensions.Options;

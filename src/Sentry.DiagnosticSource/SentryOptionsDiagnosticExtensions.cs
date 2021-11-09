@@ -1,4 +1,3 @@
-using System.Linq;
 using Sentry.Internals.DiagnosticSource;
 
 namespace Sentry;

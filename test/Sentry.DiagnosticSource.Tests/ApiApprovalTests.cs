@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Sentry.Internals.DiagnosticSource;
 using Sentry.Tests;
 using VerifyXunit;

@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;

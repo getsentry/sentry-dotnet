@@ -1,4 +1,3 @@
-using System;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;

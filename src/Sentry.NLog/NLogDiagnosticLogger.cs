@@ -1,4 +1,3 @@
-using System;
 using NLog.Common;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;

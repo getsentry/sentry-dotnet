@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Google.Protobuf;
 using Sentry.Extensibility;
 

@@ -1,7 +1,4 @@
-using System;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;

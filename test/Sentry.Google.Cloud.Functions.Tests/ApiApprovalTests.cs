@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Google.Cloud.Functions.Framework;
 using Sentry.Tests;
 using VerifyXunit;

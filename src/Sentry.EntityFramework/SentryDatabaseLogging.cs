@@ -1,6 +1,4 @@
-using System;
 using System.Data.Entity.Infrastructure.Interception;
-using System.Threading;
 using Sentry.Extensibility;
 
 namespace Sentry.EntityFramework;

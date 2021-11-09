@@ -1,6 +1,4 @@
 #if !NETCOREAPP // Test runner fails when running on netcoreapp
-using System;
-using System.Threading;
 using Sentry.Internal;
 using Sentry.PlatformAbstractions;
 using Xunit;

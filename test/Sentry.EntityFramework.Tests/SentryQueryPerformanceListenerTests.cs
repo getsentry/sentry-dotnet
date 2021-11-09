@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
-using System.Linq;
 using Effort.Provider;
 using NSubstitute;
 using NSubstitute.Core;

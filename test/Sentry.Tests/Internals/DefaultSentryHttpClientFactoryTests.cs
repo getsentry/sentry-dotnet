@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
 using NSubstitute;
 using Sentry.Internal.Http;

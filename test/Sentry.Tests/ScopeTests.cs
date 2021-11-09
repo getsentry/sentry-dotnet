@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using FluentAssertions;
 using NSubstitute;
 using Sentry.Extensibility;

@@ -1,4 +1,3 @@
-using System;
 using Sentry.Internal;
 using Xunit;
 
