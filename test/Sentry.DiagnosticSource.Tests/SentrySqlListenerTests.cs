@@ -415,13 +415,13 @@ namespace Sentry.DiagnosticSource.Tests
                 evt.WaitOne();
 
                 // 1 repeated connection  with 1 query where the first query will start before connection span gets the connectionId.
-                void SimulateDbRequest(List<Guid> connnectionOperationIds, List<Guid> queryOperationIds)
+                void SimulateDbRequest(List<Guid> connectionOperationIds, List<Guid> queryOperationIds)
                 {
-                    interceptor.OpenConnectionStart(connnectionOperationIds[threadId]);
+                    interceptor.OpenConnectionStart(connectionOperationIds[threadId]);
                     interceptor.ExecuteQueryStart(queryOperationIds[threadId], connectionsIds[threadId]);
-                    interceptor.OpenConnectionStarted(connnectionOperationIds[threadId], connectionsIds[threadId]);
+                    interceptor.OpenConnectionStarted(connectionOperationIds[threadId], connectionsIds[threadId]);
                     interceptor.ExecuteQueryFinish(queryOperationIds[threadId], connectionsIds[threadId], query);
-                    interceptor.OpenConnectionClose(connnectionOperationIds[threadId], connectionsIds[threadId]);
+                    interceptor.OpenConnectionClose(connectionOperationIds[threadId], connectionsIds[threadId]);
                 }
                 SimulateDbRequest(connectionOperationsIds, queryOperationsIds);
                 SimulateDbRequest(connectionOperations2Ids, queryOperations2Ids);
