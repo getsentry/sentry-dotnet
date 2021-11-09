@@ -114,25 +114,25 @@ public class SentryQueryPerformanceListenerTests
         switch (expectedOperation)
         {
             case DbScalarKey:
-            {
-                var context = new DbCommandInterceptionContext<object> { Exception = new Exception() };
-                interceptor.ScalarExecuting(command, context);
-                interceptor.ScalarExecuted(command, context);
-            }
+                {
+                    var context = new DbCommandInterceptionContext<object> { Exception = new Exception() };
+                    interceptor.ScalarExecuting(command, context);
+                    interceptor.ScalarExecuted(command, context);
+                }
                 break;
             case DbNonQueryKey:
-            {
-                var context = new DbCommandInterceptionContext<int> { Exception = new Exception() };
-                interceptor.NonQueryExecuting(command, context);
-                interceptor.NonQueryExecuted(command, context);
-            }
+                {
+                    var context = new DbCommandInterceptionContext<int> { Exception = new Exception() };
+                    interceptor.NonQueryExecuting(command, context);
+                    interceptor.NonQueryExecuted(command, context);
+                }
                 break;
             case DbReaderKey:
-            {
-                var context = new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() };
-                interceptor.ReaderExecuting(command, context);
-                interceptor.ReaderExecuted(command, context);
-            }
+                {
+                    var context = new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() };
+                    interceptor.ReaderExecuting(command, context);
+                    interceptor.ReaderExecuted(command, context);
+                }
                 break;
             default:
                 throw new NotImplementedException();
@@ -168,25 +168,25 @@ public class SentryQueryPerformanceListenerTests
         switch (expectedOperation)
         {
             case DbScalarKey:
-            {
-                var context = new DbCommandInterceptionContext<object>();
-                interceptor.ScalarExecuting(command, context);
-                interceptor.ScalarExecuted(command, context);
-            }
+                {
+                    var context = new DbCommandInterceptionContext<object>();
+                    interceptor.ScalarExecuting(command, context);
+                    interceptor.ScalarExecuted(command, context);
+                }
                 break;
             case DbNonQueryKey:
-            {
-                var context = new DbCommandInterceptionContext<int>();
-                interceptor.NonQueryExecuting(command, context);
-                interceptor.NonQueryExecuted(command, context);
-            }
+                {
+                    var context = new DbCommandInterceptionContext<int>();
+                    interceptor.NonQueryExecuting(command, context);
+                    interceptor.NonQueryExecuted(command, context);
+                }
                 break;
             case DbReaderKey:
-            {
-                var context = new DbCommandInterceptionContext<DbDataReader>();
-                interceptor.ReaderExecuting(command, context);
-                interceptor.ReaderExecuted(command, context);
-            }
+                {
+                    var context = new DbCommandInterceptionContext<DbDataReader>();
+                    interceptor.ReaderExecuting(command, context);
+                    interceptor.ReaderExecuted(command, context);
+                }
                 break;
             default:
                 throw new NotImplementedException();
