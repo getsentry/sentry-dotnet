@@ -1,13 +1,12 @@
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace Sentry.Extensions.Logging
+namespace Sentry.Extensions.Logging;
+
+internal class SentryLoggingOptionsSetup : ConfigureFromConfigurationOptions<SentryLoggingOptions>
 {
-    internal class SentryLoggingOptionsSetup : ConfigureFromConfigurationOptions<SentryLoggingOptions>
-    {
-        public SentryLoggingOptionsSetup(
-            ILoggerProviderConfiguration<SentryLoggerProvider> providerConfiguration)
-            : base(providerConfiguration.Configuration)
-        { }
-    }
+    public SentryLoggingOptionsSetup(
+        ILoggerProviderConfiguration<SentryLoggerProvider> providerConfiguration)
+        : base(providerConfiguration.Configuration)
+    { }
 }

@@ -1,186 +1,178 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Sentry.Internal;
 using Sentry.Testing;
-using Xunit;
 
-namespace Sentry.Tests.Internals
+namespace Sentry.Tests.Internals;
+
+public class PartialStreamTests
 {
-    public class PartialStreamTests
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_Length_ReturnsPartialLength()
     {
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_Length_ReturnsPartialLength()
-        {
-            // Arrange
+        // Arrange
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            const int offset = 10;
-            const int length = 100;
+        const int offset = 10;
+        const int length = 100;
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var partialStream = new PartialStream(originalStream, offset, length);
 
-            // Act & assert
-            partialStream.Length.Should().Be(length);
-        }
+        // Act & assert
+        partialStream.Length.Should().Be(length);
+    }
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_ReadToEnd_ReturnsOnlyDataInRange()
-        {
-            // Arrange
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_ReadToEnd_ReturnsOnlyDataInRange()
+    {
+        // Arrange
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            const int offset = 10;
-            const int length = 100;
+        const int offset = 10;
+        const int length = 100;
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var partialStream = new PartialStream(originalStream, offset, length);
 
-            // Act
+        // Act
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+        await partialStream.CopyToAsync(outputStream);
 
-            // Assert
-            var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
+        // Assert
+        var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
 
-            outputStream.Length.Should().Be(length);
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+        outputStream.Length.Should().Be(length);
+        outputStream.ToArray().Should().Equal(originalPortion);
+    }
 
-        [Fact]
-        public async Task PartialStream_WithOffset_ReadToEnd_ReturnsOnlyDataInRange()
-        {
-            // Arrange
+    [Fact]
+    public async Task PartialStream_WithOffset_ReadToEnd_ReturnsOnlyDataInRange()
+    {
+        // Arrange
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            const int offset = 10;
+        const int offset = 10;
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var partialStream = new PartialStream(originalStream, offset, null);
 
-            // Act
+        // Act
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+        await partialStream.CopyToAsync(outputStream);
 
-            // Assert
-            var originalPortion = originalStream.ToArray().Skip(offset).ToArray();
+        // Assert
+        var originalPortion = originalStream.ToArray().Skip(offset).ToArray();
 
-            outputStream.Length.Should().Be(originalStream.Length - offset);
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+        outputStream.Length.Should().Be(originalStream.Length - offset);
+        outputStream.ToArray().Should().Equal(originalPortion);
+    }
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_Seek_WorksCorrectly()
-        {
-            // Arrange
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_Seek_WorksCorrectly()
+    {
+        // Arrange
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            const int offset = 10;
-            const int length = 100;
+        const int offset = 10;
+        const int length = 100;
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var partialStream = new PartialStream(originalStream, offset, length);
 
-            // Act
-            const int additionalOffset = 40;
-            partialStream.Seek(additionalOffset, SeekOrigin.Begin);
+        // Act
+        const int additionalOffset = 40;
+        partialStream.Seek(additionalOffset, SeekOrigin.Begin);
 
-            // Assert
+        // Assert
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+        await partialStream.CopyToAsync(outputStream);
 
-            var originalPortion = originalStream
-                .ToArray()
-                .Skip(offset + additionalOffset)
-                .Take(length - additionalOffset)
-                .ToArray();
+        var originalPortion = originalStream
+            .ToArray()
+            .Skip(offset + additionalOffset)
+            .Take(length - additionalOffset)
+            .ToArray();
 
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+        outputStream.ToArray().Should().Equal(originalPortion);
+    }
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_SettingInvalidPosition_Throws()
-        {
-            // Arrange
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_SettingInvalidPosition_Throws()
+    {
+        // Arrange
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            const int offset = 10;
-            const int length = 100;
+        const int offset = 10;
+        const int length = 100;
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var partialStream = new PartialStream(originalStream, offset, length);
 
-            // Act & assert
-            Assert.Throws<InvalidOperationException>(() => partialStream.Position = 200);
-        }
+        // Act & assert
+        Assert.Throws<InvalidOperationException>(() => partialStream.Position = 200);
+    }
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_InnerPositionChanged_StillReadsCorrectly()
-        {
-            // Arrange
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_InnerPositionChanged_StillReadsCorrectly()
+    {
+        // Arrange
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            const int offset = 10;
-            const int length = 100;
+        const int offset = 10;
+        const int length = 100;
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var partialStream = new PartialStream(originalStream, offset, length);
 
-            // Act
-            originalStream.Position = 1000;
+        // Act
+        originalStream.Position = 1000;
 
-            // Assert
+        // Assert
 #if !NET461 && !NETCOREAPP2_1
-            await
+        await
 #endif
             using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+        await partialStream.CopyToAsync(outputStream);
 
-            var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
+        var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
 
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+        outputStream.ToArray().Should().Equal(originalPortion);
     }
 }

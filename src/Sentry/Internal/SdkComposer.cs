@@ -1,5 +1,7 @@
 using System;
+#if !NET6_0_OR_GREATER
 using System.Threading.Tasks;
+#endif
 using Sentry.Extensibility;
 using Sentry.Internal.Http;
 
@@ -45,6 +47,13 @@ namespace Sentry.Internal
             // Caching transport
             var cachingTransport = new CachingTransport(httpTransport, _options);
 
+            BlockCacheFlush(cachingTransport);
+
+            return cachingTransport;
+        }
+
+        internal void BlockCacheFlush(IFlushableTransport transport)
+        {
             // If configured, flush existing cache
             if (_options.InitCacheFlushTimeout > TimeSpan.Zero)
             {
@@ -55,10 +64,15 @@ namespace Sentry.Internal
                 try
                 {
                     // Flush cache but block on it only for a limited amount of time.
-                    // If we don't flush it in time, then continue doing it on the
-                    // background but don't block the calling thread until it finishes.
+                    // If we don't flush it in time, then let it continue to run on the
+                    // background but don't block the calling thread any more than set timeout.
+#if NET6_0_OR_GREATER
+                    transport.FlushAsync().WaitAsync(_options.InitCacheFlushTimeout)
+                        // Block calling thread (Init) until either Flush or Timeout is reached
+                        .GetAwaiter().GetResult();
+#else
                     var timeoutTask = Task.Delay(_options.InitCacheFlushTimeout);
-                    var flushTask = cachingTransport.FlushAsync();
+                    var flushTask = transport.FlushAsync();
 
                     // If flush finished in time, finalize the task by awaiting it to
                     // propagate potential exceptions.
@@ -74,6 +88,7 @@ namespace Sentry.Internal
                             "Continuing without waiting for the task to finish.",
                             _options.InitCacheFlushTimeout);
                     }
+#endif
                 }
                 catch (Exception ex)
                 {
@@ -82,8 +97,6 @@ namespace Sentry.Internal
                         ex);
                 }
             }
-
-            return cachingTransport;
         }
 
         public IBackgroundWorker CreateBackgroundWorker()
