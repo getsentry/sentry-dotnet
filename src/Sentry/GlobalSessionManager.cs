@@ -265,6 +265,24 @@ namespace Sentry
             {
                 var recoveredUpdate = _persistedSessionProvider(filePath);
 
+                SessionEndStatus? status = null;
+                try
+                {
+                    status = _options.CrashedLastRun?.Invoke() switch
+                    {
+                        // Native crash (if native SDK enabled):
+                        true => SessionEndStatus.Crashed,
+                        // Ended while on the background, healthy session:
+                        _ when recoveredUpdate.PauseTimestamp is not null => SessionEndStatus.Exited,
+                        // Possibly out of battery, killed by OS or user, solar flare:
+                        _ => SessionEndStatus.Abnormal
+                    };
+                }
+                catch (Exception e)
+                {
+                    _options.LogError("Invoking CrashedLastRun failed.", e);
+                }
+
                 // Create a session update to end the recovered session
                 var sessionUpdate = new SessionUpdate(
                     recoveredUpdate.Update,
@@ -275,15 +293,7 @@ namespace Sentry
                     // Increment sequence number
                     recoveredUpdate.Update.SequenceNumber + 1,
                     // If there's a callback for native crashes, check that first.
-                    _options.CrashedLastRun?.Invoke() switch
-                    {
-                        // Native crash (if native SDK enabled):
-                        true => SessionEndStatus.Crashed,
-                        // Ended while on the background, healthy session:
-                        _ when recoveredUpdate.PauseTimestamp is not null => SessionEndStatus.Exited,
-                        // Possibly out of battery, killed by OS or user, solar flare:
-                        _ => SessionEndStatus.Abnormal
-                    });
+                    status);
 
                 _options.LogInfo("Recovered session: EndStatus: {0}. PauseTimestamp: {1}",
                     sessionUpdate.EndStatus,
