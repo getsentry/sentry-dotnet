@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- update Ben.Demystifier module ([#1336](https://github.com/getsentry/sentry-dotnet/pull/1336))
+
 ## 3.12.0
 
 ### Features
