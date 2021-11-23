@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1333)
+- Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1333))
 
 ## 3.12.0
 
