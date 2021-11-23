@@ -12,6 +12,7 @@ namespace Sentry.Internal
     {
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
+        internal const string MemoryInfoKey = "Memory Info";
 
         private readonly Enricher _enricher;
 
@@ -54,6 +55,7 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
+            AddMemoryInfo(@event.Contexts);
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -132,6 +134,35 @@ namespace Sentry.Internal
             _enricher.Apply(@event);
 
             return @event;
+        }
+
+        private void AddMemoryInfo(Contexts contexts)
+        {
+#if NETCOREAPP3_0 || NET5_0_OR_GREATER
+            var memoryInfo = GC.GetGCMemoryInfo();
+            var values = new Dictionary<string, string>
+            {
+                {"TotalAllocatedBytes", GC.GetTotalAllocatedBytes().ToString()},
+                {"FragmentedBytes", memoryInfo.FragmentedBytes.ToString()},
+                {"HeapSizeBytes", memoryInfo.HeapSizeBytes.ToString()},
+                {"HighMemoryLoadThresholdBytes", memoryInfo.HighMemoryLoadThresholdBytes.ToString()},
+                {"TotalAvailableMemoryBytes", memoryInfo.TotalAvailableMemoryBytes.ToString()},
+                {"MemoryLoadBytes", memoryInfo.MemoryLoadBytes.ToString()},
+            };
+#if NET5_0_OR_GREATER
+            values.Add("TotalCommittedBytes", memoryInfo.TotalCommittedBytes.ToString());
+            values.Add("PromotedBytes", memoryInfo.PromotedBytes.ToString());
+            values.Add("PinnedObjectsCount", memoryInfo.PinnedObjectsCount.ToString());
+            values.Add("PauseTimePercentage", memoryInfo.PauseTimePercentage.ToString());
+            values.Add("PauseDurations", memoryInfo.PauseDurations.ToString());
+            values.Add("Index", memoryInfo.Index.ToString());
+            values.Add("Generation", memoryInfo.Generation.ToString());
+            values.Add("FinalizationPendingCount", memoryInfo.FinalizationPendingCount.ToString());
+            values.Add("Concurrent", memoryInfo.Concurrent.ToString());
+            values.Add("Compacted", memoryInfo.Compacted.ToString());
+#endif
+            contexts[MemoryInfoKey] = values;
+#endif
         }
 
         private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)
