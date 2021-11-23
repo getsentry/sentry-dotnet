@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Sentry.PlatformAbstractions
@@ -13,6 +14,7 @@ namespace Sentry.PlatformAbstractions
         /// The map between release number and version number
         /// </summary>
         /// <see href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed" />
+        [Obsolete("No longer required by sentry.")]
         public static IReadOnlyDictionary<int, string> NetFxReleaseVersionMap { get; }
             = new Dictionary<int, string>
             {

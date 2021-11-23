@@ -12,6 +12,7 @@ namespace Sentry.PlatformAbstractions
     {
         internal const string NetFxNdpRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\";
         internal const string NetFxNdpFullRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
+
         /// <summary>
         /// Get the latest Framework installation for the specified CLR
         /// </summary>
@@ -174,9 +175,57 @@ namespace Sentry.PlatformAbstractions
 
         internal static Version GetNetFxVersionFromRelease(int release)
         {
-            _ = NetFxReleaseVersionMap.TryGetValue(release, out var version);
-            _ = Version.TryParse(version, out var parsed);
-            return parsed;
+            if (release >= 528040)
+            {
+                return new Version(4, 8);
+            }
+
+            if (release >= 461808)
+            {
+                return new Version(4, 7, 2);
+            }
+
+            if (release >= 461308)
+            {
+                return new Version(4, 7, 1);
+            }
+
+            if (release >= 460798)
+            {
+                return new Version(4, 7);
+            }
+
+            if (release >= 394802)
+            {
+                return new Version(4, 6, 2);
+            }
+
+            if (release >= 394254)
+            {
+                return new Version(4, 6, 1);
+            }
+
+            if (release >= 393295)
+            {
+                return new Version(4, 6);
+            }
+
+            if (release >= 379893)
+            {
+                return new Version(4, 5, 2);
+            }
+
+            if (release >= 378675)
+            {
+                return new Version(4, 5, 1);
+            }
+
+            if (release >= 378389)
+            {
+                return new Version(4, 5);
+            }
+
+            throw new($"Unknown version for NetFx registry version: {release}");
         }
     }
 }
