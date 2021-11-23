@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Infer netfx version from min reg versions ([#1346](https://github.com/getsentry/sentry-dotnet/pull/1346))
+
 ## 3.12.0
 
 ### Features

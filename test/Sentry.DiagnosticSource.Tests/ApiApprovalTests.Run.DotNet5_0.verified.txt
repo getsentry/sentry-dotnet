@@ -1074,6 +1074,7 @@ namespace Sentry.PlatformAbstractions
 {
     public static class FrameworkInfo
     {
+        [System.Obsolete("No longer required by sentry.")]
         public static System.Collections.Generic.IReadOnlyDictionary<int, string> NetFxReleaseVersionMap { get; }
         public static System.Collections.Generic.IEnumerable<Sentry.PlatformAbstractions.FrameworkInstallation> GetInstallations() { }
         public static Sentry.PlatformAbstractions.FrameworkInstallation? GetLatest(int clr) { }
