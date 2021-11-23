@@ -10,7 +10,7 @@
 
 - Avoid using the same connection Span for the same ConnectionId ([#1317](https://github.com/getsentry/sentry-dotnet/pull/1317))
 - Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
-- Update X-Sentry-Auth header to include correct sdk name and version ([#1318](https://github.com/getsentry/sentry-dotnet/pull/1318)
+- Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1318)
 
 ## 3.12.0-alpha.1
 

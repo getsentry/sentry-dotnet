@@ -495,7 +495,7 @@ public class HttpTransportTests
         var authHeader = request.Headers.GetValues("X-Sentry-Auth").FirstOrDefault();
 
         // Assert
-        var versionString = Regex.Match(authHeader, @"sentry_client=(\S+),").Groups[1].Value;
+        var versionString = Regex.Match(authHeader, @"sentry_client=(\S+),sentry_key").Groups[1].Value;
         Assert.Contains(versionString, $"{SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}");
     }
 
