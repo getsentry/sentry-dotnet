@@ -173,6 +173,7 @@ namespace Sentry.PlatformAbstractions
             return ndpKey?.GetInt("Release");
         }
 
+        // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#minimum-version
         internal static Version GetNetFxVersionFromRelease(int release)
         {
             if (release >= 528040)
