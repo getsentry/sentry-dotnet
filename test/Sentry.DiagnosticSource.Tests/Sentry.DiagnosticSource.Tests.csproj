@@ -27,7 +27,7 @@
     <EFCoreVersion>5.0.11</EFCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <EFCoreVersion>6.0.0-rc.*</EFCoreVersion>
+    <EFCoreVersion>6.0.0</EFCoreVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EFCoreVersion)" />
