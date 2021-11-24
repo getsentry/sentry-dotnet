@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- dont log "Ignoring request with Size" when null ([#1348](https://github.com/getsentry/sentry-unity/pull/1348))
+
 ## 3.12.0
 
 ### Features
