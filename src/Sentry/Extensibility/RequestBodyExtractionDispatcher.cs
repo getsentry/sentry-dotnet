@@ -70,7 +70,7 @@ namespace Sentry.Extensibility
                     return null;
             }
 
-            if (request.ContentLength != null)
+            if (request.ContentLength is not null)
             {
                 _options.LogWarning("Ignoring request with Size {0} and configuration RequestSize {1}",
                     request.ContentLength, size);
