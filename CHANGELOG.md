@@ -5,6 +5,11 @@
 ### Fixes
 
 - Infer netfx version from min reg versions ([#1346](https://github.com/getsentry/sentry-dotnet/pull/1346))
+- Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1333))
+
+### Features
+
+- Move to stable v6 for `Microsoft.Extensions.*` packages ([#1347](https://github.com/getsentry/sentry-dotnet/pull/1347))
 
 ## 3.12.0
 
