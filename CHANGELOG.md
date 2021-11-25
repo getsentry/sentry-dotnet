@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Move to stable v6 for `Microsoft.Extensions.*` packages ([#1347](https://github.com/getsentry/sentry-dotnet/pull/1347))
+
+### Fixes
+
+- Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1333))
+
 ## 3.12.0
 
 ### Features
