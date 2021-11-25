@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
@@ -477,6 +478,25 @@ public class HttpTransportTests
 
         // Assert
         authHeader.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public void CreateRequest_AuthHeader_IncludesVersion()
+    {
+        // Arrange
+        var httpTransport = new HttpTransport(
+            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new HttpClient());
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        using var request = httpTransport.CreateRequest(envelope);
+        var authHeader = request.Headers.GetValues("X-Sentry-Auth").FirstOrDefault();
+
+        // Assert
+        var versionString = Regex.Match(authHeader, @"sentry_client=(\S+),sentry_key").Groups[1].Value;
+        Assert.Contains(versionString, $"{SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}");
     }
 
     [Fact]
