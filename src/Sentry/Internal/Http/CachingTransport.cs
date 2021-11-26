@@ -170,7 +170,7 @@ namespace Sentry.Internal.Http
                 }
                 catch (Exception ex) when (IsNetworkRelated(ex))
                 {
-                    _options.LogDebug(
+                    _options.LogError(
                         "Failed to send cached envelope: {0}, retrying after a delay.",
                         ex,
                         envelopeFilePath);
