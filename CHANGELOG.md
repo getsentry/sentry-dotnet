@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+- Dont log "Ignoring request with Size" when null ([#1348](https://github.com/getsentry/sentry-dotnet/pull/1348))
+- Move to stable v6 for `Microsoft.Extensions.*` packages ([#1347](https://github.com/getsentry/sentry-dotnet/pull/1347))
+- bump Ben.Demystifier adding support for Microsoft.Bcl.AsyncInterfaces([#1349](https://github.com/getsentry/sentry-dotnet/pull/1349))
+
 ### Fixes
 
 - Infer netfx version from min reg versions ([#1346](https://github.com/getsentry/sentry-dotnet/pull/1346))
