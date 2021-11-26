@@ -158,9 +158,19 @@ namespace Sentry.Internal.Http
                 {
                     await InnerProcessCacheAsync(cancellationToken, envelopeFilePath).ConfigureAwait(false);
                 }
-                catch (Exception ex) when (IsRetryable(ex))
+                catch (OperationCanceledException ex) // OperationCancel should not log an error
                 {
-                    _options.LogError(
+                    _options.LogDebug(
+                        "Canceled sending cached envelope: {0}, retrying after a delay.",
+                        ex,
+                        envelopeFilePath);
+
+                    // Let the worker catch, log, wait a bit and retry.
+                    throw;
+                }
+                catch (Exception ex) when (IsNetworkRelated(ex))
+                {
+                    _options.LogDebug(
                         "Failed to send cached envelope: {0}, retrying after a delay.",
                         ex,
                         envelopeFilePath);
@@ -211,10 +221,9 @@ namespace Sentry.Internal.Http
         // via stream directly instead of loading the whole file in memory. For that reason capturing an envelope
         // from disk could raise an IOException related to Disk I/O.
         // For that reason, we're not retrying IOException, to avoid any disk related exception from retrying.
-        private static bool IsRetryable(Exception exception) =>
-            exception is OperationCanceledException // Timed-out or Shutdown triggered
-                or HttpRequestException
-                or SocketException; // Network related
+        private static bool IsNetworkRelated(Exception exception) =>
+            exception is HttpRequestException
+                or SocketException;
 
         // Gets the next cache file and moves it to "processing"
         private async Task<string?> TryPrepareNextCacheFileAsync(
