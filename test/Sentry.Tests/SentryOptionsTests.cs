@@ -1,29 +1,27 @@
 using System.IO.Compression;
 using System.Net;
 #if NET461
-using Sentry.Internal;
 using Sentry.PlatformAbstractions;
 using Xunit.Sdk;
 #endif
-using Xunit;
 
-namespace Sentry.Tests
+namespace Sentry.Tests;
+
+public class SentryOptionsTests
 {
-    public class SentryOptionsTests
+    [Fact]
+    public void DecompressionMethods_ByDefault_AllBitsSet()
     {
-        [Fact]
-        public void DecompressionMethods_ByDefault_AllBitsSet()
-        {
-            var sut = new SentryOptions();
-            Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
-        }
+        var sut = new SentryOptions();
+        Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
+    }
 
-        [Fact]
-        public void RequestBodyCompressionLevel_ByDefault_Optimal()
-        {
-            var sut = new SentryOptions();
-            Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
-        }
+    [Fact]
+    public void RequestBodyCompressionLevel_ByDefault_Optimal()
+    {
+        var sut = new SentryOptions();
+        Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
+    }
 
 #if NET461
         [SkippableFact(typeof(IsTypeException))]
@@ -44,5 +42,4 @@ namespace Sentry.Tests
             Assert.IsNotType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
         }
 #endif
-    }
 }

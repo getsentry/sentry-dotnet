@@ -1,13 +1,12 @@
-namespace Sentry.NLog
+namespace Sentry.NLog;
+
+/// <summary>
+/// NLog Constant Values.
+/// </summary>
+internal static class Constants
 {
     /// <summary>
-    /// NLog Constant Values.
+    /// NLog SDK name
     /// </summary>
-    internal static class Constants
-    {
-        /// <summary>
-        /// NLog SDK name
-        /// </summary>
-        public const string SdkName = "sentry.dotnet.nlog";
-    }
+    public const string SdkName = "sentry.dotnet.nlog";
 }

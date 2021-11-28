@@ -4,10 +4,23 @@
 
 ### Features
 
+- Dont log "Ignoring request with Size" when null ([#1348](https://github.com/getsentry/sentry-dotnet/pull/1348))
+- Move to stable v6 for `Microsoft.Extensions.*` packages ([#1347](https://github.com/getsentry/sentry-dotnet/pull/1347))
+- bump Ben.Demystifier adding support for Microsoft.Bcl.AsyncInterfaces([#1349](https://github.com/getsentry/sentry-dotnet/pull/1349))
+
+### Fixes
+
+- Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1333))
+
+## 3.12.0
+
+### Features
+
 - Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
 
 ### Fixes
 
+- Avoid using the same connection Span for the same ConnectionId ([#1317](https://github.com/getsentry/sentry-dotnet/pull/1317))
 - Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
 
 ## 3.12.0-alpha.1
