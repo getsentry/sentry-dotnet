@@ -1,4 +1,4 @@
-﻿[assembly: System.CLSCompliant(true)]
+[assembly: System.CLSCompliant(true)]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v3.0", FrameworkDisplayName="")]
 namespace Sentry
 {

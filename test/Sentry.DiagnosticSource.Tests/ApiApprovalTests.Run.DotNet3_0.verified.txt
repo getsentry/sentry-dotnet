@@ -1,9 +1,0 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.1", FrameworkDisplayName="")]
-namespace Sentry
-{
-    public static class SentryOptionsDiagnosticExtensions
-    {
-        public static void AddDiagnosticSourceIntegration(this Sentry.SentryOptions options) { }
-        public static void DisableDiagnosticSourceIntegration(this Sentry.SentryOptions options) { }
-    }
-}

@@ -1,4 +1,4 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.1", FrameworkDisplayName="")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.1", FrameworkDisplayName="")]
 namespace Sentry.EntityFramework.ErrorProcessors
 {
     public class DbConcurrencyExceptionProcessor : Sentry.Extensibility.SentryEventExceptionProcessor<System.Data.DBConcurrencyException>
