@@ -121,7 +121,7 @@ public class SentryStartup : FunctionsStartup
 
     private class SentryGoogleCloudFunctionsRouteName : ISentryRouteName
     {
-        private static readonly Lazy<string?> RouteName = new Lazy<string?>(() => Environment.GetEnvironmentVariable("K_SERVICE"));
+        private static readonly Lazy<string?> RouteName = new(() => Environment.GetEnvironmentVariable("K_SERVICE"));
 
         // K_SERVICE is where the name of the FAAS is stored.
         // It'll return null. if GCP Function is running locally.

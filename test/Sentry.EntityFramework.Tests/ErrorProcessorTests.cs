@@ -36,7 +36,7 @@ public class ErrorProcessorTests
         }
     }
 
-    private readonly Fixture _fixture = new Fixture();
+    private readonly Fixture _fixture = new();
 
     [Fact]
     public async Task EntityValidationExceptions_Extra_EntityValidationErrorsNotNullAsync()
