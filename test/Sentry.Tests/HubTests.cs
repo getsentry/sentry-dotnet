@@ -776,7 +776,7 @@ public class HubTests
         hub.Dispose();
 
         // Assert
-        (client as IDisposable).Received(1).Dispose();
+        ((IDisposable)client).Received(1).Dispose();
     }
 
     [Fact]
