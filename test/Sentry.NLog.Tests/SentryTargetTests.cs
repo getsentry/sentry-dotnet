@@ -317,10 +317,9 @@ public class SentryTargetTests
     public void Log_NullLogEvent_CaptureNotCalled()
     {
         var sut = _fixture.GetLogger();
-        string message = null;
 
         // ReSharper disable once AssignNullToNotNullAttribute
-        sut.Error(message);
+        sut.Error((string)null);
 
         _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
