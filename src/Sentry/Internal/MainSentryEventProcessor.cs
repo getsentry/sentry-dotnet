@@ -101,8 +101,7 @@ namespace Sentry.Internal
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    if (assembly is null ||
-                        assembly.IsDynamic)
+                    if (assembly.IsDynamic)
                     {
                         continue;
                     }
