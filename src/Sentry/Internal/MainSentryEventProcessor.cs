@@ -87,7 +87,7 @@ namespace Sentry.Internal
                         Crashed = false,
                         Current = true,
                         Name = Thread.CurrentThread.Name,
-                        Id = Thread.CurrentThread.ManagedThreadId,
+                        Id = Environment.CurrentManagedThreadId,
                         Stacktrace = stackTrace
                     };
 
