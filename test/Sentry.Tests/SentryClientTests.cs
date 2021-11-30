@@ -639,9 +639,7 @@ public class SentryClientTests
     {
         _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
 
-        using (var sut = new SentryClient(_fixture.SentryOptions))
-        {
-            _ = Assert.IsType<BackgroundWorker>(sut.Worker);
-        }
+        using var sut = new SentryClient(_fixture.SentryOptions);
+        _ = Assert.IsType<BackgroundWorker>(sut.Worker);
     }
 }
