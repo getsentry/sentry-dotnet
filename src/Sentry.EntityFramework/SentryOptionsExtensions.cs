@@ -18,7 +18,6 @@ public static class SentryOptionsExtensions
     /// Adds the entity framework integration.
     /// </summary>
     /// <param name="sentryOptions">The sentry options.</param>
-    /// <returns></returns>
     public static SentryOptions AddEntityFramework(this SentryOptions sentryOptions)
     {
         try

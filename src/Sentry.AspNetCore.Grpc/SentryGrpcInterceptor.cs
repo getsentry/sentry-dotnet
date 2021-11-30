@@ -45,7 +45,6 @@ public class SentryGrpcInterceptor : Interceptor
     /// <param name="continuation">The continuation</param>
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
-    /// <returns></returns>
     public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(
         TRequest request,
         ServerCallContext context,
@@ -88,7 +87,6 @@ public class SentryGrpcInterceptor : Interceptor
     /// <param name="continuation">The continuation</param>
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
-    /// <returns></returns>
     public override async Task ServerStreamingServerHandler<TRequest, TResponse>(TRequest request,
         IServerStreamWriter<TResponse> responseStream,
         ServerCallContext context, ServerStreamingServerMethod<TRequest, TResponse> continuation)
@@ -170,7 +168,6 @@ public class SentryGrpcInterceptor : Interceptor
     /// <param name="continuation">The continuation</param>
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
-    /// <returns></returns>
     public override async Task DuplexStreamingServerHandler<TRequest, TResponse>(
         IAsyncStreamReader<TRequest> requestStream, IServerStreamWriter<TResponse> responseStream,
         ServerCallContext context, DuplexStreamingServerMethod<TRequest, TResponse> continuation)
