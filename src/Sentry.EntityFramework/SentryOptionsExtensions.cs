@@ -23,9 +23,7 @@ public static class SentryOptionsExtensions
     {
         try
         {
-#pragma warning disable 618 // TODO: We can make the method internal on a new major release.
             _ = SentryDatabaseLogging.UseBreadcrumbs(diagnosticLogger: sentryOptions.DiagnosticLogger);
-#pragma warning restore 618
         }
         catch (Exception e)
         {
