@@ -20,7 +20,6 @@ namespace Sentry
     /// <inheritdoc cref="IDisposable" />
     public class SentryClient : ISentryClient, IDisposable
     {
-        private volatile bool _disposed;
         private readonly SentryOptions _options;
 
         // Internal for testing.
@@ -62,11 +61,6 @@ namespace Sentry
         /// <inheritdoc />
         public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             if (@event == null)
             {
                 return SentryId.Empty;
@@ -86,11 +80,6 @@ namespace Sentry
         /// <inheritdoc />
         public void CaptureUserFeedback(UserFeedback userFeedback)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             if (userFeedback.EventId.Equals(SentryId.Empty))
             {
                 // Ignore the user feedback if EventId is empty
@@ -104,11 +93,6 @@ namespace Sentry
         /// <inheritdoc />
         public void CaptureTransaction(Transaction transaction)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
                 _options.LogWarning(
@@ -156,11 +140,6 @@ namespace Sentry
         /// <inheritdoc />
         public void CaptureSession(SessionUpdate sessionUpdate)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             CaptureEnvelope(Envelope.FromSession(sessionUpdate));
         }
 
@@ -299,19 +278,13 @@ namespace Sentry
         /// Disposes this client
         /// </summary>
         /// <inheritdoc />
+        [Obsolete("Sentry client should no be explicitly disposed of. This method will be removed in version 4.")]
         public void Dispose()
         {
-            _options.LogDebug("Disposing SentryClient.");
-
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
+            _options.LogDebug("Flushing SentryClient.");
 
             // Worker should empty it's queue until SentryOptions.ShutdownTimeout
-            (Worker as IDisposable)?.Dispose();
+            Worker.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
         }
     }
 }
