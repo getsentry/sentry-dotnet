@@ -427,7 +427,7 @@ namespace Sentry
 
         /// <summary>
         /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
-        /// You can set it to <code>TimeSpan.Zero</code> to disable this feature.
+        /// Set to <see cref="TimeSpan.Zero"/> to disable this feature.
         /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
         /// </summary>
         /// <remarks>
@@ -449,10 +449,10 @@ namespace Sentry
 
         /// <summary>
         /// Indicates the percentage of the tracing data that is collected.
-        /// Setting this to <code>0</code> discards all trace data.
-        /// Setting this to <code>1.0</code> collects all trace data.
+        /// Setting this to <c>0</c> discards all trace data.
+        /// Setting this to <c>1.0</c> collects all trace data.
         /// Values outside of this range are invalid.
-        /// Default value is <code>0</code>, which means tracing is disabled.
+        /// Default value is <c>0</c>, which means tracing is disabled.
         /// </summary>
         /// <remarks>
         /// Random sampling rate is only applied to transactions that don't already
@@ -478,7 +478,7 @@ namespace Sentry
         /// Custom delegate that returns sample rate dynamically for a specific transaction context.
         /// </summary>
         /// <remarks>
-        /// Returning <code>null</code> signals that the sampler did not reach a sampling decision.
+        /// Returning <c>null</c> signals that the sampler did not reach a sampling decision.
         /// In such case, if the transaction already has a sampling decision (for example, if it's
         /// started from a trace header) that decision is retained.
         /// Otherwise sampling decision is determined by applying the static sampling rate
