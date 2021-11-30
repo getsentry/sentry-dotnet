@@ -410,7 +410,6 @@ public class SentryClientTests
     [Fact]
     public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
     {
-
         //Arrange
         var sut = _fixture.GetSut();
 

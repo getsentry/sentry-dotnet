@@ -18,7 +18,6 @@ namespace Google.Cloud.Functions.Framework;
 /// </summary>
 public class SentryStartup : FunctionsStartup
 {
-
     /// <summary>
     /// Configure Sentry logging.
     /// </summary>

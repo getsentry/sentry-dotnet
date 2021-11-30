@@ -61,7 +61,6 @@ public class ErrorProcessorTests
             Assert.NotNull(entityValidationErrors);
             Assert.NotEmpty(entityValidationErrors);
         }
-
     }
 
     /// <summary>

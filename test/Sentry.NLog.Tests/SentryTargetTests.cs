@@ -359,9 +359,7 @@ public class SentryTargetTests
                 e => e.Extra[SentryTarget.AdditionalGroupingKeyProperty].ToString() == expectedGroupingKey)))
             .Do(c => actualSentryEvent = c.Arg<SentryEvent>());
 
-
         logger.Log(evt);
-
 
         Assert.NotNull(actualSentryEvent);
         Assert.Equal(expectedFingerprint, actualSentryEvent.Fingerprint);

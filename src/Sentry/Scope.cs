@@ -296,7 +296,6 @@ namespace Sentry
         /// </summary>
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
 
-
         /// <summary>
         /// Clear all Attachments.
         /// </summary>

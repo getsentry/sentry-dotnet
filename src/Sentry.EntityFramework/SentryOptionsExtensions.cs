@@ -42,7 +42,6 @@ public static class SentryOptionsExtensions
         return sentryOptions;
     }
 
-
     /// <summary>
     /// Disables the integrations with DbInterception.
     /// </summary>

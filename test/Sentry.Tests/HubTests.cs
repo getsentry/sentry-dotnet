@@ -1,5 +1,3 @@
-
-
 // ReSharper disable once CheckNamespace
 // Tests code path which excludes frames with namespace Sentry
 namespace NotSentry.Tests;
