@@ -50,21 +50,21 @@ namespace Sentry.Internals.DiagnosticSource
             _options = options;
         }
 
-        private void SetConnectionId(ISpan span, Guid? connectionId)
+        private static void SetConnectionId(ISpan span, Guid? connectionId)
         {
             Debug.Assert(connectionId != Guid.Empty);
 
             span.SetExtra(ConnectionExtraKey, connectionId);
         }
 
-        private void SetOperationId(ISpan span, Guid? operationId)
+        private static void SetOperationId(ISpan span, Guid? operationId)
         {
             Debug.Assert(operationId != Guid.Empty);
 
             span.SetExtra(OperationExtraKey, operationId);
         }
 
-        private Guid? TryGetOperationId(ISpan span)
+        private static Guid? TryGetOperationId(ISpan span)
         {
             if (span.Extra.TryGetValue(OperationExtraKey, out var key) && key is Guid guid)
             {
@@ -73,7 +73,7 @@ namespace Sentry.Internals.DiagnosticSource
             return null;
         }
 
-        private Guid? TryGetConnectionId(ISpan span)
+        private static Guid? TryGetConnectionId(ISpan span)
         {
             if (span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid)
             {
@@ -167,13 +167,13 @@ namespace Sentry.Internals.DiagnosticSource
             return span;
         }
 
-        private ISpan? TryStartChild(ISpan? parent, string operation, string? description)
+        private static ISpan? TryStartChild(ISpan? parent, string operation, string? description)
             => parent?.StartChild(operation, description);
 
-        private ISpan? TryGetConnectionSpan(Scope scope, Guid connectionId)
+        private static ISpan? TryGetConnectionSpan(Scope scope, Guid connectionId)
             => scope.Transaction?.Spans.FirstOrDefault(span => !span.IsFinished && span.Operation is "db.connection" && TryGetConnectionId(span) == connectionId);
 
-        private ISpan? TryGetQuerySpan(Scope scope, Guid operationId)
+        private static ISpan? TryGetQuerySpan(Scope scope, Guid operationId)
             => scope.Transaction?.Spans.FirstOrDefault(span => TryGetOperationId(span) == operationId);
 
         private void UpdateConnectionSpan(Guid operationId, Guid connectionId)
@@ -242,7 +242,7 @@ namespace Sentry.Internals.DiagnosticSource
             }
         }
 
-        private void TrySetConnectionStatistics(ISpan span, KeyValuePair<string, object?> value)
+        private static void TrySetConnectionStatistics(ISpan span, KeyValuePair<string, object?> value)
         {
             if (value.GetProperty<Dictionary<object, object>>("Statistics") is { } statistics)
             {

@@ -135,7 +135,7 @@ namespace Sentry
         }
 
         // Internal for testing
-        internal string GetMachineNameInstallationId() =>
+        internal static string GetMachineNameInstallationId() =>
             // Never fails
             Environment.MachineName.GetHashString();
 
@@ -161,7 +161,7 @@ namespace Sentry
                 var id =
                     TryGetPersistentInstallationId() ??
                     TryGetHardwareInstallationId() ??
-                    GetMachineNameInstallationId();
+                    GlobalSessionManager.GetMachineNameInstallationId();
 
                 if (!string.IsNullOrWhiteSpace(id))
                 {

@@ -142,7 +142,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         }
     }
 
-    private IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LogEvent logEvent)
+    private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LogEvent logEvent)
     {
         var properties = logEvent.Properties;
 
