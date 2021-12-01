@@ -15,7 +15,7 @@
     <ProjectReference Include="../../src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
   </ItemGroup>
