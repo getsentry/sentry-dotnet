@@ -322,7 +322,7 @@ public class SentryEFCoreListenerTests
 
 
     [Theory]
-    [InlineData(EFCommandExecuted)] 
+    [InlineData(EFCommandExecuted)]
     [InlineData(EFConnectionClosed)]
     [InlineData(EFQueryCompiled)]
     public void OnNext_TakeSpanWithoutSpan_ShowsGarbageCollectorError(string operation)

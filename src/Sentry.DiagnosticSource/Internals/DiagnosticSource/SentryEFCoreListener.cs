@@ -72,7 +72,7 @@ namespace Sentry.Internals.DiagnosticSource
                 {
                     return;
                 }
-                                
+
                 if (GetSpanBucket(type) is not { } asyncLocalSpan)
                 {
                     return;
