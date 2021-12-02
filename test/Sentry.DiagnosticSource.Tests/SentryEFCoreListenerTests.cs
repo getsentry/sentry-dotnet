@@ -338,7 +338,6 @@ public class SentryEFCoreListenerTests
         _fixture.Options.DiagnosticLogger.Received(1).Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"), null, Arg.Any<object[]>());
     }
 
-
     [Fact]
     public void FilterNewLineValue_StringWithNewLine_SubStringAfterNewLine()
     {
