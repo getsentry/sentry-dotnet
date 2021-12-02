@@ -24,7 +24,7 @@ namespace Sentry.Internals.DiagnosticSource
         internal const string EFCommandFailed = "Microsoft.EntityFrameworkCore.Database.Command.CommandError";
 
         /// <summary>
-        /// Used for EF Core 2.X and 3.X. 
+        /// Used for EF Core 2.X and 3.X.
         /// <seealso href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1"></seealso>
         /// </summary>
         internal const string EFQueryStartCompiling = "Microsoft.EntityFrameworkCore.Query.QueryCompilationStarting";

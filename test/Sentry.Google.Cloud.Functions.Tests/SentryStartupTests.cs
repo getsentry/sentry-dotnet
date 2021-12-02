@@ -32,7 +32,6 @@ public class SentryStartupTests
 
         LoggingBuilder = new TestLoggingBuilder();
         LoggingBuilder.Services.AddSingleton(HostingEnvironment);
-
     }
 
     private class TestLoggingBuilder : ILoggingBuilder

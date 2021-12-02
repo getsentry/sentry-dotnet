@@ -62,7 +62,6 @@ internal class SentryMiddleware
     /// Handles the <see cref="HttpContext"/> while capturing any errors
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public async Task InvokeAsync(HttpContext context)
     {
         var hub = _getHub();

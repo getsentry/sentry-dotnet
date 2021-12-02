@@ -328,7 +328,6 @@ public static class SentrySinkExtensions
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration.</param>
     /// <param name="configureOptions">The configure options callback.</param>
-    /// <returns></returns>
     public static LoggerConfiguration Sentry(
         this LoggerSinkConfiguration loggerConfiguration,
         Action<SentrySerilogOptions> configureOptions)
