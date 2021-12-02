@@ -5,8 +5,8 @@ public class SentryQueryLoggerTests
     private class Fixture
     {
         public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public Scope Scope { get; } = new Scope(new SentryOptions());
-        public SentryQueryLogger GetSut() => new SentryQueryLogger(Hub);
+        public Scope Scope { get; } = new(new SentryOptions());
+        public SentryQueryLogger GetSut() => new(Hub);
 
         public Fixture()
         {
@@ -15,7 +15,7 @@ public class SentryQueryLoggerTests
         }
     }
 
-    private readonly Fixture _fixture = new Fixture();
+    private readonly Fixture _fixture = new();
 
     [Fact]
     public void Log_QueryLogger_CaptureEvent()

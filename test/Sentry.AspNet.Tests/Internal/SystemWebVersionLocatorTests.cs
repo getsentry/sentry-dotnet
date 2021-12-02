@@ -46,5 +46,4 @@ public class SystemWebVersionLocatorTests
 
         Assert.Equal(expected, actual);
     }
-
 }

@@ -197,7 +197,7 @@ namespace Sentry
                 }
             }
 
-            SentryEvent? processedEvent = @event;
+            var processedEvent = @event;
 
             foreach (var processor in scope.GetAllEventProcessors())
             {
