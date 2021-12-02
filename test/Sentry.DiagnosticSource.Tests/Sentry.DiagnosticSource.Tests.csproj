@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netcoreapp')) OR '$(TargetFramework)' == 'net461'">
-    <EFCoreVersion>3.1.20</EFCoreVersion>
+    <EFCoreVersion>6.0.0</EFCoreVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
     <EFCoreVersion>5.0.11</EFCoreVersion>
