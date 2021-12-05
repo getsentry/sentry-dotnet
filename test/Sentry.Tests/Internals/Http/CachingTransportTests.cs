@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Net.Sockets;
+using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 
@@ -44,6 +45,31 @@ public class CachingTransportTests
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
         sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+    }
+
+    [Fact]
+    public async Task HandlesOperationCanceledException()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
+
+        var innerTransport = Substitute.For<ITransport>();
+
+        innerTransport
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .ThrowsForAnyArgs(new OperationCanceledException());
+
+        await using var transport = new CachingTransport(innerTransport, options);
+
+        // Act
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
     }
 
     [Fact(Timeout = 7000)]
