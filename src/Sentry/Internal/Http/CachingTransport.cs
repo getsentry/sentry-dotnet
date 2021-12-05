@@ -85,7 +85,10 @@ namespace Sentry.Internal.Http
                     }
                     catch (OperationCanceledException)
                     {
-                        throw; // Avoid logging an error.
+                        if (!_workerCts.IsCancellationRequested)
+                        {
+                            throw; // Avoid logging an error.
+                        }
                     }
                     catch (Exception ex)
                     {
