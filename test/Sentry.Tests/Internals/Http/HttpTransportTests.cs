@@ -32,13 +32,13 @@ public class HttpTransportTests
 #if NET5_0_OR_GREATER
         await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
 #else
-            // Act
-            await httpTransport.SendEnvelopeAsync(envelope, token);
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope, token);
 
-            // Assert
-            await httpHandler
-                .Received(1)
-                .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
+        // Assert
+        await httpHandler
+            .Received(1)
+            .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
 #endif
     }
 
