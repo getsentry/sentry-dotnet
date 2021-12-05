@@ -52,7 +52,7 @@ public class CachingTransportTests
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-        
+
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
