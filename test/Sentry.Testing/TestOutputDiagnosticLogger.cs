@@ -34,7 +34,7 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
     {
         var formattedMessage = string.Format(message, args);
         _entries.Enqueue(
-            new LogEntry {Level = logLevel, Message = formattedMessage, Exception = exception});
+            new LogEntry { Level = logLevel, Message = formattedMessage, Exception = exception });
 
         _testOutputHelper.WriteLine($@"
 [{logLevel}]: {formattedMessage}
