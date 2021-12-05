@@ -8,7 +8,7 @@ namespace Sentry.Tests.Internals.Http;
 
 public class CachingTransportTests
 {
-    private readonly IDiagnosticLogger _logger;
+    private readonly TestOutputDiagnosticLogger _logger;
 
     public CachingTransportTests(ITestOutputHelper testOutputHelper)
     {
@@ -52,11 +52,13 @@ public class CachingTransportTests
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
+        
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
-            CacheDirectoryPath = cacheDirectory.Path
+            CacheDirectoryPath = cacheDirectory.Path,
+            Debug = true
         };
 
         var innerTransport = Substitute.For<ITransport>();
@@ -66,10 +68,13 @@ public class CachingTransportTests
             .ThrowsForAnyArgs(new OperationCanceledException());
 
         await using var transport = new CachingTransport(innerTransport, options);
-
-        // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
+
+        await Task.Delay(100);
+
+        // Assert
+        Assert.False(_logger.HasErrorOrFatal);
     }
 
     [Fact(Timeout = 7000)]
