@@ -84,12 +84,11 @@ namespace Sentry.Internal.Http
                         _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
                         await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when
+                        (_workerCts.IsCancellationRequested)
                     {
-                        if (!_workerCts.IsCancellationRequested)
-                        {
-                            throw; // Avoid logging an error.
-                        }
+                        // Swallow if IsCancellationRequested
+                        // else log will be handled by generic catch
                     }
                     catch (Exception ex)
                     {

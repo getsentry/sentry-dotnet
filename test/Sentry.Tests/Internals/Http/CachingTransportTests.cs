@@ -48,11 +48,44 @@ public class CachingTransportTests
     }
 
     [Fact]
-    public async Task HandlesOperationCanceledException()
+    public async Task ShouldNotLogOperationCanceledExceptionWhenIsCancellationRequested()
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-        
+
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            CacheDirectoryPath = cacheDirectory.Path,
+            Debug = true
+        };
+
+        var innerTransport = Substitute.For<ITransport>();
+
+        innerTransport
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .ThrowsForAnyArgs(info =>
+            {
+                Thread.Sleep(100);
+                return new OperationCanceledException();
+            });
+
+        await using var transport = new CachingTransport(innerTransport, options);
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
+        await transport.StopWorkerAsync();
+
+        // Assert
+        Assert.False(_logger.HasErrorOrFatal);
+    }
+
+    [Fact]
+    public async Task ShouldLogOperationCanceledExceptionWhenNotIsCancellationRequested()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
@@ -70,11 +103,9 @@ public class CachingTransportTests
         await using var transport = new CachingTransport(innerTransport, options);
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
-
         await Task.Delay(100);
-
         // Assert
-        Assert.False(_logger.HasErrorOrFatal);
+        Assert.True(_logger.HasErrorOrFatal);
     }
 
     [Fact(Timeout = 7000)]
