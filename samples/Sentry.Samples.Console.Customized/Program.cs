@@ -162,7 +162,6 @@ internal static class Program
                 SentrySdk.CaptureException(error);
             }
 
-
             var count = 10;
             for (var i = 0; i < count; i++)
             {
@@ -201,12 +200,10 @@ internal static class Program
                 var middleware = new AdminPartMiddleware(adminClient, null);
                 var request = new { Path = "/admin" }; // made up request
                 middleware.Invoke(request);
-
             } // Dispose the client which flushes any queued events
 
             SentrySdk.CaptureException(
                 new Exception("Error outside of the admin section: Goes to the default DSN"));
-
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
@@ -239,7 +236,6 @@ internal static class Program
                 // Else it uses the default client
 
                 _middleware?.Invoke(request);
-
             } // Scope is disposed.
         }
     }

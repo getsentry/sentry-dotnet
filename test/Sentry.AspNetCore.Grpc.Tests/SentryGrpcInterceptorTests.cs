@@ -57,7 +57,6 @@ public class SentryGrpcInterceptorTests
         _ = _fixture.Hub.DidNotReceive().PushScope();
     }
 
-
     [Fact]
     public async Task UnaryServerHandler_ExceptionThrown_SameRethrown()
     {
@@ -73,7 +72,6 @@ public class SentryGrpcInterceptorTests
 
         Assert.Same(expected, actual);
     }
-
 
     [Fact]
     public async Task UnaryServerHandler_ScopePushedAndPopped_OnError()

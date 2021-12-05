@@ -38,7 +38,6 @@ public class ApplicationBuilderExtensionsTests
                     ? new[] { SentryEventExceptionProcessor }
                     : Enumerable.Empty<ISentryEventExceptionProcessor>());
 
-
             var sut = Substitute.For<IApplicationBuilder>();
             _ = sut.ApplicationServices.Returns(provider);
             return sut;
