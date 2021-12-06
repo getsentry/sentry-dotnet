@@ -1,6 +1,8 @@
+#if NETCOREAPP3_0_OR_GREATER
 using System;
 using System.Collections.Generic;
 using System.Threading;
+#endif
 using Sentry.Extensibility;
 
 namespace Sentry.Internals.DiagnosticSource
@@ -55,6 +57,9 @@ namespace Sentry.Internals.DiagnosticSource
 
         internal bool DisableQuerySpan() => _logQueryEnabled = false;
 
+        private ISpan? GetParent(SentryEFSpanType type, Scope scope)
+            => type == SentryEFSpanType.QueryExecution ? scope.GetSpan() : scope.Transaction;
+
         private ISpan? AddSpan(SentryEFSpanType type, string operation, string? description)
         {
             ISpan? span = null;
@@ -65,7 +70,7 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                if (scope.GetSpan()?.StartChild(operation, description) is not { } startedChild)
+                if (GetParent(type, scope)?.StartChild(operation, description) is not { } startedChild)
                 {
                     return;
                 }
@@ -93,7 +98,10 @@ namespace Sentry.Internals.DiagnosticSource
                     {
                         span = startedSpan;
                     }
-                    _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
+                    else
+                    {
+                        _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
+                    }
                 }
             });
             return span;
