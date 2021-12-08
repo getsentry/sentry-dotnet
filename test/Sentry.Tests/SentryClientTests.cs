@@ -581,8 +581,7 @@ public class SentryClientTests
         sut.CaptureTransaction(
             new Transaction(
                 "test name",
-                "test operation"
-            )
+                "test operation")
             {
                 IsSampled = true,
                 EndTimestamp = null // not finished
