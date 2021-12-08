@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.12.1
 
 ### Features
 
@@ -10,6 +10,7 @@
 
 ### Fixes
 
+- Fix EF Core garbage collected messages and ordering ([#1368](https://github.com/getsentry/sentry-dotnet/pull/1368))
 - Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1333))
 
 ## 3.12.0

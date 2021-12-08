@@ -202,8 +202,8 @@ public class JsonTests
 #if NET6_0
             "\"BaseUtcOffset\":\"02:00:00\"",
 #else
-                "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0",
-                "\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
+            "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0",
+            "\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
 #endif
         };
         var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);

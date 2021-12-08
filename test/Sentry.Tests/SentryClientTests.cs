@@ -45,7 +45,7 @@ public class SentryClientTests
 
         var actual = sut.CaptureEvent(evt);
 
-        var hasDashes = actual.ToString().Contains("-");
+        var hasDashes = actual.ToString().Contains('-');
         Assert.False(hasDashes);
     }
 
@@ -410,7 +410,6 @@ public class SentryClientTests
     [Fact]
     public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
     {
-
         //Arrange
         var sut = _fixture.GetSut();
 
@@ -640,9 +639,7 @@ public class SentryClientTests
     {
         _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
 
-        using (var sut = new SentryClient(_fixture.SentryOptions))
-        {
-            _ = Assert.IsType<BackgroundWorker>(sut.Worker);
-        }
+        using var sut = new SentryClient(_fixture.SentryOptions);
+        _ = Assert.IsType<BackgroundWorker>(sut.Worker);
     }
 }

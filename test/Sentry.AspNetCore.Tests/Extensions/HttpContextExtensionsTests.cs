@@ -7,9 +7,9 @@ namespace Sentry.AspNetCore.Tests.Extensions;
 
 public class HttpContextExtensionsTests
 {
-    private class Fixture
+    private static class Fixture
     {
-        public HttpContext GetSut(string pathBase = null)
+        public static HttpContext GetSut(string pathBase = null)
         {
             var httpContext = new DefaultHttpContext();
             if (pathBase is not null)
@@ -21,7 +21,7 @@ public class HttpContextExtensionsTests
             return httpContext;
         }
 
-        public HttpContext GetMvcSut(
+        public static HttpContext GetMvcSut(
             string area = null,
             string controller = null,
             string action = null,
@@ -49,9 +49,7 @@ public class HttpContextExtensionsTests
         }
     }
 
-    private readonly Fixture _fixture = new();
-
-    private string LegacyFormat(string controller, string action, string area)
+    private static string LegacyFormat(string controller, string action, string area)
         => !string.IsNullOrWhiteSpace(area) ? $"{area}.{controller}.{action}" : $"{controller}.{action}";
 
     [Theory]
@@ -67,7 +65,7 @@ public class HttpContextExtensionsTests
     public void ReplaceMcvParameters_ParsedParameters(string routeInput, string assertOutput, string controller, string action, string area)
     {
         // Arrange
-        var httpContext = _fixture.GetMvcSut(area, controller, action);
+        var httpContext = Fixture.GetMvcSut(area, controller, action);
 
         // Act
         var filteredRoute = HttpContextExtensions.ReplaceMvcParameters(routeInput, httpContext);
@@ -114,7 +112,7 @@ public class HttpContextExtensionsTests
     public void NewRouteFormat_MvcRouteWithPathBase_ParsedParameters(string routeInput, string expectedOutput, string controller, string action, string area)
     {
         // Arrange
-        var httpContext = _fixture.GetMvcSut(area, controller, action, pathBase: "/myPath");
+        var httpContext = Fixture.GetMvcSut(area, controller, action, pathBase: "/myPath");
 
         // Act
         var filteredRoute = HttpContextExtensions.NewRouteFormat(routeInput, httpContext);
@@ -134,7 +132,7 @@ public class HttpContextExtensionsTests
     public void NewRouteFormat_MvcRouteWithoutPathBase_ParsedParameters(string routeInput, string expectedOutput, string controller, string action, string area)
     {
         // Arrange
-        var httpContext = _fixture.GetMvcSut(area, controller, action);
+        var httpContext = Fixture.GetMvcSut(area, controller, action);
 
         // Act
         var filteredRoute = HttpContextExtensions.NewRouteFormat(routeInput, httpContext);
@@ -151,7 +149,7 @@ public class HttpContextExtensionsTests
     public void NewRouteFormat_WithPathBase_MatchesExpectedRoute(string expectedRoute, string pathBase, string rawRoute)
     {
         // Arrange
-        var httpContext = _fixture.GetSut(pathBase);
+        var httpContext = Fixture.GetSut(pathBase);
 
         // Act
         var filteredRoute = HttpContextExtensions.NewRouteFormat(rawRoute, httpContext);
@@ -168,7 +166,7 @@ public class HttpContextExtensionsTests
     public void LegacyRouteFormat_WithPathBase_MatchesExcpectedRoute(string expectedRoute, string pathBase, string controller, string action, string area)
     {
         // Arrange
-        var httpContext = _fixture.GetMvcSut(area, controller, action, pathBase);
+        var httpContext = Fixture.GetMvcSut(area, controller, action, pathBase);
 
         // Act
         var filteredRoute = HttpContextExtensions.LegacyRouteFormat(httpContext);
@@ -183,7 +181,7 @@ public class HttpContextExtensionsTests
     public void LegacyRouteFormat_ValidRoutes_MatchPreviousImplementationResult(string controller, string action, string area)
     {
         // Arrange
-        var httpContext = _fixture.GetMvcSut(area, controller, action);
+        var httpContext = Fixture.GetMvcSut(area, controller, action);
 
         // Act
         var filteredRoute = HttpContextExtensions.LegacyRouteFormat(httpContext);
@@ -196,7 +194,7 @@ public class HttpContextExtensionsTests
     public void TryGetRouteTemplate_NoRoute_NullOutput()
     {
         // Arrange
-        var httpContext = _fixture.GetSut();
+        var httpContext = Fixture.GetSut();
 
         // Act
         var filteredRoute = httpContext.TryGetRouteTemplate();
@@ -210,7 +208,7 @@ public class HttpContextExtensionsTests
     {
         // Arrange
         var sentryRouteName = Substitute.For<ISentryRouteName>();
-        var httpContext = _fixture.GetSut();
+        var httpContext = Fixture.GetSut();
         var expectedName = "abc";
         sentryRouteName.GetRouteName().Returns(expectedName);
         httpContext.Features.Set(sentryRouteName);
@@ -221,6 +219,5 @@ public class HttpContextExtensionsTests
         // Assert
         Assert.Equal(expectedName, filteredRoute);
     }
-
 }
 #endif

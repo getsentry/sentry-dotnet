@@ -156,7 +156,7 @@ namespace Sentry.Internal.Http
 
                 try
                 {
-                    await InnerProcessCacheAsync(cancellationToken, envelopeFilePath).ConfigureAwait(false);
+                    await InnerProcessCacheAsync(envelopeFilePath, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex) when (IsRetryable(ex))
                 {
@@ -183,7 +183,7 @@ namespace Sentry.Internal.Http
             }
         }
 
-        private async Task InnerProcessCacheAsync(CancellationToken cancellationToken, string envelopeFilePath)
+        private async Task InnerProcessCacheAsync(string envelopeFilePath, CancellationToken cancellationToken)
         {
             var envelopeFile = File.OpenRead(envelopeFilePath);
 #if NET461 || NETSTANDARD2_0

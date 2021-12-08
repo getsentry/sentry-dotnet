@@ -26,7 +26,6 @@ internal static class ApplicationBuilderExtensions
     /// Use Sentry integration
     /// </summary>
     /// <param name="app">The application.</param>
-    /// <returns></returns>
     public static IApplicationBuilder UseSentry(this IApplicationBuilder app)
     {
         // Container is built so resolve a logger and modify the SDK internal logger
