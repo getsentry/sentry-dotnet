@@ -138,7 +138,7 @@ namespace Sentry.Internal
 
         private void AddMemoryInfo(Contexts contexts)
         {
-#if NETCOREAPP3_0 || NET5_0_OR_GREATER
+#if NETCOREAPP3_0_OR_GREATER
             var memoryInfo = GC.GetGCMemoryInfo();
             var values = new Dictionary<string, string>
             {
