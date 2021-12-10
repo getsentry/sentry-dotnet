@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix file locking in attachments ([#1377](https://github.com/getsentry/sentry-dotnet/pull/1377))
+
 ## 3.12.1
 
 ### Features
