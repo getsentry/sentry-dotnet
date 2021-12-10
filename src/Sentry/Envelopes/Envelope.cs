@@ -132,7 +132,7 @@ namespace Sentry.Protocol.Envelopes
                     }
                     catch (Exception exception)
                     {
-                        if (logger == null)
+                        if (logger is null)
                         {
                             throw;
                         }
