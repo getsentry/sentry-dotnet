@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Dont fail for attachment read error ([#1378](https://github.com/getsentry/sentry-dotnet/pull/1378))
+
 ## 3.12.1
 
 ### Features
