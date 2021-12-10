@@ -344,12 +344,12 @@ public class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var attachment= new Attachment(
+        var attachment = new Attachment(
             AttachmentType.Default,
             new FileAttachmentContent("test1.txt"),
             "test1.txt",
             null);
-        
+
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
             logger,
