@@ -391,7 +391,7 @@ public class EnvelopeTests
             "file.txt",
             null);
 
-        using var envelope = Envelope.FromEvent(@event, new[] { attachment });
+        using var envelope = Envelope.FromEvent(@event, null, new[] { attachment });
 
         using var stream = new MemoryStream();
 
@@ -428,7 +428,7 @@ public class EnvelopeTests
 
         var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
 
-        using var envelope = Envelope.FromEvent(@event, new[] { attachment }, sessionUpdate);
+        using var envelope = Envelope.FromEvent(@event, null, new[] { attachment }, sessionUpdate);
 
         using var stream = new MemoryStream();
 
