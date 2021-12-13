@@ -378,7 +378,6 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
         public static Sentry.SentryEvent FromJson(System.Text.Json.JsonElement json) { }
     }
-    public static class SentryEventExtensions { }
     public class SentryHttpMessageHandler : System.Net.Http.DelegatingHandler
     {
         public SentryHttpMessageHandler() { }

@@ -5,6 +5,39 @@
 ### Fixes
 
 - Attaching byte arrays to the scope no longer leads to ObjectDisposedException ([#1384](https://github.com/getsentry/sentry-dotnet/pull/1384))
+- Operation cancel while flushing cache no longer logs an errors ([#1352](https://github.com/getsentry/sentry-dotnet/pull/1352))
+- Dont fail for attachment read error ([#1378](https://github.com/getsentry/sentry-dotnet/pull/1378))
+- Fix file locking in attachments ([#1377](https://github.com/getsentry/sentry-dotnet/pull/1377))
+
+## 3.12.1
+
+### Features
+
+- Dont log "Ignoring request with Size" when null ([#1348](https://github.com/getsentry/sentry-dotnet/pull/1348))
+- Move to stable v6 for `Microsoft.Extensions.*` packages ([#1347](https://github.com/getsentry/sentry-dotnet/pull/1347))
+- bump Ben.Demystifier adding support for Microsoft.Bcl.AsyncInterfaces([#1349](https://github.com/getsentry/sentry-dotnet/pull/1349))
+
+### Fixes
+
+- Fix EF Core garbage collected messages and ordering ([#1368](https://github.com/getsentry/sentry-dotnet/pull/1368))
+- Update X-Sentry-Auth header to include correct sdk name and version ([#1333](https://github.com/getsentry/sentry-dotnet/pull/1333))
+
+## 3.12.0
+
+### Features
+
+- Add automatic spans to Entity Framework operations ([#1107](https://github.com/getsentry/sentry-dotnet/pull/1107))
+
+### Fixes
+
+- Avoid using the same connection Span for the same ConnectionId ([#1317](https://github.com/getsentry/sentry-dotnet/pull/1317))
+- Finish unfinished Spans on Transaction completion ([#1296](https://github.com/getsentry/sentry-dotnet/pull/1296))
+
+## 3.12.0-alpha.1
+
+### Features
+
+- .NET 6 specific targets ([#939](https://github.com/getsentry/sentry-dotnet/pull/939))
 
 ## 3.11.1
 

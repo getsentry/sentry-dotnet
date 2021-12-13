@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;

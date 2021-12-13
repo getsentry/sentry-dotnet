@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Hosting;
-
 // The entrypoint used when the function is deployed to AWS.
 public class LambdaEntryPoint : Amazon.Lambda.AspNetCoreServer.APIGatewayProxyFunction
 {

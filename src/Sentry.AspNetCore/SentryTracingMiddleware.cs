@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
@@ -200,7 +197,7 @@ namespace Microsoft.AspNetCore.Builder
     {
         /// <summary>
         /// Adds Sentry's tracing middleware to the pipeline.
-        /// Make sure to place this middleware after <code>UseRouting(...)</code>.
+        /// Make sure to place this middleware after <c>UseRouting(...)</c>.
         /// </summary>
         public static IApplicationBuilder UseSentryTracing(this IApplicationBuilder builder)
         {
