@@ -9,8 +9,15 @@
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
     <Configurations>Debug;Release;Release_Unity;Debug_Unity</Configurations>
-    <DefineConstants Condition="$(Configuration) == 'Release_Unity'">$(DefineConstants);RELEASE;Unity</DefineConstants>
-    <DefineConstants Condition="$(Configuration) == 'Debug_Unity'">$(DefineConstants);DEBUG;Unity</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration) == 'Release_Unity'">
+    <DefineConstants>$(DefineConstants);RELEASE;Unity</DefineConstants>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration) == 'Debug_Unity'">
+    <DefineConstants>$(DefineConstants);DEBUG;Unity</DefineConstants>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <!-- Ben.Demystifier -->
