@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Dispose of client should only flush ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1354))
+
 ## 3.12.1
 
 ### Features
