@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
@@ -83,9 +84,11 @@ namespace Sentry.Internal.Http
                         _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
                         await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when
+                        (_workerCts.IsCancellationRequested)
                     {
-                        throw; // Avoid logging an error.
+                        // Swallow if IsCancellationRequested
+                        // else log will be handled by generic catch
                     }
                     catch (Exception ex)
                     {
@@ -158,7 +161,17 @@ namespace Sentry.Internal.Http
                 {
                     await InnerProcessCacheAsync(envelopeFilePath, cancellationToken).ConfigureAwait(false);
                 }
-                catch (Exception ex) when (IsRetryable(ex))
+                catch (OperationCanceledException ex) // OperationCancel should not log an error
+                {
+                    _options.LogDebug(
+                        "Canceled sending cached envelope: {0}, retrying after a delay.",
+                        ex,
+                        envelopeFilePath);
+
+                    // Let the worker catch, log, wait a bit and retry.
+                    throw;
+                }
+                catch (Exception ex) when (IsNetworkRelated(ex))
                 {
                     _options.LogError(
                         "Failed to send cached envelope: {0}, retrying after a delay.",
@@ -211,10 +224,9 @@ namespace Sentry.Internal.Http
         // via stream directly instead of loading the whole file in memory. For that reason capturing an envelope
         // from disk could raise an IOException related to Disk I/O.
         // For that reason, we're not retrying IOException, to avoid any disk related exception from retrying.
-        private static bool IsRetryable(Exception exception) =>
-            exception is OperationCanceledException // Timed-out or Shutdown triggered
-                or HttpRequestException
-                or SocketException; // Network related
+        private static bool IsNetworkRelated(Exception exception) =>
+            exception is HttpRequestException
+                or SocketException;
 
         // Gets the next cache file and moves it to "processing"
         private async Task<string?> TryPrepareNextCacheFileAsync(
