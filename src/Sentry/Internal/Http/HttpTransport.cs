@@ -268,10 +268,9 @@ namespace Sentry.Internal.Http
             }
 
             var dsn = Dsn.Parse(_options.Dsn);
-
             var authHeader =
                 $"Sentry sentry_version={_options.SentryVersion}," +
-                $"sentry_client={_options.ClientVersion}," +
+                $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
                 $"sentry_key={dsn.PublicKey}," +
                 (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
                 $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";

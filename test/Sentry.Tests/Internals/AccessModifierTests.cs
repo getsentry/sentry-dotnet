@@ -1,25 +1,20 @@
-using System;
-using System.Linq;
-using Xunit;
+namespace Sentry.Tests.Internals;
 
-namespace Sentry.Tests.Internals
+public class AccessModifierTests
 {
-    public class AccessModifierTests
+    private const string InternalsNamespace = "Sentry.Internal";
+
+    [Fact]
+    public void TypesInInternalsNamespace_AreNotPublic()
     {
-        private const string InternalsNamespace = "Sentry.Internal";
+        var types = typeof(ISentryClient).Assembly
+            .GetTypes()
+            .Where(t => t.Namespace?.StartsWith(InternalsNamespace, StringComparison.Ordinal) == true)
+            .ToArray();
 
-        [Fact]
-        public void TypesInInternalsNamespace_AreNotPublic()
+        Assert.All(types, type =>
         {
-            var types = typeof(ISentryClient).Assembly
-                .GetTypes()
-                .Where(t => t.Namespace?.StartsWith(InternalsNamespace, StringComparison.Ordinal) == true)
-                .ToArray();
-
-            Assert.All(types, type =>
-            {
-                Assert.False(type.IsPublic, $"Expected type {type.Name} to be internal.");
-            });
-        }
+            Assert.False(type.IsPublic, $"Expected type {type.Name} to be internal.");
+        });
     }
 }

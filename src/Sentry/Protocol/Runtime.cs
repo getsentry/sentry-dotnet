@@ -48,7 +48,6 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance
         /// </summary>
-        /// <returns></returns>
         public Runtime Clone()
             => new()
             {

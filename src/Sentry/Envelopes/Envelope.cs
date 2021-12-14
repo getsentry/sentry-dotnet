@@ -111,6 +111,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromEvent(
             SentryEvent @event,
+            IDiagnosticLogger? logger = null,
             IReadOnlyCollection<Attachment>? attachments = null,
             SessionUpdate? sessionUpdate = null)
         {
@@ -123,7 +124,22 @@ namespace Sentry.Protocol.Envelopes
 
             if (attachments is not null)
             {
-                items.AddRange(attachments.Select(EnvelopeItem.FromAttachment));
+                foreach (var attachment in attachments)
+                {
+                    try
+                    {
+                        items.Add(EnvelopeItem.FromAttachment(attachment));
+                    }
+                    catch (Exception exception)
+                    {
+                        if (logger is null)
+                        {
+                            throw;
+                        }
+
+                        logger.LogError("Failed to add attachment: {0}.", exception, attachment.FileName);
+                    }
+                }
             }
 
             if (sessionUpdate is not null)

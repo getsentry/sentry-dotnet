@@ -1,33 +1,28 @@
-using System.Collections.Generic;
-using System.Linq;
-using Xunit;
+namespace Sentry.Tests;
 
-namespace Sentry.Tests
+public class DefaultSentryScopeStateProcessorTests
 {
-    public class DefaultSentryScopeStateProcessorTests
+    [Theory]
+    [InlineData("a", "a")]
+    [InlineData("{}", "")]
+    [InlineData("{OriginalFormat}", "OriginalFormat")]
+    [InlineData("OriginalFormat", "OriginalFormat")]
+    public void Apply_KeyValuePairObjectWithBraces_TagAddedWithoutBraces(string key, string expectedKey)
     {
-        [Theory]
-        [InlineData("a", "a")]
-        [InlineData("{}", "")]
-        [InlineData("{OriginalFormat}", "OriginalFormat")]
-        [InlineData("OriginalFormat", "OriginalFormat")]
-        public void Apply_KeyValuePairObjectWithBraces_TagAddedWithoutBraces(string key, string expectedKey)
+        // Arrange
+        var expectedValue = "some string";
+        var list = new List<KeyValuePair<string, object>>
         {
-            // Arrange
-            var expectedValue = "some string";
-            var list = new List<KeyValuePair<string, object>>
-            {
-                new(key, expectedValue)
-            };
-            var scopeStateProcessor = new DefaultSentryScopeStateProcessor();
-            var scope = new Scope();
+            new(key, expectedValue)
+        };
+        var scopeStateProcessor = new DefaultSentryScopeStateProcessor();
+        var scope = new Scope();
 
-            // Act
-            scopeStateProcessor.Apply(scope, list);
+        // Act
+        scopeStateProcessor.Apply(scope, list);
 
-            // Assert
-            Assert.Equal(expectedKey, scope.Tags.First().Key);
-            Assert.Equal(expectedValue, scope.Tags.First().Value);
-        }
+        // Assert
+        Assert.Equal(expectedKey, scope.Tags.First().Key);
+        Assert.Equal(expectedValue, scope.Tags.First().Value);
     }
 }

@@ -1,16 +1,15 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sentry.AspNetCore.Tests.Utils.Extensions
+namespace Sentry.AspNetCore.Tests.Utils.Extensions;
+
+internal static class DependencyContainerExtensions
 {
-    internal static class DependencyContainerExtensions
+    public static void EnableValidation(this ServiceProviderOptions options, bool enable = true)
     {
-        public static void EnableValidation(this ServiceProviderOptions options, bool enable = true)
-        {
-            options.ValidateScopes = enable;
+        options.ValidateScopes = enable;
 
 #if !NET461 && !NETCOREAPP2_1
-            options.ValidateOnBuild = enable;
+        options.ValidateOnBuild = enable;
 #endif
-        }
     }
 }

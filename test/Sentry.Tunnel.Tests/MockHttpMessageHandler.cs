@@ -1,37 +1,34 @@
 using System.Net;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Sentry.Tunnel.Tests
+namespace Sentry.Tunnel.Tests;
+
+public class MockHttpMessageHandler : DelegatingHandler
 {
-    public class MockHttpMessageHandler : DelegatingHandler
+    private readonly string _response;
+    private readonly HttpStatusCode _statusCode;
+
+    public string Input { get; private set; }
+    public int NumberOfCalls { get; private set; }
+
+    public MockHttpMessageHandler(string response, HttpStatusCode statusCode)
     {
-        private readonly string _response;
-        private readonly HttpStatusCode _statusCode;
+        _response = response;
+        _statusCode = statusCode;
+    }
 
-        public string Input { get; private set; }
-        public int NumberOfCalls { get; private set; }
-
-        public MockHttpMessageHandler(string response, HttpStatusCode statusCode)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        NumberOfCalls++;
+        if (request.Content != null) // Could be a GET-request without a body
         {
-            _response = response;
-            _statusCode = statusCode;
+            Input = await request.Content.ReadAsStringAsync();
         }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        return new HttpResponseMessage
         {
-            NumberOfCalls++;
-            if (request.Content != null) // Could be a GET-request without a body
-            {
-                Input = await request.Content.ReadAsStringAsync();
-            }
-            return new HttpResponseMessage
-            {
-                StatusCode = _statusCode,
-                Content = new StringContent(_response)
-            };
-        }
+            StatusCode = _statusCode,
+            Content = new StringContent(_response)
+        };
     }
 }

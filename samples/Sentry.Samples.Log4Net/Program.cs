@@ -1,4 +1,3 @@
-using System;
 using System.Security.Principal;
 using log4net;
 using log4net.Config;

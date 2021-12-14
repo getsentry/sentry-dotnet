@@ -1,13 +1,10 @@
-using Xunit;
+namespace Sentry.Tests.Protocol;
 
-namespace Sentry.Tests.Protocol
+public abstract class ImmutableTests<TType>
 {
-    public abstract class ImmutableTests<TType>
+    [Fact]
+    public void Type_IsImmutable()
     {
-        [Fact]
-        public void Type_IsImmutable()
-        {
-            typeof(TType).AssertImmutable();
-        }
+        typeof(TType).AssertImmutable();
     }
 }
