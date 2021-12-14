@@ -18,7 +18,7 @@ namespace Ben.Demystifier.Test
             {
                 await Task.Run(() => throw new Exception()).ConfigureAwait(false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 innerException = ex;
             }
@@ -29,16 +29,16 @@ namespace Ben.Demystifier.Test
             // Assert
             var stackTrace = demystifiedException.ToString();
             stackTrace = LineEndingsHelper.RemoveLineEndings(stackTrace);
-            var trace = stackTrace.Split(new[]{Environment.NewLine}, StringSplitOptions.None);
+            var trace = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
 #if NETCOREAPP3_0_OR_GREATER
             Assert.Equal(
-                new[] {     
+                new[] {
                     "System.Exception: Exception of type 'System.Exception' was thrown.",
                     " ---> System.Exception: Exception of type 'System.Exception' was thrown.",
                     "   at Task Ben.Demystifier.Test.NonThrownException.DoesNotPreventThrowStackTrace()+() => { }",
                     "   at async Task Ben.Demystifier.Test.NonThrownException.DoesNotPreventThrowStackTrace()",
-                    "   --- End of inner exception stack trace ---"}, 
+                    "   --- End of inner exception stack trace ---"},
                 trace);
 #else
             Assert.Equal(
