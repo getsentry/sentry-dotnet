@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
