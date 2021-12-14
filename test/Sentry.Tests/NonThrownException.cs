@@ -11,7 +11,11 @@ namespace Ben.Demystifier.Test
             EnhancedStackTrace est = null;
 
             // Act
-            await Task.Run(() => est = EnhancedStackTrace.Current()).ConfigureAwait(false);
+            await Task.Run(() =>
+            {
+                Thread.Sleep(100);
+                return est = EnhancedStackTrace.Current();
+            }).ConfigureAwait(false);
 
             // Assert
             var stackTrace = est.ToString();
