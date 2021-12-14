@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -251,12 +252,12 @@ namespace Sentry
             IsSampled);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
         {
             writer.WriteStartObject();
 
             writer.WriteString("type", "transaction");
-            writer.WriteSerializable("event_id", EventId);
+            writer.WriteSerializable("event_id", EventId, logger);
             writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
             writer.WriteStringIfNotWhiteSpace("platform", Platform);
             writer.WriteStringIfNotWhiteSpace("release", Release);
@@ -267,7 +268,7 @@ namespace Sentry
             writer.WriteSerializableIfNotNull("contexts", _contexts);
             writer.WriteSerializableIfNotNull("user", _user);
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
-            writer.WriteSerializable("sdk", Sdk);
+            writer.WriteSerializable("sdk", Sdk, logger);
             writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
             writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs);
             writer.WriteDictionaryIfNotEmpty("extra", _extra);

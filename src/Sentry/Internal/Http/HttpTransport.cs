@@ -167,7 +167,7 @@ namespace Sentry.Internal.Http
             {
                 _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
                     envelope.TryGetEventId(),
-                    await envelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+                    await envelope.SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken).ConfigureAwait(false));
             }
             else
             {
@@ -224,7 +224,7 @@ namespace Sentry.Internal.Http
                 {
                     _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n",
                         processedEnvelope.TryGetEventId(),
-                        await processedEnvelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+                        await processedEnvelope.SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken).ConfigureAwait(false));
                 }
             }
 
@@ -251,7 +251,7 @@ namespace Sentry.Internal.Http
                 await using (envelopeFile)
 #endif
                 {
-                    await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
+                    await processedEnvelope.SerializeAsync(envelopeFile, _options.DiagnosticLogger!, cancellationToken).ConfigureAwait(false);
                     await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
                     _options.LogInfo("Envelope's {0} bytes written to: {1}",
                         envelopeFile.Length, destination);

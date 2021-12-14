@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
@@ -215,12 +216,12 @@ namespace Sentry
             (_tags ??= new Dictionary<string, string>()).Remove(key);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
         {
             writer.WriteStartObject();
 
             writer.WriteStringDictionaryIfNotEmpty("modules", _modules!);
-            writer.WriteSerializable("event_id", EventId);
+            writer.WriteSerializable("event_id", EventId, logger);
             writer.WriteString("timestamp", Timestamp);
             writer.WriteSerializableIfNotNull("logentry", Message);
             writer.WriteStringIfNotWhiteSpace("logger", Logger);
@@ -235,7 +236,7 @@ namespace Sentry
             writer.WriteSerializableIfNotNull("contexts", _contexts);
             writer.WriteSerializableIfNotNull("user", _user);
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
-            writer.WriteSerializable("sdk", Sdk);
+            writer.WriteSerializable("sdk", Sdk, logger);
             writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
             writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs);
             writer.WriteDictionaryIfNotEmpty("extra", _extra);
