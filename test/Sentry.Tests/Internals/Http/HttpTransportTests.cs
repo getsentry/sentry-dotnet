@@ -278,14 +278,14 @@ public class HttpTransportTests
                 () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
             ));
 
-            var httpTransport = new HttpTransport(
-                new SentryOptions
-                {
-                    Dsn = DsnSamples.ValidDsnWithSecret,
-                    DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
-                    Debug = true
-                },
-                new HttpClient(httpHandler));
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                Debug = true
+            },
+            new HttpClient(httpHandler));
 
         // First request always goes through
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -320,7 +320,7 @@ public class HttpTransportTests
                     new EmptySerializable())
             });
 
-            var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
