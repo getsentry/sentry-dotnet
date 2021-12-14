@@ -378,7 +378,6 @@ public class SentryLoggerTests
 
         sut.LogDebug("anything");
 
-
         _fixture.Hub.DidNotReceiveWithAnyArgs()
             .AddBreadcrumb(
                 default,
@@ -387,7 +386,6 @@ public class SentryLoggerTests
                 default,
                 default,
                 default);
-
     }
 
     [Fact]
@@ -405,7 +403,6 @@ public class SentryLoggerTests
                 default,
                 default,
                 default);
-
     }
 
     [Fact]

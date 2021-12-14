@@ -87,7 +87,7 @@ namespace Sentry.Internal
                         Crashed = false,
                         Current = true,
                         Name = Thread.CurrentThread.Name,
-                        Id = Thread.CurrentThread.ManagedThreadId,
+                        Id = Environment.CurrentManagedThreadId,
                         Stacktrace = stackTrace
                     };
 
@@ -101,8 +101,7 @@ namespace Sentry.Internal
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    if (assembly is null ||
-                        assembly.IsDynamic)
+                    if (assembly.IsDynamic)
                     {
                         continue;
                     }

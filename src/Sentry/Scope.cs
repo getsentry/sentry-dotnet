@@ -296,7 +296,6 @@ namespace Sentry
         /// </summary>
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
 
-
         /// <summary>
         /// Clear all Attachments.
         /// </summary>
@@ -461,7 +460,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
+        /// Gets the currently ongoing (not finished) span or <c>null</c> if none available.
         /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
         /// </summary>
         public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;

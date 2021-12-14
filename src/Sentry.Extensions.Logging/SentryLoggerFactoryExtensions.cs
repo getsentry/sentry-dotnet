@@ -23,7 +23,6 @@ public static class SentryLoggerFactoryExtensions
     /// </remarks>
     /// <param name="factory">The factory.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
-    /// <returns></returns>
     public static ILoggerFactory AddSentry(
         this ILoggerFactory factory,
         Action<SentryLoggingOptions>? optionsConfiguration = null)

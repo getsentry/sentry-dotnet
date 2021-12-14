@@ -18,7 +18,6 @@ public static class SentryWebHostBuilderExtensions
     /// Uses Sentry integration.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IWebHostBuilder UseSentry(this IWebHostBuilder builder)
         => UseSentry(builder, (Action<SentryAspNetCoreOptions>?)null);
 
@@ -27,7 +26,6 @@ public static class SentryWebHostBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="dsn">The DSN.</param>
-    /// <returns></returns>
     public static IWebHostBuilder UseSentry(this IWebHostBuilder builder, string dsn)
         => builder.UseSentry(o => o.Dsn = dsn);
 
@@ -36,7 +34,6 @@ public static class SentryWebHostBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureOptions">The configure options.</param>
-    /// <returns></returns>
     public static IWebHostBuilder UseSentry(
         this IWebHostBuilder builder,
         Action<SentryAspNetCoreOptions>? configureOptions)
@@ -47,7 +44,6 @@ public static class SentryWebHostBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureOptions">The configure options.</param>
-    /// <returns></returns>
     public static IWebHostBuilder UseSentry(
         this IWebHostBuilder builder,
         Action<WebHostBuilderContext, SentryAspNetCoreOptions>? configureOptions)
@@ -59,7 +55,6 @@ public static class SentryWebHostBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureSentry">The Sentry builder.</param>
-    /// <returns></returns>
     public static IWebHostBuilder UseSentry(
         this IWebHostBuilder builder,
         Action<ISentryBuilder>? configureSentry) =>
@@ -70,7 +65,6 @@ public static class SentryWebHostBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureSentry">The Sentry builder.</param>
-    /// <returns></returns>
     public static IWebHostBuilder UseSentry(
         this IWebHostBuilder builder,
         Action<WebHostBuilderContext, ISentryBuilder>? configureSentry)

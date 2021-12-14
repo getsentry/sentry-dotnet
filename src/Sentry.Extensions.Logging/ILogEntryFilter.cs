@@ -18,7 +18,6 @@ public interface ILogEntryFilter
     /// <param name="logLevel">The event level.</param>
     /// <param name="eventId">The EventId.</param>
     /// <param name="exception">The Exception, if any.</param>
-    /// <returns></returns>
     bool Filter(
         string categoryName,
         LogLevel logLevel,

@@ -1,5 +1,3 @@
-
-
 // ReSharper disable once CheckNamespace
 // Tests code path which excludes frames with namespace Sentry
 namespace NotSentry.Tests;
@@ -778,7 +776,7 @@ public class HubTests
         hub.Dispose();
 
         // Assert
-        (client as IDisposable).Received(1).Dispose();
+        ((IDisposable)client).Received(1).Dispose();
     }
 
     [Fact]

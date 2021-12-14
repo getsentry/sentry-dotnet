@@ -27,10 +27,7 @@ public class EnvelopeTests
     public async Task Deserialization_EnvelopeWithoutItems_Success()
     {
         // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n".ToMemoryStream();
+        using var input = "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n".ToMemoryStream();
 
         using var expectedEnvelope = new Envelope(
             new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
@@ -72,10 +69,7 @@ public class EnvelopeTests
     public async Task Deserialization_EnvelopeWithoutHeader_Success()
     {
         // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = (
+        using var input = (
                 "{}\n" +
                 "{\"type\":\"fake\",\"length\":75}\n" +
                 "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
@@ -149,11 +143,7 @@ public class EnvelopeTests
     [Fact]
     public async Task Deserialization_EnvelopeWithTwoItems_Success()
     {
-        // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = (
+        using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
                 "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
                 "\xef\xbb\xbfHello\r\n\n" +
@@ -242,10 +232,7 @@ public class EnvelopeTests
     public async Task Deserialization_EnvelopeWithTwoEmptyItems_Success()
     {
         // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = (
+        using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
                 "{\"type\":\"attachment\",\"length\":0}\n" +
                 "\n" +
@@ -311,10 +298,7 @@ public class EnvelopeTests
     public async Task Deserialization_EnvelopeWithItemWithoutLength_Success()
     {
         // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = (
+        using var input = (
                 "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
                 "{\"type\":\"attachment\"}\n" +
                 "helloworld\n"
@@ -372,10 +356,7 @@ public class EnvelopeTests
 
         using var envelope = Envelope.FromEvent(@event);
 
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var stream = new MemoryStream();
+        using var stream = new MemoryStream();
 
         // Act
         await envelope.SerializeAsync(stream);
@@ -410,12 +391,9 @@ public class EnvelopeTests
             "file.txt",
             null);
 
-        using var envelope = Envelope.FromEvent(@event, new[] { attachment });
+        using var envelope = Envelope.FromEvent(@event, null, new[] { attachment });
 
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var stream = new MemoryStream();
+        using var stream = new MemoryStream();
 
         // Act
         await envelope.SerializeAsync(stream);
@@ -450,12 +428,9 @@ public class EnvelopeTests
 
         var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
 
-        using var envelope = Envelope.FromEvent(@event, new[] { attachment }, sessionUpdate);
+        using var envelope = Envelope.FromEvent(@event, null, new[] { attachment }, sessionUpdate);
 
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var stream = new MemoryStream();
+        using var stream = new MemoryStream();
 
         // Act
         await envelope.SerializeAsync(stream);
@@ -487,10 +462,7 @@ public class EnvelopeTests
 
         using var envelope = Envelope.FromUserFeedback(feedback);
 
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var stream = new MemoryStream();
+        using var stream = new MemoryStream();
 
         // Act
         await envelope.SerializeAsync(stream);
@@ -516,10 +488,7 @@ public class EnvelopeTests
 
         using var envelope = Envelope.FromSession(sessionUpdate);
 
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var stream = new MemoryStream();
+        using var stream = new MemoryStream();
 
         // Act
         await envelope.SerializeAsync(stream);
@@ -541,10 +510,7 @@ public class EnvelopeTests
     public async Task Deserialization_EmptyStream_Throws()
     {
         // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = new MemoryStream();
+        using var input = new MemoryStream();
 
         // Act & assert
         await Assert.ThrowsAnyAsync<Exception>(
@@ -555,10 +521,7 @@ public class EnvelopeTests
     public async Task Deserialization_InvalidData_Throws()
     {
         // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = new MemoryStream(new byte[1_000_000]); // all 0's
+        using var input = new MemoryStream(new byte[1_000_000]); // all 0's
 
         // Act & assert
         await Assert.ThrowsAnyAsync<Exception>(
@@ -569,10 +532,7 @@ public class EnvelopeTests
     public async Task Deserialization_MalformedData_Throws()
     {
         // Arrange
-#if !NET461 && !NETCOREAPP2_1
-        await
-#endif
-            using var input = "helloworld\n".ToMemoryStream();
+        using var input = "helloworld\n".ToMemoryStream();
 
         // Act & assert
         await Assert.ThrowsAnyAsync<Exception>(
