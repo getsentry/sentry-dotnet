@@ -1,4 +1,4 @@
-﻿[assembly: System.CLSCompliant(true)]
+[assembly: System.CLSCompliant(true)]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v3.0", FrameworkDisplayName="")]
 namespace Sentry
 {
@@ -384,7 +384,6 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
         public static Sentry.SentryEvent FromJson(System.Text.Json.JsonElement json) { }
     }
-    public static class SentryEventExtensions { }
     public class SentryHttpMessageHandler : System.Net.Http.DelegatingHandler
     {
         public SentryHttpMessageHandler() { }

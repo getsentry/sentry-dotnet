@@ -1,101 +1,94 @@
-using System;
-using System.Threading.Tasks;
 using Grpc.Core;
-using NSubstitute;
-using Xunit;
 
-namespace Sentry.AspNetCore.Grpc.Tests
+namespace Sentry.AspNetCore.Grpc.Tests;
+
+public class SentryGrpcInterceptorTests
 {
-    public class SentryGrpcInterceptorTests
+    private class Fixture
     {
-        private class Fixture
+        public IHub Hub { get; set; } = Substitute.For<IHub>();
+        public Func<IHub> HubAccessor { get; set; }
+        public SentryAspNetCoreOptions Options { get; set; } = new();
+
+        public ServerCallContext Context { get; set; } = Substitute.For<ServerCallContext>();
+
+        public UnaryServerMethod<TestRequest, TestResponse> Continuation { get; set; } =
+            (_, _) => Task.FromResult(new TestResponse());
+
+        public Fixture()
         {
-            public IHub Hub { get; set; } = Substitute.For<IHub>();
-            public Func<IHub> HubAccessor { get; set; }
-            public SentryAspNetCoreOptions Options { get; set; } = new();
-
-            public ServerCallContext Context { get; set; } = Substitute.For<ServerCallContext>();
-
-            public UnaryServerMethod<TestRequest, TestResponse> Continuation { get; set; } =
-                (_, _) => Task.FromResult(new TestResponse());
-
-            public Fixture()
-            {
-                HubAccessor = () => Hub;
-                _ = Hub.IsEnabled.Returns(true);
-            }
-
-            public SentryGrpcInterceptor GetSut()
-                => new(
-                    HubAccessor,
-                    Microsoft.Extensions.Options.Options.Create(Options));
+            HubAccessor = () => Hub;
+            _ = Hub.IsEnabled.Returns(true);
         }
 
-        private readonly Fixture _fixture = new();
+        public SentryGrpcInterceptor GetSut()
+            => new(
+                HubAccessor,
+                Microsoft.Extensions.Options.Options.Create(Options));
+    }
 
-        [Fact]
-        public async Task UnaryServerHandler_DisabledSdk_InvokesNextHandlers()
-        {
-            var request = new TestRequest();
+    private readonly Fixture _fixture = new();
 
-            _ = _fixture.Hub.IsEnabled.Returns(false);
-            _fixture.Continuation = Substitute.For<UnaryServerMethod<TestRequest, TestResponse>>();
+    [Fact]
+    public async Task UnaryServerHandler_DisabledSdk_InvokesNextHandlers()
+    {
+        var request = new TestRequest();
 
-            var sut = _fixture.GetSut();
+        _ = _fixture.Hub.IsEnabled.Returns(false);
+        _fixture.Continuation = Substitute.For<UnaryServerMethod<TestRequest, TestResponse>>();
 
-            await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation);
-            await _fixture.Continuation.Received(1).Invoke(request, _fixture.Context);
-        }
+        var sut = _fixture.GetSut();
 
-        [Fact]
-        public async Task UnaryServerHandler_DisabledSdk_NoScopePushed()
-        {
-            var request = new TestRequest();
+        await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation);
+        await _fixture.Continuation.Received(1).Invoke(request, _fixture.Context);
+    }
 
-            _ = _fixture.Hub.IsEnabled.Returns(false);
+    [Fact]
+    public async Task UnaryServerHandler_DisabledSdk_NoScopePushed()
+    {
+        var request = new TestRequest();
 
-            var sut = _fixture.GetSut();
+        _ = _fixture.Hub.IsEnabled.Returns(false);
 
-            await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation);
+        var sut = _fixture.GetSut();
 
-            _ = _fixture.Hub.DidNotReceive().PushScope();
-        }
+        await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation);
 
+        _ = _fixture.Hub.DidNotReceive().PushScope();
+    }
 
-        [Fact]
-        public async Task UnaryServerHandler_ExceptionThrown_SameRethrown()
-        {
-            var request = new TestRequest();
+    [Fact]
+    public async Task UnaryServerHandler_ExceptionThrown_SameRethrown()
+    {
+        var request = new TestRequest();
 
-            var expected = new Exception("test");
-            _fixture.Continuation = (_, _) => throw expected;
+        var expected = new Exception("test");
+        _fixture.Continuation = (_, _) => throw expected;
 
-            var sut = _fixture.GetSut();
+        var sut = _fixture.GetSut();
 
-            var actual = await Assert.ThrowsAsync<Exception>(
-                async () => await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
+        var actual = await Assert.ThrowsAsync<Exception>(
+            async () => await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
 
-            Assert.Same(expected, actual);
-        }
+        Assert.Same(expected, actual);
+    }
 
+    [Fact]
+    public async Task UnaryServerHandler_ScopePushedAndPopped_OnError()
+    {
+        var request = new TestRequest();
 
-        [Fact]
-        public async Task UnaryServerHandler_ScopePushedAndPopped_OnError()
-        {
-            var request = new TestRequest();
+        var expected = new Exception("test");
+        _fixture.Continuation = (_, _) => throw expected;
+        var disposable = Substitute.For<IDisposable>();
+        _ = _fixture.Hub.PushScope().Returns(disposable);
 
-            var expected = new Exception("test");
-            _fixture.Continuation = (_, _) => throw expected;
-            var disposable = Substitute.For<IDisposable>();
-            _ = _fixture.Hub.PushScope().Returns(disposable);
+        var sut = _fixture.GetSut();
 
-            var sut = _fixture.GetSut();
+        _ = await Assert.ThrowsAsync<Exception>(
+            async () => await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
 
-            _ = await Assert.ThrowsAsync<Exception>(
-                async () => await sut.UnaryServerHandler(request, _fixture.Context, _fixture.Continuation));
-
-            _ = _fixture.Hub.Received(1).PushScope();
-            disposable.Received(1).Dispose();
-        }
+        _ = _fixture.Hub.Received(1).PushScope();
+        disposable.Received(1).Dispose();
     }
 }

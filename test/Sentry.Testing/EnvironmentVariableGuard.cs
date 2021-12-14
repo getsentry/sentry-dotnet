@@ -1,25 +1,22 @@
-using System;
+namespace Sentry.Testing;
 
-namespace Sentry.Testing
+public static class EnvironmentVariableGuard
 {
-    public static class EnvironmentVariableGuard
-    {
-        // To allow different xunit collections use of this
-        private static readonly object Lock = new();
+    // To allow different xunit collections use of this
+    private static readonly object Lock = new();
 
-        public static void WithVariable(string key, string value, Action action)
+    public static void WithVariable(string key, string value, Action action)
+    {
+        lock (Lock)
         {
-            lock (Lock)
+            Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+            try
             {
-                Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
-                try
-                {
-                    action();
-                }
-                finally
-                {
-                    Environment.SetEnvironmentVariable(key, null, EnvironmentVariableTarget.Process);
-                }
+                action();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(key, null, EnvironmentVariableTarget.Process);
             }
         }
     }

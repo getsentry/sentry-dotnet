@@ -1,7 +1,6 @@
-namespace Sentry.AspNetCore
+namespace Sentry.AspNetCore;
+
+internal interface ISentryRouteName
 {
-    internal interface ISentryRouteName
-    {
-        string? GetRouteName();
-    }
+    string? GetRouteName();
 }

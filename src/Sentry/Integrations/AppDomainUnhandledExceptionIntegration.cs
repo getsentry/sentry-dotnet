@@ -27,7 +27,10 @@ namespace Sentry.Integrations
         }
 
         // Internal for testability
-        [HandleProcessCorruptedStateExceptions, SecurityCritical]
+#if !NET6_0_OR_GREATER
+        [HandleProcessCorruptedStateExceptions]
+#endif
+        [SecurityCritical]
         internal void Handle(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.ExceptionObject is Exception ex)

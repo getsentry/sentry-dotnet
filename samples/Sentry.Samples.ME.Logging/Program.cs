@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using Sentry;
 using Sentry.Extensions.Logging;
 
 internal class Program
@@ -71,7 +68,6 @@ internal class Program
                     // Handle an exception and log it:
                     logger.LogError(e, "7 - An event that includes the scope key-value (A, B, C) and also the breadcrumbs: (2, 4, 6) and events (3, 5)");
                 }
-
             } // Dispose scope C, drops state C and breadcrumb 6
 
             // An exception that will go unhandled and crash the app:

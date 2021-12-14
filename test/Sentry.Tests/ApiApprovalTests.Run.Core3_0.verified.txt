@@ -1,5 +1,5 @@
 [assembly: System.CLSCompliant(true)]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.1", FrameworkDisplayName="")]
 namespace Sentry
 {
     [System.Diagnostics.DebuggerDisplay("{FileName}")]
@@ -44,6 +44,11 @@ namespace Sentry
         Error = 2,
         [System.Runtime.Serialization.EnumMember(Value="critical")]
         Critical = 3,
+    }
+    public class ByteAttachmentContent : Sentry.IAttachmentContent
+    {
+        public ByteAttachmentContent(byte[] bytes) { }
+        public System.IO.Stream GetStream() { }
     }
     public static class Constants
     {
@@ -379,7 +384,6 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
         public static Sentry.SentryEvent FromJson(System.Text.Json.JsonElement json) { }
     }
-    public static class SentryEventExtensions { }
     public class SentryHttpMessageHandler : System.Net.Http.DelegatingHandler
     {
         public SentryHttpMessageHandler() { }
