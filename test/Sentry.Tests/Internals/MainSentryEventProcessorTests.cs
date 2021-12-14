@@ -3,6 +3,7 @@ using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
 
+[UsesVerify]
 public class MainSentryEventProcessorTests
 {
     private class Fixture
@@ -24,7 +25,7 @@ public class MainSentryEventProcessorTests
 
         Assert.Null(evt.User.Username);
     }
-
+    
     [Fact]
     public void Process_SendDefaultPiiTrueIdEnvironmentDefault_UserNameSet()
     {
@@ -37,6 +38,39 @@ public class MainSentryEventProcessorTests
 
         Assert.Equal(Environment.UserName, evt.User.Username);
     }
+
+#if NETCOREAPP3_0_OR_GREATER
+    [Fact]
+    public void EnsureMemoryInfoExists()
+    {
+        var evt = new SentryEvent();
+
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+        var evtContext = (Dictionary<string, string>)evt.Contexts[MainSentryEventProcessor.MemoryInfoKey];
+        var keys = evtContext.Keys;
+        Assert.Contains("TotalAllocatedBytes",keys);
+        Assert.Contains("FragmentedBytes",keys);
+        Assert.Contains("HeapSizeBytes",keys);
+        Assert.Contains("HighMemoryLoadThresholdBytes",keys);
+        Assert.Contains("TotalAvailableMemoryBytes",keys);
+        Assert.Contains("MemoryLoadBytes",keys);
+#if NET5_0_OR_GREATER
+        Assert.Contains("TotalCommittedBytes",keys);
+        Assert.Contains("PromotedBytes",keys);
+        Assert.Contains("PinnedObjectsCount",keys);
+        Assert.Contains("PauseTimePercentage",keys);
+        Assert.Contains("PauseDurations",keys);
+        Assert.Contains("Index",keys);
+        Assert.Contains("Generation",keys);
+        Assert.Contains("FinalizationPendingCount",keys);
+        Assert.Contains("Concurrent",keys);
+        Assert.Contains("Compacted",keys);
+#endif
+    }
+#endif
 
     [Fact]
     public void Process_SendDefaultPiiTrueIdEnvironmentTrue_UserNameSet()

@@ -152,8 +152,9 @@ namespace Sentry.Internal
             values.Add("TotalCommittedBytes", memoryInfo.TotalCommittedBytes.ToString());
             values.Add("PromotedBytes", memoryInfo.PromotedBytes.ToString());
             values.Add("PinnedObjectsCount", memoryInfo.PinnedObjectsCount.ToString());
-            values.Add("PauseTimePercentage", memoryInfo.PauseTimePercentage.ToString());
-            values.Add("PauseDurations", memoryInfo.PauseDurations.ToString());
+            values.Add("PauseTimePercentage", memoryInfo.PauseTimePercentage.ToString(CultureInfo.InvariantCulture));
+            var pauseDurations = memoryInfo.PauseDurations.ToArray();
+            values.Add("PauseDurations", string.Join(';',pauseDurations.Select(x=>x.ToString())));
             values.Add("Index", memoryInfo.Index.ToString());
             values.Add("Generation", memoryInfo.Generation.ToString());
             values.Add("FinalizationPendingCount", memoryInfo.FinalizationPendingCount.ToString());
