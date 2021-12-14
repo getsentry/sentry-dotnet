@@ -216,7 +216,7 @@ namespace Sentry
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, scope.SessionUpdate))
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, scope.Attachments, scope.SessionUpdate))
                 ? processedEvent.EventId
                 : SentryId.Empty;
         }
