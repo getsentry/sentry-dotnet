@@ -45,6 +45,11 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="critical")]
         Critical = 3,
     }
+    public class ByteAttachmentContent : Sentry.IAttachmentContent
+    {
+        public ByteAttachmentContent(byte[] bytes) { }
+        public System.IO.Stream GetStream() { }
+    }
     public static class Constants
     {
         public const int DefaultMaxBreadcrumbs = 100;
