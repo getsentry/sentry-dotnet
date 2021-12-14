@@ -60,7 +60,7 @@ namespace Sentry
         public static SpanId Create() => new(Guid.NewGuid().ToString("n").Substring(0, 16));
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger) => writer.WriteStringValue(GetNormalizedValue());
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _) => writer.WriteStringValue(GetNormalizedValue());
 
         /// <summary>
         /// Parses from string.

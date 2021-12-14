@@ -47,7 +47,7 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : null;
 
-        private async Task SerializeHeaderAsync(Stream stream, IDiagnosticLogger logger, CancellationToken cancellationToken = default)
+        private async Task SerializeHeaderAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             var writer = new Utf8JsonWriter(stream);
 
@@ -63,7 +63,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, IDiagnosticLogger logger, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             // Header
             await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);

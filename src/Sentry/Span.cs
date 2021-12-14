@@ -100,7 +100,7 @@ namespace Sentry
             IsSampled);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 

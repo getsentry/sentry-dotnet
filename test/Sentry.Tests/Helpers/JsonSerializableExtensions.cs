@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Sentry.Infrastructure;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Tests.Helpers
@@ -12,7 +13,7 @@ namespace Sentry.Tests.Helpers
             using var stream = new MemoryStream();
             using var writer = new Utf8JsonWriter(stream);
 
-            writer.WriteSerializableValue(serializable);
+            writer.WriteSerializableValue(serializable, new TraceDiagnosticLogger(SentryLevel.Debug));
             writer.Flush();
 
             return Encoding.UTF8.GetString(stream.ToArray());

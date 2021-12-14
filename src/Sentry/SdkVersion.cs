@@ -63,11 +63,11 @@ namespace Sentry
             => InternalPackages.Add(package);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            writer.WriteArrayIfNotEmpty("packages", InternalPackages.Distinct());
+            writer.WriteArrayIfNotEmpty("packages", InternalPackages.Distinct(), logger);
             writer.WriteStringIfNotWhiteSpace("name", Name);
             writer.WriteStringIfNotWhiteSpace("version", Version);
 

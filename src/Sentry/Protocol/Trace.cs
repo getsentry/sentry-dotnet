@@ -49,14 +49,14 @@ namespace Sentry.Protocol
         };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-            writer.WriteSerializableIfNotNull("span_id", SpanId.NullIfDefault());
-            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId?.NullIfDefault());
-            writer.WriteSerializableIfNotNull("trace_id", TraceId.NullIfDefault());
+            writer.WriteSerializableIfNotNull("span_id", SpanId.NullIfDefault(), logger);
+            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId?.NullIfDefault(), logger);
+            writer.WriteSerializableIfNotNull("trace_id", TraceId.NullIfDefault(), logger);
             writer.WriteStringIfNotWhiteSpace("op", Operation);
             writer.WriteStringIfNotWhiteSpace("description", Description);
             writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());

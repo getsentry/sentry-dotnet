@@ -13,6 +13,6 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Serializes the object to a stream.
         /// </summary>
-        Task SerializeAsync(Stream stream, IDiagnosticLogger logger, CancellationToken cancellationToken = default);
+        Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default);
     }
 }

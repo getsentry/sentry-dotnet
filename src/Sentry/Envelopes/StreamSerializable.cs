@@ -22,7 +22,7 @@ namespace Sentry.Protocol.Envelopes
         public StreamSerializable(Stream source) => Source = source;
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, IDiagnosticLogger logger, CancellationToken cancellationToken = default) =>
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default) =>
             await Source.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
 
         /// <inheritdoc />

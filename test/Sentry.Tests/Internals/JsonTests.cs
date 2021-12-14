@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Xunit;
@@ -19,7 +20,7 @@ namespace Sentry.Tests.Internals
                 using var stream = new MemoryStream();
                 using (var writer = new Utf8JsonWriter(stream))
                 {
-                    writer.WriteDynamicValue(@object);
+                    writer.WriteDynamicValue(@object, new TraceDiagnosticLogger(SentryLevel.Debug));
                 }
                 return Encoding.UTF8.GetString(stream.ToArray());
             }

@@ -45,12 +45,12 @@ namespace Sentry
         public static implicit operator SentryMessage(string? message) => new() { Message = message };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
             writer.WriteStringIfNotWhiteSpace("message", Message);
-            writer.WriteArrayIfNotEmpty("params", Params);
+            writer.WriteArrayIfNotEmpty("params", Params, logger);
             writer.WriteStringIfNotWhiteSpace("formatted", Formatted);
 
             writer.WriteEndObject();

@@ -92,7 +92,7 @@ namespace Sentry.Internal.Extensions
         public static void WriteDictionaryValue(
             this Utf8JsonWriter writer,
             IEnumerable<KeyValuePair<string, object?>>? dic,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             if (dic is not null)
             {
@@ -136,7 +136,7 @@ namespace Sentry.Internal.Extensions
             this Utf8JsonWriter writer,
             string propertyName,
             IEnumerable<KeyValuePair<string, object?>>? dic,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             writer.WritePropertyName(propertyName);
             writer.WriteDictionaryValue(dic, logger);
@@ -154,7 +154,7 @@ namespace Sentry.Internal.Extensions
         public static void WriteArrayValue(
             this Utf8JsonWriter writer,
             IEnumerable<object?>? arr,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             if (arr is not null)
             {
@@ -176,10 +176,11 @@ namespace Sentry.Internal.Extensions
         public static void WriteArray(
             this Utf8JsonWriter writer,
             string propertyName,
-            IEnumerable<object?>? arr)
+            IEnumerable<object?>? arr,
+            IDiagnosticLogger? logger)
         {
             writer.WritePropertyName(propertyName);
-            writer.WriteArrayValue(arr);
+            writer.WriteArrayValue(arr, logger);
         }
 
         public static void WriteStringArrayValue(
@@ -215,7 +216,7 @@ namespace Sentry.Internal.Extensions
         public static void WriteSerializableValue(
             this Utf8JsonWriter writer,
             IJsonSerializable value,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             value.WriteTo(writer, logger);
         }
@@ -224,7 +225,7 @@ namespace Sentry.Internal.Extensions
             this Utf8JsonWriter writer,
             string propertyName,
             IJsonSerializable value,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             writer.WritePropertyName(propertyName);
             writer.WriteSerializableValue(value, logger);
@@ -233,7 +234,7 @@ namespace Sentry.Internal.Extensions
         public static void WriteDynamicValue(
             this Utf8JsonWriter writer,
             object? value,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             if (value is null)
             {
@@ -293,7 +294,7 @@ namespace Sentry.Internal.Extensions
             this Utf8JsonWriter writer,
             string propertyName,
             object? value,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             try
             {
@@ -305,7 +306,7 @@ namespace Sentry.Internal.Extensions
                 // The only location in the protocol we allow dynamic objects are Extra and Contexts
                 // In the event of an instance that can't be serialized, we don't want to throw away a whole event
                 // so we'll suppress issues here.
-                logger.LogError("Failed to serialize object for property {0}", e, propertyName);
+                logger?.LogError("Failed to serialize object for property {0}", e, propertyName);
             }
         }
 
@@ -390,7 +391,7 @@ namespace Sentry.Internal.Extensions
             this Utf8JsonWriter writer,
             string propertyName,
             IJsonSerializable? value,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             if (value is not null)
             {
@@ -402,7 +403,7 @@ namespace Sentry.Internal.Extensions
             this Utf8JsonWriter writer,
             string propertyName,
             IEnumerable<KeyValuePair<string, object?>>? dic,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             var asDictionary = dic as IReadOnlyDictionary<string, object?> ?? dic?.ToDictionary();
             if (asDictionary is not null && asDictionary.Count > 0)
@@ -426,12 +427,13 @@ namespace Sentry.Internal.Extensions
         public static void WriteArrayIfNotEmpty(
             this Utf8JsonWriter writer,
             string propertyName,
-            IEnumerable<object?>? arr)
+            IEnumerable<object?>? arr,
+            IDiagnosticLogger? logger)
         {
             var asList = arr as IReadOnlyList<object?> ?? arr?.ToArray();
             if (asList is not null && asList.Count > 0)
             {
-                writer.WriteArray(propertyName, asList);
+                writer.WriteArray(propertyName, asList, logger);
             }
         }
 
@@ -451,7 +453,7 @@ namespace Sentry.Internal.Extensions
             this Utf8JsonWriter writer,
             string propertyName,
             object? value,
-            IDiagnosticLogger logger)
+            IDiagnosticLogger? logger)
         {
             if (value is not null)
             {

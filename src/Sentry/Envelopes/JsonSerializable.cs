@@ -22,7 +22,7 @@ namespace Sentry.Protocol.Envelopes
         public JsonSerializable(IJsonSerializable source) => Source = source;
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, IDiagnosticLogger logger, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             var writer = new Utf8JsonWriter(stream);
 

@@ -182,12 +182,13 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             // Spare the overhead if level is not enabled
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true)
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true &&
+                response.Content is { } content)
             {
-                if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json",
+                if (string.Equals(content.Headers.ContentType?.MediaType, "application/json",
                     StringComparison.OrdinalIgnoreCase))
                 {
-                    var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
+                    var responseJson = await content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
 
                     var errorMessage =
                         responseJson.GetPropertyOrNull("detail")?.GetString()
@@ -208,7 +209,7 @@ namespace Sentry.Internal.Http
                 }
                 else
                 {
-                    var responseString = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    var responseString = await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
                     _options.Log(
                         SentryLevel.Error,
@@ -280,7 +281,7 @@ namespace Sentry.Internal.Http
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
                 Headers = { { "X-Sentry-Auth", authHeader } },
-                Content = new EnvelopeHttpContent(envelope)
+                Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger)
             };
         }
     }

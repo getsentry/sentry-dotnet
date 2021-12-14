@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
@@ -286,7 +287,9 @@ namespace Sentry.Tests.Internals.Http
             var httpTransport = new HttpTransport(
                 new SentryOptions
                 {
-                    Dsn = DsnSamples.ValidDsnWithSecret
+                    Dsn = DsnSamples.ValidDsnWithSecret,
+                    DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                    Debug = true
                 },
                 new HttpClient(httpHandler));
 
@@ -323,7 +326,7 @@ namespace Sentry.Tests.Internals.Http
                         new EmptySerializable())
                 });
 
-            var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync();
+            var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
 
             // Act
             await httpTransport.SendEnvelopeAsync(envelope);

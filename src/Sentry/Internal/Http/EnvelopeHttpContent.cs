@@ -10,9 +10,9 @@ namespace Sentry.Internal.Http
     internal class EnvelopeHttpContent : HttpContent
     {
         private readonly Envelope _envelope;
-        private readonly IDiagnosticLogger _logger;
+        private readonly IDiagnosticLogger? _logger;
 
-        public EnvelopeHttpContent(Envelope envelope, IDiagnosticLogger logger)
+        public EnvelopeHttpContent(Envelope envelope, IDiagnosticLogger? logger)
         {
             _envelope = envelope;
             _logger = logger;
