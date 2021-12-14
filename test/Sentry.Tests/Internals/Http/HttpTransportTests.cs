@@ -1,11 +1,5 @@
 using System.Net;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
-using Sentry.Infrastructure;
-using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;

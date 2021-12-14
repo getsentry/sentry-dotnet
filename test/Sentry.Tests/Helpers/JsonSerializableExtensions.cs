@@ -1,6 +1,4 @@
 using System.Text.Json;
-using Sentry.Infrastructure;
-using Sentry.Internal.Extensions;
 
 internal static class JsonSerializableExtensions
 {
