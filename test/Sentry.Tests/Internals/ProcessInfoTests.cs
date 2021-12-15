@@ -19,8 +19,8 @@ public class ProcessInfoTests
                                                "Now: " + utcNow);
 
         var diff = (utcNow - sut.StartupTime).Value.TotalSeconds;
-        // CI is often slow and the diff stays around 10 seconds. 60 is enough to validate the code though:
-        Assert.True(diff <= 60, "diff isn't less expected 60 seconds: " + diff);
+        // CI is often slow and the diff stays around 10 seconds. We only care that this isn't like beginning of time, or default(DateTime):
+        Assert.True(diff <= 240, "diff isn't less expected 240 seconds: " + diff);
     }
 
     [Fact]
