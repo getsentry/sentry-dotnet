@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Attaching byte arrays to the scope no longer leads to ObjectDisposedException ([#1384](https://github.com/getsentry/sentry-dotnet/pull/1384))
 - Operation cancel while flushing cache no longer logs an errors ([#1352](https://github.com/getsentry/sentry-dotnet/pull/1352))
 - Dont fail for attachment read error ([#1378](https://github.com/getsentry/sentry-dotnet/pull/1378))
 - Fix file locking in attachments ([#1377](https://github.com/getsentry/sentry-dotnet/pull/1377))

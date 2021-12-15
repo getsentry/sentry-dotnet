@@ -141,7 +141,12 @@ namespace Sentry
             string fileName,
             AttachmentType type = AttachmentType.Default,
             string? contentType = null) =>
-            scope.AddAttachment(new MemoryStream(data), fileName, type, contentType);
+            scope.AddAttachment(
+                new Attachment(
+                    type,
+                    new ByteAttachmentContent(data),
+                    fileName,
+                    contentType));
 
         /// <summary>
         /// Adds an attachment.
