@@ -214,5 +214,48 @@ namespace Sentry.Tests.Internals
             // Assert
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
+
+        [Fact]
+        public void WriteDynamic_NoLoggerAndError_ThrowsException()
+        {
+            //Assert
+            ArgumentNullException expectedException = null;
+
+            using var stream = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(stream))
+            {
+                try
+                {
+                    // Act
+                    writer.WriteDynamic(null, null, null);
+                }
+                catch (ArgumentNullException ex)
+                {
+                    expectedException = ex;
+                }
+            }
+
+            // Assert
+            Assert.NotNull(expectedException);
+        }
+
+        [Fact]
+        public void WriteDynamic_WithLoggerAndError_LogException()
+        {
+            //Assert
+            var logger = Substitute.For<IDiagnosticLogger>();
+
+            logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+
+            using var stream = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(stream))
+            {
+                // Act
+                writer.WriteDynamic(null, null, logger);
+            }
+
+            // Assert
+            logger.Received(1).Log(Arg.Is(SentryLevel.Error), Arg.Any<string>(), Arg.Any<ArgumentNullException>(), Arg.Any<object>());
+        }
     }
 }

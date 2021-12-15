@@ -252,7 +252,7 @@ namespace Sentry.Internal.Http
                 await using (envelopeFile)
 #endif
                 {
-                    await processedEnvelope.SerializeAsync(envelopeFile, _options.DiagnosticLogger!, cancellationToken).ConfigureAwait(false);
+                    await processedEnvelope.SerializeAsync(envelopeFile, _options.DiagnosticLogger, cancellationToken).ConfigureAwait(false);
                     await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
                     _options.LogInfo("Envelope's {0} bytes written to: {1}",
                         envelopeFile.Length, destination);

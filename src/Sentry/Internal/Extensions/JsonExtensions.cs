@@ -301,12 +301,12 @@ namespace Sentry.Internal.Extensions
                 writer.WritePropertyName(propertyName);
                 writer.WriteDynamicValue(value, logger);
             }
-            catch (Exception e)
+            catch (Exception e) when (logger != null)
             {
                 // The only location in the protocol we allow dynamic objects are Extra and Contexts
                 // In the event of an instance that can't be serialized, we don't want to throw away a whole event
                 // so we'll suppress issues here.
-                logger?.LogError("Failed to serialize object for property {0}", e, propertyName);
+                logger.LogError("Failed to serialize object for property {0}", e, propertyName);
             }
         }
 

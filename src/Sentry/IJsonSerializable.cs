@@ -21,7 +21,7 @@ namespace Sentry
 
     internal static class JsonSerializableExtensions
     {
-        public static void WriteToFile(this IJsonSerializable serializable, string filePath, IDiagnosticLogger logger)
+        public static void WriteToFile(this IJsonSerializable serializable, string filePath, IDiagnosticLogger? logger)
         {
             using var file = File.Create(filePath);
             using var writer = new Utf8JsonWriter(file);
