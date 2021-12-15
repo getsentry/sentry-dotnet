@@ -276,7 +276,9 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                Debug = true
             },
             new HttpClient(httpHandler));
 
@@ -313,7 +315,7 @@ public class HttpTransportTests
                     new EmptySerializable())
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync();
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
