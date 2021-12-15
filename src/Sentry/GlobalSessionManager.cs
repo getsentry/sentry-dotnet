@@ -199,7 +199,7 @@ namespace Sentry
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
                 var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
-                persistedSessionUpdate.WriteToFile(filePath);
+                persistedSessionUpdate.WriteToFile(filePath, _options.DiagnosticLogger);
 
                 _options.LogDebug("Persisted session to a file '{0}'.", filePath);
             }

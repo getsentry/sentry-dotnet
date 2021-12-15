@@ -291,7 +291,7 @@ namespace Sentry.Internal.Http
             await using (stream.ConfigureAwait(false))
 #endif
             {
-                await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await envelope.SerializeAsync(stream, _options.DiagnosticLogger, cancellationToken).ConfigureAwait(false);
             }
 
             // Tell the worker that there is work available

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
@@ -215,30 +216,30 @@ namespace Sentry
             (_tags ??= new Dictionary<string, string>()).Remove(key);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
             writer.WriteStringDictionaryIfNotEmpty("modules", _modules!);
-            writer.WriteSerializable("event_id", EventId);
+            writer.WriteSerializable("event_id", EventId, logger);
             writer.WriteString("timestamp", Timestamp);
-            writer.WriteSerializableIfNotNull("logentry", Message);
+            writer.WriteSerializableIfNotNull("logentry", Message, logger);
             writer.WriteStringIfNotWhiteSpace("logger", Logger);
             writer.WriteStringIfNotWhiteSpace("platform", Platform);
             writer.WriteStringIfNotWhiteSpace("server_name", ServerName);
             writer.WriteStringIfNotWhiteSpace("release", Release);
-            writer.WriteSerializableIfNotNull("exception", SentryExceptionValues);
-            writer.WriteSerializableIfNotNull("threads", SentryThreadValues);
+            writer.WriteSerializableIfNotNull("exception", SentryExceptionValues, logger);
+            writer.WriteSerializableIfNotNull("threads", SentryThreadValues, logger);
             writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
             writer.WriteStringIfNotWhiteSpace("transaction", TransactionName);
-            writer.WriteSerializableIfNotNull("request", _request);
-            writer.WriteSerializableIfNotNull("contexts", _contexts);
-            writer.WriteSerializableIfNotNull("user", _user);
+            writer.WriteSerializableIfNotNull("request", _request, logger);
+            writer.WriteSerializableIfNotNull("contexts", _contexts, logger);
+            writer.WriteSerializableIfNotNull("user", _user, logger);
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
-            writer.WriteSerializable("sdk", Sdk);
+            writer.WriteSerializable("sdk", Sdk, logger);
             writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
-            writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs);
-            writer.WriteDictionaryIfNotEmpty("extra", _extra);
+            writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
+            writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
             writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
 
             writer.WriteEndObject();
