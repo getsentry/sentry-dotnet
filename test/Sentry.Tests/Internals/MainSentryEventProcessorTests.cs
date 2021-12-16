@@ -49,25 +49,23 @@ public class MainSentryEventProcessorTests
         var sut = _fixture.GetSut();
 
         _ = sut.Process(evt);
-        var evtContext = (Dictionary<string, string>)evt.Contexts[MainSentryEventProcessor.MemoryInfoKey];
-        var keys = evtContext.Keys;
-        Assert.Contains("TotalAllocatedBytes", keys);
-        Assert.Contains("FragmentedBytes", keys);
-        Assert.Contains("HeapSizeBytes", keys);
-        Assert.Contains("HighMemoryLoadThresholdBytes", keys);
-        Assert.Contains("TotalAvailableMemoryBytes", keys);
-        Assert.Contains("MemoryLoadBytes", keys);
+        var memory = (MemoryInfo)evt.Contexts[MainSentryEventProcessor.MemoryInfoKey];
+        Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
+        Assert.NotEqual(0, memory.FragmentedBytes);
+        Assert.NotEqual(0, memory.HeapSizeBytes);
+        Assert.NotEqual(0, memory.HighMemoryLoadThresholdBytes);
+        Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
+        Assert.NotEqual(0, memory.MemoryLoadBytes);
 #if NET5_0_OR_GREATER
-        Assert.Contains("TotalCommittedBytes", keys);
-        Assert.Contains("PromotedBytes", keys);
-        Assert.Contains("PinnedObjectsCount", keys);
-        Assert.Contains("PauseTimePercentage", keys);
-        Assert.Contains("PauseDurations", keys);
-        Assert.Contains("Index", keys);
-        Assert.Contains("Generation", keys);
-        Assert.Contains("FinalizationPendingCount", keys);
-        Assert.Contains("Concurrent", keys);
-        Assert.Contains("Compacted", keys);
+        Assert.NotEqual(0, memory.TotalCommittedBytes);
+        Assert.NotEqual(0, memory.PromotedBytes);
+        Assert.NotEqual(0, memory.PinnedObjectsCount);
+        Assert.NotEqual(0, memory.PauseTimePercentage);
+        Assert.NotEmpty(memory.PauseDurations);
+        Assert.NotEqual(0, memory.Index);
+        Assert.NotEqual(0, memory.Generation);
+        Assert.NotEqual(0, memory.FinalizationPendingCount);
+        Assert.NotEqual(0, memory.Concurrent);
 #endif
     }
 #endif

@@ -138,30 +138,35 @@ namespace Sentry.Internal
         private void AddMemoryInfo(Contexts contexts)
         {
 #if NETCOREAPP3_0_OR_GREATER
-            var memoryInfo = GC.GetGCMemoryInfo();
-            var values = new Dictionary<string, string>
-            {
-                {"TotalAllocatedBytes", GC.GetTotalAllocatedBytes().ToString()},
-                {"FragmentedBytes", memoryInfo.FragmentedBytes.ToString()},
-                {"HeapSizeBytes", memoryInfo.HeapSizeBytes.ToString()},
-                {"HighMemoryLoadThresholdBytes", memoryInfo.HighMemoryLoadThresholdBytes.ToString()},
-                {"TotalAvailableMemoryBytes", memoryInfo.TotalAvailableMemoryBytes.ToString()},
-                {"MemoryLoadBytes", memoryInfo.MemoryLoadBytes.ToString()},
-            };
+            var memory = GC.GetGCMemoryInfo();
+            var allocatedBytes = GC.GetTotalAllocatedBytes();
 #if NET5_0_OR_GREATER
-            values.Add("TotalCommittedBytes", memoryInfo.TotalCommittedBytes.ToString());
-            values.Add("PromotedBytes", memoryInfo.PromotedBytes.ToString());
-            values.Add("PinnedObjectsCount", memoryInfo.PinnedObjectsCount.ToString());
-            values.Add("PauseTimePercentage", memoryInfo.PauseTimePercentage.ToString(CultureInfo.InvariantCulture));
-            var pauseDurations = memoryInfo.PauseDurations.ToArray();
-            values.Add("PauseDurations", string.Join(';', pauseDurations.Select(p => p.ToString())));
-            values.Add("Index", memoryInfo.Index.ToString());
-            values.Add("Generation", memoryInfo.Generation.ToString());
-            values.Add("FinalizationPendingCount", memoryInfo.FinalizationPendingCount.ToString());
-            values.Add("Concurrent", memoryInfo.Concurrent.ToString());
-            values.Add("Compacted", memoryInfo.Compacted.ToString());
+            contexts[MemoryInfoKey] = new MemoryInfo(
+                allocatedBytes,
+                memory.FragmentedBytes,
+                memory.HeapSizeBytes,
+                memory.HighMemoryLoadThresholdBytes,
+                memory.TotalAvailableMemoryBytes,
+                memory.MemoryLoadBytes,
+                memory.TotalCommittedBytes,
+                memory.PromotedBytes,
+                memory.PinnedObjectsCount,
+                memory.PauseTimePercentage,
+                memory.PauseDurations.ToArray(),
+                memory.Index,
+                memory.Generation,
+                memory.FinalizationPendingCount,
+                memory.Compacted,
+                memory.Concurrent);
+#else
+            contexts[MemoryInfoKey] = new MemoryInfo(
+            allocatedBytes,
+            memory.FragmentedBytes,
+            memory.HeapSizeBytes,
+            memory.HighMemoryLoadThresholdBytes,
+            memory.TotalAvailableMemoryBytes,
+            memory.MemoryLoadBytes);
 #endif
-            contexts[MemoryInfoKey] = values;
 #endif
         }
 
@@ -185,4 +190,5 @@ namespace Sentry.Internal
             return dic.Count > 0 ? dic : null;
         }
     }
+
 }
