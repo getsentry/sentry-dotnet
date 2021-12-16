@@ -152,12 +152,12 @@ namespace Sentry.Internal
                 memory.PromotedBytes,
                 memory.PinnedObjectsCount,
                 memory.PauseTimePercentage,
-                memory.PauseDurations.ToArray(),
                 memory.Index,
                 memory.Generation,
                 memory.FinalizationPendingCount,
                 memory.Compacted,
-                memory.Concurrent);
+                memory.Concurrent,
+                memory.PauseDurations.ToArray());
 #else
             contexts[MemoryInfoKey] = new MemoryInfo(
             allocatedBytes,

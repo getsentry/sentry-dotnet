@@ -6,7 +6,7 @@ using Sentry.Extensibility;
 
 namespace Sentry
 {
-    sealed class MemoryInfo : IJsonSerializable
+    internal sealed class MemoryInfo : IJsonSerializable
     {
         public long AllocatedBytes { get; }
         public long FragmentedBytes { get; }
@@ -38,12 +38,12 @@ namespace Sentry
             long promotedBytes,
             long pinnedObjectsCount,
             double pauseTimePercentage,
-            TimeSpan[] pauseDurations,
             long index,
             int generation,
             long finalizationPendingCount,
             bool compacted,
-            bool concurrent)
+            bool concurrent,
+            TimeSpan[] pauseDurations)
         {
             AllocatedBytes = allocatedBytes;
             FragmentedBytes = fragmentedBytes;
@@ -100,8 +100,8 @@ namespace Sentry
             writer.WriteNumber("finalizationPendingCount", FinalizationPendingCount);
             writer.WriteBoolean("compacted", Compacted);
             writer.WriteBoolean("concurrent", Concurrent);
-            writer.WriteStartArray();
             writer.WritePropertyName("pauseDurations");
+            writer.WriteStartArray();
             foreach (var duration in PauseDurations)
             {
                 writer.WriteNumberValue(duration.TotalMilliseconds);
