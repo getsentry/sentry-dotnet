@@ -287,13 +287,7 @@ namespace Sentry.Internal.Extensions
             }
             else
             {
-                using var stream = new MemoryStream();
-                var tempWriter = new Utf8JsonWriter(stream);
-                JsonSerializer.Serialize(tempWriter, value, SerializerOption);
-                tempWriter.Flush();
-                stream.Flush();
-                using var document = JsonDocument.Parse(stream);
-                document.RootElement.WriteTo(writer);
+                JsonSerializer.Serialize(writer, value, SerializerOption);
             }
         }
 
@@ -311,7 +305,8 @@ namespace Sentry.Internal.Extensions
             }
             catch (Exception e) when (logger != null)
             {
-                writer.WriteNullValue();
+                writer.WriteStartObject();
+                writer.WriteEndObject();
 
                 // The only location in the protocol we allow dynamic objects are Extra and Contexts
                 // In the event of an instance that can't be serialized, we don't want to throw away a whole event
