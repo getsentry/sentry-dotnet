@@ -5,6 +5,7 @@
 ### Fixes
 
 - Add MemoryInfo to sentry event ([#1337](https://github.com/getsentry/sentry-dotnet/pull/1337))
+- Report ThreadPool stats ([#1399](https://github.com/getsentry/sentry-dotnet/pull/1399))
 
 ## 3.12.2
 
