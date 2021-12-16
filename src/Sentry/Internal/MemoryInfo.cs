@@ -89,7 +89,7 @@ namespace Sentry
             writer.WriteNumber("highMemoryLoadThresholdBytes", HighMemoryLoadThresholdBytes);
             writer.WriteNumber("totalAvailableMemoryBytes", TotalAvailableMemoryBytes);
             writer.WriteNumber("memoryLoadBytes", MemoryLoadBytes);
-            
+
 #if NET5_0_OR_GREATER
             writer.WriteNumber("totalCommittedBytes", TotalCommittedBytes);
             writer.WriteNumber("promotedBytes", PromotedBytes);
