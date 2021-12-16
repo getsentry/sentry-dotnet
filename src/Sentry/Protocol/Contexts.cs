@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
@@ -91,7 +92,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer) => writer.WriteDictionaryValue(this!);
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) => writer.WriteDictionaryValue(this!, logger);
 
         /// <summary>
         /// Parses from JSON.

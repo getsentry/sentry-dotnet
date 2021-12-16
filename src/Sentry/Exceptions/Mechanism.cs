@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -73,12 +74,12 @@ namespace Sentry.Protocol
         public IDictionary<string, object> Data => InternalData ??= new Dictionary<string, object>();
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            writer.WriteDictionaryIfNotEmpty("data", InternalData!);
-            writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!);
+            writer.WriteDictionaryIfNotEmpty("data", InternalData!, logger);
+            writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!, logger);
             writer.WriteStringIfNotWhiteSpace("type", Type);
             writer.WriteStringIfNotWhiteSpace("description", Description);
             writer.WriteStringIfNotWhiteSpace("help_link", HelpLink);

@@ -47,7 +47,7 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : null;
 
-        private async Task SerializeHeaderAsync(Stream stream, CancellationToken cancellationToken = default)
+        private async Task SerializeHeaderAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             var writer = new Utf8JsonWriter(stream);
 
@@ -57,22 +57,22 @@ namespace Sentry.Protocol.Envelopes
             await using (writer.ConfigureAwait(false))
 #endif
             {
-                writer.WriteDictionaryValue(Header);
+                writer.WriteDictionaryValue(Header, logger);
                 await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             // Header
-            await SerializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
+            await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);
             await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
             // Items
             foreach (var item in Items)
             {
-                await item.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
                 await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
             }
         }
