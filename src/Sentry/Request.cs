@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -127,7 +128,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
@@ -136,7 +137,7 @@ namespace Sentry
             writer.WriteStringDictionaryIfNotEmpty("headers", InternalHeaders!);
             writer.WriteStringIfNotWhiteSpace("url", Url);
             writer.WriteStringIfNotWhiteSpace("method", Method);
-            writer.WriteDynamicIfNotNull("data", Data);
+            writer.WriteDynamicIfNotNull("data", Data, logger);
             writer.WriteStringIfNotWhiteSpace("query_string", QueryString);
             writer.WriteStringIfNotWhiteSpace("cookies", Cookies);
 

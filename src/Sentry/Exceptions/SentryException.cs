@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -57,7 +58,7 @@ namespace Sentry.Protocol
         public IDictionary<string, object?> Data { get; } = new Dictionary<string, object?>(StringComparer.Ordinal);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
@@ -65,8 +66,8 @@ namespace Sentry.Protocol
             writer.WriteStringIfNotWhiteSpace("value", Value);
             writer.WriteStringIfNotWhiteSpace("module", Module);
             writer.WriteNumberIfNotNull("thread_id", ThreadId.NullIfDefault());
-            writer.WriteSerializableIfNotNull("stacktrace", Stacktrace);
-            writer.WriteSerializableIfNotNull("mechanism", Mechanism);
+            writer.WriteSerializableIfNotNull("stacktrace", Stacktrace, logger);
+            writer.WriteSerializableIfNotNull("mechanism", Mechanism, logger);
 
             writer.WriteEndObject();
         }

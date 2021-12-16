@@ -38,6 +38,32 @@ public class MainSentryEventProcessorTests
         Assert.Equal(Environment.UserName, evt.User.Username);
     }
 
+#if NETCOREAPP3_1_OR_GREATER
+    [Fact]
+    public void EnsureMemoryInfoExists()
+    {
+        var evt = new SentryEvent();
+
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+        var memory = (MemoryInfo)evt.Contexts[MainSentryEventProcessor.MemoryInfoKey];
+        Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
+        Assert.NotEqual(0, memory.FragmentedBytes);
+        Assert.NotEqual(0, memory.HeapSizeBytes);
+        Assert.NotEqual(0, memory.HighMemoryLoadThresholdBytes);
+        Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
+        Assert.NotEqual(0, memory.MemoryLoadBytes);
+#if NET5_0_OR_GREATER
+        Assert.NotEqual(0, memory.TotalCommittedBytes);
+        Assert.NotEqual(0, memory.PromotedBytes);
+        Assert.NotEqual(0, memory.PauseTimePercentage);
+        Assert.NotEmpty(memory.PauseDurations);
+#endif
+    }
+#endif
+
     [Fact]
     public void Process_SendDefaultPiiTrueIdEnvironmentTrue_UserNameSet()
     {

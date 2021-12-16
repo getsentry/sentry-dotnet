@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal
@@ -10,6 +11,7 @@ namespace Sentry.Internal
     {
         public static async Task<string> SerializeToStringAsync(
             this ISerializable serializable,
+            IDiagnosticLogger logger,
             CancellationToken cancellationToken = default)
         {
             var stream = new MemoryStream();
@@ -19,7 +21,7 @@ namespace Sentry.Internal
             await using (stream.ConfigureAwait(false))
 #endif
             {
-                await serializable.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await serializable.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
                 return Encoding.UTF8.GetString(stream.ToArray());
             }
         }
