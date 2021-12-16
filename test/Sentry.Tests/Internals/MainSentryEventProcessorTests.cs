@@ -1,6 +1,6 @@
 using System.Globalization;
-using Sentry.Testing;
 using Sentry;
+using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
 
