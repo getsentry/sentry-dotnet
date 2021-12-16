@@ -60,7 +60,6 @@ public class MainSentryEventProcessorTests
 #if NET5_0_OR_GREATER
         Assert.NotEqual(0, memory.TotalCommittedBytes);
         Assert.NotEqual(0, memory.PromotedBytes);
-        Assert.NotEqual(0, memory.PinnedObjectsCount);
         Assert.NotEqual(0, memory.PauseTimePercentage);
         Assert.NotEmpty(memory.PauseDurations);
         Assert.NotEqual(0, memory.Index);
