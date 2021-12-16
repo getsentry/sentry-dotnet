@@ -20,11 +20,11 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: windows-latest
-            build_script: .\build.ps1
+            build_script: .\buildWindows.ps1
           - os: ubuntu-latest
-            build_script: ./build.sh
+            build_script: ./buildLinux.sh
           - os: macos-latest
-            build_script: ./build.sh
+            build_script: ./buildMac.sh
 
     steps:
         - name: Checkout
