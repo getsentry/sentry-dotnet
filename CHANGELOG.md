@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Add MemoryInfo to sentry event ([#1337](https://github.com/getsentry/sentry-dotnet/pull/1337))
+
 ## 3.12.2
 
 ### Fixes

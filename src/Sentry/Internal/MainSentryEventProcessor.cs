@@ -12,6 +12,7 @@ namespace Sentry.Internal
     {
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
+        internal const string MemoryInfoKey = "Memory Info";
 
         private readonly Enricher _enricher;
 
@@ -54,6 +55,7 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
+            AddMemoryInfo(@event.Contexts);
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -133,6 +135,41 @@ namespace Sentry.Internal
             return @event;
         }
 
+        private void AddMemoryInfo(Contexts contexts)
+        {
+#if NETCOREAPP3_0_OR_GREATER
+            var memory = GC.GetGCMemoryInfo();
+            var allocatedBytes = GC.GetTotalAllocatedBytes();
+#if NET5_0_OR_GREATER
+            contexts[MemoryInfoKey] = new MemoryInfo(
+                allocatedBytes,
+                memory.FragmentedBytes,
+                memory.HeapSizeBytes,
+                memory.HighMemoryLoadThresholdBytes,
+                memory.TotalAvailableMemoryBytes,
+                memory.MemoryLoadBytes,
+                memory.TotalCommittedBytes,
+                memory.PromotedBytes,
+                memory.PinnedObjectsCount,
+                memory.PauseTimePercentage,
+                memory.Index,
+                memory.Generation,
+                memory.FinalizationPendingCount,
+                memory.Compacted,
+                memory.Concurrent,
+                memory.PauseDurations.ToArray());
+#else
+            contexts[MemoryInfoKey] = new MemoryInfo(
+            allocatedBytes,
+            memory.FragmentedBytes,
+            memory.HeapSizeBytes,
+            memory.HighMemoryLoadThresholdBytes,
+            memory.TotalAvailableMemoryBytes,
+            memory.MemoryLoadBytes);
+#endif
+#endif
+        }
+
         private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)
         {
             var dic = new Dictionary<string, string>();
@@ -153,4 +190,5 @@ namespace Sentry.Internal
             return dic.Count > 0 ? dic : null;
         }
     }
+
 }
