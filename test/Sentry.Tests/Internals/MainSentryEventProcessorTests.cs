@@ -1,10 +1,8 @@
 using System.Globalization;
 using Sentry.Testing;
-using Sentry;
 
 namespace Sentry.Tests.Internals;
 
-[UsesVerify]
 public class MainSentryEventProcessorTests
 {
     private class Fixture
