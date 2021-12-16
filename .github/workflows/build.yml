@@ -24,6 +24,7 @@ jobs:
           - os: ubuntu-latest
             build_script: ./buildLinux.sh
           - os: macos-latest
+            env: solutionFilterFile =Sentry_Mac.slnf
             build_script: ./buildMac.sh
 
     steps:
