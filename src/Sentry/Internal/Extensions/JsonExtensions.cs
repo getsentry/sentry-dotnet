@@ -287,14 +287,13 @@ namespace Sentry.Internal.Extensions
             }
             else
             {
-                using var tempStream = new MemoryStream();
-                var tempWriter = new Utf8JsonWriter(tempStream);
-
+                using var stream = new MemoryStream();
+                var tempWriter = new Utf8JsonWriter(stream);
                 JsonSerializer.Serialize(tempWriter, value, SerializerOption);
-
-                tempStream.Flush();
-                var a = tempStream.ToArray();
-                
+                tempWriter.Flush();
+                stream.Flush();
+                using var document = JsonDocument.Parse(stream);
+                document.RootElement.WriteTo(writer);
             }
         }
 
