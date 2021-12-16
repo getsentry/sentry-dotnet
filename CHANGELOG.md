@@ -5,6 +5,7 @@
 ### Fixes
 
 - Add MemoryInfo to sentry event ([#1337](https://github.com/getsentry/sentry-dotnet/pull/1337))
+- Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
 
 ## 3.12.2
 
