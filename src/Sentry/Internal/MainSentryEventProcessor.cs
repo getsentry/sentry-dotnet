@@ -13,6 +13,7 @@ namespace Sentry.Internal
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
         internal const string MemoryInfoKey = "Memory Info";
+        internal const string ThreadPoolInfoKey = "ThreadPool Info";
 
         private readonly Enricher _enricher;
 
@@ -56,6 +57,7 @@ namespace Sentry.Internal
             }
 
             AddMemoryInfo(@event.Contexts);
+            AddThreadPoolInfo(@event.Contexts);
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -170,6 +172,20 @@ namespace Sentry.Internal
 #endif
         }
 
+        private void AddThreadPoolInfo(Contexts contexts)
+        {
+            ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
+            ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
+            contexts[ThreadPoolInfoKey] = new ThreadPoolInfo(
+                minWorkerThreads,
+                minCompletionPortThreads,
+                maxWorkerThreads,
+                maxCompletionPortThreads,
+                availableWorkerThreads,
+                availableCompletionPortThreads);
+        }
+
         private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)
         {
             var dic = new Dictionary<string, string>();
@@ -190,5 +206,4 @@ namespace Sentry.Internal
             return dic.Count > 0 ? dic : null;
         }
     }
-
 }

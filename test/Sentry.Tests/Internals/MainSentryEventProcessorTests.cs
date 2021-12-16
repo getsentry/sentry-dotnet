@@ -38,6 +38,22 @@ public class MainSentryEventProcessorTests
         Assert.Equal(Environment.UserName, evt.User.Username);
     }
 
+    [Fact]
+    public void EnsureThreadPoolInfoExists()
+    {
+        var evt = new SentryEvent();
+
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+        var info = (ThreadPoolInfo)evt.Contexts[MainSentryEventProcessor.ThreadPoolInfoKey];
+        Assert.NotEqual(0, info.MinWorkerThreads);
+        Assert.NotEqual(0, info.MinCompletionPortThreads);
+        Assert.NotEqual(0, info.MaxWorkerThreads);
+        Assert.NotEqual(0, info.MaxCompletionPortThreads);
+    }
+
 #if NETCOREAPP3_1_OR_GREATER
     [Fact]
     public void EnsureMemoryInfoExists()
