@@ -61,7 +61,6 @@ public class MainSentryEventProcessorTests
         Assert.NotEqual(0, memory.PauseTimePercentage);
         Assert.NotEmpty(memory.PauseDurations);
         Assert.NotEqual(0, memory.Index);
-        Assert.NotEqual(0, memory.Generation);
         Assert.NotEqual(0, memory.FinalizationPendingCount);
 #endif
     }
