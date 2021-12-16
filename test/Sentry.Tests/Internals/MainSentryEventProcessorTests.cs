@@ -1,5 +1,6 @@
 using System.Globalization;
 using Sentry.Testing;
+using Sentry;
 
 namespace Sentry.Tests.Internals;
 
@@ -39,7 +40,7 @@ public class MainSentryEventProcessorTests
         Assert.Equal(Environment.UserName, evt.User.Username);
     }
 
-#if NETCOREAPP3_0_OR_GREATER
+#if NETCOREAPP3_1_OR_GREATER
     [Fact]
     public void EnsureMemoryInfoExists()
     {
@@ -65,7 +66,6 @@ public class MainSentryEventProcessorTests
         Assert.NotEqual(0, memory.Index);
         Assert.NotEqual(0, memory.Generation);
         Assert.NotEqual(0, memory.FinalizationPendingCount);
-        Assert.NotEqual(0, memory.Concurrent);
 #endif
     }
 #endif

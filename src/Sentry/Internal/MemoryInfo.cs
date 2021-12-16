@@ -2,10 +2,11 @@
 
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 
 namespace Sentry
 {
-    internal sealed class MemoryInfo : IJsonSerializable
+    sealed class MemoryInfo : IJsonSerializable
     {
         public long AllocatedBytes { get; }
         public long FragmentedBytes { get; }
@@ -78,7 +79,7 @@ namespace Sentry
             MemoryLoadBytes = memoryLoadBytes;
         }
 #endif
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
