@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Sentry.Extensibility;
@@ -286,7 +287,14 @@ namespace Sentry.Internal.Extensions
             }
             else
             {
-                JsonSerializer.Serialize(writer, value, SerializerOption);
+                using var tempStream = new MemoryStream();
+                var tempWriter = new Utf8JsonWriter(tempStream);
+
+                JsonSerializer.Serialize(tempWriter, value, SerializerOption);
+
+                tempStream.Flush();
+                var a = tempStream.ToArray();
+                
             }
         }
 
@@ -296,13 +304,16 @@ namespace Sentry.Internal.Extensions
             object? value,
             IDiagnosticLogger? logger)
         {
+            writer.WritePropertyName(propertyName);
+
             try
             {
-                writer.WritePropertyName(propertyName);
                 writer.WriteDynamicValue(value, logger);
             }
             catch (Exception e) when (logger != null)
             {
+                writer.WriteNullValue();
+
                 // The only location in the protocol we allow dynamic objects are Extra and Contexts
                 // In the event of an instance that can't be serialized, we don't want to throw away a whole event
                 // so we'll suppress issues here.
