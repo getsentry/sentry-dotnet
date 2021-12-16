@@ -8,7 +8,7 @@ if [ "$GITHUB_ACTIONS" == "true" ]
         testLogger="console"
 fi
 
-dotnet test Sentry_Mac.slnf -c Release -l $testLogger \
+dotnet test $solutionFilterFile -c Release -l $testLogger \
     /p:CollectCoverage=true \
     /p:CoverletOutputFormat=opencover \
     /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\" \
