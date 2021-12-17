@@ -95,7 +95,6 @@ namespace Sentry
         /// </summary>
         /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
         /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
-        /// <returns></returns>
         internal static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
             => options.Integrations = options.Integrations?.Where(p => p.GetType() != typeof(TIntegration)).ToArray();
 

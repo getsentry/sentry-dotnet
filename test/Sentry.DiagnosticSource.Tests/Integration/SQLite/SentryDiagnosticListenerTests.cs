@@ -88,7 +88,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.NotNull(exception);
-#if NET461 || NETCOREAPP2_1
+#if NET461 || NETCOREAPP2_1 || NETCOREAPP3_1
             Assert.Single(spans); //1 command
 #else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
@@ -112,7 +112,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.Equal(3, result.Count);
-#if NET461 || NETCOREAPP2_1
+#if NET461 || NETCOREAPP2_1 || NETCOREAPP3_1
             Assert.Single(spans); //1 command
 #else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
@@ -154,7 +154,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             // Assert
             Assert.Equal(totalCommands, itemsList.Count);
             Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query"));
-#if !NET461 && !NETCOREAPP2_1
+#if !NET461 && !NETCOREAPP2_1 && !NETCOREAPP3_1
             Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
             Assert.All(spans, span =>
@@ -187,7 +187,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             // Assert
             Assert.Equal(3, result[0].Result.Count);
             Assert.Equal(4, spans.Count(s => s.Operation == "db.query"));
-#if !NET461 && !NETCOREAPP2_1
+#if !NET461 && !NETCOREAPP2_1 && !NETCOREAPP3_1
             Assert.Equal(4, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
             Assert.All(spans, span =>

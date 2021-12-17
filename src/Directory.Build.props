@@ -59,17 +59,6 @@
 
   <ItemGroup>
     <PackageReference Include="SIL.ReleaseTasks" Version="2.5.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'"/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--    To uncomment when Sentry.Protocol is added in-->
-    <!--    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />-->
-
-    <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to PublicAPI.Shipped.txt -->
-    <None Remove="PublicAPI.Shipped.txt"/>
-    <None Remove="PublicAPI.Unshipped.txt"/>
-    <AdditionalFiles Include="PublicAPI.Shipped.txt"/>
-    <AdditionalFiles Include="PublicAPI.Unshipped.txt"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 </Project>

@@ -7,24 +7,22 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sentry.AspNetCore.Tests
+namespace Sentry.AspNetCore.Tests;
+
+public class Startup
 {
-    public class Startup
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        Configuration = configuration;
+    }
 
-        public IConfiguration Configuration { get; }
+    public IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-        }
+    public void ConfigureServices(IServiceCollection services)
+    {
+    }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-
-        }
+    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+    {
     }
 }

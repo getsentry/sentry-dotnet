@@ -1,22 +1,20 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Sentry.AspNetCore
+namespace Sentry.AspNetCore;
+
+/// <summary>
+/// Starts Sentry integration.
+/// </summary>
+public class SentryStartupFilter : IStartupFilter
 {
     /// <summary>
-    /// Starts Sentry integration.
+    /// Adds Sentry to the pipeline.
     /// </summary>
-    public class SentryStartupFilter : IStartupFilter
+    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => e =>
     {
-        /// <summary>
-        /// Adds Sentry to the pipeline.
-        /// </summary>
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => e =>
-        {
-            e.UseSentry();
+        e.UseSentry();
 
-            next(e);
-        };
-    }
+        next(e);
+    };
 }

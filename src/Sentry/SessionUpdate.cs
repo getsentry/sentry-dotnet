@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -137,11 +138,11 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            writer.WriteSerializable("sid", Id);
+            writer.WriteSerializable("sid", Id, logger);
             writer.WriteStringIfNotWhiteSpace("did", DistinctId);
             writer.WriteBoolean("init", IsInitial);
             writer.WriteString("started", StartTimestamp);

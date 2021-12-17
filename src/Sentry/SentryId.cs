@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 
 namespace Sentry
 {
@@ -45,7 +46,7 @@ namespace Sentry
         public static SentryId Create() => new(Guid.NewGuid());
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(ToString());
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) => writer.WriteStringValue(ToString());
 
         /// <summary>
         /// Parses from string.

@@ -1,13 +1,14 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.11.1</Version>
-    <LangVersion>9</LangVersion>
+    <Version>3.12.2</Version>
+    <LangVersion>10</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
+    <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
   <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->
@@ -22,8 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="3.2.2" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="3.3.0" PrivateAssets="All" />
     <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="All" />
   </ItemGroup>
 

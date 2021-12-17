@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
@@ -46,7 +47,7 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : null;
 
-        private async Task SerializeHeaderAsync(Stream stream, CancellationToken cancellationToken = default)
+        private async Task SerializeHeaderAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             var writer = new Utf8JsonWriter(stream);
 
@@ -56,22 +57,22 @@ namespace Sentry.Protocol.Envelopes
             await using (writer.ConfigureAwait(false))
 #endif
             {
-                writer.WriteDictionaryValue(Header);
+                writer.WriteDictionaryValue(Header, logger);
                 await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             // Header
-            await SerializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
+            await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);
             await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
             // Items
             foreach (var item in Items)
             {
-                await item.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
                 await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
             }
         }
@@ -110,6 +111,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromEvent(
             SentryEvent @event,
+            IDiagnosticLogger? logger = null,
             IReadOnlyCollection<Attachment>? attachments = null,
             SessionUpdate? sessionUpdate = null)
         {
@@ -122,7 +124,22 @@ namespace Sentry.Protocol.Envelopes
 
             if (attachments is not null)
             {
-                items.AddRange(attachments.Select(EnvelopeItem.FromAttachment));
+                foreach (var attachment in attachments)
+                {
+                    try
+                    {
+                        items.Add(EnvelopeItem.FromAttachment(attachment));
+                    }
+                    catch (Exception exception)
+                    {
+                        if (logger is null)
+                        {
+                            throw;
+                        }
+
+                        logger.LogError("Failed to add attachment: {0}.", exception, attachment.FileName);
+                    }
+                }
             }
 
             if (sessionUpdate is not null)

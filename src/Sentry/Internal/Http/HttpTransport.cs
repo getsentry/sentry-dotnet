@@ -167,7 +167,7 @@ namespace Sentry.Internal.Http
             {
                 _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
                     envelope.TryGetEventId(),
-                    await envelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+                    await envelope.SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken).ConfigureAwait(false));
             }
             else
             {
@@ -182,12 +182,13 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             // Spare the overhead if level is not enabled
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true)
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true &&
+                response.Content is { } content)
             {
-                if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json",
+                if (string.Equals(content.Headers.ContentType?.MediaType, "application/json",
                     StringComparison.OrdinalIgnoreCase))
                 {
-                    var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
+                    var responseJson = await content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
 
                     var errorMessage =
                         responseJson.GetPropertyOrNull("detail")?.GetString()
@@ -208,7 +209,7 @@ namespace Sentry.Internal.Http
                 }
                 else
                 {
-                    var responseString = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    var responseString = await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
                     _options.Log(
                         SentryLevel.Error,
@@ -224,7 +225,7 @@ namespace Sentry.Internal.Http
                 {
                     _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n",
                         processedEnvelope.TryGetEventId(),
-                        await processedEnvelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+                        await processedEnvelope.SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken).ConfigureAwait(false));
                 }
             }
 
@@ -251,7 +252,7 @@ namespace Sentry.Internal.Http
                 await using (envelopeFile)
 #endif
                 {
-                    await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
+                    await processedEnvelope.SerializeAsync(envelopeFile, _options.DiagnosticLogger, cancellationToken).ConfigureAwait(false);
                     await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
                     _options.LogInfo("Envelope's {0} bytes written to: {1}",
                         envelopeFile.Length, destination);
@@ -267,10 +268,9 @@ namespace Sentry.Internal.Http
             }
 
             var dsn = Dsn.Parse(_options.Dsn);
-
             var authHeader =
                 $"Sentry sentry_version={_options.SentryVersion}," +
-                $"sentry_client={_options.ClientVersion}," +
+                $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
                 $"sentry_key={dsn.PublicKey}," +
                 (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
                 $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
@@ -280,7 +280,7 @@ namespace Sentry.Internal.Http
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
                 Headers = { { "X-Sentry-Auth", authHeader } },
-                Content = new EnvelopeHttpContent(envelope)
+                Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger)
             };
         }
     }

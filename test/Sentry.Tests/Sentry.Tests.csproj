@@ -1,21 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
-  <!-- From Ben.Demystifier -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
-    <DefineConstants>$(DefineConstants);HAS_ASYNC_ENUMERATOR</DefineConstants>
-  </PropertyGroup>
-  <!-- Ben.Demystifier doesn't test Mono -->
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net4')) and '$(OS)' != 'Windows_NT'">
-    <Compile Include="../../modules/Ben.Demystifier/test/Ben.Demystifier.Test/**/*.cs">
-      <Link>Ben.Demystifier/%(RecursiveDir)/%(Filename)%(Extension)</Link>
-    </Compile>
-  </ItemGroup>
-  <!-- From Ben.Demystifier -->
-  
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
