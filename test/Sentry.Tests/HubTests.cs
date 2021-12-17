@@ -289,7 +289,7 @@ public class HubTests
 
     class EvilContext
     {
-        public string Thrower => throw null;
+        public string Thrower => throw new InvalidDataException();
     }
 
     [Fact]
