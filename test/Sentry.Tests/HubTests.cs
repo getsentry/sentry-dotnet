@@ -287,6 +287,36 @@ public class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
+    class EvilContext
+    {
+        public string Thrower => throw null;
+    }
+
+    [Fact]
+    public void CaptureEvent_NonSerializableContext_CapturesEvent()
+    {
+        // Arrange
+        var worker = new FakeBackgroundWorker();
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            BackgroundWorker = worker,
+            AttachStacktrace = true
+        }, client);
+        var evt = new SentryEvent();
+        evt.Contexts["non-serializable-context"] = new EvilContext();
+
+        // Act
+        hub.CaptureEvent(evt);
+
+        // Assert
+        var envelope = worker.Queue.SingleOrDefault();
+
+        Assert.NotNull(envelope);
+    }
+
     [Fact]
     public void CaptureEvent_SessionActive_ExceptionReportsError()
     {
