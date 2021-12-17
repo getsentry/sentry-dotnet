@@ -296,17 +296,23 @@ namespace Sentry.Internal.Extensions
             object? value,
             IDiagnosticLogger? logger)
         {
+            writer.WritePropertyName(propertyName);
             try
             {
-                writer.WritePropertyName(propertyName);
                 writer.WriteDynamicValue(value, logger);
             }
-            catch (Exception e) when (logger != null)
+            catch (Exception e)
             {
-                // The only location in the protocol we allow dynamic objects are Extra and Contexts
+                // The only location in the protocol we allow dynamic objects are Extra and Contexts.
+                // Render an empty JSON object instead of null. This allows a round trip where this property name is the
+                // key to a map which would otherwise not be set and result in a different object.
+                // This affects envelope size which isn't getting recomputed after a roundtrip.
+                writer.WriteStartObject();
+                writer.WriteEndObject();
+
                 // In the event of an instance that can't be serialized, we don't want to throw away a whole event
                 // so we'll suppress issues here.
-                logger.LogError("Failed to serialize object for property {0}", e, propertyName);
+                logger?.LogError("Failed to serialize object for property {0}", e, propertyName);
             }
         }
 

@@ -1,5 +1,10 @@
 // ReSharper disable once CheckNamespace
 // Tests code path which excludes frames with namespace Sentry
+
+using System.IO.Compression;
+using System.Net.Http;
+using Sentry.Testing;
+
 namespace NotSentry.Tests;
 
 public class HubTests
@@ -293,28 +298,45 @@ public class HubTests
     }
 
     [Fact]
-    public void CaptureEvent_NonSerializableContext_CapturesEvent()
+    public void CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey()
     {
-        // Arrange
-        var worker = new FakeBackgroundWorker();
-        var client = Substitute.For<ISentryClient>();
+        var resetEvent = new ManualResetEventSlim();
 
+        var requests = new List<string>();
+        void Verify(HttpRequestMessage message)
+        {
+            requests.Add(message.Content.ReadAsStringAsync().Result);
+            resetEvent.Set();
+        }
+
+        var logger = Substitute.For<IDiagnosticLogger>();
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            BackgroundWorker = worker,
-            AttachStacktrace = true
-        }, client);
-        var evt = new SentryEvent();
-        evt.Contexts["non-serializable-context"] = new EvilContext();
+            CacheDirectoryPath = Path.GetTempPath(), // To go through a round trip serialization of cached envelope
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
+            CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify),
+            AutoSessionTracking = false, // Not to send some session envelope
+            Debug = true,
+            DiagnosticLogger = logger
+        });
 
-        // Act
+        var expectedMessage = Guid.NewGuid().ToString();
+        const string expectedContextKey = "non-serializable-context";
+        var evt = new SentryEvent {
+            Contexts = { [expectedContextKey] = new EvilContext() },
+            Message = new SentryMessage { Formatted = expectedMessage } };
+
         hub.CaptureEvent(evt);
 
-        // Assert
-        var envelope = worker.Queue.SingleOrDefault();
-
-        Assert.NotNull(envelope);
+        // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
+        Assert.True(resetEvent.Wait(TimeSpan.FromSeconds(3)), "No event captured");
+        Assert.True(requests.Any(p => p.Contains(expectedMessage)),
+            "Expected error to be captured");
+        Assert.True(requests.All(p => p.Contains(expectedContextKey)),
+            "Un-serializable context key should exist");
+        logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property {0}",
+            Arg.Any<Exception>(), Arg.Any<object>());
     }
 
     [Fact]
