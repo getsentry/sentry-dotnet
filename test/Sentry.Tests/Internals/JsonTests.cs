@@ -242,7 +242,7 @@ namespace Sentry.Tests.Internals
             }
 
             // Assert
-            logger.Received(1).Log(Arg.Is(SentryLevel.Error), Arg.Any<string>(), Arg.Any<InvalidDataException>(), Arg.Any<object>());
+            logger.Received(1).Log(Arg.Is(SentryLevel.Error), Arg.Any<string>(), Arg.Any<InvalidDataException>(), Arg.Any<object[]>());
         }
     }
 }

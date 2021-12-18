@@ -297,8 +297,10 @@ public class HubTests
         public string Thrower => throw new InvalidDataException();
     }
 
-    [Fact]
-    public void CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
         var resetEvent = new ManualResetEventSlim();
 
@@ -309,11 +311,15 @@ public class HubTests
             resetEvent.Set();
         }
 
+        var cachePath = offlineCaching ? Path.GetTempPath() : null;
+
         var logger = Substitute.For<IDiagnosticLogger>();
+        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            CacheDirectoryPath = Path.GetTempPath(), // To go through a round trip serialization of cached envelope
+            CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
             RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
             CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify),
             AutoSessionTracking = false, // Not to send some session envelope
@@ -335,8 +341,8 @@ public class HubTests
             "Expected error to be captured");
         Assert.True(requests.All(p => p.Contains(expectedContextKey)),
             "Un-serializable context key should exist");
-        logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property {0}",
-            Arg.Any<Exception>(), Arg.Any<object>());
+        logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            Arg.Any<InvalidDataException>(), Arg.Any<object[]>());
     }
 
     [Fact]
