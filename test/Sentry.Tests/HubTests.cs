@@ -329,9 +329,11 @@ public class HubTests
 
         var expectedMessage = Guid.NewGuid().ToString();
         const string expectedContextKey = "non-serializable-context";
-        var evt = new SentryEvent {
+        var evt = new SentryEvent
+        {
             Contexts = { [expectedContextKey] = new EvilContext() },
-            Message = new SentryMessage { Formatted = expectedMessage } };
+            Message = new SentryMessage { Formatted = expectedMessage }
+        };
 
         hub.CaptureEvent(evt);
 
