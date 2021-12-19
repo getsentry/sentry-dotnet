@@ -1,7 +1,5 @@
-using System;
 using System.Reflection;
 using System.Text.Json;
-using Xunit.Sdk;
 
 namespace Sentry.Tests.Internals
 {
@@ -242,7 +240,13 @@ namespace Sentry.Tests.Internals
             }
 
             // Assert
-            logger.Received(1).Log(Arg.Is(SentryLevel.Error), Arg.Any<string>(), Arg.Any<InvalidDataException>(), Arg.Any<object[]>());
+            logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+#if NETCOREAPP2_1
+                Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+#else
+        Arg.Any<InvalidDataException>(),
+#endif
+                Arg.Any<object[]>());
         }
     }
 }
