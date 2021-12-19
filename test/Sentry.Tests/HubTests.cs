@@ -3,6 +3,9 @@
 
 using System.IO.Compression;
 using System.Net.Http;
+#if NETCOREAPP2_1
+using System.Reflection;
+#endif
 using Sentry.Testing;
 
 namespace NotSentry.Tests;
@@ -303,18 +306,24 @@ public class HubTests
     public void CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
         var resetEvent = new ManualResetEventSlim();
+        var expectedMessage = Guid.NewGuid().ToString();
 
         var requests = new List<string>();
         void Verify(HttpRequestMessage message)
         {
-            requests.Add(message.Content.ReadAsStringAsync().Result);
-            resetEvent.Set();
+            var payload = message.Content.ReadAsStringAsync().Result;
+            requests.Add(payload);
+            if (payload.Contains(expectedMessage))
+            {
+                resetEvent.Set();
+            }
         }
 
         var cachePath = offlineCaching ? Path.GetTempPath() : null;
 
         var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var expectedLevel = SentryLevel.Error;
+        logger.IsEnabled(expectedLevel).Returns(true);
 
         var hub = new Hub(new SentryOptions
         {
@@ -324,11 +333,11 @@ public class HubTests
             CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify),
             AutoSessionTracking = false, // Not to send some session envelope
             Debug = true,
+            DiagnosticLevel = expectedLevel,
             DiagnosticLogger = logger
         });
 
-        var expectedMessage = Guid.NewGuid().ToString();
-        const string expectedContextKey = "non-serializable-context";
+        var expectedContextKey = Guid.NewGuid().ToString();
         var evt = new SentryEvent
         {
             Contexts = { [expectedContextKey] = new EvilContext() },
@@ -338,13 +347,17 @@ public class HubTests
         hub.CaptureEvent(evt);
 
         // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
-        Assert.True(resetEvent.Wait(TimeSpan.FromSeconds(3)), "No event captured");
-        Assert.True(requests.Any(p => p.Contains(expectedMessage)),
-            "Expected error to be captured");
+        Assert.True(resetEvent.Wait(TimeSpan.FromSeconds(3)), "Event not captured");
         Assert.True(requests.All(p => p.Contains(expectedContextKey)),
             "Un-serializable context key should exist");
-        logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
-            Arg.Any<InvalidDataException>(), Arg.Any<object[]>());
+
+        logger.Received().Log(expectedLevel, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+#if NETCOREAPP2_1
+            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+#else
+            Arg.Any<InvalidDataException>(),
+#endif
+            Arg.Any<object[]>());
     }
 
     [Fact]
