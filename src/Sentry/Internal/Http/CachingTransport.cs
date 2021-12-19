@@ -99,8 +99,15 @@ namespace Sentry.Internal.Http
                 {
                     _options.LogError("Exception in background worker of CachingTransport.", ex);
 
-                    // Wait a bit before retrying
-                    await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
+                    try
+                    {
+                        // Wait a bit before retrying
+                        await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break; // Shutting down triggered while waiting
+                    }
                 }
             }
             _options.LogDebug("Background worker of CachingTransport has shutdown.");
