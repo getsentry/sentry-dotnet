@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Events no longer get dropped because of non-serializable contexts or attachments ([#1401](https://github.com/getsentry/sentry-dotnet/pull/1401))
 - Add MemoryInfo to sentry event ([#1337](https://github.com/getsentry/sentry-dotnet/pull/1337))
 
 ## 3.12.2
