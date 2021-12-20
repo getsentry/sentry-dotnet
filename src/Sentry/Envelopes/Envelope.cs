@@ -132,12 +132,7 @@ namespace Sentry.Protocol.Envelopes
                     }
                     catch (Exception exception)
                     {
-                        if (logger is null)
-                        {
-                            throw;
-                        }
-
-                        logger.LogError("Failed to add attachment: {0}.", exception, attachment.FileName);
+                        logger?.LogError("Failed to add attachment: {0}.", exception, attachment.FileName);
                     }
                 }
             }
