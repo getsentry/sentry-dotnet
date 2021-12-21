@@ -61,23 +61,30 @@ public class CachingTransportTests
             Debug = true
         };
 
+        var capturingSync = new ManualResetEventSlim();
+        var cancelingSync = new ManualResetEventSlim();
         var innerTransport = Substitute.For<ITransport>();
 
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .ThrowsForAnyArgs(info =>
             {
-                Thread.Sleep(100);
+                capturingSync.Set();
+                cancelingSync.Wait(TimeSpan.FromSeconds(4));
                 return new OperationCanceledException();
             });
 
         await using var transport = new CachingTransport(innerTransport, options);
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
-        await transport.StopWorkerAsync();
+
+        Assert.True(capturingSync.Wait(TimeSpan.FromSeconds(3)), "Inner transport was never called");
+        var stopTask = transport.StopWorkerAsync();
+        cancelingSync.Set(); // Unblock the worker
+        await stopTask;
 
         // Assert
-        Assert.False(_logger.HasErrorOrFatal);
+        Assert.False(_logger.HasErrorOrFatal, "Error or fatal message logged");
     }
 
     [Fact]
@@ -85,27 +92,44 @@ public class CachingTransportTests
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
+        var loggerSync = new ManualResetEventSlim();
+
+        var logger = Substitute.For<IDiagnosticLogger>();
+        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        logger
+            .When(l =>
+                l.Log(SentryLevel.Error,
+                    "Exception in background worker of CachingTransport.",
+                    Arg.Any<OperationCanceledException>(),
+                    Arg.Any<object[]>()))
+            .Do(_ => loggerSync.Set());
 
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
-            DiagnosticLogger = _logger,
+            DiagnosticLogger = logger,
             CacheDirectoryPath = cacheDirectory.Path,
             Debug = true
         };
 
         var innerTransport = Substitute.For<ITransport>();
 
+        var capturingSync = new ManualResetEventSlim();
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-            .ThrowsForAnyArgs(new OperationCanceledException());
+            .ThrowsForAnyArgs(_ =>
+            {
+                capturingSync.Set();
+                return new OperationCanceledException();
+            });
 
         await using var transport = new CachingTransport(innerTransport, options);
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
-        await Task.Delay(100);
+
         // Assert
-        Assert.True(_logger.HasErrorOrFatal);
+        Assert.True(capturingSync.Wait(TimeSpan.FromSeconds(3)), "Envelope never reached the transport");
+        Assert.True(loggerSync.Wait(TimeSpan.FromSeconds(3)), "Expected log call never received");
     }
 
     [Fact(Timeout = 7000)]

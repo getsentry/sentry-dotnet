@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -18,8 +19,18 @@ namespace Sentry.Internal.Http
             _logger = logger;
         }
 
-        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context) =>
-            await _envelope.SerializeAsync(stream, _logger).ConfigureAwait(false);
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+        {
+            try
+            {
+                await _envelope.SerializeAsync(stream, _logger).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger?.LogError("Failed to serialize Envelope into the network stream", e);
+                throw;
+            }
+        }
 
         protected override bool TryComputeLength(out long length)
         {

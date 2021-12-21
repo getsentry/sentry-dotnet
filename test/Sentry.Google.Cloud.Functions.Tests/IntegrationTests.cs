@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sentry.AspNetCore;
+using Sentry.Testing;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 
@@ -36,7 +37,7 @@ public class IntegrationTests
                     {
                         // So we can assert on the payload without the need to Gzip decompress
                         o.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
-                        o.CreateHttpClientHandler = () => new TestHandler(Verify);
+                        o.CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify);
                     });
                     services.AddFunctionTarget<FailingFunction>();
                 })
@@ -74,18 +75,5 @@ public class IntegrationTests
     public class FailingFunction : IHttpFunction
     {
         public Task HandleAsync(HttpContext context) => throw new Exception(ExpectedMessage);
-    }
-
-    private class TestHandler : HttpClientHandler
-    {
-        private readonly Action<HttpRequestMessage> _messageCallback;
-
-        public TestHandler(Action<HttpRequestMessage> messageCallback) => _messageCallback = messageCallback;
-
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            _messageCallback(request);
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
-        }
     }
 }
