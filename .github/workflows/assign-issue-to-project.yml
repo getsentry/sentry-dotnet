@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Assign to Default Project
     steps:
-    - name: Assign NEW issues and NEW pull requests to project Default
+    - name: Assign new issues and new pull requests to project Default
       uses: srggrs/assign-one-project-github-action@4fc2b23bdaaac08e64dcc590a6e138d2f9b8c86e
       if: github.event.action == 'opened'
       with:
