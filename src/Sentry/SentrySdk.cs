@@ -227,18 +227,6 @@ namespace Sentry
             => _hub.AddBreadcrumb(clock, message, category, type, data, level);
 
         /// <summary>
-        /// Runs the callback with a new scope which gets dropped at the end.
-        /// </summary>
-        /// <remarks>
-        /// Pushes a new scope, runs the callback, pops the scope.
-        /// </remarks>
-        /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-        /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-        [DebuggerStepThrough]
-        public static void WithScope(Action<Scope> scopeCallback)
-            => _hub.WithScope(scopeCallback);
-
-        /// <summary>
         /// Configures the scope through the callback.
         /// </summary>
         /// <param name="configureScope">The configure scope callback.</param>
@@ -276,6 +264,20 @@ namespace Sentry
             => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
+        /// Captures an event with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="evt">The event.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <returns>The Id of the event.</returns>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+            => _hub.CaptureEvent(evt, configureScope);
+
+        /// <summary>
         /// Captures the exception.
         /// </summary>
         /// <param name="exception">The exception.</param>
@@ -283,6 +285,16 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryId CaptureException(Exception exception)
             => _hub.CaptureException(exception);
+
+        /// <summary>
+        /// Captures the exception with a configurable scope.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <returns>The Id of the even.t</returns>
+        [DebuggerStepThrough]
+        public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
+            => _hub.CaptureException(exception, configureScope);
 
         /// <summary>
         /// Captures the message.
@@ -293,6 +305,17 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
             => _hub.CaptureMessage(message, level);
+
+        /// <summary>
+        /// Captures the message with a configurable scope.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="level">The message level.</param>
+        /// <returns>The Id of the event.</returns>
+        [DebuggerStepThrough]
+        public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
+            => _hub.CaptureMessage(message, configureScope, level);
 
         /// <summary>
         /// Captures a user feedback.

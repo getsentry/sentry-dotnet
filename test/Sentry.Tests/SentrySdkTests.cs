@@ -375,32 +375,6 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
-    public void WithScope_DisabledSdk_CallbackNeverInvoked()
-    {
-        var invoked = false;
-        SentrySdk.WithScope(_ => invoked = true);
-        Assert.False(invoked);
-    }
-
-    [Fact]
-    public void WithScope_InvokedWithNewScope()
-    {
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
-        {
-            Scope expected = null;
-            SentrySdk.ConfigureScope(s => expected = s);
-
-            Scope actual = null;
-            SentrySdk.WithScope(s => actual = s);
-            Assert.NotNull(actual);
-
-            Assert.NotSame(expected, actual);
-
-            SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
-        }
-    }
-
-    [Fact]
     public async Task ConfigureScope_Async_CallbackNeverInvoked()
     {
         var invoked = false;

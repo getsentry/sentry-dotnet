@@ -103,18 +103,6 @@ namespace Sentry.Internal
 
         public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
-        public void WithScope(Action<Scope> scopeCallback)
-        {
-            try
-            {
-                ScopeManager.WithScope(scopeCallback);
-            }
-            catch (Exception e)
-            {
-                _options.LogError("Failure to run callback WithScope", e);
-            }
-        }
-
         public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
         public ITransaction StartTransaction(
@@ -269,6 +257,22 @@ namespace Sentry.Internal
             }
 
             return null;
+        }
+
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+        {
+            try
+            {
+                var clonedScope = ScopeManager.GetCurrent().Key.Clone();
+                configureScope(clonedScope);
+
+                return CaptureEvent(evt, clonedScope);
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+                return SentryId.Empty;
+            }
         }
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)

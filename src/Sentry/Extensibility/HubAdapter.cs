@@ -67,13 +67,6 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
-        public void WithScope(Action<Scope> scopeCallback)
-            => SentrySdk.WithScope(scopeCallback);
-
-        /// <summary>
-        /// Forwards the call to <see cref="SentrySdk"/>.
-        /// </summary>
-        [DebuggerStepThrough]
         public ITransaction StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
@@ -188,6 +181,14 @@ namespace Sentry.Extensibility
         [EditorBrowsable(EditorBrowsableState.Never)]
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
             => SentrySdk.CaptureEvent(evt, scope);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+            => SentrySdk.CaptureEvent(evt, configureScope);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
