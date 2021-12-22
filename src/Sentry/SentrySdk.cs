@@ -289,6 +289,9 @@ namespace Sentry
         /// <summary>
         /// Captures the exception with a configurable scope.
         /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
         /// <param name="exception">The exception.</param>
         /// <param name="configureScope">The callback to configure the scope.</param>
         /// <returns>The Id of the even.t</returns>
@@ -309,6 +312,9 @@ namespace Sentry
         /// <summary>
         /// Captures the message with a configurable scope.
         /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
         /// <param name="message">The message to send.</param>
         /// <param name="configureScope">The callback to configure the scope.</param>
         /// <param name="level">The message level.</param>
