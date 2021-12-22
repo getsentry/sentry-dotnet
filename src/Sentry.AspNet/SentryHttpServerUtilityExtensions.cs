@@ -14,7 +14,7 @@ public static class SentryHttpServerUtilityExtensions
     /// <param name="hub">(optional) The Hub that will capture the exception.</param>
     /// <returns>A SentryId.</returns>
     public static SentryId CaptureLastError(this HttpServerUtility server) => server.CaptureLastError(HubAdapter.Instance);
-    
+
     // for testing
     internal static SentryId CaptureLastError(this HttpServerUtility server, IHub hub)
     {
