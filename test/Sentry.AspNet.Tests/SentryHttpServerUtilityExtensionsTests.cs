@@ -1,6 +1,7 @@
 using System.Web;
 
 namespace Sentry.AspNet.Tests;
+
 public class SentryHttpServerUtilityExtensionsTests
 {
     private class Fixture
@@ -53,5 +54,4 @@ public class SentryHttpServerUtilityExtensionsTests
         hub.Received(0).CaptureEvent(Arg.Any<SentryEvent>());
         Assert.Equal(SentryId.Empty, receivedId);
     }
-
 }

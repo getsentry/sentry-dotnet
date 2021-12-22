@@ -8,12 +8,15 @@ namespace Sentry.AspNet;
 public static class SentryHttpServerUtilityExtensions
 {
     /// <summary>
-    /// Caoture the last error from the given HttpServerUtility and send to Sentry.
+    /// Captures the last error from the given HttpServerUtility and sends it to Sentry.
     /// </summary>
     /// <param name="server">The HttpServerUtility that contains the last error.</param>
     /// <param name="hub">(optional) The Hub that will capture the exception.</param>
     /// <returns>A SentryId.</returns>
-    public static SentryId CaptureLastError(this HttpServerUtility server, IHub? hub = null)
+    public static SentryId CaptureLastError(this HttpServerUtility server) => server.CaptureLastError(HubAdapter.Instance);
+    
+    // for testing
+    internal static SentryId CaptureLastError(this HttpServerUtility server, IHub hub)
     {
         if (server.GetLastError() is { } exception)
         {

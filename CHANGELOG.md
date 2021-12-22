@@ -4,7 +4,7 @@
 
 ## Features
 
-- Add CaptureLastError for ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
+- Add CaptureLastError as an extension method to the Server class on ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
 
 ## 3.12.3
 
