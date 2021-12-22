@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
@@ -59,10 +60,10 @@ namespace Sentry.Protocol.Envelopes
 
         public string? TryGetFileName() => Header.GetValueOrDefault(FileNameKey) as string;
 
-        private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
+        private async Task<MemoryStream> BufferPayloadAsync(IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             var buffer = new MemoryStream();
-            await Payload.SerializeAsync(buffer, cancellationToken).ConfigureAwait(false);
+            await Payload.SerializeAsync(buffer, logger, cancellationToken).ConfigureAwait(false);
             buffer.Seek(0, SeekOrigin.Begin);
 
             return buffer;
@@ -71,6 +72,7 @@ namespace Sentry.Protocol.Envelopes
         private static async Task SerializeHeaderAsync(
             Stream stream,
             IReadOnlyDictionary<string, object?> header,
+            IDiagnosticLogger? logger,
             CancellationToken cancellationToken = default)
         {
             var writer = new Utf8JsonWriter(stream);
@@ -80,33 +82,34 @@ namespace Sentry.Protocol.Envelopes
             await using (writer.ConfigureAwait(false))
 #endif
             {
-                writer.WriteDictionaryValue(header);
+                writer.WriteDictionaryValue(header, logger);
                 await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
         private async Task SerializeHeaderAsync(
             Stream stream,
+            IDiagnosticLogger? logger,
             CancellationToken cancellationToken = default) =>
-            await SerializeHeaderAsync(stream, Header, cancellationToken).ConfigureAwait(false);
+            await SerializeHeaderAsync(stream, Header, logger, cancellationToken).ConfigureAwait(false);
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             // Length is known
             if (TryGetLength() != null)
             {
                 // Header
-                await SerializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
+                await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);
                 await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
                 // Payload
-                await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await Payload.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
             }
             // Length is NOT known (need to calculate)
             else
             {
-                var payloadBuffer = await BufferPayloadAsync(cancellationToken).ConfigureAwait(false);
+                var payloadBuffer = await BufferPayloadAsync(logger, cancellationToken).ConfigureAwait(false);
 #if NET461 || NETSTANDARD2_0
                 using (payloadBuffer)
 #else
@@ -116,8 +119,7 @@ namespace Sentry.Protocol.Envelopes
                     // Header
                     var headerWithLength = Header.ToDictionary();
                     headerWithLength[LengthKey] = payloadBuffer.Length;
-
-                    await SerializeHeaderAsync(stream, headerWithLength, cancellationToken).ConfigureAwait(false);
+                    await SerializeHeaderAsync(stream, headerWithLength, logger, cancellationToken).ConfigureAwait(false);
                     await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
                     // Payload

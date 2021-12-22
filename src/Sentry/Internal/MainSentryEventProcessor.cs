@@ -12,6 +12,8 @@ namespace Sentry.Internal
     {
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
+        internal const string MemoryInfoKey = "Memory Info";
+        internal const string ThreadPoolInfoKey = "ThreadPool Info";
 
         private readonly Enricher _enricher;
 
@@ -54,6 +56,8 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
+            AddMemoryInfo(@event.Contexts);
+            AddThreadPoolInfo(@event.Contexts);
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -131,6 +135,55 @@ namespace Sentry.Internal
             _enricher.Apply(@event);
 
             return @event;
+        }
+
+        private void AddMemoryInfo(Contexts contexts)
+        {
+#if NETCOREAPP3_0_OR_GREATER
+            var memory = GC.GetGCMemoryInfo();
+            var allocatedBytes = GC.GetTotalAllocatedBytes();
+#if NET5_0_OR_GREATER
+            contexts[MemoryInfoKey] = new MemoryInfo(
+                allocatedBytes,
+                memory.FragmentedBytes,
+                memory.HeapSizeBytes,
+                memory.HighMemoryLoadThresholdBytes,
+                memory.TotalAvailableMemoryBytes,
+                memory.MemoryLoadBytes,
+                memory.TotalCommittedBytes,
+                memory.PromotedBytes,
+                memory.PinnedObjectsCount,
+                memory.PauseTimePercentage,
+                memory.Index,
+                memory.Generation,
+                memory.FinalizationPendingCount,
+                memory.Compacted,
+                memory.Concurrent,
+                memory.PauseDurations.ToArray());
+#else
+            contexts[MemoryInfoKey] = new MemoryInfo(
+            allocatedBytes,
+            memory.FragmentedBytes,
+            memory.HeapSizeBytes,
+            memory.HighMemoryLoadThresholdBytes,
+            memory.TotalAvailableMemoryBytes,
+            memory.MemoryLoadBytes);
+#endif
+#endif
+        }
+
+        private void AddThreadPoolInfo(Contexts contexts)
+        {
+            ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
+            ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
+            contexts[ThreadPoolInfoKey] = new ThreadPoolInfo(
+                minWorkerThreads,
+                minCompletionPortThreads,
+                maxWorkerThreads,
+                maxCompletionPortThreads,
+                availableWorkerThreads,
+                availableCompletionPortThreads);
         }
 
         private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)

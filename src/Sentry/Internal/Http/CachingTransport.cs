@@ -75,35 +75,42 @@ namespace Sentry.Internal.Http
                         File.Move(filePath, destinationPath);
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failed to move unprocessed files back to cache.", e);
+            }
 
-                while (!_workerCts.IsCancellationRequested)
+            while (!_workerCts.IsCancellationRequested)
+            {
+                try
                 {
+                    await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
+                    _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
+                    await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when
+                    (_workerCts.IsCancellationRequested)
+                {
+                    // Swallow if IsCancellationRequested as it'll get out of the loop
+                    // Other exceptions will be handled by generic catch
+                }
+                catch (Exception ex)
+                {
+                    _options.LogError("Exception in background worker of CachingTransport.", ex);
+
                     try
                     {
-                        await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
-                        _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
-                        await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException) when
-                        (_workerCts.IsCancellationRequested)
-                    {
-                        // Swallow if IsCancellationRequested
-                        // else log will be handled by generic catch
-                    }
-                    catch (Exception ex)
-                    {
-                        _options.LogError("Exception in background worker of CachingTransport.", ex);
-
                         // Wait a bit before retrying
                         await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
                     }
+                    catch (OperationCanceledException)
+                    {
+                        break; // Shutting down triggered while waiting
+                    }
                 }
             }
-            catch (OperationCanceledException)
-            {
-                // Worker has been shut down, it's okay
-                _options.LogDebug("Background worker of CachingTransport has shutdown.");
-            }
+            _options.LogDebug("Background worker of CachingTransport has shutdown.");
         }
 
         private void EnsureFreeSpaceInCache()
@@ -291,7 +298,7 @@ namespace Sentry.Internal.Http
             await using (stream.ConfigureAwait(false))
 #endif
             {
-                await envelope.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await envelope.SerializeAsync(stream, _options.DiagnosticLogger, cancellationToken).ConfigureAwait(false);
             }
 
             // Tell the worker that there is work available

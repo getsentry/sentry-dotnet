@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -16,11 +17,11 @@ namespace Sentry
             PauseTimestamp = pauseTimestamp;
         }
 
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            writer.WriteSerializable("update", Update);
+            writer.WriteSerializable("update", Update, logger);
 
             if (PauseTimestamp is { } pauseTimestamp)
             {

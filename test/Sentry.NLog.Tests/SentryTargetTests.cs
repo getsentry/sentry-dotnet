@@ -4,6 +4,7 @@ using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
+using Target = NLog.Targets.Target;
 
 namespace Sentry.NLog.Tests;
 
