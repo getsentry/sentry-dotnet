@@ -70,7 +70,6 @@ namespace Sentry
         /// </summary>
         void EndSession(SessionEndStatus status = SessionEndStatus.Exited);
 
-
         /// <summary>
         /// Captures an event with a configurable scope.
         /// </summary>

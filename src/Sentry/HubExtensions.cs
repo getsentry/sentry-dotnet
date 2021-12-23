@@ -158,7 +158,6 @@ namespace Sentry
             public void Dispose() => _scope.Dispose();
         }
 
-
         /// <summary>
         /// Captures the exception with a configurable scope callback.
         /// </summary>
@@ -167,11 +166,9 @@ namespace Sentry
         /// <param name="configureScope">The callback to configure the scope.</param>
         /// <returns>The Id of the event</returns>
         public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope)
-        {
-            return !hub.IsEnabled
+            => !hub.IsEnabled
                 ? new SentryId()
                 : hub.CaptureEvent(new SentryEvent(ex), configureScope);
-        }
 
         /// <summary>
         /// Captures a message with a configurable scope callback.
@@ -186,15 +183,14 @@ namespace Sentry
             string message,
             Action<Scope> configureScope,
             SentryLevel level = SentryLevel.Info)
-        {
-            return !hub.IsEnabled || string.IsNullOrWhiteSpace(message)
+            => !hub.IsEnabled || string.IsNullOrWhiteSpace(message)
                 ? new SentryId()
                 : hub.CaptureEvent(
                     new SentryEvent
                     {
                         Message = message,
                         Level = level
-                    }, configureScope);
-        }
+                    },
+                    configureScope);
     }
 }

@@ -227,6 +227,18 @@ namespace Sentry
             => _hub.AddBreadcrumb(clock, message, category, type, data, level);
 
         /// <summary>
+        /// Runs the callback with a new scope which gets dropped at the end.
+        /// </summary>
+        /// <remarks>
+        /// Pushes a new scope, runs the callback, pops the scope.
+        /// </remarks>
+        /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
+        /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+        [DebuggerStepThrough]
+        public static void WithScope(Action<Scope> scopeCallback)
+            => _hub.WithScope(scopeCallback);
+
+        /// <summary>
         /// Configures the scope through the callback.
         /// </summary>
         /// <param name="configureScope">The configure scope callback.</param>
