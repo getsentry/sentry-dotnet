@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Reflection;
@@ -14,6 +15,8 @@ namespace Sentry.Internal
         internal const string CurrentUiCultureKey = "Current UI Culture";
         internal const string MemoryInfoKey = "Memory Info";
         internal const string ThreadPoolInfoKey = "ThreadPool Info";
+        internal const string IsDynamicCodeCompiledKey = "Is Dynamic Code Compiled";
+        internal const string IsDynamicCodeSupportedKey = "Is Dynamic Code Supported";
 
         private readonly Enricher _enricher;
 
@@ -55,6 +58,11 @@ namespace Sentry.Internal
             {
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
+
+#if NETCOREAPP3_0_OR_GREATER
+            @event.Contexts[IsDynamicCodeCompiledKey] = RuntimeFeature.IsDynamicCodeCompiled;
+            @event.Contexts[IsDynamicCodeSupportedKey] = RuntimeFeature.IsDynamicCodeSupported;
+#endif
 
             AddMemoryInfo(@event.Contexts);
             AddThreadPoolInfo(@event.Contexts);
