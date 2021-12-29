@@ -15,8 +15,9 @@ namespace Sentry.Internal
         internal const string CurrentUiCultureKey = "Current UI Culture";
         internal const string MemoryInfoKey = "Memory Info";
         internal const string ThreadPoolInfoKey = "ThreadPool Info";
-        internal const string IsDynamicCodeCompiledKey = "Is Dynamic Code Compiled";
-        internal const string IsDynamicCodeSupportedKey = "Is Dynamic Code Supported";
+        internal const string IsDynamicCodeKey = "Dynamic Code";
+        internal const string IsDynamicCodeCompiledKey = "Compiled";
+        internal const string IsDynamicCodeSupportedKey = "Supported";
 
         private readonly Enricher _enricher;
 
