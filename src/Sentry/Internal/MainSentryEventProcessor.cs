@@ -60,8 +60,11 @@ namespace Sentry.Internal
             }
 
 #if NETCOREAPP3_0_OR_GREATER
-            @event.Contexts[IsDynamicCodeCompiledKey] = RuntimeFeature.IsDynamicCodeCompiled;
-            @event.Contexts[IsDynamicCodeSupportedKey] = RuntimeFeature.IsDynamicCodeSupported;
+            @event.Contexts[IsDynamicCodeKey] = new Dictionary<string, bool>
+            {
+                { IsDynamicCodeCompiledKey, RuntimeFeature.IsDynamicCodeCompiled },
+                { IsDynamicCodeSupportedKey, RuntimeFeature.IsDynamicCodeSupported }
+            };
 #endif
 
             AddMemoryInfo(@event.Contexts);
