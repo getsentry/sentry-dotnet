@@ -3,7 +3,6 @@
 ## Unreleased
 
 - Add IsDynamicCode* to events ([#1418](https://github.com/getsentry/sentry-dotnet/pull/1418))
-- Add missing using on sha ([#1419](https://github.com/getsentry/sentry-dotnet/pull/1419))
 
 ## 3.12.3
 
