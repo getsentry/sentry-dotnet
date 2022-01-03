@@ -26,7 +26,10 @@ namespace Sentry.Internal.Extensions
             }
         }
 
-        public static string GetHashString(this string str) =>
-            str.GetHashString(SHA1.Create());
+        public static string GetHashString(this string str)
+        {
+            using var sha = SHA1.Create();
+            return str.GetHashString(sha);
+        }
     }
 }
