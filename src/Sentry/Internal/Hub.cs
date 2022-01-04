@@ -392,6 +392,7 @@ namespace Sentry.Internal
             }
 
             _ownedClient.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+            _rootScope.Dispose();
             ScopeManager.Dispose();
         }
 
