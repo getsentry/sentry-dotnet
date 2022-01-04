@@ -839,17 +839,18 @@ public class HubTests
     public void Dispose_CalledSecondTime_ClientDisposedOnce()
     {
         var client = Substitute.For<ISentryClient, IDisposable>();
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret
-        }, client);
+        };
+        var hub = new Hub(options, client);
 
         // Act
         hub.Dispose();
         hub.Dispose();
 
         // Assert
-        ((IDisposable)client).Received(1).Dispose();
+        client.Received(1).FlushAsync(options.ShutdownTimeout);
     }
 
     [Fact]
