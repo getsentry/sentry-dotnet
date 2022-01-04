@@ -30,7 +30,7 @@ namespace Sentry.AspNetCore.Extensions
 
             var sentryRouteName = context.Features.Get<ISentryRouteName>();
 
-            return sentryRouteName?.GetRouteName();
+            return sentryRouteName?.GetRouteName(context);
         }
 
         // Internal for testing.

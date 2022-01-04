@@ -44,6 +44,12 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
     /// <summary>
+    /// RouteName sets the transaction name that was created by the ASPNetCore integration
+    /// when the integration isn't able to define the transaction name..
+    /// </summary>
+    public ISentryRouteName? RouteName { get; set; }
+
+    /// <summary>
     /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />
     /// is adjusted when setting the Sentry environment. Defaults to true.
     /// </summary>

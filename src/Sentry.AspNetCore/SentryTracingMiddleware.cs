@@ -110,6 +110,11 @@ namespace Sentry.AspNetCore
             var transaction = TryStartTransaction(context);
             var initialName = transaction?.Name;
 
+            if (_options.RouteName is { } route)
+            {
+                context.Features.Set(route);
+            }
+
             // Expose the transaction on the scope so that the user
             // can retrieve it and start child spans off of it.
             hub.ConfigureScope(scope =>
