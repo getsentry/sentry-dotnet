@@ -392,8 +392,7 @@ namespace Sentry.Internal
             }
 
             _ownedClient.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
-            _rootScope.Dispose();
-            ScopeManager.Dispose();
+            //Dont dispose of _rootScope and ScopeManager since we want dangling transactions to still be able to access tags.
         }
 
         public SentryId LastEventId
