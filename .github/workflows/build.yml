@@ -55,7 +55,13 @@ jobs:
           with:
             dotnet-version: '6.0.x'
 
-        - name: Install .NET Android workload
+        # .NET Android workload doesn't support Linux
+        - name: Install Android workload (macOS)
+          if: matrix.os == 'macos-latest'
+          run: sudo dotnet workload install android
+
+        - name: Install Android workload (Windows)
+          if: matrix.os == 'windows-latest'
           run: dotnet workload install android
 
         - name: Run build script
