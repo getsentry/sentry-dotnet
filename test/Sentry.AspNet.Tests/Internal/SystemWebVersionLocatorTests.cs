@@ -2,8 +2,6 @@ using System.Reflection;
 using System.Web;
 using Sentry.AspNet.Internal;
 
-namespace Sentry.AspNet.Tests.Internal;
-
 public class SystemWebVersionLocatorTests
 {
     private class Fixture
@@ -12,7 +10,7 @@ public class SystemWebVersionLocatorTests
 
         public Fixture()
         {
-            HttpContext = new HttpContext(new HttpRequest("test", "http://test", null), new HttpResponse(new StringWriter()));
+            HttpContext = HttpContextBuilder.Build();
         }
 
         public Assembly GetSut()

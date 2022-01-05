@@ -1,6 +1,5 @@
+using Sentry.AspNet;
 using Sentry.AspNet.Internal;
-
-namespace Sentry.AspNet.Tests;
 
 public class SentryAspNetOptionsExtensionsTests
 {

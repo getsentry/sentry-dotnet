@@ -1,8 +1,6 @@
 using System.Web;
 using Sentry.AspNet.Internal;
 
-namespace Sentry.AspNet.Tests.Internal;
-
 public class SystemWebRequestEventProcessorTests
 {
     private class Fixture
@@ -15,7 +13,7 @@ public class SystemWebRequestEventProcessorTests
         public Fixture()
         {
             _ = RequestPayloadExtractor.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(MockBody);
-            HttpContext = new HttpContext(new HttpRequest("test", "http://test", null), new HttpResponse(new StringWriter()));
+            HttpContext = HttpContextBuilder.Build();
         }
 
         public SystemWebRequestEventProcessor GetSut()
