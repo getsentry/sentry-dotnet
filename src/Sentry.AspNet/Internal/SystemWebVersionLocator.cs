@@ -12,6 +12,11 @@ internal static class SystemWebVersionLocator
             return release;
         }
 
+        return Resolve(context);
+    }
+
+    internal static string? Resolve(HttpContext context)
+    {
         if (context.ApplicationInstance?.GetType() is { } type)
         {
             // Usually the type is ASP.global_asax and the BaseType is the Web Application.

@@ -1,6 +1,5 @@
+using Sentry.AspNet;
 using Sentry.Tests;
-
-namespace Sentry.AspNet.Tests;
 
 [UsesVerify]
 public class ApiApprovalTests

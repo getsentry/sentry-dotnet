@@ -1,26 +1,21 @@
-using System.Web;
 using Sentry.AspNet.Internal;
 
-namespace Sentry.AspNet.Tests.Internal;
-
-public class SystemWebRequestEventProcessorTests
+public class SystemWebRequestEventProcessorTests :
+    HttpContextTest
 {
     private class Fixture
     {
         public IRequestPayloadExtractor RequestPayloadExtractor { get; set; } = Substitute.For<IRequestPayloadExtractor>();
         public SentryOptions SentryOptions { get; set; } = new();
         public object MockBody { get; set; } = new();
-        public HttpContext HttpContext { get; set; }
 
         public Fixture()
         {
             _ = RequestPayloadExtractor.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(MockBody);
-            HttpContext = new HttpContext(new HttpRequest("test", "http://test", null), new HttpResponse(new StringWriter()));
         }
 
         public SystemWebRequestEventProcessor GetSut()
         {
-            HttpContext.Current = HttpContext;
             return new SystemWebRequestEventProcessor(RequestPayloadExtractor, SentryOptions);
         }
     }
@@ -52,7 +47,7 @@ public class SystemWebRequestEventProcessorTests
     [Fact]
     public void Process_NoHttpContext_NoRequestData()
     {
-        _fixture.HttpContext = null;
+        Context = null;
         var expected = new SentryEvent();
 
         var sut = _fixture.GetSut();

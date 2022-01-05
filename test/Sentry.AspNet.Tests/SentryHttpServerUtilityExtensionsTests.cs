@@ -1,6 +1,4 @@
-using System.Web;
-
-namespace Sentry.AspNet.Tests;
+using Sentry.AspNet;
 
 public class SentryHttpServerUtilityExtensionsTests
 {
@@ -27,7 +25,7 @@ public class SentryHttpServerUtilityExtensionsTests
         var hub = _fixture.GetSut();
         var exception = new Exception();
 
-        var context = new HttpContext(new HttpRequest("", "http://test", null), new HttpResponse(new StringWriter()));
+        var context = HttpContextBuilder.Build();
         context.AddError(exception);
 
         // Act
@@ -45,7 +43,7 @@ public class SentryHttpServerUtilityExtensionsTests
     {
         // Arrange
         var hub = _fixture.GetSut();
-        var context = new HttpContext(new HttpRequest("", "http://test", null), new HttpResponse(new StringWriter()));
+        var context = HttpContextBuilder.Build();
 
         // Act
         var receivedId = context.Server.CaptureLastError(hub);
