@@ -15,11 +15,11 @@ public class SystemWebVersionLocatorTests :
     }
 
     [Fact]
-    public void GetCurrent_GetEntryAssemblySet_HttpApplicationAssembly()
+    public void HttpApplicationAssembly_VersionParsing()
     {
         var expected = ApplicationVersionLocator.GetCurrent(typeof(HttpApplication).Assembly);
 
-        var actual = SystemWebVersionLocator.Resolve(new SentryOptions(), Context);
+        var actual = SystemWebVersionLocator.Resolve(Context);
 
         Assert.Equal(expected, actual);
     }
