@@ -7,9 +7,12 @@
 - Add CaptureLastError as an extension method to the Server class on ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
 - Add IsDynamicCode* to events ([#1418](https://github.com/getsentry/sentry-dotnet/pull/1418))
 
+### Fixes
+
+- Dispose of client should only flush ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1354))
+
 ## 3.12.3
 
-Dispose of client should only flush ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1354))
 ### Fixes
 
 - Events no longer get dropped because of non-serializable contexts or attachments ([#1401](https://github.com/getsentry/sentry-dotnet/pull/1401))
