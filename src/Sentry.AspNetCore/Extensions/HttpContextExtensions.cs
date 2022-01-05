@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
@@ -16,12 +18,46 @@ namespace Sentry.AspNetCore.Extensions
             var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
             var routePattern = endpoint?.RoutePattern.RawText;
 
-            if (!string.IsNullOrWhiteSpace(routePattern))
+            if (NewRouteFormat(routePattern, context) is { } formattedRoute)
             {
-                return routePattern;
+                return formattedRoute;
             }
 #endif
+            if (LegacyRouteFormat(context) is { } legacyFormat)
+            {
+                return legacyFormat;
+            }
 
+            var sentryRouteName = context.Features.Get<ISentryRouteName>();
+
+            return sentryRouteName?.GetRouteName();
+        }
+
+        // Internal for testing.
+        internal static string? NewRouteFormat(string? routePattern, HttpContext context)
+        {
+            if (string.IsNullOrWhiteSpace(routePattern))
+            {
+                return null;
+            }
+
+            var builder = new StringBuilder();
+            if (context.Request.PathBase.HasValue)
+            {
+                builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                    .Append('/');
+            }
+
+            // Skip route pattern if it resembles to a MVC route or null  e.g.
+            // {controller=Home}/{action=Index}/{id?}
+            return RouteHasMvcParameters(routePattern)
+                ? builder.Append(ReplaceMvcParameters(routePattern, context)).ToString()
+                : builder.Append(routePattern).ToString();
+        }
+
+        // Internal for testing.
+        internal static string? LegacyRouteFormat(HttpContext context)
+        {
             // Fallback for legacy .UseMvc().
             // Uses context.Features.Get<IRoutingFeature?>() under the hood and CAN be null,
             // despite the annotations claiming otherwise.
@@ -33,15 +69,58 @@ namespace Sentry.AspNetCore.Extensions
 
             if (!string.IsNullOrWhiteSpace(action))
             {
-                return !string.IsNullOrWhiteSpace(area)
-                    ? $"{area}.{controller}.{action}"
-                    : $"{controller}.{action}";
+                var builder = new StringBuilder();
+                if (context.Request.PathBase.HasValue)
+                {
+                    builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                        .Append('.');
+                }
+
+                if (!string.IsNullOrWhiteSpace(area))
+                {
+                    builder.Append(area)
+                        .Append('.');
+                }
+
+                builder.Append(controller)
+                    .Append('.')
+                    .Append(action);
+                return builder.ToString();
             }
 
             // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
             // then there is no way for us to extract anything that resembles a route template.
             return null;
         }
+
+        // Internal for testing.
+        internal static string ReplaceMvcParameters(string route, HttpContext? context)
+        {
+            // Return RouteData or Null, marking the HttpContext as nullable since the output doesn't
+            // shows the nullable output.
+            var routeData = context?.GetRouteData();
+
+            if (routeData?.Values["controller"]?.ToString() is { } controller)
+            {
+                route = Regex.Replace(route, "{controller=[^}]+}", controller);
+            }
+
+            if (routeData?.Values["action"]?.ToString() is { } action)
+            {
+                route = Regex.Replace(route, "{action=[^}]+}", action);
+            }
+
+            if (routeData?.Values["area"]?.ToString() is { } area)
+            {
+                route = Regex.Replace(route, "{area=[^}]+}", area);
+            }
+
+            return route;
+        }
+
+        // Internal for testing.
+        internal static bool RouteHasMvcParameters(string route)
+            => route.Contains("{controller=") || route.Contains("{action=") || route.Contains("{area=");
 
         public static string? TryGetTransactionName(this HttpContext context)
         {

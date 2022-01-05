@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 
 namespace Sentry
 {
@@ -38,8 +39,7 @@ namespace Sentry
         /// <inheritdoc />
         public bool Equals(SpanId other) => StringComparer.Ordinal.Equals(
             GetNormalizedValue(),
-            other.GetNormalizedValue()
-        );
+            other.GetNormalizedValue());
 
         /// <inheritdoc />
         public override bool Equals(object? obj) => obj is SpanId other && Equals(other);
@@ -60,7 +60,7 @@ namespace Sentry
         public static SpanId Create() => new(Guid.NewGuid().ToString("n").Substring(0, 16));
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer) => writer.WriteStringValue(GetNormalizedValue());
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _) => writer.WriteStringValue(GetNormalizedValue());
 
         /// <summary>
         /// Parses from string.

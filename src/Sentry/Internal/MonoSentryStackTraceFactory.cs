@@ -26,7 +26,7 @@ namespace Sentry.Internal
         {
             if (exception == null)
             {
-                _options.DiagnosticLogger?.LogDebug("No Exception to collect Mono stack trace.");
+                _options.LogDebug("No Exception to collect Mono stack trace.");
                 return base.Create(exception);
             }
 
@@ -45,7 +45,7 @@ namespace Sentry.Internal
 
             if (frames == null)
             {
-                _options.DiagnosticLogger?.LogWarning("Couldn't resolve a Mono stacktrace, calling fallback");
+                _options.LogWarning("Couldn't resolve a Mono stacktrace, calling fallback");
                 return base.Create(exception);
             }
 

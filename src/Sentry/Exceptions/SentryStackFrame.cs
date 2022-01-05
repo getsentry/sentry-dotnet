@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -133,138 +134,28 @@ namespace Sentry
         public long? InstructionOffset { get; set; }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            // Pre-context
-            if (InternalPreContext is {} preContext && preContext.Any())
-            {
-                writer.WriteStartArray("pre_context");
-
-                foreach (var i in preContext)
-                {
-                    writer.WriteStringValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Post-context
-            if (InternalPostContext is {} postContext && postContext.Any())
-            {
-                writer.WriteStartArray("post_context");
-
-                foreach (var i in postContext)
-                {
-                    writer.WriteStringValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Vars
-            if (InternalVars is {} vars && vars.Any())
-            {
-                writer.WriteDictionary("vars", vars!);
-            }
-
-            // Frames omitted
-            if (InternalFramesOmitted is {} framesOmitted && framesOmitted.Any())
-            {
-                writer.WriteStartArray("frames_omitted");
-
-                foreach (var i in framesOmitted)
-                {
-                    writer.WriteNumberValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Filename
-            if (!string.IsNullOrWhiteSpace(FileName))
-            {
-                writer.WriteString("filename", FileName);
-            }
-
-            // Function
-            if (!string.IsNullOrWhiteSpace(Function))
-            {
-                writer.WriteString("function", Function);
-            }
-
-            // Module
-            if (!string.IsNullOrWhiteSpace(Module))
-            {
-                writer.WriteString("module", Module);
-            }
-
-            // Line
-            if (LineNumber is {} lineNumber)
-            {
-                writer.WriteNumber("lineno", lineNumber);
-            }
-
-            // Column
-            if (ColumnNumber is {} columnNumber)
-            {
-                writer.WriteNumber("colno", columnNumber);
-            }
-
-            // Absolute path
-            if (!string.IsNullOrWhiteSpace(AbsolutePath))
-            {
-                writer.WriteString("abs_path", AbsolutePath);
-            }
-
-            // Context line
-            if (!string.IsNullOrWhiteSpace(ContextLine))
-            {
-                writer.WriteString("context_line", ContextLine);
-            }
-
-            // In app
-            if (InApp is {} inApp)
-            {
-                writer.WriteBoolean("in_app", inApp);
-            }
-
-            // Package
-            if (!string.IsNullOrWhiteSpace(Package))
-            {
-                writer.WriteString("package", Package);
-            }
-
-            // Platform
-            if (!string.IsNullOrWhiteSpace(Platform))
-            {
-                writer.WriteString("platform", Platform);
-            }
-
-            // Image address
-            if (ImageAddress != default)
-            {
-                writer.WriteNumber("image_addr", ImageAddress);
-            }
-
-            // Symbol address
-            if (SymbolAddress is {} symbolAddress)
-            {
-                writer.WriteNumber("symbol_addr", symbolAddress);
-            }
-
-            // Instruction address
-            if (!string.IsNullOrWhiteSpace(InstructionAddress))
-            {
-                writer.WriteString("instruction_addr", InstructionAddress);
-            }
-
-            // Instruction offset
-            if (InstructionOffset is {} instructionOffset)
-            {
-                writer.WriteNumber("instruction_offset", instructionOffset);
-            }
+            writer.WriteStringArrayIfNotEmpty("pre_context", InternalPreContext);
+            writer.WriteStringArrayIfNotEmpty("post_context", InternalPostContext);
+            writer.WriteStringDictionaryIfNotEmpty("vars", InternalVars!);
+            writer.WriteArrayIfNotEmpty("frames_omitted", InternalFramesOmitted?.Cast<object>(), logger);
+            writer.WriteStringIfNotWhiteSpace("filename", FileName);
+            writer.WriteStringIfNotWhiteSpace("function", Function);
+            writer.WriteStringIfNotWhiteSpace("module", Module);
+            writer.WriteNumberIfNotNull("lineno", LineNumber);
+            writer.WriteNumberIfNotNull("colno", ColumnNumber);
+            writer.WriteStringIfNotWhiteSpace("abs_path", AbsolutePath);
+            writer.WriteStringIfNotWhiteSpace("context_line", ContextLine);
+            writer.WriteBooleanIfNotNull("in_app", InApp);
+            writer.WriteStringIfNotWhiteSpace("package", Package);
+            writer.WriteStringIfNotWhiteSpace("platform", Platform);
+            writer.WriteNumberIfNotNull("image_addr", ImageAddress.NullIfDefault());
+            writer.WriteNumberIfNotNull("symbol_addr", SymbolAddress);
+            writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
+            writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
 
             writer.WriteEndObject();
         }
@@ -276,7 +167,7 @@ namespace Sentry
         {
             var preContext = json.GetPropertyOrNull("pre_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
             var postContext = json.GetPropertyOrNull("post_context")?.EnumerateArray().Select(j => j.GetString()).ToList();
-            var vars = json.GetPropertyOrNull("vars")?.GetDictionary();
+            var vars = json.GetPropertyOrNull("vars")?.GetStringDictionaryOrNull();
             var framesOmitted = json.GetPropertyOrNull("frames_omitted")?.EnumerateArray().Select(j => j.GetInt32()).ToList();
             var filename = json.GetPropertyOrNull("filename")?.GetString();
             var function = json.GetPropertyOrNull("function")?.GetString();
@@ -297,7 +188,7 @@ namespace Sentry
             {
                 InternalPreContext = preContext!,
                 InternalPostContext = postContext!,
-                InternalVars = vars?.ToDictionary()!,
+                InternalVars = vars?.WhereNotNullValue().ToDictionary(),
                 InternalFramesOmitted = framesOmitted,
                 FileName = filename,
                 Function = function,

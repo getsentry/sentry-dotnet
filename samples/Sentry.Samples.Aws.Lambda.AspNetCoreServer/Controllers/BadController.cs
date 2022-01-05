@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Sentry.Samples.Aws.Lambda.AspNetCoreServer
+namespace Sentry.Samples.Aws.Lambda.AspNetCoreServer;
+
+[Route("api/[controller]")]
+public class BadController
 {
-    [Route("api/[controller]")]
-    public class BadController
-    {
-        [HttpGet]
-        public string Get() => throw null;
-    }
+    [HttpGet]
+    public string Get() => throw null;
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -157,9 +158,87 @@ namespace Sentry.Protocol
         /// A formatted UTC timestamp when the system was booted.
         /// </summary>
         /// <example>
-        /// 018-02-08T12:52:12Z
+        /// 2018-02-08T12:52:12Z
         /// </example>
         public DateTimeOffset? BootTime { get; set; }
+
+        /// <summary>
+        /// Number of "logical processors".
+        /// </summary>
+        /// <example>
+        /// 8
+        /// </example>
+        public int? ProcessorCount { get; set; }
+
+        /// <summary>
+        /// CPU description.
+        /// </summary>
+        /// <example>
+        /// Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz
+        /// </example>
+        public string? CpuDescription { get; set; }
+
+        /// <summary>
+        /// Processor frequency in MHz. Note that the actual CPU frequency might vary depending on current load and power
+        /// conditions, especially on low-powered devices like phones and laptops. On some platforms it's not possible
+        /// to query the CPU frequency. Currently such platforms are iOS and WebGL.
+        /// </summary>
+        /// <example>
+        /// 2500
+        /// </example>
+        public int? ProcessorFrequency { get; set; }
+
+        /// <summary>
+        /// Kind of device the application is running on.
+        /// </summary>
+        /// <example>
+        /// Unknown, Handheld, Console, Desktop
+        /// </example>
+        public string? DeviceType { get; set; }
+
+        /// <summary>
+        /// Status of the device's battery.
+        /// </summary>
+        /// <example>
+        /// Unknown, Charging, Discharging, NotCharging, Full
+        /// </example>
+        public string? BatteryStatus { get; set; }
+
+        /// <summary>
+        /// Unique device identifier. Depends on the running platform.
+        /// </summary>
+        /// <example>
+        /// iOS: UIDevice.identifierForVendor (UUID)
+        /// Android: md5 of ANDROID_ID
+        /// Windows Store Apps: AdvertisingManager::AdvertisingId (possible fallback to HardwareIdentification::GetPackageSpecificToken().Id)
+        /// Windows Standalone: hash from the concatenation of strings taken from Computer System Hardware Classes
+        /// </example>
+        public string? DeviceUniqueIdentifier { get; set; }
+
+        /// <summary>
+        /// Is vibration available on the device?
+        /// </summary>
+        public bool? SupportsVibration { get; set; }
+
+        /// <summary>
+        /// Is accelerometer available on the device?
+        /// </summary>
+        public bool? SupportsAccelerometer { get; set; }
+
+        /// <summary>
+        /// Is gyroscope available on the device?
+        /// </summary>
+        public bool? SupportsGyroscope { get; set; }
+
+        /// <summary>
+        /// Is audio available on the device?
+        /// </summary>
+        public bool? SupportsAudio { get; set; }
+
+        /// <summary>
+        /// Is the device capable of reporting its location?
+        /// </summary>
+        public bool? SupportsLocationService { get; set; }
 
         /// <summary>
         /// Clones this instance.
@@ -191,146 +270,69 @@ namespace Sentry.Protocol
                 StorageSize = StorageSize,
                 Timezone = Timezone,
                 UsableMemory = UsableMemory,
-                LowMemory = LowMemory
+                LowMemory = LowMemory,
+                ProcessorCount = ProcessorCount,
+                CpuDescription = CpuDescription,
+                ProcessorFrequency = ProcessorFrequency,
+                SupportsVibration = SupportsVibration,
+                DeviceType = DeviceType,
+                BatteryStatus = BatteryStatus,
+                DeviceUniqueIdentifier = DeviceUniqueIdentifier,
+                SupportsAccelerometer = SupportsAccelerometer,
+                SupportsGyroscope = SupportsGyroscope,
+                SupportsAudio = SupportsAudio,
+                SupportsLocationService = SupportsLocationService
             };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
         {
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
+            writer.WriteStringIfNotWhiteSpace("timezone", Timezone?.Id);
 
-            if (Timezone is {} timezone)
+            // Write display name, but only if it's different from the ID
+            if (!string.Equals(Timezone?.Id, Timezone?.DisplayName, StringComparison.OrdinalIgnoreCase))
             {
-                writer.WriteString("timezone", timezone.Id);
-
-                // Write display name, but only if it's different from the ID
-                if (!string.Equals(timezone.Id, timezone.DisplayName, StringComparison.OrdinalIgnoreCase))
-                {
-                    writer.WriteString("timezone_display_name", timezone.DisplayName);
-                }
+                writer.WriteStringIfNotWhiteSpace("timezone_display_name", Timezone?.DisplayName);
             }
 
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Manufacturer))
-            {
-                writer.WriteString("manufacturer", Manufacturer);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Brand))
-            {
-                writer.WriteString("brand", Brand);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Family))
-            {
-                writer.WriteString("family", Family);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Model))
-            {
-                writer.WriteString("model", Model);
-            }
-
-            if (!string.IsNullOrWhiteSpace(ModelId))
-            {
-                writer.WriteString("model_id", ModelId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Architecture))
-            {
-                writer.WriteString("arch", Architecture);
-            }
-
-            if (BatteryLevel is {} batteryLevel)
-            {
-                writer.WriteNumber("battery_level", batteryLevel);
-            }
-
-            if (IsCharging is {} isCharging)
-            {
-                writer.WriteBoolean("charging", isCharging);
-            }
-
-            if (IsOnline is {} isOnline)
-            {
-                writer.WriteBoolean("online", isOnline);
-            }
-
-            if (Orientation is {} orientation)
-            {
-                writer.WriteString("orientation", orientation.ToString().ToLowerInvariant());
-            }
-
-            if (Simulator is {} simulator)
-            {
-                writer.WriteBoolean("simulator", simulator);
-            }
-
-            if (MemorySize is {} memorySize)
-            {
-                writer.WriteNumber("memory_size", memorySize);
-            }
-
-            if (FreeMemory is {} freeMemory)
-            {
-                writer.WriteNumber("free_memory", freeMemory);
-            }
-
-            if (UsableMemory is {} usableMemory)
-            {
-                writer.WriteNumber("usable_memory", usableMemory);
-            }
-
-            if (LowMemory is {} lowMemory)
-            {
-                writer.WriteBoolean("low_memory", lowMemory);
-            }
-
-            if (StorageSize is {} storageSize)
-            {
-                writer.WriteNumber("storage_size", storageSize);
-            }
-
-            if (FreeStorage is {} freeStorage)
-            {
-                writer.WriteNumber("free_storage", freeStorage);
-            }
-
-            if (ExternalStorageSize is {} externalStorageSize)
-            {
-                writer.WriteNumber("external_storage_size", externalStorageSize);
-            }
-
-            if (ExternalFreeStorage is {} externalFreeStorage)
-            {
-                writer.WriteNumber("external_free_storage", externalFreeStorage);
-            }
-
-            if (!string.IsNullOrWhiteSpace(ScreenResolution))
-            {
-                writer.WriteString("screen_resolution", ScreenResolution);
-            }
-
-            if (ScreenDensity is {} screenDensity)
-            {
-                writer.WriteNumber("screen_density", screenDensity);
-            }
-
-            if (ScreenDpi is {} screenDpi)
-            {
-                writer.WriteNumber("screen_dpi", screenDpi);
-            }
-
-            if (BootTime is {} bootTime)
-            {
-                writer.WriteString("boot_time", bootTime);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("manufacturer", Manufacturer);
+            writer.WriteStringIfNotWhiteSpace("brand", Brand);
+            writer.WriteStringIfNotWhiteSpace("family", Family);
+            writer.WriteStringIfNotWhiteSpace("model", Model);
+            writer.WriteStringIfNotWhiteSpace("model_id", ModelId);
+            writer.WriteStringIfNotWhiteSpace("arch", Architecture);
+            writer.WriteNumberIfNotNull("battery_level", BatteryLevel);
+            writer.WriteBooleanIfNotNull("charging", IsCharging);
+            writer.WriteBooleanIfNotNull("online", IsOnline);
+            writer.WriteStringIfNotWhiteSpace("orientation", Orientation?.ToString().ToLowerInvariant());
+            writer.WriteBooleanIfNotNull("simulator", Simulator);
+            writer.WriteNumberIfNotNull("memory_size", MemorySize);
+            writer.WriteNumberIfNotNull("free_memory", FreeMemory);
+            writer.WriteNumberIfNotNull("usable_memory", UsableMemory);
+            writer.WriteBooleanIfNotNull("low_memory", LowMemory);
+            writer.WriteNumberIfNotNull("storage_size", StorageSize);
+            writer.WriteNumberIfNotNull("free_storage", FreeStorage);
+            writer.WriteNumberIfNotNull("external_storage_size", ExternalStorageSize);
+            writer.WriteNumberIfNotNull("external_free_storage", ExternalFreeStorage);
+            writer.WriteStringIfNotWhiteSpace("screen_resolution", ScreenResolution);
+            writer.WriteNumberIfNotNull("screen_density", ScreenDensity);
+            writer.WriteNumberIfNotNull("screen_dpi", ScreenDpi);
+            writer.WriteStringIfNotNull("boot_time", BootTime);
+            writer.WriteNumberIfNotNull("processor_count", ProcessorCount);
+            writer.WriteStringIfNotWhiteSpace("cpu_description", CpuDescription);
+            writer.WriteNumberIfNotNull("processor_frequency", ProcessorFrequency);
+            writer.WriteStringIfNotWhiteSpace("device_type", DeviceType);
+            writer.WriteStringIfNotWhiteSpace("battery_status", BatteryStatus);
+            writer.WriteStringIfNotWhiteSpace("device_unique_identifier", DeviceUniqueIdentifier);
+            writer.WriteBooleanIfNotNull("supports_vibration", SupportsVibration);
+            writer.WriteBooleanIfNotNull("supports_accelerometer", SupportsAccelerometer);
+            writer.WriteBooleanIfNotNull("supports_gyroscope", SupportsGyroscope);
+            writer.WriteBooleanIfNotNull("supports_audio", SupportsAudio);
+            writer.WriteBooleanIfNotNull("supports_location_service", SupportsLocationService);
 
             writer.WriteEndObject();
         }
@@ -369,7 +371,7 @@ namespace Sentry.Protocol
             var batteryLevel = json.GetPropertyOrNull("battery_level")?.GetInt16();
             var isCharging = json.GetPropertyOrNull("charging")?.GetBoolean();
             var isOnline = json.GetPropertyOrNull("online")?.GetBoolean();
-            var orientation = json.GetPropertyOrNull("orientation")?.GetString()?.Pipe(s => s.ParseEnum<DeviceOrientation>());
+            var orientation = json.GetPropertyOrNull("orientation")?.GetString()?.ParseEnum<DeviceOrientation>();
             var simulator = json.GetPropertyOrNull("simulator")?.GetBoolean();
             var memorySize = json.GetPropertyOrNull("memory_size")?.GetInt64();
             var freeMemory = json.GetPropertyOrNull("free_memory")?.GetInt64();
@@ -383,6 +385,17 @@ namespace Sentry.Protocol
             var screenDensity = json.GetPropertyOrNull("screen_density")?.GetSingle();
             var screenDpi = json.GetPropertyOrNull("screen_dpi")?.GetInt32();
             var bootTime = json.GetPropertyOrNull("boot_time")?.GetDateTimeOffset();
+            var processorCount = json.GetPropertyOrNull("processor_count")?.GetInt32();
+            var cpuDescription = json.GetPropertyOrNull("cpu_description")?.GetString();
+            var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.GetInt32();
+            var deviceType = json.GetPropertyOrNull("device_type")?.GetString();
+            var batteryStatus = json.GetPropertyOrNull("battery_status")?.GetString();
+            var deviceUniqueIdentifier = json.GetPropertyOrNull("device_unique_identifier")?.GetString();
+            var supportsVibration = json.GetPropertyOrNull("supports_vibration")?.GetBoolean();
+            var supportsAccelerometer = json.GetPropertyOrNull("supports_accelerometer")?.GetBoolean();
+            var supportsGyroscope = json.GetPropertyOrNull("supports_gyroscope")?.GetBoolean();
+            var supportsAudio = json.GetPropertyOrNull("supports_audio")?.GetBoolean();
+            var supportsLocationService = json.GetPropertyOrNull("supports_location_service")?.GetBoolean();
 
             return new Device
             {
@@ -410,7 +423,18 @@ namespace Sentry.Protocol
                 ScreenResolution = screenResolution,
                 ScreenDensity = screenDensity,
                 ScreenDpi = screenDpi,
-                BootTime = bootTime
+                BootTime = bootTime,
+                ProcessorCount = processorCount,
+                CpuDescription = cpuDescription,
+                ProcessorFrequency = processorFrequency,
+                DeviceType = deviceType,
+                BatteryStatus = batteryStatus,
+                DeviceUniqueIdentifier = deviceUniqueIdentifier,
+                SupportsVibration = supportsVibration,
+                SupportsAccelerometer = supportsAccelerometer,
+                SupportsGyroscope = supportsGyroscope,
+                SupportsAudio = supportsAudio,
+                SupportsLocationService = supportsLocationService
             };
         }
     }

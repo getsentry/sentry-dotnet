@@ -1,17 +1,35 @@
 using System;
+using System.Diagnostics;
 
 namespace Sentry.Internal
 {
     internal static class EnvironmentLocator
     {
-        private static readonly Lazy<string?> Environment = new(Locate);
+        private static Lazy<string?> FromEnvironmentVariableLazy = new(LocateFromEnvironmentVariable);
 
-        /// <summary>
-        /// Attempts to locate the environment the app is running in.
-        /// </summary>
-        /// <returns>The Environment name or null, if it couldn't be located.</returns>
-        public static string? Current => Environment.Value;
+        // For testing
+        internal static void Reset() => FromEnvironmentVariableLazy = new(LocateFromEnvironmentVariable);
 
-        internal static string? Locate() => System.Environment.GetEnvironmentVariable(Constants.EnvironmentEnvironmentVariable);
+        internal static string? LocateFromEnvironmentVariable() =>
+            Environment.GetEnvironmentVariable(Constants.EnvironmentEnvironmentVariable);
+
+        public static string Resolve(SentryOptions options)
+        {
+            var fromEnvironmentVariable = FromEnvironmentVariableLazy.Value;
+            if (!string.IsNullOrWhiteSpace(fromEnvironmentVariable))
+            {
+                return fromEnvironmentVariable;
+            }
+
+            var fromOptions = options.Environment;
+            if (!string.IsNullOrWhiteSpace(fromOptions))
+            {
+                return fromOptions;
+            }
+
+            return Debugger.IsAttached
+                ? Constants.DebugEnvironmentSetting
+                : Constants.ProductionEnvironmentSetting;
+        }
     }
 }

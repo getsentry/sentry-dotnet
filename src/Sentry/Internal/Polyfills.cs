@@ -4,13 +4,13 @@
 // Polyfills to bridge the missing APIs in older versions of the framework/standard.
 // In some cases, these just proxy calls to existing methods but also provide a signature that matches .netstd2.1
 
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 #if NET461 || NETSTANDARD2_0
 internal static partial class PolyfillExtensions
@@ -57,7 +57,7 @@ namespace System.Collections.Generic
 }
 #endif
 
-#if !NET5_0
+#if !NET5_0_OR_GREATER
 internal static partial class PolyfillExtensions
 {
     public static Task<string> ReadAsStringAsync(this HttpContent content, CancellationToken cancellationToken = default) =>

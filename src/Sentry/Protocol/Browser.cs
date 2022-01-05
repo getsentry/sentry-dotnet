@@ -1,6 +1,7 @@
 // ReSharper disable once CheckNamespace
 
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -39,21 +40,13 @@ namespace Sentry.Protocol
             };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
         {
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
 
             writer.WriteEndObject();
         }
@@ -66,7 +59,7 @@ namespace Sentry.Protocol
             var name = json.GetPropertyOrNull("name")?.GetString();
             var version = json.GetPropertyOrNull("version")?.GetString();
 
-            return new Browser {Name = name, Version = version};
+            return new Browser { Name = name, Version = version };
         }
     }
 }

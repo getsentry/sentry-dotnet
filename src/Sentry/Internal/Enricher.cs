@@ -1,8 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
-using Sentry.Reflection;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 using Runtime = Sentry.Protocol.Runtime;
 
@@ -23,15 +21,7 @@ namespace Sentry.Internal
             };
         });
 
-        private readonly Lazy<SdkVersion> _sdkVersionLazy =
-            new(() => typeof(ISentryClient).Assembly.GetNameAndVersion());
-
-        private readonly Lazy<string?> _releaseLazy = new(ReleaseLocator.GetCurrent);
-
-        public Enricher(SentryOptions options)
-        {
-            _options = options;
-        }
+        public Enricher(SentryOptions options) => _options = options;
 
         public void Apply(IEventLike eventLike)
         {
@@ -57,42 +47,22 @@ namespace Sentry.Internal
             if (eventLike.Sdk.Version is null && eventLike.Sdk.Name is null)
             {
                 eventLike.Sdk.Name = Constants.SdkName;
-                eventLike.Sdk.Version = _sdkVersionLazy.Value.Version;
+                eventLike.Sdk.Version = SdkVersion.Instance.Version;
             }
 
-            if (_sdkVersionLazy.Value.Version is not null)
+            if (SdkVersion.Instance.Version is not null)
             {
-                eventLike.Sdk.AddPackage("nuget:" + _sdkVersionLazy.Value.Name, _sdkVersionLazy.Value.Version);
+                eventLike.Sdk.AddPackage("nuget:" + SdkVersion.Instance.Name, SdkVersion.Instance.Version);
             }
 
             // Platform
             eventLike.Platform ??= Sentry.Constants.Platform;
 
             // Release
-            eventLike.Release ??= _options.Release ?? _releaseLazy.Value;
+            eventLike.Release ??= ReleaseLocator.Resolve(_options);
 
             // Environment
-            if (string.IsNullOrWhiteSpace(eventLike.Environment))
-            {
-                // Environment from environment variable
-                var foundEnvironment = EnvironmentLocator.Locate();
-                if (!string.IsNullOrWhiteSpace(foundEnvironment))
-                {
-                    eventLike.Environment = foundEnvironment;
-                }
-                // Environment from options
-                else if (!string.IsNullOrWhiteSpace(_options.Environment))
-                {
-                    eventLike.Environment = _options.Environment;
-                }
-                // Default
-                else
-                {
-                    eventLike.Environment = Debugger.IsAttached
-                        ? Constants.DebugEnvironmentSetting
-                        : Constants.ProductionEnvironmentSetting;
-                }
-            }
+            eventLike.Environment ??= EnvironmentLocator.Resolve(_options);
 
             // User
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:

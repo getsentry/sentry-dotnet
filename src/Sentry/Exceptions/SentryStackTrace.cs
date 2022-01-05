@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -30,21 +31,11 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            if (InternalFrames is {} frames && frames.Any())
-            {
-                writer.WriteStartArray("frames");
-
-                foreach (var frame in frames)
-                {
-                    writer.WriteSerializableValue(frame);
-                }
-
-                writer.WriteEndArray();
-            }
+            writer.WriteArrayIfNotEmpty("frames", InternalFrames, logger);
 
             writer.WriteEndObject();
         }

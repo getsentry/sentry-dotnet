@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30611.23
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.31903.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry", "src\Sentry\Sentry.csproj", "{F2486CC8-FAB7-4775-976F-C5A4CF97867F}"
 EndProject
@@ -25,7 +25,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{9D7E2F87
 		build.ps1 = build.ps1
 		build.sh = build.sh
 		CHANGELOG.md = CHANGELOG.md
+		CONTRIBUTING.md = CONTRIBUTING.md
 		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -45,9 +47,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Benchmarks", "benchmarks\Sentry.Benchmarks\Sentry.Benchmarks.csproj", "{BD43F598-5B20-477D-88C9-55B186542179}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{97EF834D-6BEB-45E8-B69A-1F9B7815B8B4}"
-	ProjectSection(SolutionItems) = preProject
-		benchmarks\Directory.Build.props = benchmarks\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore", "src\Sentry.AspNetCore\Sentry.AspNetCore.csproj", "{EBD057E5-771A-47EC-90E3-3C2625426A05}"
 EndProject
@@ -101,13 +100,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F267
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{E1800E08-72E6-45AE-91EC-69B4FDBA7555}"
-ProjectSection(SolutionItems) = preProject
-	.github\workflows\build.yml = .github\workflows\build.yml
-	.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
-	.github\workflows\danger.yml = .github\workflows\danger.yml
-	.github\workflows\docs.yml = .github\workflows\docs.yml
-	.github\workflows\vulnerabilities.yml = .github\workflows\vulnerabilities.yml
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
+		.github\workflows\danger.yml = .github\workflows\danger.yml
+		.github\workflows\docs.yml = .github\workflows\docs.yml
+		.github\workflows\vulnerabilities.yml = .github\workflows\vulnerabilities.yml
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.Grpc", "src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj", "{720811C8-29C7-4368-86F2-D61DF415AC2A}"
 EndProject
@@ -115,17 +114,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.Grpc.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Grpc", "samples\Sentry.Samples.AspNetCore.Grpc\Sentry.Samples.AspNetCore.Grpc.csproj", "{21599C29-C3D4-4DAC-A2D6-6C194600478F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.Blazor.Wasm", "samples\Sentry.Samples.AspNetCore.Blazor.Wasm\Sentry.Samples.AspNetCore.Blazor.Wasm.csproj", "{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Blazor.Wasm", "samples\Sentry.Samples.AspNetCore.Blazor.Wasm\Sentry.Samples.AspNetCore.Blazor.Wasm.csproj", "{73FDCE53-75D1-4DCC-933A-8AB93A0E86EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{274CEDC2-2129-469D-B269-649EFA2EF5E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{274CEDC2-2129-469D-B269-649EFA2EF5E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.EntityFramework", "src\Sentry.EntityFramework\Sentry.EntityFramework.csproj", "{8B38F62E-0DD5-486F-96F5-2025AFB9B491}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.EntityFramework", "src\Sentry.EntityFramework\Sentry.EntityFramework.csproj", "{8B38F62E-0DD5-486F-96F5-2025AFB9B491}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.EntityFramework.Tests", "test\Sentry.EntityFramework.Tests\Sentry.EntityFramework.Tests.csproj", "{840B220E-68EC-4ECB-AEA1-67B0151F17FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.EntityFramework.Tests", "test\Sentry.EntityFramework.Tests\Sentry.EntityFramework.Tests.csproj", "{840B220E-68EC-4ECB-AEA1-67B0151F17FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.EntityFramework", "samples\Sentry.Samples.EntityFramework\Sentry.Samples.EntityFramework.csproj", "{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.EntityFramework", "samples\Sentry.Samples.EntityFramework\Sentry.Samples.EntityFramework.csproj", "{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Wpf", "samples\Sentry.Samples.Wpf\Sentry.Samples.Wpf.csproj", "{0A73AAD2-F705-4A64-8214-C49739E0FF07}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Google.Cloud.Functions", "samples\Sentry.Samples.Google.Cloud.Functions\Sentry.Samples.Google.Cloud.Functions.csproj", "{88269A52-A0BA-41B2-8DF3-505B66B17243}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Google.Cloud.Functions", "src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj", "{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Google.Cloud.Functions.Tests", "test\Sentry.Google.Cloud.Functions.Tests\Sentry.Google.Cloud.Functions.Tests.csproj", "{066522A4-8380-4D29-8DD0-973B1EDF0B39}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tunnel", "src\Sentry.Tunnel\Sentry.Tunnel.csproj", "{D2F8BF0E-7749-4C92-A4F1-7B96A9878458}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Tunnel.Tests", "test\Sentry.Tunnel.Tests\Sentry.Tunnel.Tests.csproj", "{BB54EF08-2FA1-498B-827B-32D905FB0F9F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource", "src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj", "{0BE821AB-88D4-4EB5-B012-C964FF58087A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.Tests", "test\Sentry.DiagnosticSource.Tests\Sentry.DiagnosticSource.Tests.csproj", "{D870B028-16ED-4551-8B0F-5529479D04C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -273,10 +284,34 @@ Global
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A73AAD2-F705-4A64-8214-C49739E0FF07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A73AAD2-F705-4A64-8214-C49739E0FF07}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A73AAD2-F705-4A64-8214-C49739E0FF07}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A73AAD2-F705-4A64-8214-C49739E0FF07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88269A52-A0BA-41B2-8DF3-505B66B17243}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88269A52-A0BA-41B2-8DF3-505B66B17243}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88269A52-A0BA-41B2-8DF3-505B66B17243}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88269A52-A0BA-41B2-8DF3-505B66B17243}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2F8BF0E-7749-4C92-A4F1-7B96A9878458}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2F8BF0E-7749-4C92-A4F1-7B96A9878458}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2F8BF0E-7749-4C92-A4F1-7B96A9878458}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2F8BF0E-7749-4C92-A4F1-7B96A9878458}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB54EF08-2FA1-498B-827B-32D905FB0F9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB54EF08-2FA1-498B-827B-32D905FB0F9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB54EF08-2FA1-498B-827B-32D905FB0F9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB54EF08-2FA1-498B-827B-32D905FB0F9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D870B028-16ED-4551-8B0F-5529479D04C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D870B028-16ED-4551-8B0F-5529479D04C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D870B028-16ED-4551-8B0F-5529479D04C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D870B028-16ED-4551-8B0F-5529479D04C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -320,7 +355,13 @@ Global
 		{8B38F62E-0DD5-486F-96F5-2025AFB9B491} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{840B220E-68EC-4ECB-AEA1-67B0151F17FC} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{8E4BA4C7-413C-4668-8F41-32F484FFB7AA} = {77454495-55EE-4B40-A089-71B9E8F82E89}
-		{0A73AAD2-F705-4A64-8214-C49739E0FF07} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{88269A52-A0BA-41B2-8DF3-505B66B17243} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{D1DB7B31-EC6B-430B-B6B0-2849BAE41AC1} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{066522A4-8380-4D29-8DD0-973B1EDF0B39} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{D2F8BF0E-7749-4C92-A4F1-7B96A9878458} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{BB54EF08-2FA1-498B-827B-32D905FB0F9F} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{0BE821AB-88D4-4EB5-B012-C964FF58087A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{D870B028-16ED-4551-8B0F-5529479D04C9} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

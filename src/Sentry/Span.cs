@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -97,54 +97,23 @@ namespace Sentry
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            writer.WriteSerializable("span_id", SpanId);
-
-            if (ParentSpanId is {} parentSpanId)
-            {
-                writer.WriteSerializable("parent_span_id", parentSpanId);
-            }
-
-            writer.WriteSerializable("trace_id", TraceId);
-
-            if (!string.IsNullOrWhiteSpace(Operation))
-            {
-                writer.WriteString("op", Operation);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            if (Status is {} status)
-            {
-                writer.WriteString("status", status.ToString().ToSnakeCase());
-            }
-
+            writer.WriteSerializable("span_id", SpanId, logger);
+            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId, logger);
+            writer.WriteSerializable("trace_id", TraceId, logger);
+            writer.WriteStringIfNotWhiteSpace("op", Operation);
+            writer.WriteStringIfNotWhiteSpace("description", Description);
+            writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
             writer.WriteString("start_timestamp", StartTimestamp);
-
-            if (EndTimestamp is {} endTimestamp)
-            {
-                writer.WriteString("timestamp", endTimestamp);
-            }
-
-            if (_tags is {} tags && tags.Any())
-            {
-                writer.WriteDictionary("tags", tags!);
-            }
-
-            if (_extra is {} data && data.Any())
-            {
-                writer.WriteDictionary("data", data!);
-            }
+            writer.WriteStringIfNotNull("timestamp", EndTimestamp);
+            writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
+            writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
 
             writer.WriteEndObject();
         }
@@ -161,10 +130,10 @@ namespace Sentry
             var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
             var description = json.GetPropertyOrNull("description")?.GetString();
-            var status = json.GetPropertyOrNull("status")?.GetString()?.Pipe(s => s.Replace("_", "").ParseEnum<SpanStatus>());
+            var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
-            var tags = json.GetPropertyOrNull("tags")?.GetDictionary()?.ToDictionary();
-            var data = json.GetPropertyOrNull("data")?.GetObjectDictionary()?.ToDictionary();
+            var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()?.ToDictionary();
+            var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDictionary();
 
             return new Span(parentSpanId, operation)
             {

@@ -1,671 +1,663 @@
-using System;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Sentry.Protocol.Envelopes;
-using VerifyXunit;
-using Xunit;
+#pragma warning disable CS0618
 
-namespace Sentry.Tests
+namespace Sentry.Tests;
+
+[UsesVerify]
+public class SentryClientTests
 {
-    [UsesVerify]
-    public class SentryClientTests
+    private class Fixture
     {
-        private class Fixture
+        public SentryOptions SentryOptions { get; set; } = new();
+        public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
+
+        public SentryClient GetSut() => new(SentryOptions, BackgroundWorker);
+    }
+
+    private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void CaptureEvent_ExceptionFiltered_EmptySentryId()
+    {
+        _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
+        _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
+
+        var sut = _fixture.GetSut();
+
+        // Filtered out for it's the exact filtered type
+        Assert.Equal(default, sut.CaptureException(new SystemException()));
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        // Filtered for it's a derived type
+        Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        // Not filtered since it's not in the inheritance chain
+        Assert.NotEqual(default, sut.CaptureException(new Exception()));
+        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureEvent_IdReturnedToString_NoDashes()
+    {
+        var sut = _fixture.GetSut();
+
+        var evt = new SentryEvent(new Exception());
+
+        var actual = sut.CaptureEvent(evt);
+
+        var hasDashes = actual.ToString().Contains('-');
+        Assert.False(hasDashes);
+    }
+
+    [Fact]
+    public void CaptureEvent_ExceptionProcessorsOnOptions_Invoked()
+    {
+        var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+        _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
+        var sut = _fixture.GetSut();
+
+        var evt = new SentryEvent(new Exception());
+
+        _ = sut.CaptureEvent(evt);
+
+        exceptionProcessor.Received(1).Process(evt.Exception!, evt);
+    }
+
+    [Fact]
+    public void CaptureEvent_ExceptionProcessorsOnScope_Invoked()
+    {
+        var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+        var scope = new Scope();
+        scope.AddExceptionProcessor(exceptionProcessor);
+
+        var sut = _fixture.GetSut();
+
+        var evt = new SentryEvent(new Exception());
+
+        _ = sut.CaptureEvent(evt, scope);
+
+        exceptionProcessor.Received(1).Process(evt.Exception!, evt);
+    }
+
+    [Fact]
+    public void CaptureEvent_NullEventWithScope_EmptyGuid()
+    {
+        var sut = _fixture.GetSut();
+        Assert.Equal(default, sut.CaptureEvent(null, new Scope(_fixture.SentryOptions)));
+    }
+
+    [Fact]
+    public void CaptureEvent_NullEvent_EmptyGuid()
+    {
+        var sut = _fixture.GetSut();
+        Assert.Equal(default, sut.CaptureEvent(null));
+    }
+
+    [Fact]
+    public void CaptureEvent_NullScope_QueuesEvent()
+    {
+        var expectedId = Guid.NewGuid();
+        var expectedEvent = new SentryEvent(eventId: expectedId);
+        _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
+
+        var sut = _fixture.GetSut();
+
+        var actualId = sut.CaptureEvent(expectedEvent);
+        Assert.Equal(expectedId, (Guid)actualId);
+    }
+
+    [Fact]
+    public void CaptureEvent_EventAndScope_QueuesEvent()
+    {
+        var expectedId = Guid.NewGuid();
+        var expectedEvent = new SentryEvent(eventId: expectedId);
+        _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
+
+        var sut = _fixture.GetSut();
+
+        var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
+        Assert.Equal(expectedId, (Guid)actualId);
+    }
+
+    [Fact]
+    public void CaptureEvent_EventAndScope_EvaluatesScope()
+    {
+        var scope = new Scope(_fixture.SentryOptions);
+        var sut = _fixture.GetSut();
+
+        var evaluated = false;
+        object actualSender = null;
+        scope.OnEvaluating += (sender, _) =>
         {
-            public SentryOptions SentryOptions { get; set; } = new();
-            public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
+            actualSender = sender;
+            evaluated = true;
+        };
 
-            public SentryClient GetSut() => new(SentryOptions, BackgroundWorker);
-        }
+        _ = sut.CaptureEvent(new SentryEvent(), scope);
 
-        private readonly Fixture _fixture = new();
+        Assert.True(evaluated);
+        Assert.Same(scope, actualSender);
+    }
 
-        [Fact]
-        public void CaptureEvent_ExceptionFiltered_EmptySentryId()
+    [Fact]
+    public void CaptureEvent_EventAndScope_CopyScopeIntoEvent()
+    {
+        const string expectedBreadcrumb = "test";
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddBreadcrumb(expectedBreadcrumb);
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event, scope);
+
+        Assert.Equal(scope.Breadcrumbs, @event.Breadcrumbs);
+    }
+
+    [Fact]
+    public void CaptureEvent_BeforeEvent_RejectEvent()
+    {
+        _fixture.SentryOptions.BeforeSend = _ => null;
+        var expectedEvent = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
+
+        Assert.Equal(default, actualId);
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureEvent_BeforeEvent_ModifyEvent()
+    {
+        SentryEvent received = null;
+        _fixture.SentryOptions.BeforeSend = e => received = e;
+
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event);
+
+        Assert.Same(@event, received);
+    }
+
+    [Fact]
+    public void CaptureEvent_LevelOnScope_OverridesLevelOnEvent()
+    {
+        const SentryLevel expected = SentryLevel.Fatal;
+        var @event = new SentryEvent
         {
-            _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
-            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
-
-            var sut = _fixture.GetSut();
-
-            // Filtered out for it's the exact filtered type
-            Assert.Equal(default, sut.CaptureException(new SystemException()));
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-
-            // Filtered for it's a derived type
-            Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-
-            // Not filtered since it's not in the inheritance chain
-            Assert.NotEqual(default, sut.CaptureException(new Exception()));
-            _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureEvent_IdReturnedToString_NoDashes()
+            Level = SentryLevel.Fatal
+        };
+        var scope = new Scope
         {
-            var sut = _fixture.GetSut();
+            Level = expected
+        };
 
-            var evt = new SentryEvent(new Exception());
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event, scope);
 
-            var actual = sut.CaptureEvent(evt);
+        Assert.Equal(expected, @event.Level);
+    }
 
-            var hasDashes = actual.ToString().Contains("-");
-            Assert.False(hasDashes);
-        }
+    [Fact]
+    public void CaptureEvent_SamplingLowest_DropsEvent()
+    {
+        // Three decimal places longer than what Random returns. Should always drop
+        _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
+        var @event = new SentryEvent();
 
-        [Fact]
-        public void CaptureEvent_ExceptionProcessorsOnOptions_Invoked()
+        var sut = _fixture.GetSut();
+
+        Assert.Equal(default, sut.CaptureEvent(@event));
+    }
+
+    [Fact]
+    public void CaptureEvent_SamplingHighest_SendsEvent()
+    {
+        // Three decimal places longer than what Random returns. Should always send
+        _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
+        SentryEvent received = null;
+        _fixture.SentryOptions.BeforeSend = e => received = e;
+
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+
+        _ = sut.CaptureEvent(@event);
+
+        Assert.Same(@event, received);
+    }
+
+    [Fact]
+    public void CaptureEvent_SamplingNull_DropsEvent()
+    {
+        _fixture.SentryOptions.SampleRate = null;
+        SentryEvent received = null;
+        _fixture.SentryOptions.BeforeSend = e => received = e;
+
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+
+        _ = sut.CaptureEvent(@event);
+
+        Assert.Same(@event, received);
+    }
+
+    [Fact]
+    public void CaptureEvent_Sampling50Percent_EqualDistribution()
+    {
+        // 15% deviation is ok
+        const double allowedRelativeDeviation = 0.15;
+
+        // Arrange
+        var client = new SentryClient(new SentryOptions
         {
-            var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
-            _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
-            var sut = _fixture.GetSut();
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            SampleRate = 0.5f,
+            MaxQueueItems = int.MaxValue
+        });
 
-            var evt = new SentryEvent(new Exception());
+        // Act
+        var eventIds = Enumerable
+            .Range(0, 1_000)
+            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
+            .ToArray();
 
-            _ = sut.CaptureEvent(evt);
+        var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
+        var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
 
-            exceptionProcessor.Received(1).Process(evt.Exception!, evt);
-        }
+        // Assert
+        sampledInEventsCount.Should().BeCloseTo(
+            (int)(0.5 * eventIds.Length),
+            (uint)(allowedRelativeDeviation * eventIds.Length));
 
-        [Fact]
-        public void CaptureEvent_ExceptionProcessorsOnScope_Invoked()
+        sampledOutEventsCount.Should().BeCloseTo(
+            (int)(0.5 * eventIds.Length),
+            (uint)(allowedRelativeDeviation * eventIds.Length));
+    }
+
+    [Fact]
+    public void CaptureEvent_Sampling25Percent_AppropriateDistribution()
+    {
+        // 15% deviation is ok
+        const double allowedRelativeDeviation = 0.15;
+
+        // Arrange
+        var client = new SentryClient(new SentryOptions
         {
-            var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
-            var scope = new Scope();
-            scope.AddExceptionProcessor(exceptionProcessor);
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            SampleRate = 0.25f,
+            MaxQueueItems = int.MaxValue
+        });
 
-            var sut = _fixture.GetSut();
+        // Act
+        var eventIds = Enumerable
+            .Range(0, 1_000)
+            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
+            .ToArray();
 
-            var evt = new SentryEvent(new Exception());
+        var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
+        var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
 
-            _ = sut.CaptureEvent(evt, scope);
+        // Assert
+        sampledInEventsCount.Should().BeCloseTo(
+            (int)(0.25 * eventIds.Length),
+            (uint)(allowedRelativeDeviation * eventIds.Length));
 
-            exceptionProcessor.Received(1).Process(evt.Exception!, evt);
-        }
+        sampledOutEventsCount.Should().BeCloseTo(
+            (int)(0.75 * eventIds.Length),
+            (uint)(allowedRelativeDeviation * eventIds.Length));
+    }
 
-        [Fact]
-        public void CaptureEvent_NullEventWithScope_EmptyGuid()
+    [Fact]
+    public void CaptureEvent_Sampling75Percent_AppropriateDistribution()
+    {
+        // 15% deviation is ok
+        const double allowedRelativeDeviation = 0.15;
+
+        // Arrange
+        var client = new SentryClient(new SentryOptions
         {
-            var sut = _fixture.GetSut();
-            Assert.Equal(default, sut.CaptureEvent(null, new Scope(_fixture.SentryOptions)));
-        }
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            SampleRate = 0.75f,
+            MaxQueueItems = int.MaxValue
+        });
 
-        [Fact]
-        public void CaptureEvent_NullEvent_EmptyGuid()
+        // Act
+        var eventIds = Enumerable
+            .Range(0, 1_000)
+            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
+            .ToArray();
+
+        var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
+        var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
+
+        // Assert
+        sampledInEventsCount.Should().BeCloseTo(
+            (int)(0.75 * eventIds.Length),
+            (uint)(allowedRelativeDeviation * eventIds.Length));
+
+        sampledOutEventsCount.Should().BeCloseTo(
+            (int)(0.25 * eventIds.Length),
+            (uint)(allowedRelativeDeviation * eventIds.Length));
+    }
+
+    [Fact]
+    public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
+    {
+        var error = new Exception("Exception message!");
+        _fixture.SentryOptions.BeforeSend = _ => throw error;
+
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event);
+
+        return Verifier.Verify(@event.Breadcrumbs);
+    }
+
+    [Fact]
+    public void CaptureEvent_Release_SetFromOptions()
+    {
+        const string expectedRelease = "release number";
+        _fixture.SentryOptions.Release = expectedRelease;
+
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event);
+
+        Assert.Equal(expectedRelease, @event.Release);
+    }
+
+    [Fact]
+    public void CaptureEvent_DisposedClient_DoesNotThrow()
+    {
+        var sut = _fixture.GetSut();
+        sut.Dispose();
+        var @event = new SentryEvent();
+        sut.CaptureEvent(@event);
+    }
+
+    [Fact]
+    public void CaptureUserFeedback_EventIdEmpty_IgnoreUserFeedback()
+    {
+        //Arrange
+        var sut = _fixture.GetSut();
+
+        //Act
+        sut.CaptureUserFeedback(
+            new UserFeedback(SentryId.Empty, "name", "email", "comment"));
+
+        //Assert
+        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureUserFeedback_ValidUserFeedback_FeedbackRegistered()
+    {
+        //Arrange
+        var sut = _fixture.GetSut();
+
+        //Act
+        sut.CaptureUserFeedback(
+            new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment"));
+
+        //Assert
+        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
+    {
+        //Arrange
+        var sut = _fixture.GetSut();
+
+        //Act
+        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
+
+        //Assert
+        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+    [Fact]
+    public void Dispose_should_only_flush()
+    {
+        // Arrange
+        var client = new SentryClient(new SentryOptions
         {
-            var sut = _fixture.GetSut();
-            Assert.Equal(default, sut.CaptureEvent(null));
-        }
+            Dsn = DsnSamples.ValidDsnWithSecret,
+        });
 
-        [Fact]
-        public void CaptureEvent_NullScope_QueuesEvent()
+        // Act
+        client.Dispose();
+
+        //Assert is still usable
+        client.CaptureEvent(new SentryEvent { Message = "Test" });
+    }
+
+    [Fact]
+    public void CaptureUserFeedback_DisposedClient_DoesNotThrow()
+    {
+        var sut = _fixture.GetSut();
+        sut.Dispose();
+        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
+    }
+
+    [Fact]
+    public void CaptureTransaction_SampledOut_Dropped()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(new Transaction(
+            "test name",
+            "test operation"
+        )
         {
-            var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(eventId: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
-
-            var sut = _fixture.GetSut();
-
-            var actualId = sut.CaptureEvent(expectedEvent);
-            Assert.Equal(expectedId, (Guid)actualId);
-        }
-
-        [Fact]
-        public void CaptureEvent_EventAndScope_QueuesEvent()
-        {
-            var expectedId = Guid.NewGuid();
-            var expectedEvent = new SentryEvent(eventId: expectedId);
-            _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
-
-            var sut = _fixture.GetSut();
-
-            var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
-            Assert.Equal(expectedId, (Guid)actualId);
-        }
-
-        [Fact]
-        public void CaptureEvent_EventAndScope_EvaluatesScope()
-        {
-            var scope = new Scope(_fixture.SentryOptions);
-            var sut = _fixture.GetSut();
-
-            var evaluated = false;
-            object actualSender = null;
-            scope.OnEvaluating += (sender, _) =>
-            {
-                actualSender = sender;
-                evaluated = true;
-            };
-
-            _ = sut.CaptureEvent(new SentryEvent(), scope);
-
-            Assert.True(evaluated);
-            Assert.Same(scope, actualSender);
-        }
-
-        [Fact]
-        public void CaptureEvent_EventAndScope_CopyScopeIntoEvent()
-        {
-            const string expectedBreadcrumb = "test";
-            var scope = new Scope(_fixture.SentryOptions);
-            scope.AddBreadcrumb(expectedBreadcrumb);
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-            _ = sut.CaptureEvent(@event, scope);
-
-            Assert.Equal(scope.Breadcrumbs, @event.Breadcrumbs);
-        }
-
-        [Fact]
-        public void CaptureEvent_BeforeEvent_RejectEvent()
-        {
-            _fixture.SentryOptions.BeforeSend = _ => null;
-            var expectedEvent = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-            var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
-
-            Assert.Equal(default, actualId);
-            _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureEvent_BeforeEvent_ModifyEvent()
-        {
-            SentryEvent received = null;
-            _fixture.SentryOptions.BeforeSend = e => received = e;
-
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-            _ = sut.CaptureEvent(@event);
-
-            Assert.Same(@event, received);
-        }
-
-        [Fact]
-        public void CaptureEvent_LevelOnScope_OverridesLevelOnEvent()
-        {
-            const SentryLevel expected = SentryLevel.Fatal;
-            var @event = new SentryEvent
-            {
-                Level = SentryLevel.Fatal
-            };
-            var scope = new Scope
-            {
-                Level = expected
-            };
-
-            var sut = _fixture.GetSut();
-            _ = sut.CaptureEvent(@event, scope);
-
-            Assert.Equal(expected, @event.Level);
-        }
-
-        [Fact]
-        public void CaptureEvent_SamplingLowest_DropsEvent()
-        {
-            // Three decimal places longer than what Random returns. Should always drop
-            _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-
-            Assert.Equal(default, sut.CaptureEvent(@event));
-        }
-
-        [Fact]
-        public void CaptureEvent_SamplingHighest_SendsEvent()
-        {
-            // Three decimal places longer than what Random returns. Should always send
-            _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
-            SentryEvent received = null;
-            _fixture.SentryOptions.BeforeSend = e => received = e;
-
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-
-            _ = sut.CaptureEvent(@event);
-
-            Assert.Same(@event, received);
-        }
-
-        [Fact]
-        public void CaptureEvent_SamplingNull_DropsEvent()
-        {
-            _fixture.SentryOptions.SampleRate = null;
-            SentryEvent received = null;
-            _fixture.SentryOptions.BeforeSend = e => received = e;
-
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-
-            _ = sut.CaptureEvent(@event);
-
-            Assert.Same(@event, received);
-        }
-
-        [Fact]
-        public void CaptureEvent_Sampling50Percent_EqualDistribution()
-        {
-            // 15% deviation is ok
-            const double allowedRelativeDeviation = 0.15;
-
-            // Arrange
-            var client = new SentryClient(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                SampleRate = 0.5f,
-                MaxQueueItems = int.MaxValue
-            });
-
-            // Act
-            var eventIds = Enumerable
-                .Range(0, 1_000)
-                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
-                .ToArray();
-
-            var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
-            var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
-
-            // Assert
-            sampledInEventsCount.Should().BeCloseTo(
-                (int)(0.5 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
-
-            sampledOutEventsCount.Should().BeCloseTo(
-                (int)(0.5 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
-        }
-
-        [Fact]
-        public void CaptureEvent_Sampling25Percent_AppropriateDistribution()
-        {
-            // 15% deviation is ok
-            const double allowedRelativeDeviation = 0.15;
-
-            // Arrange
-            var client = new SentryClient(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                SampleRate = 0.25f,
-                MaxQueueItems = int.MaxValue
-            });
-
-            // Act
-            var eventIds = Enumerable
-                .Range(0, 1_000)
-                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
-                .ToArray();
-
-            var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
-            var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
-
-            // Assert
-            sampledInEventsCount.Should().BeCloseTo(
-                (int)(0.25 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
-
-            sampledOutEventsCount.Should().BeCloseTo(
-                (int)(0.75 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
-        }
-
-        [Fact]
-        public void CaptureEvent_Sampling75Percent_AppropriateDistribution()
-        {
-            // 15% deviation is ok
-            const double allowedRelativeDeviation = 0.15;
-
-            // Arrange
-            var client = new SentryClient(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                SampleRate = 0.75f,
-                MaxQueueItems = int.MaxValue
-            });
-
-            // Act
-            var eventIds = Enumerable
-                .Range(0, 1_000)
-                .Select(i => client.CaptureEvent(new SentryEvent{Message = $"Test[{i}]"}))
-                .ToArray();
-
-            var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
-            var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
-
-            // Assert
-            sampledInEventsCount.Should().BeCloseTo(
-                (int)(0.75 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
-
-            sampledOutEventsCount.Should().BeCloseTo(
-                (int)(0.25 * eventIds.Length),
-                (uint)(allowedRelativeDeviation * eventIds.Length)
-            );
-        }
-
-        [Fact]
-        public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
-        {
-            var error = new Exception("Exception message!");
-            _fixture.SentryOptions.BeforeSend = _ => throw error;
-
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-            _ = sut.CaptureEvent(@event);
-
-            return Verifier.Verify(@event.Breadcrumbs);
-        }
-
-        [Fact]
-        public void CaptureEvent_Release_SetFromOptions()
-        {
-            const string expectedRelease = "release number";
-            _fixture.SentryOptions.Release = expectedRelease;
-
-            var @event = new SentryEvent();
-
-            var sut = _fixture.GetSut();
-            _ = sut.CaptureEvent(@event);
-
-            Assert.Equal(expectedRelease, @event.Release);
-        }
-
-        [Fact]
-        public void CaptureEvent_DisposedClient_ThrowsObjectDisposedException()
-        {
-            var sut = _fixture.GetSut();
-            sut.Dispose();
-            _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureEvent(null));
-        }
-
-        [Fact]
-        public void CaptureUserFeedback_EventIdEmpty_IgnoreUserFeedback()
-        {
-            //Arrange
-            var sut = _fixture.GetSut();
-
-            //Act
-            sut.CaptureUserFeedback(
-                new UserFeedback(SentryId.Empty, "name", "email", "comment")
-            );
-
-            //Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureUserFeedback_ValidUserFeedback_FeedbackRegistered()
-        {
-            //Arrange
-            var sut = _fixture.GetSut();
-
-            //Act
-            sut.CaptureUserFeedback(
-                new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment")
-            );
-
-            //Assert
-            _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
-        {
-
-            //Arrange
-            var sut = _fixture.GetSut();
-
-            //Act
-            sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
-
-            //Assert
-            _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureUserFeedback_DisposedClient_ThrowsObjectDisposedException()
-        {
-            var sut = _fixture.GetSut();
-            sut.Dispose();
-            _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureUserFeedback(null));
-        }
-
-        [Fact]
-        public void CaptureTransaction_SampledOut_Dropped()
-        {
-            // Arrange
-            var client = _fixture.GetSut();
-
-            // Act
-            client.CaptureTransaction(new Transaction(
-                "test name",
-                "test operation"
-            )
-            {
-                IsSampled = false,
-                EndTimestamp = DateTimeOffset.Now // finished
-            });
-
-            // Assert
-            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureTransaction_ValidTransaction_Sent()
-        {
-            // Arrange
-            var client = _fixture.GetSut();
-
-            // Act
-            client.CaptureTransaction(
-                new Transaction(
-                    "test name",
-                    "test operation"
-                )
-                {
-                    IsSampled = true,
-                    EndTimestamp = DateTimeOffset.Now // finished
-                }
-            );
-
-            // Assert
-            _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureTransaction_NoSpanId_Ignored()
-        {
-            // Arrange
-            var client = _fixture.GetSut();
-
-            var transaction = new Transaction(
+            IsSampled = false,
+            EndTimestamp = DateTimeOffset.Now // finished
+        });
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_ValidTransaction_Sent()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new Transaction(
                 "test name",
                 "test operation"
             )
             {
                 IsSampled = true,
                 EndTimestamp = DateTimeOffset.Now // finished
-            };
+            });
 
-            transaction.Contexts.Trace.SpanId = SpanId.Empty;
+        // Assert
+        _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
 
-            // Act
-            client.CaptureTransaction(transaction);
+    [Fact]
+    public void CaptureTransaction_NoSpanId_Ignored()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
 
-            // Assert
-            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureTransaction_NoName_Ignored()
+        var transaction = new Transaction(
+            "test name",
+            "test operation"
+        )
         {
-            // Arrange
-            var client = _fixture.GetSut();
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
 
-            // Act
-            client.CaptureTransaction(
-                new Transaction(
-                    null!,
-                    "test operation"
-                )
-                {
-                    IsSampled = true,
-                    EndTimestamp = DateTimeOffset.Now // finished
-                }
-            );
+        transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
-            // Assert
-            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
+        // Act
+        client.CaptureTransaction(transaction);
 
-        [Fact]
-        public void CaptureTransaction_NoOperation_Ignored()
-        {
-            // Arrange
-            var client = _fixture.GetSut();
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
 
-            // Act
-            client.CaptureTransaction(
-                new Transaction(
-                    "test name",
-                    null!
-                )
-                {
-                    IsSampled = true,
-                    EndTimestamp = DateTimeOffset.Now // finished
-                }
-            );
+    [Fact]
+    public void CaptureTransaction_NoName_Ignored()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
 
-            // Assert
-            _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureTransaction_NotFinished_Sent()
-        {
-            // Arrange
-            var client = _fixture.GetSut();
-
-            // Act
-            client.CaptureTransaction(
-                new Transaction(
-                    "test name",
-                    "test operation"
-                )
-                {
-                    IsSampled = true,
-                    EndTimestamp = null // not finished
-                }
-            );
-
-            // Assert
-            _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
-        }
-
-        [Fact]
-        public void CaptureTransaction_DisposedClient_ThrowsObjectDisposedException()
-        {
-            var sut = _fixture.GetSut();
-            sut.Dispose();
-            _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureTransaction(null));
-        }
-
-        [Fact]
-        public void Dispose_Worker_DisposeCalled()
-        {
-            _fixture.GetSut().Dispose();
-            (_fixture.BackgroundWorker as IDisposable)?.Received(1).Dispose();
-        }
-
-        [Fact]
-        public void Dispose_MultipleCalls_WorkerDisposedOnce()
-        {
-            var sut = _fixture.GetSut();
-            sut.Dispose();
-            sut.Dispose();
-            (_fixture.BackgroundWorker as IDisposable).Received(1).Dispose();
-        }
-
-        [Fact]
-        public void Dispose_WorkerDoesNotImplementDispose_DoesntThrow()
-        {
-            _fixture.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            _fixture.GetSut().Dispose();
-        }
-
-        [Fact]
-        public void IsEnabled_AlwaysTrue()
-        {
-            var sut = _fixture.GetSut();
-            Assert.True(sut.IsEnabled);
-        }
-
-        [Fact]
-        public void Ctor_NullSentryOptions_ThrowsArgumentNullException()
-        {
-            _fixture.SentryOptions = null;
-            var ex = Assert.Throws<ArgumentNullException>(() => _fixture.GetSut());
-            Assert.Equal("options", ex.ParamName);
-        }
-
-        [Fact]
-        public void Ctor_HttpOptionsCallback_InvokedConfigureClient()
-        {
-            var invoked = false;
-            _fixture.BackgroundWorker = null;
-            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
-            _fixture.SentryOptions.ConfigureClient = _ => invoked = true;
-
-            using (_fixture.GetSut())
+        // Act
+        client.CaptureTransaction(
+            new Transaction(
+                null!,
+                "test operation"
+            )
             {
-                Assert.True(invoked);
-            }
-        }
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
 
-        [Fact]
-        public void Ctor_CreateHttpClientHandler_InvokedConfigureHandler()
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_NoOperation_Ignored()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new Transaction(
+                "test name",
+                null!
+            )
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        // Assert
+        _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_NotFinished_Sent()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureTransaction(
+            new Transaction(
+                "test name",
+                "test operation"
+            )
+            {
+                IsSampled = true,
+                EndTimestamp = null // not finished
+            });
+
+        // Assert
+        _ = client.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_DisposedClient_DoesNotThrow()
+    {
+        var sut = _fixture.GetSut();
+        sut.Dispose();
+        sut.CaptureTransaction(
+            new Transaction(
+                "test name",
+                "test operation")
+            {
+                IsSampled = true,
+                EndTimestamp = null // not finished
+            });
+    }
+
+    [Fact]
+    public void Dispose_Worker_FlushCalled()
+    {
+        var client = _fixture.GetSut();
+        client.Dispose();
+        _fixture.BackgroundWorker?.Received(1).FlushAsync(_fixture.SentryOptions.ShutdownTimeout);
+    }
+
+    [Fact]
+    public void Dispose_MultipleCalls_WorkerFlushedTwice()
+    {
+        var sut = _fixture.GetSut();
+        sut.Dispose();
+        sut.Dispose();
+        _fixture.BackgroundWorker?.Received(2).FlushAsync(_fixture.SentryOptions.ShutdownTimeout);
+    }
+
+    [Fact]
+    public void IsEnabled_AlwaysTrue()
+    {
+        var sut = _fixture.GetSut();
+        Assert.True(sut.IsEnabled);
+    }
+
+    [Fact]
+    public void Ctor_NullSentryOptions_ThrowsArgumentNullException()
+    {
+        _fixture.SentryOptions = null;
+        var ex = Assert.Throws<ArgumentNullException>(() => _fixture.GetSut());
+        Assert.Equal("options", ex.ParamName);
+    }
+
+    [Fact]
+    public void Ctor_HttpOptionsCallback_InvokedConfigureClient()
+    {
+        var invoked = false;
+        _fixture.BackgroundWorker = null;
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.ConfigureClient = _ => invoked = true;
+
+        using (_fixture.GetSut())
         {
-            var invoked = false;
-            _fixture.BackgroundWorker = null;
-            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
-            _fixture.SentryOptions.CreateHttpClientHandler = () =>
-            {
-                invoked = true;
-                return Substitute.For<HttpClientHandler>();
-            };
-
-            using (_fixture.GetSut())
-            {
-                Assert.True(invoked);
-            }
+            Assert.True(invoked);
         }
+    }
 
-        [Fact]
-        public void Ctor_NullBackgroundWorker_ConcreteBackgroundWorker()
+    [Fact]
+    public void Ctor_CreateHttpClientHandler_InvokedConfigureHandler()
+    {
+        var invoked = false;
+        _fixture.BackgroundWorker = null;
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.CreateHttpClientHandler = () =>
         {
-            _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+            invoked = true;
+            return Substitute.For<HttpClientHandler>();
+        };
 
-            using (var sut = new SentryClient(_fixture.SentryOptions))
-            {
-                _ = Assert.IsType<BackgroundWorker>(sut.Worker);
-            }
+        using (_fixture.GetSut())
+        {
+            Assert.True(invoked);
         }
+    }
+
+    [Fact]
+    public void Ctor_NullBackgroundWorker_ConcreteBackgroundWorker()
+    {
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+        _ = Assert.IsType<BackgroundWorker>(sut.Worker);
     }
 }

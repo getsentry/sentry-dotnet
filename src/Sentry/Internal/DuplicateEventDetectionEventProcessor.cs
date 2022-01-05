@@ -18,28 +18,31 @@ namespace Sentry.Internal
             {
                 if (_capturedObjects.TryGetValue(@event, out _))
                 {
-                    _options.DiagnosticLogger?.LogDebug("Same event instance detected and discarded. EventId: {0}", @event.EventId);
+                    _options.LogDebug("Same event instance detected and discarded. EventId: {0}", @event.EventId);
                     return null;
                 }
                 _capturedObjects.Add(@event, null);
             }
 
             if (@event.Exception == null
-                || !IsDuplicate(@event.Exception))
+                || !IsDuplicate(@event.Exception, @event.EventId, true))
             {
                 return @event;
             }
 
-            _options.DiagnosticLogger?.LogDebug("Duplicate Exception detected. Event {0} will be discarded.", @event.EventId);
             return null;
         }
 
-        private bool IsDuplicate(Exception ex)
+        private bool IsDuplicate(Exception ex, SentryId eventId, bool debugLog)
         {
             if (_options.DeduplicateMode.HasFlag(DeduplicateMode.SameExceptionInstance))
             {
                 if (_capturedObjects.TryGetValue(ex, out _))
                 {
+                    if (debugLog)
+                    {
+                        _options.LogDebug("Duplicate Exception: 'SameExceptionInstance'. Event {0} will be discarded.", eventId);
+                    }
                     return true;
                 }
 
@@ -49,14 +52,21 @@ namespace Sentry.Internal
             if (_options.DeduplicateMode.HasFlag(DeduplicateMode.AggregateException)
                 && ex is AggregateException aex)
             {
-                return aex.InnerExceptions.Any(IsDuplicate);
+                var result = aex.InnerExceptions.Any(e => IsDuplicate(e, eventId, false));
+                if (result)
+                {
+                    _options.LogDebug("Duplicate Exception: 'AggregateException'. Event {0} will be discarded.", eventId);
+                }
+
+                return result;
             }
 
             if (_options.DeduplicateMode.HasFlag(DeduplicateMode.InnerException)
                 && ex.InnerException != null)
             {
-                if (IsDuplicate(ex.InnerException))
+                if (IsDuplicate(ex.InnerException, eventId, false))
                 {
+                    _options.LogDebug("Duplicate Exception: 'SameExceptionInstance'. Event {0} will be discarded.", eventId);
                     return true;
                 }
             }

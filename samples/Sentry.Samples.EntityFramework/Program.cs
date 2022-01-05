@@ -1,26 +1,73 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Configuration;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
-using Sentry;
-using Sentry.EntityFramework;
 
-var _ = SentrySdk.Init(o =>
+using var _ = SentrySdk.Init(o =>
 {
     o.Debug = true; // To see SDK logs on the console
     o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+    o.TracesSampleRate = 1;
     // Add the EntityFramework integration to the SentryOptions of your app startup code:
     o.AddEntityFramework();
 });
 
 var dbConnection = Effort.DbConnectionFactory.CreateTransient();
-using var db = new SampleDbContext(dbConnection, true);
+dbConnection.SetConnectionTimeout(60);
+var db = new SampleDbContext(dbConnection, true);
 
-var user = new SampleUser();
-db.Users.Add(user);
+// This creates a transaction where each insertion will be registered into the active transaction.
+Console.WriteLine("Some Http Post request");
+SentrySdk.ConfigureScope(scope =>
+{
+    scope.Transaction = SentrySdk.StartTransaction("/Start", "Create");
+    var manualSpan = scope.Transaction.StartChild("Database Fill");
+
+    //Populate the database
+    for (var j = 0; j < 10; j++)
+    {
+        db.Users.Add(new SampleUser { Id = j, RequiredColumn = "123" });
+    }
+    db.Users.Add(new SampleUser { Id = 52, RequiredColumn = "Bill" });
+    manualSpan.Finish();
+
+    manualSpan = scope.Transaction.StartChild("Save changes");
+    db.SaveChanges();
+    manualSpan.Finish();
+    scope.Transaction.Finish();
+});
+
+// This simulates a search operation, creating a new transaction for the requested data.
+SentrySdk.ConfigureScope(scope =>
+{
+    Console.WriteLine("Searching for users named Bill");
+    scope.Transaction = SentrySdk.StartTransaction("/Users?name=Bill", "GET");
+    var manualSpan = scope.Transaction.StartChild("manual - search");
+
+    var query = db.Users
+        .Where(s => s.RequiredColumn == "Bill")
+        .ToList();
+
+    manualSpan.Finish();
+    scope.Transaction.Finish();
+    Console.WriteLine($"Found {query.Count} users.");
+});
+
+// This simulates a search operation, creating a new transaction for the requested data.
+SentrySdk.ConfigureScope(scope =>
+{
+    Console.WriteLine("Searching for users with Id higher than 5...");
+    scope.Transaction = SentrySdk.StartTransaction("/Users?id>5", "GET");
+
+    var query2 = db.Users.Where(user => user.Id > 5).ToList();
+
+    scope.Transaction.Finish();
+    Console.WriteLine($"Found {query2.Count} users.");
+});
 
 // This will throw a DbEntityValidationException and crash the app
 // But Sentry will capture the error.
+var user = new SampleUser();
+db.Users.Add(user);
 db.SaveChanges();
 
 public class SampleUser

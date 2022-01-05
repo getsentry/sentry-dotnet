@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -11,13 +13,27 @@ namespace Sentry
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
     public sealed class User : IJsonSerializable
     {
+        internal Action<User>? PropertyChanged { get; set; }
+
+        private string? _email;
+
         /// <summary>
         /// The email address of the user.
         /// </summary>
         /// <value>
         /// The user's email address.
         /// </value>
-        public string? Email { get; set; }
+        public string? Email
+        {
+            get => _email;
+            set
+            {
+                _email = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        private string? _id;
 
         /// <summary>
         /// The unique ID of the user.
@@ -25,7 +41,17 @@ namespace Sentry
         /// <value>
         /// The unique identifier.
         /// </value>
-        public string? Id { get; set; }
+        public string? Id
+        {
+            get => _id;
+            set
+            {
+                _id = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        private string? _ipAddress;
 
         /// <summary>
         /// The IP of the user.
@@ -33,7 +59,17 @@ namespace Sentry
         /// <value>
         /// The user's IP address.
         /// </value>
-        public string? IpAddress { get; set; }
+        public string? IpAddress
+        {
+            get => _ipAddress;
+            set
+            {
+                _ipAddress = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        private string? _username;
 
         /// <summary>
         /// The username of the user.
@@ -41,9 +77,17 @@ namespace Sentry
         /// <value>
         /// The user's username.
         /// </value>
-        public string? Username { get; set; }
+        public string? Username
+        {
+            get => _username;
+            set
+            {
+                _username = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
 
-        internal IDictionary<string, string>? InternalOther;
+        internal IDictionary<string, string>? InternalOther { get; private set; }
 
         /// <summary>
         /// Additional information about the user.
@@ -81,44 +125,19 @@ namespace Sentry
 
             user.InternalOther ??= InternalOther?.ToDictionary(
                 entry => entry.Key,
-                entry => entry.Value
-            );
+                entry => entry.Value);
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
         {
             writer.WriteStartObject();
 
-            // Email
-            if (!string.IsNullOrWhiteSpace(Email))
-            {
-                writer.WriteString("email", Email);
-            }
-
-            // Id
-            if (!string.IsNullOrWhiteSpace(Id))
-            {
-                writer.WriteString("id", Id);
-            }
-
-            // IP
-            if (!string.IsNullOrWhiteSpace(IpAddress))
-            {
-                writer.WriteString("ip_address", IpAddress);
-            }
-
-            // Username
-            if (!string.IsNullOrWhiteSpace(Username))
-            {
-                writer.WriteString("username", Username);
-            }
-
-            // Other
-            if (InternalOther is {} other && other.Any())
-            {
-                writer.WriteDictionary("other", other!);
-            }
+            writer.WriteStringIfNotWhiteSpace("email", Email);
+            writer.WriteStringIfNotWhiteSpace("id", Id);
+            writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
+            writer.WriteStringIfNotWhiteSpace("username", Username);
+            writer.WriteStringDictionaryIfNotEmpty("other", InternalOther!);
 
             writer.WriteEndObject();
         }
@@ -132,7 +151,7 @@ namespace Sentry
             var id = json.GetPropertyOrNull("id")?.GetString();
             var ip = json.GetPropertyOrNull("ip_address")?.GetString();
             var username = json.GetPropertyOrNull("username")?.GetString();
-            var other = json.GetPropertyOrNull("other")?.GetDictionary();
+            var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
 
             return new User
             {
@@ -140,7 +159,7 @@ namespace Sentry
                 Id = id,
                 IpAddress = ip,
                 Username = username,
-                Other = other?.ToDictionary()!
+                InternalOther = other?.WhereNotNullValue().ToDictionary()
             };
         }
     }

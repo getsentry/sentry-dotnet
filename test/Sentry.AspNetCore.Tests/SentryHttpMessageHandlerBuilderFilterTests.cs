@@ -1,11 +1,5 @@
-﻿#if NET5_0 || NETCOREAPP3_1
-using System;
-using System.Collections.Generic;
-using System.Linq;
+#if NETCOREAPP3_1_OR_GREATER
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -14,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
 using Sentry.Testing;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {
@@ -74,11 +67,15 @@ namespace Sentry.AspNetCore.Tests
                                 .GetRequiredService<IHttpClientFactory>()
                                 .CreateClient();
 
-                            await httpClient.GetAsync("https://example.com");
+                            // The framework setup pipeline would end up adding an HttpClientHandler and this test
+                            // would require access to the Internet. So overriding it here
+                            // so the request stops at our stub:
+                            recorder.InnerHandler = new FakeHttpMessageHandler();
+
+                            await httpClient.GetAsync("https://fake.tld");
                         });
                     });
-                })
-            );
+                }));
 
             var client = server.CreateClient();
 

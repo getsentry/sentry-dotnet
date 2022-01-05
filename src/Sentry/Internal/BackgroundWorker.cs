@@ -94,20 +94,18 @@ namespace Sentry.Internal
                         {
                             if (_options.ShutdownTimeout == TimeSpan.Zero)
                             {
-                                _options.DiagnosticLogger?.LogDebug(
+                                _options.LogDebug(
                                     "Exiting immediately due to 0 shutdown timeout. #{0} in queue.",
-                                    _queue.Count
-                                );
+                                    _queue.Count);
 
                                 return;
                             }
                             else
                             {
-                                _options.DiagnosticLogger?.LogDebug(
+                                _options.LogDebug(
                                     "Shutdown scheduled. Stopping by: {0}. #{1} in queue.",
                                     _options.ShutdownTimeout,
-                                    _queue.Count
-                                );
+                                    _queue.Count);
 
                                 shutdownTimeout.CancelAfter(_options.ShutdownTimeout);
                             }
@@ -125,31 +123,28 @@ namespace Sentry.Internal
 
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
-                            _options.DiagnosticLogger?.LogDebug(
+                            _options.LogDebug(
                                 "Envelope {0} handed off to transport. #{1} in queue.",
                                 envelope.TryGetEventId(),
-                                _queue.Count
-                            );
+                                _queue.Count);
 
                             await task.ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {
-                            _options.DiagnosticLogger?.LogInfo(
+                            _options.LogInfo(
                                 "Shutdown token triggered. Time to exit. #{0} in queue.",
-                                _queue.Count
-                            );
+                                _queue.Count);
 
                             return;
                         }
                         catch (Exception exception)
                         {
-                            _options.DiagnosticLogger?.LogError(
-                                "Error while processing event {1}: {0}. #{2} in queue.",
+                            _options.LogError(
+                                "Error while processing envelope (event ID: '{0}'). #{1} in queue.",
                                 exception,
                                 envelope.TryGetEventId(),
-                                _queue.Count
-                            );
+                                _queue.Count);
                         }
                         finally
                         {
@@ -161,7 +156,7 @@ namespace Sentry.Internal
                     else
                     {
                         Debug.Assert(shutdownRequested);
-                        _options.DiagnosticLogger?.LogInfo("Exiting the worker with an empty queue.");
+                        _options.LogInfo("Exiting the worker with an empty queue.");
 
                         // Empty queue. Exit.
                         return;
@@ -170,7 +165,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogFatal("Exception in the background worker.", e);
+                _options.LogFatal("Exception in the background worker.", e);
                 throw;
             }
             finally
@@ -183,13 +178,13 @@ namespace Sentry.Internal
         {
             if (_disposed)
             {
-                _options.DiagnosticLogger?.LogDebug("Worker disposed. Nothing to flush.");
+                _options.LogDebug("Worker disposed. Nothing to flush.");
                 return;
             }
 
-            if (_queue.Count == 0)
+            if (_queue.IsEmpty)
             {
-                _options.DiagnosticLogger?.LogDebug("No events to flush.");
+                _options.LogDebug("No events to flush.");
                 return;
             }
 
@@ -201,8 +196,7 @@ namespace Sentry.Internal
             var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
                 timeoutSource.Token,
                 _shutdownSource.Token,
-                flushSuccessSource.Token
-            );
+                flushSuccessSource.Token);
 
             var counter = 0;
             var depth = int.MaxValue;
@@ -214,7 +208,7 @@ namespace Sentry.Internal
                 {
                     try
                     {
-                        _options.DiagnosticLogger?.LogDebug("Signaling flush completed.");
+                        _options.LogDebug("Signaling flush completed.");
                         // ReSharper disable once AccessToDisposedClosure
                         flushSuccessSource.Cancel();
                     }
@@ -235,7 +229,7 @@ namespace Sentry.Internal
                 }
 
                 _ = Interlocked.Exchange(ref depth, trackedDepth);
-                _options.DiagnosticLogger?.LogDebug("Tracking depth: {0}.", trackedDepth);
+                _options.LogDebug("Tracking depth: {0}.", trackedDepth);
 
                 if (counter >= depth) // When the worker finished flushing before we set the depth
                 {
@@ -244,14 +238,13 @@ namespace Sentry.Internal
 
                 // Await until event is flushed or one of the tokens triggers
                 await Task.Delay(timeout, timeoutWithShutdown.Token).ConfigureAwait(false);
-                _options.DiagnosticLogger?.LogDebug("Timeout when trying to flush queue.");
+                _options.LogDebug("Timeout when trying to flush queue.");
             }
             catch (OperationCanceledException)
             {
-                _options.DiagnosticLogger?.LogDebug(flushSuccessSource.IsCancellationRequested
+                _options.LogDebug(flushSuccessSource.IsCancellationRequested
                     ? "Successfully flushed all events up to call to FlushAsync."
-                    : "Timeout when trying to flush queue."
-                );
+                    : "Timeout when trying to flush queue.");
             }
             finally
             {
@@ -266,7 +259,7 @@ namespace Sentry.Internal
         /// <inheritdoc />
         public void Dispose()
         {
-            _options.DiagnosticLogger?.LogDebug("Disposing BackgroundWorker.");
+            _options.LogDebug("Disposing BackgroundWorker.");
 
             if (_disposed)
             {
@@ -289,19 +282,18 @@ namespace Sentry.Internal
             }
             catch (OperationCanceledException)
             {
-                 _options.DiagnosticLogger?.LogDebug("Stopping the background worker due to a cancellation");
+                _options.LogDebug("Stopping the background worker due to a cancellation");
             }
             catch (Exception exception)
             {
-                _options.DiagnosticLogger?.LogError("Stopping the background worker threw an exception.", exception);
+                _options.LogError("Stopping the background worker threw an exception.", exception);
             }
 
-            if (_queue.Count > 0)
+            if (!_queue.IsEmpty)
             {
-                _options.DiagnosticLogger?.LogWarning(
+                _options.LogWarning(
                     "Worker stopped while {0} were still in the queue.",
-                    _queue.Count
-                );
+                    _queue.Count);
             }
         }
     }

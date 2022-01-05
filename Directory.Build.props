@@ -1,30 +1,29 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.4.0</Version>
-    <LangVersion>latest</LangVersion>
+    <Version>3.12.3</Version>
+    <LangVersion>10</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AssemblyOriginatorKeyFile>../../.assets/Sentry.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets/Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
+    <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
   <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->
   <!-- there's no reason to cause friction to a consumer that for some reason is stuck on an unsupported version. -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+  <PropertyGroup>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.0" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="3.0.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.1" PrivateAssets="All" />
+    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="3.3.0" PrivateAssets="All" />
     <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="All" />
   </ItemGroup>
 

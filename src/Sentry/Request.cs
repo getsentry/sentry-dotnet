@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -128,57 +128,18 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            // Env
-            if (InternalEnv is {} env && env.Any())
-            {
-                writer.WriteDictionary("env", env!);
-            }
-
-            // Other
-            if (InternalOther is {} other && other.Any())
-            {
-                writer.WriteDictionary("other", other!);
-            }
-
-            // Headers
-            if (InternalHeaders is {} headers && headers.Any())
-            {
-                writer.WriteDictionary("headers", headers!);
-            }
-
-            // Url
-            if (!string.IsNullOrWhiteSpace(Url))
-            {
-                writer.WriteString("url", Url);
-            }
-
-            // Method
-            if (!string.IsNullOrWhiteSpace(Method))
-            {
-                writer.WriteString("method", Method);
-            }
-
-            // Data
-            if (Data is {} data)
-            {
-                writer.WriteDynamic("data", data);
-            }
-
-            // Query
-            if (!string.IsNullOrWhiteSpace(QueryString))
-            {
-                writer.WriteString("query_string", QueryString);
-            }
-
-            // Cookies
-            if (!string.IsNullOrWhiteSpace(Cookies))
-            {
-                writer.WriteString("cookies", Cookies);
-            }
+            writer.WriteStringDictionaryIfNotEmpty("env", InternalEnv!);
+            writer.WriteStringDictionaryIfNotEmpty("other", InternalOther!);
+            writer.WriteStringDictionaryIfNotEmpty("headers", InternalHeaders!);
+            writer.WriteStringIfNotWhiteSpace("url", Url);
+            writer.WriteStringIfNotWhiteSpace("method", Method);
+            writer.WriteDynamicIfNotNull("data", Data, logger);
+            writer.WriteStringIfNotWhiteSpace("query_string", QueryString);
+            writer.WriteStringIfNotWhiteSpace("cookies", Cookies);
 
             writer.WriteEndObject();
         }
@@ -188,20 +149,20 @@ namespace Sentry
         /// </summary>
         public static Request FromJson(JsonElement json)
         {
-            var env = json.GetPropertyOrNull("env")?.GetDictionary();
-            var other = json.GetPropertyOrNull("other")?.GetDictionary();
-            var headers = json.GetPropertyOrNull("headers")?.GetDictionary();
+            var env = json.GetPropertyOrNull("env")?.GetStringDictionaryOrNull();
+            var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
+            var headers = json.GetPropertyOrNull("headers")?.GetStringDictionaryOrNull();
             var url = json.GetPropertyOrNull("url")?.GetString();
             var method = json.GetPropertyOrNull("method")?.GetString();
-            var data = json.GetPropertyOrNull("data")?.GetDynamic();
+            var data = json.GetPropertyOrNull("data")?.GetDynamicOrNull();
             var query = json.GetPropertyOrNull("query_string")?.GetString();
             var cookies = json.GetPropertyOrNull("cookies")?.GetString();
 
             return new Request
             {
-                InternalEnv = env?.ToDictionary()!,
-                InternalOther = other?.ToDictionary()!,
-                InternalHeaders = headers?.ToDictionary()!,
+                InternalEnv = env?.WhereNotNullValue()?.ToDictionary(),
+                InternalOther = other?.WhereNotNullValue().ToDictionary(),
+                InternalHeaders = headers?.WhereNotNullValue().ToDictionary(),
                 Url = url,
                 Method = method,
                 Data = data,

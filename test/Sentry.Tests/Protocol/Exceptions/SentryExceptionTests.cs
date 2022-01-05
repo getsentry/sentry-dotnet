@@ -1,53 +1,48 @@
-using System.Collections.Generic;
-using Sentry.Protocol;
 using Sentry.Tests.Helpers;
-using Xunit;
 
-namespace Sentry.Tests.Protocol.Exceptions
+namespace Sentry.Tests.Protocol.Exceptions;
+
+public class SentryExceptionTests
 {
-    public class SentryExceptionTests
+    [Fact]
+    public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
-        [Fact]
-        public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
+        var sut = new SentryException
         {
-            var sut = new SentryException
+            Value = "Value",
+            Type = "Type",
+            Module = "Module",
+            ThreadId = 1,
+            Stacktrace = new SentryStackTrace
             {
-                Value = "Value",
-                Type = "Type",
-                Module = "Module",
-                ThreadId = 1,
-                Stacktrace = new SentryStackTrace
+                Frames = { new SentryStackFrame
                 {
-                    Frames = { new SentryStackFrame
-                    {
-                        FileName = "FileName"
-                    }}
-                },
-                Data = { new KeyValuePair<string, object>("data-key", "data-value") },
-                Mechanism = new Mechanism
-                {
-                    Description = "Description"
-                }
-            };
+                    FileName = "FileName"
+                }}
+            },
+            Data = { new KeyValuePair<string, object>("data-key", "data-value") },
+            Mechanism = new Mechanism
+            {
+                Description = "Description"
+            }
+        };
 
-            var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString();
 
-            Assert.Equal(
-                "{\"type\":\"Type\"," +
-                "\"value\":\"Value\"," +
-                "\"module\":\"Module\"," +
-                "\"thread_id\":1," +
-                "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
-                "\"mechanism\":{\"description\":\"Description\"}}",
-                actual
-            );
-        }
+        Assert.Equal(
+            "{\"type\":\"Type\"," +
+            "\"value\":\"Value\"," +
+            "\"module\":\"Module\"," +
+            "\"thread_id\":1," +
+            "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
+            "\"mechanism\":{\"description\":\"Description\"}}",
+            actual);
+    }
 
-        [Fact]
-        public void Data_Getter_NotNull()
-        {
-            var sut = new SentryException();
-            Assert.NotNull(sut.Data);
-        }
+    [Fact]
+    public void Data_Getter_NotNull()
+    {
+        var sut = new SentryException();
+        Assert.NotNull(sut.Data);
     }
 }

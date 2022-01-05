@@ -1,4 +1,4 @@
-﻿namespace Sentry
+namespace Sentry
 {
     /// <summary>
     /// Transaction metadata used for sampling.
@@ -71,7 +71,7 @@
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>
         public TransactionContext(string name, string operation)
-            : this(name, operation, (bool?) null)
+            : this(name, operation, (bool?)null)
         {
         }
     }

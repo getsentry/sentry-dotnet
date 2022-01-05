@@ -32,10 +32,20 @@ namespace Sentry
         /// </summary>
         /// <remarks>
         /// Note: this method is NOT meant to be called from user code!
-        /// Instead, call <see cref="ISpan.Finish(Sentry.SpanStatus)"/> on the transaction.
+        /// Instead, call <see cref="ISpan.Finish(SpanStatus)"/> on the transaction.
         /// </remarks>
         /// <param name="transaction">The transaction.</param>
         void CaptureTransaction(Transaction transaction);
+
+        /// <summary>
+        /// Captures a session update.
+        /// </summary>
+        /// <remarks>
+        /// Note: this method is NOT meant to be called from user code!
+        /// It will be called automatically by the SDK.
+        /// </remarks>
+        /// <param name="sessionUpdate">The update to send to Sentry.</param>
+        void CaptureSession(SessionUpdate sessionUpdate);
 
         /// <summary>
         /// Flushes events queued up.
