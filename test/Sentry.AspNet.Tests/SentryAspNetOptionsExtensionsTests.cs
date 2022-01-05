@@ -1,8 +1,8 @@
+using Sentry.AspNet;
 using Sentry.AspNet.Internal;
 
-namespace Sentry.AspNet.Tests;
-
-public class SentryAspNetOptionsExtensionsTests
+public class SentryAspNetOptionsExtensionsTests :
+    HttpContextTest
 {
     [Fact]
     public void AddAspNet_EventProcessorsContainBodyExtractor()

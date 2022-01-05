@@ -215,32 +215,13 @@ namespace Sentry.Tests.Internals
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
 
-        [Fact]
-        public void WriteDynamic_NoLoggerAndError_ThrowsException()
+        class NonSerializableValue
         {
-            //Assert
-            ArgumentNullException expectedException = null;
-
-            using var stream = new MemoryStream();
-            using (var writer = new Utf8JsonWriter(stream))
-            {
-                try
-                {
-                    // Act
-                    writer.WriteDynamic(null, null, null);
-                }
-                catch (ArgumentNullException ex)
-                {
-                    expectedException = ex;
-                }
-            }
-
-            // Assert
-            Assert.NotNull(expectedException);
+            public string Thrower => throw new InvalidDataException();
         }
 
         [Fact]
-        public void WriteDynamic_WithLoggerAndError_LogException()
+        public void WriteDynamic_NonSerializableValue_LogException()
         {
             //Assert
             var logger = Substitute.For<IDiagnosticLogger>();
@@ -250,12 +231,22 @@ namespace Sentry.Tests.Internals
             using var stream = new MemoryStream();
             using (var writer = new Utf8JsonWriter(stream))
             {
+                writer.WriteStartObject();
+
                 // Act
-                writer.WriteDynamic(null, null, logger);
+                writer.WriteDynamic("property_name", new NonSerializableValue(), logger);
+
+                writer.WriteEndObject();
             }
 
             // Assert
-            logger.Received(1).Log(Arg.Is(SentryLevel.Error), Arg.Any<string>(), Arg.Any<ArgumentNullException>(), Arg.Any<object>());
+            logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+#if NETCOREAPP2_1
+                Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+#else
+        Arg.Any<InvalidDataException>(),
+#endif
+                Arg.Any<object[]>());
         }
     }
 }
