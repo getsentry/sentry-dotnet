@@ -11,7 +11,7 @@ fi
 case "$OSTYPE" in
   darwin*)  export Filter=SentryMac.slnf ;;
   linux*)   export Filter=SentryLinux.slnf ;;
-  *)        exit -1 ;;
+  *)        echo Unsupported $OSTYPE && exit -1 ;;
 esac
 
 dotnet test $Filter -c Release -l $testLogger \
