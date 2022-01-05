@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $testLogger = if ($env:GITHUB_ACTIONS -eq "true") {"GitHubActions;report-warnings=false"} else {"console"}
 
-dotnet test -c Release -l $testLogger `
+dotnet test SentryWindows.slnf -c Release -l $testLogger `
     /p:CollectCoverage=true `
     /p:CoverletOutputFormat=opencover `
     /p:Exclude='"""[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\"""'
