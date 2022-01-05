@@ -39,12 +39,15 @@ public class HttpContextExtensionsTests
     public void FinishSentryTransaction_FinishesTransaction()
     {
         // Arrange
-        using var _ = SentrySdk.UseHub(new Sentry.Internal.Hub(
-            new SentryOptions { Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647" },
+        using var _ = SentrySdk.UseHub(new Hub(
+            new SentryOptions
+            {
+                Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"
+            },
             Substitute.For<ISentryClient>()
         ));
 
-        var context =HttpContextBuilder.Build(404);
+        var context = HttpContextBuilder.Build(404);
 
         // Act
         var transaction = context.StartSentryTransaction();
