@@ -1,7 +1,5 @@
 using Sentry.AspNet.Internal;
 
-namespace Sentry.AspNet.Tests.Internal;
-
 public class SentryScopeManagerTests
 {
     private class Fixture
