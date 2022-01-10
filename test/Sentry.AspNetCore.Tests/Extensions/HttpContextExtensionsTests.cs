@@ -207,10 +207,10 @@ public class HttpContextExtensionsTests
     public void TryGetRouteTemplate_WithSentryRouteName_RouteName()
     {
         // Arrange
-        var sentryRouteName = Substitute.For<ISentryRouteName>();
+        var sentryRouteName = Substitute.For<ITransactionNameProvider>();
         var httpContext = Fixture.GetSut();
         var expectedName = "abc";
-        sentryRouteName.GetRouteName().Returns(expectedName);
+        sentryRouteName.GetRouteName(httpContext).Returns(expectedName);
         httpContext.Features.Set(sentryRouteName);
 
         // Act

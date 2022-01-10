@@ -107,13 +107,13 @@ namespace Sentry.AspNetCore
                 return;
             }
 
-            var transaction = TryStartTransaction(context);
-            var initialName = transaction?.Name;
-
-            if (_options.RouteName is { } route)
+            if (_options.TransactionNameProvider is { } route)
             {
                 context.Features.Set(route);
             }
+
+            var transaction = TryStartTransaction(context);
+            var initialName = transaction?.Name;
 
             // Expose the transaction on the scope so that the user
             // can retrieve it and start child spans off of it.

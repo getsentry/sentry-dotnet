@@ -47,7 +47,7 @@ public class SentryStartup : FunctionsStartup
         {
             // Make sure all events are flushed out
             options.FlushBeforeRequestCompleted = true;
-            options.RouteName = new SentryGoogleCloudFunctionsRouteName();
+            options.TransactionNameProvider = new SentryGoogleCloudFunctionsRouteName();
         });
 
         logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
@@ -119,7 +119,7 @@ public class SentryStartup : FunctionsStartup
         }
     }
 
-    private class SentryGoogleCloudFunctionsRouteName : ISentryRouteName
+    private class SentryGoogleCloudFunctionsRouteName : ITransactionNameProvider
     {
         private static readonly Lazy<string?> RouteName = new(() => Environment.GetEnvironmentVariable("K_SERVICE"));
 
