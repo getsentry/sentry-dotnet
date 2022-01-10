@@ -44,10 +44,12 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
     /// <summary>
-    /// RouteName sets the transaction name that was created by the ASPNetCore integration
-    /// when the integration isn't able to define the transaction name..
+    /// The strategy to define the name of a transaction based on the HttpContext
     /// </summary>
-    public ISentryRouteName? RouteName { get; set; }
+    /// <remarks >
+    /// The SDK can name transactions automatically when using MVC or Endpoint Routing. In other cases, like when serving static files, it fallback to Unknown Route. This hook allows custom code to define a transaction name given a HttpContext.
+    /// </remarks>
+    public ITransactionNameProvider? TransactionNameProvider { get; set; }
 
     /// <summary>
     /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />
