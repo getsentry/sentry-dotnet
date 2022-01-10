@@ -30,6 +30,7 @@
     <EFCoreVersion>6.0.0</EFCoreVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="LocalDb" Version="13.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EFCoreVersion)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EFCoreVersion)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="$(EFCoreVersion)" />
