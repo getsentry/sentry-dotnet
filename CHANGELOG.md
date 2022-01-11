@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## 3.13.0
+
+### Various fixes & improvements
+
+- fix flakey memory test (#1430) by @SimonCropp
+- dispose of client should only flush (#1354) by @SimonCropp
+- Add CaptureLastError for ASP.NET (#1411) by @lucas-zimerman
+- add IsDynamicCode* to events (#1418) by @SimonCropp
+- Report ThreadPool stats (#1399) by @SimonCropp
 
 ## Features
 
