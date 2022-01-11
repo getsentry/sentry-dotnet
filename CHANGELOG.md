@@ -10,7 +10,7 @@
 ### Fixes
 
 - Dispose of client should only flush ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1354))
-- Create CachingTransport directories in contructor to avoid DirectoryNotFoundException ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1432))
+- Create CachingTransport directories in contructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 
 ## 3.12.3
 
