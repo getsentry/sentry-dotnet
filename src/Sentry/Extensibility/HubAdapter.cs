@@ -66,6 +66,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
+        [Obsolete]
         [DebuggerStepThrough]
         public void WithScope(Action<Scope> scopeCallback)
             => SentrySdk.WithScope(scopeCallback);

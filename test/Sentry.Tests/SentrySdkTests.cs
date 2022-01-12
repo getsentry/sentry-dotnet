@@ -374,6 +374,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         }
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
@@ -382,6 +383,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_InvokedWithNewScope()
     {
