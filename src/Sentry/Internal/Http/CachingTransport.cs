@@ -301,13 +301,13 @@ namespace Sentry.Internal.Http
         internal int GetCacheLength() => GetCacheFilePaths().Count();
 
         // This method asynchronously blocks until the envelope is written to cache, but not until it's sent
-        public Task SendEnvelopeAsync(
+        public async Task SendEnvelopeAsync(
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
             // Store the envelope in a file without actually sending it anywhere.
             // The envelope will get picked up by the background thread eventually.
-            return StoreToCacheAsync(envelope, cancellationToken);
+            await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task StopWorkerAsync()
