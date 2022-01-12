@@ -2,7 +2,7 @@
 
 ## 3.13.0
 
-## Features
+### Features
 
 - Add ITransactionNameProvider to allow the name definition from Unknown transactions on ASP.NET Core ([#1421](https://github.com/getsentry/sentry-dotnet/pull/1421))
 - Add CaptureLastError as an extension method to the Server class on ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
