@@ -46,7 +46,7 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// <summary>
     /// The strategy to define the name of a transaction based on the HttpContext
     /// </summary>
-    /// <remarks >
+    /// <remarks>
     /// The SDK can name transactions automatically when using MVC or Endpoint Routing. In other cases, like when serving static files, it fallback to Unknown Route. This hook allows custom code to define a transaction name given a HttpContext.
     /// </remarks>
     public ITransactionNameProvider? TransactionNameProvider { get; set; }
