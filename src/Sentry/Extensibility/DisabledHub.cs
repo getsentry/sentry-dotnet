@@ -121,7 +121,7 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) => SentryId.Empty;
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> scope) => SentryId.Empty;
 
         /// <summary>
         /// No-Op.

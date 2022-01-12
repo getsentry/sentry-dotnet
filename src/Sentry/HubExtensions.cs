@@ -163,25 +163,25 @@ namespace Sentry
         /// </summary>
         /// <param name="hub">The Sentry hub.</param>
         /// <param name="ex">The exception.</param>
-        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="scope">The callback to configure the scope.</param>
         /// <returns>The Id of the event</returns>
-        public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope)
+        public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> scope)
             => !hub.IsEnabled
                 ? new SentryId()
-                : hub.CaptureEvent(new SentryEvent(ex), configureScope);
+                : hub.CaptureEvent(new SentryEvent(ex), scope);
 
         /// <summary>
         /// Captures a message with a configurable scope callback.
         /// </summary>
         /// <param name="hub">The Sentry hub.</param>
         /// <param name="message">The message to send.</param>
-        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="scope">The callback to configure the scope.</param>
         /// <param name="level">The message level.</param>
         /// <returns>The Id of the event</returns>
         public static SentryId CaptureMessage(
             this IHub hub,
             string message,
-            Action<Scope> configureScope,
+            Action<Scope> scope,
             SentryLevel level = SentryLevel.Info)
             => !hub.IsEnabled || string.IsNullOrWhiteSpace(message)
                 ? new SentryId()
@@ -191,6 +191,6 @@ namespace Sentry
                         Message = message,
                         Level = level
                     },
-                    configureScope);
+                    scope);
     }
 }

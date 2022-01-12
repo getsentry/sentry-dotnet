@@ -282,12 +282,12 @@ namespace Sentry
         /// This allows modifying a scope without affecting other events.
         /// </remarks>
         /// <param name="evt">The event.</param>
-        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="scope">The callback to configure the scope.</param>
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
-            => _hub.CaptureEvent(evt, configureScope);
+        public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> scope)
+            => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
         /// Captures the exception.
@@ -305,11 +305,11 @@ namespace Sentry
         /// This allows modifying a scope without affecting other events.
         /// </remarks>
         /// <param name="exception">The exception.</param>
-        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="scope">The callback to configure the scope.</param>
         /// <returns>The Id of the even.t</returns>
         [DebuggerStepThrough]
-        public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
-            => _hub.CaptureException(exception, configureScope);
+        public static SentryId CaptureException(Exception exception, Action<Scope> scope)
+            => _hub.CaptureException(exception, scope);
 
         /// <summary>
         /// Captures the message.
@@ -328,12 +328,12 @@ namespace Sentry
         /// This allows modifying a scope without affecting other events.
         /// </remarks>
         /// <param name="message">The message to send.</param>
-        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="scope">The callback to configure the scope.</param>
         /// <param name="level">The message level.</param>
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
-        public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
-            => _hub.CaptureMessage(message, configureScope, level);
+        public static SentryId CaptureMessage(string message, Action<Scope> scope, SentryLevel level = SentryLevel.Info)
+            => _hub.CaptureMessage(message, scope, level);
 
         /// <summary>
         /// Captures a user feedback.

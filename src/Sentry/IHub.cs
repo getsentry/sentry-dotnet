@@ -77,8 +77,8 @@ namespace Sentry
         /// This allows modifying a scope without affecting other events.
         /// </remarks>
         /// <param name="evt">The event to be captured.</param>
-        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="scope">The callback to configure the scope.</param>
         /// <returns></returns>
-        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope);
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> scope);
     }
 }
