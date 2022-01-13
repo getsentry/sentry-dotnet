@@ -17,16 +17,12 @@ namespace Sentry.Internal.Extensions
             return buffer.ToString();
         }
 
-        public static string GetHashString(this string str, HashAlgorithm algo)
+        public static string GetHashString(this string str)
         {
-            using (algo)
-            {
-                var hashData = algo.ComputeHash(Encoding.UTF8.GetBytes(str));
-                return hashData.GetHexString();
-            }
+            var bytes = Encoding.UTF8.GetBytes(str);
+            using var sha = SHA1.Create();
+            var hash = sha.ComputeHash(bytes);
+            return hash.GetHexString();
         }
-
-        public static string GetHashString(this string str) =>
-            str.GetHashString(SHA1.Create());
     }
 }

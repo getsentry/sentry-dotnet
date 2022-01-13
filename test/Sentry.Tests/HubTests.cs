@@ -257,6 +257,7 @@ public class HubTests
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         hub.StartSession();
@@ -369,6 +370,7 @@ public class HubTests
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         hub.StartSession();
@@ -387,7 +389,11 @@ public class HubTests
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
+        };
         var client = new SentryClient(options, worker);
         var hub = new Hub(options, client);
 
@@ -418,7 +424,11 @@ public class HubTests
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
+        };
         var client = new SentryClient(options, worker);
         var hub = new Hub(options, client);
 
@@ -839,17 +849,18 @@ public class HubTests
     public void Dispose_CalledSecondTime_ClientDisposedOnce()
     {
         var client = Substitute.For<ISentryClient, IDisposable>();
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret
-        }, client);
+        };
+        var hub = new Hub(options, client);
 
         // Act
         hub.Dispose();
         hub.Dispose();
 
         // Assert
-        ((IDisposable)client).Received(1).Dispose();
+        client.Received(1).FlushAsync(options.ShutdownTimeout);
     }
 
     [Fact]
@@ -860,7 +871,8 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         // Act
@@ -878,7 +890,8 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         hub.StartSession();
@@ -900,7 +913,8 @@ public class HubTests
         _ = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTracking = true
+            AutoSessionTracking = true,
+            Release = "release"
         }, client);
 
         // Assert
@@ -950,7 +964,8 @@ public class HubTests
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTracking = true
+            AutoSessionTracking = true,
+            Release = "release"
         }, client);
 
         // Act
@@ -992,7 +1007,8 @@ public class HubTests
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10),
+            Release = "release"
         };
 
         var hub = new Hub(

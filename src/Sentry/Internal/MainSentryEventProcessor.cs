@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Reflection;
@@ -13,6 +14,10 @@ namespace Sentry.Internal
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
         internal const string MemoryInfoKey = "Memory Info";
+        internal const string ThreadPoolInfoKey = "ThreadPool Info";
+        internal const string IsDynamicCodeKey = "Dynamic Code";
+        internal const string IsDynamicCodeCompiledKey = "Compiled";
+        internal const string IsDynamicCodeSupportedKey = "Supported";
 
         private readonly Enricher _enricher;
 
@@ -55,7 +60,16 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
+#if NETCOREAPP3_0_OR_GREATER
+            @event.Contexts[IsDynamicCodeKey] = new Dictionary<string, bool>
+            {
+                { IsDynamicCodeCompiledKey, RuntimeFeature.IsDynamicCodeCompiled },
+                { IsDynamicCodeSupportedKey, RuntimeFeature.IsDynamicCodeSupported }
+            };
+#endif
+
             AddMemoryInfo(@event.Contexts);
+            AddThreadPoolInfo(@event.Contexts);
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -170,6 +184,20 @@ namespace Sentry.Internal
 #endif
         }
 
+        private void AddThreadPoolInfo(Contexts contexts)
+        {
+            ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
+            ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
+            contexts[ThreadPoolInfoKey] = new ThreadPoolInfo(
+                minWorkerThreads,
+                minCompletionPortThreads,
+                maxWorkerThreads,
+                maxCompletionPortThreads,
+                availableWorkerThreads,
+                availableCompletionPortThreads);
+        }
+
         private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)
         {
             var dic = new Dictionary<string, string>();
@@ -190,5 +218,4 @@ namespace Sentry.Internal
             return dic.Count > 0 ? dic : null;
         }
     }
-
 }
