@@ -6,6 +6,7 @@
 
 - Add CaptureLastError as an extension method to the Server class on ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
 - Add IsDynamicCode* to events ([#1418](https://github.com/getsentry/sentry-dotnet/pull/1418))
+- Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
 
 ### Fixes
 
@@ -17,7 +18,6 @@
 
 - Events no longer get dropped because of non-serializable contexts or attachments ([#1401](https://github.com/getsentry/sentry-dotnet/pull/1401))
 - Add MemoryInfo to sentry event ([#1337](https://github.com/getsentry/sentry-dotnet/pull/1337))
-- Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
 - Report ThreadPool stats ([#1399](https://github.com/getsentry/sentry-dotnet/pull/1399))
 
 ## 3.12.2
