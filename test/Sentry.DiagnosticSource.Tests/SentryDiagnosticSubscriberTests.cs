@@ -24,7 +24,6 @@ public class SentryDiagnosticSubscriberTests
 
         List<ICall> receivedCalls = hub.ReceivedCalls().ToList();
         var enumerable = receivedCalls.Select(x=>x.GetArguments().Single()).Cast<Action<Scope>>().ToList();
-        enumerable.Select(x => x(new Scope()));
         await Verifier.Verify(receivedCalls);
     }
 
