@@ -8,6 +8,7 @@ public static class ModuleInit
     [ModuleInitializer]
     public static void Init()
     {
+        VerifyNSubstitute.Enable();
         VerifierSettings.ModifySerialization(
             settings => settings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(
                 target => target.Data,
