@@ -443,6 +443,30 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
+    public void CaptureEvent_WithConfiguredScopeNull_LogsError()
+    {
+        var logger = new InMemoryDiagnosticLogger();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsnWithoutSecret,
+            DiagnosticLogger = logger,
+            Debug = true
+        };
+
+        using (SentrySdk.Init(options))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), null as Action<Scope>);
+
+            logger.Entries.Any(e =>
+                    e.Level == SentryLevel.Error &&
+                    e.Message == "Failure to capture event: {0}")
+                .Should()
+                .BeTrue();
+        }
+    }
+
+    [Fact]
     public void CaptureEvent_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         var scopeCallbackWasInvoked = false;
