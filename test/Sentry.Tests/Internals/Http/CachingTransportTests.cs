@@ -65,7 +65,7 @@ public class CachingTransportTests
 
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-            .ThrowsForAnyArgs(info =>
+            .ThrowsForAnyArgs(_ =>
             {
                 capturingSync.Set();
                 cancelingSync.Wait(TimeSpan.FromSeconds(4));

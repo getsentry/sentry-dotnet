@@ -144,12 +144,10 @@ namespace Sentry.Internal.Http
             }
         }
 
-        private IEnumerable<string> GetCacheFilePaths()
-        {
-            return Directory
+        private IEnumerable<string> GetCacheFilePaths() =>
+            Directory
                 .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
                 .OrderBy(f => new FileInfo(f).CreationTimeUtc);
-        }
 
         private async Task ProcessCacheAsync(CancellationToken cancellationToken = default)
         {
