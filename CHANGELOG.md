@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## 3.13.0
 
-## Features
+### Features
 
 - Add CaptureLastError as an extension method to the Server class on ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
 - Add IsDynamicCode* to events ([#1418](https://github.com/getsentry/sentry-dotnet/pull/1418))
@@ -10,6 +10,7 @@
 ### Fixes
 
 - Dispose of client should only flush ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1354))
+- Create CachingTransport directories in contructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 
 ## 3.12.3
 
