@@ -35,9 +35,7 @@ public class CachingTransportTests
         await transport.SendEnvelopeAsync(envelope);
 
         // Wait until directory is empty
-        while (
-            Directory.Exists(cacheDirectory.Path) &&
-            Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
+        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
         {
             await Task.Delay(100);
         }
@@ -228,9 +226,7 @@ public class CachingTransportTests
         // Act
 
         // Wait until directory is empty
-        while (
-            Directory.Exists(cacheDirectory.Path) &&
-            Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
+        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
         {
             await Task.Delay(100);
         }
