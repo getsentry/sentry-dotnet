@@ -403,6 +403,82 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeAppliesToEvent()
+    {
+        const string expected = "test";
+        var worker = Substitute.For<IBackgroundWorker>();
+
+        using (SentrySdk.Init(o =>
+               {
+                   o.Dsn = ValidDsnWithoutSecret;
+                   o.BackgroundWorker = worker;
+               }))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), s => s.AddBreadcrumb(expected));
+
+            worker.EnqueueEnvelope(
+                Arg.Is<Envelope>(e => e.Items
+                    .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Breadcrumbs
+                    .Single()
+                    .Message == expected));
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeOnlyAppliesOnlyOnce()
+    {
+        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        {
+            var callbackCounter = 0;
+            SentrySdk.CaptureEvent(new SentryEvent(), _ => callbackCounter++);
+            SentrySdk.CaptureEvent(new SentryEvent());
+
+            Assert.Equal(1, callbackCounter);
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
+        }
+    }
+
+    [Fact]
+    public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        {
+            SentrySdk.CaptureException(new Exception(), _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
+        }
+    }
+
+    [Fact]
+    public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        {
+            SentrySdk.CaptureMessage("TestMessage", _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
+        }
+    }
+
+    [Fact]
     public async Task ConfigureScope_Async_CallbackNeverInvoked()
     {
         var invoked = false;
