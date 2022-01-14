@@ -27,6 +27,5 @@ public class GameService : IGameService
         {
             throw ae; // re-throw the AggregateException to capture all errors
         }
-
     }
 }

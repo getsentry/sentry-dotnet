@@ -18,14 +18,11 @@ public static class SentryOptionsExtensions
     /// Adds the entity framework integration.
     /// </summary>
     /// <param name="sentryOptions">The sentry options.</param>
-    /// <returns></returns>
     public static SentryOptions AddEntityFramework(this SentryOptions sentryOptions)
     {
         try
         {
-#pragma warning disable 618 // TODO: We can make the method internal on a new major release.
             _ = SentryDatabaseLogging.UseBreadcrumbs(diagnosticLogger: sentryOptions.DiagnosticLogger);
-#pragma warning restore 618
         }
         catch (Exception e)
         {
@@ -41,7 +38,6 @@ public static class SentryOptionsExtensions
         //sentryOptions.AddExceptionProcessor(new DbConcurrencyExceptionProcessor());
         return sentryOptions;
     }
-
 
     /// <summary>
     /// Disables the integrations with DbInterception.

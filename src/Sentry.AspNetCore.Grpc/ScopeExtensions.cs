@@ -56,10 +56,7 @@ public static class ScopeExtensions
         if (message != null)
         {
             // Convert message into JSON format for readability
-
-            string jsonData = JsonFormatter.Default.Format(message);
-
-            scope.Request.Data = jsonData;
+            scope.Request.Data = JsonFormatter.Default.Format(message);
         }
     }
 }

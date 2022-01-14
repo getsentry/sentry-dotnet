@@ -375,7 +375,6 @@ public class SentryMiddlewareTests
         await sut.InvokeAsync(_fixture.HttpContext);
 
         Assert.True(invoked);
-
     }
 
     [Fact]

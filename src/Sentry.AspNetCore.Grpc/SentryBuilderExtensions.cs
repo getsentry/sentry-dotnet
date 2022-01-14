@@ -13,7 +13,6 @@ public static class SentryBuilderExtensions
     /// Adds gRPC integration to Sentry
     /// </summary>
     /// <param name="builder"></param>
-    /// <returns></returns>
     public static ISentryBuilder AddGrpc(this ISentryBuilder builder)
     {
         _ = builder.Services

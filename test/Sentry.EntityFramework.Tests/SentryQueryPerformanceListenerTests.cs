@@ -221,5 +221,4 @@ public class SentryQueryPerformanceListenerTests
         });
         integration.Unregister();
     }
-
 }

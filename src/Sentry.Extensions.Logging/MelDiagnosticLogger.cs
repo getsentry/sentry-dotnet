@@ -31,7 +31,6 @@ public class MelDiagnosticLogger : IDiagnosticLogger
     /// set via the options and also the inner <see cref="ILogger{TCategoryName}"/>
     /// </remarks>
     /// <param name="level"></param>
-    /// <returns></returns>
     public bool IsEnabled(SentryLevel level) => _logger.IsEnabled(level.ToMicrosoft()) && level >= _level;
 
     /// <summary>

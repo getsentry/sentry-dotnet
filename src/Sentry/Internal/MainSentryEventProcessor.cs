@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Reflection;
@@ -12,6 +13,11 @@ namespace Sentry.Internal
     {
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
+        internal const string MemoryInfoKey = "Memory Info";
+        internal const string ThreadPoolInfoKey = "ThreadPool Info";
+        internal const string IsDynamicCodeKey = "Dynamic Code";
+        internal const string IsDynamicCodeCompiledKey = "Compiled";
+        internal const string IsDynamicCodeSupportedKey = "Supported";
 
         private readonly Enricher _enricher;
 
@@ -54,6 +60,16 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
+#if NETCOREAPP3_0_OR_GREATER
+            @event.Contexts[IsDynamicCodeKey] = new Dictionary<string, bool>
+            {
+                { IsDynamicCodeCompiledKey, RuntimeFeature.IsDynamicCodeCompiled },
+                { IsDynamicCodeSupportedKey, RuntimeFeature.IsDynamicCodeSupported }
+            };
+#endif
+
+            AddMemoryInfo(@event.Contexts);
+            AddThreadPoolInfo(@event.Contexts);
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -87,7 +103,7 @@ namespace Sentry.Internal
                         Crashed = false,
                         Current = true,
                         Name = Thread.CurrentThread.Name,
-                        Id = Thread.CurrentThread.ManagedThreadId,
+                        Id = Environment.CurrentManagedThreadId,
                         Stacktrace = stackTrace
                     };
 
@@ -101,8 +117,7 @@ namespace Sentry.Internal
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    if (assembly is null ||
-                        assembly.IsDynamic)
+                    if (assembly.IsDynamic)
                     {
                         continue;
                     }
@@ -132,6 +147,55 @@ namespace Sentry.Internal
             _enricher.Apply(@event);
 
             return @event;
+        }
+
+        private void AddMemoryInfo(Contexts contexts)
+        {
+#if NETCOREAPP3_0_OR_GREATER
+            var memory = GC.GetGCMemoryInfo();
+            var allocatedBytes = GC.GetTotalAllocatedBytes();
+#if NET5_0_OR_GREATER
+            contexts[MemoryInfoKey] = new MemoryInfo(
+                allocatedBytes,
+                memory.FragmentedBytes,
+                memory.HeapSizeBytes,
+                memory.HighMemoryLoadThresholdBytes,
+                memory.TotalAvailableMemoryBytes,
+                memory.MemoryLoadBytes,
+                memory.TotalCommittedBytes,
+                memory.PromotedBytes,
+                memory.PinnedObjectsCount,
+                memory.PauseTimePercentage,
+                memory.Index,
+                memory.Generation,
+                memory.FinalizationPendingCount,
+                memory.Compacted,
+                memory.Concurrent,
+                memory.PauseDurations.ToArray());
+#else
+            contexts[MemoryInfoKey] = new MemoryInfo(
+            allocatedBytes,
+            memory.FragmentedBytes,
+            memory.HeapSizeBytes,
+            memory.HighMemoryLoadThresholdBytes,
+            memory.TotalAvailableMemoryBytes,
+            memory.MemoryLoadBytes);
+#endif
+#endif
+        }
+
+        private void AddThreadPoolInfo(Contexts contexts)
+        {
+            ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
+            ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
+            contexts[ThreadPoolInfoKey] = new ThreadPoolInfo(
+                minWorkerThreads,
+                minCompletionPortThreads,
+                maxWorkerThreads,
+                maxCompletionPortThreads,
+                availableWorkerThreads,
+                availableCompletionPortThreads);
         }
 
         private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)

@@ -86,7 +86,6 @@ public class SentryAppenderTests
         var package = Assert.Single(actual.Sdk.Packages);
         Assert.Equal("nuget:" + expected.Name, package.Name);
         Assert.Equal(expected.Version, package.Version);
-
     }
 
     [Fact]

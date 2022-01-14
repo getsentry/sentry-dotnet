@@ -9,7 +9,6 @@ namespace Sentry.Internal
 {
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
-
         internal static readonly string ExceptionDataTagKey = "sentry:tag:";
         internal static readonly string ExceptionDataContextKey = "sentry:context:";
 

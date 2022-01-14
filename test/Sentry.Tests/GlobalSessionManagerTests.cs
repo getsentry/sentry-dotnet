@@ -201,7 +201,7 @@ public class GlobalSessionManagerTests
         var sut = _fixture.GetSut();
 
         // Act
-        var installationId = sut.GetMachineNameInstallationId();
+        var installationId = GlobalSessionManager.GetMachineNameInstallationId();
 
         // Assert
         installationId.Should().NotBeNullOrWhiteSpace();
@@ -217,7 +217,7 @@ public class GlobalSessionManagerTests
         // Act
         var installationIds = Enumerable
             .Range(0, 10)
-            .Select(_ => sut.GetMachineNameInstallationId())
+            .Select(_ => GlobalSessionManager.GetMachineNameInstallationId())
             .ToArray();
 
         // Assert

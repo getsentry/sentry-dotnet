@@ -16,7 +16,6 @@ namespace Sentry.Internal.Http
         /// Creates an <see cref="T:System.Net.Http.HttpClient" /> configure to call Sentry for the specified <see cref="T:Sentry.Dsn" />
         /// </summary>
         /// <param name="options">The HTTP options.</param>
-        /// <returns></returns>
         public HttpClient Create(SentryOptions options)
         {
             if (options == null)

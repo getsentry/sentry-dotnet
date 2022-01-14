@@ -50,5 +50,4 @@ public class SentryWebHostBuilderExtensionsIntegrationTests : AspNetSentrySdkTes
 
         Assert.False(SentrySdk.IsEnabled);
     }
-
 }

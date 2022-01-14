@@ -131,7 +131,7 @@ internal static class Program
             });
 
             // Configures a scope which is only valid within the callback
-            SentrySdk.WithScope(s =>
+            SentrySdk.CaptureMessage("Fatal message!", s =>
             {
                 s.Level = SentryLevel.Fatal;
                 s.TransactionName = "main";
@@ -139,8 +139,6 @@ internal static class Program
 
                 // Add a file attachment for upload
                 s.AddAttachment(typeof(Program).Assembly.Location);
-
-                SentrySdk.CaptureMessage("Fatal message!");
             });
 
             var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
@@ -161,7 +159,6 @@ internal static class Program
                 // This is useful, for example, when multiple loggers log the same exception. Or exception is re-thrown and recaptured.
                 SentrySdk.CaptureException(error);
             }
-
 
             var count = 10;
             for (var i = 0; i < count; i++)
@@ -201,12 +198,10 @@ internal static class Program
                 var middleware = new AdminPartMiddleware(adminClient, null);
                 var request = new { Path = "/admin" }; // made up request
                 middleware.Invoke(request);
-
             } // Dispose the client which flushes any queued events
 
             SentrySdk.CaptureException(
                 new Exception("Error outside of the admin section: Goes to the default DSN"));
-
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
@@ -239,7 +234,6 @@ internal static class Program
                 // Else it uses the default client
 
                 _middleware?.Invoke(request);
-
             } // Scope is disposed.
         }
     }

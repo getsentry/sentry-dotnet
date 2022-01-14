@@ -135,7 +135,7 @@ namespace Sentry
         }
 
         // Internal for testing
-        internal string GetMachineNameInstallationId() =>
+        internal static string GetMachineNameInstallationId() =>
             // Never fails
             Environment.MachineName.GetHashString();
 
@@ -161,7 +161,7 @@ namespace Sentry
                 var id =
                     TryGetPersistentInstallationId() ??
                     TryGetHardwareInstallationId() ??
-                    GetMachineNameInstallationId();
+                    GlobalSessionManager.GetMachineNameInstallationId();
 
                 if (!string.IsNullOrWhiteSpace(id))
                 {
@@ -199,7 +199,7 @@ namespace Sentry
                 var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
                 var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
-                persistedSessionUpdate.WriteToFile(filePath);
+                persistedSessionUpdate.WriteToFile(filePath, _options.DiagnosticLogger);
 
                 _options.LogDebug("Persisted session to a file '{0}'.", filePath);
             }

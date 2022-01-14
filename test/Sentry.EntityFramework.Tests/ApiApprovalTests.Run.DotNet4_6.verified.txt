@@ -41,5 +41,6 @@ namespace Sentry
     public static class SentryOptionsExtensions
     {
         public static Sentry.SentryOptions AddEntityFramework(this Sentry.SentryOptions sentryOptions) { }
+        public static void DisableDbInterceptionIntegration(this Sentry.SentryOptions options) { }
     }
 }

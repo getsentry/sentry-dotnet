@@ -12,7 +12,6 @@ public static class SentryBuilderExtensions
     /// </summary>
     /// <param name="builder">The Sentry builder</param>
     /// <param name="configureOptions">The configure options</param>
-    /// <returns></returns>
     public static ISentryBuilder AddSentryOptions(this ISentryBuilder builder,
         Action<SentryAspNetCoreOptions>? configureOptions)
     {

@@ -72,9 +72,6 @@ public class ProtobufRequestExtractionDispatcher : IProtobufRequestPayloadExtrac
                 return null;
         }
 
-        _options.Log(SentryLevel.Warning,
-            "Ignoring request with Size {0} and configuration RequestSize {1}", null, request.ContentLength, size);
-
         return null;
     }
 }

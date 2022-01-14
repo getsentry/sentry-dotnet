@@ -39,6 +39,39 @@ public class MainSentryEventProcessorTests
     }
 
     [Fact]
+    public void EnsureThreadPoolInfoExists()
+    {
+        var evt = new SentryEvent();
+
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+        var info = (ThreadPoolInfo)evt.Contexts[MainSentryEventProcessor.ThreadPoolInfoKey];
+        Assert.NotEqual(0, info.MinWorkerThreads);
+        Assert.NotEqual(0, info.MinCompletionPortThreads);
+        Assert.NotEqual(0, info.MaxWorkerThreads);
+        Assert.NotEqual(0, info.MaxCompletionPortThreads);
+    }
+
+#if NETCOREAPP3_1_OR_GREATER
+    [Fact]
+    public void EnsureMemoryInfoExists()
+    {
+        var evt = new SentryEvent();
+
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+        var memory = (MemoryInfo)evt.Contexts[MainSentryEventProcessor.MemoryInfoKey];
+        Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
+        Assert.NotEqual(0, memory.HighMemoryLoadThresholdBytes);
+        Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
+    }
+#endif
+
+    [Fact]
     public void Process_SendDefaultPiiTrueIdEnvironmentTrue_UserNameSet()
     {
         var evt = new SentryEvent();

@@ -41,31 +41,31 @@ public class RuntimeInfoTests
     }
 
 #if NET461
-        [SkippableFact]
-        public void SetReleaseAndVersionNetFx_OnNetFx_NonNullReleaseAndVersion()
-        {
-            // This test is only relevant when running on CLR.
-            Skip.If(RuntimeInfo.GetRuntime().IsMono());
+    [SkippableFact]
+    public void SetReleaseAndVersionNetFx_OnNetFx_NonNullReleaseAndVersion()
+    {
+        // This test is only relevant when running on CLR.
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
-            var input = new Runtime(".NET Framework");
-            RuntimeInfo.SetNetFxReleaseAndVersion(input);
+        var input = new Runtime(".NET Framework");
+        RuntimeInfo.SetNetFxReleaseAndVersion(input);
 
-            Assert.NotNull(input.Version);
-            Assert.NotNull(input.FrameworkInstallation);
-            Assert.NotNull(input.FrameworkInstallation.Version);
-        }
+        Assert.NotNull(input.Version);
+        Assert.NotNull(input.FrameworkInstallation);
+        Assert.NotNull(input.FrameworkInstallation.Version);
+    }
 #endif
 
 #if NETCOREAPP2_1 || NETCOREAPP3_0
-        [Fact]
-        public void SetNetCoreVersion_NetCoreAsName()
-        {
-            var input = new Runtime(".NET Core");
-            RuntimeInfo.SetNetCoreVersion(input);
+    [Fact]
+    public void SetNetCoreVersion_NetCoreAsName()
+    {
+        var input = new Runtime(".NET Core");
+        RuntimeInfo.SetNetCoreVersion(input);
 
-            Assert.NotNull(input.Version);
-            Assert.Equal(".NET Core", input.Name);
-        }
+        Assert.NotNull(input.Version);
+        Assert.Equal(".NET Core", input.Name);
+    }
 #endif
 
 #if NET5_0_OR_GREATER

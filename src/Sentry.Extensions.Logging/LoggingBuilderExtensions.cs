@@ -19,7 +19,6 @@ public static class LoggingBuilderExtensions
     /// Adds the Sentry logging integration.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder)
         => builder.AddSentry((Action<SentryLoggingOptions>?)null);
 
@@ -28,7 +27,6 @@ public static class LoggingBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="dsn">The DSN.</param>
-    /// <returns></returns>
     public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, string dsn)
         => builder.AddSentry(o => o.Dsn = dsn);
 
@@ -37,7 +35,6 @@ public static class LoggingBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
-    /// <returns></returns>
     public static ILoggingBuilder AddSentry(
         this ILoggingBuilder builder,
         Action<SentryLoggingOptions>? optionsConfiguration)

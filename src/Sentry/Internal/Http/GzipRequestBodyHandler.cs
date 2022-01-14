@@ -42,7 +42,6 @@ namespace Sentry.Internal.Http
         /// </summary>
         /// <param name="request">The HTTP request to compress.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         /// <inheritdoc />
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,

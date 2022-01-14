@@ -1,12 +1,10 @@
 using Sentry.AspNet.Internal;
 
-namespace Sentry.AspNet.Tests.Internal;
-
 public class SentryScopeManagerTests
 {
     private class Fixture
     {
-        public SentryScopeManager GetSut() => new SentryScopeManager(
+        public SentryScopeManager GetSut() => new(
             new HttpContextScopeStackContainer(),
             new SentryOptions(),
             Substitute.For<ISentryClient>());

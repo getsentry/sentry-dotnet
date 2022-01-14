@@ -1,5 +1,3 @@
-#if NETCOREAPP2_1 || NET461
-#endif
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Extensions.Logging.Tests;
@@ -43,25 +41,25 @@ public class MelDiagnosticLoggerTests
     // .NET Core 3 (and hence .NET 5) has turned FormattedLogValues into an internal readonly struct
     // and now we can't match that with NSubstitute
 #if NETCOREAPP2_1 || NET461
-        [Fact]
-        public void Log_PassedThrough()
-        {
-            const SentryLevel expectedLevel = SentryLevel.Debug;
-            const string expectedMessage = "test";
-            var expectedException = new Exception();
+    [Fact]
+    public void Log_PassedThrough()
+    {
+        const SentryLevel expectedLevel = SentryLevel.Debug;
+        const string expectedMessage = "test";
+        var expectedException = new Exception();
 
-            _fixture.Level = SentryLevel.Debug;
-            var sut = _fixture.GetSut();
-            _ = _fixture.MelLogger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
+        _fixture.Level = SentryLevel.Debug;
+        var sut = _fixture.GetSut();
+        _ = _fixture.MelLogger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
 
-            sut.Log(expectedLevel, expectedMessage, expectedException);
+        sut.Log(expectedLevel, expectedMessage, expectedException);
 
-            _fixture.MelLogger.Received(1).Log(
-                expectedLevel.ToMicrosoft(),
-                0,
-                Arg.Is<object>(e => e.ToString() == expectedMessage),
-                expectedException,
-                Arg.Any<Func<object, Exception, string>>());
-        }
+        _fixture.MelLogger.Received(1).Log(
+            expectedLevel.ToMicrosoft(),
+            0,
+            Arg.Is<object>(e => e.ToString() == expectedMessage),
+            expectedException,
+            Arg.Any<Func<object, Exception, string>>());
+    }
 #endif
 }

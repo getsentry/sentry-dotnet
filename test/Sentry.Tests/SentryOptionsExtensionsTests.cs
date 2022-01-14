@@ -17,15 +17,15 @@ public class SentryOptionsExtensionsTests
     }
 
 #if NET461
-        [Fact]
-        public void DisableNetFxInstallationsEventProcessor_RemovesDisableNetFxInstallationsEventProcessorEventProcessor()
-        {
-            Sut.DisableNetFxInstallationsIntegration();
-            Assert.DoesNotContain(Sut.EventProcessors,
-                p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
-            Assert.DoesNotContain(Sut.Integrations,
-                p => p.GetType() == typeof(NetFxInstallationsIntegration));
-        }
+    [Fact]
+    public void DisableNetFxInstallationsEventProcessor_RemovesDisableNetFxInstallationsEventProcessorEventProcessor()
+    {
+        Sut.DisableNetFxInstallationsIntegration();
+        Assert.DoesNotContain(Sut.EventProcessors,
+            p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
+        Assert.DoesNotContain(Sut.Integrations,
+            p => p.GetType() == typeof(NetFxInstallationsIntegration));
+    }
 #endif
 
     [Fact]

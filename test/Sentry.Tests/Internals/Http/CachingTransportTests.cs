@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Net.Sockets;
+using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 
@@ -7,7 +8,7 @@ namespace Sentry.Tests.Internals.Http;
 
 public class CachingTransportTests
 {
-    private readonly IDiagnosticLogger _logger;
+    private readonly TestOutputDiagnosticLogger _logger;
 
     public CachingTransportTests(ITestOutputHelper testOutputHelper)
     {
@@ -34,9 +35,7 @@ public class CachingTransportTests
         await transport.SendEnvelopeAsync(envelope);
 
         // Wait until directory is empty
-        while (
-            Directory.Exists(cacheDirectory.Path) &&
-            Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
+        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
         {
             await Task.Delay(100);
         }
@@ -44,6 +43,91 @@ public class CachingTransportTests
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
         sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+    }
+
+    [Fact]
+    public async Task ShouldNotLogOperationCanceledExceptionWhenIsCancellationRequested()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            CacheDirectoryPath = cacheDirectory.Path,
+            Debug = true
+        };
+
+        var capturingSync = new ManualResetEventSlim();
+        var cancelingSync = new ManualResetEventSlim();
+        var innerTransport = Substitute.For<ITransport>();
+
+        innerTransport
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .ThrowsForAnyArgs(_ =>
+            {
+                capturingSync.Set();
+                cancelingSync.Wait(TimeSpan.FromSeconds(4));
+                return new OperationCanceledException();
+            });
+
+        await using var transport = new CachingTransport(innerTransport, options);
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
+
+        Assert.True(capturingSync.Wait(TimeSpan.FromSeconds(3)), "Inner transport was never called");
+        var stopTask = transport.StopWorkerAsync();
+        cancelingSync.Set(); // Unblock the worker
+        await stopTask;
+
+        // Assert
+        Assert.False(_logger.HasErrorOrFatal, "Error or fatal message logged");
+    }
+
+    [Fact]
+    public async Task ShouldLogOperationCanceledExceptionWhenNotIsCancellationRequested()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var loggerSync = new ManualResetEventSlim();
+
+        var logger = Substitute.For<IDiagnosticLogger>();
+        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        logger
+            .When(l =>
+                l.Log(SentryLevel.Error,
+                    "Exception in background worker of CachingTransport.",
+                    Arg.Any<OperationCanceledException>(),
+                    Arg.Any<object[]>()))
+            .Do(_ => loggerSync.Set());
+
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = logger,
+            CacheDirectoryPath = cacheDirectory.Path,
+            Debug = true
+        };
+
+        var innerTransport = Substitute.For<ITransport>();
+
+        var capturingSync = new ManualResetEventSlim();
+        innerTransport
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .ThrowsForAnyArgs(_ =>
+            {
+                capturingSync.Set();
+                return new OperationCanceledException();
+            });
+
+        await using var transport = new CachingTransport(innerTransport, options);
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        Assert.True(capturingSync.Wait(TimeSpan.FromSeconds(3)), "Envelope never reached the transport");
+        Assert.True(loggerSync.Wait(TimeSpan.FromSeconds(3)), "Expected log call never received");
     }
 
     [Fact(Timeout = 7000)]
@@ -142,9 +226,7 @@ public class CachingTransportTests
         // Act
 
         // Wait until directory is empty
-        while (
-            Directory.Exists(cacheDirectory.Path) &&
-            Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
+        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
         {
             await Task.Delay(100);
         }

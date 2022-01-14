@@ -4,6 +4,7 @@ using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
+using Target = NLog.Targets.Target;
 
 namespace Sentry.NLog.Tests;
 
@@ -317,10 +318,9 @@ public class SentryTargetTests
     public void Log_NullLogEvent_CaptureNotCalled()
     {
         var sut = _fixture.GetLogger();
-        string message = null;
 
         // ReSharper disable once AssignNullToNotNullAttribute
-        sut.Error(message);
+        sut.Error((string)null);
 
         _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
@@ -359,9 +359,7 @@ public class SentryTargetTests
                 e => e.Extra[SentryTarget.AdditionalGroupingKeyProperty].ToString() == expectedGroupingKey)))
             .Do(c => actualSentryEvent = c.Arg<SentryEvent>());
 
-
         logger.Log(evt);
-
 
         Assert.NotNull(actualSentryEvent);
         Assert.Equal(expectedFingerprint, actualSentryEvent.Fingerprint);

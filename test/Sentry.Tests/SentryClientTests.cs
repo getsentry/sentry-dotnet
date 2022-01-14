@@ -1,4 +1,5 @@
 using System.Net.Http;
+#pragma warning disable CS0618
 
 namespace Sentry.Tests;
 
@@ -45,7 +46,7 @@ public class SentryClientTests
 
         var actual = sut.CaptureEvent(evt);
 
-        var hasDashes = actual.ToString().Contains("-");
+        var hasDashes = actual.ToString().Contains('-');
         Assert.False(hasDashes);
     }
 
@@ -372,11 +373,12 @@ public class SentryClientTests
     }
 
     [Fact]
-    public void CaptureEvent_DisposedClient_ThrowsObjectDisposedException()
+    public void CaptureEvent_DisposedClient_DoesNotThrow()
     {
         var sut = _fixture.GetSut();
         sut.Dispose();
-        _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureEvent(null));
+        var @event = new SentryEvent();
+        sut.CaptureEvent(@event);
     }
 
     [Fact]
@@ -410,7 +412,6 @@ public class SentryClientTests
     [Fact]
     public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
     {
-
         //Arrange
         var sut = _fixture.GetSut();
 
@@ -420,13 +421,28 @@ public class SentryClientTests
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
     }
+    [Fact]
+    public void Dispose_should_only_flush()
+    {
+        // Arrange
+        var client = new SentryClient(new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+        });
+
+        // Act
+        client.Dispose();
+
+        //Assert is still usable
+        client.CaptureEvent(new SentryEvent { Message = "Test" });
+    }
 
     [Fact]
-    public void CaptureUserFeedback_DisposedClient_ThrowsObjectDisposedException()
+    public void CaptureUserFeedback_DisposedClient_DoesNotThrow()
     {
         var sut = _fixture.GetSut();
         sut.Dispose();
-        _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureUserFeedback(null));
+        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
     }
 
     [Fact]
@@ -558,34 +574,35 @@ public class SentryClientTests
     }
 
     [Fact]
-    public void CaptureTransaction_DisposedClient_ThrowsObjectDisposedException()
+    public void CaptureTransaction_DisposedClient_DoesNotThrow()
     {
         var sut = _fixture.GetSut();
         sut.Dispose();
-        _ = Assert.Throws<ObjectDisposedException>(() => sut.CaptureTransaction(null));
+        sut.CaptureTransaction(
+            new Transaction(
+                "test name",
+                "test operation")
+            {
+                IsSampled = true,
+                EndTimestamp = null // not finished
+            });
     }
 
     [Fact]
-    public void Dispose_Worker_DisposeCalled()
+    public void Dispose_Worker_FlushCalled()
     {
-        _fixture.GetSut().Dispose();
-        (_fixture.BackgroundWorker as IDisposable)?.Received(1).Dispose();
+        var client = _fixture.GetSut();
+        client.Dispose();
+        _fixture.BackgroundWorker?.Received(1).FlushAsync(_fixture.SentryOptions.ShutdownTimeout);
     }
 
     [Fact]
-    public void Dispose_MultipleCalls_WorkerDisposedOnce()
+    public void Dispose_MultipleCalls_WorkerFlushedTwice()
     {
         var sut = _fixture.GetSut();
         sut.Dispose();
         sut.Dispose();
-        (_fixture.BackgroundWorker as IDisposable).Received(1).Dispose();
-    }
-
-    [Fact]
-    public void Dispose_WorkerDoesNotImplementDispose_DoesntThrow()
-    {
-        _fixture.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-        _fixture.GetSut().Dispose();
+        _fixture.BackgroundWorker?.Received(2).FlushAsync(_fixture.SentryOptions.ShutdownTimeout);
     }
 
     [Fact]
@@ -640,9 +657,7 @@ public class SentryClientTests
     {
         _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
 
-        using (var sut = new SentryClient(_fixture.SentryOptions))
-        {
-            _ = Assert.IsType<BackgroundWorker>(sut.Worker);
-        }
+        using var sut = new SentryClient(_fixture.SentryOptions);
+        _ = Assert.IsType<BackgroundWorker>(sut.Worker);
     }
 }

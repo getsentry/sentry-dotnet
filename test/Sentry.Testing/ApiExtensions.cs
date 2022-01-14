@@ -11,7 +11,7 @@ public static class ApiExtensions
         var generatorOptions = new ApiGeneratorOptions { WhitelistedNamespacePrefixes = new[] { "Sentry" } };
         var apiText = assembly.GeneratePublicApi(generatorOptions);
         return Verifier.Verify(apiText, null, filePath)
-            .AutoVerify()
+            .AutoVerify(includeBuildServer: false)
             .UniqueForTargetFrameworkAndVersion()
             .ScrubEmptyLines()
             .ScrubLines(l =>

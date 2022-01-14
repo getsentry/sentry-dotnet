@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
@@ -31,13 +32,13 @@ public class HttpTransportTests
 #if NET5_0_OR_GREATER
         await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
 #else
-            // Act
-            await httpTransport.SendEnvelopeAsync(envelope, token);
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope, token);
 
-            // Assert
-            await httpHandler
-                .Received(1)
-                .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
+        // Assert
+        await httpHandler
+            .Received(1)
+            .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
 #endif
     }
 
@@ -275,7 +276,9 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                Debug = true
             },
             new HttpClient(httpHandler));
 
@@ -312,7 +315,7 @@ public class HttpTransportTests
                     new EmptySerializable())
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync();
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -322,6 +325,52 @@ public class HttpTransportTests
 
         // Assert
         actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_AttachmentFail_DropsItem()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler());
+
+        var logger = new InMemoryDiagnosticLogger();
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                MaxAttachmentSize = 1,
+                DiagnosticLogger = logger,
+                Debug = true
+            },
+            new HttpClient(httpHandler));
+
+        var attachment = new Attachment(
+            AttachmentType.Default,
+            new FileAttachmentContent("test1.txt"),
+            "test1.txt",
+            null);
+
+        using var envelope = Envelope.FromEvent(
+            new SentryEvent(),
+            logger,
+            new[] { attachment });
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        var lastRequest = httpHandler.GetRequests().Last();
+        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+        // Assert
+        // (the envelope should have only one item)
+
+        logger.Entries.Should().Contain(e =>
+            e.Message == "Failed to add attachment: {0}." &&
+            (string)e.Args[0] == "test1.txt");
+
+        actualEnvelopeSerialized.Should().NotContain("test2.txt");
     }
 
     [Fact]
@@ -357,6 +406,7 @@ public class HttpTransportTests
 
         using var envelope = Envelope.FromEvent(
             new SentryEvent(),
+            null,
             new[] { attachmentNormal, attachmentTooBig });
 
         // Act
@@ -398,7 +448,7 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
 
         // Send session update with init=true
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
         // Pretend the rate limit has already passed
         foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -409,7 +459,7 @@ public class HttpTransportTests
         // Act
 
         // Send another update with init=false (should get promoted)
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(false, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
         var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
@@ -440,7 +490,7 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
 
         // Send session update with init=true
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, session.CreateUpdate(true, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
         // Pretend the rate limit has already passed
         foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -452,7 +502,7 @@ public class HttpTransportTests
 
         // Send an update for different session with init=false (should NOT get promoted)
         var nextSession = new Session("foo2", "bar2", "baz2");
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
         var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
@@ -477,6 +527,25 @@ public class HttpTransportTests
 
         // Assert
         authHeader.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public void CreateRequest_AuthHeader_IncludesVersion()
+    {
+        // Arrange
+        var httpTransport = new HttpTransport(
+            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new HttpClient());
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        using var request = httpTransport.CreateRequest(envelope);
+        var authHeader = request.Headers.GetValues("X-Sentry-Auth").FirstOrDefault();
+
+        // Assert
+        var versionString = Regex.Match(authHeader, @"sentry_client=(\S+),sentry_key").Groups[1].Value;
+        Assert.Contains(versionString, $"{SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}");
     }
 
     [Fact]

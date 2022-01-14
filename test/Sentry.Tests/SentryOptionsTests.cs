@@ -24,22 +24,22 @@ public class SentryOptionsTests
     }
 
 #if NET461
-        [SkippableFact(typeof(IsTypeException))]
-        public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
-        {
-            Skip.If(!RuntimeInfo.GetRuntime().IsMono());
+    [SkippableFact(typeof(IsTypeException))]
+    public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
+    {
+        Skip.If(!RuntimeInfo.GetRuntime().IsMono());
 
-            var sut = new SentryOptions();
-            Assert.IsType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
-        }
+        var sut = new SentryOptions();
+        Assert.IsType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
+    }
 
-        [SkippableFact(typeof(IsNotTypeException))]
-        public void StackTraceFactory_NotRunningOnMono_NotMonoStackTraceFactory()
-        {
-            Skip.If(RuntimeInfo.GetRuntime().IsMono());
+    [SkippableFact(typeof(IsNotTypeException))]
+    public void StackTraceFactory_NotRunningOnMono_NotMonoStackTraceFactory()
+    {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
-            var sut = new SentryOptions();
-            Assert.IsNotType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
-        }
+        var sut = new SentryOptions();
+        Assert.IsNotType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
+    }
 #endif
 }

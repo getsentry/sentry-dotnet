@@ -229,6 +229,7 @@ public class SentryEFCoreListenerTests
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
         Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        _fixture.Options.DiagnosticLogger.Received(0).Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"), null, Arg.Any<object[]>());
     }
 
     [Fact]
@@ -284,7 +285,7 @@ public class SentryEFCoreListenerTests
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, efSql));
-        hub.CaptureEvent(new SentryEvent(), null);
+        hub.CaptureEvent(new SentryEvent(), null as Scope);
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
@@ -317,6 +318,24 @@ public class SentryEFCoreListenerTests
 
         // Assert
         Assert.False(exceptionReceived);
+    }
+
+
+    [Theory]
+    [InlineData(EFCommandExecuted)]
+    [InlineData(EFConnectionClosed)]
+    [InlineData(EFQueryCompiled)]
+    public void OnNext_TakeSpanWithoutSpan_ShowsGarbageCollectorError(string operation)
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+
+        // Act
+        interceptor.OnNext(new(operation, "ef Junk\r\nSELECT * FROM ..."));
+
+        // Assert
+        _fixture.Options.DiagnosticLogger.Received(1).Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"), null, Arg.Any<object[]>());
     }
 
     [Fact]

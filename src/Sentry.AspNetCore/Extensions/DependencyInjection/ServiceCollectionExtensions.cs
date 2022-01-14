@@ -17,7 +17,6 @@ public static class ServiceCollectionExtensions
     /// Adds Sentry's services to the <see cref="IServiceCollection"/>
     /// </summary>
     /// <param name="services">The services.</param>
-    /// <returns></returns>
     public static ISentryBuilder AddSentry(this IServiceCollection services)
     {
         services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -99,20 +100,20 @@ namespace Sentry
             IsSampled);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            writer.WriteSerializable("span_id", SpanId);
-            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId);
-            writer.WriteSerializable("trace_id", TraceId);
+            writer.WriteSerializable("span_id", SpanId, logger);
+            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId, logger);
+            writer.WriteSerializable("trace_id", TraceId, logger);
             writer.WriteStringIfNotWhiteSpace("op", Operation);
             writer.WriteStringIfNotWhiteSpace("description", Description);
             writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteStringIfNotNull("timestamp", EndTimestamp);
             writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
-            writer.WriteDictionaryIfNotEmpty("data", _extra!);
+            writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
 
             writer.WriteEndObject();
         }

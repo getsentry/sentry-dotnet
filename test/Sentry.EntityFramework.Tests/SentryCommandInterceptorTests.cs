@@ -1,7 +1,6 @@
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
 using Effort.Provider;
-#pragma warning disable 618 // UseBreadcrumbs is obsolete (will be made internal)
 
 namespace Sentry.EntityFramework.Tests;
 
@@ -19,7 +18,7 @@ public class SentryCommandInterceptorTests
         }
     }
 
-    private readonly Fixture _fixture = new Fixture();
+    private readonly Fixture _fixture = new();
 
     [Fact]
     public void UseBreadCrumbs_SentryDatabaseLogging_AddsInterceptor()

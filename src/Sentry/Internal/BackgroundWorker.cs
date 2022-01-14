@@ -182,7 +182,7 @@ namespace Sentry.Internal
                 return;
             }
 
-            if (_queue.Count == 0)
+            if (_queue.IsEmpty)
             {
                 _options.LogDebug("No events to flush.");
                 return;
@@ -289,7 +289,7 @@ namespace Sentry.Internal
                 _options.LogError("Stopping the background worker threw an exception.", exception);
             }
 
-            if (_queue.Count > 0)
+            if (!_queue.IsEmpty)
             {
                 _options.LogWarning(
                     "Worker stopped while {0} were still in the queue.",
