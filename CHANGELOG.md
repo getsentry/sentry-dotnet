@@ -4,6 +4,7 @@
 
 ## Features
 
+- SentrySDK.WithScope is now obsolete in favour of overloads of CaptureEvent, CaptureMessage, CaptureException ([#1412](https://github.com/getsentry/sentry-dotnet/pull/1412))
 - Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
 
 ### Fixes
