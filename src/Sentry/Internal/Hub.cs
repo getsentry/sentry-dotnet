@@ -271,12 +271,12 @@ namespace Sentry.Internal
             return null;
         }
 
-        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> scope)
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         {
             try
             {
                 var clonedScope = ScopeManager.GetCurrent().Key.Clone();
-                scope(clonedScope);
+                configureScope(clonedScope);
 
                 return CaptureEvent(evt, clonedScope);
             }
