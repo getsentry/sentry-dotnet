@@ -66,7 +66,8 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
-        [Obsolete]
+        [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+                  "that provide a callback to a configurable scope.")]
         [DebuggerStepThrough]
         public void WithScope(Action<Scope> scopeCallback)
             => SentrySdk.WithScope(scopeCallback);
