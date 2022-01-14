@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+## Features
+
+- Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
+
+### Fixes
+
+- Create CachingTransport directories in constructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
+
 ## 3.13.0
 
 ### Features
@@ -10,7 +20,6 @@
 ### Fixes
 
 - Dispose of client should only flush ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1354))
-- Create CachingTransport directories in contructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 
 ## 3.12.3
 
