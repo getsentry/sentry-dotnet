@@ -227,7 +227,8 @@ public class SentryQueryPerformanceListenerTests
     public void Finish_NoActiveTransaction_LoggerNotCalled()
     {
         // Arrange
-        var integration = new DbInterceptionIntegration();
+        var hub = _fixture.Hub;
+        hub.GetSpan().Returns((_) => null);
         var logger = Substitute.For<ITestOutputHelper>();
 
         var options = new SentryOptions()
@@ -236,8 +237,7 @@ public class SentryQueryPerformanceListenerTests
             DiagnosticLogger = new TestOutputDiagnosticLogger(logger, SentryLevel.Debug)
         };
 
-        _fixture.Hub.GetSpan().Returns((_) => null);
-        var listener = new SentryQueryPerformanceListener(_fixture.Hub, options);
+        var listener = new SentryQueryPerformanceListener(hub, options);
 
         // Act
         listener.ScalarExecuted(Substitute.For<DbCommand>(), Substitute.For<DbCommandInterceptionContext<object>>());
