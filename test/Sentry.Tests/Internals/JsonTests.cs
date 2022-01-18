@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using Sentry.Internal;
-using Sentry.Internal.Extensions;
-using Xunit;
 
 namespace Sentry.Tests.Internals
 {
@@ -19,7 +12,7 @@ namespace Sentry.Tests.Internals
                 using var stream = new MemoryStream();
                 using (var writer = new Utf8JsonWriter(stream))
                 {
-                    writer.WriteDynamicValue(@object);
+                    writer.WriteDynamicValue(@object, new TraceDiagnosticLogger(SentryLevel.Debug));
                 }
                 return Encoding.UTF8.GetString(stream.ToArray());
             }
@@ -100,12 +93,12 @@ namespace Sentry.Tests.Internals
             var expectedStackTrace = _fixture.ToJsonString(ex.StackTrace);
             var expectedSerializedData = new[]
             {
-                $"\"Message\":\"{expectedMessage}\"",
-                "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
-                "\"InnerException\":null",
-                "\"Source\":\"Sentry.Tests\"",
-                $"\"StackTrace\":{expectedStackTrace}"
-            };
+            $"\"Message\":\"{expectedMessage}\"",
+            "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
+            "\"InnerException\":null",
+            "\"Source\":\"Sentry.Tests\"",
+            $"\"StackTrace\":{expectedStackTrace}"
+        };
 
             // Act
             var serializedString = _fixture.ToJsonString(ex);
@@ -196,18 +189,22 @@ namespace Sentry.Tests.Internals
         {
             // Arrange
             var timeZone = TimeZoneInfo.CreateCustomTimeZone(
-            "tz_id",
+                "tz_id",
                 TimeSpan.FromHours(2),
                 "my timezone",
                 "my timezone");
             var expectedSerializedData = new[]
             {
-                "\"Id\":1,\"Data\":\"1234\"",
-                "\"Id\":\"tz_id\"",
-                "\"DisplayName\":\"my timezone\"",
-                "\"StandardName\":\"my timezone\"",
-                "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0",
-                "\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
+            "\"Id\":1,\"Data\":\"1234\"",
+            "\"Id\":\"tz_id\"",
+            "\"DisplayName\":\"my timezone\"",
+            "\"StandardName\":\"my timezone\"",
+#if NET6_0
+            "\"BaseUtcOffset\":\"02:00:00\"",
+#else
+            "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0",
+            "\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
+#endif
             };
             var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
 
@@ -216,6 +213,40 @@ namespace Sentry.Tests.Internals
 
             // Assert
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
+        }
+
+        class NonSerializableValue
+        {
+            public string Thrower => throw new InvalidDataException();
+        }
+
+        [Fact]
+        public void WriteDynamic_NonSerializableValue_LogException()
+        {
+            //Assert
+            var logger = Substitute.For<IDiagnosticLogger>();
+
+            logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+
+            using var stream = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(stream))
+            {
+                writer.WriteStartObject();
+
+                // Act
+                writer.WriteDynamic("property_name", new NonSerializableValue(), logger);
+
+                writer.WriteEndObject();
+            }
+
+            // Assert
+            logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+#if NETCOREAPP2_1
+                Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+#else
+        Arg.Any<InvalidDataException>(),
+#endif
+                Arg.Any<object[]>());
         }
     }
 }

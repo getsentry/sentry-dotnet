@@ -33,10 +33,16 @@ namespace Sentry.Internal
 
         private void OnProcessExit(object? sender, EventArgs e) => ProcessExit?.Invoke(sender, e);
 
-        [HandleProcessCorruptedStateExceptions, SecurityCritical]
+#if !NET6_0_OR_GREATER
+        [HandleProcessCorruptedStateExceptions]
+#endif
+        [SecurityCritical]
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e) => UnhandledException?.Invoke(this, e);
 
-        [HandleProcessCorruptedStateExceptions, SecurityCritical]
+#if !NET6_0_OR_GREATER
+        [HandleProcessCorruptedStateExceptions]
+#endif
+        [SecurityCritical]
         private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e) => UnobservedTaskException?.Invoke(this, e);
     }
 }

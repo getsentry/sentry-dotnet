@@ -1,106 +1,101 @@
-using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Samples.AspNetCore.Mvc.Models;
-using Sentry;
 
-namespace Samples.AspNetCore.Mvc.Controllers
+namespace Samples.AspNetCore.Mvc.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly IGameService _gameService;
+    private readonly ILogger<HomeController> _logger;
+
+    public HomeController(IGameService gameService, ILogger<HomeController> logger)
     {
-        private readonly IGameService _gameService;
-        private readonly ILogger<HomeController> _logger;
+        _gameService = gameService;
+        _logger = logger;
+    }
 
-        public HomeController(IGameService gameService, ILogger<HomeController> logger)
-        {
-            _gameService = gameService;
-            _logger = logger;
-        }
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
 
-        [HttpGet]
-        public IActionResult Index()
+    // Example: An exception that goes unhandled by the app will be captured by Sentry:
+    [HttpPost]
+    public async Task PostIndex(string @params)
+    {
+        try
         {
-            return View();
-        }
-
-        // Example: An exception that goes unhandled by the app will be captured by Sentry:
-        [HttpPost]
-        public async Task PostIndex(string @params)
-        {
-            try
+            if (@params == null)
             {
-                if (@params == null)
+                _logger.LogWarning("Param is null!", @params);
+            }
+
+            await _gameService.FetchNextPhaseDataAsync();
+        }
+        catch (Exception e)
+        {
+            var ioe = new InvalidOperationException("Bad POST! See Inner exception for details.", e);
+
+            ioe.Data.Add("inventory",
+                // The following anonymous object gets serialized:
+                new
                 {
-                    _logger.LogWarning("Param is null!", @params);
-                }
+                    SmallPotion = 3,
+                    BigPotion = 0,
+                    CheeseWheels = 512
+                });
 
-                await _gameService.FetchNextPhaseDataAsync();
-            }
-            catch (Exception e)
-            {
-                var ioe = new InvalidOperationException("Bad POST! See Inner exception for details.", e);
-
-                ioe.Data.Add("inventory",
-                    // The following anonymous object gets serialized:
-                    new
-                    {
-                        SmallPotion = 3,
-                        BigPotion = 0,
-                        CheeseWheels = 512
-                    });
-
-                throw ioe;
-            }
+            throw ioe;
         }
+    }
 
-        // Example: The view rendering throws: see about.cshtml
-        public IActionResult About(string who = null)
+    // Example: The view rendering throws: see about.cshtml
+    public IActionResult About(string who = null)
+    {
+        if (who == null)
         {
-            if (who == null)
-            {
-                // Exemplifies using the logger to raise a warning which will be sent as an event because MinimumEventLevel was configured to Warning
-                // ALso, the stack trace of this location will be sent (even though there was no exception) because of the configuration AttachStackTrace
-                _logger.LogWarning("A {route} '{value}' was requested.",
-                    // example structured logging where keys (in the template above) go as tag keys and values below:
-                    "/about",
-                    "null");
-            }
-
-            return View();
+            // Exemplifies using the logger to raise a warning which will be sent as an event because MinimumEventLevel was configured to Warning
+            // ALso, the stack trace of this location will be sent (even though there was no exception) because of the configuration AttachStackTrace
+            _logger.LogWarning("A {route} '{value}' was requested.",
+                // example structured logging where keys (in the template above) go as tag keys and values below:
+                "/about",
+                "null");
         }
 
-        // Example: To take the Sentry Hub and submit errors directly:
-        public IActionResult Contact(
-            // Hub holds a Client and Scope management
-            // Errors sent with the hub will include all context collected in the current scope
-            [FromServices] IHub sentry)
+        return View();
+    }
+
+    // Example: To take the Sentry Hub and submit errors directly:
+    public IActionResult Contact(
+        // Hub holds a Client and Scope management
+        // Errors sent with the hub will include all context collected in the current scope
+        [FromServices] IHub sentry)
+    {
+        try
         {
-            try
-            {
-                // Some code block that could throw
-                throw null;
-            }
-            catch (Exception e)
-            {
-                e.Data.Add("detail",
-                    new
-                    {
-                        Reason = "There's a 'throw null' hard-coded here!",
-                        IsCrazy = true
-                    });
-
-                var id = sentry.CaptureException(e);
-
-                ViewData["Message"] = "An exception was caught and sent to Sentry! Event id: " + id;
-            }
-            return View();
+            // Some code block that could throw
+            throw null;
         }
-
-        public IActionResult Error()
+        catch (Exception e)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            e.Data.Add("detail",
+                new
+                {
+                    Reason = "There's a 'throw null' hard-coded here!",
+                    IsCrazy = true
+                });
+
+            var id = sentry.CaptureException(e);
+
+            ViewData["Message"] = "An exception was caught and sent to Sentry! Event id: " + id;
         }
+        return View();
+    }
+
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

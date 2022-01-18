@@ -222,19 +222,22 @@ namespace Sentry
         /// <inheritdoc />
         public void Finish()
         {
-            try
-            {
-                Status ??= SpanStatus.UnknownError;
-                EndTimestamp = DateTimeOffset.UtcNow;
+            Status ??= SpanStatus.UnknownError;
+            EndTimestamp = DateTimeOffset.UtcNow;
 
-                // Client decides whether to discard this transaction based on sampling
-                _hub.CaptureTransaction(new Transaction(this));
-            }
-            finally
+            foreach (var span in _spans)
             {
-                // Clear the transaction from the scope
-                _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+                if (!span.IsFinished)
+                {
+                    span.Finish(SpanStatus.DeadlineExceeded);
+                }
             }
+
+            // Clear the transaction from the scope
+            _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+
+            // Client decides whether to discard this transaction based on sampling
+            _hub.CaptureTransaction(new Transaction(this));
         }
 
         /// <inheritdoc />

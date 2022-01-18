@@ -58,7 +58,7 @@ namespace Sentry.Internal.Http
 
                 if (isRateLimited)
                 {
-                    _options.DiagnosticLogger?.LogDebug(
+                    _options.LogDebug(
                         "Envelope item of type {0} was discarded because it's rate-limited.",
                         envelopeItem.TryGetType());
 
@@ -67,7 +67,7 @@ namespace Sentry.Internal.Http
                     {
                         _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
 
-                        _options.DiagnosticLogger?.LogDebug(
+                        _options.LogDebug(
                             "Discarded envelope item containing initial session update (SID: {0}).",
                             discardedSessionUpdate.Id);
                     }
@@ -79,7 +79,7 @@ namespace Sentry.Internal.Http
                 if (string.Equals(envelopeItem.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
                     envelopeItem.TryGetLength() > _options.MaxAttachmentSize)
                 {
-                    _options.DiagnosticLogger?.LogWarning(
+                    _options.LogWarning(
                         "Attachment '{0}' dropped because it's too large ({1} bytes).",
                         envelopeItem.TryGetFileName(),
                         envelopeItem.TryGetLength());
@@ -99,7 +99,7 @@ namespace Sentry.Internal.Http
 
                     envelopeItems.Add(modifiedEnvelopeItem);
 
-                    _options.DiagnosticLogger?.LogDebug(
+                    _options.LogDebug(
                         "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
                         sessionUpdate.Id);
                 }
@@ -143,7 +143,7 @@ namespace Sentry.Internal.Http
             using var processedEnvelope = ProcessEnvelope(envelope, instant);
             if (processedEnvelope.Items.Count == 0)
             {
-                _options.DiagnosticLogger?.LogInfo(
+                _options.LogInfo(
                     "Envelope {0} was discarded because all contained items are rate-limited.",
                     envelope.TryGetEventId());
 
@@ -165,13 +165,13 @@ namespace Sentry.Internal.Http
 
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
-                _options.DiagnosticLogger?.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
+                _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
                     envelope.TryGetEventId(),
-                    await envelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+                    await envelope.SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken).ConfigureAwait(false));
             }
             else
             {
-                _options.DiagnosticLogger?.LogInfo("Envelope '{0}' successfully received by Sentry.",
+                _options.LogInfo("Envelope '{0}' successfully received by Sentry.",
                     processedEnvelope.TryGetEventId());
             }
         }
@@ -182,12 +182,13 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             // Spare the overhead if level is not enabled
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true)
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true &&
+                response.Content is { } content)
             {
-                if (string.Equals(response.Content.Headers.ContentType?.MediaType, "application/json",
+                if (string.Equals(content.Headers.ContentType?.MediaType, "application/json",
                     StringComparison.OrdinalIgnoreCase))
                 {
-                    var responseJson = await response.Content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
+                    var responseJson = await content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
 
                     var errorMessage =
                         responseJson.GetPropertyOrNull("detail")?.GetString()
@@ -197,7 +198,7 @@ namespace Sentry.Internal.Http
                         responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
                         ?? Array.Empty<string>();
 
-                    _options.DiagnosticLogger?.Log(
+                    _options.Log(
                         SentryLevel.Error,
                         "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}.",
                         null,
@@ -208,9 +209,9 @@ namespace Sentry.Internal.Http
                 }
                 else
                 {
-                    var responseString = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    var responseString = await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-                    _options.DiagnosticLogger?.Log(
+                    _options.Log(
                         SentryLevel.Error,
                         "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}.",
                         null,
@@ -222,9 +223,9 @@ namespace Sentry.Internal.Http
                 // If debug level, dump the whole envelope to the logger
                 if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
                 {
-                    _options.DiagnosticLogger?.LogDebug("Failed envelope '{0}' has payload:\n{1}\n",
+                    _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n",
                         processedEnvelope.TryGetEventId(),
-                        await processedEnvelope.SerializeToStringAsync(cancellationToken).ConfigureAwait(false));
+                        await processedEnvelope.SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken).ConfigureAwait(false));
                 }
             }
 
@@ -244,14 +245,18 @@ namespace Sentry.Internal.Http
 
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 
-#if !NET461 && !NETSTANDARD2_0
-                await
+                var envelopeFile = File.Create(destination);
+#if NET461 || NETSTANDARD2_0
+                using (envelopeFile)
+#else
+                await using (envelopeFile)
 #endif
-                    using var envelopeFile = File.Create(destination);
-                await processedEnvelope.SerializeAsync(envelopeFile, cancellationToken).ConfigureAwait(false);
-                await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
-                _options.DiagnosticLogger?.LogInfo("Envelope's {0} bytes written to: {1}",
-                    envelopeFile.Length, destination);
+                {
+                    await processedEnvelope.SerializeAsync(envelopeFile, _options.DiagnosticLogger, cancellationToken).ConfigureAwait(false);
+                    await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    _options.LogInfo("Envelope's {0} bytes written to: {1}",
+                        envelopeFile.Length, destination);
+                }
             }
         }
 
@@ -263,10 +268,9 @@ namespace Sentry.Internal.Http
             }
 
             var dsn = Dsn.Parse(_options.Dsn);
-
             var authHeader =
                 $"Sentry sentry_version={_options.SentryVersion}," +
-                $"sentry_client={_options.ClientVersion}," +
+                $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
                 $"sentry_key={dsn.PublicKey}," +
                 (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
                 $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
@@ -276,7 +280,7 @@ namespace Sentry.Internal.Http
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
                 Headers = { { "X-Sentry-Auth", authHeader } },
-                Content = new EnvelopeHttpContent(envelope)
+                Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger)
             };
         }
     }

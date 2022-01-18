@@ -1,28 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;net461</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or $(TargetFramework.StartsWith('netstandard2')) or $(TargetFramework.StartsWith('net4'))">
-    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" />
-  </ItemGroup>
-
+  <!-- netcoreapp3.0;netcoreapp2.1;net461 will test Sentry.DiagnosticSource's targets: netstandard2.1;netstandard2.0;net461 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.17" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.17" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.17" />
+    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" />
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <!-- Use nca3.0 to test the ns2.1 target. nca3.1 will test the nca3.0 target of Sentry instead. -->
+    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' AND '$(TargetFramework)' != 'netcoreapp2.1' AND '$(TargetFramework)' != 'net461'">
+    <!-- .NET Core targets test types through Sentry: -->
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1' AND '$(TargetFramework)' != 'net461'">
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.8" />
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netcoreapp')) OR '$(TargetFramework)' == 'net461'">
+    <EFCoreVersion>3.1.20</EFCoreVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <EFCoreVersion>5.0.11</EFCoreVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <EFCoreVersion>6.0.0</EFCoreVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EFCoreVersion)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EFCoreVersion)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="$(EFCoreVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
-    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
 
 </Project>

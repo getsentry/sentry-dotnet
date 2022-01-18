@@ -32,13 +32,13 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 _efInterceptor = new(_hub, _options);
                 _disposableListeners.Add(listener.Subscribe(_efInterceptor));
-                _options.DiagnosticLogger?.Log(SentryLevel.Debug, "Registered integration with EF Core.");
+                _options.Log(SentryLevel.Debug, "Registered integration with EF Core.");
             }
             else if (listener.Name == "SqlClientDiagnosticListener")
             {
                 _sqlListener = new(_hub, _options);
                 _disposableListeners.Add(listener.Subscribe(_sqlListener));
-                _options.DiagnosticLogger?.LogDebug("Registered integration with SQL Client.");
+                _options.LogDebug("Registered integration with SQL Client.");
 
                 // Duplicated data.
                 _efInterceptor?.DisableConnectionSpan();

@@ -15,6 +15,12 @@ namespace Sentry
         public FileAttachmentContent(string filePath) => _filePath = filePath;
 
         /// <inheritdoc />
-        public Stream GetStream() => File.OpenRead(_filePath);
+        public Stream GetStream() => new FileStream(
+            _filePath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite,
+            bufferSize: 4096,
+            useAsync: true);
     }
 }

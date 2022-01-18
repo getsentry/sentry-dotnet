@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -22,7 +23,7 @@ namespace Sentry
         public SentryValues(IEnumerable<T>? values) => Values = values ?? Enumerable.Empty<T>();
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
@@ -30,7 +31,7 @@ namespace Sentry
 
             foreach (var i in Values)
             {
-                writer.WriteDynamicValue(i);
+                writer.WriteDynamicValue(i, logger);
             }
 
             writer.WriteEndArray();

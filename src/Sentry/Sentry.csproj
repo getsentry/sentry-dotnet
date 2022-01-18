@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
+    <!-- We'll pin to C# 9 and ImplicitUsings false to allow us to compile within Unity -->
+    <LangVersion>9</LangVersion>
+    <ImplicitUsings>false</ImplicitUsings>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
@@ -46,6 +49,11 @@
   <!-- Prefer bundled version of System.Text.Json to avoid extra dependencies -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="buildTransitive\Sentry.props" PackagePath="buildTransitive\Sentry.props" />
+    <Content Include="buildTransitive\Sentry.props" PackagePath="build\Sentry.props" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,10 +42,10 @@ namespace Sentry.Internal
             if (string.IsNullOrWhiteSpace(options.Dsn))
             {
                 const string msg = "Attempt to instantiate a Hub without a DSN.";
-                options.DiagnosticLogger?.LogFatal(msg);
+                options.LogFatal(msg);
                 throw new InvalidOperationException(msg);
             }
-            options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
+            options.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
             _options = options;
             _ownedClient = client ?? new SentryClient(options);
@@ -70,7 +69,7 @@ namespace Sentry.Internal
             {
                 foreach (var integration in _integrations)
                 {
-                    options.DiagnosticLogger?.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
+                    options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
                     integration.Register(this, options);
                 }
             }
@@ -84,7 +83,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to ConfigureScope", e);
+                _options.LogError("Failure to ConfigureScope", e);
             }
         }
 
@@ -96,7 +95,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to ConfigureScopeAsync", e);
+                _options.LogError("Failure to ConfigureScopeAsync", e);
             }
         }
 
@@ -112,7 +111,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to run callback WithScope", e);
+                _options.LogError("Failure to run callback WithScope", e);
             }
         }
 
@@ -183,9 +182,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to recover persisted session.",
-                        ex);
+                    _options.LogError("Failed to recover persisted session.", ex);
                 }
             }
 
@@ -200,9 +197,7 @@ namespace Sentry.Internal
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to start a session.",
-                    ex);
+                _options.LogError("Failed to start a session.", ex);
             }
         }
 
@@ -216,9 +211,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to pause a session.",
-                        ex);
+                    _options.LogError("Failed to pause a session.", ex);
                 }
             }
         }
@@ -236,9 +229,7 @@ namespace Sentry.Internal
                 }
                 catch (Exception ex)
                 {
-                    _options.DiagnosticLogger?.LogError(
-                        "Failed to resume a session.",
-                        ex);
+                    _options.LogError("Failed to resume a session.", ex);
                 }
             }
         }
@@ -255,9 +246,7 @@ namespace Sentry.Internal
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to end a session.",
-                    ex);
+                _options.LogError("Failed to end a session.", ex);
             }
         }
 
@@ -282,6 +271,22 @@ namespace Sentry.Internal
             return null;
         }
 
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+        {
+            try
+            {
+                var clonedScope = ScopeManager.GetCurrent().Key.Clone();
+                configureScope(clonedScope);
+
+                return CaptureEvent(evt, clonedScope);
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+                return SentryId.Empty;
+            }
+        }
+
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
@@ -295,11 +300,6 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                     evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
-                }
-                else if (evt.IsErrored() && scope?.LastCreatedSpan() is { } lastSpan && lastSpan?.IsFinished == false)
-                {
-                    // Can still be reset by the owner but lets consider it finished and errored for now.
-                    lastSpan.Finish(SpanStatus.InternalError);
                 }
 
                 actualScope.SessionUpdate = evt switch
@@ -325,7 +325,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
+                _options.LogError("Failure to capture event: {0}", e, evt.EventId);
                 return SentryId.Empty;
             }
         }
@@ -338,7 +338,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+                _options.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
             }
         }
 
@@ -358,7 +358,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+                _options.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
             }
         }
 
@@ -370,7 +370,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
+                _options.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
             }
         }
 
@@ -383,13 +383,13 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to Flush events", e);
+                _options.LogError("Failure to Flush events", e);
             }
         }
 
         public void Dispose()
         {
-            _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
+            _options.LogInfo("Disposing the Hub.");
 
             if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
             {
@@ -407,9 +407,8 @@ namespace Sentry.Internal
                 }
             }
 
-            (_ownedClient as IDisposable)?.Dispose();
-            _rootScope.Dispose();
-            ScopeManager.Dispose();
+            _ownedClient.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+            //Dont dispose of _rootScope and ScopeManager since we want dangling transactions to still be able to access tags.
         }
 
         public SentryId LastEventId

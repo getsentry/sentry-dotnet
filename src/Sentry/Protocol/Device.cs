@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -284,7 +285,7 @@ namespace Sentry.Protocol
             };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
         {
             writer.WriteStartObject();
 

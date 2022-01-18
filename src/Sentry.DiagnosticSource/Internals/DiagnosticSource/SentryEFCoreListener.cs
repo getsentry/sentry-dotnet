@@ -1,6 +1,8 @@
+#if NETCOREAPP3_0_OR_GREATER
 using System;
 using System.Collections.Generic;
 using System.Threading;
+#endif
 using Sentry.Extensibility;
 
 namespace Sentry.Internals.DiagnosticSource
@@ -24,7 +26,7 @@ namespace Sentry.Internals.DiagnosticSource
         internal const string EFCommandFailed = "Microsoft.EntityFrameworkCore.Database.Command.CommandError";
 
         /// <summary>
-        /// Used for EF Core 2.X and 3.X. 
+        /// Used for EF Core 2.X and 3.X.
         /// <seealso href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1"></seealso>
         /// </summary>
         internal const string EFQueryStartCompiling = "Microsoft.EntityFrameworkCore.Query.QueryCompilationStarting";
@@ -55,25 +57,54 @@ namespace Sentry.Internals.DiagnosticSource
 
         internal bool DisableQuerySpan() => _logQueryEnabled = false;
 
+        private ISpan? GetParent(SentryEFSpanType type, Scope scope)
+            => type == SentryEFSpanType.QueryExecution ? scope.GetSpan() : scope.Transaction;
+
         private ISpan? AddSpan(SentryEFSpanType type, string operation, string? description)
         {
-            if (_hub.GetSpan()?.StartChild(operation, description) is { } span &&
-                GetSpanBucket(type) is { } asyncLocalSpan)
+            ISpan? span = null;
+            _hub.ConfigureScope(scope =>
             {
-                asyncLocalSpan.Value = new WeakReference<ISpan>(span);
-                return span;
-            }
-            return null;
+                if (scope.Transaction?.IsSampled != true)
+                {
+                    return;
+                }
+
+                if (GetParent(type, scope)?.StartChild(operation, description) is not { } startedChild)
+                {
+                    return;
+                }
+
+                if (GetSpanBucket(type) is not { } asyncLocalSpan)
+                {
+                    return;
+                }
+
+                asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
+                span = startedChild;
+            });
+            return span;
         }
 
         private ISpan? TakeSpan(SentryEFSpanType type)
         {
-            if (GetSpanBucket(type)?.Value is { } reference && reference.TryGetTarget(out var span))
+            ISpan? span = null;
+            _hub.ConfigureScope(scope =>
             {
-                return span;
-            }
-            _options.DiagnosticLogger?.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
-            return null;
+                if (scope.Transaction?.IsSampled == true)
+                {
+                    if (GetSpanBucket(type)?.Value is { } reference &&
+                        reference.TryGetTarget(out var startedSpan))
+                    {
+                        span = startedSpan;
+                    }
+                    else
+                    {
+                        _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
+                    }
+                }
+            });
+            return span;
         }
 
         private AsyncLocal<WeakReference<ISpan>>? GetSpanBucket(SentryEFSpanType type)
@@ -105,7 +136,7 @@ namespace Sentry.Internals.DiagnosticSource
 
                 //Connection Span
                 //A transaction may or may not show a connection with it.
-                if (_logConnectionEnabled && value.Key == EFConnectionOpening)
+                else if (_logConnectionEnabled && value.Key == EFConnectionOpening)
                 {
                     AddSpan(SentryEFSpanType.Connection, "db.connection", null);
                 }
@@ -133,7 +164,7 @@ namespace Sentry.Internals.DiagnosticSource
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Failed to intercept EF Core event.", ex);
+                _options.LogError("Failed to intercept EF Core event.", ex);
             }
         }
 

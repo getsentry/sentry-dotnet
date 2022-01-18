@@ -115,7 +115,7 @@ namespace Sentry
             var length = stream.TryGetLength();
             if (length is null)
             {
-                scope.Options.DiagnosticLogger?.LogWarning(
+                scope.Options.LogWarning(
                     "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
                     fileName);
 
@@ -141,7 +141,12 @@ namespace Sentry
             string fileName,
             AttachmentType type = AttachmentType.Default,
             string? contentType = null) =>
-            scope.AddAttachment(new MemoryStream(data), fileName, type, contentType);
+            scope.AddAttachment(
+                new Attachment(
+                    type,
+                    new ByteAttachmentContent(data),
+                    fileName,
+                    contentType));
 
         /// <summary>
         /// Adds an attachment.

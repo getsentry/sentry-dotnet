@@ -1,15 +1,13 @@
 using Sentry.Tests.Helpers.Reflection;
-using Xunit;
 
 // ReSharper disable once CheckNamespace
-namespace Sentry.Tests
+namespace Sentry.Tests;
+
+public abstract class ImmutableTests<TType>
 {
-    public abstract class ImmutableTests<TType>
+    [Fact]
+    public void Type_IsImmutable()
     {
-        [Fact]
-        public void Type_IsImmutable()
-        {
-            typeof(TType).AssertImmutable();
-        }
+        typeof(TType).AssertImmutable();
     }
 }

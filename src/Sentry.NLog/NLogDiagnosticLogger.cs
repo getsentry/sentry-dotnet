@@ -1,64 +1,62 @@
-using System;
 using NLog.Common;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 
-namespace Sentry.NLog
+namespace Sentry.NLog;
+
+internal class NLogDiagnosticLogger : IDiagnosticLogger
 {
-    internal class NLogDiagnosticLogger : IDiagnosticLogger
+    private readonly IDiagnosticLogger? _extraLogger;
+
+    public NLogDiagnosticLogger(IDiagnosticLogger? extraLogger = null)
     {
-        private readonly IDiagnosticLogger? _extraLogger;
-
-        public NLogDiagnosticLogger(IDiagnosticLogger? extraLogger = null)
+        if (!InternalLogger.LogToConsole || !(extraLogger is ConsoleDiagnosticLogger))
         {
-            if (!InternalLogger.LogToConsole || !(extraLogger is ConsoleDiagnosticLogger))
-            {
-                _extraLogger = extraLogger;
-            }
+            _extraLogger = extraLogger;
+        }
+    }
+
+    public bool IsEnabled(SentryLevel level)
+    {
+        if (_extraLogger?.IsEnabled(level) == true)
+        {
+            return true;
         }
 
-        public bool IsEnabled(SentryLevel level)
+        return level switch
         {
-            if (_extraLogger?.IsEnabled(level) == true)
-            {
-                return true;
-            }
+            SentryLevel.Fatal => InternalLogger.IsFatalEnabled,
+            SentryLevel.Error => InternalLogger.IsErrorEnabled,
+            SentryLevel.Warning => InternalLogger.IsWarnEnabled,
+            SentryLevel.Info => InternalLogger.IsInfoEnabled,
+            _ => InternalLogger.IsDebugEnabled
+        };
+    }
 
-            return level switch
-            {
-                SentryLevel.Fatal => InternalLogger.IsFatalEnabled,
-                SentryLevel.Error => InternalLogger.IsErrorEnabled,
-                SentryLevel.Warning => InternalLogger.IsWarnEnabled,
-                SentryLevel.Info => InternalLogger.IsInfoEnabled,
-                _ => InternalLogger.IsDebugEnabled
-            };
+    public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
+    {
+        switch (logLevel)
+        {
+            case SentryLevel.Fatal:
+                InternalLogger.Fatal(exception, message, args);
+                break;
+            case SentryLevel.Error:
+                InternalLogger.Error(exception, message, args);
+                break;
+            case SentryLevel.Warning:
+                InternalLogger.Warn(exception, message, args);
+                break;
+            case SentryLevel.Info:
+                InternalLogger.Info(exception, message, args);
+                break;
+            default:
+                InternalLogger.Debug(exception, message, args);
+                break;
         }
 
-        public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
+        if (_extraLogger?.IsEnabled(logLevel) == true)
         {
-            switch (logLevel)
-            {
-                case SentryLevel.Fatal:
-                    InternalLogger.Fatal(exception, message, args);
-                    break;
-                case SentryLevel.Error:
-                    InternalLogger.Error(exception, message, args);
-                    break;
-                case SentryLevel.Warning:
-                    InternalLogger.Warn(exception, message, args);
-                    break;
-                case SentryLevel.Info:
-                    InternalLogger.Info(exception, message, args);
-                    break;
-                default:
-                    InternalLogger.Debug(exception, message, args);
-                    break;
-            }
-
-            if (_extraLogger?.IsEnabled(logLevel) == true)
-            {
-                _extraLogger.Log(logLevel, message, exception, args);
-            }
+            _extraLogger.Log(logLevel, message, exception, args);
         }
     }
 }

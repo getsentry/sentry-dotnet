@@ -1,13 +1,12 @@
-namespace Sentry.Serilog
+namespace Sentry.Serilog;
+
+/// <summary>
+/// Serilog Constant Values.
+/// </summary>
+internal static class Constants
 {
     /// <summary>
-    /// Serilog Constant Values.
+    /// Serilog SDK name.
     /// </summary>
-    internal static class Constants
-    {
-        /// <summary>
-        /// Serilog SDK name.
-        /// </summary>
-        public const string SdkName = "sentry.dotnet.serilog";
-    }
+    public const string SdkName = "sentry.dotnet.serilog";
 }

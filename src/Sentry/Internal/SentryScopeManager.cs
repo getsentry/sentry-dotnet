@@ -41,14 +41,14 @@ namespace Sentry.Internal
 
         public void ConfigureScope(Action<Scope>? configureScope)
         {
-            _options.DiagnosticLogger?.LogDebug("Configuring the scope.");
+            _options.LogDebug("Configuring the scope.");
             var scope = GetCurrent();
             configureScope?.Invoke(scope.Key);
         }
 
         public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
         {
-            _options.DiagnosticLogger?.LogDebug("Configuring the scope asynchronously.");
+            _options.LogDebug("Configuring the scope asynchronously.");
             var scope = GetCurrent();
             return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }
@@ -59,7 +59,7 @@ namespace Sentry.Internal
         {
             if (IsGlobalMode)
             {
-                _options.DiagnosticLogger?.LogWarning("Push scope called in global mode, returning.");
+                _options.LogWarning("Push scope called in global mode, returning.");
                 return DisabledHub.Instance;
             }
 
@@ -68,7 +68,7 @@ namespace Sentry.Internal
 
             if (scope.Key.Locked)
             {
-                _options.DiagnosticLogger?.LogDebug("Locked scope. No new scope pushed.");
+                _options.LogDebug("Locked scope. No new scope pushed.");
 
                 // Apply to current scope
                 if (state != null)
@@ -88,7 +88,7 @@ namespace Sentry.Internal
 
             var scopeSnapshot = new ScopeSnapshot(_options, currentScopeAndClientStack, this);
 
-            _options.DiagnosticLogger?.LogDebug("New scope pushed.");
+            _options.LogDebug("New scope pushed.");
             var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length + 1];
             Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
             newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new KeyValuePair<Scope, ISentryClient>(clonedScope, scope.Value);
@@ -108,7 +108,7 @@ namespace Sentry.Internal
 
         public void BindClient(ISentryClient? client)
         {
-            _options.DiagnosticLogger?.LogDebug("Binding a new client to the current scope.");
+            _options.LogDebug("Binding a new client to the current scope.");
 
             var currentScopeAndClientStack = ScopeAndClientStack;
             var top = currentScopeAndClientStack[currentScopeAndClientStack.Length - 1];
@@ -137,7 +137,7 @@ namespace Sentry.Internal
 
             public void Dispose()
             {
-                _options.DiagnosticLogger?.LogDebug("Disposing scope.");
+                _options.LogDebug("Disposing scope.");
 
                 var previousScopeKey = _snapshot[_snapshot.Length - 1].Key;
                 var currentScope = _scopeManager.ScopeAndClientStack;
@@ -156,7 +156,7 @@ namespace Sentry.Internal
 
         public void Dispose()
         {
-            _options.DiagnosticLogger?.LogDebug($"Disposing {nameof(SentryScopeManager)}.");
+            _options.LogDebug($"Disposing {nameof(SentryScopeManager)}.");
             ScopeStackContainer.Stack = null;
         }
     }

@@ -20,7 +20,6 @@ namespace Sentry
     /// <inheritdoc cref="IDisposable" />
     public class SentryClient : ISentryClient, IDisposable
     {
-        private volatile bool _disposed;
         private readonly SentryOptions _options;
 
         // Internal for testing.
@@ -54,7 +53,7 @@ namespace Sentry
             }
             else
             {
-                options.DiagnosticLogger?.LogDebug("Worker of type {0} was provided via Options.", worker.GetType().Name);
+                options.LogDebug("Worker of type {0} was provided via Options.", worker.GetType().Name);
                 Worker = worker;
             }
         }
@@ -62,11 +61,6 @@ namespace Sentry
         /// <inheritdoc />
         public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             if (@event == null)
             {
                 return SentryId.Empty;
@@ -78,7 +72,7 @@ namespace Sentry
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("An error occurred when capturing the event {0}.", e, @event.EventId);
+                _options.LogError("An error occurred when capturing the event {0}.", e, @event.EventId);
                 return SentryId.Empty;
             }
         }
@@ -86,15 +80,10 @@ namespace Sentry
         /// <inheritdoc />
         public void CaptureUserFeedback(UserFeedback userFeedback)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             if (userFeedback.EventId.Equals(SentryId.Empty))
             {
                 // Ignore the user feedback if EventId is empty
-                _options.DiagnosticLogger?.LogWarning("User feedback dropped due to empty id.");
+                _options.LogWarning("User feedback dropped due to empty id.");
                 return;
             }
 
@@ -104,14 +93,9 @@ namespace Sentry
         /// <inheritdoc />
         public void CaptureTransaction(Transaction transaction)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
-                _options.DiagnosticLogger?.LogWarning(
+                _options.LogWarning(
                     "Transaction dropped due to empty id.");
 
                 return;
@@ -120,7 +104,7 @@ namespace Sentry
             if (string.IsNullOrWhiteSpace(transaction.Name) ||
                 string.IsNullOrWhiteSpace(transaction.Operation))
             {
-                _options.DiagnosticLogger?.LogWarning(
+                _options.LogWarning(
                     "Transaction discarded due to one or more required fields missing.");
 
                 return;
@@ -131,7 +115,7 @@ namespace Sentry
             // We still send these transactions over, but warn the user not to do it.
             if (!transaction.IsFinished)
             {
-                _options.DiagnosticLogger?.LogWarning(
+                _options.LogWarning(
                     "Capturing a transaction which has not been finished. " +
                     "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
                     "to properly finalize the transaction and send it to Sentry.");
@@ -144,7 +128,7 @@ namespace Sentry
 
             if (transaction.IsSampled != true)
             {
-                _options.DiagnosticLogger?.LogDebug(
+                _options.LogDebug(
                     "Transaction dropped by sampling.");
 
                 return;
@@ -156,11 +140,6 @@ namespace Sentry
         /// <inheritdoc />
         public void CaptureSession(SessionUpdate sessionUpdate)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SentryClient));
-            }
-
             CaptureEnvelope(Envelope.FromSession(sessionUpdate));
         }
 
@@ -178,7 +157,7 @@ namespace Sentry
             {
                 if (!SynchronizedRandom.NextBool(_options.SampleRate.Value))
                 {
-                    _options.DiagnosticLogger?.LogDebug("Event sampled.");
+                    _options.LogDebug("Event sampled.");
                     return SentryId.Empty;
                 }
             }
@@ -187,7 +166,7 @@ namespace Sentry
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
-                    _options.DiagnosticLogger?.LogInfo(
+                    _options.LogInfo(
                         "Event with exception of type '{0}' was dropped by an exception filter.", @event.Exception.GetType());
                     return SentryId.Empty;
                 }
@@ -195,7 +174,7 @@ namespace Sentry
 
             scope ??= new Scope(_options);
 
-            _options.DiagnosticLogger?.LogInfo("Capturing event.");
+            _options.LogInfo("Capturing event.");
 
             // Evaluate and copy before invoking the callback
             scope.Evaluate();
@@ -204,7 +183,7 @@ namespace Sentry
             if (scope.Level != null)
             {
                 // Level on scope takes precedence over the one on event
-                _options.DiagnosticLogger?.LogInfo("Overriding level set on event '{0}' with level set on scope '{1}'.", @event.Level, scope.Level);
+                _options.LogInfo("Overriding level set on event '{0}' with level set on scope '{1}'.", @event.Level, scope.Level);
                 @event.Level = scope.Level;
             }
 
@@ -218,14 +197,14 @@ namespace Sentry
                 }
             }
 
-            SentryEvent? processedEvent = @event;
+            var processedEvent = @event;
 
             foreach (var processor in scope.GetAllEventProcessors())
             {
                 processedEvent = processor.Process(processedEvent);
                 if (processedEvent == null)
                 {
-                    _options.DiagnosticLogger?.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
+                    _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                     return SentryId.Empty;
                 }
             }
@@ -233,11 +212,11 @@ namespace Sentry
             processedEvent = BeforeSend(processedEvent);
             if (processedEvent == null) // Rejected event
             {
-                _options.DiagnosticLogger?.LogInfo("Event dropped by BeforeSend callback.");
+                _options.LogInfo("Event dropped by BeforeSend callback.");
                 return SentryId.Empty;
             }
 
-            return CaptureEnvelope(Envelope.FromEvent(processedEvent, scope.Attachments, scope.SessionUpdate))
+            return CaptureEnvelope(Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, scope.Attachments, scope.SessionUpdate))
                 ? processedEvent.EventId
                 : SentryId.Empty;
         }
@@ -251,11 +230,11 @@ namespace Sentry
         {
             if (Worker.EnqueueEnvelope(envelope))
             {
-                _options.DiagnosticLogger?.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId());
+                _options.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId());
                 return true;
             }
 
-            _options.DiagnosticLogger?.LogWarning(
+            _options.LogWarning(
                 "The attempt to queue the event failed. Items in queue: {0}",
                 Worker.QueuedItems);
 
@@ -269,14 +248,14 @@ namespace Sentry
                 return @event;
             }
 
-            _options.DiagnosticLogger?.LogDebug("Calling the BeforeSend callback");
+            _options.LogDebug("Calling the BeforeSend callback");
             try
             {
                 @event = _options.BeforeSend?.Invoke(@event!);
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
+                _options.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
                 var data = new Dictionary<string, string>
                 {
                     {"message", e.Message}
@@ -299,19 +278,13 @@ namespace Sentry
         /// Disposes this client
         /// </summary>
         /// <inheritdoc />
+        [Obsolete("Sentry client should no be explicitly disposed of. This method will be removed in version 4.")]
         public void Dispose()
         {
-            _options.DiagnosticLogger?.LogDebug("Disposing SentryClient.");
-
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
+            _options.LogDebug("Flushing SentryClient.");
 
             // Worker should empty it's queue until SentryOptions.ShutdownTimeout
-            (Worker as IDisposable)?.Dispose();
+            Worker.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
         }
     }
 }

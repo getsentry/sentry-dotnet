@@ -5,32 +5,31 @@ using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace -- Discoverability
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+/// <summary>
+/// Extension methods for <see cref="IServiceCollection"/>
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Extension methods for <see cref="IServiceCollection"/>
+    /// Adds Sentry's services to the <see cref="IServiceCollection"/>
     /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class ServiceCollectionExtensions
+    /// <param name="services">The services.</param>
+    public static ISentryBuilder AddSentry(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds Sentry's services to the <see cref="IServiceCollection"/>
-        /// </summary>
-        /// <param name="services">The services.</param>
-        /// <returns></returns>
-        public static ISentryBuilder AddSentry(this IServiceCollection services)
-        {
-            services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
-            services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
+        services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
+        services.AddSingleton<ISentryEventExceptionProcessor, AspNetCoreExceptionProcessor>();
+        services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
 
-            services
-                    .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
-                    // Last
-                    .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
+        services
+            .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()
+            // Last
+            .AddSingleton<IRequestPayloadExtractor, DefaultRequestPayloadExtractor>();
 
-            services.AddSentry<SentryAspNetCoreOptions>();
+        services.AddSentry<SentryAspNetCoreOptions>();
 
-            return new SentryAspNetCoreBuilder(services);
-        }
+        return new SentryAspNetCoreBuilder(services);
     }
 }

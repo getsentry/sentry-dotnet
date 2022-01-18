@@ -18,7 +18,7 @@ namespace Sentry.Integrations
             }
             catch (Exception ex)
             {
-                options.DiagnosticLogger?.LogError("Failed to register NetFxInstallations.", ex);
+                options.LogError("Failed to register NetFxInstallations.", ex);
             }
         }
     }
