@@ -285,7 +285,7 @@ public class SentryEFCoreListenerTests
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, efSql));
-        hub.CaptureEvent(new SentryEvent(), null);
+        hub.CaptureEvent(new SentryEvent(), null as Scope);
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
