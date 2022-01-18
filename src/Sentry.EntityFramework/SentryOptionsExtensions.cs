@@ -30,8 +30,16 @@ public static class SentryOptionsExtensions
                 .LogError("Failed to configure EF breadcrumbs. Make sure to init Sentry before EF.", e);
         }
 
-        DbIntegration = new DbInterceptionIntegration();
-        sentryOptions.AddIntegration(DbIntegration);
+        if (sentryOptions.TracesSampleRate == 0)
+        {
+            sentryOptions.DiagnosticLogger?
+                .LogInfo("Database performance integration is now disabled due to TracesSampleRate being set to zero.");
+        }
+        else
+        {
+            DbIntegration = new DbInterceptionIntegration();
+            sentryOptions.AddIntegration(DbIntegration);
+        }
 
         sentryOptions.AddExceptionProcessor(new DbEntityValidationExceptionProcessor());
         // DbConcurrencyExceptionProcessor is untested due to problems with testing it, so it might not be production ready
