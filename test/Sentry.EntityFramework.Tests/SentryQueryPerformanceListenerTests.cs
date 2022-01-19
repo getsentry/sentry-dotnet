@@ -200,7 +200,7 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var integration = new DbInterceptionIntegration();
-        integration.Register(_fixture.Hub, new SentryOptions());
+        integration.Register(_fixture.Hub, new SentryOptions() { TracesSampleRate = 1 });
 
         // Act
         _ = _fixture.DbContext.TestTable.FirstOrDefault();
