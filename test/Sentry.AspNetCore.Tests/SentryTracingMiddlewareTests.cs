@@ -366,7 +366,7 @@ public class SentryTracingMiddlewareTests
         var sentryClient = Substitute.For<ISentryClient>();
         sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
             .Do(callback => transaction = callback.Arg<Transaction>());
-        var options = new SentryAspNetCoreOptions()
+        var options = new SentryAspNetCoreOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             TracesSampleRate = 1
