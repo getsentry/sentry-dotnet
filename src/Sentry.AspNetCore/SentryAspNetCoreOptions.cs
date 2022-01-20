@@ -50,7 +50,7 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// <remarks>
     /// The SDK can name transactions automatically when using MVC or Endpoint Routing. In other cases, like when serving static files, it will fallback to Unknown Route. This hook allows custom code to define a transaction name given a <see cref="HttpContext"/>.
     /// </remarks>
-    public ITransactionNameProvider? TransactionNameProvider { get; set; }
+    public TransactionNameProvider? TransactionNameProvider { get; set; }
 
     /// <summary>
     /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />

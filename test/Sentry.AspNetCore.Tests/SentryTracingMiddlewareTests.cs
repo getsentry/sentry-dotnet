@@ -327,13 +327,10 @@ public class SentryTracingMiddlewareTests
 
         var hub = new Hub(options, sentryClient);
 
-        var transactionNameProvider = Substitute.For<ITransactionNameProvider>();
-        transactionNameProvider.GetRouteName(Arg.Any<HttpContext>()).Returns(expectedName);
-
         var server = new TestServer(new WebHostBuilder()
             .UseSentry(aspNewOptions =>
             {
-                aspNewOptions.TransactionNameProvider = transactionNameProvider;
+                aspNewOptions.TransactionNameProvider = _ => expectedName;
             })
             .ConfigureServices(services =>
             {
