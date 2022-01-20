@@ -8,7 +8,7 @@ namespace Sentry
     /// <remarks>
     /// <see href="https://develop.sentry.dev/sdk/overview/#parsing-the-dsn"/>
     /// </remarks>
-    internal sealed class Dsn
+    public sealed class Dsn
     {
         /// <summary>
         /// Source DSN string.

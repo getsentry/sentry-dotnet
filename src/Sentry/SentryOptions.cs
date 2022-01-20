@@ -56,7 +56,7 @@ namespace Sentry
 
         internal string ClientVersion { get; } = SdkName;
 
-        internal int SentryVersion { get; } = ProtocolVersion;
+        public int SentryVersion { get; } = ProtocolVersion;
 
         /// <summary>
         /// A list of exception processors

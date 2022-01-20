@@ -19,7 +19,7 @@ namespace Sentry
         private static readonly Lazy<SdkVersion> InstanceLazy = new(
             () => typeof(ISentryClient).Assembly.GetNameAndVersion());
 
-        internal static SdkVersion Instance => InstanceLazy.Value;
+        public static SdkVersion Instance => InstanceLazy.Value;
 
         internal ConcurrentBag<Package> InternalPackages { get; set; } = new();
 
