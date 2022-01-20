@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 
@@ -44,10 +45,10 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
     /// <summary>
-    /// The strategy to define the name of a transaction based on the HttpContext
+    /// The strategy to define the name of a transaction based on the <see cref="HttpContext"/>.
     /// </summary>
     /// <remarks>
-    /// The SDK can name transactions automatically when using MVC or Endpoint Routing. In other cases, like when serving static files, it fallback to Unknown Route. This hook allows custom code to define a transaction name given a HttpContext.
+    /// The SDK can name transactions automatically when using MVC or Endpoint Routing. In other cases, like when serving static files, it will fallback to Unknown Route. This hook allows custom code to define a transaction name given a <see cref="HttpContext"/>.
     /// </remarks>
     public ITransactionNameProvider? TransactionNameProvider { get; set; }
 
