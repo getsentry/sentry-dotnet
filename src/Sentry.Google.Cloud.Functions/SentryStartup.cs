@@ -49,7 +49,8 @@ public class SentryStartup : FunctionsStartup
             options.FlushBeforeRequestCompleted = true;
             // K_SERVICE is where the name of the FAAS is stored.
             // It'll return null. if GCP Function is running locally.
-            options.TransactionNameProvider = _ => Environment.GetEnvironmentVariable("K_SERVICE");
+            var serviceName = Environment.GetEnvironmentVariable("K_SERVICE");
+            options.TransactionNameProvider = _ => serviceName;
         });
 
         logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
