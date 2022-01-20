@@ -9,6 +9,7 @@
 
 ### Fixes
 
+- Handle exception from crashedLastRun callback ([#1328](https://github.com/getsentry/sentry-dotnet/pull/1328))
 - Create CachingTransport directories in constructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 
 ## 3.13.0
