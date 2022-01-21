@@ -47,7 +47,10 @@ public class SentryStartup : FunctionsStartup
         {
             // Make sure all events are flushed out
             options.FlushBeforeRequestCompleted = true;
-            options.TransactionNameProvider = new SentryGoogleCloudFunctionsRouteName();
+            // K_SERVICE is where the name of the FAAS is stored.
+            // It'll return null. if GCP Function is running locally.
+            var serviceName = Environment.GetEnvironmentVariable("K_SERVICE");
+            options.TransactionNameProvider = _ => serviceName;
         });
 
         logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
@@ -117,14 +120,5 @@ public class SentryStartup : FunctionsStartup
         {
             await _next(httpContext).ConfigureAwait(false);
         }
-    }
-
-    private class SentryGoogleCloudFunctionsRouteName : ITransactionNameProvider
-    {
-        private static readonly Lazy<string?> RouteName = new(() => Environment.GetEnvironmentVariable("K_SERVICE"));
-
-        // K_SERVICE is where the name of the FAAS is stored.
-        // It'll return null. if GCP Function is running locally.
-        public string? GetRouteName(HttpContext _) => RouteName.Value;
     }
 }
