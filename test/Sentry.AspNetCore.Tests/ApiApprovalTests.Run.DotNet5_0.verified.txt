@@ -17,10 +17,6 @@ namespace Sentry.AspNetCore
     {
         Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
     }
-    public interface ITransactionNameProvider
-    {
-        string? GetRouteName(Microsoft.AspNetCore.Http.HttpContext context);
-    }
     public interface IUserFactory
     {
         Sentry.User? Create(Microsoft.AspNetCore.Http.HttpContext context);
@@ -49,7 +45,7 @@ namespace Sentry.AspNetCore
         public System.TimeSpan FlushTimeout { get; set; }
         public bool IncludeActivityData { get; set; }
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
-        public Sentry.AspNetCore.ITransactionNameProvider? TransactionNameProvider { get; set; }
+        public Sentry.AspNetCore.TransactionNameProvider? TransactionNameProvider { get; set; }
     }
     public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.ConfigureFromConfigurationOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
     {
@@ -65,4 +61,5 @@ namespace Sentry.AspNetCore
         public SentryStartupFilter() { }
         public System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> Configure(System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> next) { }
     }
+    public delegate string? TransactionNameProvider(Microsoft.AspNetCore.Http.HttpContext context);
 }
