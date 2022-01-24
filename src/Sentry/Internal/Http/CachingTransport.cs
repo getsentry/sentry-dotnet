@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
@@ -52,7 +51,11 @@ namespace Sentry.Internal.Http
                 options.TryGetProcessSpecificCacheDirectoryPath() ??
                 throw new InvalidOperationException("Cache directory or DSN is not set.");
 
+            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+
+            // Ensure that the processing directory exists
+            Directory.CreateDirectory(_processingDirectoryPath);
 
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);
         }
@@ -141,20 +144,10 @@ namespace Sentry.Internal.Http
             }
         }
 
-        private IEnumerable<string> GetCacheFilePaths()
-        {
-            try
-            {
-                return Directory
-                    .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
-                    .OrderBy(f => new FileInfo(f).CreationTimeUtc);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                _options.LogWarning("Cache directory is empty.");
-                return Array.Empty<string>();
-            }
-        }
+        private IEnumerable<string> GetCacheFilePaths() =>
+            Directory
+                .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                .OrderBy(f => new FileInfo(f).CreationTimeUtc);
 
         private async Task ProcessCacheAsync(CancellationToken cancellationToken = default)
         {
@@ -250,9 +243,6 @@ namespace Sentry.Internal.Http
 
             var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
 
-            // Ensure that the processing directory exists
-            Directory.CreateDirectory(_processingDirectoryPath);
-
             // Move the file to processing.
             // We move with overwrite just in case a file with the same name
             // already exists in the output directory.
@@ -290,7 +280,6 @@ namespace Sentry.Internal.Http
 
             EnsureFreeSpaceInCache();
 
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             var stream = File.Create(envelopeFilePath);
 #if NET461 || NETSTANDARD2_0
             using(stream)
