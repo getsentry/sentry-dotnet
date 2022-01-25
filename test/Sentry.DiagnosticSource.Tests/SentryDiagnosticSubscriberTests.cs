@@ -2,6 +2,8 @@ using System.Data.Common;
 using System.Diagnostics;
 using LocalDb;
 using Sentry.Internals.DiagnosticSource;
+using Sentry.Testing;
+using VerifyTests.Http;
 
 [UsesVerify]
 public class SentryDiagnosticSubscriberTests
@@ -13,8 +15,12 @@ public class SentryDiagnosticSubscriberTests
     [Fact]
     public async Task RecordsSql()
     {
-        var hub = Substitute.For<IHub>();
-        using (var subscriber = new SentryDiagnosticSubscriber(hub, new SentryOptions()))
+        var options = new SentryOptions();
+        options.Dsn = DsnSamples.ValidDsnWithoutSecret;
+        var httpClient = new MockHttpClient();
+        options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => httpClient);
+        var hub = SentrySdk.InitHub(options);
+        using (var subscriber = new SentryDiagnosticSubscriber(hub, options))
         using (DiagnosticListener.AllListeners.Subscribe(subscriber))
         {
             using var database = await sqlInstance.Build();
@@ -22,9 +28,7 @@ public class SentryDiagnosticSubscriberTests
             await TestDbBuilder.GetData(database);
         }
 
-        List<ICall> receivedCalls = hub.ReceivedCalls().ToList();
-        var enumerable = receivedCalls.Select(x=>x.GetArguments().Single()).Cast<Action<Scope>>().ToList();
-        await Verifier.Verify(receivedCalls);
+        await Verify(httpClient);
     }
 
     public static class TestDbBuilder
@@ -36,7 +40,7 @@ public class SentryDiagnosticSubscriberTests
             await command.ExecuteNonQueryAsync();
         }
 
-        static int intData = 0;
+        private static int intData;
 
         public static async Task<int> AddData(DbConnection connection)
         {

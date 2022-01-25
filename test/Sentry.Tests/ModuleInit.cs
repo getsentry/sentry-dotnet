@@ -7,7 +7,7 @@ public static class ModuleInit
     [ModuleInitializer]
     public static void Init()
     {
-        VerifyNSubstitute.Enable();
+        VerifyHttp.Enable();
         VerifierSettings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(
             target => target.Data,
             (_, value) =>
