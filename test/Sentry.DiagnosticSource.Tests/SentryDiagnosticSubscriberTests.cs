@@ -15,17 +15,23 @@ public class SentryDiagnosticSubscriberTests
     [Fact]
     public async Task RecordsSql()
     {
-        var options = new SentryOptions();
-        options.Dsn = DsnSamples.ValidDsnWithoutSecret;
         var httpClient = new MockHttpClient();
-        options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => httpClient);
-        var hub = SentrySdk.InitHub(options);
-        using (var subscriber = new SentryDiagnosticSubscriber(hub, options))
-        using (DiagnosticListener.AllListeners.Subscribe(subscriber))
+        var options = new SentryOptions
         {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            SentryHttpClientFactory = new DelegateHttpClientFactory(_ => httpClient),
+            DiagnosticLevel = SentryLevel.Debug
+        };
+        options.AddIntegration(new SentryDiagnosticListenerIntegration());
+        using (var sdk = SentrySdk.Init(options))
+        {
+            var transaction = SentrySdk.StartTransaction("sdf", "sdf");
+            SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+            SentrySdk.CaptureException(new Exception("my other error"));
             using var database = await sqlInstance.Build();
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
+            transaction.Finish();
         }
 
         await Verify(httpClient);
@@ -35,7 +41,7 @@ public class SentryDiagnosticSubscriberTests
     {
         public static async Task CreateTable(DbConnection connection)
         {
-            await using var command = connection.CreateCommand();
+            using var command = connection.CreateCommand();
             command.CommandText = "create table MyTable (Value int);";
             await command.ExecuteNonQueryAsync();
         }
@@ -44,7 +50,7 @@ public class SentryDiagnosticSubscriberTests
 
         public static async Task<int> AddData(DbConnection connection)
         {
-            await using var command = connection.CreateCommand();
+            using var command = connection.CreateCommand();
             var addData = intData;
             intData++;
             command.CommandText = $@"
@@ -57,9 +63,9 @@ values ({addData});";
         public static async Task<List<int>> GetData(DbConnection connection)
         {
             var values = new List<int>();
-            await using var command = connection.CreateCommand();
+            using var command = connection.CreateCommand();
             command.CommandText = "select Value from MyTable";
-            await using var reader = await command.ExecuteReaderAsync();
+            using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 values.Add(reader.GetInt32(0));

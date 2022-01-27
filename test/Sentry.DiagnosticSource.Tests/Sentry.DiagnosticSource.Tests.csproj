@@ -30,7 +30,10 @@
     <EFCoreVersion>6.0.0</EFCoreVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LocalDb" Version="13.1.0" />
+    <PackageReference Include="LocalDb" Version="13.3.0" />
+    <PackageReference Include="Verify.Http" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(EFCoreVersion)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EFCoreVersion)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="$(EFCoreVersion)" />
