@@ -107,6 +107,11 @@ namespace Sentry.AspNetCore
                 return;
             }
 
+            if (_options.TransactionNameProvider is { } route)
+            {
+                context.Features.Set(route);
+            }
+
             var transaction = TryStartTransaction(context);
             var initialName = transaction?.Name;
 
