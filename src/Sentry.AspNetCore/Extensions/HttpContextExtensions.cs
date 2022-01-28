@@ -28,9 +28,9 @@ namespace Sentry.AspNetCore.Extensions
                 return legacyFormat;
             }
 
-            var sentryRouteName = context.Features.Get<ISentryRouteName>();
+            var sentryRouteName = context.Features.Get<TransactionNameProvider>();
 
-            return sentryRouteName?.GetRouteName();
+            return sentryRouteName?.Invoke(context);
         }
 
         // Internal for testing.
