@@ -1,14 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- The implementation of the background worker can now be changed ([#1450](https://github.com/getsentry/sentry-dotnet/pull/1450))
+
 ## 3.13.0
-
-### Various fixes & improvements
-
-- fix flakey memory test (#1430) by @SimonCropp
-- dispose of client should only flush (#1354) by @SimonCropp
-- Add CaptureLastError for ASP.NET (#1411) by @lucas-zimerman
-- add IsDynamicCode* to events (#1418) by @SimonCropp
-- Report ThreadPool stats (#1399) by @SimonCropp
 
 ## Features
 
