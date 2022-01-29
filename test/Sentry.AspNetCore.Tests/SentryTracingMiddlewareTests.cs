@@ -307,6 +307,93 @@ public class SentryTracingMiddlewareTests
         Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out var span));
         Assert.Equal(SpanStatus.InternalError, span.Status);
     }
+
+    [Fact]
+    public async Task Transaction_TransactionNameProviderSetSet_TransactionNameSet()
+    {
+        // Arrange
+        Transaction transaction = null;
+
+        var expectedName = "My custom name";
+
+        var sentryClient = Substitute.For<ISentryClient>();
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
+            .Do(callback => transaction = callback.Arg<Transaction>());
+        var options = new SentryAspNetCoreOptions()
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            TracesSampleRate = 1
+        };
+
+        var hub = new Hub(options, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseSentry(aspNewOptions =>
+            {
+                aspNewOptions.TransactionNameProvider = _ => expectedName;
+            })
+            .ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            }).Configure(app => app.UseSentryTracing()));
+
+        var client = server.CreateClient();
+
+        // Act
+        try
+        {
+            await client.GetStringAsync("/person/13.bmp");
+        }
+        // Expected error.
+        catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+        { }
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction?.Name.Should().Be($"GET {expectedName}");
+    }
+
+    [Fact]
+    public async Task Transaction_TransactionNameProviderSetUnset_UnknownTransactionNameSet()
+    {
+        // Arrange
+        Transaction transaction = null;
+
+        var sentryClient = Substitute.For<ISentryClient>();
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
+            .Do(callback => transaction = callback.Arg<Transaction>());
+        var options = new SentryAspNetCoreOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            TracesSampleRate = 1
+        };
+
+        var hub = new Hub(options, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            }).Configure(app => app.UseSentryTracing()));
+
+        var client = server.CreateClient();
+
+        // Act
+        try
+        {
+            await client.GetStringAsync("/person/13.bmp");
+        }
+        // Expected error.
+        catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+        { }
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction?.Name.Should().Be("Unknown Route");
+    }
 }
 
 #endif

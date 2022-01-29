@@ -131,7 +131,7 @@ internal static class Program
             });
 
             // Configures a scope which is only valid within the callback
-            SentrySdk.WithScope(s =>
+            SentrySdk.CaptureMessage("Fatal message!", s =>
             {
                 s.Level = SentryLevel.Fatal;
                 s.TransactionName = "main";
@@ -139,8 +139,6 @@ internal static class Program
 
                 // Add a file attachment for upload
                 s.AddAttachment(typeof(Program).Assembly.Location);
-
-                SentrySdk.CaptureMessage("Fatal message!");
             });
 
             var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);

@@ -1,15 +1,8 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using NSubstitute;
-using Sentry.Internal;
 using Sentry.Internal.ScopeStack;
 using Sentry.Internals.DiagnosticSource;
-using Xunit;
 
 namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 {
@@ -88,7 +81,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.NotNull(exception);
-#if NET461 || NETCOREAPP2_1 || NETCOREAPP3_1
+#if !NET5_0_OR_GREATER
             Assert.Single(spans); //1 command
 #else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
@@ -112,7 +105,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 
             // Assert
             Assert.Equal(3, result.Count);
-#if NET461 || NETCOREAPP2_1 || NETCOREAPP3_1
+#if !NET5_0_OR_GREATER
             Assert.Single(spans); //1 command
 #else
             Assert.Equal(2, spans.Count); //1 query compiler, 1 command
@@ -154,7 +147,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             // Assert
             Assert.Equal(totalCommands, itemsList.Count);
             Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query"));
-#if !NET461 && !NETCOREAPP2_1 && !NETCOREAPP3_1
+#if NET5_0_OR_GREATER
             Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
             Assert.All(spans, span =>
@@ -187,7 +180,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             // Assert
             Assert.Equal(3, result[0].Result.Count);
             Assert.Equal(4, spans.Count(s => s.Operation == "db.query"));
-#if !NET461 && !NETCOREAPP2_1 && !NETCOREAPP3_1
+#if NET5_0_OR_GREATER
             Assert.Equal(4, spans.Count(s => s.Operation == "db.query_compiler"));
 #endif
             Assert.All(spans, span =>

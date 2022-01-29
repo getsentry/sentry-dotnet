@@ -69,5 +69,16 @@ namespace Sentry
         /// Ends the currently active session.
         /// </summary>
         void EndSession(SessionEndStatus status = SessionEndStatus.Exited);
+
+        /// <summary>
+        /// Captures an event with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="evt">The event to be captured.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <returns></returns>
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope);
     }
 }
