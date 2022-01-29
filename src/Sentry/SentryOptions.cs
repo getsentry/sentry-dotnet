@@ -84,7 +84,7 @@ namespace Sentry
         internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
         /// <summary>
-        /// The worker used by the client and passes to the transport.
+        /// The worker used by the client to pass envelopes.
         /// </summary>
         public IBackgroundWorker? BackgroundWorker { get; set; }
 
