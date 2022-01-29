@@ -83,7 +83,10 @@ namespace Sentry
 
         internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
-        internal IBackgroundWorker? BackgroundWorker { get; set; }
+        /// <summary>
+        /// The worker used by the client and passes to the transport.
+        /// </summary>
+        public IBackgroundWorker? BackgroundWorker { get; set; }
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
