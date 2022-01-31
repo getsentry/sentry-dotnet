@@ -442,6 +442,7 @@ namespace Sentry
         public bool AttachStacktrace { get; set; }
         public bool AutoSessionTracking { get; set; }
         public System.TimeSpan AutoSessionTrackingInterval { get; set; }
+        public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
         public System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?>? BeforeBreadcrumb { get; set; }
         public System.Func<Sentry.SentryEvent, Sentry.SentryEvent?>? BeforeSend { get; set; }
         public string? CacheDirectoryPath { get; set; }
@@ -980,6 +981,12 @@ namespace Sentry.Extensibility
             "nd CaptureException that provide a callback to a configurable scope.")]
         public void WithScope(System.Action<Sentry.Scope> scopeCallback) { }
     }
+    public interface IBackgroundWorker
+    {
+        int QueuedItems { get; }
+        bool EnqueueEnvelope(Sentry.Protocol.Envelopes.Envelope envelope);
+        System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
+    }
     public interface IDiagnosticLogger
     {
         bool IsEnabled(Sentry.SentryLevel level);
@@ -1303,6 +1310,44 @@ namespace Sentry.Protocol
         public Sentry.SentryId TraceId { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Trace FromJson(System.Text.Json.JsonElement json) { }
+    }
+}
+namespace Sentry.Protocol.Envelopes
+{
+    public sealed class Envelope : Sentry.Protocol.Envelopes.ISerializable, System.IDisposable
+    {
+        public Envelope(System.Collections.Generic.IReadOnlyDictionary<string, object?> header, System.Collections.Generic.IReadOnlyList<Sentry.Protocol.Envelopes.EnvelopeItem> items) { }
+        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Header { get; }
+        public System.Collections.Generic.IReadOnlyList<Sentry.Protocol.Envelopes.EnvelopeItem> Items { get; }
+        public void Dispose() { }
+        public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
+        public Sentry.SentryId? TryGetEventId() { }
+        public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.Envelope> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.Attachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromSession(Sentry.SessionUpdate sessionUpdate) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromTransaction(Sentry.Transaction transaction) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
+    }
+    public sealed class EnvelopeItem : Sentry.Protocol.Envelopes.ISerializable, System.IDisposable
+    {
+        public EnvelopeItem(System.Collections.Generic.IReadOnlyDictionary<string, object?> header, Sentry.Protocol.Envelopes.ISerializable payload) { }
+        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Header { get; }
+        public Sentry.Protocol.Envelopes.ISerializable Payload { get; }
+        public void Dispose() { }
+        public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
+        public string? TryGetFileName() { }
+        public long? TryGetLength() { }
+        public string? TryGetType() { }
+        public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.EnvelopeItem> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromAttachment(Sentry.Attachment attachment) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromEvent(Sentry.SentryEvent @event) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromSession(Sentry.SessionUpdate sessionUpdate) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromTransaction(Sentry.Transaction transaction) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
+    }
+    public interface ISerializable
+    {
+        System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default);
     }
 }
 namespace Sentry.Reflection

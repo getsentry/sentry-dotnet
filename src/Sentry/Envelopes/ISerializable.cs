@@ -8,7 +8,7 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Represents a serializable entity.
     /// </summary>
-    internal interface ISerializable
+    public interface ISerializable
     {
         /// <summary>
         /// Serializes the object to a stream.
