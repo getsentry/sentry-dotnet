@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 
@@ -42,6 +43,14 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// How long to wait for the flush to finish. Defaults to 2 seconds.
     /// </summary>
     public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// The strategy to define the name of a transaction based on the <see cref="HttpContext"/>.
+    /// </summary>
+    /// <remarks>
+    /// The SDK can name transactions automatically when using MVC or Endpoint Routing. In other cases, like when serving static files, it will fallback to Unknown Route. This hook allows custom code to define a transaction name given a <see cref="HttpContext"/>.
+    /// </remarks>
+    public TransactionNameProvider? TransactionNameProvider { get; set; }
 
     /// <summary>
     /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />

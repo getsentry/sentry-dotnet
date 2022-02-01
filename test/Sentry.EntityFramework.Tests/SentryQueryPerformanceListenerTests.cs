@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure.Interception;
 using Effort.Provider;
+using Sentry.Testing;
 
 namespace Sentry.EntityFramework.Tests;
 
@@ -199,7 +200,7 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var integration = new DbInterceptionIntegration();
-        integration.Register(_fixture.Hub, new SentryOptions());
+        integration.Register(_fixture.Hub, new SentryOptions() { TracesSampleRate = 1 });
 
         // Act
         _ = _fixture.DbContext.TestTable.FirstOrDefault();
@@ -220,5 +221,28 @@ public class SentryQueryPerformanceListenerTests
             span.Received(1).Finish(Arg.Is<SpanStatus>(status => SpanStatus.Ok == status));
         });
         integration.Unregister();
+    }
+
+    [Fact]
+    public void Finish_NoActiveTransaction_LoggerNotCalled()
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        hub.GetSpan().Returns((_) => null);
+        var logger = Substitute.For<ITestOutputHelper>();
+
+        var options = new SentryOptions()
+        {
+            Debug = true,
+            DiagnosticLogger = new TestOutputDiagnosticLogger(logger, SentryLevel.Debug)
+        };
+
+        var listener = new SentryQueryPerformanceListener(hub, options);
+
+        // Act
+        listener.ScalarExecuted(Substitute.For<DbCommand>(), Substitute.For<DbCommandInterceptionContext<object>>());
+
+        // Assert
+        logger.Received(0).WriteLine(Arg.Any<string>());
     }
 }

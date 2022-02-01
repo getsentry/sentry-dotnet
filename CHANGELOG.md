@@ -2,13 +2,16 @@
 
 ## Unreleased
 
-## Features
+### Features
 
+- Add the delegate TransactionNameProvider to allow the name definition from Unknown transactions on ASP.NET Core ([#1421](https://github.com/getsentry/sentry-dotnet/pull/1421))
 - SentrySDK.WithScope is now obsolete in favour of overloads of CaptureEvent, CaptureMessage, CaptureException ([#1412](https://github.com/getsentry/sentry-dotnet/pull/1412))
 - Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
+- The implementation of the background worker can now be changed ([#1450](https://github.com/getsentry/sentry-dotnet/pull/1450))
 
 ### Fixes
 
+- Reduced the logger noise from EF when not using Performance Monitoring ([#1441](https://github.com/getsentry/sentry-dotnet/pull/1441))
 - Create CachingTransport directories in constructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 - UnobservedTaskException is now considered as Unhandled ([#1447](https://github.com/getsentry/sentry-dotnet/pull/1447))
 
