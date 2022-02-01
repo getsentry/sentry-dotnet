@@ -40,6 +40,17 @@ public class SentryDiagnosticSubscriberTests
                 _ =>
                 {
                     _.IgnoreMember<SentryEvent>(_ => _.Modules);
+                    _.IgnoreMembers("app","os","device","runtime");
+                    _.IgnoreMembers<Span>(
+                        _ => _.SpanId,
+                        _ => _.ParentSpanId,
+                        _ => _.TraceId
+                    );
+                    _.IgnoreMembers<Trace>(
+                        _ => _.SpanId,
+                        _ => _.ParentSpanId,
+                        _ => _.TraceId
+                    );
                 });
     }
 

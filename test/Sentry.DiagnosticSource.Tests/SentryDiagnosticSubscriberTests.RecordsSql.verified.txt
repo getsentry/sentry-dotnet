@@ -32,24 +32,22 @@
                 os: {
                   RawDescription: Microsoft Windows 10.0.19043
                 },
-                trace: {
-                  SpanId: {},
-                  TraceId: {},
-                  Operation: sdf,
-                  Description: ,
-                  Status: UnknownError,
-                  IsSampled: true
+                device: {
+                  BootTime: DateTimeOffset_3
                 },
                 runtime: {
                   Name: .NET,
                   Version: 6.0.1,
                   RawDescription: .NET 6.0.1
                 },
-                device: {
-                  BootTime: DateTimeOffset_3
-                },
                 app: {
                   StartTime: DateTimeOffset_4
+                },
+                trace: {
+                  Operation: sdf,
+                  Description: ,
+                  Status: UnknownError,
+                  IsSampled: true
                 }
               },
               User: {},
@@ -66,9 +64,6 @@
               },
               Spans: [
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_5,
                   EndTimestamp: DateTimeOffset_6,
                   IsFinished: true,
@@ -85,9 +80,6 @@ values (0);,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_7,
                   EndTimestamp: DateTimeOffset_8,
                   IsFinished: true,
@@ -100,9 +92,6 @@ values (0);,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_9,
                   EndTimestamp: DateTimeOffset_10,
                   IsFinished: true,
@@ -116,9 +105,6 @@ values (0);,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_11,
                   EndTimestamp: DateTimeOffset_12,
                   IsFinished: true,
@@ -131,9 +117,6 @@ values (0);,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_13,
                   EndTimestamp: DateTimeOffset_14,
                   IsFinished: true,
@@ -165,9 +148,6 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_15,
                   EndTimestamp: DateTimeOffset_16,
                   IsFinished: true,
@@ -180,9 +160,6 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_17,
                   EndTimestamp: DateTimeOffset_18,
                   IsFinished: true,
@@ -198,9 +175,6 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_19,
                   EndTimestamp: DateTimeOffset_20,
                   IsFinished: true,
@@ -212,103 +186,31 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_21,
                   EndTimestamp: DateTimeOffset_22,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Description: create table MyTable (Value int);,
-                  Status: Ok,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_8,
-                    db.operation_id: Guid_9
-                  }
-                },
-                {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
-                  StartTimestamp: DateTimeOffset_23,
-                  EndTimestamp: DateTimeOffset_24,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_8,
-                    db.operation_id: Guid_9
-                  }
-                },
-                {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
-                  StartTimestamp: DateTimeOffset_25,
-                  EndTimestamp: DateTimeOffset_26,
-                  IsFinished: true,
-                  Operation: db.connection,
-                  Status: Ok,
-                  IsSampled: true,
-                  Extra: {
-                    bytes_received: 21,
-                    bytes_sent : 96,
-                    db.connection_id: Guid_8,
-                    db.operation_id: Guid_10,
-                    rows_sent: 0
-                  }
-                },
-                {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
-                  StartTimestamp: DateTimeOffset_27,
-                  EndTimestamp: DateTimeOffset_28,
-                  IsFinished: true,
-                  Operation: db.connection,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.operation_id: Guid_10
-                  }
-                },
-                {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
-                  StartTimestamp: DateTimeOffset_29,
-                  EndTimestamp: DateTimeOffset_30,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
                     db.connection_id: Guid_2,
-                    db.operation_id: Guid_11
+                    db.operation_id: Guid_8
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
-                  StartTimestamp: DateTimeOffset_31,
-                  EndTimestamp: DateTimeOffset_32,
+                  StartTimestamp: DateTimeOffset_23,
+                  EndTimestamp: DateTimeOffset_24,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
-                    db.operation_id: Guid_11
+                    db.operation_id: Guid_8
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
-                  StartTimestamp: DateTimeOffset_33,
-                  EndTimestamp: DateTimeOffset_34,
+                  StartTimestamp: DateTimeOffset_25,
+                  EndTimestamp: DateTimeOffset_26,
                   IsFinished: true,
                   Operation: db.query,
                   Description:
@@ -320,29 +222,74 @@ end;,
                   Status: Ok,
                   IsSampled: true,
                   Extra: {
-                    db.connection_id: Guid_12,
-                    db.operation_id: Guid_13
+                    db.connection_id: Guid_9,
+                    db.operation_id: Guid_10
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
-                  StartTimestamp: DateTimeOffset_35,
-                  EndTimestamp: DateTimeOffset_36,
+                  StartTimestamp: DateTimeOffset_27,
+                  EndTimestamp: DateTimeOffset_28,
                   IsFinished: true,
                   Operation: db.query,
                   Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
-                    db.connection_id: Guid_12,
+                    db.connection_id: Guid_9,
+                    db.operation_id: Guid_10
+                  }
+                },
+                {
+                  StartTimestamp: DateTimeOffset_29,
+                  EndTimestamp: DateTimeOffset_30,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description: create table MyTable (Value int);,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_11,
+                    db.operation_id: Guid_12
+                  }
+                },
+                {
+                  StartTimestamp: DateTimeOffset_31,
+                  EndTimestamp: DateTimeOffset_32,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_11,
+                    db.operation_id: Guid_12
+                  }
+                },
+                {
+                  StartTimestamp: DateTimeOffset_33,
+                  EndTimestamp: DateTimeOffset_34,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    bytes_received: 21,
+                    bytes_sent : 96,
+                    db.connection_id: Guid_11,
+                    db.operation_id: Guid_13,
+                    rows_sent: 0
+                  }
+                },
+                {
+                  StartTimestamp: DateTimeOffset_35,
+                  EndTimestamp: DateTimeOffset_36,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
                     db.operation_id: Guid_13
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_37,
                   EndTimestamp: DateTimeOffset_38,
                   IsFinished: true,
@@ -368,14 +315,11 @@ log on
                   Status: Ok,
                   IsSampled: true,
                   Extra: {
-                    db.connection_id: Guid_12,
+                    db.connection_id: Guid_9,
                     db.operation_id: Guid_14
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_39,
                   EndTimestamp: DateTimeOffset_40,
                   IsFinished: true,
@@ -383,14 +327,11 @@ log on
                   Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
-                    db.connection_id: Guid_12,
+                    db.connection_id: Guid_9,
                     db.operation_id: Guid_14
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_41,
                   EndTimestamp: DateTimeOffset_42,
                   IsFinished: true,
@@ -400,15 +341,12 @@ log on
                   Extra: {
                     bytes_received: 729,
                     bytes_sent : 1182,
-                    db.connection_id: Guid_12,
+                    db.connection_id: Guid_9,
                     db.operation_id: Guid_15,
                     rows_sent: 3
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_43,
                   EndTimestamp: DateTimeOffset_44,
                   IsFinished: true,
@@ -420,9 +358,6 @@ log on
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_45,
                   EndTimestamp: DateTimeOffset_46,
                   IsFinished: true,
@@ -448,9 +383,6 @@ execute sp_executesql @command,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_47,
                   EndTimestamp: DateTimeOffset_48,
                   IsFinished: true,
@@ -463,9 +395,6 @@ execute sp_executesql @command,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_49,
                   EndTimestamp: DateTimeOffset_50,
                   IsFinished: true,
@@ -481,9 +410,6 @@ execute sp_executesql @command,
                   }
                 },
                 {
-                  SpanId: {},
-                  ParentSpanId: {},
-                  TraceId: {},
                   StartTimestamp: DateTimeOffset_51,
                   EndTimestamp: DateTimeOffset_52,
                   IsFinished: true,
@@ -539,46 +465,30 @@ execute sp_executesql @command,
               TransactionName: sdf,
               Request: {},
               Contexts: {
-                Current UI Culture: {
-                  Calendar: GregorianCalendar,
-                  DisplayName: English (United States),
-                  Name: en-US
-                },
-                Dynamic Code: {
-                  Compiled: true,
-                  Supported: true
-                },
-                Current Culture: {
-                  Calendar: GregorianCalendar,
-                  DisplayName: English (Australia),
-                  Name: en-AU
+                ThreadPool Info: {
+                  MinWorkerThreads: 16,
+                  MinCompletionPortThreads: 16,
+                  MaxWorkerThreads: 32767,
+                  MaxCompletionPortThreads: 1000,
+                  AvailableWorkerThreads: 32766,
+                  AvailableCompletionPortThreads: 1000
                 },
                 os: {
                   RawDescription: Microsoft Windows 10.0.19043
                 },
-                trace: {
-                  SpanId: {},
-                  TraceId: {},
-                  Operation: 
-                },
-                runtime: {
-                  Name: .NET,
-                  Version: 6.0.1,
-                  RawDescription: .NET 6.0.1
-                },
                 Memory Info: {
-                  AllocatedBytes: 22241872,
-                  FragmentedBytes: 11664,
-                  HeapSizeBytes: 2606288,
+                  AllocatedBytes: 22263792,
+                  FragmentedBytes: 11768,
+                  HeapSizeBytes: 2609776,
                   HighMemoryLoadThresholdBytes: 30821986713,
                   TotalAvailableMemoryBytes: 34246651904,
-                  MemoryLoadBytes: 11643861647,
+                  MemoryLoadBytes: 10616462090,
                   TotalCommittedBytes: 10608640,
-                  PromotedBytes: 2398976,
+                  PromotedBytes: 2402360,
                   PinnedObjectsCount: 2,
-                  PauseTimePercentage: 1.36,
+                  PauseTimePercentage: 1.43,
                   PauseDurations: [
-                    00:00:00.0065450,
+                    00:00:00.0065090,
                     00:00:00
                   ],
                   Index: 2,
@@ -597,16 +507,30 @@ execute sp_executesql @command,
                   },
                   BootTime: DateTimeOffset_3
                 },
+                Dynamic Code: {
+                  Compiled: true,
+                  Supported: true
+                },
+                runtime: {
+                  Name: .NET,
+                  Version: 6.0.1,
+                  RawDescription: .NET 6.0.1
+                },
+                Current UI Culture: {
+                  Calendar: GregorianCalendar,
+                  DisplayName: English (United States),
+                  Name: en-US
+                },
                 app: {
                   StartTime: DateTimeOffset_4
                 },
-                ThreadPool Info: {
-                  MinWorkerThreads: 16,
-                  MinCompletionPortThreads: 16,
-                  MaxWorkerThreads: 32767,
-                  MaxCompletionPortThreads: 1000,
-                  AvailableWorkerThreads: 32766,
-                  AvailableCompletionPortThreads: 1000
+                trace: {
+                  Operation: 
+                },
+                Current Culture: {
+                  Calendar: GregorianCalendar,
+                  DisplayName: English (Australia),
+                  Name: en-AU
                 }
               },
               User: {},
