@@ -28,28 +28,6 @@
               Status: UnknownError,
               IsSampled: true,
               Request: {},
-              Contexts: {
-                os: {
-                  RawDescription: Microsoft Windows 10.0.19043
-                },
-                device: {
-                  BootTime: DateTimeOffset_3
-                },
-                runtime: {
-                  Name: .NET,
-                  Version: 6.0.1,
-                  RawDescription: .NET 6.0.1
-                },
-                app: {
-                  StartTime: DateTimeOffset_4
-                },
-                trace: {
-                  Operation: sdf,
-                  Description: ,
-                  Status: UnknownError,
-                  IsSampled: true
-                }
-              },
               User: {},
               Environment: production,
               Sdk: {
@@ -64,15 +42,24 @@
               },
               Spans: [
                 {
+                  StartTimestamp: DateTimeOffset_3,
+                  EndTimestamp: DateTimeOffset_4,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description: select Value from MyTable,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_2,
+                    db.operation_id: Guid_3
+                  }
+                },
+                {
                   StartTimestamp: DateTimeOffset_5,
                   EndTimestamp: DateTimeOffset_6,
                   IsFinished: true,
                   Operation: db.query,
-                  Description:
-
-insert into MyTable (Value)
-values (0);,
-                  Status: Ok,
+                  Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
                     db.connection_id: Guid_2,
@@ -84,11 +71,15 @@ values (0);,
                   EndTimestamp: DateTimeOffset_8,
                   IsFinished: true,
                   Operation: db.query,
-                  Status: DeadlineExceeded,
+                  Description:
+
+insert into MyTable (Value)
+values (0);,
+                  Status: Ok,
                   IsSampled: true,
                   Extra: {
                     db.connection_id: Guid_2,
-                    db.operation_id: Guid_3
+                    db.operation_id: Guid_4
                   }
                 },
                 {
@@ -96,8 +87,7 @@ values (0);,
                   EndTimestamp: DateTimeOffset_10,
                   IsFinished: true,
                   Operation: db.query,
-                  Description: select Value from MyTable,
-                  Status: Ok,
+                  Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
                     db.connection_id: Guid_2,
@@ -107,18 +97,6 @@ values (0);,
                 {
                   StartTimestamp: DateTimeOffset_11,
                   EndTimestamp: DateTimeOffset_12,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_2,
-                    db.operation_id: Guid_4
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_13,
-                  EndTimestamp: DateTimeOffset_14,
                   IsFinished: true,
                   Operation: db.query,
                   Description:
@@ -148,8 +126,8 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_15,
-                  EndTimestamp: DateTimeOffset_16,
+                  StartTimestamp: DateTimeOffset_13,
+                  EndTimestamp: DateTimeOffset_14,
                   IsFinished: true,
                   Operation: db.query,
                   Status: DeadlineExceeded,
@@ -160,8 +138,8 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_17,
-                  EndTimestamp: DateTimeOffset_18,
+                  StartTimestamp: DateTimeOffset_15,
+                  EndTimestamp: DateTimeOffset_16,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: Ok,
@@ -175,8 +153,8 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_19,
-                  EndTimestamp: DateTimeOffset_20,
+                  StartTimestamp: DateTimeOffset_17,
+                  EndTimestamp: DateTimeOffset_18,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: DeadlineExceeded,
@@ -186,8 +164,8 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_21,
-                  EndTimestamp: DateTimeOffset_22,
+                  StartTimestamp: DateTimeOffset_19,
+                  EndTimestamp: DateTimeOffset_20,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: DeadlineExceeded,
@@ -198,8 +176,8 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_23,
-                  EndTimestamp: DateTimeOffset_24,
+                  StartTimestamp: DateTimeOffset_21,
+                  EndTimestamp: DateTimeOffset_22,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: DeadlineExceeded,
@@ -209,157 +187,34 @@ alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_25,
-                  EndTimestamp: DateTimeOffset_26,
+                  StartTimestamp: DateTimeOffset_23,
+                  EndTimestamp: DateTimeOffset_24,
                   IsFinished: true,
-                  Operation: db.query,
-                  Description:
-if db_id('template') is not null
-begin
-    alter database [template] set single_user with rollback immediate;
-    execute sp_detach_db 'template', 'true';
-end;,
+                  Operation: db.connection,
                   Status: Ok,
                   IsSampled: true,
                   Extra: {
+                    bytes_received: 0,
+                    bytes_sent : 0,
                     db.connection_id: Guid_9,
+                    db.operation_id: Guid_10,
+                    rows_sent: 0
+                  }
+                },
+                {
+                  StartTimestamp: DateTimeOffset_25,
+                  EndTimestamp: DateTimeOffset_26,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
                     db.operation_id: Guid_10
                   }
                 },
                 {
                   StartTimestamp: DateTimeOffset_27,
                   EndTimestamp: DateTimeOffset_28,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_9,
-                    db.operation_id: Guid_10
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_29,
-                  EndTimestamp: DateTimeOffset_30,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Description: create table MyTable (Value int);,
-                  Status: Ok,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_11,
-                    db.operation_id: Guid_12
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_31,
-                  EndTimestamp: DateTimeOffset_32,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_11,
-                    db.operation_id: Guid_12
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_33,
-                  EndTimestamp: DateTimeOffset_34,
-                  IsFinished: true,
-                  Operation: db.connection,
-                  Status: Ok,
-                  IsSampled: true,
-                  Extra: {
-                    bytes_received: 21,
-                    bytes_sent : 96,
-                    db.connection_id: Guid_11,
-                    db.operation_id: Guid_13,
-                    rows_sent: 0
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_35,
-                  EndTimestamp: DateTimeOffset_36,
-                  IsFinished: true,
-                  Operation: db.connection,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.operation_id: Guid_13
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_37,
-                  EndTimestamp: DateTimeOffset_38,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Description:
-if db_id('template') is not null
-begin
-  execute sp_detach_db 'template', 'true';
-end;
-create database template on
-(
-    name = template,
-    filename = 'C:\localdb\SentryDiagnosticSubscriber\template.mdf',
-    fileGrowth = 100KB
-)
-log on
-(
-    name = template_log,
-    filename = 'C:\localdb\SentryDiagnosticSubscriber\template_log.ldf',
-    size = 512KB,
-    filegrowth = 100KB
-);,
-                  Status: Ok,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_9,
-                    db.operation_id: Guid_14
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_39,
-                  EndTimestamp: DateTimeOffset_40,
-                  IsFinished: true,
-                  Operation: db.query,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.connection_id: Guid_9,
-                    db.operation_id: Guid_14
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_41,
-                  EndTimestamp: DateTimeOffset_42,
-                  IsFinished: true,
-                  Operation: db.connection,
-                  Status: Ok,
-                  IsSampled: true,
-                  Extra: {
-                    bytes_received: 729,
-                    bytes_sent : 1182,
-                    db.connection_id: Guid_9,
-                    db.operation_id: Guid_15,
-                    rows_sent: 3
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_43,
-                  EndTimestamp: DateTimeOffset_44,
-                  IsFinished: true,
-                  Operation: db.connection,
-                  Status: DeadlineExceeded,
-                  IsSampled: true,
-                  Extra: {
-                    db.operation_id: Guid_15
-                  }
-                },
-                {
-                  StartTimestamp: DateTimeOffset_45,
-                  EndTimestamp: DateTimeOffset_46,
                   IsFinished: true,
                   Operation: db.query,
                   Description:
@@ -379,24 +234,24 @@ execute sp_executesql @command,
                   IsSampled: true,
                   Extra: {
                     db.connection_id: Guid_5,
-                    db.operation_id: Guid_16
+                    db.operation_id: Guid_11
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_47,
-                  EndTimestamp: DateTimeOffset_48,
+                  StartTimestamp: DateTimeOffset_29,
+                  EndTimestamp: DateTimeOffset_30,
                   IsFinished: true,
                   Operation: db.query,
                   Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
                     db.connection_id: Guid_5,
-                    db.operation_id: Guid_16
+                    db.operation_id: Guid_11
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_49,
-                  EndTimestamp: DateTimeOffset_50,
+                  StartTimestamp: DateTimeOffset_31,
+                  EndTimestamp: DateTimeOffset_32,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: Ok,
@@ -405,19 +260,19 @@ execute sp_executesql @command,
                     bytes_received: 91,
                     bytes_sent : 828,
                     db.connection_id: Guid_5,
-                    db.operation_id: Guid_17,
+                    db.operation_id: Guid_12,
                     rows_sent: 2
                   }
                 },
                 {
-                  StartTimestamp: DateTimeOffset_51,
-                  EndTimestamp: DateTimeOffset_52,
+                  StartTimestamp: DateTimeOffset_33,
+                  EndTimestamp: DateTimeOffset_34,
                   IsFinished: true,
                   Operation: db.connection,
                   Status: DeadlineExceeded,
                   IsSampled: true,
                   Extra: {
-                    db.operation_id: Guid_17
+                    db.operation_id: Guid_12
                   }
                 }
               ],
@@ -429,7 +284,7 @@ execute sp_executesql @command,
     },
     {
       Header: {
-        event_id: Guid_18,
+        event_id: Guid_13,
         sdk: {
           name: Sentry,
           version: 3.13.0
@@ -448,7 +303,7 @@ execute sp_executesql @command,
                 Message: my other error
               },
               EventId: {},
-              Timestamp: DateTimeOffset_53,
+              Timestamp: DateTimeOffset_35,
               Platform: csharp,
               Release: ReSharperTestRunner@2.6.2.69,
               SentryExceptions: [
@@ -464,75 +319,6 @@ execute sp_executesql @command,
               Level: error,
               TransactionName: sdf,
               Request: {},
-              Contexts: {
-                ThreadPool Info: {
-                  MinWorkerThreads: 16,
-                  MinCompletionPortThreads: 16,
-                  MaxWorkerThreads: 32767,
-                  MaxCompletionPortThreads: 1000,
-                  AvailableWorkerThreads: 32766,
-                  AvailableCompletionPortThreads: 1000
-                },
-                os: {
-                  RawDescription: Microsoft Windows 10.0.19043
-                },
-                Memory Info: {
-                  AllocatedBytes: 22263792,
-                  FragmentedBytes: 11768,
-                  HeapSizeBytes: 2609776,
-                  HighMemoryLoadThresholdBytes: 30821986713,
-                  TotalAvailableMemoryBytes: 34246651904,
-                  MemoryLoadBytes: 10616462090,
-                  TotalCommittedBytes: 10608640,
-                  PromotedBytes: 2402360,
-                  PinnedObjectsCount: 2,
-                  PauseTimePercentage: 1.43,
-                  PauseDurations: [
-                    00:00:00.0065090,
-                    00:00:00
-                  ],
-                  Index: 2,
-                  Generation: 1,
-                  FinalizationPendingCount: 6,
-                  Compacted: true
-                },
-                device: {
-                  Timezone: {
-                    Id: AUS Eastern Standard Time,
-                    DisplayName: (UTC+10:00) Canberra, Melbourne, Sydney,
-                    StandardName: AUS Eastern Standard Time,
-                    DaylightName: AUS Eastern Daylight Time,
-                    BaseUtcOffset: 10:00:00,
-                    SupportsDaylightSavingTime: true
-                  },
-                  BootTime: DateTimeOffset_3
-                },
-                Dynamic Code: {
-                  Compiled: true,
-                  Supported: true
-                },
-                runtime: {
-                  Name: .NET,
-                  Version: 6.0.1,
-                  RawDescription: .NET 6.0.1
-                },
-                Current UI Culture: {
-                  Calendar: GregorianCalendar,
-                  DisplayName: English (United States),
-                  Name: en-US
-                },
-                app: {
-                  StartTime: DateTimeOffset_4
-                },
-                trace: {
-                  Operation: 
-                },
-                Current Culture: {
-                  Calendar: GregorianCalendar,
-                  DisplayName: English (Australia),
-                  Name: en-AU
-                }
-              },
               User: {},
               Environment: production,
               Sdk: {

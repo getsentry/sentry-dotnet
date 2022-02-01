@@ -22,13 +22,14 @@ public class SentryDiagnosticSubscriberTests
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLevel = SentryLevel.Debug
         };
+
+        using var database = await sqlInstance.Build();
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
         using (var sdk = SentrySdk.Init(options))
         {
             var transaction = SentrySdk.StartTransaction("sdf", "sdf");
             SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
             SentrySdk.CaptureException(new Exception("my other error"));
-            using var database = await sqlInstance.Build();
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
             sdk.Dispose();
@@ -40,10 +41,11 @@ public class SentryDiagnosticSubscriberTests
                 _ =>
                 {
                     _.IgnoreMember<SentryEvent>(_ => _.Modules);
-                    _.IgnoreMembers("app","os","device","runtime");
                     _.IgnoreMembers<Span>(
                         _ => _.SpanId,
                         _ => _.ParentSpanId,
+                        _ => _.StartTimestamp,
+                        _ => _.EndTimestamp,
                         _ => _.TraceId
                     );
                     _.IgnoreMembers<Trace>(
