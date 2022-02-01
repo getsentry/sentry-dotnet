@@ -1,4 +1,4 @@
-#if NET6_0_OR_GREATER
+#if NET5_0_OR_GREATER
 using System.Collections.Concurrent;
 using System.Data.Common;
 using LocalDb;
@@ -25,7 +25,7 @@ public class SentryDiagnosticSubscriberTests
 
         await using var database = await sqlInstance.Build();
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
-        using (var sdk = SentrySdk.Init(options))
+        using (SentrySdk.Init(options))
         {
             var transaction = SentrySdk.StartTransaction("sdf", "sdf");
             SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -52,11 +52,11 @@ public class SentryDiagnosticSubscriberTests
                         _ => _.EndTimestamp,
                         _ => _.TraceId
                     );
-                    _.IgnoreMembers<Trace>(
-                        _ => _.SpanId,
-                        _ => _.ParentSpanId,
-                        _ => _.TraceId
-                    );
+                    //_.IgnoreMembers<Trace>(
+                    //    _ => _.SpanId,
+                    //    _ => _.ParentSpanId,
+                    //    _ => _.TraceId
+                    //);
                 });
     }
 
