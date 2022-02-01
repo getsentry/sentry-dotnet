@@ -1,1 +1,204 @@
-﻿
+﻿{
+  Envelopes: [
+    {
+      Header: {
+        event_id: Guid_1,
+        sdk: {
+          name: Sentry,
+          version: 3.13.0
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: event
+          },
+          Payload: {
+            Source: {
+              Exception: {
+                $type: Exception,
+                Type: Exception,
+                Message: my other error
+              },
+              EventId: {},
+              Timestamp: DateTimeOffset_1,
+              Platform: csharp,
+              Release: ReSharperTestRunner@2.6.2.69,
+              SentryExceptions: [
+                {
+                  Type: System.Exception,
+                  Value: my other error,
+                  Module: System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e,
+                  ThreadId: Id_1,
+                  Mechanism: {}
+                }
+              ],
+              SentryThreads: [],
+              Modules: {
+                JetBrains.ReSharper.TestRunner.Abstractions: 2.6.2.0,
+                JetBrains.ReSharper.TestRunner.Adapters.XUnit: 2.6.2.29,
+                JetBrains.ReSharper.TestRunner.Adapters.XUnit.Tasks: 2.6.2.8,
+                JetBrains.ReSharper.TestRunner.Merged: 2.6.2.69,
+                JetBrains.ReSharper.TestRunner.Utilities: 2.6.2.7,
+                LocalDb: 1.0.0.0,
+                Microsoft.AspNetCore.Hosting: 6.0.0.0,
+                Microsoft.AspNetCore.Hosting.Abstractions: 6.0.0.0,
+                Microsoft.Extensions.Configuration.Abstractions: 6.0.0.0,
+                Microsoft.Extensions.DependencyInjection.Abstractions: 6.0.0.0,
+                Microsoft.Win32.Primitives: 6.0.0.0,
+                netstandard: 2.1.0.0,
+                Newtonsoft.Json: 13.0.0.0,
+                ReSharperTestRunner: 2.6.2.69,
+                Sentry: 3.13.0.0,
+                Sentry.Testing: 3.13.0.0,
+                Sentry.Tests: 3.13.0.0,
+                System.Collections: 6.0.0.0,
+                System.Collections.Concurrent: 6.0.0.0,
+                System.Collections.NonGeneric: 6.0.0.0,
+                System.Collections.Specialized: 6.0.0.0,
+                System.ComponentModel: 6.0.0.0,
+                System.ComponentModel.Primitives: 6.0.0.0,
+                System.ComponentModel.TypeConverter: 6.0.0.0,
+                System.Console: 6.0.0.0,
+                System.Data.Common: 6.0.0.0,
+                System.Diagnostics.Debug: 6.0.0.0,
+                System.Diagnostics.DiagnosticSource: 6.0.0.0,
+                System.Diagnostics.Process: 6.0.0.0,
+                System.Diagnostics.StackTrace: 6.0.0.0,
+                System.Diagnostics.TraceSource: 6.0.0.0,
+                System.Diagnostics.Tracing: 6.0.0.0,
+                System.Globalization: 6.0.0.0,
+                System.IO: 6.0.0.0,
+                System.IO.Compression: 6.0.0.0,
+                System.IO.FileSystem: 6.0.0.0,
+                System.IO.FileSystem.Watcher: 6.0.0.0,
+                System.Linq: 6.0.0.0,
+                System.Linq.Expressions: 6.0.0.0,
+                System.Memory: 6.0.0.0,
+                System.Net.Http: 6.0.0.0,
+                System.Net.Mail: 6.0.0.0,
+                System.Net.Primitives: 6.0.0.0,
+                System.Net.Sockets: 6.0.0.0,
+                System.ObjectModel: 6.0.0.0,
+                System.Private.CoreLib: 6.0.0.0,
+                System.Private.Uri: 6.0.0.0,
+                System.Private.Xml: 6.0.0.0,
+                System.Private.Xml.Linq: 6.0.0.0,
+                System.Reflection: 6.0.0.0,
+                System.Reflection.Emit: 6.0.0.0,
+                System.Reflection.Emit.ILGeneration: 6.0.0.0,
+                System.Reflection.Emit.Lightweight: 6.0.0.0,
+                System.Reflection.Extensions: 6.0.0.0,
+                System.Reflection.Metadata: 6.0.0.0,
+                System.Reflection.Primitives: 6.0.0.0,
+                System.Runtime: 6.0.0.0,
+                System.Runtime.Extensions: 6.0.0.0,
+                System.Runtime.InteropServices: 6.0.0.0,
+                System.Runtime.InteropServices.RuntimeInformation: 6.0.0.0,
+                System.Runtime.Loader: 6.0.0.0,
+                System.Runtime.Serialization.Formatters: 6.0.0.0,
+                System.Security.Claims: 6.0.0.0,
+                System.Text.Encoding.Extensions: 6.0.0.0,
+                System.Text.RegularExpressions: 6.0.0.0,
+                System.Threading: 6.0.0.0,
+                System.Threading.Tasks: 6.0.0.0,
+                System.Threading.Thread: 6.0.0.0,
+                System.Threading.ThreadPool: 6.0.0.0,
+                System.Xml.ReaderWriter: 6.0.0.0,
+                System.Xml.XDocument: 6.0.0.0,
+                Verify: 1.0.0.0,
+                Verify.Http: 1.0.0.0,
+                Verify.Xunit: 1.0.0.0,
+                xunit.abstractions: 2.0.0.0,
+                xunit.core: 2.4.1.0,
+                xunit.execution.dotnet: 2.4.1.0,
+                xunit.runner.utility.netstandard15: 2.4.1.0
+              },
+              Level: error,
+              TransactionName: sdf,
+              Request: {},
+              Contexts: {
+                Memory Info: {
+                  AllocatedBytes: 22251528,
+                  FragmentedBytes: 11584,
+                  HeapSizeBytes: 2606680,
+                  HighMemoryLoadThresholdBytes: 30821986713,
+                  TotalAvailableMemoryBytes: 34246651904,
+                  MemoryLoadBytes: 10958928609,
+                  TotalCommittedBytes: 10608640,
+                  PromotedBytes: 2399448,
+                  PinnedObjectsCount: 2,
+                  PauseTimePercentage: 1.25,
+                  PauseDurations: [
+                    00:00:00.0063290,
+                    00:00:00
+                  ],
+                  Index: 2,
+                  Generation: 1,
+                  FinalizationPendingCount: 6,
+                  Compacted: true
+                },
+                os: {
+                  RawDescription: Microsoft Windows 10.0.19043
+                },
+                Current Culture: {
+                  Calendar: GregorianCalendar,
+                  DisplayName: English (Australia),
+                  Name: en-AU
+                },
+                app: {
+                  StartTime: DateTimeOffset_2
+                },
+                ThreadPool Info: {
+                  MinWorkerThreads: 16,
+                  MinCompletionPortThreads: 16,
+                  MaxWorkerThreads: 32767,
+                  MaxCompletionPortThreads: 1000,
+                  AvailableWorkerThreads: 32766,
+                  AvailableCompletionPortThreads: 1000
+                },
+                runtime: {
+                  Name: .NET,
+                  Version: 6.0.1,
+                  RawDescription: .NET 6.0.1
+                },
+                Dynamic Code: {
+                  Compiled: true,
+                  Supported: true
+                },
+                device: {
+                  Timezone: {
+                    Id: AUS Eastern Standard Time,
+                    DisplayName: (UTC+10:00) Canberra, Melbourne, Sydney,
+                    StandardName: AUS Eastern Standard Time,
+                    DaylightName: AUS Eastern Daylight Time,
+                    BaseUtcOffset: 10:00:00,
+                    SupportsDaylightSavingTime: true
+                  },
+                  BootTime: DateTimeOffset_3
+                },
+                Current UI Culture: {
+                  Calendar: GregorianCalendar,
+                  DisplayName: English (United States),
+                  Name: en-US
+                }
+              },
+              User: {},
+              Environment: production,
+              Sdk: {
+                Packages: [
+                  {
+                    Name: nuget:Sentry,
+                    Version: 3.13.0
+                  }
+                ],
+                Name: sentry.dotnet,
+                Version: 3.13.0
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,8 @@
+#if NET6_0_OR_GREATER
+using System.Collections.Concurrent;
 using System.Data.Common;
-using System.Diagnostics;
 using LocalDb;
 using Sentry.Internals.DiagnosticSource;
-using Sentry.Testing;
-using VerifyTests.Http;
 
 [UsesVerify]
 public class SentryDiagnosticSubscriberTests
@@ -15,13 +14,8 @@ public class SentryDiagnosticSubscriberTests
     [Fact]
     public async Task RecordsSql()
     {
-        var httpClient = new MockHttpClient();
-        var options = new SentryOptions
-        {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
-            SentryHttpClientFactory = new DelegateHttpClientFactory(_ => httpClient),
-            DiagnosticLevel = SentryLevel.Debug
-        };
+        var transport = new RecordingTransport();
+        var options = new SentryOptions {TracesSampleRate = .5, Transport = transport, Dsn = DsnSamples.ValidDsnWithoutSecret, DiagnosticLevel = SentryLevel.Debug};
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
         using (var sdk = SentrySdk.Init(options))
         {
@@ -31,10 +25,16 @@ public class SentryDiagnosticSubscriberTests
             using var database = await sqlInstance.Build();
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
+            sdk.Dispose();
             transaction.Finish();
         }
 
-        await Verify(httpClient);
+        await Verify(transport)
+            .ModifySerialization(
+                _ =>
+                {
+                    _.IgnoreMember<SentryEvent>(_ => _.Modules);
+                });
     }
 
     public static class TestDbBuilder
@@ -75,3 +75,18 @@ values ({addData});";
         }
     }
 }
+
+class RecordingTransport : ITransport
+{
+    private ConcurrentBag<Envelope> envelopes = new();
+
+    public IEnumerable<Envelope> Envelopes => envelopes;
+
+    public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        envelopes.Add(envelope);
+        return Task.CompletedTask;
+    }
+}
+
+#endif
