@@ -7,7 +7,7 @@ namespace Sentry.EntityFramework;
 internal class DbInterceptionIntegration : ISdkIntegration
 {
     // Internal for testing.
-    internal IDbInterceptor? SqlInterceptor { get; set; }
+    internal IDbInterceptor? SqlInterceptor { get; private set; }
 
     internal const string SampleRateDisabledMessage = "EF performance won't be collected because TracesSampleRate is set to 0.";
 
