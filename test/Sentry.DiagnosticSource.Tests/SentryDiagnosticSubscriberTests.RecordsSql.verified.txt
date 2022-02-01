@@ -11,6 +11,507 @@
       Items: [
         {
           Header: {
+            type: transaction
+          },
+          Payload: {
+            Source: {
+              EventId: {},
+              SpanId: {},
+              TraceId: {},
+              Name: sdf,
+              Platform: csharp,
+              Release: ReSharperTestRunner@2.6.2.69,
+              StartTimestamp: DateTimeOffset_1,
+              EndTimestamp: DateTimeOffset_2,
+              Operation: sdf,
+              Description: ,
+              Status: UnknownError,
+              IsSampled: true,
+              Request: {},
+              Contexts: {
+                os: {
+                  RawDescription: Microsoft Windows 10.0.19043
+                },
+                trace: {
+                  SpanId: {},
+                  TraceId: {},
+                  Operation: sdf,
+                  Description: ,
+                  Status: UnknownError,
+                  IsSampled: true
+                },
+                runtime: {
+                  Name: .NET,
+                  Version: 6.0.1,
+                  RawDescription: .NET 6.0.1
+                },
+                device: {
+                  BootTime: DateTimeOffset_3
+                },
+                app: {
+                  StartTime: DateTimeOffset_4
+                }
+              },
+              User: {},
+              Environment: production,
+              Sdk: {
+                Packages: [
+                  {
+                    Name: nuget:Sentry,
+                    Version: 3.13.0
+                  }
+                ],
+                Name: sentry.dotnet,
+                Version: 3.13.0
+              },
+              Spans: [
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_5,
+                  EndTimestamp: DateTimeOffset_6,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description:
+
+insert into MyTable (Value)
+values (0);,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_2,
+                    db.operation_id: Guid_3
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_7,
+                  EndTimestamp: DateTimeOffset_8,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_2,
+                    db.operation_id: Guid_3
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_9,
+                  EndTimestamp: DateTimeOffset_10,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description: select Value from MyTable,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_2,
+                    db.operation_id: Guid_4
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_11,
+                  EndTimestamp: DateTimeOffset_12,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_2,
+                    db.operation_id: Guid_4
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_13,
+                  EndTimestamp: DateTimeOffset_14,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description:
+if db_id('SentryDiagnosticSubscriberTests_RecordsSql') is null
+    begin
+       
+create database [SentryDiagnosticSubscriberTests_RecordsSql] on
+(
+    name = [SentryDiagnosticSubscriberTests_RecordsSql],
+    filename = 'C:\localdb\SentryDiagnosticSubscriber\SentryDiagnosticSubscriberTests_RecordsSql.mdf'
+),
+(
+    filename = 'C:\localdb\SentryDiagnosticSubscriber\SentryDiagnosticSubscriberTests_RecordsSql_log.ldf'
+)
+for attach;
+    end;
+else
+    begin
+        alter database [SentryDiagnosticSubscriberTests_RecordsSql] set online;
+    end;
+alter database [SentryDiagnosticSubscriberTests_RecordsSql] set read_write;,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_5,
+                    db.operation_id: Guid_6
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_15,
+                  EndTimestamp: DateTimeOffset_16,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_5,
+                    db.operation_id: Guid_6
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_17,
+                  EndTimestamp: DateTimeOffset_18,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    bytes_received: 53,
+                    bytes_sent : 1302,
+                    db.connection_id: Guid_5,
+                    db.operation_id: Guid_7,
+                    rows_sent: 0
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_19,
+                  EndTimestamp: DateTimeOffset_20,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.operation_id: Guid_7
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_21,
+                  EndTimestamp: DateTimeOffset_22,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description: create table MyTable (Value int);,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_8,
+                    db.operation_id: Guid_9
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_23,
+                  EndTimestamp: DateTimeOffset_24,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_8,
+                    db.operation_id: Guid_9
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_25,
+                  EndTimestamp: DateTimeOffset_26,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    bytes_received: 21,
+                    bytes_sent : 96,
+                    db.connection_id: Guid_8,
+                    db.operation_id: Guid_10,
+                    rows_sent: 0
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_27,
+                  EndTimestamp: DateTimeOffset_28,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.operation_id: Guid_10
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_29,
+                  EndTimestamp: DateTimeOffset_30,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_2,
+                    db.operation_id: Guid_11
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_31,
+                  EndTimestamp: DateTimeOffset_32,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.operation_id: Guid_11
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_33,
+                  EndTimestamp: DateTimeOffset_34,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description:
+if db_id('template') is not null
+begin
+    alter database [template] set single_user with rollback immediate;
+    execute sp_detach_db 'template', 'true';
+end;,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_12,
+                    db.operation_id: Guid_13
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_35,
+                  EndTimestamp: DateTimeOffset_36,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_12,
+                    db.operation_id: Guid_13
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_37,
+                  EndTimestamp: DateTimeOffset_38,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description:
+if db_id('template') is not null
+begin
+  execute sp_detach_db 'template', 'true';
+end;
+create database template on
+(
+    name = template,
+    filename = 'C:\localdb\SentryDiagnosticSubscriber\template.mdf',
+    fileGrowth = 100KB
+)
+log on
+(
+    name = template_log,
+    filename = 'C:\localdb\SentryDiagnosticSubscriber\template_log.ldf',
+    size = 512KB,
+    filegrowth = 100KB
+);,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_12,
+                    db.operation_id: Guid_14
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_39,
+                  EndTimestamp: DateTimeOffset_40,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_12,
+                    db.operation_id: Guid_14
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_41,
+                  EndTimestamp: DateTimeOffset_42,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    bytes_received: 729,
+                    bytes_sent : 1182,
+                    db.connection_id: Guid_12,
+                    db.operation_id: Guid_15,
+                    rows_sent: 3
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_43,
+                  EndTimestamp: DateTimeOffset_44,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.operation_id: Guid_15
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_45,
+                  EndTimestamp: DateTimeOffset_46,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Description:
+declare @command nvarchar(max)
+set @command = ''
+
+select @command = @command
++ '
+    alter database [' + [name] + '] set single_user with rollback immediate;
+    alter database [' + [name] + '] set multi_user;
+    alter database [' + [name] + '] set offline;
+'
+from master.sys.databases
+where [name] not in ('master', 'model', 'msdb', 'tempdb', 'template');
+execute sp_executesql @command,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_5,
+                    db.operation_id: Guid_16
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_47,
+                  EndTimestamp: DateTimeOffset_48,
+                  IsFinished: true,
+                  Operation: db.query,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.connection_id: Guid_5,
+                    db.operation_id: Guid_16
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_49,
+                  EndTimestamp: DateTimeOffset_50,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: Ok,
+                  IsSampled: true,
+                  Extra: {
+                    bytes_received: 91,
+                    bytes_sent : 828,
+                    db.connection_id: Guid_5,
+                    db.operation_id: Guid_17,
+                    rows_sent: 2
+                  }
+                },
+                {
+                  SpanId: {},
+                  ParentSpanId: {},
+                  TraceId: {},
+                  StartTimestamp: DateTimeOffset_51,
+                  EndTimestamp: DateTimeOffset_52,
+                  IsFinished: true,
+                  Operation: db.connection,
+                  Status: DeadlineExceeded,
+                  IsSampled: true,
+                  Extra: {
+                    db.operation_id: Guid_17
+                  }
+                }
+              ],
+              IsFinished: true
+            }
+          }
+        }
+      ]
+    },
+    {
+      Header: {
+        event_id: Guid_18,
+        sdk: {
+          name: Sentry,
+          version: 3.13.0
+        }
+      },
+      Items: [
+        {
+          Header: {
             type: event
           },
           Payload: {
@@ -21,7 +522,7 @@
                 Message: my other error
               },
               EventId: {},
-              Timestamp: DateTimeOffset_1,
+              Timestamp: DateTimeOffset_53,
               Platform: csharp,
               Release: ReSharperTestRunner@2.6.2.69,
               SentryExceptions: [
@@ -34,137 +535,56 @@
                 }
               ],
               SentryThreads: [],
-              Modules: {
-                JetBrains.ReSharper.TestRunner.Abstractions: 2.6.2.0,
-                JetBrains.ReSharper.TestRunner.Adapters.XUnit: 2.6.2.29,
-                JetBrains.ReSharper.TestRunner.Adapters.XUnit.Tasks: 2.6.2.8,
-                JetBrains.ReSharper.TestRunner.Merged: 2.6.2.69,
-                JetBrains.ReSharper.TestRunner.Utilities: 2.6.2.7,
-                LocalDb: 1.0.0.0,
-                Microsoft.AspNetCore.Hosting: 6.0.0.0,
-                Microsoft.AspNetCore.Hosting.Abstractions: 6.0.0.0,
-                Microsoft.Extensions.Configuration.Abstractions: 6.0.0.0,
-                Microsoft.Extensions.DependencyInjection.Abstractions: 6.0.0.0,
-                Microsoft.Win32.Primitives: 6.0.0.0,
-                netstandard: 2.1.0.0,
-                Newtonsoft.Json: 13.0.0.0,
-                ReSharperTestRunner: 2.6.2.69,
-                Sentry: 3.13.0.0,
-                Sentry.Testing: 3.13.0.0,
-                Sentry.Tests: 3.13.0.0,
-                System.Collections: 6.0.0.0,
-                System.Collections.Concurrent: 6.0.0.0,
-                System.Collections.NonGeneric: 6.0.0.0,
-                System.Collections.Specialized: 6.0.0.0,
-                System.ComponentModel: 6.0.0.0,
-                System.ComponentModel.Primitives: 6.0.0.0,
-                System.ComponentModel.TypeConverter: 6.0.0.0,
-                System.Console: 6.0.0.0,
-                System.Data.Common: 6.0.0.0,
-                System.Diagnostics.Debug: 6.0.0.0,
-                System.Diagnostics.DiagnosticSource: 6.0.0.0,
-                System.Diagnostics.Process: 6.0.0.0,
-                System.Diagnostics.StackTrace: 6.0.0.0,
-                System.Diagnostics.TraceSource: 6.0.0.0,
-                System.Diagnostics.Tracing: 6.0.0.0,
-                System.Globalization: 6.0.0.0,
-                System.IO: 6.0.0.0,
-                System.IO.Compression: 6.0.0.0,
-                System.IO.FileSystem: 6.0.0.0,
-                System.IO.FileSystem.Watcher: 6.0.0.0,
-                System.Linq: 6.0.0.0,
-                System.Linq.Expressions: 6.0.0.0,
-                System.Memory: 6.0.0.0,
-                System.Net.Http: 6.0.0.0,
-                System.Net.Mail: 6.0.0.0,
-                System.Net.Primitives: 6.0.0.0,
-                System.Net.Sockets: 6.0.0.0,
-                System.ObjectModel: 6.0.0.0,
-                System.Private.CoreLib: 6.0.0.0,
-                System.Private.Uri: 6.0.0.0,
-                System.Private.Xml: 6.0.0.0,
-                System.Private.Xml.Linq: 6.0.0.0,
-                System.Reflection: 6.0.0.0,
-                System.Reflection.Emit: 6.0.0.0,
-                System.Reflection.Emit.ILGeneration: 6.0.0.0,
-                System.Reflection.Emit.Lightweight: 6.0.0.0,
-                System.Reflection.Extensions: 6.0.0.0,
-                System.Reflection.Metadata: 6.0.0.0,
-                System.Reflection.Primitives: 6.0.0.0,
-                System.Runtime: 6.0.0.0,
-                System.Runtime.Extensions: 6.0.0.0,
-                System.Runtime.InteropServices: 6.0.0.0,
-                System.Runtime.InteropServices.RuntimeInformation: 6.0.0.0,
-                System.Runtime.Loader: 6.0.0.0,
-                System.Runtime.Serialization.Formatters: 6.0.0.0,
-                System.Security.Claims: 6.0.0.0,
-                System.Text.Encoding.Extensions: 6.0.0.0,
-                System.Text.RegularExpressions: 6.0.0.0,
-                System.Threading: 6.0.0.0,
-                System.Threading.Tasks: 6.0.0.0,
-                System.Threading.Thread: 6.0.0.0,
-                System.Threading.ThreadPool: 6.0.0.0,
-                System.Xml.ReaderWriter: 6.0.0.0,
-                System.Xml.XDocument: 6.0.0.0,
-                Verify: 1.0.0.0,
-                Verify.Http: 1.0.0.0,
-                Verify.Xunit: 1.0.0.0,
-                xunit.abstractions: 2.0.0.0,
-                xunit.core: 2.4.1.0,
-                xunit.execution.dotnet: 2.4.1.0,
-                xunit.runner.utility.netstandard15: 2.4.1.0
-              },
               Level: error,
               TransactionName: sdf,
               Request: {},
               Contexts: {
-                Memory Info: {
-                  AllocatedBytes: 22251528,
-                  FragmentedBytes: 11584,
-                  HeapSizeBytes: 2606680,
-                  HighMemoryLoadThresholdBytes: 30821986713,
-                  TotalAvailableMemoryBytes: 34246651904,
-                  MemoryLoadBytes: 10958928609,
-                  TotalCommittedBytes: 10608640,
-                  PromotedBytes: 2399448,
-                  PinnedObjectsCount: 2,
-                  PauseTimePercentage: 1.25,
-                  PauseDurations: [
-                    00:00:00.0063290,
-                    00:00:00
-                  ],
-                  Index: 2,
-                  Generation: 1,
-                  FinalizationPendingCount: 6,
-                  Compacted: true
+                Current UI Culture: {
+                  Calendar: GregorianCalendar,
+                  DisplayName: English (United States),
+                  Name: en-US
                 },
-                os: {
-                  RawDescription: Microsoft Windows 10.0.19043
+                Dynamic Code: {
+                  Compiled: true,
+                  Supported: true
                 },
                 Current Culture: {
                   Calendar: GregorianCalendar,
                   DisplayName: English (Australia),
                   Name: en-AU
                 },
-                app: {
-                  StartTime: DateTimeOffset_2
+                os: {
+                  RawDescription: Microsoft Windows 10.0.19043
                 },
-                ThreadPool Info: {
-                  MinWorkerThreads: 16,
-                  MinCompletionPortThreads: 16,
-                  MaxWorkerThreads: 32767,
-                  MaxCompletionPortThreads: 1000,
-                  AvailableWorkerThreads: 32766,
-                  AvailableCompletionPortThreads: 1000
+                trace: {
+                  SpanId: {},
+                  TraceId: {},
+                  Operation: 
                 },
                 runtime: {
                   Name: .NET,
                   Version: 6.0.1,
                   RawDescription: .NET 6.0.1
                 },
-                Dynamic Code: {
-                  Compiled: true,
-                  Supported: true
+                Memory Info: {
+                  AllocatedBytes: 22241872,
+                  FragmentedBytes: 11664,
+                  HeapSizeBytes: 2606288,
+                  HighMemoryLoadThresholdBytes: 30821986713,
+                  TotalAvailableMemoryBytes: 34246651904,
+                  MemoryLoadBytes: 11643861647,
+                  TotalCommittedBytes: 10608640,
+                  PromotedBytes: 2398976,
+                  PinnedObjectsCount: 2,
+                  PauseTimePercentage: 1.36,
+                  PauseDurations: [
+                    00:00:00.0065450,
+                    00:00:00
+                  ],
+                  Index: 2,
+                  Generation: 1,
+                  FinalizationPendingCount: 6,
+                  Compacted: true
                 },
                 device: {
                   Timezone: {
@@ -177,10 +597,16 @@
                   },
                   BootTime: DateTimeOffset_3
                 },
-                Current UI Culture: {
-                  Calendar: GregorianCalendar,
-                  DisplayName: English (United States),
-                  Name: en-US
+                app: {
+                  StartTime: DateTimeOffset_4
+                },
+                ThreadPool Info: {
+                  MinWorkerThreads: 16,
+                  MinCompletionPortThreads: 16,
+                  MaxWorkerThreads: 32767,
+                  MaxCompletionPortThreads: 1000,
+                  AvailableWorkerThreads: 32766,
+                  AvailableCompletionPortThreads: 1000
                 }
               },
               User: {},

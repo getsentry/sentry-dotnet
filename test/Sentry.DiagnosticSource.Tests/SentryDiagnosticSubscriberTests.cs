@@ -15,7 +15,13 @@ public class SentryDiagnosticSubscriberTests
     public async Task RecordsSql()
     {
         var transport = new RecordingTransport();
-        var options = new SentryOptions {TracesSampleRate = .5, Transport = transport, Dsn = DsnSamples.ValidDsnWithoutSecret, DiagnosticLevel = SentryLevel.Debug};
+        var options = new SentryOptions
+        {
+            TracesSampleRate = .5,
+            Transport = transport,
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLevel = SentryLevel.Debug
+        };
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
         using (var sdk = SentrySdk.Init(options))
         {
