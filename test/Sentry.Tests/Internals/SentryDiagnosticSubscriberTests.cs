@@ -23,7 +23,7 @@ public class SentryDiagnosticSubscriberTests
             DiagnosticLevel = SentryLevel.Debug
         };
 
-        using var database = await sqlInstance.Build();
+        await using var database = await sqlInstance.Build();
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
         using (var sdk = SentrySdk.Init(options))
         {
@@ -35,11 +35,12 @@ public class SentryDiagnosticSubscriberTests
             sdk.Dispose();
             transaction.Finish();
         }
-
-        await Verify(transport)
+        var payloads = transport.Envelopes.SelectMany(x=>x.Items).Select(x=>x.Payload);
+        await Verify(payloads)
             .ModifySerialization(
                 _ =>
                 {
+                    _.IgnoreMembersWithType<Contexts>();
                     _.IgnoreMember<SentryEvent>(_ => _.Modules);
                     _.IgnoreMembers<Span>(
                         _ => _.SpanId,
