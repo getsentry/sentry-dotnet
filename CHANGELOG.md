@@ -11,6 +11,7 @@
 
 ### Fixes
 
+- Reduced the logger noise from EF when not using Performance Monitoring ([#1441](https://github.com/getsentry/sentry-dotnet/pull/1441))
 - Create CachingTransport directories in constructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 
 ## 3.13.0
