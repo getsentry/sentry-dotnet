@@ -16,16 +16,6 @@
       Request: {},
       User: {},
       Environment: production,
-      Sdk: {
-        Packages: [
-          {
-            Name: nuget:Sentry,
-            Version: 3.13.0
-          }
-        ],
-        Name: sentry.dotnet,
-        Version: 3.13.0
-      },
       Spans: [
         {
           IsFinished: true,
@@ -101,17 +91,7 @@ values (0);,
       TransactionName: sdf,
       Request: {},
       User: {},
-      Environment: production,
-      Sdk: {
-        Packages: [
-          {
-            Name: nuget:Sentry,
-            Version: 3.13.0
-          }
-        ],
-        Name: sentry.dotnet,
-        Version: 3.13.0
-      }
+      Environment: production
     }
   }
 ]

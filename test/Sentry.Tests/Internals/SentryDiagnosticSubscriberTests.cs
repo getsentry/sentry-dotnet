@@ -17,7 +17,7 @@ public class SentryDiagnosticSubscriberTests
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
-            TracesSampleRate = .5,
+            TracesSampleRate = 1,
             Transport = transport,
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLevel = SentryLevel.Debug
@@ -32,15 +32,18 @@ public class SentryDiagnosticSubscriberTests
             SentrySdk.CaptureException(new Exception("my other error"));
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
-            sdk.Dispose();
             transaction.Finish();
         }
-        var payloads = transport.Envelopes.SelectMany(x=>x.Items).Select(x=>x.Payload);
+        var payloads = transport.Envelopes
+            .SelectMany(x=>x.Items)
+            .Select(x=>x.Payload)
+            .ToList();
         await Verify(payloads)
             .ModifySerialization(
                 _ =>
                 {
                     _.IgnoreMembersWithType<Contexts>();
+                    _.IgnoreMembersWithType<SdkVersion>();
                     _.IgnoreMember<SentryEvent>(_ => _.Modules);
                     _.IgnoreMembers<Span>(
                         _ => _.SpanId,
