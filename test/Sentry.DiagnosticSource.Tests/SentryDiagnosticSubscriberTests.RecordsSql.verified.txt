@@ -1,15 +1,9 @@
 ﻿[
   {
     Source: {
-      EventId: {},
-      SpanId: {},
-      TraceId: {},
-      Name: sdf,
+      Name: my transaction,
       Platform: csharp,
-      Release: ReSharperTestRunner@2.6.2.69,
-      StartTimestamp: DateTimeOffset_1,
-      EndTimestamp: DateTimeOffset_2,
-      Operation: sdf,
+      Operation: my operation,
       Description: ,
       Status: UnknownError,
       IsSampled: true,
@@ -71,24 +65,19 @@ values (0);,
       Exception: {
         $type: Exception,
         Type: Exception,
-        Message: my other error
+        Message: my exception
       },
-      EventId: {},
-      Timestamp: DateTimeOffset_3,
       Platform: csharp,
-      Release: ReSharperTestRunner@2.6.2.69,
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my other error,
-          Module: System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e,
-          ThreadId: Id_1,
+          Value: my exception,
           Mechanism: {}
         }
       ],
       SentryThreads: [],
       Level: error,
-      TransactionName: sdf,
+      TransactionName: my transaction,
       Request: {},
       User: {},
       Environment: production

@@ -27,16 +27,17 @@ public class SentryDiagnosticSubscriberTests
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
         using (SentrySdk.Init(options))
         {
-            var transaction = SentrySdk.StartTransaction("sdf", "sdf");
+            var transaction = SentrySdk.StartTransaction("my transaction", "my operation");
             SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-            SentrySdk.CaptureException(new Exception("my other error"));
+            SentrySdk.CaptureException(new Exception("my exception"));
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
             transaction.Finish();
         }
+
         var payloads = transport.Envelopes
-            .SelectMany(x=>x.Items)
-            .Select(x=>x.Payload)
+            .SelectMany(x => x.Items)
+            .Select(x => x.Payload)
             .ToList();
         await Verify(payloads)
             .ModifySerialization(
@@ -44,19 +45,12 @@ public class SentryDiagnosticSubscriberTests
                 {
                     _.IgnoreMembersWithType<Contexts>();
                     _.IgnoreMembersWithType<SdkVersion>();
-                    _.IgnoreMember<SentryEvent>(_ => _.Modules);
-                    _.IgnoreMembers<Span>(
-                        _ => _.SpanId,
-                        _ => _.ParentSpanId,
-                        _ => _.StartTimestamp,
-                        _ => _.EndTimestamp,
-                        _ => _.TraceId
-                    );
-                    //_.IgnoreMembers<Trace>(
-                    //    _ => _.SpanId,
-                    //    _ => _.ParentSpanId,
-                    //    _ => _.TraceId
-                    //);
+                    _.IgnoreMembersWithType<DateTimeOffset>();
+                    _.IgnoreMembersWithType<SpanId>();
+                    _.IgnoreMembersWithType<SentryId>();
+                    _.IgnoreMembers<SentryEvent>(_ => _.Modules, _ => _.Release);
+                    _.IgnoreMembers<Transaction>(_ => _.Release);
+                    _.IgnoreMembers<SentryException>(_ => _.Module, _ => _.ThreadId);
                 });
     }
 
