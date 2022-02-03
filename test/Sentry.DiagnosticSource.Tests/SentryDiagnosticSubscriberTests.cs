@@ -28,13 +28,14 @@ public class SentryDiagnosticSubscriberTests
             DiagnosticLevel = SentryLevel.Debug
         };
 
-        using var database = await sqlInstance.Build();
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
-        using (SentrySdk.Init(options))
+
+        using var database = await sqlInstance.Build();
+        using (var hub = new Hub(options))
         {
-            var transaction = SentrySdk.StartTransaction("my transaction", "my operation");
-            SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
-            SentrySdk.CaptureException(new Exception("my exception"));
+            var transaction = hub.StartTransaction("my transaction", "my operation");
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+            hub.CaptureException(new Exception("my exception"));
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
             transaction.Finish();
