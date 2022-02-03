@@ -1,4 +1,4 @@
-#if NET5_0_OR_GREATER
+#if !net461
 using System.Collections.Concurrent;
 using System.Data.Common;
 using LocalDb;
@@ -23,7 +23,7 @@ public class SentryDiagnosticSubscriberTests
             DiagnosticLevel = SentryLevel.Debug
         };
 
-        await using var database = await sqlInstance.Build();
+        using var database = await sqlInstance.Build();
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
         using (SentrySdk.Init(options))
         {
