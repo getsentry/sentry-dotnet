@@ -466,6 +466,32 @@ public class GlobalSessionManagerTests
         persistedSessionUpdate.Should().BeNull();
     }
 
+    [Fact]
+    public SessionUpdate TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured()
+    {
+        // Arrange
+        var expectedCrashMessage = "Invoking CrashedLastRun failed.";
+        var expectedException = new Exception();
+
+        var sut = _fixture.GetSut();
+        _fixture.Options.CrashedLastRun = () => throw expectedException;
+        sut.StartSession();
+
+        // Act
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+        // Assert
+        persistedSessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate.EndStatus.Should().BeNull();
+        _fixture.Logger.Entries.Should().Contain(entry =>
+            entry.Level == SentryLevel.Error &&
+            entry.Message == expectedCrashMessage &&
+            entry.Exception == expectedException);
+        return persistedSessionUpdate;
+    }
+
+    public SessionUpdate TryRecoverPersistedSessionWithExceptionOnLastRun() => TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured();
+
     // A session update (of which the state doesn't matter for the test):
     private static SessionUpdate AnySessionUpdate()
         => new(

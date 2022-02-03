@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Reflection;
 #endif
 using Sentry.Testing;
+using Sentry.Tests;
 
 namespace NotSentry.Tests;
 
@@ -296,7 +297,7 @@ public class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
-    class EvilContext
+    private class EvilContext
     {
         public string Thrower => throw new InvalidDataException();
     }
@@ -880,6 +881,32 @@ public class HubTests
 
         // Assert
         client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+    }
+
+    [Fact]
+    public void StartSession_GlobalSessionManager_ExceptionOnCrashLastRun_CapturesUpdate()
+    {
+        // Arrange
+        var sessionUpdate = new GlobalSessionManagerTests().TryRecoverPersistedSessionWithExceptionOnLastRun();
+        var newSession = new SessionUpdate(Substitute.For<ISession>(), false, default, 0, null);
+
+        var client = Substitute.For<ISentryClient>();
+        var sessionManager = Substitute.For<ISessionManager>();
+        sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
+        sessionManager.StartSession().Returns(newSession);
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
+        }, client, sessionManager);
+
+        // Act
+        hub.StartSession();
+
+        // Assert
+        client.Received().CaptureSession(Arg.Is(sessionUpdate));
+        client.Received().CaptureSession(Arg.Is(newSession));
     }
 
     [Fact]
