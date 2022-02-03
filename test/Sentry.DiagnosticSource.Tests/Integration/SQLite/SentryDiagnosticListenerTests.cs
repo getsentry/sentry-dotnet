@@ -39,7 +39,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
                 _database = new Database();
                 _database.Seed();
             }
-            public ItemsContext NewContext() => new ItemsContext(_database.ContextOptions);
+            public ItemsContext NewContext() => new(_database.ContextOptions);
 
             public ISpan GetSpan()
             {
