@@ -292,10 +292,7 @@ public class SentryTracingMiddlewareTests
                 });
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => throw exception);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => throw exception));
             }));
 
         var client = server.CreateClient();
@@ -328,10 +325,7 @@ public class SentryTracingMiddlewareTests
         var hub = new Hub(options, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
-            .UseSentry(aspNewOptions =>
-            {
-                aspNewOptions.TransactionNameProvider = _ => expectedName;
-            })
+            .UseSentry(aspNewOptions => aspNewOptions.TransactionNameProvider = _ => expectedName)
             .ConfigureServices(services =>
             {
                 services.RemoveAll(typeof(Func<IHub>));
