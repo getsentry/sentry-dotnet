@@ -13,7 +13,7 @@ public class SentryEFCoreListenerTests
     internal const string EFCommandFailed = SentryEFCoreListener.EFCommandFailed;
     internal const string EFConnectionClosed = SentryEFCoreListener.EFConnectionClosed;
 
-    private Func<ISpan, bool> GetValidator(string type)
+    private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
             _ when
@@ -319,7 +319,6 @@ public class SentryEFCoreListenerTests
         // Assert
         Assert.False(exceptionReceived);
     }
-
 
     [Theory]
     [InlineData(EFCommandExecuted)]

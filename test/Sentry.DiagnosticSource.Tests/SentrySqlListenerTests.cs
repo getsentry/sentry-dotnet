@@ -59,7 +59,7 @@ public class SentrySqlListenerTests
     internal const string SqlDataWriteTransactionCommitAfter = SentrySqlListener.SqlDataWriteTransactionCommitAfter;
     internal const string SqlMicrosoftWriteTransactionCommitAfter = SentrySqlListener.SqlMicrosoftWriteTransactionCommitAfter;
 
-    private Func<ISpan, bool> GetValidator(string type)
+    private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
             _ when
