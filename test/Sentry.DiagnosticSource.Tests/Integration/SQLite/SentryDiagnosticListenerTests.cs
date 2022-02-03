@@ -123,9 +123,9 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             for (var j = 0; j < totalCommands; j++)
             {
                 var i = j + 4;
-                context.Items.Add(new Item() { Name = $"Number {i}" });
-                context.Items.Add(new Item() { Name = $"Number2 {i}" });
-                context.Items.Add(new Item() { Name = $"Number3 {i}" });
+                context.Items.Add(new Item { Name = $"Number {i}" });
+                context.Items.Add(new Item { Name = $"Number2 {i}" });
+                context.Items.Add(new Item { Name = $"Number3 {i}" });
                 commands.Add(i * 2);
             }
             // Save before the Transaction creation to avoid storing junk.

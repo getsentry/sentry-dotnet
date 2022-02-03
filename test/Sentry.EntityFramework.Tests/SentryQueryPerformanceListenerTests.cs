@@ -200,7 +200,7 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var integration = new DbInterceptionIntegration();
-        integration.Register(_fixture.Hub, new SentryOptions() { TracesSampleRate = 1 });
+        integration.Register(_fixture.Hub, new SentryOptions { TracesSampleRate = 1 });
 
         // Act
         _ = _fixture.DbContext.TestTable.FirstOrDefault();
@@ -231,7 +231,7 @@ public class SentryQueryPerformanceListenerTests
         hub.GetSpan().Returns((_) => null);
         var logger = Substitute.For<ITestOutputHelper>();
 
-        var options = new SentryOptions()
+        var options = new SentryOptions
         {
             Debug = true,
             DiagnosticLogger = new TestOutputDiagnosticLogger(logger, SentryLevel.Debug)
