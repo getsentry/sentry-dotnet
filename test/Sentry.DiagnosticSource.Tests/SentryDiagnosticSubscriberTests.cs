@@ -12,13 +12,10 @@ public class SentryDiagnosticSubscriberTests
             name: "SentryDiagnosticSubscriber",
             buildTemplate: TestDbBuilder.CreateTable);
 
-    [Fact]
+    [SkippableFact]
     public async Task RecordsSql()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return;
-        }
+        Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {

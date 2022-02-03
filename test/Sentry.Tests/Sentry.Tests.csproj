@@ -39,9 +39,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.11" />
   </ItemGroup>
 
-  <!-- DiagnosticSource -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
-  </ItemGroup>
-
 </Project>
