@@ -98,7 +98,7 @@ values ({addData});";
     }
 }
 
-class RecordingTransport : ITransport
+internal class RecordingTransport : ITransport
 {
     private ConcurrentBag<Envelope> envelopes = new();
 
