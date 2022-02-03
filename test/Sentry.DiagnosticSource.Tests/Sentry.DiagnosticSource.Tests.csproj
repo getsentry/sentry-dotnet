@@ -47,7 +47,6 @@
   <ItemGroup>
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
     <PackageReference Include="LocalDb" Version="13.3.0" />
-    <PackageReference Include="Verify.Http" Version="2.1.0" />
   </ItemGroup>
 
 </Project>
