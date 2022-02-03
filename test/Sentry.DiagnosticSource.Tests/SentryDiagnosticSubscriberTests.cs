@@ -1,6 +1,7 @@
 #if !net461
 using System.Collections.Concurrent;
 using System.Data.Common;
+using System.Runtime.InteropServices;
 using LocalDb;
 using Sentry.Internals.DiagnosticSource;
 
@@ -14,6 +15,10 @@ public class SentryDiagnosticSubscriberTests
     [Fact]
     public async Task RecordsSql()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return;
+        }
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
