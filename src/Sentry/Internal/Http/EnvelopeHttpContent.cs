@@ -17,7 +17,6 @@ namespace Sentry.Internal.Http
         public EnvelopeHttpContent(Envelope envelope, IDiagnosticLogger? logger)
         {
             _envelope = envelope;
-            Headers.ContentType = new MediaTypeHeaderValue("text/plain");
             _logger = logger;
         }
 
