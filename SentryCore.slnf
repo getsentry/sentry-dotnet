@@ -2,6 +2,7 @@
   "solution": {
     "path": "Sentry.sln",
     "projects": [
+      "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
       "test\\Sentry.Tests\\Sentry.Tests.csproj"
