@@ -44,6 +44,10 @@ namespace Sentry.Internals.DiagnosticSource
                 _efInterceptor?.DisableConnectionSpan();
                 _efInterceptor?.DisableQuerySpan();
             }
+            else
+            {
+                throw new(listener.Name);
+            }
         }
 
         /// <summary>
