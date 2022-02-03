@@ -215,7 +215,7 @@ namespace Sentry.Tests.Internals
             Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
         }
 
-        private class NonSerializableValue
+        class NonSerializableValue
         {
             public string Thrower => throw new InvalidDataException();
         }
