@@ -370,7 +370,7 @@ public sealed class SentryTarget : TargetWithContext
         if (logEvent.Level >= Options.MinimumBreadcrumbLevel)
         {
             var breadcrumbFormatted = RenderLogEvent(BreadcrumbLayout, logEvent);
-            string? breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
+            var breadcrumbCategory = RenderLogEvent(BreadcrumbCategory, logEvent);
             if (string.IsNullOrEmpty(breadcrumbCategory))
             {
                 breadcrumbCategory = null;

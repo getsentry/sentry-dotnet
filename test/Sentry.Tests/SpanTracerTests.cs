@@ -6,14 +6,14 @@ public class SpanTracerTests
     public async Task SetExtra_DataInserted_NoDataLoss()
     {
         // Run 20 times to avoid flacky tests scapping.
-        for (int amount = 0; amount < 20; amount++)
+        for (var amount = 0; amount < 20; amount++)
         {
             // Arrange
             var hub = Substitute.For<IHub>();
             var transaction = new SpanTracer(hub, null, null, SentryId.Empty, "");
             var evt = new ManualResetEvent(false);
             var ready = new ManualResetEvent(false);
-            int counter = 0;
+            var counter = 0;
             // Act
             var tasks = Enumerable.Range(1, 4).Select(_ => Task.Run(() =>
             {
@@ -25,7 +25,7 @@ public class SpanTracerTests
                 }
                 evt.WaitOne();
 
-                for (int i = 0; i < amount; i++)
+                for (var i = 0; i < amount; i++)
                 {
                     transaction.SetExtra(Guid.NewGuid().ToString(), Guid.NewGuid());
                 }

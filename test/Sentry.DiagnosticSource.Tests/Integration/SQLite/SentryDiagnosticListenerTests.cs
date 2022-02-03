@@ -120,7 +120,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             var context = _fixture.NewContext();
             var commands = new List<int>();
             var totalCommands = 50;
-            for (int j = 0; j < totalCommands; j++)
+            for (var j = 0; j < totalCommands; j++)
             {
                 var i = j + 4;
                 context.Items.Add(new Item() { Name = $"Number {i}" });

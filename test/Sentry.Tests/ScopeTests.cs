@@ -237,7 +237,7 @@ public class ScopeTests
         // Arrange
         var scope = new Scope();
 
-        for (int i = 0; i < 5; i++)
+        for (var i = 0; i < 5; i++)
         {
             scope.AddAttachment(new MemoryStream(1_000), Guid.NewGuid().ToString());
         }
@@ -262,7 +262,7 @@ public class ScopeTests
         // Arrange
         var scope = new Scope(new SentryOptions { MaxBreadcrumbs = maxBreadcrumbs });
 
-        for (int i = 0; i < initialCount; i++)
+        for (var i = 0; i < initialCount; i++)
         {
             scope.AddBreadcrumb(new Breadcrumb());
         }

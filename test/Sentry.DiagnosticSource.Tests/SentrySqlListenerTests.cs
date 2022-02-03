@@ -384,7 +384,7 @@ public class SentrySqlListenerTests
         // Arrange
         var hub = _fixture.Hub;
         var interceptor = new SentrySqlListener(hub, _fixture.Options);
-        int maxItems = 8;
+        var maxItems = 8;
         var query = "SELECT * FROM ...";
         var connectionsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
         var connectionOperationsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
@@ -393,7 +393,7 @@ public class SentrySqlListenerTests
         var queryOperations2Ids = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
         var evt = new ManualResetEvent(false);
         var ready = new ManualResetEvent(false);
-        int counter = 0;
+        var counter = 0;
 
         // Act
         var taskList = Enumerable.Range(1, maxItems).Select(_ => Task.Run(() =>
