@@ -105,10 +105,11 @@ public class ScopeTests
     public void TransactionName_TransactionNotStarted_NameIsSet()
     {
         // Arrange
-        var scope = new Scope();
-
-        // Act
-        scope.TransactionName = "foo";
+        var scope = new Scope
+        {
+            // Act
+            TransactionName = "foo"
+        };
 
         // Assert
         scope.TransactionName.Should().Be("foo");
@@ -119,11 +120,12 @@ public class ScopeTests
     public void TransactionName_TransactionStarted_NameIsSetAndOverwritten()
     {
         // Arrange
-        var scope = new Scope();
-        scope.Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_");
-
-        // Act
-        scope.TransactionName = "foo";
+        var scope = new Scope
+        {
+            Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_"),
+            // Act
+            TransactionName = "foo"
+        };
 
         // Assert
         scope.TransactionName.Should().Be("foo");
@@ -134,11 +136,12 @@ public class ScopeTests
     public void TransactionName_TransactionStarted_NameIsSetToNullCoercedToEmpty()
     {
         // Arrange
-        var scope = new Scope();
-        scope.Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_");
-
-        // Act
-        scope.TransactionName = null;
+        var scope = new Scope
+        {
+            Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_"),
+            // Act
+            TransactionName = null
+        };
 
         // Assert
         scope.TransactionName.Should().BeNullOrEmpty();
@@ -149,12 +152,12 @@ public class ScopeTests
     public void TransactionName_TransactionStarted_NameReturnsActualTransactionName()
     {
         // Arrange
-        var scope = new Scope();
-
-        scope.TransactionName = "bar";
-
-        // Act
-        scope.Transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var scope = new Scope
+        {
+            TransactionName = "bar",
+            // Act
+            Transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_")
+        };
 
         // Assert
         scope.TransactionName.Should().Be("foo");

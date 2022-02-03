@@ -49,8 +49,10 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 
             public ITransaction StartTransaction(IHub hub, ITransactionContext context)
             {
-                var transaction = new TransactionTracer(hub, context);
-                transaction.IsSampled = true;
+                var transaction = new TransactionTracer(hub, context)
+                {
+                    IsSampled = true
+                };
                 var (currentScope, _) = ScopeManager.GetCurrent();
                 currentScope.Transaction = transaction;
                 return transaction;

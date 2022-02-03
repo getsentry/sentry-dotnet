@@ -120,8 +120,10 @@ public class SentrySqlListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope();
-            _scope.Transaction = Tracer;
+            _scope = new Scope
+            {
+                Transaction = Tracer
+            };
             Hub = Substitute.For<IHub>();
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
