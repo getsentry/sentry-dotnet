@@ -427,11 +427,11 @@ public class SentrySqlListenerTests
         // 1 connection span and 1 query span, executed twice for 11 threads.
         _fixture.Spans.Should().HaveCount(2 * 2 * maxItems);
 
-        var openSpans = _fixture.Spans.Where(span => span.IsFinished is false);
-        var closedSpans = _fixture.Spans.Where(span => span.IsFinished is true);
         var connectionSpans = _fixture.Spans.Where(span => span.Operation is "db.connection");
         var closedConnectionSpans = connectionSpans.Where(span => span.IsFinished);
         var querySpans = _fixture.Spans.Where(span => span.Operation is "db.query");
+        var openSpans = _fixture.Spans.Where(span => !span.IsFinished);
+        var closedSpans = _fixture.Spans.Where(span => span.IsFinished);
 
         // We have two connections per thread, despite having the same ConnectionId, both will be closed.
         closedConnectionSpans.Should().HaveCount(2 * maxItems);
