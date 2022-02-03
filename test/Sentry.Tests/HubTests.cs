@@ -296,7 +296,7 @@ public class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
-    class EvilContext
+    private class EvilContext
     {
         public string Thrower => throw new InvalidDataException();
     }
