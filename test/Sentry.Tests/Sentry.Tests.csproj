@@ -8,8 +8,6 @@
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
     <PackageReference Include="LocalDb" Version="13.3.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
   </ItemGroup>
 
   <!-- Run netcoreapp3.1 against netcoreapp3.0 target of Sentry -->
