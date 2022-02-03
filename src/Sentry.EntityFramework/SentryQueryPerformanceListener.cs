@@ -68,9 +68,10 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
                 span.Finish(interceptionContext.Exception);
             }
         }
-        else
+        //Only log if there was a transaction on the Hub.
+        else if (_options.DiagnosticLevel == SentryLevel.Debug && _hub.GetSpan() is { })
         {
-            _options.DiagnosticLogger?.LogWarning("Span with key {0} was not found on interceptionContext.", key);
+            _options.DiagnosticLogger?.LogDebug("Span with key {0} was not found on interceptionContext.", key);
         }
     }
 }
