@@ -27,8 +27,6 @@ public class JsonTests
         }
     }
 
-    private static SentryJsonConverter GetConverter() => new();
-
     private class DataAndNonSerializableObject<T>
     {
         /// <summary>
