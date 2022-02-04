@@ -212,7 +212,9 @@ public class JsonTests
 
     private class NonSerializableValue
     {
+#pragma warning disable CA1822 // Mark members as static
         public string Thrower => throw new InvalidDataException();
+#pragma warning restore CA1822
     }
 
     [Fact]
@@ -237,7 +239,7 @@ public class JsonTests
         // Assert
         logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
-                Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
 #else
             Arg.Any<InvalidDataException>(),
 #endif
