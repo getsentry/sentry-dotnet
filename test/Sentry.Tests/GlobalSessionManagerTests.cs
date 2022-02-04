@@ -290,14 +290,17 @@ public class GlobalSessionManagerTests
     {
         // Arrange
         var sut = _fixture.GetSut();
+        var clockBefore = (_fixture.Clock ?? SystemClock.Clock).GetUtcNow();
 
         var sessionUpdate = sut.StartSession();
+        var clockAfter = (_fixture.Clock ?? SystemClock.Clock).GetUtcNow();
 
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
         // Assert
         sessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Abnormal);
         persistedSessionUpdate.Should().NotBeNull();
         persistedSessionUpdate.Should().BeEquivalentTo(sessionUpdate, o =>
         {
@@ -310,13 +313,20 @@ public class GlobalSessionManagerTests
             return o;
         });
         persistedSessionUpdate!.IsInitial.Should().BeFalse();
-        persistedSessionUpdate!.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
-        persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration,
-            "Ok what broke: duration ticks is even? {0}, what about {1} and {2}",
-            persistedSessionUpdate!.Duration.Ticks == sessionUpdate!.Duration.Ticks,
-            persistedSessionUpdate!.Duration,
-            sessionUpdate!.Duration);
+        persistedSessionUpdate!.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp,
+            "time is even {0} is even to {1} ? {2}",
+            clockBefore,
+            clockAfter,
+            clockAfter.Ticks == clockBefore.Ticks);
         persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
+
+        var persistedSessionDuration = persistedSessionUpdate!.Duration;
+        var sessionUpdateDuration = sessionUpdate!.Duration;
+        persistedSessionDuration.Should().BeGreaterThan(sessionUpdateDuration,
+            "Ok what broke: duration ticks is even? {0}, what about {1} and {2}",
+            persistedSessionDuration.Ticks == sessionUpdateDuration.Ticks,
+            persistedSessionDuration,
+            sessionUpdateDuration);
     }
 
     [Fact]
