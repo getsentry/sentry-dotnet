@@ -311,7 +311,11 @@ public class GlobalSessionManagerTests
         });
         persistedSessionUpdate!.IsInitial.Should().BeFalse();
         persistedSessionUpdate!.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
-        persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
+        persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration,
+            "Ok what broke: duration ticks is even? {0}, what about {1} and {2}",
+            persistedSessionUpdate!.Duration.Ticks == sessionUpdate!.Duration.Ticks,
+            persistedSessionUpdate!.Duration,
+            sessionUpdate!.Duration);
         persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
     }
 
