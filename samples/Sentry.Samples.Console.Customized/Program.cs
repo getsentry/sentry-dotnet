@@ -189,7 +189,7 @@ internal static class Program
             evt.AddBreadcrumb("Breadcrumb directly to the event");
             evt.User.Username = "some@user";
             // Group all events with the following fingerprint:
-            evt.SetFingerprint(new[] { "NewClientDebug" });
+            evt.SetFingerprint("NewClientDebug");
             evt.Level = SentryLevel.Debug;
             SentrySdk.CaptureEvent(evt);
 
