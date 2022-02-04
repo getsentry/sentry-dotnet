@@ -293,8 +293,15 @@ public class GlobalSessionManagerTests
         // Arrange
         var sut = _fixture.GetSut();
 
+        var time = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns((_) =>
+        {
+            time = time.AddSeconds(1);
+            return time;
+        });
+
         var sessionUpdate = sut.StartSession();
-        _fixture.Clock.GetUtcNow().Returns(DateTimeOffset.Now.AddSeconds(1));
+
         // Act
         var persistedSessionUpdate = sut.TryRecoverPersistedSession();
 
