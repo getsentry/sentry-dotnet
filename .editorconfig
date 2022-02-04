@@ -186,4 +186,5 @@ csharp_new_line_before_members_in_anonymous_types = true
 csharp_new_line_between_query_expression_clauses = true
 dotnet_diagnostic.RCS1118.severity = silent
 dotnet_diagnostic.RCS1080.severity = silent
+dotnet_diagnostic.RCS1110.severity = silent
 
