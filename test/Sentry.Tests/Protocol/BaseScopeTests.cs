@@ -2,7 +2,7 @@ namespace Sentry.Tests.Protocol;
 
 public class BaseScopeTests
 {
-    private readonly Scope _sut = new Scope(new SentryOptions());
+    private readonly Scope _sut = new(new SentryOptions());
 
     [Fact]
     public void Fingerprint_ByDefault_ReturnsEmptyEnumerable()

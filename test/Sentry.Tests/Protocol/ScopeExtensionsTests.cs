@@ -8,7 +8,7 @@ public class ScopeExtensionsTests
     {
         public SentryOptions ScopeOptions { get; set; } = new();
 
-        public Scope GetSut() => new Scope(ScopeOptions);
+        public Scope GetSut() => new(ScopeOptions);
     }
 
     private readonly Fixture _fixture = new();

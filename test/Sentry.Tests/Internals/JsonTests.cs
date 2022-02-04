@@ -29,7 +29,7 @@ namespace Sentry.Tests.Internals
                 }
             }
 
-            public SentryJsonConverter GetConverter() => new SentryJsonConverter();
+            public SentryJsonConverter GetConverter() => new();
         }
 
         private class DataAndNonSerializableObject<T>
