@@ -38,6 +38,21 @@ jobs:
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: '2.1.818'
+        - name: Setup .NET SDK (v3.1)
+          if: matrix.os == 'windows-2022'
+          uses: actions/setup-dotnet@v1
+          with:
+            dotnet-version: '3.1.x'
+        - name: Setup .NET SDK (v5.0)
+          if: matrix.os == 'windows-2022'
+          uses: actions/setup-dotnet@v1
+          with:
+            dotnet-version: '5.0.x'
+        - name: Setup .NET SDK (v6.0)
+          if: matrix.os == 'windows-2022'
+          uses: actions/setup-dotnet@v1
+          with:
+            dotnet-version: '6.0.x'
 
         - name: Setup .NET SDK (v6.0)
           if: matrix.os == 'macos-latest'
