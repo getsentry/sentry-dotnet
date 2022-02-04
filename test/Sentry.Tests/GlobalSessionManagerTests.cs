@@ -293,11 +293,11 @@ public class GlobalSessionManagerTests
         // Arrange
         var sut = _fixture.GetSut();
 
-        var time = DateTimeOffset.Now;
+        var timeOffset = DateTimeOffset.Now;
         _fixture.Clock.GetUtcNow().Returns((_) =>
         {
-            time = time.AddSeconds(1);
-            return time;
+            timeOffset = timeOffset.AddSeconds(1);
+            return timeOffset;
         });
 
         var sessionUpdate = sut.StartSession();
