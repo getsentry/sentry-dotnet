@@ -17,9 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-2022, macos-latest]
         include:
-          - os: windows-latest
+          - os: windows-2022
             build_script: .\build.ps1
           - os: ubuntu-latest
             build_script: ./build.sh
@@ -65,7 +65,7 @@ jobs:
 
         - name: Archive Artifacts
           # only the ps1 script packages the SDK
-          if: matrix.os == 'windows-latest'
+          if: matrix.os == 'windows-2022'
           uses: actions/upload-artifact@v2
           with:
             name: ${{ github.sha }}
