@@ -510,7 +510,7 @@ public class SentryTargetTests
         var logFactory = new LogFactory();
         var logConfig = new LoggingConfiguration(logFactory)
         {
-            Variables = {["mydsn"] = expectedDsn}
+            Variables = { ["mydsn"] = expectedDsn }
         };
         logConfig.AddRuleForAllLevels(target);
         logFactory.Configuration = logConfig;

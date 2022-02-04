@@ -140,7 +140,7 @@ public class MainExceptionProcessorTests
         var sut = _fixture.GetSut();
         var ex = new Exception
         {
-            Data = {[new object()] = new object()}
+            Data = { [new object()] = new object() }
         };
 
         var actual = sut.CreateSentryException(ex);
