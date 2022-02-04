@@ -106,7 +106,7 @@ public class MainSentryEventProcessorTests
     {
         //Arrange
         var evt = new SentryEvent();
-        var @ip = "192.0.0.1";
+        var ip = "192.0.0.1";
         evt.User.IpAddress = ip;
 
         _fixture.SentryOptions.SendDefaultPii = true;

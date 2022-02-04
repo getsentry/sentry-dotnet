@@ -44,12 +44,12 @@ namespace Sentry.Tests.Internals
             {
                 Id = id;
                 Data = data;
-                @Object = obj;
+                Object = obj;
             }
 
             public int Id { get; set; }
             public string Data { get; set; }
-            public T @Object { get; set; }
+            public T Object { get; set; }
         }
 
         private class ExceptionMock
