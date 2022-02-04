@@ -59,7 +59,7 @@ public class SentrySqlListenerTests
     internal const string SqlDataWriteTransactionCommitAfter = SentrySqlListener.SqlDataWriteTransactionCommitAfter;
     internal const string SqlMicrosoftWriteTransactionCommitAfter = SentrySqlListener.SqlMicrosoftWriteTransactionCommitAfter;
 
-    private Func<ISpan, bool> GetValidator(string type)
+    private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
             _ when
@@ -120,8 +120,10 @@ public class SentrySqlListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope();
-            _scope.Transaction = Tracer;
+            _scope = new Scope
+            {
+                Transaction = Tracer
+            };
             Hub = Substitute.For<IHub>();
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
@@ -268,7 +270,6 @@ public class SentrySqlListenerTests
         Assert.Equal(query, commandSpan.Description);
     }
 
-
     [Theory]
     [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand)]
     [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand)]
@@ -384,7 +385,7 @@ public class SentrySqlListenerTests
         // Arrange
         var hub = _fixture.Hub;
         var interceptor = new SentrySqlListener(hub, _fixture.Options);
-        int maxItems = 8;
+        var maxItems = 8;
         var query = "SELECT * FROM ...";
         var connectionsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
         var connectionOperationsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
@@ -393,7 +394,7 @@ public class SentrySqlListenerTests
         var queryOperations2Ids = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
         var evt = new ManualResetEvent(false);
         var ready = new ManualResetEvent(false);
-        int counter = 0;
+        var counter = 0;
 
         // Act
         var taskList = Enumerable.Range(1, maxItems).Select(_ => Task.Run(() =>
@@ -426,11 +427,11 @@ public class SentrySqlListenerTests
         // 1 connection span and 1 query span, executed twice for 11 threads.
         _fixture.Spans.Should().HaveCount(2 * 2 * maxItems);
 
-        var openSpans = _fixture.Spans.Where(span => span.IsFinished is false);
-        var closedSpans = _fixture.Spans.Where(span => span.IsFinished is true);
-        var connectionSpans = _fixture.Spans.Where(span => span.Operation is "db.connection");
-        var closedConnectionSpans = connectionSpans.Where(span => span.IsFinished);
-        var querySpans = _fixture.Spans.Where(span => span.Operation is "db.query");
+        var openSpans = _fixture.Spans.Where(span => !span.IsFinished);
+        var closedSpans = _fixture.Spans.Where(span => span.IsFinished);
+        var connectionSpans = _fixture.Spans.Where(span => span.Operation is "db.connection").ToList();
+        var closedConnectionSpans = connectionSpans.Where(span => span.IsFinished).ToList();
+        var querySpans = _fixture.Spans.Where(span => span.Operation is "db.query").ToList();
 
         // We have two connections per thread, despite having the same ConnectionId, both will be closed.
         closedConnectionSpans.Should().HaveCount(2 * maxItems);

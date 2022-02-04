@@ -9,7 +9,7 @@ namespace Sentry.EntityFramework.Tests
         {
             // Arrange
             var logger = Substitute.For<ITestOutputHelper>();
-            var options = new SentryOptions()
+            var options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = new TestOutputDiagnosticLogger(logger, SentryLevel.Debug),

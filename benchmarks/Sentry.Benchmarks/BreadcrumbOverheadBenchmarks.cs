@@ -29,7 +29,7 @@ public class BreadcrumbOverheadBenchmarks
     [Benchmark(Baseline = true, Description = "Disabled SDK: Add breadcrumbs")]
     public void DisabledClient_AddBreadcrumb()
     {
-        for (int i = 0; i < BreadcrumbsCount; i++)
+        for (var i = 0; i < BreadcrumbsCount; i++)
         {
             SentrySdk.AddBreadcrumb(
                 Message,
@@ -43,7 +43,7 @@ public class BreadcrumbOverheadBenchmarks
     [Benchmark(Description = "Enabled SDK: Add breadcrumbs")]
     public void EnabledClient_AddBreadcrumb()
     {
-        for (int i = 0; i < BreadcrumbsCount; i++)
+        for (var i = 0; i < BreadcrumbsCount; i++)
         {
             SentrySdk.AddBreadcrumb(
                 Message,
@@ -59,7 +59,7 @@ public class BreadcrumbOverheadBenchmarks
     {
         using (SentrySdk.PushScope())
         {
-            for (int i = 0; i < BreadcrumbsCount; i++)
+            for (var i = 0; i < BreadcrumbsCount; i++)
             {
                 SentrySdk.AddBreadcrumb(
                     Message,
@@ -76,7 +76,7 @@ public class BreadcrumbOverheadBenchmarks
     {
         using (SentrySdk.PushScope())
         {
-            for (int i = 0; i < BreadcrumbsCount; i++)
+            for (var i = 0; i < BreadcrumbsCount; i++)
             {
                 SentrySdk.AddBreadcrumb(
                     Message,
@@ -87,5 +87,4 @@ public class BreadcrumbOverheadBenchmarks
             }
         }
     }
-
 }
