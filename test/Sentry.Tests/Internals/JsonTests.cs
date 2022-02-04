@@ -153,7 +153,7 @@ public class JsonTests
             "{" +
             "\"Id\":1," +
             "\"Data\":\"1234\"," +
-            $"\"Object\":null" + //This type has no Full Name.
+            "\"Object\":null" + //This type has no Full Name.
             "}";
 
         // Act
