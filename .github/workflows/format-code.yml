@@ -8,8 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install dotnet-format
-        run: dotnet tool install -g dotnet-format
       - name: Format Code
         run: dotnet format Sentry.sln
       
