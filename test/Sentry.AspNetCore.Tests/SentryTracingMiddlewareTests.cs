@@ -125,10 +125,7 @@ public class SentryTracingMiddlewareTests
                 app.UseRouting();
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => Task.CompletedTask);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
             }));
 
         var client = server.CreateClient();
@@ -229,10 +226,7 @@ public class SentryTracingMiddlewareTests
                 app.UseRouting();
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => Task.CompletedTask);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
             }));
 
         var client = server.CreateClient();

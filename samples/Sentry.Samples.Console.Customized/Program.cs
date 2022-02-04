@@ -98,10 +98,7 @@ internal static class Program
             };
 
             // Access to the HttpClient created to serve the SentryClint
-            o.ConfigureClient = client =>
-            {
-                client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
-            };
+            o.ConfigureClient = client => client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
 
             // Control/override how to apply the State object into the scope
             o.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
