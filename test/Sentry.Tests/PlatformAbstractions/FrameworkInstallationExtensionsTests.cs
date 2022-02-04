@@ -44,7 +44,6 @@ public class FrameworkInstallationExtensionsTests
         Assert.Equal(expectedShortVersion, version);
     }
 
-
     [Fact]
     public void GetVersionNumber_ValidVersionAndNullShortVersion_NullVersion()
     {

@@ -218,7 +218,6 @@ public class MainExceptionProcessorTests
                 { "Data2", "Something broke again." }
             });
 
-
         //Act
         ex.AddSentryContext(expectedContext1.Key, expectedContext1.Value);
         ex.AddSentryContext(expectedContext2.Key, expectedContext2.Value);
