@@ -51,15 +51,20 @@ public class SentryEFCoreListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope();
-            _scope.Transaction = Tracer;
+            _scope = new Scope
+            {
+                Transaction = Tracer
+            };
 
             var logger = Substitute.For<IDiagnosticLogger>();
             logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-            Options = new SentryOptions { TracesSampleRate = 1.0 };
-            Options.Debug = true;
-            Options.DiagnosticLogger = logger;
+            Options = new SentryOptions
+            {
+                TracesSampleRate = 1.0,
+                Debug = true,
+                DiagnosticLogger = logger
+            };
             Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
             Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
             {

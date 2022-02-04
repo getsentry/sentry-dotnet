@@ -508,8 +508,10 @@ public class SentryTargetTests
         var target = (SentryTarget)_fixture.GetTarget();
         target.Dsn = "${var:mydsn}";
         var logFactory = new LogFactory();
-        var logConfig = new LoggingConfiguration(logFactory);
-        logConfig.Variables["mydsn"] = expectedDsn;
+        var logConfig = new LoggingConfiguration(logFactory)
+        {
+            Variables = {["mydsn"] = expectedDsn}
+        };
         logConfig.AddRuleForAllLevels(target);
         logFactory.Configuration = logConfig;
         Assert.Equal(expectedDsn, target.Options.Dsn);

@@ -49,8 +49,10 @@ public class FrameworkInstallationExtensionsTests
     public void GetVersionNumber_ValidVersionAndNullShortVersion_NullVersion()
     {
         //Arrange
-        var frameworkInstallation = new FrameworkInstallation();
-        frameworkInstallation.Version = new Version("1.2");
+        var frameworkInstallation = new FrameworkInstallation
+        {
+            Version = new Version("1.2")
+        };
 
         //Act
         var version = frameworkInstallation.GetVersionNumber();
@@ -63,8 +65,10 @@ public class FrameworkInstallationExtensionsTests
     public void GetVersionNumber_ValidMinorMajorVersionAndNullShortVersion_NullVersion()
     {
         //Arrange
-        var frameworkInstallation = new FrameworkInstallation();
-        frameworkInstallation.Version = new Version(1, 2);
+        var frameworkInstallation = new FrameworkInstallation
+        {
+            Version = new Version(1, 2)
+        };
 
         //Act
         var version = frameworkInstallation.GetVersionNumber();
