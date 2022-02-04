@@ -8,9 +8,17 @@ using Sentry.Internals.DiagnosticSource;
 [UsesVerify]
 public class SentryDiagnosticSubscriberTests
 {
-    private static SqlInstance sqlInstance = new(
-            name: "SentryDiagnosticSubscriber",
-            buildTemplate: TestDbBuilder.CreateTable);
+    private static SqlInstance sqlInstance = null!;
+
+    static SentryDiagnosticSubscriberTests()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            sqlInstance = new SqlInstance(
+                name: "SentryDiagnosticSubscriber",
+                buildTemplate: TestDbBuilder.CreateTable);
+        }
+    }
 
     [SkippableFact]
     public async Task RecordsSql()
