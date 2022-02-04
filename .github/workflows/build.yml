@@ -15,9 +15,9 @@ jobs:
       DOTNET_NOLOGO: 1
       DOTNET_MULTILEVEL_LOOKUP: 1
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest]
         include:
           - os: windows-latest
             build_script: .\build.ps1
