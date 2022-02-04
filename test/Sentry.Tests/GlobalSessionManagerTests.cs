@@ -314,8 +314,8 @@ public class GlobalSessionManagerTests
         });
         persistedSessionUpdate!.IsInitial.Should().BeFalse();
         persistedSessionUpdate!.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
-        persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
         persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
+        persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
     }
 
     [Fact]
