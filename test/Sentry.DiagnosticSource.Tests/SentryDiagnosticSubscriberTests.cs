@@ -16,6 +16,7 @@ public class SentryDiagnosticSubscriberTests
     public async Task RecordsSql()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
@@ -27,7 +28,7 @@ public class SentryDiagnosticSubscriberTests
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await sqlInstance.Build();
+        using var database = await sqlInstance.Build(databaseSuffix: Namer.RuntimeAndVersion);
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
