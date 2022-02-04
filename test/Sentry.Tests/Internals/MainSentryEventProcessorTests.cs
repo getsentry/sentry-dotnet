@@ -106,7 +106,7 @@ public class MainSentryEventProcessorTests
     {
         //Arrange
         var evt = new SentryEvent();
-        var @ip = "192.0.0.1";
+        var ip = "192.0.0.1";
         evt.User.IpAddress = ip;
 
         _fixture.SentryOptions.SendDefaultPii = true;
@@ -368,7 +368,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         // Don't allow any assembly with a + (sha commit is added to informational version)
-        Assert.DoesNotContain(evt.Modules, x => x.Value.Contains("+"));
+        Assert.DoesNotContain(evt.Modules, x => x.Value.Contains('+'));
     }
 
     [Fact]
@@ -380,7 +380,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         // Ensure at least 1 assembly with a + (sha commit is added to informational version)
-        Assert.Contains(evt.Modules, x => x.Value.Contains("+"));
+        Assert.Contains(evt.Modules, x => x.Value.Contains('+'));
     }
 
     [Fact]

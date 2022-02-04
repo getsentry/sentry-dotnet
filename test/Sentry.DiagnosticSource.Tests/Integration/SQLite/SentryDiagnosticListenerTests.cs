@@ -39,7 +39,7 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
                 _database = new Database();
                 _database.Seed();
             }
-            public ItemsContext NewContext() => new ItemsContext(_database.ContextOptions);
+            public ItemsContext NewContext() => new(_database.ContextOptions);
 
             public ISpan GetSpan()
             {
@@ -49,8 +49,10 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 
             public ITransaction StartTransaction(IHub hub, ITransactionContext context)
             {
-                var transaction = new TransactionTracer(hub, context);
-                transaction.IsSampled = true;
+                var transaction = new TransactionTracer(hub, context)
+                {
+                    IsSampled = true
+                };
                 var (currentScope, _) = ScopeManager.GetCurrent();
                 currentScope.Transaction = transaction;
                 return transaction;
@@ -120,12 +122,12 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             var context = _fixture.NewContext();
             var commands = new List<int>();
             var totalCommands = 50;
-            for (int j = 0; j < totalCommands; j++)
+            for (var j = 0; j < totalCommands; j++)
             {
                 var i = j + 4;
-                context.Items.Add(new Item() { Name = $"Number {i}" });
-                context.Items.Add(new Item() { Name = $"Number2 {i}" });
-                context.Items.Add(new Item() { Name = $"Number3 {i}" });
+                context.Items.Add(new Item { Name = $"Number {i}" });
+                context.Items.Add(new Item { Name = $"Number2 {i}" });
+                context.Items.Add(new Item { Name = $"Number3 {i}" });
                 commands.Add(i * 2);
             }
             // Save before the Transaction creation to avoid storing junk.

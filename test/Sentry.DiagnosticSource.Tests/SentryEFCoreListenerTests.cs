@@ -13,7 +13,7 @@ public class SentryEFCoreListenerTests
     internal const string EFCommandFailed = SentryEFCoreListener.EFCommandFailed;
     internal const string EFConnectionClosed = SentryEFCoreListener.EFConnectionClosed;
 
-    private Func<ISpan, bool> GetValidator(string type)
+    private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
             _ when
@@ -51,19 +51,24 @@ public class SentryEFCoreListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope();
-            _scope.Transaction = Tracer;
+            _scope = new Scope
+            {
+                Transaction = Tracer
+            };
 
             var logger = Substitute.For<IDiagnosticLogger>();
             logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-            Options = new SentryOptions { TracesSampleRate = 1.0 };
-            Options.Debug = true;
-            Options.DiagnosticLogger = logger;
+            Options = new SentryOptions
+            {
+                TracesSampleRate = 1.0,
+                Debug = true,
+                DiagnosticLogger = logger
+            };
             Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
             Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
             {
-                Spans.LastOrDefault(s => s.IsFinished is false)?.Finish(SpanStatus.InternalError);
+                Spans.LastOrDefault(s => !s.IsFinished)?.Finish(SpanStatus.InternalError);
                 return SentryId.Empty;
             });
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
@@ -319,7 +324,6 @@ public class SentryEFCoreListenerTests
         // Assert
         Assert.False(exceptionReceived);
     }
-
 
     [Theory]
     [InlineData(EFCommandExecuted)]

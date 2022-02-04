@@ -39,8 +39,13 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleDevicePropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts();
-        sut.Device.Architecture = "x86";
+        var sut = new Contexts
+        {
+            Device =
+            {
+                Architecture = "x86"
+            }
+        };
 
         var actualString = sut.ToJsonString();
 
@@ -53,8 +58,13 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleAppPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts();
-        sut.App.Name = "My.App";
+        var sut = new Contexts
+        {
+            App =
+            {
+                Name = "My.App"
+            }
+        };
 
         var actualString = sut.ToJsonString();
 
@@ -67,8 +77,13 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleGpuPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts();
-        sut.Gpu.Name = "My.Gpu";
+        var sut = new Contexts
+        {
+            Gpu =
+            {
+                Name = "My.Gpu"
+            }
+        };
 
         var actualString = sut.ToJsonString();
 
@@ -81,8 +96,13 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleRuntimePropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts();
-        sut.Runtime.Version = "2.1.1.100";
+        var sut = new Contexts
+        {
+            Runtime =
+            {
+                Version = "2.1.1.100"
+            }
+        };
 
         var actualString = sut.ToJsonString();
 
@@ -118,8 +138,13 @@ public class ContextsTests
     [Fact]
     public void Ctor_SingleBrowserPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts();
-        sut.Browser.Name = "Netscape 1";
+        var sut = new Contexts
+        {
+            Browser =
+            {
+                Name = "Netscape 1"
+            }
+        };
 
         var actualString = sut.ToJsonString();
 
@@ -132,8 +157,13 @@ public class ContextsTests
     [Fact]
     public void Ctor_SingleOperatingSystemPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts();
-        sut.OperatingSystem.Name = "BeOS 1";
+        var sut = new Contexts
+        {
+            OperatingSystem =
+            {
+                Name = "BeOS 1"
+            }
+        };
 
         var actualString = sut.ToJsonString();
 
@@ -146,11 +176,16 @@ public class ContextsTests
     [Fact]
     public void Clone_CopyValues()
     {
-        var sut = new Contexts();
-        sut.App.Name = "name";
+        var sut = new Contexts
+        {
+            App =
+            {
+                Name = "name"
+            }
+        };
         const string expectedKey = "key";
-        var expectedObject = new object();
-        sut[expectedKey] = expectedObject;
+
+        sut[expectedKey] = new object();
 
         var clone = sut.Clone();
 

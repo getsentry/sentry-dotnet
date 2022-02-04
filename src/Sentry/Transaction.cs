@@ -304,7 +304,7 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()
                 ?.ToDictionary();
 
-            var transaction = new Transaction(name)
+            return new Transaction(name)
             {
                 EventId = eventId,
                 StartTimestamp = startTimestamp,
@@ -320,16 +320,13 @@ namespace Sentry
                 _fingerprint = fingerprint,
                 _breadcrumbs = breadcrumbs ?? new(),
                 _extra = extra ?? new(),
-                _tags = (tags ?? new())!
+                _tags = (tags ?? new())!,
+                _spans = json
+                    .GetPropertyOrNull("spans")?
+                    .EnumerateArray()
+                    .Select(Span.FromJson)
+                    .ToArray() ?? Array.Empty<Span>()
             };
-
-            transaction._spans = json
-                .GetPropertyOrNull("spans")?
-                .EnumerateArray()
-                .Select(Span.FromJson)
-                .ToArray() ?? Array.Empty<Span>();
-
-            return transaction;
         }
     }
 }

@@ -125,10 +125,7 @@ public class SentryTracingMiddlewareTests
                 app.UseRouting();
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => Task.CompletedTask);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
             }));
 
         var client = server.CreateClient();
@@ -229,10 +226,7 @@ public class SentryTracingMiddlewareTests
                 app.UseRouting();
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => Task.CompletedTask);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
             }));
 
         var client = server.CreateClient();
@@ -292,10 +286,7 @@ public class SentryTracingMiddlewareTests
                 });
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => throw exception);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => throw exception));
             }));
 
         var client = server.CreateClient();
@@ -319,7 +310,7 @@ public class SentryTracingMiddlewareTests
         var sentryClient = Substitute.For<ISentryClient>();
         sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
             .Do(callback => transaction = callback.Arg<Transaction>());
-        var options = new SentryAspNetCoreOptions()
+        var options = new SentryAspNetCoreOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             TracesSampleRate = 1
@@ -328,10 +319,7 @@ public class SentryTracingMiddlewareTests
         var hub = new Hub(options, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
-            .UseSentry(aspNewOptions =>
-            {
-                aspNewOptions.TransactionNameProvider = _ => expectedName;
-            })
+            .UseSentry(aspNewOptions => aspNewOptions.TransactionNameProvider = _ => expectedName)
             .ConfigureServices(services =>
             {
                 services.RemoveAll(typeof(Func<IHub>));
