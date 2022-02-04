@@ -231,7 +231,7 @@ public sealed class SentryTarget : TargetWithContext
         if (InternalLogger.IsDebugEnabled || InternalLogger.IsInfoEnabled || InternalLogger.IsWarnEnabled || InternalLogger.IsErrorEnabled || InternalLogger.IsFatalEnabled)
         {
             var existingLogger = Options.DiagnosticLogger;
-            if (!(existingLogger is NLogDiagnosticLogger))
+            if (existingLogger is not NLogDiagnosticLogger)
             {
                 Options.DiagnosticLogger = new NLogDiagnosticLogger(existingLogger);
             }
