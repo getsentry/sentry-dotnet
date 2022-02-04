@@ -12,12 +12,9 @@ public class SentryDiagnosticSubscriberTests
 
     static SentryDiagnosticSubscriberTests()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            sqlInstance = new SqlInstance(
-                name: "SentryDiagnosticSubscriber",
-                buildTemplate: TestDbBuilder.CreateTable);
-        }
+        sqlInstance = new SqlInstance(
+            name: "SentryDiagnosticSubscriber",
+            buildTemplate: TestDbBuilder.CreateTable);
     }
 
     [SkippableFact]
