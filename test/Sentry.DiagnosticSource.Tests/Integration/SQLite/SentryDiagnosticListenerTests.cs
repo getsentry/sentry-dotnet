@@ -7,16 +7,16 @@ using Sentry.Internals.DiagnosticSource;
 namespace Sentry.DiagnosticSource.Tests.Integration.SQLite;
 
 [CollectionDefinition("Database collection")]
-public class SentryDiagnosticListenerTests: IDisposable
+public class SentryDiagnosticListenerTests : IDisposable
 {
-    private class Fixture: IDisposable
+    private class Fixture : IDisposable
     {
         private readonly Database _database;
 
         public IHub Hub { get; set; }
 
         private SentryDiagnosticSubscriber subscriber;
-        private  IDisposable subscription;
+        private IDisposable subscription;
         internal SentryScopeManager ScopeManager { get; }
         public Fixture()
         {
