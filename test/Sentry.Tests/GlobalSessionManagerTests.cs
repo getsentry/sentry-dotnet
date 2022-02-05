@@ -12,12 +12,14 @@ public class GlobalSessionManagerTests
 
         public SentryOptions Options { get; }
 
-        public ISystemClock Clock { get; }
+        public ISystemClock Clock { get; } = Substitute.For<ISystemClock>();
 
         public Func<string, PersistedSessionUpdate> PersistedSessionProvider { get; set; }
 
         public Fixture(Action<SentryOptions> configureOptions = null)
         {
+            Clock.GetUtcNow().Returns(DateTimeOffset.Now);
+
             Logger = new InMemoryDiagnosticLogger();
 
             Options = new SentryOptions
@@ -291,13 +293,21 @@ public class GlobalSessionManagerTests
         // Arrange
         var sut = _fixture.GetSut();
 
+        var timeOffset = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns((_) =>
+        {
+            timeOffset = timeOffset.AddSeconds(1);
+            return timeOffset;
+        });
+
         var sessionUpdate = sut.StartSession();
 
         // Act
-        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession()!;
 
         // Assert
         sessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate.EndStatus.Should().Be(SessionEndStatus.Abnormal);
         persistedSessionUpdate.Should().NotBeNull();
         persistedSessionUpdate.Should().BeEquivalentTo(sessionUpdate, o =>
         {
@@ -309,10 +319,10 @@ public class GlobalSessionManagerTests
 
             return o;
         });
-        persistedSessionUpdate!.IsInitial.Should().BeFalse();
-        persistedSessionUpdate!.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
-        persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
-        persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
+        persistedSessionUpdate.IsInitial.Should().BeFalse();
+        persistedSessionUpdate.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
+        persistedSessionUpdate.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
+        persistedSessionUpdate.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
     }
 
     [Fact]
