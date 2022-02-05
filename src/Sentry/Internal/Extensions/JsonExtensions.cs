@@ -11,7 +11,7 @@ namespace Sentry.Internal.Extensions
     {
         // The Json options with a preset of rules that will remove dangerous and problematic
         // data from the serialized object.
-        private static JsonSerializerOptions serializerOption = new() {Converters = {new SentryJsonConverter()}};
+        private static JsonSerializerOptions serializerOption = new() { Converters = { new SentryJsonConverter() } };
 
         public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
         {
