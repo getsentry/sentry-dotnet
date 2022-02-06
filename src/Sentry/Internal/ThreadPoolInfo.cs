@@ -32,12 +32,12 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            writer.WriteNumber("minWorkerThreads", MinWorkerThreads);
-            writer.WriteNumber("minCompletionPortThreads", MinCompletionPortThreads);
-            writer.WriteNumber("maxWorkerThreads", MaxWorkerThreads);
-            writer.WriteNumber("maxCompletionPortThreads", MaxCompletionPortThreads);
-            writer.WriteNumber("availableWorkerThreads", AvailableWorkerThreads);
-            writer.WriteNumber("availableCompletionPortThreads", AvailableCompletionPortThreads);
+            writer.WriteNumber("min_worker_threads", MinWorkerThreads);
+            writer.WriteNumber("min_completion_port_threads", MinCompletionPortThreads);
+            writer.WriteNumber("max_worker_threads", MaxWorkerThreads);
+            writer.WriteNumber("max_completion_port_threads", MaxCompletionPortThreads);
+            writer.WriteNumber("available_worker_threads", AvailableWorkerThreads);
+            writer.WriteNumber("available_completion_port_threads", AvailableCompletionPortThreads);
 
             writer.WriteEndObject();
         }
