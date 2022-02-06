@@ -522,9 +522,9 @@ public class MainSentryEventProcessorTests
             // Assert
             dynamic ret = evt.Contexts[key];
 #pragma warning disable IDE0058 // Expression value is never used, cannot use _ = because it'll affect the test result
-            Assert.Equal(getter().Name, ret["Name"]);
-            Assert.Equal(getter().DisplayName, ret["DisplayName"]);
-            Assert.Equal(getter().Calendar.GetType().Name, ret["Calendar"]);
+            Assert.Equal(getter().Name, ret["name"]);
+            Assert.Equal(getter().DisplayName, ret["display_name"]);
+            Assert.Equal(getter().Calendar.GetType().Name, ret["calendar"]);
 #pragma warning restore IDE0058
         }
         finally
