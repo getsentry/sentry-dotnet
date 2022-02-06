@@ -16,6 +16,7 @@
 - Reduced the logger noise from EF when not using Performance Monitoring ([#1441](https://github.com/getsentry/sentry-dotnet/pull/1441))
 - Create CachingTransport directories in constructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 - UnobservedTaskException is now considered as Unhandled ([#1447](https://github.com/getsentry/sentry-dotnet/pull/1447))
+- Rename thread pool protocol keys to snake case ([#1472](https://github.com/getsentry/sentry-dotnet/pull/1472))
 
 ## 3.13.0
 
