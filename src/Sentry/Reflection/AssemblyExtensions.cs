@@ -24,7 +24,7 @@ namespace Sentry.Reflection
         {
             return new SdkVersion
             {
-                Name =  asm.GetName().Name,
+                Name = asm.GetName().Name,
                 Version = asm.GetVersion()
             };
         }

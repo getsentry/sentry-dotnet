@@ -19,7 +19,7 @@ namespace Sentry
         private static readonly Lazy<SdkVersion> InstanceLazy = new(
             () => new SdkVersion
             {
-                Name =  "sentry.dotnet",
+                Name = "sentry.dotnet",
                 Version = typeof(ISentryClient).Assembly.GetVersion()
             });
 
