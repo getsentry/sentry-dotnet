@@ -186,7 +186,7 @@ namespace Sentry.Internal.Http
                 }
                 catch (Exception ex)
                 {
-                    await LogFailureWithDiscard(file, cancellation, ex).ConfigureAwait(false);
+                    LogFailureWithDiscard(file, ex);
                 }
             }
 
@@ -196,18 +196,14 @@ namespace Sentry.Internal.Http
             File.Delete(file);
         }
 
-        private Task LogFailureWithDiscard(string file, CancellationToken cancellation, Exception ex)
+        private void LogFailureWithDiscard(string file, Exception ex)
         {
             string? envelopeContents = null;
             try
             {
                 if (File.Exists(file))
                 {
-#if NET461 || NETSTANDARD2_0
-                    envelopeContents = File.ReadAllText(envelopeFilePath);
-#else
-                    envelopeContents = await File.ReadAllTextAsync(file, cancellation).ConfigureAwait(false);
-#endif
+                    envelopeContents = File.ReadAllText(file);
                 }
             }
             catch
@@ -222,8 +218,6 @@ namespace Sentry.Internal.Http
             {
                 _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", ex, file, envelopeContents);
             }
-
-            return Task.CompletedTask;
         }
 
         private static async Task<Envelope> ReadEnvelope(string file, CancellationToken cancellation)
