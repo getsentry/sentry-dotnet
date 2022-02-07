@@ -240,7 +240,13 @@ public class CachingTransportTests
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, DiagnosticLogger = _logger, Debug = true, CacheDirectoryPath = cacheDirectory.Path };
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
 
         var innerTransport = Substitute.For<ITransport>();
 
