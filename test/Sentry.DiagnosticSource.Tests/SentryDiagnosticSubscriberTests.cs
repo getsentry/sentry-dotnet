@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using LocalDb;
 using Sentry.Internals.DiagnosticSource;
 
-[CollectionDefinition("Database collection")]
 [UsesVerify]
 public class SentryDiagnosticSubscriberTests
 {
