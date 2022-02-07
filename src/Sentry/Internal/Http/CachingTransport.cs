@@ -183,10 +183,37 @@ namespace Sentry.Internal.Http
                 }
                 catch (Exception ex)
                 {
-                    _options.LogError(
-                        "Failed to send cached envelope: {0}, discarding cached envelope.",
-                        ex,
-                        envelopeFilePath);
+                    string? envelopeContents = null;
+                    try
+                    {
+                        if (File.Exists(envelopeFilePath))
+                        {
+#if NET461 || NETSTANDARD2_0
+                            envelopeContents = File.ReadAllText(envelopeFilePath);
+#else
+                            envelopeContents = await File.ReadAllTextAsync(envelopeFilePath, cancellationToken).ConfigureAwait(false);
+#endif
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    if (envelopeContents == null)
+                    {
+                        _options.LogError(
+                            "Failed to send cached envelope: {0}, discarding cached envelope.",
+                            ex,
+                            envelopeFilePath);
+                    }
+                    else
+                    {
+                        _options.LogError(
+                            "Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}",
+                            ex,
+                            envelopeFilePath,
+                            envelopeContents);
+                    }
                 }
 
                 // Envelope & file stream must be disposed prior to reaching this point
