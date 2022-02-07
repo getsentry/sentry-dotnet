@@ -17,9 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-2022, macos-latest]
         include:
-          - os: windows-latest
+          - os: windows-2022
             build_script: .\build.ps1
           - os: ubuntu-latest
             build_script: ./build.sh
@@ -32,23 +32,20 @@ jobs:
           with:
             submodules: recursive
             fetch-depth: 2 # default is 1 and codecov needs > 1
-        - name: Setup .NET SDK (v2.1)
+
+        - name: Setup .NET SDK
+          if: matrix.os == 'windows-2022'
           uses: actions/setup-dotnet@v1
           with:
-            dotnet-version: '2.1.818'
-        - name: Setup .NET SDK (v3.1)
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: '3.1.x'
-        - name: Setup .NET SDK (v5.0)
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: '5.0.x'
-        - name: Setup .NET SDK (v6.0)
+            dotnet-version: |
+              2.1.818
+              3.1.x
+        - name: Setup .NET SDK
+          if: matrix.os == 'macos-latest'
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: '6.0.x'
-            
+
         - name: Run build script
           run: ${{ matrix.build_script }}
 
@@ -65,7 +62,7 @@ jobs:
 
         - name: Archive Artifacts
           # only the ps1 script packages the SDK
-          if: matrix.os == 'windows-latest'
+          if: matrix.os == 'windows-2022'
           uses: actions/upload-artifact@v2
           with:
             name: ${{ github.sha }}

@@ -1351,6 +1351,7 @@ namespace Sentry.Protocol.Envelopes
 }
 namespace Sentry.Reflection
 {
+    [System.Obsolete("Should not be public. This method will be removed in version 4.")]
     public static class AssemblyExtensions
     {
         public static Sentry.SdkVersion GetNameAndVersion(this System.Reflection.Assembly asm) { }

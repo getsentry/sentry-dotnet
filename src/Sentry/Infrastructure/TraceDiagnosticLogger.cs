@@ -1,6 +1,8 @@
+#define TRACE
 using System;
 using System.Diagnostics;
 using Sentry.Extensibility;
+
 namespace Sentry.Infrastructure
 {
     /// <summary>
@@ -28,22 +30,15 @@ namespace Sentry.Infrastructure
         /// </summary>
         public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
         {
-            try
+            var formattedMessage = string.Format(message, args);
+            if (exception == null)
             {
-                for (var i = 0; i < Trace.Listeners.Count; i++)
-                {
-                    var listener = Trace.Listeners[i];
-                    listener.WriteLine($"{logLevel,7}: {string.Format(message, args)}");
-                    if (exception != null)
-                    {
-                        listener.WriteLine(exception);
-                    }
-                }
+                Trace.WriteLine($"{logLevel,7}: {formattedMessage}");
             }
-            catch (ArgumentOutOfRangeException)
+            else
             {
-                // Trace.Listeners is a public mutable static property and listeners can be removed
-                // from anywhere at anytime.
+                Trace.WriteLine($@"{logLevel,7}: {formattedMessage}
+{exception}");
             }
         }
     }
