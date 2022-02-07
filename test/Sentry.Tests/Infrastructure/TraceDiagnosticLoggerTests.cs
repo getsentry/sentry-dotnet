@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Trace=System.Diagnostics.Trace;
+using Trace = System.Diagnostics.Trace;
 
 [UsesVerify]
 public class TraceDiagnosticLoggerTests
@@ -15,7 +15,7 @@ public class TraceDiagnosticLoggerTests
             logger.Log(SentryLevel.Debug, "the message {0}", new Exception("the exception"), "arg1");
             Trace.Flush();
             Assert.Equal(@"  Debug: the message arg1
-System.Exception: the exception",listener.Messages.Single());
+System.Exception: the exception", listener.Messages.Single());
         }
         finally
         {
@@ -23,7 +23,7 @@ System.Exception: the exception",listener.Messages.Single());
         }
     }
 
-    class Listener : TraceListener
+    private class Listener : TraceListener
     {
         public List<string> Messages = new();
 
