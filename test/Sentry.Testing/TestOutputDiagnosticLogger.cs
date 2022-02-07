@@ -18,7 +18,6 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         public SentryLevel Level { get; set; }
         public string Message { get; set; }
         public Exception Exception { get; set; }
-        public object[] Arguments { get; set; }
         public string RawMessage { get; set; }
     }
 
@@ -40,8 +39,7 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
             Level = logLevel,
             Message = formattedMessage,
             RawMessage = message,
-            Exception = exception,
-            Arguments = args
+            Exception = exception
         };
         _entries.Enqueue(entry);
 
