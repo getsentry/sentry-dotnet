@@ -20,16 +20,13 @@ namespace Sentry.Reflection
         /// <returns>The SdkVersion.</returns>
         public static SdkVersion GetNameAndVersion(this Assembly asm)
         {
-            var asmVersion = GetVersion(asm);
+            var asmName = asm.GetName();
+            var name = asmName.Name;
+            string? asmVersion = null;
 
-            return new SdkVersion { Name = "sentry.dotnet", Version = asmVersion };
-        }
-
-        private static string? GetVersion(Assembly asm)
-        {
             try
             {
-                return asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                asmVersion = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
             }
             catch
             {
@@ -41,7 +38,9 @@ namespace Sentry.Reflection
             // be used for versioning and the software should not fallback to the assembly version string.
             // See https://github.com/getsentry/sentry-dotnet/pull/1079#issuecomment-866992216
             // TODO: Lets change this in a new major to return the Version as fallback
-            return  asm.GetName().Version?.ToString();
+            asmVersion ??= asmName.Version?.ToString();
+
+            return new SdkVersion { Name = name, Version = asmVersion };
         }
     }
 }
