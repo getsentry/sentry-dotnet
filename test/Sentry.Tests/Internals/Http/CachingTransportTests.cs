@@ -321,7 +321,27 @@ public class CachingTransportTests
     }
 
     [Fact(Timeout = 7000)]
-    public async Task DoesNotDeleteCacheIfConnectionWithIssue()
+    public async Task DoesNotDeleteCacheIfHttpRequestException()
+    {
+        var exception = new HttpRequestException(null);
+        await TestNetworkException(exception);
+    }
+
+    [Fact(Timeout = 7000)]
+    public async Task DoesNotDeleteCacheIfIOException()
+    {
+        var exception = new IOException(null);
+        await TestNetworkException(exception);
+    }
+
+    [Fact(Timeout = 7000)]
+    public async Task DoesNotDeleteCacheIfSocketException()
+    {
+        var exception = new SocketException();
+        await TestNetworkException(exception);
+    }
+
+    private async Task TestNetworkException(Exception exception)
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
@@ -332,7 +352,6 @@ public class CachingTransportTests
             CacheDirectoryPath = cacheDirectory.Path
         };
 
-        var exception = new HttpRequestException(null, new SocketException());
         var receivedException = new Exception();
         var innerTransport = Substitute.For<ITransport>();
 
@@ -363,6 +382,7 @@ public class CachingTransportTests
             innerTransport.ClearReceivedCalls();
             await transport.FlushAsync();
         }
+
         // Assert
         Assert.Equal(exception, receivedException);
         Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
