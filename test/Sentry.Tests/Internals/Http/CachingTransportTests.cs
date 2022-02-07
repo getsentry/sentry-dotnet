@@ -240,7 +240,7 @@ public class CachingTransportTests
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret, DiagnosticLogger = _logger, Debug = true, CacheDirectoryPath = cacheDirectory.Path};
+        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, DiagnosticLogger = _logger, Debug = true, CacheDirectoryPath = cacheDirectory.Path };
 
         var innerTransport = Substitute.For<ITransport>();
 
@@ -263,7 +263,7 @@ public class CachingTransportTests
             .Where(x => x.Level == SentryLevel.Error)
             .Select(x => x.RawMessage)
             .Single();
-        Assert.Equal("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}",message);
+        Assert.Equal("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", message);
     }
 
     [Fact(Timeout = 7000)]
