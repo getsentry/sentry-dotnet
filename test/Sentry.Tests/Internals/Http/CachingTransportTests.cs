@@ -263,6 +263,8 @@ public class CachingTransportTests
             .Where(x => x.Level == SentryLevel.Error)
             .Select(x => x.RawMessage)
             .Single();
+
+        // Assert
         Assert.Equal("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", message);
     }
 
