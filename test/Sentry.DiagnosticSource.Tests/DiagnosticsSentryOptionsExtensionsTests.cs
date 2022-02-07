@@ -7,7 +7,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
     public SentryOptions Sut { get; set; } = new();
 
     [Fact]
-    public void DisableDiagnosticListnerIntegration_RemovesDiagnosticSourceIntegration()
+    public void DisableDiagnosticListenerIntegration_RemovesDiagnosticSourceIntegration()
     {
         Sut.DisableDiagnosticSourceIntegration();
         Assert.DoesNotContain(Sut.Integrations!,
