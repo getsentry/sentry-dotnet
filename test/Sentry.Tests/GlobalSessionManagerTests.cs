@@ -2,7 +2,7 @@ using Sentry.Testing;
 
 namespace Sentry.Tests;
 
-public class GlobalSessionManagerTests
+public class GlobalSessionManagerTests : IDisposable
 {
     private class Fixture : IDisposable
     {
@@ -517,4 +517,9 @@ public class GlobalSessionManagerTests
             DateTimeOffset.Now,
             1,
             null);
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
+    }
 }
