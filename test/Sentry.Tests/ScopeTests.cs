@@ -294,8 +294,8 @@ public class ScopeTests
             EnableScopeSync = observerEnable
         });
         var expectedEmail = observerEnable ? email : null;
-        var expectedusername = observerEnable ? username : null;
-        var expectedid = observerEnable ? id : null;
+        var expectedUsername = observerEnable ? username : null;
+        var expectedId = observerEnable ? id : null;
         var expectedCount = observerEnable ? 1 : 0;
         // Act
         if (email != null)
@@ -313,8 +313,8 @@ public class ScopeTests
 
         // Assert
         observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Email == expectedEmail));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedid));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedusername));
+        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedId));
+        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedUsername));
     }
 
     [Theory]

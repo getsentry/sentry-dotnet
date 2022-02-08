@@ -131,7 +131,7 @@ namespace Sentry.Internal
                     var asmVersion = _options.ReportAssembliesMode switch
                     {
                         ReportAssembliesMode.Version => asmName.Version?.ToString() ?? string.Empty,
-                        ReportAssembliesMode.InformationalVersion => assembly.GetNameAndVersion().Version ?? string.Empty,
+                        ReportAssembliesMode.InformationalVersion => assembly.GetVersion() ?? string.Empty,
                         _ => throw new ArgumentOutOfRangeException(
                             $"Report assemblies mode '{_options.ReportAssembliesMode}' is not yet supported")
                     };

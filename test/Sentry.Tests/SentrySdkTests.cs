@@ -239,7 +239,6 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-
         {
             // Pre-populate cache
             var initialInnerTransport = new FakeFailingTransport();

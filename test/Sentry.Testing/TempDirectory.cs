@@ -16,12 +16,9 @@ public class TempDirectory : IDisposable
 
     public void Dispose()
     {
-        try
+        if (Directory.Exists(Path))
         {
             Directory.Delete(Path, true);
-        }
-        catch (DirectoryNotFoundException)
-        {
         }
     }
 }

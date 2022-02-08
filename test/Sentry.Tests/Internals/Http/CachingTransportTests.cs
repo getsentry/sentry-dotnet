@@ -236,6 +236,45 @@ public class CachingTransportTests
     }
 
     [Fact(Timeout = 7000)]
+    public async Task NonTransientExceptionShouldLog()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
+
+        var innerTransport = Substitute.For<ITransport>();
+
+        innerTransport
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .Returns(_ => Task.FromException(new Exception("The Message")));
+
+        await using var transport = new CachingTransport(innerTransport, options);
+
+        // Can't really reliably test this with a worker
+        await transport.StopWorkerAsync();
+
+        // Act
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
+
+        await transport.FlushAsync();
+
+        var message = _logger.Entries
+            .Where(x => x.Level == SentryLevel.Error)
+            .Select(x => x.RawMessage)
+            .Single();
+
+        // Assert
+        Assert.Equal("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", message);
+    }
+
+    [Fact(Timeout = 7000)]
     public async Task DoesNotRetryOnNonTransientExceptions()
     {
         // Arrange
@@ -282,7 +321,27 @@ public class CachingTransportTests
     }
 
     [Fact(Timeout = 7000)]
-    public async Task DoesNotDeleteCacheIfConnectionWithIssue()
+    public async Task DoesNotDeleteCacheIfHttpRequestException()
+    {
+        var exception = new HttpRequestException(null);
+        await TestNetworkException(exception);
+    }
+
+    [Fact(Timeout = 7000)]
+    public async Task DoesNotDeleteCacheIfIOException()
+    {
+        var exception = new IOException(null);
+        await TestNetworkException(exception);
+    }
+
+    [Fact(Timeout = 7000)]
+    public async Task DoesNotDeleteCacheIfSocketException()
+    {
+        var exception = new SocketException();
+        await TestNetworkException(exception);
+    }
+
+    private async Task TestNetworkException(Exception exception)
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
@@ -293,7 +352,6 @@ public class CachingTransportTests
             CacheDirectoryPath = cacheDirectory.Path
         };
 
-        var exception = new HttpRequestException(null, new SocketException());
         var receivedException = new Exception();
         var innerTransport = Substitute.For<ITransport>();
 
@@ -324,6 +382,7 @@ public class CachingTransportTests
             innerTransport.ClearReceivedCalls();
             await transport.FlushAsync();
         }
+
         // Assert
         Assert.Equal(exception, receivedException);
         Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
