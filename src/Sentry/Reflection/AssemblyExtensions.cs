@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -7,6 +8,7 @@ namespace Sentry.Reflection
     /// Extension methods to <see cref="Assembly"/>.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("Should not be public. This method will be removed in version 4.")]
     public static class AssemblyExtensions
     {
         /// <summary>
@@ -20,13 +22,22 @@ namespace Sentry.Reflection
         /// <returns>The SdkVersion.</returns>
         public static SdkVersion GetNameAndVersion(this Assembly asm)
         {
-            var asmName = asm.GetName();
-            var name = asmName.Name;
-            string? asmVersion = null;
+            return new SdkVersion
+            {
+                Name = asm.GetName().Name,
+                Version = asm.GetVersion()
+            };
+        }
 
+        internal static string? GetVersion(this Assembly assembly)
+        {
             try
             {
-                asmVersion = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                if (informationalVersion != null)
+                {
+                    return informationalVersion;
+                }
             }
             catch
             {
@@ -38,9 +49,7 @@ namespace Sentry.Reflection
             // be used for versioning and the software should not fallback to the assembly version string.
             // See https://github.com/getsentry/sentry-dotnet/pull/1079#issuecomment-866992216
             // TODO: Lets change this in a new major to return the Version as fallback
-            asmVersion ??= asmName.Version?.ToString();
-
-            return new SdkVersion { Name = name, Version = asmVersion };
+            return assembly.GetName().Version?.ToString();
         }
     }
 }

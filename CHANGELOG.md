@@ -8,6 +8,8 @@
 - SentrySDK.WithScope is now obsolete in favour of overloads of CaptureEvent, CaptureMessage, CaptureException ([#1412](https://github.com/getsentry/sentry-dotnet/pull/1412))
 - Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
 - The implementation of the background worker can now be changed ([#1450](https://github.com/getsentry/sentry-dotnet/pull/1450))
+- Map reg key 528449 to net48 ([#1465](https://github.com/getsentry/sentry-dotnet/pull/1465))
+- Improve logging for failed JSON serialization ([#1473](https://github.com/getsentry/sentry-dotnet/pull/1473))
 
 ### Fixes
 
@@ -17,6 +19,10 @@
 - UnobservedTaskException is now considered as Unhandled ([#1447](https://github.com/getsentry/sentry-dotnet/pull/1447))
 - Avoid calls the Thread.CurrentThread where possible ([#1466](https://github.com/getsentry/sentry-dotnet/pull/1466))
 - Map reg key 528449 to net48 ([#1465](https://github.com/getsentry/sentry-dotnet/pull/1465))
+- Rename thread pool protocol keys to snake case ([#1472](https://github.com/getsentry/sentry-dotnet/pull/1472))
+- Treat IOException as a network issue ([#1476](https://github.com/getsentry/sentry-dotnet/pull/1476))
+- Fix incorrect sdk name in envelope header ([#1474](https://github.com/getsentry/sentry-dotnet/pull/1474))
+- Use Trace.WriteLine for TraceDiagnosticLogger ([#1475](https://github.com/getsentry/sentry-dotnet/pull/1475))
 
 ## 3.13.0
 

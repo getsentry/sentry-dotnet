@@ -273,7 +273,7 @@ public class SentrySqlListenerTests
     [Theory]
     [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand)]
     [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand)]
-    public void OnNext_TwoConnectionSpansWithSameId_FinishBothWithOk(string connectionBeforeKey, string connectionUpdate, string connctionClose)
+    public void OnNext_TwoConnectionSpansWithSameId_FinishBothWithOk(string connectionBeforeKey, string connectionUpdate, string connectionClose)
     {
         // Arrange
         var hub = _fixture.Hub;
@@ -292,7 +292,7 @@ public class SentrySqlListenerTests
                 new(connectionUpdate,
                     new { OperationId = connectionOperationIds[i], ConnectionId = connectionId }));
             interceptor.OnNext(
-                new(connctionClose,
+                new(connectionClose,
                     new { OperationId = connectionOperationIds[i], ConnectionId = connectionId }));
         }
 
@@ -311,7 +311,7 @@ public class SentrySqlListenerTests
     [Theory]
     [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand, SqlMicrosoftWriteConnectionCloseAfterCommand, SqlMicrosoftBeforeExecuteCommand, SqlMicrosoftAfterExecuteCommand)]
     [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand, SqlDataWriteConnectionCloseAfterCommand, SqlDataBeforeExecuteCommand, SqlDataAfterExecuteCommand)]
-    public void OnNext_ExecuteQueryCalledBeforeConnectionId_ExecuteParentIsConnectionSpan(string connectionBeforeKey, string connectionUpdate, string connctionClose, string executeBeforeKey, string executeAfterKey)
+    public void OnNext_ExecuteQueryCalledBeforeConnectionId_ExecuteParentIsConnectionSpan(string connectionBeforeKey, string connectionUpdate, string connectionClose, string executeBeforeKey, string executeAfterKey)
     {
         // Arrange
         var hub = _fixture.Hub;
@@ -338,7 +338,7 @@ public class SentrySqlListenerTests
             new(executeAfterKey,
                 new { OperationId = queryOperationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
         interceptor.OnNext(
-            new(connctionClose,
+            new(connectionClose,
                 new { OperationId = connectionOperationId, ConnectionId = connectionId }));
 
         // Assert

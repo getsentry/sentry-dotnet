@@ -132,7 +132,7 @@ namespace Sentry.Internal
                     var asmVersion = _options.ReportAssembliesMode switch
                     {
                         ReportAssembliesMode.Version => asmName.Version?.ToString() ?? string.Empty,
-                        ReportAssembliesMode.InformationalVersion => assembly.GetNameAndVersion().Version ?? string.Empty,
+                        ReportAssembliesMode.InformationalVersion => assembly.GetVersion() ?? string.Empty,
                         _ => throw new ArgumentOutOfRangeException(
                             $"Report assemblies mode '{_options.ReportAssembliesMode}' is not yet supported")
                     };
@@ -205,15 +205,15 @@ namespace Sentry.Internal
 
             if (!string.IsNullOrWhiteSpace(cultureInfo.Name))
             {
-                dic.Add("Name", cultureInfo.Name);
+                dic.Add("name", cultureInfo.Name);
             }
             if (!string.IsNullOrWhiteSpace(cultureInfo.DisplayName))
             {
-                dic.Add("DisplayName", cultureInfo.DisplayName);
+                dic.Add("display_name", cultureInfo.DisplayName);
             }
             if (cultureInfo.Calendar is { } cal)
             {
-                dic.Add("Calendar", cal.GetType().Name);
+                dic.Add("calendar", cal.GetType().Name);
             }
 
             return dic.Count > 0 ? dic : null;

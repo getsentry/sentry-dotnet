@@ -1,10 +1,16 @@
 using System.Text.RegularExpressions;
-using Sentry.Tests.Helpers;
-
-namespace Sentry.Tests.Protocol;
 
 public class SdkVersionTests
 {
+    [Fact]
+    public void InstanceIsCorrect()
+    {
+        var instance = SdkVersion.Instance;
+        Assert.Equal("sentry.dotnet", instance.Name);
+        Assert.NotNull(instance.Version);
+        Assert.NotEmpty(instance.Version);
+    }
+
     [Fact]
     public void AddPackage_DoesNotExcludeCurrentOne()
     {

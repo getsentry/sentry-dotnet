@@ -83,24 +83,24 @@ namespace Sentry
         {
             writer.WriteStartObject();
 
-            writer.WriteNumber("allocatedBytes", AllocatedBytes);
-            writer.WriteNumber("fragmentedBytes", FragmentedBytes);
-            writer.WriteNumber("heapSizeBytes", HeapSizeBytes);
-            writer.WriteNumber("highMemoryLoadThresholdBytes", HighMemoryLoadThresholdBytes);
-            writer.WriteNumber("totalAvailableMemoryBytes", TotalAvailableMemoryBytes);
-            writer.WriteNumber("memoryLoadBytes", MemoryLoadBytes);
+            writer.WriteNumber("allocated_bytes", AllocatedBytes);
+            writer.WriteNumber("fragmented_bytes", FragmentedBytes);
+            writer.WriteNumber("heap_size_bytes", HeapSizeBytes);
+            writer.WriteNumber("high_memory_load_threshold_bytes", HighMemoryLoadThresholdBytes);
+            writer.WriteNumber("total_available_memory_bytes", TotalAvailableMemoryBytes);
+            writer.WriteNumber("memory_load_bytes", MemoryLoadBytes);
 
 #if NET5_0_OR_GREATER
-            writer.WriteNumber("totalCommittedBytes", TotalCommittedBytes);
-            writer.WriteNumber("promotedBytes", PromotedBytes);
-            writer.WriteNumber("pinnedObjectsCount", PinnedObjectsCount);
-            writer.WriteNumber("pauseTimePercentage", PauseTimePercentage);
+            writer.WriteNumber("total_committed_bytes", TotalCommittedBytes);
+            writer.WriteNumber("promoted_bytes", PromotedBytes);
+            writer.WriteNumber("pinned_objects_count", PinnedObjectsCount);
+            writer.WriteNumber("pause_time_percentage", PauseTimePercentage);
             writer.WriteNumber("index", Index);
             writer.WriteNumber("generation", Generation);
-            writer.WriteNumber("finalizationPendingCount", FinalizationPendingCount);
+            writer.WriteNumber("finalization_pending_count", FinalizationPendingCount);
             writer.WriteBoolean("compacted", Compacted);
             writer.WriteBoolean("concurrent", Concurrent);
-            writer.WritePropertyName("pauseDurations");
+            writer.WritePropertyName("pause_durations");
             writer.WriteStartArray();
             foreach (var duration in PauseDurations)
             {
