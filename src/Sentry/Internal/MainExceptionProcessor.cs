@@ -103,7 +103,7 @@ namespace Sentry.Internal
                 Type = exception.GetType()?.FullName,
                 Module = exception.GetType()?.Assembly?.FullName,
                 Value = exception.Message,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
+                ThreadId = Environment.CurrentManagedThreadId,
                 Mechanism = GetMechanism(exception)
             };
 

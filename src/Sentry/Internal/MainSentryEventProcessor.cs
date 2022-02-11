@@ -98,12 +98,13 @@ namespace Sentry.Internal
                 var stackTrace = SentryStackTraceFactoryAccessor().Create(@event.Exception);
                 if (stackTrace != null)
                 {
+                    var currentThread = Thread.CurrentThread;
                     var thread = new SentryThread
                     {
                         Crashed = false,
                         Current = true,
-                        Name = Thread.CurrentThread.Name,
-                        Id = Environment.CurrentManagedThreadId,
+                        Name = currentThread.Name,
+                        Id = currentThread.ManagedThreadId,
                         Stacktrace = stackTrace
                     };
 
