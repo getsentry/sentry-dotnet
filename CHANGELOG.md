@@ -18,7 +18,6 @@
 - Create CachingTransport directories in constructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
 - UnobservedTaskException is now considered as Unhandled ([#1447](https://github.com/getsentry/sentry-dotnet/pull/1447))
 - Avoid calls the Thread.CurrentThread where possible ([#1466](https://github.com/getsentry/sentry-dotnet/pull/1466))
-- Map reg key 528449 to net48 ([#1465](https://github.com/getsentry/sentry-dotnet/pull/1465))
 - Rename thread pool protocol keys to snake case ([#1472](https://github.com/getsentry/sentry-dotnet/pull/1472))
 - Treat IOException as a network issue ([#1476](https://github.com/getsentry/sentry-dotnet/pull/1476))
 - Fix incorrect sdk name in envelope header ([#1474](https://github.com/getsentry/sentry-dotnet/pull/1474))
