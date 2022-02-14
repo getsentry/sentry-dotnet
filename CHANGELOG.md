@@ -22,6 +22,7 @@
 - Treat IOException as a network issue ([#1476](https://github.com/getsentry/sentry-dotnet/pull/1476))
 - Fix incorrect sdk name in envelope header ([#1474](https://github.com/getsentry/sentry-dotnet/pull/1474))
 - Use Trace.WriteLine for TraceDiagnosticLogger ([#1475](https://github.com/getsentry/sentry-dotnet/pull/1475))
+- Remove Exception filters to work around Unity bug on 2019.4.35f IL2CPP ([#1486](https://github.com/getsentry/sentry-dotnet/pull/1486))
 
 ## 3.13.0
 
