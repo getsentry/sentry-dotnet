@@ -301,19 +301,22 @@ namespace Sentry
 
                 return sessionUpdate;
             }
-            catch (IOException ioEx) when (ioEx is FileNotFoundException or DirectoryNotFoundException)
-            {
-                // Not a notable error
-                _options.LogDebug("A persisted session does not exist at {0}.", filePath);
-
-                return null;
-            }
             catch (Exception ex)
             {
-                _options.LogError(
-                    "Failed to recover persisted session from the file system '{0}'.",
-                    ex,
-                    filePath);
+                // Can't use exception filters because of a Unity 2019.4.35f IL2CPP bug
+                // https://github.com/getsentry/sentry-unity/issues/550
+                if (ex is FileNotFoundException or DirectoryNotFoundException)
+                {
+                    // Not a notable error
+                    _options.LogDebug("A persisted session does not exist ({0}) at {1}.", ex.GetType().Name, filePath);
+                }
+                else
+                {
+                    _options.LogError(
+                        "Failed to recover persisted session from the file system '{0}'.",
+                        ex,
+                        filePath);
+                }
 
                 return null;
             }
