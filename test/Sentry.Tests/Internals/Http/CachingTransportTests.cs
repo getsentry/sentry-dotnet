@@ -15,6 +15,42 @@ public class CachingTransportTests
         _logger = new TestOutputDiagnosticLogger(testOutputHelper);
     }
 
+    [Fact(Timeout = 700000)]
+    public async Task WithAttachment()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret, DiagnosticLogger = _logger, CacheDirectoryPath = cacheDirectory.Path};
+
+        using var innerTransport = new FakeTransport();
+        await using var transport = new CachingTransport(innerTransport, options);
+
+        var tempFile = Path.GetTempFileName();
+        
+        try
+        {
+            var attachment = new Attachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
+            using var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] {attachment});
+
+            // Act
+            await transport.SendEnvelopeAsync(envelope);
+
+            // Wait until directory is empty
+            while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
+            {
+                await Task.Delay(100);
+            }
+
+            // Assert
+            var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
+            sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
     [Fact(Timeout = 7000)]
     public async Task WorksInBackground()
     {
