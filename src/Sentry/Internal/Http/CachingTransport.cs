@@ -163,7 +163,13 @@ namespace Sentry.Internal.Http
         {
             _options.LogDebug("Reading cached envelope: {0}", file);
 
-            using (var envelope = await ReadEnvelope(file, cancellation).ConfigureAwait(false))
+            var stream = File.OpenRead(file);
+#if NET461 || NETSTANDARD2_0
+            using (stream)
+#else
+            await using (stream.ConfigureAwait(false))
+#endif
+            using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
             {
                 try
                 {
@@ -221,19 +227,6 @@ namespace Sentry.Internal.Http
             else
             {
                 _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", ex, file, envelopeContents);
-            }
-        }
-
-        private static async Task<Envelope> ReadEnvelope(string file, CancellationToken cancellation)
-        {
-            var stream = File.OpenRead(file);
-#if NET461 || NETSTANDARD2_0
-            using (stream)
-#else
-            await using (stream.ConfigureAwait(false))
-#endif
-            {
-                return await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false);
             }
         }
 

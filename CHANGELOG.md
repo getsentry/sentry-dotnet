@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix caching transport with attachments ([#1489](https://github.com/getsentry/sentry-dotnet/pull/1489))
+
 ## 3.14.0
 
 ### Features
