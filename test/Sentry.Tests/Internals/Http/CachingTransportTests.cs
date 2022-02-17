@@ -29,25 +29,25 @@ public class CachingTransportTests
         };
 
         Exception exception = null;
-        var innerTransport = new HttpTransport(options,new HttpClient(new CallbackHttpClientHandler(message =>
-        {
-            try
-            {
-                message.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception readStreamException)
-            {
-                exception = readStreamException;
-            }
-        })));
+        var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(message =>
+         {
+             try
+             {
+                 message.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+             }
+             catch (Exception readStreamException)
+             {
+                 exception = readStreamException;
+             }
+         })));
         await using var transport = new CachingTransport(innerTransport, options);
 
         var tempFile = Path.GetTempFileName();
-        
+
         try
         {
             var attachment = new Attachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
-            using var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] {attachment});
+            using var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] { attachment });
 
             // Act
             await transport.SendEnvelopeAsync(envelope);
