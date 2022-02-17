@@ -20,9 +20,14 @@ public class CachingTransportTests
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions {Dsn = DsnSamples.ValidDsnWithoutSecret, DiagnosticLogger = _logger, CacheDirectoryPath = cacheDirectory.Path};
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
 
-        using var innerTransport = new FakeTransport();
+        var innerTransport = new HttpTransport(options,new HttpClient(new CallbackHttpClientHandler(_ => { })));
         await using var transport = new CachingTransport(innerTransport, options);
 
         var tempFile = Path.GetTempFileName();
@@ -42,8 +47,6 @@ public class CachingTransportTests
             }
 
             // Assert
-            var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-            sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
         }
         finally
         {
