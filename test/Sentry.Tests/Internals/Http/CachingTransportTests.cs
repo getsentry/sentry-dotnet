@@ -15,7 +15,7 @@ public class CachingTransportTests
         _logger = new TestOutputDiagnosticLogger(testOutputHelper);
     }
 
-    [Fact(Timeout = 700000)]
+    [Fact(Timeout = 7000)]
     public async Task WithAttachment()
     {
         // Arrange
@@ -28,9 +28,17 @@ public class CachingTransportTests
             CacheDirectoryPath = cacheDirectory.Path
         };
 
+        Exception exception = null;
         var innerTransport = new HttpTransport(options,new HttpClient(new CallbackHttpClientHandler(message =>
         {
-            message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            try
+            {
+                message.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception readStreamException)
+            {
+                exception = readStreamException;
+            }
         })));
         await using var transport = new CachingTransport(innerTransport, options);
 
@@ -45,12 +53,16 @@ public class CachingTransportTests
             await transport.SendEnvelopeAsync(envelope);
 
             // Wait until directory is empty
-            while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
+            while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any() && exception == null)
             {
                 await Task.Delay(100);
             }
 
             // Assert
+            if (exception != null)
+            {
+                throw exception;
+            }
         }
         finally
         {
