@@ -24,10 +24,14 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
-        var innerTransport = new HttpTransport(options,new HttpClient(new CallbackHttpClientHandler(_ => { })));
+        var innerTransport = new HttpTransport(options,new HttpClient(new CallbackHttpClientHandler(message =>
+        {
+            message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        })));
         await using var transport = new CachingTransport(innerTransport, options);
 
         var tempFile = Path.GetTempFileName();
