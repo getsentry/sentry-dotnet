@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix caching transport with attachments ([#1489](https://github.com/getsentry/sentry-dotnet/pull/1489))
+- Revert Sentry in implicit usings ([#1490](https://github.com/getsentry/sentry-dotnet/pull/1490))
 
 ## 3.14.0
 
