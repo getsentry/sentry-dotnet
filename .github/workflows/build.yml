@@ -51,7 +51,7 @@ jobs:
           with:
             dotnet-version: |
               2.1.818
-              '6.0.x'
+              6.0.x
             
         - name: Run build script
           run: ${{ matrix.build_script }}
