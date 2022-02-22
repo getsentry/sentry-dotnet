@@ -34,7 +34,7 @@ jobs:
             fetch-depth: 2 # default is 1 and codecov needs > 1
 
         - name: Setup .NET SDK
-          if: matrix.os == 'windows-2022' || matrix.os == 'ubuntu-latest'
+          if: matrix.os == 'windows-2022'
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: |
@@ -45,6 +45,11 @@ jobs:
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: '6.0.x'
+        - name: Setup .NET SDK
+          if: matrix.os == 'ubuntu-latest'
+          uses: actions/setup-dotnet@v1
+          with:
+            dotnet-version: 2.1.818
 
         - name: Run build script
           run: ${{ matrix.build_script }}
