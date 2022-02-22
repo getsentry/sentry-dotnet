@@ -49,8 +49,11 @@ jobs:
           if: matrix.os == 'ubuntu-latest'
           uses: actions/setup-dotnet@v1
           with:
+          # Installing 2.1.818 on ubuntu has the side-effect of uninstalling the previous Frameworks.
             dotnet-version: |
               2.1.818
+              3.1.x
+              5.0.x
               6.0.x
             
         - name: Run build script
