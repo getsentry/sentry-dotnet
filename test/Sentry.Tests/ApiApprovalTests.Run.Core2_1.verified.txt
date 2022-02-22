@@ -1046,6 +1046,7 @@ namespace Sentry.Extensibility
         protected virtual System.Diagnostics.StackTrace CreateStackTrace(System.Exception? exception) { }
         protected virtual System.Reflection.MethodBase? GetMethod(System.Diagnostics.StackFrame stackFrame) { }
         protected Sentry.SentryStackFrame InternalCreateFrame(System.Diagnostics.StackFrame stackFrame, bool demangle) { }
+        public static bool IsSystemModuleName(string? moduleName, Sentry.SentryOptions options) { }
     }
 }
 namespace Sentry.Http

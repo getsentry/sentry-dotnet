@@ -164,7 +164,7 @@ namespace Sentry.Extensibility
                 }
             }
 
-            frame.InApp ??= !IsSystemModuleName(frame.Module);
+            frame.InApp ??= !IsSystemModuleName(frame.Module, _options);
 
             frame.FileName = stackFrame.GetFileName();
 
@@ -211,15 +211,21 @@ namespace Sentry.Extensibility
         protected virtual MethodBase? GetMethod(StackFrame stackFrame)
             => stackFrame.GetMethod();
 
-        private bool IsSystemModuleName(string? moduleName)
+        /// <summary>
+        /// Inform if the given module name belongs to the System or not.
+        /// </summary>
+        /// <param name="moduleName">The module name to be checked.</param>
+        /// <param name="options">The Sentry options.</param>
+        /// <returns>True if the module belongs to the System, false otherwise.</returns>
+        public static bool IsSystemModuleName(string? moduleName, SentryOptions options)
         {
             if (string.IsNullOrEmpty(moduleName))
             {
                 return false;
             }
 
-            return _options.InAppInclude?.Any(include => moduleName.StartsWith(include, StringComparison.Ordinal)) != true &&
-                   _options.InAppExclude?.Any(exclude => moduleName.StartsWith(exclude, StringComparison.Ordinal)) == true;
+            return options.InAppInclude?.Any(include => moduleName.StartsWith(include, StringComparison.Ordinal)) != true &&
+                   options.InAppExclude?.Any(exclude => moduleName.StartsWith(exclude, StringComparison.Ordinal)) == true;
         }
 
         /// <summary>
