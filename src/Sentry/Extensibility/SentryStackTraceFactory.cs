@@ -164,7 +164,7 @@ namespace Sentry.Extensibility
                 }
             }
 
-            frame.InApp ??= !IsSystemModuleName(frame.Module, _options);
+            frame.ConfigureAppFrame(_options);
 
             frame.FileName = stackFrame.GetFileName();
 
@@ -210,23 +210,6 @@ namespace Sentry.Extensibility
         /// <param name="stackFrame">The <see cref="StackFrame"/></param>.
         protected virtual MethodBase? GetMethod(StackFrame stackFrame)
             => stackFrame.GetMethod();
-
-        /// <summary>
-        /// Inform if the given module name belongs to the System or not.
-        /// </summary>
-        /// <param name="moduleName">The module name to be checked.</param>
-        /// <param name="options">The Sentry options.</param>
-        /// <returns>True if the module belongs to the System, false otherwise.</returns>
-        public static bool IsSystemModuleName(string? moduleName, SentryOptions options)
-        {
-            if (string.IsNullOrEmpty(moduleName))
-            {
-                return false;
-            }
-
-            return options.InAppInclude?.Any(include => moduleName.StartsWith(include, StringComparison.Ordinal)) != true &&
-                   options.InAppExclude?.Any(exclude => moduleName.StartsWith(exclude, StringComparison.Ordinal)) == true;
-        }
 
         /// <summary>
         /// Clean up function and module names produced from `async` state machine calls.

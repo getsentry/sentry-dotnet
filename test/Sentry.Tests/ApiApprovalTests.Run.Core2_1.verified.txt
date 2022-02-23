@@ -572,6 +572,7 @@ namespace Sentry
         public System.Collections.Generic.IList<string> PreContext { get; }
         public long? SymbolAddress { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Vars { get; }
+        public void ConfigureAppFrame(Sentry.SentryOptions options) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackFrame FromJson(System.Text.Json.JsonElement json) { }
     }
@@ -1046,7 +1047,6 @@ namespace Sentry.Extensibility
         protected virtual System.Diagnostics.StackTrace CreateStackTrace(System.Exception? exception) { }
         protected virtual System.Reflection.MethodBase? GetMethod(System.Diagnostics.StackFrame stackFrame) { }
         protected Sentry.SentryStackFrame InternalCreateFrame(System.Diagnostics.StackFrame stackFrame, bool demangle) { }
-        public static bool IsSystemModuleName(string? moduleName, Sentry.SentryOptions options) { }
     }
 }
 namespace Sentry.Http
