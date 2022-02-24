@@ -16,6 +16,61 @@ public class CachingTransportTests
     }
 
     [Fact(Timeout = 7000)]
+    public async Task WithAttachment()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
+
+        Exception exception = null;
+        var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(message =>
+         {
+             try
+             {
+                 message.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+             }
+             catch (Exception readStreamException)
+             {
+                 exception = readStreamException;
+             }
+         })));
+        await using var transport = new CachingTransport(innerTransport, options);
+
+        var tempFile = Path.GetTempFileName();
+
+        try
+        {
+            var attachment = new Attachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
+            using var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] { attachment });
+
+            // Act
+            await transport.SendEnvelopeAsync(envelope);
+
+            // Wait until directory is empty
+            while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any() && exception == null)
+            {
+                await Task.Delay(100);
+            }
+
+            // Assert
+            if (exception != null)
+            {
+                throw exception;
+            }
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
+    [Fact(Timeout = 7000)]
     public async Task WorksInBackground()
     {
         // Arrange
@@ -321,7 +376,27 @@ public class CachingTransportTests
     }
 
     [Fact(Timeout = 7000)]
-    public async Task DoesNotDeleteCacheIfConnectionWithIssue()
+    public async Task DoesNotDeleteCacheIfHttpRequestException()
+    {
+        var exception = new HttpRequestException(null);
+        await TestNetworkException(exception);
+    }
+
+    [Fact(Timeout = 7000)]
+    public async Task DoesNotDeleteCacheIfIOException()
+    {
+        var exception = new IOException(null);
+        await TestNetworkException(exception);
+    }
+
+    [Fact(Timeout = 7000)]
+    public async Task DoesNotDeleteCacheIfSocketException()
+    {
+        var exception = new SocketException();
+        await TestNetworkException(exception);
+    }
+
+    private async Task TestNetworkException(Exception exception)
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
@@ -332,7 +407,6 @@ public class CachingTransportTests
             CacheDirectoryPath = cacheDirectory.Path
         };
 
-        var exception = new HttpRequestException(null, new SocketException());
         var receivedException = new Exception();
         var innerTransport = Substitute.For<ITransport>();
 
@@ -363,6 +437,7 @@ public class CachingTransportTests
             innerTransport.ClearReceivedCalls();
             await transport.FlushAsync();
         }
+
         // Assert
         Assert.Equal(exception, receivedException);
         Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());

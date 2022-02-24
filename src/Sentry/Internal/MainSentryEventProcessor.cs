@@ -98,12 +98,13 @@ namespace Sentry.Internal
                 var stackTrace = SentryStackTraceFactoryAccessor().Create(@event.Exception);
                 if (stackTrace != null)
                 {
+                    var currentThread = Thread.CurrentThread;
                     var thread = new SentryThread
                     {
                         Crashed = false,
                         Current = true,
-                        Name = Thread.CurrentThread.Name,
-                        Id = Environment.CurrentManagedThreadId,
+                        Name = currentThread.Name,
+                        Id = currentThread.ManagedThreadId,
                         Stacktrace = stackTrace
                     };
 
@@ -204,15 +205,15 @@ namespace Sentry.Internal
 
             if (!string.IsNullOrWhiteSpace(cultureInfo.Name))
             {
-                dic.Add("Name", cultureInfo.Name);
+                dic.Add("name", cultureInfo.Name);
             }
             if (!string.IsNullOrWhiteSpace(cultureInfo.DisplayName))
             {
-                dic.Add("DisplayName", cultureInfo.DisplayName);
+                dic.Add("display_name", cultureInfo.DisplayName);
             }
             if (cultureInfo.Calendar is { } cal)
             {
-                dic.Add("Calendar", cal.GetType().Name);
+                dic.Add("calendar", cal.GetType().Name);
             }
 
             return dic.Count > 0 ? dic : null;
