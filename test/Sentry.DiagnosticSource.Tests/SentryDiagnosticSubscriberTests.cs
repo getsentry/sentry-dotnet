@@ -1,4 +1,4 @@
-#if !net461
+#if NET6_0
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Runtime.InteropServices;
