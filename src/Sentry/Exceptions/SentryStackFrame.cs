@@ -170,16 +170,18 @@ namespace Sentry
         {
             var parameterName = Module ?? Function;
             if (InApp != null)
-            { }
-            else if (string.IsNullOrEmpty(parameterName))
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(parameterName))
             {
                 InApp = true;
+                return;
             }
-            else
-            {
-                InApp = options.InAppInclude?.Any(include => parameterName.StartsWith(include, StringComparison.Ordinal)) == true ||
-                        options.InAppExclude?.Any(exclude => parameterName.StartsWith(exclude, StringComparison.Ordinal)) != true;
-            }
+
+            InApp = options.InAppInclude?.Any(include => parameterName.StartsWith(include, StringComparison.Ordinal)) == true ||
+                    options.InAppExclude?.Any(exclude => parameterName.StartsWith(exclude, StringComparison.Ordinal)) != true;
         }
 
         /// <summary>
