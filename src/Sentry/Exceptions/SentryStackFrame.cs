@@ -162,7 +162,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Configures <see cref="InApp"/> based on the InApp defined on SentryOptions.
+        /// Configures <see cref="InApp"/> based on the <see cref="SentryOptions.InAppInclude"/> and <see cref="SentryOptions.InAppExclude"/> or <paramref name="options"/>.
         /// </summary>
         /// <param name="options">The Sentry options.</param>
         /// <remarks><see cref="InApp"/> will remain with the same value if previously set.</remarks>
