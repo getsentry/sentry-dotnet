@@ -6,6 +6,7 @@ using Sentry.Internals.DiagnosticSource;
 
 namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
 {
+    [UsesVerify]
     public class SentryDiagnosticListenerTests
     {
         private class Fixture
@@ -139,12 +140,11 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             var itemsList = new ConcurrentBag<List<Item>>();
 
             // Act
-            var tasks = commands.Select(async limit =>
+            foreach (var limit in commands)
             {
                 var command = $"SELECT * FROM Items LIMIT {limit}";
                 itemsList.Add(await _fixture.NewContext().Items.FromSqlRaw(command).ToListAsync());
-            });
-            await Task.WhenAll(tasks);
+            }
 
             // Assert
             Assert.Equal(totalCommands, itemsList.Count);
@@ -170,17 +170,14 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
             var spans = transaction.Spans;
 
             // Act
-            var result = new[]
-            {
-                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 10").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 9").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 8").ToListAsync(),
-                context.Items.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 7").ToListAsync(),
-            };
-            await Task.WhenAll(result);
+            var dbSet = context.Items;
+            var result1 = await dbSet.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 10").ToListAsync();
+            await dbSet.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 9").ToListAsync();
+            await dbSet.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 8").ToListAsync();
+            await dbSet.FromSqlRaw("SELECT * FROM Items WHERE 1=1 LIMIT 7").ToListAsync();
 
             // Assert
-            Assert.Equal(3, result[0].Result.Count);
+            Assert.Equal(3, result1.Count);
             Assert.Equal(4, spans.Count(s => s.Operation == "db.query"));
 #if NET5_0_OR_GREATER
             Assert.Equal(4, spans.Count(s => s.Operation == "db.query_compiler"));
