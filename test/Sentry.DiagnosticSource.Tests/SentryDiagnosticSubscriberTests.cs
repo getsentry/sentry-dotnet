@@ -13,7 +13,7 @@ public class SentryDiagnosticSubscriberTests
     static SentryDiagnosticSubscriberTests()
     {
         sqlInstance = new SqlInstance(
-            name: "SentryDiagnosticSubscriber",
+            name: "SentryDiagnosticSubscriber" + Namer.RuntimeAndVersion,
             buildTemplate: TestDbBuilder.CreateTable);
     }
 
@@ -33,7 +33,7 @@ public class SentryDiagnosticSubscriberTests
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await sqlInstance.Build(databaseSuffix: Namer.RuntimeAndVersion);
+        using var database = await sqlInstance.Build();
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
