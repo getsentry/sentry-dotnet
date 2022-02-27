@@ -84,7 +84,7 @@ namespace Sentry
         public DefaultSentryScopeStateProcessor() { }
         public void Apply(Sentry.Scope scope, object state) { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.All)]
+    [System.AttributeUsage(System.AttributeTargets.Assembly)]
     public class DsnAttribute : System.Attribute
     {
         public DsnAttribute(string dsn) { }
