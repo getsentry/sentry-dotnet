@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Expose ConfigureAppFrame as a public static function. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
+ 
 ### Fixes
 
 - Adjust database span names by replacing `_` to `.`. `db.query_compiler` becomes `db.query.compile`. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
