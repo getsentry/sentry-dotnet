@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Expose ConfigureAppFrame as a public static function. #1493
+ 
 ## 3.14.1
 
 ### Fixes
