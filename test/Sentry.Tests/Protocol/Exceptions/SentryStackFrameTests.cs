@@ -83,4 +83,72 @@ public class SentryStackFrameTests
         var sut = new SentryStackFrame();
         Assert.NotNull(sut.FramesOmitted);
     }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppIncludeMatches_TrueSet()
+    {
+        // Arrange
+        var module = "IncludedModule";
+        var sut = new SentryStackFrame();
+        sut.Module = module;
+        var options = new SentryOptions();
+        options.AddInAppInclude(module);
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppExcludeMatches_TrueSet()
+    {
+        // Arrange
+        var module = "ExcludedModule";
+        var sut = new SentryStackFrame();
+        sut.Module = module;
+        var options = new SentryOptions();
+        options.AddInAppExclude(module);
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.False(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppRuleDoesntMatch_TrueSet()
+    {
+        // Arrange
+        var module = "AppModule";
+        var sut = new SentryStackFrame();
+        sut.Module = module;
+        var options = new SentryOptions();
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppAlreadySet_InAppIgnored()
+    {
+        // Arrange
+        var module = "ExcludedModule";
+        var sut = new SentryStackFrame();
+        sut.Module = module;
+        var options = new SentryOptions();
+        options.AddInAppExclude(module);
+        sut.InApp = true;
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp, "InApp started as true but ConfigureAppFrame changed it to false.");
+    }
 }

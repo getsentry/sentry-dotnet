@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -158,6 +159,29 @@ namespace Sentry
             writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
 
             writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Configures <see cref="InApp"/> based on the <see cref="SentryOptions.InAppInclude"/> and <see cref="SentryOptions.InAppExclude"/> or <paramref name="options"/>.
+        /// </summary>
+        /// <param name="options">The Sentry options.</param>
+        /// <remarks><see cref="InApp"/> will remain with the same value if previously set.</remarks>
+        public void ConfigureAppFrame(SentryOptions options)
+        {
+            var parameterName = Module ?? Function;
+            if (InApp != null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(parameterName))
+            {
+                InApp = true;
+                return;
+            }
+
+            InApp = options.InAppInclude?.Any(include => parameterName.StartsWith(include, StringComparison.Ordinal)) == true ||
+                    options.InAppExclude?.Any(exclude => parameterName.StartsWith(exclude, StringComparison.Ordinal)) != true;
         }
 
         /// <summary>
