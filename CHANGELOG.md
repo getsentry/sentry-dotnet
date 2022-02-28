@@ -8,7 +8,7 @@
  
 ### Fixes
 
-- Adjust database span names by replacing `_` to `.`. `db.query_compiler` becomes `db.query.compile`. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
+- Adjust database span names by replacing `_` to `.`. `db.query_compiler` becomes `db.query.compile`. ([#1502](https://github.com/getsentry/sentry-dotnet/pull/1502))
 
 ## 3.14.1
 
