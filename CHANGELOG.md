@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Expose ConfigureAppFrame as a public static function. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
+ 
 ## 3.14.1
 
 ### Fixes
