@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Runtime.InteropServices;
 using LocalDb;
@@ -7,7 +6,7 @@ using Sentry.Internals.DiagnosticSource;
 [UsesVerify]
 public class SentryDiagnosticSubscriberTests
 {
-    private static SqlInstance sqlInstance = null!;
+    private static SqlInstance sqlInstance;
 
     static SentryDiagnosticSubscriberTests()
     {
@@ -98,18 +97,5 @@ values ({addData});";
 
             return values;
         }
-    }
-}
-
-internal class RecordingTransport : ITransport
-{
-    private ConcurrentBag<Envelope> envelopes = new();
-
-    public IEnumerable<Envelope> Envelopes => envelopes;
-
-    public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
-    {
-        envelopes.Add(envelope);
-        return Task.CompletedTask;
     }
 }
