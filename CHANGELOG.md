@@ -5,6 +5,10 @@
 ### Features
 
 - Expose ConfigureAppFrame as a public static function. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
+
+### Fixes
+
+- Make `SentryDiagnosticSubscriber._disposableListeners` thread safe ([#1506](https://github.com/getsentry/sentry-dotnet/pull/1506))
  
 ## 3.14.1
 
