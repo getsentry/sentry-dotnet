@@ -144,7 +144,6 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite
                 var command = $"SELECT * FROM Items LIMIT {limit}";
                 itemsList.Add(await _fixture.NewContext().Items.FromSqlRaw(command).ToListAsync());
             });
-
             await Task.WhenAll(tasks);
 
             // Assert
