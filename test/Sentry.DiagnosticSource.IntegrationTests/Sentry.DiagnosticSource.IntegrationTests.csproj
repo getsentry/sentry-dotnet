@@ -46,13 +46,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="SentryDiagnosticSubscriberTests.RecordsSql.verified.txt">
-      <ParentFile>SentryDiagnosticSubscriberTests</ParentFile>
-      <DependentUpon>SentryDiagnosticSubscriberTests.cs</DependentUpon>
-    </None>
+    <PackageReference Include="LocalDb" Version="13.3.1" />
   </ItemGroup>
 
 </Project>
