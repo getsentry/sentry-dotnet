@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Sentry.Extensibility;
 
@@ -12,7 +12,7 @@ namespace Sentry.Internals.DiagnosticSource
     {
         private SentryEFCoreListener? _efInterceptor { get; set; }
         private SentrySqlListener? _sqlListener { get; set; }
-        private List<IDisposable> _disposableListeners = new();
+        private ConcurrentBag<IDisposable> _disposableListeners = new();
         private IHub _hub { get; }
         private SentryOptions _options { get; }
 
