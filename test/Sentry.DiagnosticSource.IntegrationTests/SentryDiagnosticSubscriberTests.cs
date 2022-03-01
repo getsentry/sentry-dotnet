@@ -1,4 +1,3 @@
-#if NET6_0
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Runtime.InteropServices;
@@ -114,5 +113,3 @@ internal class RecordingTransport : ITransport
         return Task.CompletedTask;
     }
 }
-
-#endif
