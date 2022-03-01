@@ -1,4 +1,4 @@
-#if NET5_0_OR_GREATER
+#if NET6_0
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Runtime.InteropServices;
