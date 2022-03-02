@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,5 +9,10 @@
     <PackageReference Include="LocalDb" Version="13.3.1" />
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=net461" />
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=net461" />
+  </ItemGroup>
+
 
 </Project>
