@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+    <PackageReference Include="LocalDb" Version="13.3.1" />
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+  </ItemGroup>
+
+</Project>
