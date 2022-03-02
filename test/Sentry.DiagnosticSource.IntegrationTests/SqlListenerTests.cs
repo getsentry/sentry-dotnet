@@ -3,14 +3,14 @@ using LocalDb;
 using Sentry.Internals.DiagnosticSource;
 
 [UsesVerify]
-public class SentryDiagnosticSubscriberTests
+public class SqlListenerTests
 {
     private static SqlInstance sqlInstance;
 
-    static SentryDiagnosticSubscriberTests()
+    static SqlListenerTests()
     {
         sqlInstance = new SqlInstance(
-            name: "SentryDiagnosticSubscriber" + Namer.RuntimeAndVersion,
+            name: "SqlListenerTests" + Namer.RuntimeAndVersion,
             buildTemplate: TestDbBuilder.CreateTable);
     }
 
