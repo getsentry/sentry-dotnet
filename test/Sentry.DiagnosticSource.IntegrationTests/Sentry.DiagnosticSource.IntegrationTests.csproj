@@ -7,7 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
     <PackageReference Include="LocalDb" Version="13.3.1" />
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    <ProjectReference Include="../../src/Sentry/Sentry.csproj" Condition="'$(TargetFramework)' != 'net48'"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=net461" />
