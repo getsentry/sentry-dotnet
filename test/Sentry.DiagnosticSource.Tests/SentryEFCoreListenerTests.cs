@@ -19,7 +19,7 @@ public class SentryEFCoreListenerTests
             _ when
                 type == EFQueryCompiling ||
                 type == EFQueryCompiled
-                => span => span.Description != null && span.Operation == "db.query_compiler",
+                => span => span.Description != null && span.Operation == "db.query.compile",
             _ when
                 type == EFConnectionOpening ||
                 type == EFConnectionClosed
