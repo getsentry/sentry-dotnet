@@ -47,16 +47,16 @@ public class SentryDiagnosticSubscriberTests
             .ToList();
         await Verify(payloads)
             .ModifySerialization(
-                _ =>
+                p =>
                 {
-                    _.IgnoreMembersWithType<Contexts>();
-                    _.IgnoreMembersWithType<SdkVersion>();
-                    _.IgnoreMembersWithType<DateTimeOffset>();
-                    _.IgnoreMembersWithType<SpanId>();
-                    _.IgnoreMembersWithType<SentryId>();
-                    _.IgnoreMembers<SentryEvent>(_ => _.Modules, _ => _.Release);
-                    _.IgnoreMembers<Transaction>(_ => _.Release);
-                    _.IgnoreMembers<SentryException>(_ => _.Module, _ => _.ThreadId);
+                    p.IgnoreMembersWithType<Contexts>();
+                    p.IgnoreMembersWithType<SdkVersion>();
+                    p.IgnoreMembersWithType<DateTimeOffset>();
+                    p.IgnoreMembersWithType<SpanId>();
+                    p.IgnoreMembersWithType<SentryId>();
+                    p.IgnoreMembers<SentryEvent>(e => e.Modules, e => e.Release);
+                    p.IgnoreMembers<Transaction>(t => t.Release);
+                    p.IgnoreMembers<SentryException>(e => e.Module, e => e.ThreadId);
                 });
     }
 
