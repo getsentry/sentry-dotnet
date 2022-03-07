@@ -17,7 +17,7 @@
   <!-- Run netcoreapp3.0 against netstandard2.1 target of Sentry -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <ProjectReference Update="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
-    <!-- NET Core's built-in STJ is lower version which causes conflicts, so we have to explicitly reference it -->
+    <!-- NET Core 3.0's built-in STJ is lower version which causes conflicts, so we have to explicitly reference it -->
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
     <!-- Ben.Demystifier uses S.R.M v5 and also requires it via package reference when on nca3.x -->
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
