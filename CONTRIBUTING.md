@@ -41,7 +41,7 @@ The M1 ("Apple silicon") is an Arm64 processor.  While .NET 6 runs natively on t
   - If prompted, you will need to allow Apple's [Rosetta](https://support.apple.com/HT211861) to be installed.  If you have previously done this for another app, you won't be prompted again.
 - Install the latest .NET 5 SDK through the normal process.  It is only available for `x64`.
 - Install the latest .NET Core 3.1 SDK through the normal process.  It is only available for `x64`.
-- Install the .NET Core 3.1 SDK through a custom process as described below, which forces the SDK to be installed to a usable location.  
+- Install the .NET Core 2.1 SDK through a custom process as described below, which forces the SDK to be installed to a usable location.  
   *.NET Core 2.1 is no longer supported by Microsoft and is only used in our unit tests.  You can skip this step if you don't care about tests failing on .NET Core 2.1.*
   - Download the [dotnet-install bash script](https://dot.net/v1/dotnet-install.sh) from Microsoft.
   - Run the following commands:
