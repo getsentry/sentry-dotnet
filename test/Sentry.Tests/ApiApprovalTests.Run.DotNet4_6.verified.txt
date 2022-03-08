@@ -354,6 +354,19 @@ namespace Sentry
         public static Sentry.SentryId CaptureMessage(this Sentry.ISentryClient client, string message, Sentry.SentryLevel level = 1) { }
         public static void CaptureUserFeedback(this Sentry.ISentryClient client, Sentry.SentryId eventId, string email, string comments, string? name = null) { }
     }
+    public sealed class SentryDebugImage : Sentry.IJsonSerializable
+    {
+        public SentryDebugImage() { }
+        public string? CodeFile { get; set; }
+        public string? CodeId { get; set; }
+        public string? DebugFile { get; set; }
+        public string? DebugId { get; set; }
+        public string? ImageAddress { get; set; }
+        public long ImageSize { get; set; }
+        public string? Type { get; set; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.SentryDebugImage FromJson(System.Text.Json.JsonElement json) { }
+    }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
     public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable
     {
@@ -374,6 +387,7 @@ namespace Sentry
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
+        public System.Collections.Generic.List<Sentry.SentryDebugImage>? SentryDebugImages { get; set; }
         public System.Collections.Generic.IEnumerable<Sentry.Protocol.SentryException>? SentryExceptions { get; set; }
         public System.Collections.Generic.IEnumerable<Sentry.SentryThread>? SentryThreads { get; set; }
         public string? ServerName { get; set; }
@@ -555,6 +569,7 @@ namespace Sentry
     {
         public SentryStackFrame() { }
         public string? AbsolutePath { get; set; }
+        public string? AddressMode { get; set; }
         public int? ColumnNumber { get; set; }
         public string? ContextLine { get; set; }
         public string? FileName { get; set; }
