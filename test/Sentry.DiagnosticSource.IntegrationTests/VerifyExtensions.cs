@@ -1,8 +1,8 @@
-﻿static class VerifyExtensions{
-
+﻿static class VerifyExtensions
+{
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
     {
-        return settings .ModifySerialization(
+        return settings.ModifySerialization(
             p =>
             {
                 p.IgnoreMembersWithType<Contexts>();
