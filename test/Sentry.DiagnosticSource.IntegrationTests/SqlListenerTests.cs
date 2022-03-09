@@ -50,7 +50,7 @@ public class SqlListenerTests
     }
 
     [SkippableFact]
-    public async Task RecordsEfAsync()
+    public async Task RecordsEf()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
