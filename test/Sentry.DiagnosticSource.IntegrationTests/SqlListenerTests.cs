@@ -9,7 +9,6 @@ public class SqlListenerTests
 
     static SqlListenerTests()
     {
-        Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         sqlInstance = new SqlInstance(
             name: "SqlListenerTests" + Namer.RuntimeAndVersion,
             buildTemplate: TestDbBuilder.CreateTable);
@@ -18,6 +17,7 @@ public class SqlListenerTests
     [SkippableFact]
     public async Task RecordsSql()
     {
+        Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
@@ -52,6 +52,7 @@ public class SqlListenerTests
     [SkippableFact]
     public async Task RecordsEfAsync()
     {
+        Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
