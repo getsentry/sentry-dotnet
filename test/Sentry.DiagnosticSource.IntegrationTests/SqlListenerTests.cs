@@ -80,6 +80,6 @@ public class SqlListenerTests
             .Select(x => x.Payload)
             .ToList();
         await Verify(payloads)
-            .IgnoreStandardSentryMembers();
+            .IgnoreStandardSentryMembers().UniqueForRuntimeAndVersion();
     }
 }
