@@ -100,7 +100,7 @@ namespace Sentry
         /// The Sentry Debug Meta Images interface.
         /// </summary>
         /// <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta#debug-images"/>
-        public List<SentryDebugImage>? SentryDebugImages { get; set; }
+        public List<DebugImage>? DebugImages { get; set; }
 
         /// <summary>
         /// A list of relevant modules and their versions.
@@ -248,12 +248,12 @@ namespace Sentry
             writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
             writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
 
-            if (SentryDebugImages != null && SentryDebugImages.Count > 0)
+            if (DebugImages != null && DebugImages.Count > 0)
             {
                 writer.WritePropertyName("debug_meta");
                 writer.WriteStartObject();
 
-                writer.WriteArray("images", SentryDebugImages.ToArray(), logger);
+                writer.WriteArray("images", DebugImages.ToArray(), logger);
 
                 writer.WriteEndObject();
             }
@@ -289,7 +289,7 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
 
             var debugMeta = json.GetPropertyOrNull("debug_meta");
-            var images = debugMeta?.GetPropertyOrNull("images")?.EnumerateArray().Select(SentryDebugImage.FromJson).ToList();
+            var images = debugMeta?.GetPropertyOrNull("images")?.EnumerateArray().Select(DebugImage.FromJson).ToList();
 
             return new SentryEvent(null, timestamp, eventId)
             {
@@ -301,7 +301,7 @@ namespace Sentry
                 Release = release,
                 SentryExceptionValues = exceptionValues,
                 SentryThreadValues = threadValues,
-                SentryDebugImages = images,
+                DebugImages = images,
                 Level = level,
                 TransactionName = transaction,
                 _request = request,

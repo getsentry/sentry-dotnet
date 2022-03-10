@@ -10,7 +10,7 @@ namespace Sentry
     /// The Sentry Debug Meta Images interface.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta#debug-images"/>
-    public sealed class SentryDebugImage : IJsonSerializable
+    public sealed class DebugImage : IJsonSerializable
     {
         /// <summary>
         /// Type of the debug image.
@@ -69,7 +69,7 @@ namespace Sentry
         /// <summary>
         /// Parses from JSON.
         /// </summary>
-        public static SentryDebugImage FromJson(JsonElement json)
+        public static DebugImage FromJson(JsonElement json)
         {
             var type = json.GetPropertyOrNull("type")?.GetString();
             var imageAddress = json.GetPropertyOrNull("image_addr")?.GetString();
@@ -79,7 +79,7 @@ namespace Sentry
             var codeId = json.GetPropertyOrNull("code_id")?.GetString();
             var codeFile = json.GetPropertyOrNull("code_file")?.GetString();
 
-            return new SentryDebugImage
+            return new DebugImage
             {
                 Type = type,
                 ImageAddress = imageAddress,
