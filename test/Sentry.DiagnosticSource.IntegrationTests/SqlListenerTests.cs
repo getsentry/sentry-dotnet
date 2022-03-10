@@ -14,6 +14,7 @@ public class SqlListenerTests
             buildTemplate: TestDbBuilder.CreateTable);
     }
 
+#if !NET48
     [SkippableFact]
     public async Task RecordsSql()
     {
@@ -48,6 +49,7 @@ public class SqlListenerTests
         await Verify(payloads)
             .IgnoreStandardSentryMembers();
     }
+#endif
 
     [SkippableFact]
     public async Task RecordsEf()
@@ -80,6 +82,7 @@ public class SqlListenerTests
             .Select(x => x.Payload)
             .ToList();
         await Verify(payloads)
-            .IgnoreStandardSentryMembers().UniqueForRuntimeAndVersion();
+            .IgnoreStandardSentryMembers()
+            .UniqueForRuntimeAndVersion();
     }
 }
