@@ -84,7 +84,7 @@ namespace Sentry
         public DefaultSentryScopeStateProcessor() { }
         public void Apply(Sentry.Scope scope, object state) { }
     }
-    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.All)]
+    [System.AttributeUsage(System.AttributeTargets.Assembly)]
     public class DsnAttribute : System.Attribute
     {
         public DsnAttribute(string dsn) { }
@@ -588,6 +588,7 @@ namespace Sentry
         public System.Collections.Generic.IList<string> PreContext { get; }
         public long? SymbolAddress { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Vars { get; }
+        public void ConfigureAppFrame(Sentry.SentryOptions options) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackFrame FromJson(System.Text.Json.JsonElement json) { }
     }

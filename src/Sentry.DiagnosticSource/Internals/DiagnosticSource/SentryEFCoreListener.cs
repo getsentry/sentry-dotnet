@@ -127,7 +127,7 @@ namespace Sentry.Internals.DiagnosticSource
                 //Query compiler Span
                 if (value.Key == EFQueryStartCompiling || value.Key == EFQueryCompiling)
                 {
-                    AddSpan(SentryEFSpanType.QueryCompiler, "db.query_compiler", FilterNewLineValue(value.Value));
+                    AddSpan(SentryEFSpanType.QueryCompiler, "db.query.compile", FilterNewLineValue(value.Value));
                 }
                 else if (value.Key == EFQueryCompiled)
                 {

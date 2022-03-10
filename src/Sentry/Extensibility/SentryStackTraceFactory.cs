@@ -164,7 +164,7 @@ namespace Sentry.Extensibility
                 }
             }
 
-            frame.InApp ??= !IsSystemModuleName(frame.Module);
+            frame.ConfigureAppFrame(_options);
 
             frame.FileName = stackFrame.GetFileName();
 
@@ -210,17 +210,6 @@ namespace Sentry.Extensibility
         /// <param name="stackFrame">The <see cref="StackFrame"/></param>.
         protected virtual MethodBase? GetMethod(StackFrame stackFrame)
             => stackFrame.GetMethod();
-
-        private bool IsSystemModuleName(string? moduleName)
-        {
-            if (string.IsNullOrEmpty(moduleName))
-            {
-                return false;
-            }
-
-            return _options.InAppInclude?.Any(include => moduleName.StartsWith(include, StringComparison.Ordinal)) != true &&
-                   _options.InAppExclude?.Any(exclude => moduleName.StartsWith(exclude, StringComparison.Ordinal)) == true;
-        }
 
         /// <summary>
         /// Clean up function and module names produced from `async` state machine calls.
