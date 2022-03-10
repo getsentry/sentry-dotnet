@@ -1,6 +1,29 @@
 ﻿[
   {
     Source: {
+      Exception: {
+        $type: Exception,
+        Type: Exception,
+        Message: my exception
+      },
+      Platform: csharp,
+      SentryExceptions: [
+        {
+          Type: System.Exception,
+          Value: my exception,
+          Mechanism: {}
+        }
+      ],
+      SentryThreads: [],
+      Level: error,
+      TransactionName: my transaction,
+      Request: {},
+      User: {},
+      Environment: production
+    }
+  },
+  {
+    Source: {
       Name: my transaction,
       Platform: csharp,
       Operation: my operation,
@@ -79,29 +102,6 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
         }
       ],
       IsFinished: true
-    }
-  },
-  {
-    Source: {
-      Exception: {
-        $type: Exception,
-        Type: Exception,
-        Message: my exception
-      },
-      Platform: csharp,
-      SentryExceptions: [
-        {
-          Type: System.Exception,
-          Value: my exception,
-          Mechanism: {}
-        }
-      ],
-      SentryThreads: [],
-      Level: error,
-      TransactionName: my transaction,
-      Request: {},
-      User: {},
-      Environment: production
     }
   }
 ]

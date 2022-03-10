@@ -1,8 +1,6 @@
-﻿using System.Collections.Concurrent;
-
-internal class RecordingTransport : ITransport
+﻿internal class RecordingTransport : ITransport
 {
-    private ConcurrentBag<Envelope> envelopes = new();
+    private List<Envelope> envelopes = new();
 
     public IEnumerable<Envelope> Envelopes => envelopes;
 
