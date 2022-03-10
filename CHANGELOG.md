@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add new Protocol definitions for DebugImages and AddressMode ([#1513](https://github.com/getsentry/sentry-dotnet/pull/1513))
+
 ## 3.14.1
 
 ### Fixes
