@@ -25,7 +25,7 @@ namespace Sentry
         /// The size of the image in virtual memory.
         /// If missing, Sentry will assume that the image spans up to the next image, which might lead to invalid stack traces.
         /// </summary>
-        public long ImageSize { get; set; }
+        public long? ImageSize { get; set; }
 
         /// <summary>
         /// Unique debug identifier of the image.
@@ -71,7 +71,7 @@ namespace Sentry
         {
             var type = json.GetPropertyOrNull("type")?.GetString();
             var imageAddress = json.GetPropertyOrNull("image_addr")?.GetString();
-            var imageSize = json.GetPropertyOrNull("image_size")?.GetInt64() ?? 0;
+            var imageSize = json.GetPropertyOrNull("image_size")?.GetInt64();
             var debugId = json.GetPropertyOrNull("debug_id")?.GetString();
             var debugFile = json.GetPropertyOrNull("debug_file")?.GetString();
             var codeId = json.GetPropertyOrNull("code_id")?.GetString();

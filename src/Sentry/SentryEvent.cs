@@ -248,7 +248,7 @@ namespace Sentry
             writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
             writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
 
-            if (DebugImages != null && DebugImages.Count > 0)
+            if (DebugImages?.Count > 0)
             {
                 writer.WritePropertyName("debug_meta");
                 writer.WriteStartObject();
