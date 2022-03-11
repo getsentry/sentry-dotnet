@@ -37,10 +37,6 @@ public class SqlListenerTests
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureException(new Exception("my exception"));
             await TestDbBuilder.AddData(database);
-            while (!transport.Envelopes.Any())
-            {
-                await Task.Delay(100);
-            }
             await TestDbBuilder.GetData(database);
             transaction.Finish();
         }
