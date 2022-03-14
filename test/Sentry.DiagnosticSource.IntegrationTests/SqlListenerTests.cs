@@ -37,7 +37,6 @@ public class SqlListenerTests
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureException(new Exception("my exception"));
             await TestDbBuilder.AddData(database);
-            await transport.WaitUntilCount(1);
             await TestDbBuilder.GetData(database);
             transaction.Finish();
         }
@@ -74,7 +73,6 @@ public class SqlListenerTests
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureException(new Exception("my exception"));
             await TestDbBuilder.AddEfData(database);
-            await transport.WaitUntilCount(1);
             await TestDbBuilder.GetEfData(database);
             transaction.Finish();
         }

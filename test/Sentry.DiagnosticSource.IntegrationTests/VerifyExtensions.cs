@@ -5,6 +5,7 @@
         return settings.ModifySerialization(
             p =>
             {
+                p.AddExtraSettings(x=>x.Converters.Add(new SpansConverter()));
                 p.IgnoreMembersWithType<Contexts>();
                 p.IgnoreMembersWithType<SdkVersion>();
                 p.IgnoreMembersWithType<DateTimeOffset>();

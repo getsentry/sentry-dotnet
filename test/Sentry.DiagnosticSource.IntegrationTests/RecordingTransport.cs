@@ -12,12 +12,4 @@
         }
         return Task.CompletedTask;
     }
-
-    public async Task WaitUntilCount(int target)
-    {
-        while (_envelopes.Count != target)
-        {
-            await Task.Delay(100);
-        }
-    }
 }

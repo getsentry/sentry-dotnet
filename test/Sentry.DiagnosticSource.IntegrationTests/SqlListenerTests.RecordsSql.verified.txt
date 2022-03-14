@@ -37,17 +37,6 @@
         {
           IsFinished: true,
           Operation: db.query,
-          Description: select Value from MyTable,
-          Status: Ok,
-          IsSampled: true,
-          Extra: {
-            db.connection_id: Guid_1,
-            db.operation_id: Guid_2
-          }
-        },
-        {
-          IsFinished: true,
-          Operation: db.query,
           Status: DeadlineExceeded,
           IsSampled: true,
           Extra: {
@@ -66,13 +55,24 @@ values (0);,
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.operation_id: Guid_3
+            db.operation_id: Guid_2
           }
         },
         {
           IsFinished: true,
           Operation: db.query,
           Status: DeadlineExceeded,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_3
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Description: select Value from MyTable,
+          Status: Ok,
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
