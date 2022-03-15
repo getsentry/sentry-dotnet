@@ -164,7 +164,7 @@ public class SentrySqlListenerTests
         // Act
         interceptor.OnNext(
             new(key,
-                new { OperationId = Guid.Empty, ConnectionId = Guid.Empty, Command = new { CommandText = "" } }));
+                new { OperationId = Guid.NewGuid(), ConnectionId = Guid.NewGuid(), Command = new { CommandText = "" } }));
 
         // Assert
         var spans = _fixture.Spans.Where(s => s.Operation != "abc");
