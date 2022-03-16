@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using Sentry.Extensibility;
 using Sentry.Internal;
 
 namespace Sentry.Internals.DiagnosticSource
@@ -13,7 +14,7 @@ namespace Sentry.Internals.DiagnosticSource
         {
             if (options.TracesSampleRate == 0)
             {
-                options.DiagnosticLogger?.Log(SentryLevel.Info, "DiagnosticSource Integration is now disabled due to TracesSampleRate being set to zero.");
+                options.Log(SentryLevel.Info, "DiagnosticSource Integration is now disabled due to TracesSampleRate being set to zero.");
                 options.DisableDiagnosticSourceIntegration();
             }
             else
