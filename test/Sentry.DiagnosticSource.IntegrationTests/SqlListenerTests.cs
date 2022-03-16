@@ -14,7 +14,7 @@ public class SqlListenerTests
             buildTemplate: TestDbBuilder.CreateTable);
     }
 
-#if !NET48
+#if !NETFRAMEWORK
     [SkippableFact]
     public async Task RecordsSql()
     {
