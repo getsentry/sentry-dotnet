@@ -8,7 +8,7 @@ namespace Sentry.Internals.DiagnosticSource
     internal class SentryDiagnosticListenerIntegration : IInternalSdkIntegration
     {
         private SentryDiagnosticSubscriber? _subscriber;
-        private IDisposable? _diagnosticListener { get; set; }
+        private IDisposable? _diagnosticListener;
 
         public void Register(IHub hub, SentryOptions options)
         {
