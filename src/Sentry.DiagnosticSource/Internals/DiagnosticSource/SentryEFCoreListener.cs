@@ -1,8 +1,6 @@
-#if NETCOREAPP3_0_OR_GREATER
-using System;
-using System.Collections.Generic;
 using System.Threading;
-#endif
+using System.Collections.Generic;
+using System;
 using Sentry.Extensibility;
 
 namespace Sentry.Internals.DiagnosticSource
