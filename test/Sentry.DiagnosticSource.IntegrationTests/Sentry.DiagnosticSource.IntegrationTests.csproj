@@ -23,7 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
-    <PackageReference Include="LocalDb" Version="13.3.1" />
+    <PackageReference Include="LocalDb" Version="13.4.0" />
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
 
