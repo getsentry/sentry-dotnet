@@ -63,22 +63,23 @@ public class SentrySqlListenerTests
         => type switch
         {
             _ when
-                type == SqlDataWriteConnectionOpenBeforeCommand ||
-                type == SqlMicrosoftWriteConnectionOpenBeforeCommand ||
-                type == SqlMicrosoftWriteConnectionOpenAfterCommand ||
-                type == SqlDataWriteConnectionOpenAfterCommand ||
-                type == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                type == SqlDataWriteConnectionCloseAfterCommand ||
-                type == SqlDataWriteTransactionCommitAfter ||
-                type == SqlMicrosoftWriteTransactionCommitAfter
+                type is
+                    SqlDataWriteConnectionOpenBeforeCommand or
+                    SqlMicrosoftWriteConnectionOpenBeforeCommand or
+                    SqlMicrosoftWriteConnectionOpenAfterCommand or
+                    SqlDataWriteConnectionOpenAfterCommand or
+                    SqlMicrosoftWriteConnectionCloseAfterCommand or
+                    SqlDataWriteConnectionCloseAfterCommand or
+                    SqlDataWriteTransactionCommitAfter or
+                    SqlMicrosoftWriteTransactionCommitAfter
                 => span => span.Description is null && span.Operation == "db.connection",
             _ when
-                type == SqlDataBeforeExecuteCommand ||
-                type == SqlMicrosoftBeforeExecuteCommand ||
-                type == SqlDataAfterExecuteCommand ||
-                type == SqlMicrosoftAfterExecuteCommand ||
-                type == SqlDataWriteCommandError ||
-                type == SqlMicrosoftWriteCommandError
+                type is SqlDataBeforeExecuteCommand or
+                    SqlMicrosoftBeforeExecuteCommand or
+                    SqlDataAfterExecuteCommand or
+                    SqlMicrosoftAfterExecuteCommand or
+                    SqlDataWriteCommandError or
+                    SqlMicrosoftWriteCommandError
                 => span => span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };

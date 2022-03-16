@@ -17,17 +17,13 @@ public class SentryEFCoreListenerTests
         => type switch
         {
             _ when
-                type == EFQueryCompiling ||
-                type == EFQueryCompiled
+                type is EFQueryCompiling or EFQueryCompiled
                 => span => span.Description != null && span.Operation == "db.query.compile",
             _ when
-                type == EFConnectionOpening ||
-                type == EFConnectionClosed
+                type is EFConnectionOpening or EFConnectionClosed
                 => span => span.Description == null && span.Operation == "db.connection",
             _ when
-                type == EFCommandExecuting ||
-                type == EFCommandExecuting ||
-                type == EFCommandFailed
+                type is EFCommandExecuting or EFCommandExecuting or EFCommandFailed
                 => span => span.Description != null && span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
