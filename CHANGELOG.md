@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
+
 ## 3.15.0
 
 ### Features
