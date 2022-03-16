@@ -55,8 +55,15 @@ namespace Sentry.Internals.DiagnosticSource
 
         internal void DisableQuerySpan() => _logQueryEnabled = false;
 
-        private ISpan? GetParent(SentryEFSpanType type, Scope scope)
-            => type == SentryEFSpanType.QueryExecution ? scope.GetSpan() : scope.Transaction;
+        private static ISpan? GetParent(SentryEFSpanType type, Scope scope)
+        {
+            if (type == SentryEFSpanType.QueryExecution)
+            {
+                return scope.GetSpan();
+            }
+
+            return scope.Transaction;
+        }
 
         private void AddSpan(SentryEFSpanType type, string operation, string? description)
         {
