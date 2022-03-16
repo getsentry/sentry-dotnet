@@ -10,11 +10,11 @@ namespace Sentry.Internals.DiagnosticSource
     /// </summary>
     internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>, IDisposable
     {
-        private SentryEFCoreListener? _efInterceptor { get; set; }
-        private SentrySqlListener? _sqlListener { get; set; }
+        private SentryEFCoreListener? _efInterceptor;
+        private SentrySqlListener? _sqlListener;
         private ConcurrentBag<IDisposable> _disposableListeners = new();
-        private IHub _hub { get; }
-        private SentryOptions _options { get; }
+        private IHub _hub;
+        private SentryOptions _options;
 
         public SentryDiagnosticSubscriber(IHub hub, SentryOptions options)
         {

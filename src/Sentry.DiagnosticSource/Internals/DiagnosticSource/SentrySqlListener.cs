@@ -41,8 +41,8 @@ namespace Sentry.Internals.DiagnosticSource
         internal const string SqlDataWriteCommandError = "System.Data.SqlClient.WriteCommandError";
         internal const string SqlMicrosoftWriteCommandError = "Microsoft.Data.SqlClient.WriteCommandError";
 
-        private IHub _hub { get; }
-        private SentryOptions _options { get; }
+        private IHub _hub;
+        private SentryOptions _options;
 
         public SentrySqlListener(IHub hub, SentryOptions options)
         {
