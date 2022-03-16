@@ -91,18 +91,19 @@ namespace Sentry.Internals.DiagnosticSource
             ISpan? span = null;
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction?.IsSampled == true)
+                if (scope.Transaction?.IsSampled != true)
                 {
-                    if (GetSpanBucket(type)?.Value is { } reference &&
-                        reference.TryGetTarget(out var startedSpan))
-                    {
-                        span = startedSpan;
-                    }
-                    else
-                    {
-                        _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
-                    }
+                    return;
                 }
+
+                if (GetSpanBucket(type)?.Value is { } reference &&
+                    reference.TryGetTarget(out var startedSpan))
+                {
+                    span = startedSpan;
+                    return;
+                }
+
+                _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
             });
             return span;
         }
@@ -128,38 +129,51 @@ namespace Sentry.Internals.DiagnosticSource
                 if (value.Key == EFQueryStartCompiling || value.Key == EFQueryCompiling)
                 {
                     AddSpan(SentryEFSpanType.QueryCompiler, "db.query.compile", FilterNewLineValue(value.Value));
+                    return;
                 }
-                else if (value.Key == EFQueryCompiled)
+
+                if (value.Key == EFQueryCompiled)
                 {
                     TakeSpan(SentryEFSpanType.QueryCompiler)?.Finish(SpanStatus.Ok);
+                    return;
                 }
 
                 //Connection Span
                 //A transaction may or may not show a connection with it.
-                else if (_logConnectionEnabled && value.Key == EFConnectionOpening)
+
+                if (_logConnectionEnabled && value.Key == EFConnectionOpening)
                 {
                     AddSpan(SentryEFSpanType.Connection, "db.connection", null);
-                }
-                else if (_logConnectionEnabled && value.Key == EFConnectionClosed)
-                {
-                    TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
+                    return;
                 }
 
-                //Query Execution Span
-                else if (_logQueryEnabled)
+                if (_logConnectionEnabled && value.Key == EFConnectionClosed)
                 {
-                    if (value.Key == EFCommandExecuting)
-                    {
-                        AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
-                    }
-                    else if (value.Key == EFCommandFailed)
-                    {
-                        TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
-                    }
-                    else if (value.Key == EFCommandExecuted)
-                    {
-                        TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
-                    }
+                    TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
+                    return;
+                }
+
+                // return if not Query Execution Span
+                if (!_logQueryEnabled)
+                {
+                    return;
+                }
+
+                if (value.Key == EFCommandExecuting)
+                {
+                    AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
+                    return;
+                }
+
+                if (value.Key == EFCommandFailed)
+                {
+                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
+                    return;
+                }
+
+                if (value.Key == EFCommandExecuted)
+                {
+                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
                 }
             }
             catch (Exception ex)

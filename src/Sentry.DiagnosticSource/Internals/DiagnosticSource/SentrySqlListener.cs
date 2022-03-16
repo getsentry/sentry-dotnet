@@ -70,6 +70,7 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 return guid;
             }
+
             return null;
         }
 
@@ -79,6 +80,7 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 return guid;
             }
+
             return null;
         }
 
@@ -86,24 +88,28 @@ namespace Sentry.Internals.DiagnosticSource
         {
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction is { } transaction)
+                if (scope.Transaction is not { } transaction)
                 {
-                    if (type == SentrySqlSpanType.Connection &&
-                        transaction?.StartChild(operation) is { } connectionSpan)
+                    return;
+                }
+
+                if (type == SentrySqlSpanType.Connection &&
+                    transaction?.StartChild(operation) is { } connectionSpan)
+                {
+                    SetOperationId(connectionSpan, value.GetProperty<Guid>(OperationKey));
+                    return;
+                }
+
+                if (type == SentrySqlSpanType.Execution && value.GetProperty<Guid>(ConnectionKey) is { } connectionId)
+                {
+                    var span = TryStartChild(
+                        TryGetConnectionSpan(scope, connectionId) ?? transaction,
+                        operation,
+                        null);
+                    if (span is not null)
                     {
-                        SetOperationId(connectionSpan, value.GetProperty<Guid>(OperationKey));
-                    }
-                    else if (type == SentrySqlSpanType.Execution && value.GetProperty<Guid>(ConnectionKey) is { } connectionId)
-                    {
-                        var span = TryStartChild(
-                            TryGetConnectionSpan(scope, connectionId) ?? transaction,
-                            operation,
-                            null);
-                        if (span is not null)
-                        {
-                            SetOperationId(span, value.GetProperty<Guid>(OperationKey));
-                            SetConnectionId(span, connectionId);
-                        }
+                        SetOperationId(span, value.GetProperty<Guid>(OperationKey));
+                        SetConnectionId(span, connectionId);
                     }
                 }
             });

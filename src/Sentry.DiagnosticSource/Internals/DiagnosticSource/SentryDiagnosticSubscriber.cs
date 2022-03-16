@@ -33,8 +33,10 @@ namespace Sentry.Internals.DiagnosticSource
                 _efInterceptor = new(_hub, _options);
                 _disposableListeners.Add(listener.Subscribe(_efInterceptor));
                 _options.Log(SentryLevel.Debug, "Registered integration with EF Core.");
+                return;
             }
-            else if (listener.Name == "SqlClientDiagnosticListener")
+
+            if (listener.Name == "SqlClientDiagnosticListener")
             {
                 _sqlListener = new(_hub, _options);
                 _disposableListeners.Add(listener.Subscribe(_sqlListener));

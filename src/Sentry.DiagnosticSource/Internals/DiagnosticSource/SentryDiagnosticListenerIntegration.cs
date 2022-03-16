@@ -16,12 +16,11 @@ namespace Sentry.Internals.DiagnosticSource
             {
                 options.Log(SentryLevel.Info, "DiagnosticSource Integration is now disabled due to TracesSampleRate being set to zero.");
                 options.DisableDiagnosticSourceIntegration();
+                return;
             }
-            else
-            {
-                _subscriber = new SentryDiagnosticSubscriber(hub, options);
-                _diagnosticListener = DiagnosticListener.AllListeners.Subscribe(_subscriber);
-            }
+
+            _subscriber = new SentryDiagnosticSubscriber(hub, options);
+            _diagnosticListener = DiagnosticListener.AllListeners.Subscribe(_subscriber);
         }
 
         public void Unregister(IHub hub)
