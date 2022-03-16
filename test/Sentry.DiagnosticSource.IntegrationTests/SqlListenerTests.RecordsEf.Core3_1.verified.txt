@@ -1,4 +1,4 @@
-﻿[
+[
   {
     Source: {
       Exception: {
@@ -48,9 +48,14 @@
           IsFinished: true,
           Operation: db.query,
           Description:
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 
-insert into MyTable (Value)
-values (0);,
+,
           Status: Ok,
           IsSampled: true,
           Extra: {
@@ -71,7 +76,9 @@ values (0);,
         {
           IsFinished: true,
           Operation: db.query,
-          Description: select Value from MyTable,
+          Description:
+SELECT [t].[Id], [t].[Property]
+FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
           Extra: {
