@@ -53,14 +53,13 @@ namespace Sentry.Internals.DiagnosticSource
 
         internal void DisableConnectionSpan() => _logConnectionEnabled = false;
 
-        internal bool DisableQuerySpan() => _logQueryEnabled = false;
+        internal void DisableQuerySpan() => _logQueryEnabled = false;
 
         private ISpan? GetParent(SentryEFSpanType type, Scope scope)
             => type == SentryEFSpanType.QueryExecution ? scope.GetSpan() : scope.Transaction;
 
-        private ISpan? AddSpan(SentryEFSpanType type, string operation, string? description)
+        private void AddSpan(SentryEFSpanType type, string operation, string? description)
         {
-            ISpan? span = null;
             _hub.ConfigureScope(scope =>
             {
                 if (scope.Transaction?.IsSampled != true)
@@ -79,9 +78,7 @@ namespace Sentry.Internals.DiagnosticSource
                 }
 
                 asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
-                span = startedChild;
             });
-            return span;
         }
 
         private ISpan? TakeSpan(SentryEFSpanType type)
