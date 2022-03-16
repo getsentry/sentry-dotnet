@@ -209,13 +209,13 @@ namespace Sentry.Internals.DiagnosticSource
             try
             {
                 // Query.
-                if (value.Key == SqlMicrosoftBeforeExecuteCommand || value.Key == SqlDataBeforeExecuteCommand)
+                if (value.Key is SqlMicrosoftBeforeExecuteCommand or SqlDataBeforeExecuteCommand)
                 {
                     AddSpan(SentrySqlSpanType.Execution, "db.query", value);
                     return;
                 }
 
-                if ((value.Key == SqlMicrosoftAfterExecuteCommand || value.Key == SqlDataAfterExecuteCommand) &&
+                if (value.Key is SqlMicrosoftAfterExecuteCommand or SqlDataAfterExecuteCommand &&
                     GetSpan(SentrySqlSpanType.Execution, value) is { } commandSpan)
                 {
                     commandSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
@@ -223,7 +223,7 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                if ((value.Key == SqlMicrosoftWriteCommandError || value.Key == SqlDataWriteCommandError) &&
+                if (value.Key is SqlMicrosoftWriteCommandError or SqlDataWriteCommandError &&
                     GetSpan(SentrySqlSpanType.Execution, value) is { } errorSpan)
                 {
                     errorSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
@@ -233,20 +233,19 @@ namespace Sentry.Internals.DiagnosticSource
 
                 // Connection.
 
-                if (value.Key == SqlMicrosoftWriteConnectionOpenBeforeCommand || value.Key == SqlDataWriteConnectionOpenBeforeCommand)
+                if (value.Key is SqlMicrosoftWriteConnectionOpenBeforeCommand or SqlDataWriteConnectionOpenBeforeCommand)
                 {
                     AddSpan(SentrySqlSpanType.Connection, "db.connection", value);
                     return;
                 }
 
-                if (value.Key == SqlMicrosoftWriteConnectionOpenAfterCommand || value.Key == SqlDataWriteConnectionOpenAfterCommand)
+                if (value.Key is SqlMicrosoftWriteConnectionOpenAfterCommand or SqlDataWriteConnectionOpenAfterCommand)
                 {
                     UpdateConnectionSpan(value.GetProperty<Guid>(OperationKey), value.GetProperty<Guid>(ConnectionKey));
                     return;
                 }
 
-                if ((value.Key == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                     value.Key == SqlDataWriteConnectionCloseAfterCommand) &&
+                if (value.Key is SqlMicrosoftWriteConnectionCloseAfterCommand or SqlDataWriteConnectionCloseAfterCommand &&
                     GetSpan(SentrySqlSpanType.Connection, value) is { } connectionSpan)
                 {
                     TrySetConnectionStatistics(connectionSpan, value);
@@ -254,7 +253,7 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                if ((value.Key is SqlMicrosoftWriteTransactionCommitAfter || value.Key is SqlDataWriteTransactionCommitAfter) &&
+                if (value.Key is SqlMicrosoftWriteTransactionCommitAfter or SqlDataWriteTransactionCommitAfter &&
                     GetSpan(SentrySqlSpanType.Connection, value) is { } connectionSpan2)
                 {
                     // If some query makes changes to the Database data, CloseAfterCommand event will not be invoked,
