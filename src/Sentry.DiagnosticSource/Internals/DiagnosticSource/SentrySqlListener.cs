@@ -207,57 +207,39 @@ namespace Sentry.Internals.DiagnosticSource
         {
             try
             {
-                // Query.
-                if (value.Key is SqlMicrosoftBeforeExecuteCommand or SqlDataBeforeExecuteCommand)
+                switch (value.Key)
                 {
-                    AddSpan(SentrySqlSpanType.Execution, "db.query", value);
-                    return;
-                }
-
-                if (value.Key is SqlMicrosoftAfterExecuteCommand or SqlDataAfterExecuteCommand &&
-                    GetSpan(SentrySqlSpanType.Execution, value) is { } commandSpan)
-                {
-                    commandSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
-                    commandSpan.Finish(SpanStatus.Ok);
-                    return;
-                }
-
-                if (value.Key is SqlMicrosoftWriteCommandError or SqlDataWriteCommandError &&
-                    GetSpan(SentrySqlSpanType.Execution, value) is { } errorSpan)
-                {
-                    errorSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
-                    errorSpan.Finish(SpanStatus.InternalError);
-                    return;
-                }
-
-                // Connection.
-
-                if (value.Key is SqlMicrosoftWriteConnectionOpenBeforeCommand or SqlDataWriteConnectionOpenBeforeCommand)
-                {
-                    AddSpan(SentrySqlSpanType.Connection, "db.connection", value);
-                    return;
-                }
-
-                if (value.Key is SqlMicrosoftWriteConnectionOpenAfterCommand or SqlDataWriteConnectionOpenAfterCommand)
-                {
-                    UpdateConnectionSpan(value.GetProperty<Guid>(OperationKey), value.GetProperty<Guid>(ConnectionKey));
-                    return;
-                }
-
-                if (value.Key is SqlMicrosoftWriteConnectionCloseAfterCommand or SqlDataWriteConnectionCloseAfterCommand &&
-                    GetSpan(SentrySqlSpanType.Connection, value) is { } connectionSpan)
-                {
-                    TrySetConnectionStatistics(connectionSpan, value);
-                    connectionSpan.Finish(SpanStatus.Ok);
-                    return;
-                }
-
-                if (value.Key is SqlMicrosoftWriteTransactionCommitAfter or SqlDataWriteTransactionCommitAfter &&
-                    GetSpan(SentrySqlSpanType.Connection, value) is { } connectionSpan2)
-                {
-                    // If some query makes changes to the Database data, CloseAfterCommand event will not be invoked,
-                    // instead, TransactionCommitAfter is invoked.
-                    connectionSpan2.Finish(SpanStatus.Ok);
+                    // Query.
+                    case SqlMicrosoftBeforeExecuteCommand or SqlDataBeforeExecuteCommand:
+                        AddSpan(SentrySqlSpanType.Execution, "db.query", value);
+                        return;
+                    case SqlMicrosoftAfterExecuteCommand or SqlDataAfterExecuteCommand
+                        when GetSpan(SentrySqlSpanType.Execution, value) is { } commandSpan:
+                        commandSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
+                        commandSpan.Finish(SpanStatus.Ok);
+                        return;
+                    case SqlMicrosoftWriteCommandError or SqlDataWriteCommandError when GetSpan(SentrySqlSpanType.Execution, value) is { } errorSpan:
+                        errorSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
+                        errorSpan.Finish(SpanStatus.InternalError);
+                        return;
+                    // Connection.
+                    case SqlMicrosoftWriteConnectionOpenBeforeCommand or SqlDataWriteConnectionOpenBeforeCommand:
+                        AddSpan(SentrySqlSpanType.Connection, "db.connection", value);
+                        return;
+                    case SqlMicrosoftWriteConnectionOpenAfterCommand or SqlDataWriteConnectionOpenAfterCommand:
+                        UpdateConnectionSpan(value.GetProperty<Guid>(OperationKey), value.GetProperty<Guid>(ConnectionKey));
+                        return;
+                    case SqlMicrosoftWriteConnectionCloseAfterCommand or SqlDataWriteConnectionCloseAfterCommand
+                        when GetSpan(SentrySqlSpanType.Connection, value) is { } closeSpan:
+                        TrySetConnectionStatistics(closeSpan, value);
+                        closeSpan.Finish(SpanStatus.Ok);
+                        return;
+                    case SqlMicrosoftWriteTransactionCommitAfter or SqlDataWriteTransactionCommitAfter
+                        when GetSpan(SentrySqlSpanType.Connection, value) is { } commitSpan:
+                        // If some query makes changes to the Database data, CloseAfterCommand event will not be invoked,
+                        // instead, TransactionCommitAfter is invoked.
+                        commitSpan.Finish(SpanStatus.Ok);
+                        break;
                 }
             }
             catch (Exception ex)
