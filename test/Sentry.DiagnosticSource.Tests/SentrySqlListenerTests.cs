@@ -1,31 +1,11 @@
 using Sentry.Internals.DiagnosticSource;
 using Sentry.Testing;
+using static Sentry.Internals.DiagnosticSource.SentrySqlListener;
 
 namespace Sentry.DiagnosticSource.Tests;
 
 public class SentrySqlListenerTests
 {
-    internal const string SqlDataWriteConnectionOpenBeforeCommand = SentrySqlListener.SqlDataWriteConnectionOpenBeforeCommand;
-    internal const string SqlMicrosoftWriteConnectionOpenBeforeCommand = SentrySqlListener.SqlMicrosoftWriteConnectionOpenBeforeCommand;
-
-    internal const string SqlMicrosoftWriteConnectionOpenAfterCommand = SentrySqlListener.SqlMicrosoftWriteConnectionOpenAfterCommand;
-    internal const string SqlDataWriteConnectionOpenAfterCommand = SentrySqlListener.SqlDataWriteConnectionOpenAfterCommand;
-
-    internal const string SqlMicrosoftWriteConnectionCloseAfterCommand = SentrySqlListener.SqlMicrosoftWriteConnectionCloseAfterCommand;
-    internal const string SqlDataWriteConnectionCloseAfterCommand = SentrySqlListener.SqlDataWriteConnectionCloseAfterCommand;
-
-    internal const string SqlDataBeforeExecuteCommand = SentrySqlListener.SqlDataBeforeExecuteCommand;
-    internal const string SqlMicrosoftBeforeExecuteCommand = SentrySqlListener.SqlMicrosoftBeforeExecuteCommand;
-
-    internal const string SqlDataAfterExecuteCommand = SentrySqlListener.SqlDataAfterExecuteCommand;
-    internal const string SqlMicrosoftAfterExecuteCommand = SentrySqlListener.SqlMicrosoftAfterExecuteCommand;
-
-    internal const string SqlDataWriteCommandError = SentrySqlListener.SqlDataWriteCommandError;
-    internal const string SqlMicrosoftWriteCommandError = SentrySqlListener.SqlMicrosoftWriteCommandError;
-
-    internal const string SqlDataWriteTransactionCommitAfter = SentrySqlListener.SqlDataWriteTransactionCommitAfter;
-    internal const string SqlMicrosoftWriteTransactionCommitAfter = SentrySqlListener.SqlMicrosoftWriteTransactionCommitAfter;
-
     private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
@@ -64,7 +44,6 @@ public class SentrySqlListenerTests
 
     private class Fixture
     {
-        private Scope _scope { get; }
         internal TransactionTracer Tracer { get; }
 
         public InMemoryDiagnosticLogger Logger { get; }
@@ -88,13 +67,13 @@ public class SentrySqlListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope
+            var scope = new Scope
             {
                 Transaction = Tracer
             };
             Hub = Substitute.For<IHub>();
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
         }
     }
 

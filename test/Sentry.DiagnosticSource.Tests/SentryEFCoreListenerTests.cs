@@ -1,18 +1,10 @@
 using Sentry.Internals.DiagnosticSource;
+using static Sentry.Internals.DiagnosticSource.SentryEFCoreListener;
 
 namespace Sentry.DiagnosticSource.Tests;
 
 public class SentryEFCoreListenerTests
 {
-    internal const string EFQueryStartCompiling = SentryEFCoreListener.EFQueryStartCompiling;
-    internal const string EFQueryCompiling = SentryEFCoreListener.EFQueryCompiling;
-    internal const string EFQueryCompiled = SentryEFCoreListener.EFQueryCompiled;
-    internal const string EFConnectionOpening = SentryEFCoreListener.EFConnectionOpening;
-    internal const string EFCommandExecuting = SentryEFCoreListener.EFCommandExecuting;
-    internal const string EFCommandExecuted = SentryEFCoreListener.EFCommandExecuted;
-    internal const string EFCommandFailed = SentryEFCoreListener.EFCommandFailed;
-    internal const string EFConnectionClosed = SentryEFCoreListener.EFConnectionClosed;
-
     private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
