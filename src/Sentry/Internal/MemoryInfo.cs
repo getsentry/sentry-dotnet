@@ -23,7 +23,6 @@ namespace Sentry
         public double PauseTimePercentage { get; }
         public TimeSpan[] PauseDurations { get; }
         public long Index { get; }
-        public int Generation { get; }
         public long FinalizationPendingCount { get; }
         public bool Compacted { get; }
         public bool Concurrent { get; }
@@ -40,7 +39,6 @@ namespace Sentry
             long pinnedObjectsCount,
             double pauseTimePercentage,
             long index,
-            int generation,
             long finalizationPendingCount,
             bool compacted,
             bool concurrent,
@@ -58,7 +56,6 @@ namespace Sentry
             PauseTimePercentage = pauseTimePercentage;
             PauseDurations = pauseDurations;
             Index = index;
-            Generation = generation;
             FinalizationPendingCount = finalizationPendingCount;
             Compacted = compacted;
             Concurrent = concurrent;
@@ -98,8 +95,7 @@ namespace Sentry
             writer.WriteNumberIfNotZero("pinned_objects_count", PinnedObjectsCount);
             writer.WriteNumberIfNotZero("pause_time_percentage", PauseTimePercentage);
             writer.WriteNumberIfNotZero("index", Index);
-            writer.WriteNumberIfNotZero("generation", Generation);
-            writer.WriteNumberIfNotZero("finalization_pending_count", FinalizationPendingCount);
+            writer.WriteNumber("finalization_pending_count", FinalizationPendingCount);
             writer.WriteBoolean("compacted", Compacted);
             writer.WriteBoolean("concurrent", Concurrent);
             writer.WritePropertyName("pause_durations");
