@@ -96,7 +96,7 @@ namespace Sentry.Internals.DiagnosticSource
                 }
 
                 if (type == SentrySqlSpanType.Connection &&
-                    transaction?.StartChild(operation) is { } connectionSpan)
+                    transaction.StartChild(operation) is { } connectionSpan)
                 {
                     SetOperationId(connectionSpan, value.GetProperty<Guid>(OperationKey));
                     return;
@@ -123,7 +123,8 @@ namespace Sentry.Internals.DiagnosticSource
             ISpan? span = null;
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction == null)
+                var transaction = scope.Transaction;
+                if (transaction == null)
                 {
                     return;
                 }
@@ -135,7 +136,7 @@ namespace Sentry.Internals.DiagnosticSource
                     {
                         span = querySpan;
 
-                        if (span.ParentSpanId == scope.Transaction?.SpanId &&
+                        if (span.ParentSpanId == transaction.SpanId &&
                             TryGetConnectionId(span) is { } spanConnectionId &&
                             span is SpanTracer executionTracer &&
                             TryGetConnectionSpan(scope, spanConnectionId) is { } spanConnectionRef)
@@ -147,7 +148,7 @@ namespace Sentry.Internals.DiagnosticSource
                         return;
                     }
 
-                    _options.DiagnosticLogger?.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
+                    _options.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
                         type,
                         operationId);
                     return;
@@ -184,7 +185,8 @@ namespace Sentry.Internals.DiagnosticSource
         private static ISpan? TryGetConnectionSpan(Scope scope, Guid connectionId)
             => scope.Transaction?.Spans
                 .FirstOrDefault(span => !span.IsFinished &&
-                                        span.Operation is "db.connection" && TryGetConnectionId(span) == connectionId);
+                                        span.Operation is "db.connection" &&
+                                        TryGetConnectionId(span) == connectionId);
 
         private static ISpan? TryGetQuerySpan(Scope scope, Guid operationId)
             => scope.Transaction?.Spans.FirstOrDefault(span => TryGetOperationId(span) == operationId);
@@ -192,8 +194,15 @@ namespace Sentry.Internals.DiagnosticSource
         private void UpdateConnectionSpan(Guid operationId, Guid connectionId)
             => _hub.ConfigureScope(scope =>
             {
-                var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection").ToList();
-                if (connectionSpans?.FirstOrDefault(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } span)
+                var transaction = scope.Transaction;
+                if (transaction is null)
+                {
+                    return;
+                }
+
+                var spans = transaction.Spans.Where(span => span.Operation is "db.connection").ToList();
+                if (spans.FirstOrDefault(span => !span.IsFinished &&
+                                                 TryGetOperationId(span) == operationId) is { } span)
                 {
                     SetConnectionId(span, connectionId);
                 }
@@ -218,7 +227,8 @@ namespace Sentry.Internals.DiagnosticSource
                         commandSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
                         commandSpan.Finish(SpanStatus.Ok);
                         return;
-                    case SqlMicrosoftWriteCommandError or SqlDataWriteCommandError when GetSpan(SentrySqlSpanType.Execution, value) is { } errorSpan:
+                    case SqlMicrosoftWriteCommandError or SqlDataWriteCommandError
+                        when GetSpan(SentrySqlSpanType.Execution, value) is { } errorSpan:
                         errorSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
                         errorSpan.Finish(SpanStatus.InternalError);
                         return;
