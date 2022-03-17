@@ -15,8 +15,8 @@ namespace Sentry.Internals.DiagnosticSource
             Execution
         };
 
-        internal const string OperationKey = "OperationId";
-        internal const string ConnectionKey = "ConnectionId";
+        private const string OperationKey = "OperationId";
+        private const string ConnectionKey = "ConnectionId";
         internal const string ConnectionExtraKey = "db.connection_id";
         internal const string OperationExtraKey = "db.operation_id";
 
