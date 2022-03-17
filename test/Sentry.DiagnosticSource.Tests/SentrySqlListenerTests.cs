@@ -249,7 +249,7 @@ public class SentrySqlListenerTests
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
-            Assert.Equal(connectionId, (Guid)span.Extra[.ConnectionExtraKey]);
+            Assert.Equal(connectionId, (Guid)span.Extra[ConnectionExtraKey]);
         });
     }
 
