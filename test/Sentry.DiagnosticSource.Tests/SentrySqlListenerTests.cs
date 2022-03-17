@@ -17,13 +17,15 @@ public class SentrySqlListenerTests
                 SqlDataWriteConnectionCloseAfterCommand or
                 SqlDataWriteTransactionCommitAfter or
                 SqlMicrosoftWriteTransactionCommitAfter =>
-                span => span.Description is null && span.Operation == "db.connection",
+                span => span.Description is null &&
+                        span.Operation == "db.connection",
             SqlDataBeforeExecuteCommand or
                 SqlMicrosoftBeforeExecuteCommand or
                 SqlDataAfterExecuteCommand or
                 SqlMicrosoftAfterExecuteCommand or
                 SqlDataWriteCommandError or
-                SqlMicrosoftWriteCommandError => span => span.Operation == "db.query",
+                SqlMicrosoftWriteCommandError =>
+                span => span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
