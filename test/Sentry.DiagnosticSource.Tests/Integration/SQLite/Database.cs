@@ -33,16 +33,14 @@ public class Database
         context.SaveChanges();
     }
 
-    private DbConnection CreateInMemoryDatabase()
+    private static DbConnection CreateInMemoryDatabase()
     {
         var connection = new SqliteConnection("Filename=:memory:");
 
         connection.Open();
-        using (var command = connection.CreateCommand())
-        {
-            command.CommandText = "PRAGMA journal_mode=WAL;";
-            command.ExecuteNonQuery();
-        }
+        using var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA journal_mode=WAL;";
+        command.ExecuteNonQuery();
         return connection;
     }
 }
