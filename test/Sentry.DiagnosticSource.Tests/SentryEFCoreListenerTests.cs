@@ -376,7 +376,7 @@ public class SentryEFCoreListenerTests
         var expectedText = "";
 
         // Act
-        var value = .FilterNewLineValue(text);
+        var value = FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);
