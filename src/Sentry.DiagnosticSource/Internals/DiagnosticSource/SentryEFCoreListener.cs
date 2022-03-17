@@ -79,7 +79,10 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                var asyncLocalSpan = GetSpanBucket(type);
+                if (GetSpanBucket(type) is not { } asyncLocalSpan)
+                {
+                    return;
+                }
 
                 asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
             });
@@ -95,7 +98,7 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                if (GetSpanBucket(type).Value is { } reference &&
+                if (GetSpanBucket(type)?.Value is { } reference &&
                     reference.TryGetTarget(out var startedSpan))
                 {
                     span = startedSpan;
@@ -107,13 +110,13 @@ namespace Sentry.Internals.DiagnosticSource
             return span;
         }
 
-        private AsyncLocal<WeakReference<ISpan>> GetSpanBucket(SentryEFSpanType type)
+        private AsyncLocal<WeakReference<ISpan>>? GetSpanBucket(SentryEFSpanType type)
             => type switch
             {
                 SentryEFSpanType.QueryCompiler => _spansCompilerLocal,
                 SentryEFSpanType.QueryExecution => _spansQueryLocal,
                 SentryEFSpanType.Connection => _spansConnectionLocal,
-                _ => throw new NotImplementedException()
+                _ => null
             };
 
         public void OnCompleted() { }
