@@ -338,7 +338,7 @@ public class SentryEFCoreListenerTests
         var expectedText = "SELECT *...\n FROM ...";
 
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(text);
+        var value = FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);
@@ -348,7 +348,7 @@ public class SentryEFCoreListenerTests
     public void FilterNewLineValue_NullObject_NullString()
     {
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(null);
+        var value = FilterNewLineValue(null);
 
         // Assert
         Assert.Null(value);
@@ -362,9 +362,9 @@ public class SentryEFCoreListenerTests
         var expectedText = "1234";
 
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(text);
+        var value = FilterNewLineValue(text);
 
-        // Assert
+        // Asset
         Assert.Equal(expectedText, value);
     }
 
@@ -376,7 +376,7 @@ public class SentryEFCoreListenerTests
         var expectedText = "";
 
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(text);
+        var value = .FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);

@@ -103,7 +103,7 @@ public class SentrySqlListenerTests
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         if (addConnectionSpan)
         {
-            _fixture.Tracer.StartChild("abc").SetExtra(SentrySqlListener.ConnectionExtraKey, Guid.Empty);
+            _fixture.Tracer.StartChild("abc").SetExtra(ConnectionExtraKey, Guid.Empty);
         }
 
         // Act
@@ -249,7 +249,7 @@ public class SentrySqlListenerTests
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
-            Assert.Equal(connectionId, (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey]);
+            Assert.Equal(connectionId, (Guid)span.Extra[.ConnectionExtraKey]);
         });
     }
 
@@ -383,14 +383,14 @@ public class SentrySqlListenerTests
         querySpans.Should().HaveCount(2 * maxItems);
 
         // Open Spans should not have any Connection key.
-        Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey)));
+        Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(ConnectionExtraKey)));
         Assert.All(closedSpans, span => Assert.Equal(SpanStatus.Ok, span.Status));
 
         // Assert that all connectionIds is set and ParentId set to Trace.
         Assert.All(closedConnectionSpans, connectionSpan =>
         {
-            Assert.NotNull(connectionSpan.Extra[SentrySqlListener.ConnectionExtraKey]);
-            Assert.NotNull(connectionSpan.Extra[SentrySqlListener.OperationExtraKey]);
+            Assert.NotNull(connectionSpan.Extra[ConnectionExtraKey]);
+            Assert.NotNull(connectionSpan.Extra[OperationExtraKey]);
             Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
         });
 
@@ -398,11 +398,11 @@ public class SentrySqlListenerTests
         Assert.All(querySpans, querySpan =>
         {
             Assert.True(querySpan.IsFinished);
-            var connectionId = (Guid)querySpan.Extra[SentrySqlListener.ConnectionExtraKey];
-            var connectionSpan = connectionSpans.Single(span => span.SpanId == querySpan.ParentSpanId);
+            var connectionId = (Guid)querySpan.Extra[ConnectionExtraKey];
+            var connectionSpan  connectionSpans.Single(span => span.SpanId == querySpan.ParentSpanId);
 
             Assert.NotEqual(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
-            Assert.Equal((Guid)connectionSpan.Extra[SentrySqlListener.ConnectionExtraKey], connectionId);
+            Assert.Equal((Guid)connectionSpan.Extra[ConnectionExtraKey], connectionId);
         });
 
         _fixture.Logger.Entries.Should().BeEmpty();
