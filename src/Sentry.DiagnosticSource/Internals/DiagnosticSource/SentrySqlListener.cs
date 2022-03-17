@@ -86,7 +86,7 @@ namespace Sentry.Internals.DiagnosticSource
             return null;
         }
 
-        private void AddSpan(SentrySqlSpanType type, string operation, KeyValuePair<string, object?> pair)
+        private void AddSpan(SentrySqlSpanType type, string operation, KeyValuePair<string, object?> value)
         {
             _hub.ConfigureScope(scope =>
             {
@@ -98,12 +98,12 @@ namespace Sentry.Internals.DiagnosticSource
                 if (type == SentrySqlSpanType.Connection &&
                     transaction?.StartChild(operation) is { } connectionSpan)
                 {
-                    SetOperationId(connectionSpan, pair.GetProperty<Guid>(OperationKey));
+                    SetOperationId(connectionSpan, value.GetProperty<Guid>(OperationKey));
                     return;
                 }
 
                 if (type == SentrySqlSpanType.Execution &&
-                    pair.GetProperty<Guid>(ConnectionKey) is var connectionId)
+                    value.GetProperty<Guid>(ConnectionKey) is { } connectionId)
                 {
                     var span = TryStartChild(
                         TryGetConnectionSpan(scope, connectionId) ?? transaction,
@@ -111,7 +111,7 @@ namespace Sentry.Internals.DiagnosticSource
                         null);
                     if (span is not null)
                     {
-                        SetOperationId(span, pair.GetProperty<Guid>(OperationKey));
+                        SetOperationId(span, value.GetProperty<Guid>(OperationKey));
                         SetConnectionId(span, connectionId);
                     }
                 }
@@ -155,7 +155,7 @@ namespace Sentry.Internals.DiagnosticSource
 
                 if ((value.Key == SqlMicrosoftWriteConnectionCloseAfterCommand ||
                      value.Key == SqlDataWriteConnectionCloseAfterCommand) &&
-                    value.GetProperty<Guid>(ConnectionKey) is var id &&
+                    value.GetProperty<Guid>(ConnectionKey) is { } id &&
                     TryGetConnectionSpan(scope, id) is { } connectionSpan)
                 {
                     span = connectionSpan;
@@ -164,7 +164,7 @@ namespace Sentry.Internals.DiagnosticSource
 
                 if ((value.Key is SqlMicrosoftWriteTransactionCommitAfter ||
                      value.Key is SqlDataWriteTransactionCommitAfter) &&
-                    value.GetSubProperty<Guid>("Connection", "ClientConnectionId") is var commitId &&
+                    value.GetSubProperty<Guid>("Connection", "ClientConnectionId") is { } commitId &&
                     TryGetConnectionSpan(scope, commitId) is { } commitSpan)
                 {
                     span = commitSpan;
