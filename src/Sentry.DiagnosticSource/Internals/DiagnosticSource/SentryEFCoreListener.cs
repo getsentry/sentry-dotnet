@@ -35,12 +35,12 @@ namespace Sentry.Internals.DiagnosticSource
         internal const string EFQueryCompiling = "Microsoft.EntityFrameworkCore.Query.QueryModelCompiling";
         internal const string EFQueryCompiled = "Microsoft.EntityFrameworkCore.Query.QueryExecutionPlanned";
 
-        private IHub _hub;
-        private SentryOptions _options;
+        private readonly IHub _hub;
+        private readonly SentryOptions _options;
 
-        private AsyncLocal<WeakReference<ISpan>> _spansCompilerLocal = new();
-        private AsyncLocal<WeakReference<ISpan>> _spansQueryLocal = new();
-        private AsyncLocal<WeakReference<ISpan>> _spansConnectionLocal = new();
+        private readonly AsyncLocal<WeakReference<ISpan>> _spansCompilerLocal = new();
+        private readonly AsyncLocal<WeakReference<ISpan>> _spansQueryLocal = new();
+        private readonly AsyncLocal<WeakReference<ISpan>> _spansConnectionLocal = new();
 
         private bool _logConnectionEnabled = true;
         private bool _logQueryEnabled = true;

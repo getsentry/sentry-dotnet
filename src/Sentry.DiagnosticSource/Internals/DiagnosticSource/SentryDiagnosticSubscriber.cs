@@ -12,9 +12,9 @@ namespace Sentry.Internals.DiagnosticSource
     {
         private SentryEFCoreListener? _efInterceptor;
         private SentrySqlListener? _sqlListener;
-        private ConcurrentBag<IDisposable> _disposableListeners = new();
-        private IHub _hub;
-        private SentryOptions _options;
+        private readonly ConcurrentBag<IDisposable> _disposableListeners = new();
+        private readonly IHub _hub;
+        private readonly SentryOptions _options;
 
         public SentryDiagnosticSubscriber(IHub hub, SentryOptions options)
         {
