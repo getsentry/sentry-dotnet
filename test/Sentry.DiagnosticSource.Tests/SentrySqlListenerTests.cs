@@ -399,7 +399,7 @@ public class SentrySqlListenerTests
         {
             Assert.True(querySpan.IsFinished);
             var connectionId = (Guid)querySpan.Extra[ConnectionExtraKey];
-            var connectionSpan  connectionSpans.Single(span => span.SpanId == querySpan.ParentSpanId);
+            var connectionSpan = connectionSpans.Single(span => span.SpanId == querySpan.ParentSpanId);
 
             Assert.NotEqual(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
             Assert.Equal((Guid)connectionSpan.Extra[ConnectionExtraKey], connectionId);
