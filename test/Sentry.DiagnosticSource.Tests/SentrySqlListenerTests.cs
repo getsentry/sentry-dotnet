@@ -9,25 +9,21 @@ public class SentrySqlListenerTests
     private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
-            _ when
-                type is
-                    SqlDataWriteConnectionOpenBeforeCommand or
-                    SqlMicrosoftWriteConnectionOpenBeforeCommand or
-                    SqlMicrosoftWriteConnectionOpenAfterCommand or
-                    SqlDataWriteConnectionOpenAfterCommand or
-                    SqlMicrosoftWriteConnectionCloseAfterCommand or
-                    SqlDataWriteConnectionCloseAfterCommand or
-                    SqlDataWriteTransactionCommitAfter or
-                    SqlMicrosoftWriteTransactionCommitAfter
-                => span => span.Description is null && span.Operation == "db.connection",
-            _ when
-                type is SqlDataBeforeExecuteCommand or
-                    SqlMicrosoftBeforeExecuteCommand or
-                    SqlDataAfterExecuteCommand or
-                    SqlMicrosoftAfterExecuteCommand or
-                    SqlDataWriteCommandError or
-                    SqlMicrosoftWriteCommandError
-                => span => span.Operation == "db.query",
+            SqlDataWriteConnectionOpenBeforeCommand or
+                SqlMicrosoftWriteConnectionOpenBeforeCommand or
+                SqlMicrosoftWriteConnectionOpenAfterCommand or
+                SqlDataWriteConnectionOpenAfterCommand or
+                SqlMicrosoftWriteConnectionCloseAfterCommand or
+                SqlDataWriteConnectionCloseAfterCommand or
+                SqlDataWriteTransactionCommitAfter or
+                SqlMicrosoftWriteTransactionCommitAfter =>
+                span => span.Description is null && span.Operation == "db.connection",
+            SqlDataBeforeExecuteCommand or
+                SqlMicrosoftBeforeExecuteCommand or
+                SqlDataAfterExecuteCommand or
+                SqlMicrosoftAfterExecuteCommand or
+                SqlDataWriteCommandError or
+                SqlMicrosoftWriteCommandError => span => span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
