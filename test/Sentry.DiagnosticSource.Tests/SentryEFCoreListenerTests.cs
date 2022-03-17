@@ -8,15 +8,15 @@ public class SentryEFCoreListenerTests
     private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
-            _ when
-                type is EFQueryCompiling or EFQueryCompiled
-                => span => span.Description != null && span.Operation == "db.query.compile",
-            _ when
-                type is EFConnectionOpening or EFConnectionClosed
-                => span => span.Description == null && span.Operation == "db.connection",
-            _ when
-                type is EFCommandExecuting or EFCommandExecuting or EFCommandFailed
-                => span => span.Description != null && span.Operation == "db.query",
+            EFQueryCompiling or EFQueryCompiled =>
+                span => span.Description != null &&
+                        span.Operation == "db.query.compile",
+            EFConnectionOpening or EFConnectionClosed =>
+                span => span.Description == null &&
+                        span.Operation == "db.connection",
+            EFCommandExecuting or EFCommandExecuting or EFCommandFailed =>
+                span => span.Description != null &&
+                        span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
