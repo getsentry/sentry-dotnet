@@ -29,11 +29,11 @@ public class CachingTransportTests
         };
 
         Exception exception = null;
-        var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(message =>
+        var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(async message =>
          {
              try
              {
-                 message.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                 await message.Content!.ReadAsStringAsync();
              }
              catch (Exception readStreamException)
              {

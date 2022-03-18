@@ -23,9 +23,10 @@ public class IntegrationTests
         var evt = new ManualResetEventSlim();
 
         var requests = new List<string>();
-        void Verify(HttpRequestMessage message)
+        async Task VerifyAsync(HttpRequestMessage message)
         {
-            requests.Add(message.Content.ReadAsStringAsync().Result);
+            var content = await message.Content.ReadAsStringAsync();
+            requests.Add(content);
             evt.Set();
         }
 
@@ -37,7 +38,7 @@ public class IntegrationTests
                     {
                         // So we can assert on the payload without the need to Gzip decompress
                         o.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
-                        o.CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify);
+                        o.CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync);
                     });
                     services.AddFunctionTarget<FailingFunction>();
                 })
