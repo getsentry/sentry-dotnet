@@ -9,6 +9,7 @@ if [ "$GITHUB_ACTIONS" == "true" ]
 fi
 
 dotnet test SentryNoSamples.slnf -c Release -l $testLogger \
+    --filter ShouldNotLogOperationCanceledExceptionWhenIsCancellationRequested \
     /p:CollectCoverage=true \
     /p:CoverletOutputFormat=opencover \
     /p:CopyLocalLockFileAssemblies=true \

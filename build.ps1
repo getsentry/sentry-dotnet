@@ -3,6 +3,7 @@ $ErrorActionPreference = "Stop"
 $testLogger = if ($env:GITHUB_ACTIONS -eq "true") {"GitHubActions;report-warnings=false"} else {"console"}
 
 dotnet test SentryNoSamples.slnf -c Release -l $testLogger `
+    --filter ShouldNotLogOperationCanceledExceptionWhenIsCancellationRequested `
     /p:CollectCoverage=true `
     /p:CoverletOutputFormat=opencover `
     /p:CopyLocalLockFileAssemblies=true `
