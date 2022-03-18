@@ -64,36 +64,43 @@ namespace Sentry.Internal.Http
 
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-            if (response.StatusCode == TooManyRequests && response.Headers != null)
+            if (response.StatusCode == TooManyRequests)
             {
-                if (response.Headers.RetryAfter != null)
-                {
-                    if (response.Headers.RetryAfter.Delta != null)
-                    {
-                        var retryAfterUtc = _clock.GetUtcNow() + response.Headers.RetryAfter.Delta.Value;
-                        _ = Interlocked.Exchange(ref _retryAfterUtcTicks, retryAfterUtc.UtcTicks);
-                    }
-                    else if (response.Headers.RetryAfter.Date != null)
-                    {
-                        _ = Interlocked.Exchange(ref _retryAfterUtcTicks, response.Headers.RetryAfter.Date.Value.UtcTicks);
-                    }
-                }
-                // Sentry was sending floating point numbers which are not handled by RetryConditionHeaderValue
-                // To be compatible with older versions of sentry on premise: https://github.com/getsentry/sentry/issues/7919
-                else if (response.Headers.TryGetValues("Retry-After", out var values)
-                         && double.TryParse(values?.FirstOrDefault(), out var retryAfterSeconds))
-                {
-                    var retryAfterSpan = TimeSpan.FromSeconds(retryAfterSeconds);
-                    _ = Interlocked.Exchange(ref _retryAfterUtcTicks, _clock.GetUtcNow().AddTicks(retryAfterSpan.Ticks).UtcTicks);
-                }
-                else
-                {
-                    // No retry header was sent. Use the default retry delay.
-                    _ = Interlocked.Exchange(ref _retryAfterUtcTicks, _clock.GetUtcNow().Add(DefaultRetryAfterDelay).UtcTicks);
-                }
+                var retryAfterTimestamp = GetRetryAfterTimestamp(response);
+                _ = Interlocked.Exchange(ref _retryAfterUtcTicks, retryAfterTimestamp.UtcTicks);
             }
 
             return response;
+        }
+
+        private DateTimeOffset GetRetryAfterTimestamp(HttpResponseMessage response)
+        {
+            if (response.Headers != null)
+            {
+                if (response.Headers.RetryAfter != null)
+                {
+                    if (response.Headers.RetryAfter.Delta is { } delta)
+                    {
+                        return _clock.GetUtcNow() + delta;
+                    }
+
+                    if (response.Headers.RetryAfter.Date is { } date)
+                    {
+                        return date;
+                    }
+                }
+
+                // Sentry was sending floating point numbers which are not handled by RetryConditionHeaderValue
+                // To be compatible with older versions of sentry on premise: https://github.com/getsentry/sentry/issues/7919
+                if (response.Headers.TryGetValues("Retry-After", out var values)
+                    && double.TryParse(values?.FirstOrDefault(), out var retryAfterSeconds))
+                {
+                    return _clock.GetUtcNow() + TimeSpan.FromSeconds(retryAfterSeconds);
+                }
+            }
+
+            // No retry header was sent. Use the default retry delay.
+            return _clock.GetUtcNow() + DefaultRetryAfterDelay;
         }
     }
 }
