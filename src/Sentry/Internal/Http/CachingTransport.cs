@@ -102,7 +102,7 @@ namespace Sentry.Internal.Http
                         break;
                     }
 
-                    _options.LogError("Exception in background worker of CachingTransport.", ex);
+                    _options.LogError("Exception in background worker of CachingTransport.\nCancellation Requested: {0}", ex, _workerCts.IsCancellationRequested);
 
                     try
                     {

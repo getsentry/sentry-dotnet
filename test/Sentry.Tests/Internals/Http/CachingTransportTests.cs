@@ -123,7 +123,7 @@ public class CachingTransportTests
             .ThrowsForAnyArgs(_ =>
             {
                 capturingSync.Set();
-                cancelingSync.Wait(TimeSpan.FromSeconds(4));
+                Assert.True(cancelingSync.Wait(TimeSpan.FromSeconds(4)), "Timeout waiting for cancellation sync");
                 return new OperationCanceledException();
             });
 
