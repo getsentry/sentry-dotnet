@@ -95,7 +95,7 @@ namespace Sentry.Internal.Http
                 if (response.Headers.TryGetValues("Retry-After", out var values)
                     && double.TryParse(values?.FirstOrDefault(), out var retryAfterSeconds))
                 {
-                    return _clock.GetUtcNow() + TimeSpan.FromSeconds(retryAfterSeconds);
+                    return _clock.GetUtcNow().AddTicks((long)(retryAfterSeconds * TimeSpan.TicksPerSecond));
                 }
             }
 
