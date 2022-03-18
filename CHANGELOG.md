@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1443](https://github.com/getsentry/sentry-dotnet/issues/1443))
+- Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1537](https://github.com/getsentry/sentry-dotnet/pull/1537))
 
 ## 3.15.0
 
