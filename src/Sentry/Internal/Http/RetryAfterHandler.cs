@@ -19,6 +19,7 @@ namespace Sentry.Internal.Http
         private readonly ISystemClock _clock;
 
         private const HttpStatusCode TooManyRequests = (HttpStatusCode)429;
+        internal static readonly TimeSpan DefaultRetryAfterDelay = TimeSpan.FromSeconds(60);
 
         private long _retryAfterUtcTicks;
         internal long RetryAfterUtcTicks => _retryAfterUtcTicks;
@@ -84,6 +85,11 @@ namespace Sentry.Internal.Http
                 {
                     var retryAfterSpan = TimeSpan.FromSeconds(retryAfterSeconds);
                     _ = Interlocked.Exchange(ref _retryAfterUtcTicks, _clock.GetUtcNow().AddTicks(retryAfterSpan.Ticks).UtcTicks);
+                }
+                else
+                {
+                    // No retry header was sent. Use the default retry delay.
+                    _ = Interlocked.Exchange(ref _retryAfterUtcTicks, _clock.GetUtcNow().Add(DefaultRetryAfterDelay).UtcTicks);
                 }
             }
 

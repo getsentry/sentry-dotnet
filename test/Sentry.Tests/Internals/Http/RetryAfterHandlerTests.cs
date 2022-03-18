@@ -54,7 +54,7 @@ public class RetryAfterHandlerTests
         var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
-        Assert.Equal(0, _fixture.Sut.RetryAfterUtcTicks);
+        Assert.Equal((_fixture.TimeReturned + RetryAfterHandler.DefaultRetryAfterDelay).UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
         Assert.True(_fixture.StubHandler.SendAsyncCalled);
     }
 
