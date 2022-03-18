@@ -8,10 +8,6 @@ if [ "$GITHUB_ACTIONS" == "true" ]
         testLogger="console"
 fi
 
-dotnet test SentryNoSamples.slnf -c Release -l $testLogger \
+dotnet test test/Sentry.Tests -c Debug -l $testLogger \
     --filter ShouldNotLogOperationCanceledExceptionWhenIsCancellationRequested \
-    /p:CollectCoverage=true \
-    /p:CoverletOutputFormat=opencover \
-    /p:CopyLocalLockFileAssemblies=true \
-    /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*\" \
-    /p:UseSourceLink=true
+    /p:CopyLocalLockFileAssemblies=true
