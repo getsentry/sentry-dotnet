@@ -5,6 +5,7 @@
 ### Fixes
 
 - Ignore zero properties for MemoryInfo ([#1531](https://github.com/getsentry/sentry-dotnet/pull/1531))
+- Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
 
 ## 3.15.0
 
