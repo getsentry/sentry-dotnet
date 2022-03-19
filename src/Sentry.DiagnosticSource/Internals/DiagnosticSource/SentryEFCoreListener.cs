@@ -112,7 +112,7 @@ namespace Sentry.Internals.DiagnosticSource
                 SentryEFSpanType.QueryCompiler => _spansCompilerLocal,
                 SentryEFSpanType.QueryExecution => _spansQueryLocal,
                 SentryEFSpanType.Connection => _spansConnectionLocal,
-                _ => throw new NotImplementedException()
+                _ => throw new ($"Unknown SentryEFSpanType: {type}")
             };
 
         public void OnCompleted() { }
