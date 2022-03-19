@@ -1,5 +1,4 @@
 using System.Globalization;
-using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests;
 
