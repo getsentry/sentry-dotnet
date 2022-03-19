@@ -292,7 +292,7 @@ public class GlobalSessionManagerTests : IDisposable
         var sut = _fixture.GetSut();
 
         var timeOffset = DateTimeOffset.Now;
-        _fixture.Clock.GetUtcNow().Returns((_) =>
+        _fixture.Clock.GetUtcNow().Returns(_ =>
         {
             timeOffset = timeOffset.AddSeconds(1);
             return timeOffset;
