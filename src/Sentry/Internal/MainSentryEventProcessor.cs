@@ -184,7 +184,7 @@ namespace Sentry.Internal
 #endif
         }
 
-        private void AddThreadPoolInfo(Contexts contexts)
+        private static void AddThreadPoolInfo(Contexts contexts)
         {
             ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
             ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
