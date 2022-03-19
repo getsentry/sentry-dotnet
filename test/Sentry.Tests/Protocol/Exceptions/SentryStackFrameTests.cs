@@ -87,8 +87,7 @@ public class SentryStackFrameTests
     {
         // Arrange
         var module = "IncludedModule";
-        var sut = new SentryStackFrame();
-        sut.Module = module;
+        var sut = new SentryStackFrame {Module = module};
         var options = new SentryOptions();
         options.AddInAppInclude(module);
 
@@ -104,8 +103,7 @@ public class SentryStackFrameTests
     {
         // Arrange
         var module = "ExcludedModule";
-        var sut = new SentryStackFrame();
-        sut.Module = module;
+        var sut = new SentryStackFrame {Module = module};
         var options = new SentryOptions();
         options.AddInAppExclude(module);
 
