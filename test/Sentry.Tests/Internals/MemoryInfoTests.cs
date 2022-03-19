@@ -7,7 +7,7 @@ public class MemoryInfoTests
     public void WriteTo()
     {
 #if NET5_0_OR_GREATER
-        var info = new MemoryInfo(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, true, false, new[] { TimeSpan.FromSeconds(1) });
+        var info = new MemoryInfo(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, true, false, new[] { TimeSpan.FromSeconds(1) });
 #else
         var info = new MemoryInfo(1, 2, 3, 4, 5, 6);
 #endif

@@ -373,6 +373,61 @@ namespace Sentry.Internal.Extensions
             }
         }
 
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            short value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            int value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            long value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            float value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            double value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
         public static void WriteStringIfNotWhiteSpace(
             this Utf8JsonWriter writer,
             string propertyName,
