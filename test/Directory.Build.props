@@ -31,6 +31,7 @@
     <Using Include="Sentry.Integrations"/>
     <Using Include="Sentry.Internal.Extensions"/>
     <Using Include="System.Text"/>
+    <Using Include="Sentry.Testing"/>
     <Using Include="Xunit"/>
     <Using Include="Xunit.Abstractions"/>
     <Using Include="FluentAssertions"/>

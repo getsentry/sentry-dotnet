@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
-using Sentry.Testing;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 

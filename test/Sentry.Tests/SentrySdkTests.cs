@@ -1,7 +1,6 @@
 using System.Reflection;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
-using Sentry.Testing;
 using static Sentry.DsnSamples;
 using static Sentry.Internal.Constants;
 

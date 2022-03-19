@@ -6,7 +6,6 @@ using System.Net.Http;
 #if NETCOREAPP2_1
 using System.Reflection;
 #endif
-using Sentry.Testing;
 using Sentry.Tests;
 
 namespace NotSentry.Tests;

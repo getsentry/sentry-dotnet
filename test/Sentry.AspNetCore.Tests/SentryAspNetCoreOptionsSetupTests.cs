@@ -5,7 +5,6 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
-using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 

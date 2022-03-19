@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Serilog.Tests;
 
 [Collection(nameof(SentrySdkCollection))]

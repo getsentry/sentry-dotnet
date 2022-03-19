@@ -1,6 +1,5 @@
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Hosting;
-using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Grpc.Tests;
 

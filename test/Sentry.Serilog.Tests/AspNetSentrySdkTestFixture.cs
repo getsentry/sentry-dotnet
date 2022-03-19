@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Sentry.AspNetCore;
 using Sentry.Serilog.Tests.Utils;
-using Sentry.Testing;
-using Serilog;
 
 namespace Sentry.Serilog.Tests;
 

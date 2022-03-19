@@ -8,7 +8,6 @@ using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
-using Sentry.Testing;
 
 namespace Sentry.Tests.Protocol.Envelopes;
 

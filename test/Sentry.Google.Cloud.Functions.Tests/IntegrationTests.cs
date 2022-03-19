@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sentry.AspNetCore;
-using Sentry.Testing;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 

@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Sentry.Testing;
 
 namespace Sentry.Tests.Extensibility;
 

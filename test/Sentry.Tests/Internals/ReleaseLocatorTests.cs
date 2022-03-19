@@ -1,5 +1,4 @@
 using System.Reflection;
-using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
 

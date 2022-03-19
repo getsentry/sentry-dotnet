@@ -1,4 +1,3 @@
-using Sentry.Testing;
 using Sentry.Tests.Helpers.Reflection;
 using static Sentry.Constants;
 using static Sentry.Internal.Constants;

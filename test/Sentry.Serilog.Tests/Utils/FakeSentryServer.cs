@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Sentry.Serilog.Tests.Utils.Extensions;
-using Sentry.Testing;
 
 namespace Sentry.Serilog.Tests.Utils;
 
