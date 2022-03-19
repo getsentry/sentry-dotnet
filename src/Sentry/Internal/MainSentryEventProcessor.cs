@@ -150,7 +150,7 @@ namespace Sentry.Internal
             return @event;
         }
 
-        private void AddMemoryInfo(Contexts contexts)
+        private static void AddMemoryInfo(Contexts contexts)
         {
 #if NETCOREAPP3_0_OR_GREATER
             var memory = GC.GetGCMemoryInfo();
@@ -168,7 +168,6 @@ namespace Sentry.Internal
                 memory.PinnedObjectsCount,
                 memory.PauseTimePercentage,
                 memory.Index,
-                memory.Generation,
                 memory.FinalizationPendingCount,
                 memory.Compacted,
                 memory.Concurrent,
