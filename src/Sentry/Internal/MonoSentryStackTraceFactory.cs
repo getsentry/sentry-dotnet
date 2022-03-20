@@ -55,7 +55,7 @@ namespace Sentry.Internal
                 Frames = frames.Select(f => new SentryStackFrame
                 {
                     Module = f.TypeFullName,
-                    InstructionOffset = f.Offset != 0 ? f.Offset : (long?)null,
+                    InstructionOffset = f.Offset != 0 ? f.Offset : null,
                     Function = f.MethodSignature,
                     LineNumber = GetLineNumber(f.Line),
                 }).Reverse().ToArray()
@@ -65,7 +65,7 @@ namespace Sentry.Internal
                 // Protocol is uint. Also, Mono AOT / IL2CPP / no pdb means no line number (0) which isn't useful.
                 line is { } l && int.TryParse(l, out var parsedLine) && parsedLine >= 0
                     ? parsedLine
-                    : (int?)null;
+                    : null;
         }
     }
 }

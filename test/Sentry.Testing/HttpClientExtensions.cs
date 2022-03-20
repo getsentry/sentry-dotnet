@@ -12,7 +12,7 @@ public static class HttpClientExtensions
         var fieldInfo = invoker.GetField("handler", BindingFlags.NonPublic | BindingFlags.Instance)
                         ?? invoker.GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        if (!(fieldInfo.GetValue(client) is HttpMessageHandler handler))
+        if (fieldInfo.GetValue(client) is not HttpMessageHandler handler)
         {
             yield break;
         }

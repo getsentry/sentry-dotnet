@@ -9,11 +9,11 @@ public class CaptureExceptionDuplicateDetectionBenchmarks
     [Params(1, 10, 100)]
     public int EventCount;
 
-    private static Action<SentryOptions> SharedConfig => (o =>
+    private static Action<SentryOptions> SharedConfig => o =>
     {
         o.Dsn = Constants.ValidDsn;
         o.SentryHttpClientFactory = new FakeHttpClientFactory();
-    });
+    };
 
     [GlobalSetup(Target = nameof(CaptureException_WithDuplicateDetection))]
     public void EnabledWithDuplicateDetectionSdk() => _sdk = SentrySdk.Init(o =>

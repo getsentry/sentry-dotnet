@@ -17,8 +17,7 @@ internal class SampleHostedService : IHostedService
         // Logging integration by default keeps informational logs as Breadcrumb
         _logger.LogInformation("Starting sample hosted service. This goes as a breadcrumb");
         // You can also add breadcrumb directly through Sentry.Hub:
-        _hub.AddBreadcrumb("Breadcrumb added directly to Sentry Hub")
-            ;
+        _hub.AddBreadcrumb("Breadcrumb added directly to Sentry Hub");
         // Hub allows total control of the scope
         _hub.ConfigureScope(s => s.SetTag("Worker", nameof(SampleHostedService)));
 
