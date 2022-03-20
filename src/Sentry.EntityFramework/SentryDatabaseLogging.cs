@@ -16,7 +16,8 @@ public static class SentryDatabaseLogging
     /// </summary>
     /// <param name="logger">Query Logger.</param>
     [Obsolete("This method is called automatically by options.AddEntityFramework. This method will be removed in future versions.")]
-    public static SentryCommandInterceptor? UseBreadcrumbs(IQueryLogger? logger = null) => UseBreadcrumbs(logger);
+    public static SentryCommandInterceptor? UseBreadcrumbs(IQueryLogger? logger = null)
+        => UseBreadcrumbs(logger, true);
 
     internal static SentryCommandInterceptor? UseBreadcrumbs(
         IQueryLogger? queryLogger = null,
