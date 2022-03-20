@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Net;
 using System.Net.Http;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Hosting;

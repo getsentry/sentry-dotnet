@@ -1,5 +1,3 @@
-using Sentry.Tests.Helpers;
-
 namespace Sentry.Tests.Protocol.Context;
 
 public class TraceTests
