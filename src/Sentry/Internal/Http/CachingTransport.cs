@@ -36,9 +36,16 @@ namespace Sentry.Internal.Http
         private readonly Lock _cacheDirectoryLock = new();
 
         private readonly CancellationTokenSource _workerCts = new();
-        private readonly Task _worker;
+        private Task _worker = null!;
 
-        public CachingTransport(ITransport innerTransport, SentryOptions options)
+        public static CachingTransport Create(ITransport innerTransport, SentryOptions options)
+        {
+            var transport = new CachingTransport(innerTransport, options);
+            transport.Initialize();
+            return transport;
+        }
+
+        private CachingTransport(ITransport innerTransport, SentryOptions options)
         {
             _innerTransport = innerTransport;
             _options = options;
@@ -51,10 +58,12 @@ namespace Sentry.Internal.Http
                 options.TryGetProcessSpecificCacheDirectoryPath() ??
                 throw new InvalidOperationException("Cache directory or DSN is not set.");
 
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+        }
 
-            // Ensure that the processing directory exists
+        private void Initialize()
+        {
+            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             Directory.CreateDirectory(_processingDirectoryPath);
 
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);

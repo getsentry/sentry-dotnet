@@ -242,7 +242,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         {
             // Pre-populate cache
             var initialInnerTransport = new FakeFailingTransport();
-            await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
+            await using var initialTransport = CachingTransport.Create(initialInnerTransport, new SentryOptions
             {
                 DiagnosticLogger = _logger,
                 Dsn = ValidDsnWithoutSecret,
