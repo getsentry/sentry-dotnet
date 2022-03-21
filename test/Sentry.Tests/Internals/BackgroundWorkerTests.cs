@@ -47,19 +47,20 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
-    public void Dispose_WhenRequestInFlight_StopsTask()
+    public async Task Dispose_WhenRequestInFlight_StopsTask()
     {
-        var signal = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
         var envelope = Envelope.FromEvent(new SentryEvent());
 
         _fixture.Transport
             .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-            .Do(_ => signal.Set());
+            .Do(_ => tcs.SetResult(null));
 
         var sut = _fixture.GetSut();
         _ = sut.EnqueueEnvelope(envelope);
 
-        Assert.True(signal.Wait(TimeSpan.FromSeconds(3)));
+        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(tcs.Task.IsCompleted);
 
         sut.Dispose();
 

@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Net;
 using System.Net.Http;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Hosting;
@@ -20,13 +19,13 @@ public class IntegrationTests
     [Fact]
     public async Task SentryIntegrationTest_CaptureUnhandledException()
     {
-        var evt = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
 
         var requests = new List<string>();
         void Verify(HttpRequestMessage message)
         {
             requests.Add(message.Content.ReadAsStringAsync().Result);
-            evt.Set();
+            tcs.SetResult(null);
         }
 
         var host = Host.CreateDefaultBuilder()
@@ -62,7 +61,8 @@ public class IntegrationTests
         catch (Exception e) when (e.Message == ExpectedMessage)
         {
             // Synchronizing in the tests because `OnCompleted` is not being called with TestServer.
-            Assert.True(evt.Wait(TimeSpan.FromSeconds(3)));
+            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+            Assert.True(tcs.Task.IsCompleted, "Expected Verify to complete.");
             Assert.True(requests.Any(p => p.Contains(ExpectedMessage)),
                 "Expected error to be captured");
             Assert.True(requests.All(p => p.Contains("sentry.dotnet.google-cloud-function")),
