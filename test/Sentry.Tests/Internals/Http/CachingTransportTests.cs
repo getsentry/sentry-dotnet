@@ -131,7 +131,7 @@ public class CachingTransportTests
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
 
-        Assert.True(capturingSync.Wait(TimeSpan.FromSeconds(3)), "Inner transport was never called");
+        Assert.True(await capturingSync.WaitAsync(TimeSpan.FromSeconds(3)), "Inner transport was never called");
         var stopTask = transport.StopWorkerAsync();
         cancelingSync.Set(); // Unblock the worker
         await stopTask;
@@ -181,8 +181,8 @@ public class CachingTransportTests
         await transport.SendEnvelopeAsync(envelope);
 
         // Assert
-        Assert.True(capturingSync.Wait(TimeSpan.FromSeconds(3)), "Envelope never reached the transport");
-        Assert.True(loggerSync.Wait(TimeSpan.FromSeconds(3)), "Expected log call never received");
+        Assert.True(await capturingSync.WaitAsync(TimeSpan.FromSeconds(3)), "Envelope never reached the transport");
+        Assert.True(await loggerSync.WaitAsync(TimeSpan.FromSeconds(3)), "Expected log call never received");
     }
 
     [Fact(Timeout = 7000)]
