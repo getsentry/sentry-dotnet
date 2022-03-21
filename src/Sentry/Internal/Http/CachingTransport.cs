@@ -176,8 +176,6 @@ namespace Sentry.Internal.Http
                     _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
 
                     await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
-
-                    _options.LogDebug("Successfully sent cached envelope: {0}", envelope.TryGetEventId());
                 }
                 // OperationCancel should not log an error
                 catch (OperationCanceledException ex)
