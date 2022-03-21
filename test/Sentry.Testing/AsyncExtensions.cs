@@ -3,32 +3,45 @@ namespace Sentry.Testing;
 public static class AsyncExtensions
 {
     // Adapted from:
+    // https://stackoverflow.com/a/18766131
+    //
+    // See also:
     // https://docs.microsoft.com/dotnet/standard/asynchronous-programming-patterns/interop-with-other-asynchronous-patterns-and-types#tasks-and-wait-handles
-    public static Task WaitOneAsync(this WaitHandle waitHandle)
+
+    public static Task AsTask(this WaitHandle handle)
     {
-        if (waitHandle == null)
+        return AsTask(handle, Timeout.InfiniteTimeSpan);
+    }
+
+    public static Task AsTask(this WaitHandle handle, TimeSpan timeout)
+    {
+        var tcs = new TaskCompletionSource<object>();
+        var registration = ThreadPool.RegisterWaitForSingleObject(handle, (state, timedOut) =>
         {
-            throw new ArgumentNullException(nameof(waitHandle));
-        }
-
-        var tcs = new TaskCompletionSource<bool>();
-        var rwh = ThreadPool.RegisterWaitForSingleObject(waitHandle,
-            (_, _) => tcs.TrySetResult(true), null, -1, true);
-
-        var t = tcs.Task;
-        t.ContinueWith( _ => rwh.Unregister(null));
-        return t;
+            var localTcs = (TaskCompletionSource<object>)state;
+            if (timedOut)
+            {
+                localTcs.TrySetCanceled();
+            }
+            else
+            {
+                localTcs.TrySetResult(null);
+            }
+        }, tcs, timeout, executeOnlyOnce: true);
+        tcs.Task.ContinueWith((_, state) =>
+            ((RegisteredWaitHandle)state).Unregister(null), registration, TaskScheduler.Default);
+        return tcs.Task;
     }
 
     public static async Task WaitAsync(this ManualResetEventSlim manualResetEvent)
     {
-        await manualResetEvent.WaitHandle.WaitOneAsync();
+        await manualResetEvent.WaitHandle.AsTask();
     }
 
     public static async Task<bool> WaitAsync(this ManualResetEventSlim manualResetEvent, TimeSpan timeout)
     {
-        var task = manualResetEvent.WaitAsync();
-        await Task.WhenAny(task, Task.Delay(timeout));
-        return task.IsCompleted;
+        var task = manualResetEvent.WaitHandle.AsTask(timeout);
+        await task;
+        return task.IsCompleted && !task.IsCanceled;
     }
 }
