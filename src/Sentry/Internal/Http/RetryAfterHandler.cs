@@ -75,28 +75,25 @@ namespace Sentry.Internal.Http
 
         private DateTimeOffset GetRetryAfterTimestamp(HttpResponseMessage response)
         {
-            if (response.Headers != null)
+            if (response.Headers.RetryAfter != null)
             {
-                if (response.Headers.RetryAfter != null)
+                if (response.Headers.RetryAfter.Delta is { } delta)
                 {
-                    if (response.Headers.RetryAfter.Delta is { } delta)
-                    {
-                        return _clock.GetUtcNow() + delta;
-                    }
-
-                    if (response.Headers.RetryAfter.Date is { } date)
-                    {
-                        return date;
-                    }
+                    return _clock.GetUtcNow() + delta;
                 }
 
-                // Sentry was sending floating point numbers which are not handled by RetryConditionHeaderValue
-                // To be compatible with older versions of sentry on premise: https://github.com/getsentry/sentry/issues/7919
-                if (response.Headers.TryGetValues("Retry-After", out var values)
-                    && double.TryParse(values?.FirstOrDefault(), out var retryAfterSeconds))
+                if (response.Headers.RetryAfter.Date is { } date)
                 {
-                    return _clock.GetUtcNow().AddTicks((long)(retryAfterSeconds * TimeSpan.TicksPerSecond));
+                    return date;
                 }
+            }
+
+            // Sentry was sending floating point numbers which are not handled by RetryConditionHeaderValue
+            // To be compatible with older versions of sentry on premise: https://github.com/getsentry/sentry/issues/7919
+            if (response.Headers.TryGetValues("Retry-After", out var values)
+                && double.TryParse(values.FirstOrDefault(), out var retryAfterSeconds))
+            {
+                return _clock.GetUtcNow().AddTicks((long)(retryAfterSeconds * TimeSpan.TicksPerSecond));
             }
 
             // No retry header was sent. Use the default retry delay.
