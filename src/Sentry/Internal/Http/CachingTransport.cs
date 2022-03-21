@@ -228,14 +228,6 @@ namespace Sentry.Internal.Http
             }
         }
 
-        // Loading an Envelope only reads the headers. The payload is read lazily, so we do
-        // Disk -> Network I/O via stream directly instead of loading the whole file in memory.
-        private static bool IsNetworkRelated(Exception exception) =>
-            exception is
-                HttpRequestException or
-                SocketException or
-                IOException;
-
         // Gets the next cache file and moves it to "processing"
         private async Task<string?> TryPrepareNextCacheFileAsync(
             CancellationToken cancellationToken = default)
