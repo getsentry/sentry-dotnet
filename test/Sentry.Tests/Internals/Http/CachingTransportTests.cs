@@ -114,16 +114,17 @@ public class CachingTransportTests
             Debug = true
         };
 
-        var capturingSync = new ManualResetEventSlim();
-        var cancelingSync = new ManualResetEventSlim();
+        var capturingCompletionSource = new TaskCompletionSource<object>();
+        var cancelingCompletionSource = new TaskCompletionSource<object>();
+
         var innerTransport = Substitute.For<ITransport>();
 
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .ThrowsForAnyArgs(_ =>
             {
-                capturingSync.Set();
-                cancelingSync.Wait(TimeSpan.FromSeconds(4));
+                capturingCompletionSource.SetResult(null);
+                cancelingCompletionSource.Task.Wait(TimeSpan.FromSeconds(4));
                 return new OperationCanceledException();
             });
 
@@ -131,9 +132,11 @@ public class CachingTransportTests
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
 
-        Assert.True(await capturingSync.WaitAsync(TimeSpan.FromSeconds(3)), "Inner transport was never called");
+        await Task.WhenAny(capturingCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(capturingCompletionSource.Task.IsCompleted, "Inner transport was never called");
+
         var stopTask = transport.StopWorkerAsync();
-        cancelingSync.Set(); // Unblock the worker
+        cancelingCompletionSource.SetResult(null); // Unblock the worker
         await stopTask;
 
         // Assert
@@ -145,7 +148,7 @@ public class CachingTransportTests
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-        var loggerSync = new ManualResetEventSlim();
+        var loggerCompletionSource = new TaskCompletionSource<object>();
 
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
@@ -155,7 +158,7 @@ public class CachingTransportTests
                     "Exception in background worker of CachingTransport.",
                     Arg.Any<OperationCanceledException>(),
                     Arg.Any<object[]>()))
-            .Do(_ => loggerSync.Set());
+            .Do(_ => loggerCompletionSource.SetResult(null));
 
         var options = new SentryOptions
         {
@@ -167,12 +170,12 @@ public class CachingTransportTests
 
         var innerTransport = Substitute.For<ITransport>();
 
-        var capturingSync = new ManualResetEventSlim();
+        var capturingCompletionSource = new TaskCompletionSource<object>();
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .ThrowsForAnyArgs(_ =>
             {
-                capturingSync.Set();
+                capturingCompletionSource.SetResult(null);
                 return new OperationCanceledException();
             });
 
@@ -181,8 +184,10 @@ public class CachingTransportTests
         await transport.SendEnvelopeAsync(envelope);
 
         // Assert
-        Assert.True(await capturingSync.WaitAsync(TimeSpan.FromSeconds(3)), "Envelope never reached the transport");
-        Assert.True(await loggerSync.WaitAsync(TimeSpan.FromSeconds(3)), "Expected log call never received");
+        await Task.WhenAny(capturingCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(capturingCompletionSource.Task.IsCompleted, "Envelope never reached the transport");
+        await Task.WhenAny(loggerCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(loggerCompletionSource.Task.IsCompleted, "Expected log call never received");
     }
 
     [Fact(Timeout = 7000)]
@@ -229,11 +234,12 @@ public class CachingTransportTests
 
         var innerTransport = Substitute.For<ITransport>();
 
-        var evt = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
+
         // Block until we're done
         innerTransport
             .When(t => t.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>()))
-            .Do(_ => evt.Wait());
+            .Do(_ => tcs.Task.Wait());
 
         await using var transport = CachingTransport.Create(innerTransport, options);
 
@@ -245,7 +251,7 @@ public class CachingTransportTests
 
             transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxCacheItems);
         }
-        evt.Set();
+        tcs.SetResult(null);
     }
 
     [Fact(Timeout = 7000)]
