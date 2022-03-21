@@ -3,7 +3,7 @@ namespace Sentry.Testing;
 public static class AsyncExtensions
 {
     // Adapted from:
-    // https://docs.microsoft.com/dotnet/standard/asynchronous-programming-patterns/interop-with-other-asynchronous-patterns-and-types
+    // https://docs.microsoft.com/dotnet/standard/asynchronous-programming-patterns/interop-with-other-asynchronous-patterns-and-types#tasks-and-wait-handles
     public static Task WaitOneAsync(this WaitHandle waitHandle)
     {
         if (waitHandle == null)
