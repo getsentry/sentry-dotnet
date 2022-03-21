@@ -45,7 +45,7 @@ namespace Sentry.Internal
             }
 
             // Caching transport
-            var cachingTransport = new CachingTransport(httpTransport, _options);
+            var cachingTransport = CachingTransport.Create(httpTransport, _options);
 
             BlockCacheFlush(cachingTransport);
 
