@@ -305,9 +305,9 @@ public class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
+    public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
-        var resetEvent = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
         var expectedMessage = Guid.NewGuid().ToString();
 
         var requests = new List<string>();
@@ -317,7 +317,7 @@ public class HubTests
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
-                resetEvent.Set();
+                tcs.SetResult(null);
             }
         }
 
@@ -349,7 +349,8 @@ public class HubTests
         hub.CaptureEvent(evt);
 
         // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
-        Assert.True(resetEvent.Wait(TimeSpan.FromSeconds(3)), "Event not captured");
+        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(tcs.Task.IsCompleted, "Event not captured");
         Assert.True(requests.All(p => p.Contains(expectedContextKey)),
             "Un-serializable context key should exist");
 
