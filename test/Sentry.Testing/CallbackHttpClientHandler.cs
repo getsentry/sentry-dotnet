@@ -5,13 +5,13 @@ namespace Sentry.Testing;
 
 public class CallbackHttpClientHandler : HttpClientHandler
 {
-    private readonly Action<HttpRequestMessage> _messageCallback;
+    private readonly Func<HttpRequestMessage, Task> _asyncMessageCallback;
 
-    public CallbackHttpClientHandler(Action<HttpRequestMessage> messageCallback) => _messageCallback = messageCallback;
+    public CallbackHttpClientHandler(Func<HttpRequestMessage, Task> asyncMessageCallback) => _asyncMessageCallback = asyncMessageCallback;
 
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        _messageCallback(request);
-        return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+        await _asyncMessageCallback(request);
+        return new HttpResponseMessage(HttpStatusCode.OK);
     }
 }

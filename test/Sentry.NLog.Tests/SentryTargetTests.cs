@@ -442,17 +442,18 @@ public class SentryTargetTests
 
         var testDisposable = Substitute.For<IDisposable>();
 
-        var evt = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
 
         void Continuation(Exception _)
         {
             testDisposable.Dispose();
-            evt.Set();
+            tcs.SetResult(null);
         }
 
         factory.Flush(Continuation, timeout);
 
-        Assert.True(evt.Wait(timeout));
+        await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+        Assert.True(tcs.Task.IsCompleted);
 
         testDisposable.Received().Dispose();
         await hub.Received().FlushAsync(Arg.Any<TimeSpan>());

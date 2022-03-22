@@ -47,11 +47,11 @@ public class TaskUnobservedTaskExceptionIntegrationTests
                 _ = taskStartedEvent.Set();
                 throw new Exception("Unhandled on Task");
             });
-            Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(4)));
+            Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(10)));
             var counter = 0;
             do
             {
-                Assert.True(counter++ < 10);
+                Assert.True(counter++ < 20);
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));

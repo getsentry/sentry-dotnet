@@ -291,16 +291,16 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     }
 
     [Fact]
-    public void Environment_NotOnOptions_ValueFromEnvVar()
+    public async Task Environment_NotOnOptions_ValueFromEnvVar()
     {
         const string expected = "environment";
 
-        EnvironmentVariableGuard.WithVariable("ASPNETCORE_ENVIRONMENT",
+        await EnvironmentVariableGuard.WithVariableAsync("ASPNETCORE_ENVIRONMENT",
             expected,
-            () =>
+            async () =>
             {
                 Build();
-                _ = HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
+                _ = await HttpClient.GetAsync("/throw");
 
                 _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                     e.Items
@@ -315,19 +315,19 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     }
 
     [Fact]
-    public void Environment_BothOnOptionsAndEnvVar_ValueFromOption()
+    public async Task Environment_BothOnOptionsAndEnvVar_ValueFromOption()
     {
         const string expected = "environment";
         const string other = "other";
 
         Configure = o => o.Environment = expected;
 
-        EnvironmentVariableGuard.WithVariable("ASPNETCORE_ENVIRONMENT",
+        await EnvironmentVariableGuard.WithVariableAsync("ASPNETCORE_ENVIRONMENT",
             other,
-            () =>
+            async () =>
             {
                 Build();
-                _ = HttpClient.GetAsync("/throw").GetAwaiter().GetResult();
+                _ = await HttpClient.GetAsync("/throw");
 
                 _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
                     e.Items

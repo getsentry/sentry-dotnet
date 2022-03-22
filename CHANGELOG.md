@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1537](https://github.com/getsentry/sentry-dotnet/pull/1537))
+### Fixes
+
+- Ignore zero properties for MemoryInfo ([#1531](https://github.com/getsentry/sentry-dotnet/pull/1531))
+- Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
+- Remove confusing message Successfully sent cached envelope ([#1542](https://github.com/getsentry/sentry-dotnet/pull/1542))
+- Fix infinite loop in SentryDatabaseLogging.UseBreadcrumbs ([#1543](https://github.com/getsentry/sentry-dotnet/pull/1543))
+
 ## 3.15.0
 
 ### Features

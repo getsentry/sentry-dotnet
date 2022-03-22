@@ -47,19 +47,20 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
-    public void Dispose_WhenRequestInFlight_StopsTask()
+    public async Task Dispose_WhenRequestInFlight_StopsTask()
     {
-        var signal = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
         var envelope = Envelope.FromEvent(new SentryEvent());
 
         _fixture.Transport
             .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
-            .Do(_ => signal.Set());
+            .Do(_ => tcs.SetResult(null));
 
         var sut = _fixture.GetSut();
         _ = sut.EnqueueEnvelope(envelope);
 
-        Assert.True(signal.Wait(TimeSpan.FromSeconds(3)));
+        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(tcs.Task.IsCompleted);
 
         sut.Dispose();
 
@@ -84,19 +85,22 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
-    public void Dispose_SwallowsException()
+    public async Task Dispose_SwallowsException()
     {
         _fixture.CancellationTokenSource.Dispose();
         var sut = _fixture.GetSut();
 
-        _ = Assert.Throws<AggregateException>(() => sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
+        // We expect an exception here, because we disposed the cancellation token source
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => sut.WorkerTask);
+
+        // No exception should be thrown here
         sut.Dispose();
 
         Assert.Equal(TaskStatus.Faulted, sut.WorkerTask.Status);
     }
 
     [Fact]
-    public void Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
+    public async Task Dispose_EventQueuedZeroShutdownTimeout_CantEmptyQueueBeforeShutdown()
     {
         _fixture.SentryOptions.ShutdownTimeout = default; // Don't wait
 
@@ -118,7 +122,10 @@ public class BackgroundWorkerTests
 
         _ = sut.EnqueueEnvelope(envelope);
 
-        Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(5)));
+        // Wait 5 seconds for task to finish
+        await Task.WhenAny(sut.WorkerTask, Task.Delay(TimeSpan.FromSeconds(5)));
+
+        Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
 
         // First event was sent, second hit transport with a cancelled token.
         // Third never taken from the queue
@@ -165,7 +172,7 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
-    public void Create_CancelledTaskAndNoShutdownTimeout_ConsumesNoEvents()
+    public async Task Create_CancelledTaskAndNoShutdownTimeout_ConsumesNoEvents()
     {
         // Arrange
         _fixture.SentryOptions.ShutdownTimeout = default;
@@ -174,8 +181,8 @@ public class BackgroundWorkerTests
         // Act
         using var sut = _fixture.GetSut();
 
-        // Make sure task has finished
-        Assert.True(sut.WorkerTask.Wait(TimeSpan.FromSeconds(3)));
+        // Wait 3 seconds for task to finish
+        await Task.WhenAny(sut.WorkerTask, Task.Delay(TimeSpan.FromSeconds(3)));
 
         // Assert
         Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
