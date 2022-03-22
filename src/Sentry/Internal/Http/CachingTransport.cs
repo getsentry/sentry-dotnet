@@ -36,9 +36,16 @@ namespace Sentry.Internal.Http
         private readonly Lock _cacheDirectoryLock = new();
 
         private readonly CancellationTokenSource _workerCts = new();
-        private readonly Task _worker;
+        private Task _worker = null!;
 
-        public CachingTransport(ITransport innerTransport, SentryOptions options)
+        public static CachingTransport Create(ITransport innerTransport, SentryOptions options)
+        {
+            var transport = new CachingTransport(innerTransport, options);
+            transport.Initialize();
+            return transport;
+        }
+
+        private CachingTransport(ITransport innerTransport, SentryOptions options)
         {
             _innerTransport = innerTransport;
             _options = options;
@@ -51,10 +58,12 @@ namespace Sentry.Internal.Http
                 options.TryGetProcessSpecificCacheDirectoryPath() ??
                 throw new InvalidOperationException("Cache directory or DSN is not set.");
 
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+        }
 
-            // Ensure that the processing directory exists
+        private void Initialize()
+        {
+            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             Directory.CreateDirectory(_processingDirectoryPath);
 
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);
@@ -176,8 +185,6 @@ namespace Sentry.Internal.Http
                     _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
 
                     await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
-
-                    _options.LogDebug("Successfully sent cached envelope: {0}", envelope.TryGetEventId());
                 }
                 // OperationCancel should not log an error
                 catch (OperationCanceledException ex)
@@ -229,14 +236,6 @@ namespace Sentry.Internal.Http
                 _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", ex, file, envelopeContents);
             }
         }
-
-        // Loading an Envelope only reads the headers. The payload is read lazily, so we do
-        // Disk -> Network I/O via stream directly instead of loading the whole file in memory.
-        private static bool IsNetworkRelated(Exception exception) =>
-            exception is
-                HttpRequestException or
-                SocketException or
-                IOException;
 
         // Gets the next cache file and moves it to "processing"
         private async Task<string?> TryPrepareNextCacheFileAsync(

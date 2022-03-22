@@ -304,19 +304,19 @@ public class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
+    public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
-        var resetEvent = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
         var expectedMessage = Guid.NewGuid().ToString();
 
         var requests = new List<string>();
-        void Verify(HttpRequestMessage message)
+        async Task VerifyAsync(HttpRequestMessage message)
         {
-            var payload = message.Content.ReadAsStringAsync().Result;
+            var payload = await message.Content.ReadAsStringAsync();
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
-                resetEvent.Set();
+                tcs.SetResult(null);
             }
         }
 
@@ -331,7 +331,7 @@ public class HubTests
             Dsn = DsnSamples.ValidDsnWithSecret,
             CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
             RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
-            CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify),
+            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
             AutoSessionTracking = false, // Not to send some session envelope
             Debug = true,
             DiagnosticLevel = expectedLevel,
@@ -348,7 +348,8 @@ public class HubTests
         hub.CaptureEvent(evt);
 
         // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
-        Assert.True(resetEvent.Wait(TimeSpan.FromSeconds(3)), "Event not captured");
+        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(tcs.Task.IsCompleted, "Event not captured");
         Assert.True(requests.All(p => p.Contains(expectedContextKey)),
             "Un-serializable context key should exist");
 
