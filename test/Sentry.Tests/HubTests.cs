@@ -311,9 +311,9 @@ public class HubTests
         var expectedMessage = Guid.NewGuid().ToString();
 
         var requests = new List<string>();
-        void Verify(HttpRequestMessage message)
+        async Task VerifyAsync(HttpRequestMessage message)
         {
-            var payload = message.Content.ReadAsStringAsync().Result;
+            var payload = await message.Content.ReadAsStringAsync();
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
@@ -332,7 +332,7 @@ public class HubTests
             Dsn = DsnSamples.ValidDsnWithSecret,
             CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
             RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
-            CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify),
+            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
             AutoSessionTracking = false, // Not to send some session envelope
             Debug = true,
             DiagnosticLevel = expectedLevel,
