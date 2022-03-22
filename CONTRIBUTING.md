@@ -49,6 +49,9 @@ The M1 ("Apple silicon") is an Arm64 processor.  While .NET 6 runs natively on t
     chmod +x ./dotnet-install.sh
     sudo ./dotnet-install.sh --version 2.1.818 --arch x64 --install-dir /usr/local/share/dotnet/x64
      ```
+- If you are using JetBrains Rider as your IDE, launch it, go to `Preferences` -> `Build, Execution, Deployment` -> `Toolset and Build`, and set the following:
+  - .NET Core CLI executable path: `/usr/local/share/dotnet/dotnet`   (*not* x64)
+  - Use MSBuild version: `17.0 - /usr/local/share/dotnet/sdk/6.0.201/MSBuild.dll` (or higher version)
 
 Note that if you have accidentally corrupted your .NET installation by trying to install the .NET Core 2.1 SDK to the default location, you can wipe clean with the following, then start over:
 
