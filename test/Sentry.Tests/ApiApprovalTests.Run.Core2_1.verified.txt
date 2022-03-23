@@ -1096,6 +1096,14 @@ namespace Sentry.Integrations
         void Register(Sentry.IHub hub, Sentry.SentryOptions options);
     }
 }
+namespace Sentry.Internal.Http
+{
+    public class HttpTransport
+    {
+        public HttpTransport(Sentry.SentryOptions options, System.Net.Http.HttpClient httpClient) { }
+        public System.Threading.Tasks.Task SendEnvelopeAsync(Sentry.Protocol.Envelopes.Envelope envelope, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+}
 namespace Sentry.PlatformAbstractions
 {
     public static class FrameworkInfo

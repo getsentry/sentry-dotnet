@@ -14,7 +14,10 @@ public class AccessModifierTests
 
         Assert.All(types, type =>
         {
-            Assert.False(type.IsPublic, $"Expected type {type.Name} to be internal.");
+            if (type.Name != "HttpTransport")
+            {
+                Assert.False(type.IsPublic, $"Expected type {type.Name} to be internal.");
+            }
         });
     }
 }
