@@ -24,3 +24,5 @@ docs/docfx.zip
 /samples/Sentry.Samples.Aws.Lambda.AspNetCoreServer/Properties/launchSettings.json
 
 *.received.*
+
+.vscode
