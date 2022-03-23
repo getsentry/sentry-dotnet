@@ -14,7 +14,10 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {
-    internal class HttpTransport : ITransport
+    /// <summary>
+    /// Internal HTTP Transport logic implementation. This is only meant to be used by this and other Sentry SDKs.
+    /// </summary>
+    public class HttpTransport : ITransport
     {
         private readonly SentryOptions _options;
         private readonly HttpClient _httpClient;
@@ -33,6 +36,9 @@ namespace Sentry.Internal.Http
 
         internal const string DefaultErrorMessage = "No message";
 
+        /// <summary>
+        /// Creates the internal HTTP Transport with the given option and HttpClient implementation.
+        /// </summary>
         public HttpTransport(SentryOptions options, HttpClient httpClient)
             : this(options, httpClient, Environment.GetEnvironmentVariable)
         {
@@ -135,6 +141,7 @@ namespace Sentry.Internal.Http
             }
         }
 
+        /// <inheritdoc/>
         public async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
         {
             var instant = DateTimeOffset.Now;
