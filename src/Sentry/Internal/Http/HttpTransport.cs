@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -52,9 +53,11 @@ namespace Sentry.Internal.Http
             _getEnvironmentVariable = getEnvironmentVariable;
         }
 
-        private Envelope ProcessEnvelope(Envelope envelope, DateTimeOffset instant)
+        /// <summary>
+        /// Re-package the envelope, discarding items that don't fit the rate limit
+        /// </summary>
+        protected Envelope ProcessEnvelope(Envelope envelope, DateTimeOffset instant)
         {
-            // Re-package envelope, discarding items that don't fit the rate limit
             var envelopeItems = new List<EnvelopeItem>();
             foreach (var envelopeItem in envelope.Items)
             {
@@ -115,10 +118,20 @@ namespace Sentry.Internal.Http
                 }
             }
 
+            if (envelopeItems.Count == 0)
+            {
+                _options.LogInfo(
+                    "Envelope {0} was discarded because all contained items are rate-limited.",
+                    envelope.TryGetEventId());
+            }
+
             return new Envelope(envelope.Header, envelopeItems);
         }
 
-        private void ExtractRateLimits(HttpResponseMessage response, DateTimeOffset instant)
+        /// <summary>
+        /// Update local rate limits based on the response from the server.
+        /// </summary>
+        protected void ExtractRateLimits(HttpResponseMessage response, DateTimeOffset instant)
         {
             if (!response.Headers.TryGetValues("X-Sentry-Rate-Limits", out var rateLimitHeaderValues))
             {
@@ -150,10 +163,6 @@ namespace Sentry.Internal.Http
             using var processedEnvelope = ProcessEnvelope(envelope, instant);
             if (processedEnvelope.Items.Count == 0)
             {
-                _options.LogInfo(
-                    "Envelope {0} was discarded because all contained items are rate-limited.",
-                    envelope.TryGetEventId());
-
                 return;
             }
 
@@ -167,10 +176,8 @@ namespace Sentry.Internal.Http
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 await HandleFailureAsync(response, processedEnvelope, cancellationToken).ConfigureAwait(false);
-                return;
             }
-
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
+            else if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
                 _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
                     envelope.TryGetEventId(),
@@ -178,8 +185,7 @@ namespace Sentry.Internal.Http
             }
             else
             {
-                _options.LogInfo("Envelope '{0}' successfully received by Sentry.",
-                    processedEnvelope.TryGetEventId());
+                _options.LogInfo("Envelope '{0}' successfully received by Sentry.", processedEnvelope.TryGetEventId());
             }
         }
 
@@ -189,42 +195,18 @@ namespace Sentry.Internal.Http
             CancellationToken cancellationToken)
         {
             // Spare the overhead if level is not enabled
-            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true &&
-                response.Content is { } content)
+            if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
             {
                 if (string.Equals(content.Headers.ContentType?.MediaType, "application/json",
                     StringComparison.OrdinalIgnoreCase))
                 {
-                    var responseJson = await content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
-
-                    var errorMessage =
-                        responseJson.GetPropertyOrNull("detail")?.GetString()
-                        ?? DefaultErrorMessage;
-
-                    var errorCauses =
-                        responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
-                        ?? Array.Empty<string>();
-
-                    _options.Log(
-                        SentryLevel.Error,
-                        "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}.",
-                        null,
-                        processedEnvelope.TryGetEventId(),
-                        response.StatusCode,
-                        errorMessage,
-                        string.Join(", ", errorCauses));
+                    LogFailure(response, processedEnvelope,
+                        await content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false));
                 }
                 else
                 {
-                    var responseString = await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-                    _options.Log(
-                        SentryLevel.Error,
-                        "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}.",
-                        null,
-                        processedEnvelope.TryGetEventId(),
-                        response.StatusCode,
-                        responseString);
+                    LogFailure(response, processedEnvelope,
+                        await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
                 }
 
                 // If debug level, dump the whole envelope to the logger
@@ -267,7 +249,47 @@ namespace Sentry.Internal.Http
             }
         }
 
-        internal HttpRequestMessage CreateRequest(Envelope envelope)
+        /// <summary>
+        /// Log failure response.
+        /// </summary>
+        protected void LogFailure(HttpResponseMessage response, Envelope processedEnvelope, JsonElement responseJson)
+        {
+            var errorMessage =
+                responseJson.GetPropertyOrNull("detail")?.GetString()
+                ?? DefaultErrorMessage;
+
+            var errorCauses =
+                responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
+                ?? Array.Empty<string>();
+
+            _options.Log(
+                SentryLevel.Error,
+                "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}.",
+                null,
+                processedEnvelope.TryGetEventId(),
+                response.StatusCode,
+                errorMessage,
+                string.Join(", ", errorCauses));
+        }
+
+        /// <summary>
+        /// Log failure response.
+        /// </summary>
+        protected void LogFailure(HttpResponseMessage response, Envelope processedEnvelope, string responseString)
+        {
+            _options.Log(
+                SentryLevel.Error,
+                "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}.",
+                null,
+                processedEnvelope.TryGetEventId(),
+                response.StatusCode,
+                responseString);
+        }
+
+        /// <summary>
+        /// Create HTTP request for the envelope.
+        /// </summary>
+        protected internal HttpRequestMessage CreateRequest(Envelope envelope)
         {
             if (string.IsNullOrWhiteSpace(_options.Dsn))
             {

@@ -1101,6 +1101,11 @@ namespace Sentry.Internal.Http
     public class HttpTransport
     {
         public HttpTransport(Sentry.SentryOptions options, System.Net.Http.HttpClient httpClient) { }
+        protected System.Net.Http.HttpRequestMessage CreateRequest(Sentry.Protocol.Envelopes.Envelope envelope) { }
+        protected void ExtractRateLimits(System.Net.Http.HttpResponseMessage response, System.DateTimeOffset instant) { }
+        protected void LogFailure(System.Net.Http.HttpResponseMessage response, Sentry.Protocol.Envelopes.Envelope processedEnvelope, string responseString) { }
+        protected void LogFailure(System.Net.Http.HttpResponseMessage response, Sentry.Protocol.Envelopes.Envelope processedEnvelope, System.Text.Json.JsonElement responseJson) { }
+        protected Sentry.Protocol.Envelopes.Envelope ProcessEnvelope(Sentry.Protocol.Envelopes.Envelope envelope, System.DateTimeOffset instant) { }
         public System.Threading.Tasks.Task SendEnvelopeAsync(Sentry.Protocol.Envelopes.Envelope envelope, System.Threading.CancellationToken cancellationToken = default) { }
     }
 }
