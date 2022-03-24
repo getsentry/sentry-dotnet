@@ -1,8 +1,6 @@
 using System.IO.Compression;
 using System.Net;
 using System.Text.Json;
-using Serilog;
-using Serilog.Events;
 
 namespace Sentry.Serilog.Tests;
 
