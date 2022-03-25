@@ -334,6 +334,12 @@ namespace Sentry
         public bool RequestBodyCompressionBuffered { get; set; } = true;
 
         /// <summary>
+        /// Whether to send client reports, which contain statistics about discarded events.
+        /// </summary>
+        /// <see href="https://develop.sentry.dev/sdk/client-reports/"/>
+        public bool SendClientReports { get; set; } = true;
+
+        /// <summary>
         /// An optional web proxy
         /// </summary>
         public IWebProxy? HttpProxy { get; set; }
