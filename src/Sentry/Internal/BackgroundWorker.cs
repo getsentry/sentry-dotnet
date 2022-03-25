@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace Sentry.Internal
         private readonly int _maxItems;
         private readonly CancellationTokenSource _shutdownSource;
         private readonly SemaphoreSlim _queuedEnvelopeSemaphore;
+        private readonly ThreadsafeCounterDictionary<(DataCategory Category, DiscardReason Reason)> _discardedEvents = new();
 
         private volatile bool _disposed;
         private int _currentItems;
@@ -23,6 +25,8 @@ namespace Sentry.Internal
         private event EventHandler? OnFlushObjectReceived;
 
         internal Task WorkerTask { get; }
+
+        internal IReadOnlyDictionary<(DataCategory Category, DiscardReason Reason), int> DiscardedEvents => _discardedEvents;
 
         public int QueuedItems => _queue.Count;
 
@@ -59,6 +63,10 @@ namespace Sentry.Internal
             if (Interlocked.Increment(ref _currentItems) > _maxItems)
             {
                 _ = Interlocked.Decrement(ref _currentItems);
+                foreach (var item in envelope.Items)
+                {
+                    _discardedEvents.Increment((item.DataCategory, DiscardReason.QueueOverflow));
+                }
                 return false;
             }
 

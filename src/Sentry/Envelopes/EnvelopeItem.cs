@@ -34,6 +34,15 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public ISerializable Payload { get; }
 
+        internal DataCategory DataCategory => TryGetType() switch
+        {
+            TypeValueEvent => DataCategory.Error,
+            TypeValueTransaction => DataCategory.Transaction,
+            TypeValueSession => DataCategory.Session,
+            TypeValueAttachment => DataCategory.Attachment,
+            _ => DataCategory.Default
+        };
+
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopeItem"/>.
         /// </summary>

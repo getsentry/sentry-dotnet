@@ -217,6 +217,12 @@ public class BackgroundWorkerTests
         var queued = sut.EnqueueEnvelope(envelope);
         Assert.False(queued); // Fails to queue second
 
+        // Also check that we recorded a single discarded event with the correct information
+        var ((category, reason), count) = sut.DiscardedEvents.Single();
+        Assert.Equal(DataCategory.Error, category);
+        Assert.Equal(DiscardReason.QueueOverflow, reason);
+        Assert.Equal(1, count);
+
         _ = eventsQueuedEvent.Set();
     }
 
