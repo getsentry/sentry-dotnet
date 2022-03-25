@@ -102,20 +102,22 @@ namespace Sentry.PlatformAbstractions
 
         internal static Runtime? GetFromRuntimeInformation()
         {
+            string frameworkDescription;
             try
             {
                 // Preferred API: netstandard2.0
                 // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
                 // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs
                 // e.g: .NET Framework 4.7.2633.0, .NET Native, WebAssembly
-                var frameworkDescription = RuntimeInformation.FrameworkDescription;
-
-                return Parse(frameworkDescription);
+                // Note: this throws on some Unity IL2CPP versions
+                frameworkDescription = RuntimeInformation.FrameworkDescription;
             }
             catch
             {
                 return null;
             }
+
+            return Parse(frameworkDescription);
         }
 
         internal static Runtime? GetFromMonoRuntime()
