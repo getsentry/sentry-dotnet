@@ -4,6 +4,7 @@
 
 ### Features
 
+- Collect and send Client Reports to Sentry, which contain counts of discarded events. ([#1556](https://github.com/getsentry/sentry-dotnet/pull/1556))
 - Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1537](https://github.com/getsentry/sentry-dotnet/pull/1537))
 
 ### Fixes
