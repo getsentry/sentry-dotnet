@@ -21,6 +21,7 @@ namespace Sentry.Protocol.Envelopes
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueSession = "session";
         private const string TypeValueAttachment = "attachment";
+        private const string TypeValueClientReport = "client_report";
         private const string LengthKey = "length";
         private const string FileNameKey = "filename";
 
@@ -222,6 +223,19 @@ namespace Sentry.Protocol.Envelopes
             };
 
             return new EnvelopeItem(header, new StreamSerializable(stream));
+        }
+
+        /// <summary>
+        /// Creates an envelope item from a client report.
+        /// </summary>
+        internal static EnvelopeItem FromClientReport(ClientReport clientReport)
+        {
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+            {
+                [TypeKey] = TypeValueClientReport
+            };
+
+            return new EnvelopeItem(header, new JsonSerializable(clientReport));
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
