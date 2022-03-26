@@ -217,7 +217,37 @@ public class BackgroundWorkerTests
         var queued = sut.EnqueueEnvelope(envelope);
         Assert.False(queued); // Fails to queue second
 
-        // Also check that we recorded a single discarded event with the correct information
+        _ = eventsQueuedEvent.Set();
+    }
+
+    [Fact]
+    public void CaptureEvent_LimitReached_RecordsDiscardedEvent()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        var transportEvent = new ManualResetEvent(false);
+        var eventsQueuedEvent = new ManualResetEvent(false);
+
+        _fixture.SentryOptions.MaxQueueItems = 1;
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
+            {
+                _ = transportEvent.Set(); // Processing first event
+                _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+            });
+
+        using var sut = _fixture.GetSut();
+
+        // Act
+        _ = sut.EnqueueEnvelope(envelope);
+        _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+
+        // in-flight events are kept in queue until completed.
+        _ = sut.EnqueueEnvelope(envelope);
+
+        // Check that we recorded a single discarded event with the correct information
         var ((category, reason), count) = sut.DiscardedEvents.Single();
         Assert.Equal(DataCategory.Error, category);
         Assert.Equal(DiscardReason.QueueOverflow, reason);
