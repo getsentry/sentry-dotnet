@@ -34,15 +34,11 @@ public class ThreadsafeCounterDictionaryTests
         Assert.Equal(1, value);
     }
 
-    [Fact(Timeout = 1200)]
+    [Fact]
     public async Task CanIncrementManyCountersSimultaneously()
     {
-        // This test should pass in roughly 700ms - 800ms on most systems.
-        // If the implementation used a hard lock while incrementing, it would take about 1500ms - 2000ms.
-        // If the implementation did a naive increment (_value++), it would not be threadsafe and this test would fail.
-
         const int numCounters = 10;
-        const int numTasksPerCounter = 100;
+        const int numTasksPerCounter = 20;
         const int numIterationsPerTask = 10000;
 
         var counters = new ThreadsafeCounterDictionary<string>();
