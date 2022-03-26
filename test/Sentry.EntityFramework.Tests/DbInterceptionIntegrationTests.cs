@@ -10,7 +10,7 @@ namespace Sentry.EntityFramework.Tests
             var options = new SentryOptions
             {
                 Debug = true,
-                DiagnosticLogger = new TestOutputDiagnosticLogger(logger, SentryLevel.Debug),
+                DiagnosticLogger = new TestOutputDiagnosticLogger(logger),
                 TracesSampleRate = 0
             };
             var integration = new DbInterceptionIntegration();

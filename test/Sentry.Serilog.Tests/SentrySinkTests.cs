@@ -260,7 +260,7 @@ public class SentrySinkTests
         const int param = 10;
 
         // Use custom TextFormatter
-        _fixture.Options.TextFormatter = new MessageTemplateTextFormatter("[{structured}] {Message}", null);
+        _fixture.Options.TextFormatter = new MessageTemplateTextFormatter("[{structured}] {Message}");
 
         var sut = _fixture.GetSut();
 

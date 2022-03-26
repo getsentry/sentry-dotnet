@@ -43,7 +43,7 @@ public class SentryCommandInterceptorTests
         };
 
         interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int>());
-        _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Debug);
+        _fixture.QueryLogger.Received(1).Log(expected.Query);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class SentryCommandInterceptorTests
         };
 
         interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
-        _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Debug);
+        _fixture.QueryLogger.Received(1).Log(expected.Query);
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class SentryCommandInterceptorTests
         };
 
         interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object>());
-        _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Debug);
+        _fixture.QueryLogger.Received(1).Log(expected.Query);
     }
 
     [Fact]
@@ -148,6 +148,6 @@ public class SentryCommandInterceptorTests
 
         _ = _fixture.DbContext.TestTable.FirstOrDefault();
 
-        _fixture.QueryLogger.Received().Log(Arg.Any<string>(), BreadcrumbLevel.Debug);
+        _fixture.QueryLogger.Received().Log(Arg.Any<string>());
     }
 }
