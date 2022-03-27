@@ -35,34 +35,26 @@ public class ThreadsafeCounterDictionaryTests
     }
 
     [Fact]
-    public async Task CanIncrementManyCountersSimultaneously()
+    public void CanIncrementManyCountersSimultaneously()
     {
         const int numCounters = 10;
-        const int numTasksPerCounter = 20;
-        const int numIterationsPerTask = 10000;
+        const int numThreadsPerCounter = 20;
+        const int numIterationsPerThread = 10000;
 
         var counters = new ThreadsafeCounterDictionary<string>();
 
-        var tasks = new List<Task>(capacity: numCounters * numTasksPerCounter);
-        for (var i = 0; i < numCounters; i++)
+        Parallel.For(0, numCounters * numThreadsPerCounter, x =>
         {
+            var i = x % numCounters;
             var counterName = $"counter_{i}";
-            for (var j = 0; j < numTasksPerCounter; j++)
+
+            for (var j = 0; j < numIterationsPerThread; j++)
             {
-                tasks.Add(Task.Run(async () =>
-                {
-                    await Task.Yield();
-                    for (var k = 0; k < numIterationsPerTask; k++)
-                    {
-                        counters.Increment(counterName);
-                    }
-                }));
+                counters.Increment(counterName);
             }
-        }
+        });
 
-        await Task.WhenAll(tasks);
-
-        const int expectedCount = numTasksPerCounter * numIterationsPerTask;
+        const int expectedCount = numThreadsPerCounter * numIterationsPerThread;
         for (var i = 0; i < numCounters; i++)
         {
             Assert.Equal(expectedCount, counters[$"counter_{i}"]);
