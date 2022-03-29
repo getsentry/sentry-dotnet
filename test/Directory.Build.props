@@ -7,8 +7,6 @@
     <!-- some projects have transive dependencies on legacy TFW https://github.com/dotnet/announcements/issues/190 -->
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <IsPackable>false</IsPackable>
-    <!-- https://github.com/tonerdo/coverlet/issues/33#issuecomment-382748414 -->
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
@@ -37,7 +35,6 @@
     <Using Include="NSubstitute"/>
     <Using Include="NSubstitute.Core"/>
     <Using Include="NSubstitute.ReturnsExtensions"/>
-    <PackageReference Include="coverlet.msbuild" Version="3.1.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="FluentAssertions" Version="6.5.1" />
