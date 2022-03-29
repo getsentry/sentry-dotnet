@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- Fix event dropped by bad attachment when no logger is set. ([#1557](https://github.com/getsentry/sentry-dotnet/pull/1557))
 - Ignore zero properties for MemoryInfo ([#1531](https://github.com/getsentry/sentry-dotnet/pull/1531))
 - Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
 - Remove confusing message Successfully sent cached envelope ([#1542](https://github.com/getsentry/sentry-dotnet/pull/1542))
