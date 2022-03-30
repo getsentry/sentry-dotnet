@@ -26,7 +26,8 @@ public class SentryStackFrameTests
             ImageAddress = 3,
             SymbolAddress = 4,
             InstructionOffset = 5,
-            InstructionAddress = "0xffffffff"
+            InstructionAddress = "0xffffffff",
+            AddressMode = "rel:0"
         };
 
         var actual = sut.ToJsonString();
@@ -42,8 +43,7 @@ public class SentryStackFrameTests
             "\"module\":\"Module\"," +
             "\"lineno\":1," +
             "\"colno\":2," +
-            "\"abs_path\":" +
-            "\"AbsolutePath\"," +
+            "\"abs_path\":\"AbsolutePath\"," +
             "\"context_line\":\"ContextLine\"," +
             "\"in_app\":true," +
             "\"package\":\"Package\"," +
@@ -51,9 +51,14 @@ public class SentryStackFrameTests
             "\"image_addr\":3," +
             "\"symbol_addr\":4," +
             "\"instruction_addr\":\"0xffffffff\"," +
-            "\"instruction_offset\":5" +
+            "\"instruction_offset\":5," +
+            "\"addr_mode\":\"rel:0\"" +
             "}",
             actual);
+
+        var parsed = SentryStackFrame.FromJson(Json.Parse(actual));
+
+        parsed.Should().BeEquivalentTo(sut);
     }
 
     [Fact]

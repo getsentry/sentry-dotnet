@@ -70,6 +70,19 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Contexts FromJson(System.Text.Json.JsonElement json) { }
     }
+    public sealed class DebugImage : Sentry.IJsonSerializable
+    {
+        public DebugImage() { }
+        public string? CodeFile { get; set; }
+        public string? CodeId { get; set; }
+        public string? DebugFile { get; set; }
+        public string? DebugId { get; set; }
+        public string? ImageAddress { get; set; }
+        public long? ImageSize { get; set; }
+        public string? Type { get; set; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.DebugImage FromJson(System.Text.Json.JsonElement json) { }
+    }
     [System.Flags]
     public enum DeduplicateMode
     {
@@ -362,6 +375,7 @@ namespace Sentry
         public SentryEvent(System.Exception? exception) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
+        public System.Collections.Generic.List<Sentry.DebugImage>? DebugImages { get; set; }
         public string? Environment { get; set; }
         public Sentry.SentryId EventId { get; }
         public System.Exception? Exception { get; }
@@ -556,6 +570,7 @@ namespace Sentry
     {
         public SentryStackFrame() { }
         public string? AbsolutePath { get; set; }
+        public string? AddressMode { get; set; }
         public int? ColumnNumber { get; set; }
         public string? ContextLine { get; set; }
         public string? FileName { get; set; }
