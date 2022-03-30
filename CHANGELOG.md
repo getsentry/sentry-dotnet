@@ -4,15 +4,27 @@
 
 ### Features
 
-- Expose ConfigureAppFrame as a public static function. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
+- Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1537](https://github.com/getsentry/sentry-dotnet/pull/1537))
 - Add new Protocol definitions for DebugImages and AddressMode ([#1513](https://github.com/getsentry/sentry-dotnet/pull/1513))
 
 ### Fixes
 
-- Make `SentryDiagnosticSubscriber._disposableListeners` thread safe ([#1506](https://github.com/getsentry/sentry-dotnet/pull/1506))
- 
+- Fix event dropped by bad attachment when no logger is set. ([#1557](https://github.com/getsentry/sentry-dotnet/pull/1557))
+- Ignore zero properties for MemoryInfo ([#1531](https://github.com/getsentry/sentry-dotnet/pull/1531))
+- Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
+- Remove confusing message Successfully sent cached envelope ([#1542](https://github.com/getsentry/sentry-dotnet/pull/1542))
+- Fix infinite loop in SentryDatabaseLogging.UseBreadcrumbs ([#1543](https://github.com/getsentry/sentry-dotnet/pull/1543))
+- GetFromRuntimeInformation() in try-catch  ([#1554](https://github.com/getsentry/sentry-dotnet/pull/1554))
+
+## 3.15.0
+
+### Features
+
+- Expose ConfigureAppFrame as a public static function. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
+
 ### Fixes
 
+- Make `SentryDiagnosticSubscriber._disposableListeners` thread safe ([#1506](https://github.com/getsentry/sentry-dotnet/pull/1506))
 - Adjust database span names by replacing `_` to `.`. `db.query_compiler` becomes `db.query.compile`. ([#1502](https://github.com/getsentry/sentry-dotnet/pull/1502))
 
 ## 3.14.1

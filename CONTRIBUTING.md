@@ -3,7 +3,7 @@
 We love receiving PRs from the community with features and fixed. 
 For big feature it's advised to raise an issue to discuss it first.
 
-## TLDR: 
+## TLDR:
 
 * Install the .NET SDKs
 * To quickly get up and running, you can just run `dotnet build`
@@ -17,16 +17,17 @@ For big feature it's advised to raise an issue to discuss it first.
   - [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
   - [.NET Core 2.1](https://dotnet.microsoft.com/download/dotnet/2.1)
 
-  *If you are using an M1 ("Apple silicon") processor, read [the special instructions below](#special-instructions-for-apple-m1-cpus).*
+  *If using an M1 ("Apple silicon") processor, read [the special instructions below](#special-instructions-for-apple-m1-cpus).*
 
 * On Windows: [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
-* On macOS/Linux: [Mono 6 or higher](https://www.mono-project.com/download/stable) if you expect to run the unit tests on the `net4x` targets.
+  - `Sentry.DiagnosticSource.IntegrationTests.csproj` uses [SQL LocalDb](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb) - [download SQL LocalDB 2019](https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi). To avoid running these tests, unload `Sentry.DiagnosticSource.IntegrationTests.csproj` from the solution.
+* On macOS/Linux: [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
 
 ## API changes approval process
 
 This repository uses [Verify](https://github.com/VerifyTests/Verify) to store the public API diffs in snapshot files.
 When a change involves modifying the public API area (by for example adding a public method),
-you'll need to approve the changes otherwise the CI process will fail.
+that change will need to be approved, otherwise the CI process will fail.
 
 To do that, run the build locally (i.e: `./build.sh` or `pwsh .\build.ps1`)
 and commit the `verify` files that were changed.
@@ -34,7 +35,7 @@ and commit the `verify` files that were changed.
 
 ## Special Instructions for Apple M1 CPUs
 
-The M1 ("Apple silicon") is an Arm64 processor.  While .NET 6 runs natively on this architecture under macOS, .NET 5 and previous versions of the SDK are only built for x64.  To get everything working correctly, you will need to do the following, in sequence:
+The M1 ("Apple silicon") is an Arm64 processor. While .NET 6 runs natively on this architecture under macOS, .NET 5 and previous versions of the SDK are only built for x64. To get everything working correctly take the following steps:
 
 - Install the `Arm64` release of the latest .NET 6 SDK through the normal process.
 - Also install the `x64` release of the latest .NET 6 SDK through the normal process.
@@ -49,6 +50,9 @@ The M1 ("Apple silicon") is an Arm64 processor.  While .NET 6 runs natively on t
     chmod +x ./dotnet-install.sh
     sudo ./dotnet-install.sh --version 2.1.818 --arch x64 --install-dir /usr/local/share/dotnet/x64
      ```
+- If using JetBrains Rider, launch it, go to `Preferences` -> `Build, Execution, Deployment` -> `Toolset and Build`, and set the following:
+  - .NET Core CLI executable path: `/usr/local/share/dotnet/dotnet` (*not* x64)
+  - Use MSBuild version: `17.0 - /usr/local/share/dotnet/sdk/6.0.201/MSBuild.dll` (or higher version)
 
 Note that if you have accidentally corrupted your .NET installation by trying to install the .NET Core 2.1 SDK to the default location, you can wipe clean with the following, then start over:
 

@@ -54,7 +54,7 @@ public class RetryAfterHandlerTests
         var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
-        Assert.Equal(0, _fixture.Sut.RetryAfterUtcTicks);
+        Assert.Equal((_fixture.TimeReturned + RetryAfterHandler.DefaultRetryAfterDelay).UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
         Assert.True(_fixture.StubHandler.SendAsyncCalled);
     }
 
@@ -104,7 +104,8 @@ public class RetryAfterHandlerTests
         var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
-        Assert.Equal((_fixture.TimeReturned + TimeSpan.FromSeconds(floating)).UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
+        var expectedTime = _fixture.TimeReturned.AddTicks((long)(floating * TimeSpan.TicksPerSecond));
+        Assert.Equal(expectedTime.UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
         Assert.True(_fixture.StubHandler.SendAsyncCalled);
     }
 
@@ -127,7 +128,8 @@ public class RetryAfterHandlerTests
         var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
 
         Assert.Equal(TooManyRequests, actual.StatusCode);
-        Assert.Equal((_fixture.TimeReturned + TimeSpan.FromSeconds(floating)).UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
+        var expectedTime = _fixture.TimeReturned.AddTicks((long)(floating * TimeSpan.TicksPerSecond));
+        Assert.Equal(expectedTime.UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
         Assert.False(_fixture.StubHandler.SendAsyncCalled);
     }
 

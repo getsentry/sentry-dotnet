@@ -1,85 +1,31 @@
 using Sentry.Internals.DiagnosticSource;
 using Sentry.Testing;
+using static Sentry.Internals.DiagnosticSource.SentrySqlListener;
 
 namespace Sentry.DiagnosticSource.Tests;
 
-internal static class SentrySqlListenerExtensions
-{
-    public static void OpenConnectionStart(this SentrySqlListener listener, Guid operationId)
-        => listener.OnNext(new KeyValuePair<string, object>(
-            SentrySqlListener.SqlMicrosoftWriteConnectionOpenBeforeCommand,
-            new { OperationId = operationId }));
-
-    public static void OpenConnectionStarted(this SentrySqlListener listener, Guid operationId, Guid connectionId)
-        => listener.OnNext(new KeyValuePair<string, object>(
-            SentrySqlListener.SqlMicrosoftWriteConnectionOpenAfterCommand,
-            new { OperationId = operationId, ConnectionId = connectionId }));
-
-    public static void OpenConnectionClose(this SentrySqlListener listener, Guid operationId, Guid connectionId)
-        => listener.OnNext(new KeyValuePair<string, object>(
-            SentrySqlListener.SqlMicrosoftWriteConnectionCloseAfterCommand,
-            new { OperationId = operationId, ConnectionId = connectionId }));
-
-    public static void ExecuteQueryStart(this SentrySqlListener listener, Guid operationId, Guid connectionId)
-        => listener.OnNext(new KeyValuePair<string, object>(
-            SentrySqlListener.SqlDataBeforeExecuteCommand,
-            new { OperationId = operationId, ConnectionId = connectionId }));
-
-    public static void ExecuteQueryFinish(this SentrySqlListener listener, Guid operationId, Guid connectionId, string query)
-        => listener.OnNext(new KeyValuePair<string, object>(
-            SentrySqlListener.SqlDataAfterExecuteCommand,
-            new { OperationId = operationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
-
-    public static void ExecuteQueryFinishWithError(this SentrySqlListener listener, Guid operationId, Guid connectionId, string query)
-        => listener.OnNext(new KeyValuePair<string, object>(
-            SentrySqlListener.SqlDataWriteCommandError,
-            new { OperationId = operationId, ConnectionId = connectionId, Command = new { CommandText = query } }));
-}
-
 public class SentrySqlListenerTests
 {
-    internal const string SqlDataWriteConnectionOpenBeforeCommand = SentrySqlListener.SqlDataWriteConnectionOpenBeforeCommand;
-    internal const string SqlMicrosoftWriteConnectionOpenBeforeCommand = SentrySqlListener.SqlMicrosoftWriteConnectionOpenBeforeCommand;
-
-    internal const string SqlMicrosoftWriteConnectionOpenAfterCommand = SentrySqlListener.SqlMicrosoftWriteConnectionOpenAfterCommand;
-    internal const string SqlDataWriteConnectionOpenAfterCommand = SentrySqlListener.SqlDataWriteConnectionOpenAfterCommand;
-
-    internal const string SqlMicrosoftWriteConnectionCloseAfterCommand = SentrySqlListener.SqlMicrosoftWriteConnectionCloseAfterCommand;
-    internal const string SqlDataWriteConnectionCloseAfterCommand = SentrySqlListener.SqlDataWriteConnectionCloseAfterCommand;
-
-    internal const string SqlDataBeforeExecuteCommand = SentrySqlListener.SqlDataBeforeExecuteCommand;
-    internal const string SqlMicrosoftBeforeExecuteCommand = SentrySqlListener.SqlMicrosoftBeforeExecuteCommand;
-
-    internal const string SqlDataAfterExecuteCommand = SentrySqlListener.SqlDataAfterExecuteCommand;
-    internal const string SqlMicrosoftAfterExecuteCommand = SentrySqlListener.SqlMicrosoftAfterExecuteCommand;
-
-    internal const string SqlDataWriteCommandError = SentrySqlListener.SqlDataWriteCommandError;
-    internal const string SqlMicrosoftWriteCommandError = SentrySqlListener.SqlMicrosoftWriteCommandError;
-
-    internal const string SqlDataWriteTransactionCommitAfter = SentrySqlListener.SqlDataWriteTransactionCommitAfter;
-    internal const string SqlMicrosoftWriteTransactionCommitAfter = SentrySqlListener.SqlMicrosoftWriteTransactionCommitAfter;
-
     private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
-            _ when
-                type == SqlDataWriteConnectionOpenBeforeCommand ||
-                type == SqlMicrosoftWriteConnectionOpenBeforeCommand ||
-                type == SqlMicrosoftWriteConnectionOpenAfterCommand ||
-                type == SqlDataWriteConnectionOpenAfterCommand ||
-                type == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                type == SqlDataWriteConnectionCloseAfterCommand ||
-                type == SqlDataWriteTransactionCommitAfter ||
-                type == SqlMicrosoftWriteTransactionCommitAfter
-                => span => span.Description is null && span.Operation == "db.connection",
-            _ when
-                type == SqlDataBeforeExecuteCommand ||
-                type == SqlMicrosoftBeforeExecuteCommand ||
-                type == SqlDataAfterExecuteCommand ||
-                type == SqlMicrosoftAfterExecuteCommand ||
-                type == SqlDataWriteCommandError ||
-                type == SqlMicrosoftWriteCommandError
-                => span => span.Operation == "db.query",
+            SqlDataWriteConnectionOpenBeforeCommand or
+                SqlMicrosoftWriteConnectionOpenBeforeCommand or
+                SqlMicrosoftWriteConnectionOpenAfterCommand or
+                SqlDataWriteConnectionOpenAfterCommand or
+                SqlMicrosoftWriteConnectionCloseAfterCommand or
+                SqlDataWriteConnectionCloseAfterCommand or
+                SqlDataWriteTransactionCommitAfter or
+                SqlMicrosoftWriteTransactionCommitAfter =>
+                span => span.Description is null &&
+                        span.Operation == "db.connection",
+            SqlDataBeforeExecuteCommand or
+                SqlMicrosoftBeforeExecuteCommand or
+                SqlDataAfterExecuteCommand or
+                SqlMicrosoftAfterExecuteCommand or
+                SqlDataWriteCommandError or
+                SqlMicrosoftWriteCommandError =>
+                span => span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
@@ -96,7 +42,6 @@ public class SentrySqlListenerTests
 
     private class Fixture
     {
-        private Scope _scope { get; }
         internal TransactionTracer Tracer { get; }
 
         public InMemoryDiagnosticLogger Logger { get; }
@@ -120,13 +65,13 @@ public class SentrySqlListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope
+            var scope = new Scope
             {
                 Transaction = Tracer
             };
             Hub = Substitute.For<IHub>();
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
         }
     }
 
@@ -158,7 +103,7 @@ public class SentrySqlListenerTests
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         if (addConnectionSpan)
         {
-            _fixture.Tracer.StartChild("abc").SetExtra(SentrySqlListener.ConnectionExtraKey, Guid.Empty);
+            _fixture.Tracer.StartChild("abc").SetExtra(ConnectionExtraKey, Guid.Empty);
         }
 
         // Act
@@ -304,7 +249,7 @@ public class SentrySqlListenerTests
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
-            Assert.Equal(connectionId, (Guid)span.Extra[SentrySqlListener.ConnectionExtraKey]);
+            Assert.Equal(connectionId, (Guid)span.Extra[ConnectionExtraKey]);
         });
     }
 
@@ -438,14 +383,14 @@ public class SentrySqlListenerTests
         querySpans.Should().HaveCount(2 * maxItems);
 
         // Open Spans should not have any Connection key.
-        Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(SentrySqlListener.ConnectionExtraKey)));
+        Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(ConnectionExtraKey)));
         Assert.All(closedSpans, span => Assert.Equal(SpanStatus.Ok, span.Status));
 
         // Assert that all connectionIds is set and ParentId set to Trace.
         Assert.All(closedConnectionSpans, connectionSpan =>
         {
-            Assert.NotNull(connectionSpan.Extra[SentrySqlListener.ConnectionExtraKey]);
-            Assert.NotNull(connectionSpan.Extra[SentrySqlListener.OperationExtraKey]);
+            Assert.NotNull(connectionSpan.Extra[ConnectionExtraKey]);
+            Assert.NotNull(connectionSpan.Extra[OperationExtraKey]);
             Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
         });
 
@@ -453,11 +398,11 @@ public class SentrySqlListenerTests
         Assert.All(querySpans, querySpan =>
         {
             Assert.True(querySpan.IsFinished);
-            var connectionId = (Guid)querySpan.Extra[SentrySqlListener.ConnectionExtraKey];
+            var connectionId = (Guid)querySpan.Extra[ConnectionExtraKey];
             var connectionSpan = connectionSpans.Single(span => span.SpanId == querySpan.ParentSpanId);
 
             Assert.NotEqual(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
-            Assert.Equal((Guid)connectionSpan.Extra[SentrySqlListener.ConnectionExtraKey], connectionId);
+            Assert.Equal((Guid)connectionSpan.Extra[ConnectionExtraKey], connectionId);
         });
 
         _fixture.Logger.Entries.Should().BeEmpty();
