@@ -34,6 +34,6 @@ public class DebugImageTests
 
         var parsed = DebugImage.FromJson(Json.Parse(actual));
 
-        Assert.Equal(parsed, sut);
+        parsed.Should().BeEquivalentTo(sut);
     }
 }
