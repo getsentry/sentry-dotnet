@@ -248,9 +248,9 @@ public class BackgroundWorkerTests
         _ = sut.EnqueueEnvelope(envelope);
 
         // Check that we recorded a single discarded event with the correct information
-        var ((category, reason), count) = sut.DiscardedEvents.Single();
-        Assert.Equal(DataCategory.Error, category);
+        var ((reason, category), count) = sut.DiscardedEvents.Single();
         Assert.Equal(DiscardReason.QueueOverflow, reason);
+        Assert.Equal(DataCategory.Error, category);
         Assert.Equal(1, count);
 
         _ = eventsQueuedEvent.Set();

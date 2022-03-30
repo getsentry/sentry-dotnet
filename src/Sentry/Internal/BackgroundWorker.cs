@@ -20,7 +20,7 @@ namespace Sentry.Internal
         private readonly int _maxItems;
         private readonly CancellationTokenSource _shutdownSource;
         private readonly SemaphoreSlim _queuedEnvelopeSemaphore;
-        private readonly ThreadsafeCounterDictionary<(DataCategory Category, DiscardReason Reason)> _discardedEvents = new();
+        private readonly ThreadsafeCounterDictionary<DiscardReasonWithCategory> _discardedEvents = new();
 
         private volatile bool _disposed;
         private int _currentItems;
@@ -29,7 +29,7 @@ namespace Sentry.Internal
 
         internal Task WorkerTask { get; }
 
-        internal IReadOnlyDictionary<(DataCategory Category, DiscardReason Reason), int> DiscardedEvents => _discardedEvents;
+        internal IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents => _discardedEvents;
 
         public int QueuedItems => _queue.Count;
 
@@ -70,7 +70,7 @@ namespace Sentry.Internal
                 _ = Interlocked.Decrement(ref _currentItems);
                 foreach (var item in envelope.Items)
                 {
-                    _discardedEvents.Increment((item.DataCategory, DiscardReason.QueueOverflow));
+                    _discardedEvents.Increment(DiscardReason.QueueOverflow.WithCategory(item.DataCategory));
                 }
                 return false;
             }

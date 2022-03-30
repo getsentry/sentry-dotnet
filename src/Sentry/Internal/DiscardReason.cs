@@ -11,5 +11,7 @@ namespace Sentry.Internal
         private DiscardReason(string value) : base(value)
         {
         }
+
+        public DiscardReasonWithCategory WithCategory(DataCategory category) => new(this, category);
     }
 }

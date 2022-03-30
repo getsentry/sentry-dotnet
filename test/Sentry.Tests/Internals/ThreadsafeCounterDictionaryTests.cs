@@ -165,4 +165,24 @@ public class ThreadsafeCounterDictionaryTests
         Assert.Equal(new[] {1, 2, 3}, actual);
     }
 
+    [Fact]
+    public void CanIncrementUsingDiscardReasonWithCategory()
+    {
+        var a = DiscardReason.QueueOverflow.WithCategory(DataCategory.Error);
+        var b = DiscardReason.QueueOverflow.WithCategory(DataCategory.Error);
+        var c = DiscardReason.QueueOverflow.WithCategory(DataCategory.Attachment);
+
+        var counters = new ThreadsafeCounterDictionary<DiscardReasonWithCategory>();
+
+        // these should increment the same counter, despite a and b being separate instances
+        counters.Increment(a);
+        counters.Increment(b);
+
+        // this should increment a different counter entirely
+        counters.Increment(c);
+
+        Assert.Equal(2, counters[a]);
+        Assert.Equal(2, counters[b]);
+        Assert.Equal(1, counters[c]);
+    }
 }

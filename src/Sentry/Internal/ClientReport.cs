@@ -10,10 +10,10 @@ namespace Sentry.Internal
     internal class ClientReport : IJsonSerializable
     {
         public DateTimeOffset Timestamp { get; }
-        public IReadOnlyDictionary<(DataCategory Category, DiscardReason Reason), int> DiscardedEvents { get; }
+        public IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents { get; }
 
         public ClientReport(DateTimeOffset timestamp,
-            IReadOnlyDictionary<(DataCategory Category, DiscardReason Reason), int> discardedEvents)
+            IReadOnlyDictionary<DiscardReasonWithCategory, int> discardedEvents)
         {
             Timestamp = timestamp;
             DiscardedEvents = discardedEvents;
