@@ -1,13 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Sentry.Infrastructure;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 
 namespace Sentry.Tests.Protocol.Envelopes;
@@ -27,6 +17,22 @@ public class EnvelopeTests
 
         // Act
         var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithoutItems_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
+            Array.Empty<EnvelopeItem>());
+
+        // Act
+        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
 
         // Assert
         output.Should().Be(
@@ -67,6 +73,31 @@ public class EnvelopeTests
 
         // Act
         var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+
+        // Assert
+        output.Should().Be(
+            "{}\n" +
+            "{\"type\":\"session\",\"length\":75}\n" +
+            "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithoutHeader_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object>(),
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object>{["type"] = "session"},
+                    new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
+                        .ToMemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
 
         // Assert
         output.Should().Be(
@@ -140,6 +171,53 @@ public class EnvelopeTests
 
         // Act
         var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
+            "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
+            "\xef\xbb\xbfHello\r\n\n" +
+            "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
+            "{\"message\":\"hello world\",\"level\":\"error\"}\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithTwoItems_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object>
+            {
+                ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc",
+                ["dsn"] = "https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42"
+            },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "attachment",
+                        ["length"] = 13,
+                        ["content_type"] = "text/plain",
+                        ["filename"] = "hello.txt"
+                    },
+                    new StreamSerializable("\xef\xbb\xbfHello\r\n".ToMemoryStream())
+                ),
+
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "event",
+                        ["length"] = 41,
+                        ["content_type"] = "application/json",
+                        ["filename"] = "application.log"
+                    },
+                    new StreamSerializable("{\"message\":\"hello world\",\"level\":\"error\"}".ToMemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
 
         // Assert
         output.Should().Be(
@@ -239,6 +317,45 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public void Serialization_EnvelopeWithTwoEmptyItems_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "attachment",
+                        ["length"] = 0L
+                    },
+                    new StreamSerializable(new MemoryStream())
+                ),
+
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "attachment",
+                        ["length"] = 0L
+                    },
+                    new StreamSerializable(new MemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"type\":\"attachment\",\"length\":0}\n" +
+            "\n" +
+            "{\"type\":\"attachment\",\"length\":0}\n" +
+            "\n");
+    }
+
+    [Fact]
     public async Task Deserialization_EnvelopeWithTwoEmptyItems_Success()
     {
         // Arrange
@@ -296,6 +413,30 @@ public class EnvelopeTests
 
         // Act
         var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"type\":\"attachment\",\"length\":10}\n" +
+            "helloworld\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithItemWithoutLength_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "attachment"},
+                    new StreamSerializable("helloworld".ToMemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
 
         // Assert
         output.Should().Be(

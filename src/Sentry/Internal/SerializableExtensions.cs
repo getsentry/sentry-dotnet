@@ -28,14 +28,9 @@ namespace Sentry.Internal
 
         public static string SerializeToString(this ISerializable serializable, IDiagnosticLogger logger)
         {
-            // TODO: Serialize synchronously
-            return serializable.SerializeToStringAsync(logger).Result;
-        }
-
-        public static void Serialize(this ISerializable serializable, Stream stream, IDiagnosticLogger? logger)
-        {
-            // TODO: Serialize synchronously
-            serializable.SerializeAsync(stream, logger).Wait();
+            using var stream = new MemoryStream();
+            serializable.Serialize(stream, logger);
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
     }
 }

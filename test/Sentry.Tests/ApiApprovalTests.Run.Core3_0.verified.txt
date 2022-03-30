@@ -1351,6 +1351,7 @@ namespace Sentry.Protocol.Envelopes
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Header { get; }
         public System.Collections.Generic.IReadOnlyList<Sentry.Protocol.Envelopes.EnvelopeItem> Items { get; }
         public void Dispose() { }
+        public void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
         public Sentry.SentryId? TryGetEventId() { }
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.Envelope> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
@@ -1365,6 +1366,7 @@ namespace Sentry.Protocol.Envelopes
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Header { get; }
         public Sentry.Protocol.Envelopes.ISerializable Payload { get; }
         public void Dispose() { }
+        public void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
         public string? TryGetFileName() { }
         public long? TryGetLength() { }
@@ -1378,6 +1380,7 @@ namespace Sentry.Protocol.Envelopes
     }
     public interface ISerializable
     {
+        void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger);
         System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default);
     }
 }
