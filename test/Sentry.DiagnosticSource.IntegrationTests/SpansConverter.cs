@@ -1,4 +1,4 @@
-﻿class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
+class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
 {
     public override void Write(VerifyJsonWriter writer, IReadOnlyCollection<Span> spans)
     {

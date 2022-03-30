@@ -1,4 +1,4 @@
-﻿using Sentry.Internals.DiagnosticSource;
+using Sentry.Internals.DiagnosticSource;
 
 namespace Sentry.DiagnosticSource.Tests;
 
