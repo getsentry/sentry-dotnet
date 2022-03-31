@@ -32,6 +32,23 @@ namespace Sentry.Internal.Http
             }
         }
 
+#if NET5_0_OR_GREATER
+        protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
+#else
+        internal void SerializeToStream(Stream stream)
+#endif
+        {
+            try
+            {
+                _envelope.Serialize(stream, _logger);
+            }
+            catch (Exception e)
+            {
+                _logger?.LogError("Failed to serialize Envelope into the network stream", e);
+                throw;
+            }
+        }
+
         protected override bool TryComputeLength(out long length)
         {
             length = default;

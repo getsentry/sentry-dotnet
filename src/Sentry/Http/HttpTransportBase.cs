@@ -26,7 +26,6 @@ namespace Sentry.Http
     {
         internal const string DefaultErrorMessage = "No message";
         private readonly SentryOptions _options;
-        private readonly HttpContentReader _httpContentReader;
         private readonly ISystemClock _clock;
         private readonly Func<string, string?> _getEnvironmentVariable;
 
@@ -39,16 +38,13 @@ namespace Sentry.Http
         /// Constructor for this class.
         /// </summary>
         /// <param name="options">The Sentry options.</param>
-        /// <param name="httpContentReader">An optional HTTP content reader.</param>
         /// <param name="getEnvironmentVariable">An optional method used to read environment variables.</param>
         /// <param name="clock">An optional system clock - used for testing.</param>
         protected HttpTransportBase(SentryOptions options,
-            HttpContentReader? httpContentReader = default,
             Func<string, string?>? getEnvironmentVariable = default,
             ISystemClock? clock = default)
         {
             _options = options;
-            _httpContentReader = httpContentReader ?? new HttpContentReader();
             _clock = clock ?? new SystemClock();
             _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
         }
@@ -218,6 +214,20 @@ namespace Sentry.Http
             }
         }
 
+        /// <summary>
+        /// Reads a stream from an HTTP content object.
+        /// </summary>
+        /// <param name="content">The HTTP content object to read from.</param>
+        /// <returns>A stream of the content.</returns>
+        /// <remarks>
+        /// This is a helper method that allows higher-level APIs to serialize content synchronously
+        /// without exposing our custom <see cref="EnvelopeHttpContent"/> type.
+        /// </remarks>
+        protected Stream ReadStreamFromHttpContent(HttpContent content)
+        {
+            return content.ReadAsStream();
+        }
+
         private void ExtractRateLimits(HttpHeaders responseHeaders)
         {
             if (!responseHeaders.TryGetValues("X-Sentry-Rate-Limits", out var rateLimitHeaderValues))
@@ -284,12 +294,12 @@ namespace Sentry.Http
             {
                 if (HasJsonContent(content))
                 {
-                    var responseJson = _httpContentReader.ReadJson(content);
+                    var responseJson = content.ReadAsJson();
                     LogFailure(responseJson, response.StatusCode, envelope.TryGetEventId());
                 }
                 else
                 {
-                    var responseString = _httpContentReader.ReadString(content);
+                    var responseString = content.ReadAsString();
                     LogFailure(responseString, response.StatusCode, envelope.TryGetEventId());
                 }
             }
@@ -336,14 +346,12 @@ namespace Sentry.Http
             {
                 if (HasJsonContent(content))
                 {
-                    var responseJson = await _httpContentReader.ReadJsonAsync(content, cancellationToken)
-                        .ConfigureAwait(false);
+                    var responseJson = await content.ReadAsJsonAsync(cancellationToken).ConfigureAwait(false);
                     LogFailure(responseJson, response.StatusCode, envelope.TryGetEventId());
                 }
                 else
                 {
-                    var responseString = await _httpContentReader.ReadStringAsync(content, cancellationToken)
-                        .ConfigureAwait(false);
+                    var responseString = await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                     LogFailure(responseString, response.StatusCode, envelope.TryGetEventId());
                 }
             }

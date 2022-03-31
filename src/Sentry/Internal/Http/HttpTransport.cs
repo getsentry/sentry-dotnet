@@ -22,7 +22,7 @@ namespace Sentry.Internal.Http
         internal HttpTransport(SentryOptions options, HttpClient httpClient,
             Func<string, string?>? getEnvironmentVariable = default,
             ISystemClock? clock = default)
-            : base(options, default, getEnvironmentVariable, clock)
+            : base(options, getEnvironmentVariable, clock)
         {
             _httpClient = httpClient;
         }
