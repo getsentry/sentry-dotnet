@@ -6,6 +6,7 @@
 
 - Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1537](https://github.com/getsentry/sentry-dotnet/pull/1537))
 - Add new Protocol definitions for DebugImages and AddressMode ([#1513](https://github.com/getsentry/sentry-dotnet/pull/1513))
+- Add `HttpTransport` extensibility and synchronous serialization support ([#1560](https://github.com/getsentry/sentry-dotnet/pull/1560))
 
 ### Fixes
 
