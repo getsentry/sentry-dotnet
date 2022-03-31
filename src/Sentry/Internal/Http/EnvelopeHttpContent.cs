@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Protocol.Envelopes;
 
+#if NET5_0_OR_GREATER
+using System.Threading;
+#endif
+
 namespace Sentry.Internal.Http
 {
     internal class EnvelopeHttpContent : HttpContent
