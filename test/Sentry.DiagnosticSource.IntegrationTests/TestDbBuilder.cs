@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 
 public static class TestDbBuilder
@@ -26,7 +26,7 @@ public static class TestDbBuilder
     public static async Task AddEfData(DbConnection connection)
     {
         using var dbContext = GetDbContext(connection);
-        dbContext.TestEntities.Add(new TestEntity{Property = "Value"});
+        dbContext.TestEntities.Add(new TestEntity { Property = "Value" });
         await dbContext.SaveChangesAsync();
     }
 

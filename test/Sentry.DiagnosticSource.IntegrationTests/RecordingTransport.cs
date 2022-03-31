@@ -1,4 +1,4 @@
-﻿internal class RecordingTransport : ITransport
+internal class RecordingTransport : ITransport
 {
     private List<Envelope> _envelopes = new();
 

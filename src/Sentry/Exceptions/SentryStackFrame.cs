@@ -134,6 +134,14 @@ namespace Sentry
         /// </remarks>
         public long? InstructionOffset { get; set; }
 
+        /// <summary>
+        /// Optionally changes the addressing mode. The default value is the same as
+        /// `"abs"` which means absolute referencing. This can also be set to
+        /// `"rel:DEBUG_ID"` or `"rel:IMAGE_INDEX"` to make addresses relative to an
+        /// object referenced by debug id or index.
+        /// </summary>
+        public string? AddressMode { get; set; }
+
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
@@ -157,6 +165,7 @@ namespace Sentry
             writer.WriteNumberIfNotNull("symbol_addr", SymbolAddress);
             writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
             writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
+            writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
 
             writer.WriteEndObject();
         }
@@ -207,6 +216,7 @@ namespace Sentry
             var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetInt64();
             var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetString();
             var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
+            var addressMode = json.GetPropertyOrNull("addr_mode")?.GetString();
 
             return new SentryStackFrame
             {
@@ -227,7 +237,8 @@ namespace Sentry
                 ImageAddress = imageAddress,
                 SymbolAddress = symbolAddress,
                 InstructionAddress = instructionAddress,
-                InstructionOffset = instructionOffset
+                InstructionOffset = instructionOffset,
+                AddressMode = addressMode,
             };
         }
     }

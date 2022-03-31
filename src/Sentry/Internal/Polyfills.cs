@@ -12,6 +12,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+#if !NET5_0_OR_GREATER
+using Sentry.Internal.Http;
+#endif
+
 #if NET461 || NETSTANDARD2_0
 internal static partial class PolyfillExtensions
 {
@@ -69,5 +73,18 @@ internal static partial class PolyfillExtensions
         !cancellationToken.IsCancellationRequested
             ? content.ReadAsStreamAsync()
             : Task.FromCanceled<Stream>(cancellationToken);
+
+    public static Stream ReadAsStream(this HttpContent content)
+    {
+        if (content is EnvelopeHttpContent envelopeHttpContent)
+        {
+            var stream = new MemoryStream();
+            envelopeHttpContent.SerializeToStream(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
+
+        return content.ReadAsStreamAsync().Result;
+    }
 }
 #endif

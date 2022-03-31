@@ -1,11 +1,11 @@
-﻿static class VerifyExtensions
+static class VerifyExtensions
 {
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
     {
         return settings.ModifySerialization(
             p =>
             {
-                p.AddExtraSettings(x=>x.Converters.Add(new SpansConverter()));
+                p.AddExtraSettings(x => x.Converters.Add(new SpansConverter()));
                 p.IgnoreMembersWithType<Contexts>();
                 p.IgnoreMembersWithType<SdkVersion>();
                 p.IgnoreMembersWithType<DateTimeOffset>();

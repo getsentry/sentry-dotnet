@@ -74,10 +74,19 @@ namespace Sentry.Protocol.Envelopes
         /// <returns>The file name or null.</returns>
         public string? TryGetFileName() => Header.GetValueOrDefault(FileNameKey) as string;
 
-        private async Task<MemoryStream> BufferPayloadAsync(IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
+        private async Task<MemoryStream> BufferPayloadAsync(IDiagnosticLogger? logger, CancellationToken cancellationToken)
         {
             var buffer = new MemoryStream();
             await Payload.SerializeAsync(buffer, logger, cancellationToken).ConfigureAwait(false);
+            buffer.Seek(0, SeekOrigin.Begin);
+
+            return buffer;
+        }
+
+        private MemoryStream BufferPayload(IDiagnosticLogger? logger)
+        {
+            var buffer = new MemoryStream();
+            Payload.Serialize(buffer, logger);
             buffer.Seek(0, SeekOrigin.Begin);
 
             return buffer;
@@ -87,7 +96,7 @@ namespace Sentry.Protocol.Envelopes
             Stream stream,
             IReadOnlyDictionary<string, object?> header,
             IDiagnosticLogger? logger,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             var writer = new Utf8JsonWriter(stream);
 #if NET461 || NETSTANDARD2_0
@@ -101,11 +110,24 @@ namespace Sentry.Protocol.Envelopes
             }
         }
 
+        private static void SerializeHeader(
+            Stream stream,
+            IReadOnlyDictionary<string, object?> header,
+            IDiagnosticLogger? logger)
+        {
+            using var writer = new Utf8JsonWriter(stream);
+            writer.WriteDictionaryValue(header, logger);
+            writer.Flush();
+        }
+
         private async Task SerializeHeaderAsync(
             Stream stream,
             IDiagnosticLogger? logger,
-            CancellationToken cancellationToken = default) =>
+            CancellationToken cancellationToken) =>
             await SerializeHeaderAsync(stream, Header, logger, cancellationToken).ConfigureAwait(false);
+
+        private void SerializeHeader(Stream stream, IDiagnosticLogger? logger) =>
+            SerializeHeader(stream, Header, logger);
 
         /// <inheritdoc />
         public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
@@ -139,6 +161,35 @@ namespace Sentry.Protocol.Envelopes
                     // Payload
                     await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
                 }
+            }
+        }
+
+        /// <inheritdoc />
+        public void Serialize(Stream stream, IDiagnosticLogger? logger)
+        {
+            // Length is known
+            if (TryGetLength() != null)
+            {
+                // Header
+                SerializeHeader(stream, logger);
+                stream.WriteByte((byte)'\n');
+
+                // Payload
+                Payload.Serialize(stream, logger);
+            }
+            // Length is NOT known (need to calculate)
+            else
+            {
+                using var payloadBuffer = BufferPayload(logger);
+
+                // Header
+                var headerWithLength = Header.ToDictionary();
+                headerWithLength[LengthKey] = payloadBuffer.Length;
+                SerializeHeader(stream, headerWithLength, logger);
+                stream.WriteByte((byte)'\n');
+
+                // Payload
+                payloadBuffer.CopyTo(stream);
             }
         }
 

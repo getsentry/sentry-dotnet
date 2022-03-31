@@ -6,9 +6,12 @@
 
 - Collect and send Client Reports to Sentry, which contain counts of discarded events. ([#1556](https://github.com/getsentry/sentry-dotnet/pull/1556))
 - Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1537](https://github.com/getsentry/sentry-dotnet/pull/1537))
+- Add new Protocol definitions for DebugImages and AddressMode ([#1513](https://github.com/getsentry/sentry-dotnet/pull/1513))
+- Add `HttpTransport` extensibility and synchronous serialization support ([#1560](https://github.com/getsentry/sentry-dotnet/pull/1560))
 
 ### Fixes
 
+- Fix event dropped by bad attachment when no logger is set. ([#1557](https://github.com/getsentry/sentry-dotnet/pull/1557))
 - Ignore zero properties for MemoryInfo ([#1531](https://github.com/getsentry/sentry-dotnet/pull/1531))
 - Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
 - Remove confusing message Successfully sent cached envelope ([#1542](https://github.com/getsentry/sentry-dotnet/pull/1542))

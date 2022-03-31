@@ -25,5 +25,12 @@ namespace Sentry.Internal
                 return Encoding.UTF8.GetString(stream.ToArray());
             }
         }
+
+        public static string SerializeToString(this ISerializable serializable, IDiagnosticLogger logger)
+        {
+            using var stream = new MemoryStream();
+            serializable.Serialize(stream, logger);
+            return Encoding.UTF8.GetString(stream.ToArray());
+        }
     }
 }

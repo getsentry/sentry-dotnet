@@ -86,8 +86,8 @@ public class SentryDiagnosticListenerTests
 #if !NET5_0_OR_GREATER
         Assert.Single(spans); //1 command
 #else
-            Assert.Equal(2, spans.Count); //1 query compiler, 1 command
-            Assert.Single(spans.Where(s => s.Status == SpanStatus.Ok && s.Operation == "db.query.compile"));
+        Assert.Equal(2, spans.Count); //1 query compiler, 1 command
+        Assert.Single(spans.Where(s => s.Status == SpanStatus.Ok && s.Operation == "db.query.compile"));
 #endif
         Assert.Single(spans.Where(s => s.Status == SpanStatus.InternalError && s.Operation == "db.query"));
         Assert.All(spans, span => Assert.True(span.IsFinished));
@@ -110,7 +110,7 @@ public class SentryDiagnosticListenerTests
 #if !NET5_0_OR_GREATER
         Assert.Single(spans); //1 command
 #else
-            Assert.Equal(2, spans.Count); //1 query compiler, 1 command
+        Assert.Equal(2, spans.Count); //1 query compiler, 1 command
 #endif
         Assert.All(spans, span => Assert.True(span.IsFinished));
     }
@@ -150,7 +150,7 @@ public class SentryDiagnosticListenerTests
         Assert.Equal(totalCommands, itemsList.Count);
         Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query"));
 #if NET5_0_OR_GREATER
-            Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query.compile"));
+        Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query.compile"));
 #endif
         Assert.All(spans, span =>
         {
@@ -183,7 +183,7 @@ public class SentryDiagnosticListenerTests
         Assert.Equal(3, result[0].Result.Count);
         Assert.Equal(4, spans.Count(s => s.Operation == "db.query"));
 #if NET5_0_OR_GREATER
-            Assert.Equal(4, spans.Count(s => s.Operation == "db.query.compile"));
+        Assert.Equal(4, spans.Count(s => s.Operation == "db.query.compile"));
 #endif
         Assert.All(spans, span =>
         {
