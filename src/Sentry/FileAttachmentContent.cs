@@ -8,11 +8,18 @@ namespace Sentry
     public class FileAttachmentContent : IAttachmentContent
     {
         private readonly string _filePath;
+        private readonly bool _readFileAsynchronously;
 
         /// <summary>
         /// Creates a new instance of <see cref="FileAttachmentContent"/>.
         /// </summary>
-        public FileAttachmentContent(string filePath) => _filePath = filePath;
+        /// <param name="filePath">The path to the file to attach.</param>
+        /// <param name="readFileAsynchronously">Whether to use async file I/O to read the file.</param>
+        public FileAttachmentContent(string filePath, bool readFileAsynchronously = true)
+        {
+            _filePath = filePath;
+            _readFileAsynchronously = readFileAsynchronously;
+        }
 
         /// <inheritdoc />
         public Stream GetStream() => new FileStream(
@@ -21,6 +28,6 @@ namespace Sentry
             FileAccess.Read,
             FileShare.ReadWrite,
             bufferSize: 4096,
-            useAsync: true);
+            useAsync: _readFileAsynchronously);
     }
 }
