@@ -50,7 +50,7 @@ The M1 ("Apple silicon") is an Arm64 processor. While .NET 6 runs natively on th
     chmod +x ./dotnet-install.sh
     sudo ./dotnet-install.sh --version 2.1.818 --arch x64 --install-dir /usr/local/share/dotnet/x64
      ```
-- If using JetBrains Rider, use it to launch `Sentry.sln` (or one of the `slnf` files).  Then go to `Preferences` -> `Build, Execution, Deployment` -> `Toolset and Build`, and set the following, which will tell JetBrains to use the x64 versions of the SDKs.  (This is *required* to run unit tests or debug using .NET 5.0 and earlier .NET Core SDKs.)
+- If using JetBrains Rider, use it to launch `Sentry.sln` (or one of the `slnf` files).  Then go to `Preferences` -> `Build, Execution, Deployment` -> `Toolset and Build`, and set the following, which will tell Rider to use the x64 versions of the SDKs.  (This is *required* to run unit tests or debug using .NET 5.0 and earlier .NET Core SDKs.)
   - .NET Core CLI executable path: `/usr/local/share/dotnet/x64/dotnet`
   - Use MSBuild version: `17.0 - /usr/local/share/dotnet/x64/sdk/6.0.201/MSBuild.dll` (or higher version)
   - Click the arrow next to the "Save" button and choose `Solution "Sentry" personal"` to save these settings locally for yourself only.
