@@ -1,7 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
+  </PropertyGroup>
+
+  <!--
+  Build these tests for .NET Core 3.0 only in Release configuration.
+  This avoids false-negatives with solution analysis.
+  See https://github.com/getsentry/sentry-dotnet/pull/1563
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
