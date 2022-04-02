@@ -112,6 +112,7 @@ namespace Sentry
     public class FileAttachmentContent : Sentry.IAttachmentContent
     {
         public FileAttachmentContent(string filePath) { }
+        public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
         public System.IO.Stream GetStream() { }
     }
     public static class HasBreadcrumbsExtensions
@@ -496,6 +497,7 @@ namespace Sentry
         public Sentry.StackTraceMode StackTraceMode { get; set; }
         public double TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
+        public bool UseAsyncFileIO { get; set; }
     }
     public static class SentryOptionsExtensions
     {

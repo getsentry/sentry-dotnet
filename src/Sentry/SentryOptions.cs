@@ -565,6 +565,15 @@ namespace Sentry
         public bool AutoSessionTracking { get; set; } = false;
 
         /// <summary>
+        /// Whether the SDK should attempt to use asynchronous file I/O.
+        /// For example, when reading a file to use as an attachment.
+        /// </summary>
+        /// <remarks>
+        /// This option should rarely be disabled, but is necessary in some environments such as Unity WebGL.
+        /// </remarks>
+        public bool UseAsyncFileIO { get; set; } = true;
+
+        /// <summary>
         /// Delegate which is used to check whether the application crashed during last run.
         /// </summary>
         public Func<bool>? CrashedLastRun { get; set; }

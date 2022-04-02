@@ -159,7 +159,7 @@ namespace Sentry
             scope.AddAttachment(
                 new Attachment(
                     type,
-                    new FileAttachmentContent(filePath),
+                    new FileAttachmentContent(filePath, scope.Options.UseAsyncFileIO),
                     Path.GetFileName(filePath),
                     contentType));
 
