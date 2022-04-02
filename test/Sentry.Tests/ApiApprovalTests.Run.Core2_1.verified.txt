@@ -111,7 +111,8 @@ namespace Sentry
     }
     public class FileAttachmentContent : Sentry.IAttachmentContent
     {
-        public FileAttachmentContent(string filePath, bool readFileAsynchronously = true) { }
+        public FileAttachmentContent(string filePath) { }
+        public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
         public System.IO.Stream GetStream() { }
     }
     public static class HasBreadcrumbsExtensions
