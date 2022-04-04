@@ -17,6 +17,7 @@
 - Remove confusing message Successfully sent cached envelope ([#1542](https://github.com/getsentry/sentry-dotnet/pull/1542))
 - Fix infinite loop in SentryDatabaseLogging.UseBreadcrumbs ([#1543](https://github.com/getsentry/sentry-dotnet/pull/1543))
 - GetFromRuntimeInformation() in try-catch  ([#1554](https://github.com/getsentry/sentry-dotnet/pull/1554))
+- Fix `PlatformNotSupportedException` exception on `net6.0-maccatalyst` targets ([#1567](https://github.com/getsentry/sentry-dotnet/pull/1567))
 
 ## 3.15.0
 
