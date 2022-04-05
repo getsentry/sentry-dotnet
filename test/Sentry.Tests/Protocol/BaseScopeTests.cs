@@ -59,6 +59,7 @@ public class BaseScopeTests
         _sut.Contexts = expected;
 
         Assert.Equal(expected, _sut.Contexts);
+        Assert.NotSame(expected, _sut.Contexts);
     }
 
     [Fact]
