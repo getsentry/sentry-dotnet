@@ -31,7 +31,7 @@ namespace Sentry.Internal.Http
             }
 
             // If the platform supports automatic decompression
-            if (httpClientHandler.SupportsAutomaticDecompression)
+            if (SupportsAutomaticDecompression(httpClientHandler))
             {
                 // if the SDK is configured to accept compressed data
                 httpClientHandler.AutomaticDecompression = options.DecompressionMethods;
@@ -75,6 +75,20 @@ namespace Sentry.Internal.Http
             }
 
             return client;
+        }
+
+        private static bool SupportsAutomaticDecompression(HttpClientHandler handler)
+        {
+            // Workaround for https://github.com/getsentry/sentry-dotnet/issues/1561
+            // OK to remove when fixed in .NET https://github.com/dotnet/runtime/issues/67529
+            try
+            {
+                return handler.SupportsAutomaticDecompression;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                return false;
+            }
         }
     }
 }
