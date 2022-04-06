@@ -19,6 +19,7 @@
 - GetFromRuntimeInformation() in try-catch  ([#1554](https://github.com/getsentry/sentry-dotnet/pull/1554))
 - Make `Contexts` properties more thread-safe ([#1571](https://github.com/getsentry/sentry-dotnet/pull/1571))
 - Fix `PlatformNotSupportedException` exception on `net6.0-maccatalyst` targets ([#1567](https://github.com/getsentry/sentry-dotnet/pull/1567))
+- In ASP.Net Core, make sure that `SentrySdk.LastEventId` is accessible from exception handler pages ([#1573](https://github.com/getsentry/sentry-dotnet/pull/1573))
 
 ## 3.15.0
 
