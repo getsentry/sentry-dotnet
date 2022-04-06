@@ -607,4 +607,35 @@ public class SentryMiddlewareTests
         firstHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
         secondHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
     }
+
+    [Fact]
+    public async Task InvokeAsync_AlwaysSetsLastEventIdOnScope()
+    {
+        var sut = _fixture.GetSut();
+
+        await sut.InvokeAsync(_fixture.HttpContext);
+
+        Assert.NotEqual(SentryId.Empty, _fixture.Scope.LastEventId);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_SetsEventIdOnEvent()
+    {
+        var expected = new Exception("test");
+        _fixture.RequestDelegate = _ => throw expected;
+
+        var sut = _fixture.GetSut();
+
+        try
+        {
+            await sut.InvokeAsync(_fixture.HttpContext);
+        }
+        catch
+        {
+            // swallow exception for this test
+        }
+
+        var eventId = _fixture.Scope.LastEventId;
+        _ = _fixture.Hub.Received().CaptureEvent(Arg.Is<SentryEvent>(e => e.EventId.Equals(eventId)));
+    }
 }
