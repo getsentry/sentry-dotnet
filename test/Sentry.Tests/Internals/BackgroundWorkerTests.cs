@@ -7,7 +7,7 @@ public class BackgroundWorkerTests
 {
     private class Fixture
     {
-        public ITransport Transport { get; set; } = Substitute.For<ITransport>();
+        public ITransport Transport { get; set; } = Substitute.For<ITransport, IDiscardedEventCounter>();
         public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
         public ConcurrentQueue<Envelope> Queue { get; set; } = new();
         public CancellationTokenSource CancellationTokenSource { get; set; } = new();
@@ -247,11 +247,9 @@ public class BackgroundWorkerTests
         // in-flight events are kept in queue until completed.
         _ = sut.EnqueueEnvelope(envelope);
 
-        // Check that we recorded a single discarded event with the correct information
-        var ((reason, category), count) = sut.DiscardedEvents.Single();
-        Assert.Equal(DiscardReason.QueueOverflow, reason);
-        Assert.Equal(DataCategory.Error, category);
-        Assert.Equal(1, count);
+        // Check that we counted a single discarded event with the correct information
+        _fixture.Transport.As<IDiscardedEventCounter>().Received(1)
+            .IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
 
         _ = eventsQueuedEvent.Set();
     }

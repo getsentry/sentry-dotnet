@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -253,13 +252,6 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return new Envelope(header, items);
-        }
-
-        internal Envelope WithClientReport(ClientReport clientReport)
-        {
-            var items = Items.ToList();
-            items.Add(EnvelopeItem.FromClientReport(clientReport));
-            return new Envelope(Header, items);
         }
     }
 }

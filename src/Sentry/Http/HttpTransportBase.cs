@@ -22,12 +22,15 @@ namespace Sentry.Http
     /// Provides a base class for Sentry HTTP transports.  Used internally by the Sentry SDK,
     /// but also allows for higher-level SDKs (such as Unity) to implement their own transport.
     /// </summary>
-    public abstract class HttpTransportBase
+    public abstract class HttpTransportBase : IDiscardedEventCounter
     {
         internal const string DefaultErrorMessage = "No message";
         private readonly SentryOptions _options;
         private readonly ISystemClock _clock;
         private readonly Func<string, string?> _getEnvironmentVariable;
+
+        private readonly ThreadsafeCounterDictionary<DiscardReasonWithCategory> _discardedEvents = new();
+        internal IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents => _discardedEvents;
 
         // Keep track of last discarded session init so that we can promote the next update.
         // We only track one because session updates are ordered.
@@ -128,14 +131,44 @@ namespace Sentry.Http
                 }
             }
 
+            var eventId = envelope.TryGetEventId();
+
+            AttachClientReport(envelopeItems, eventId);
+
             if (envelopeItems.Count == 0)
             {
-                _options.LogInfo(
-                    "Envelope {0} was discarded because all contained items are rate-limited.",
-                    envelope.TryGetEventId());
+                if (_options.SendClientReports)
+                {
+                    _options.LogInfo("Envelope {0} was discarded because all contained items are rate-limited " +
+                                     "and there are no client reports to send.",
+                        eventId);
+                }
+                else
+                {
+                    _options.LogInfo("Envelope {0} was discarded because all contained items are rate-limited.",
+                        eventId);
+                }
             }
 
             return new Envelope(envelope.Header, envelopeItems);
+        }
+
+        private void AttachClientReport(ICollection<EnvelopeItem> envelopeItems, SentryId? eventId)
+        {
+            // Read and reset discards even if we're not sending them (to prevent excessive growth over time)
+            var discardedEvents = _discardedEvents.ReadAllAndReset();
+
+            // Don't attach a client report if we've turned them off or if there's nothing to report
+            if (!_options.SendClientReports || !discardedEvents.Any(x => x.Value > 0))
+            {
+                return;
+            }
+
+            // Create and attach the client report
+            var timestamp = _clock.GetUtcNow();
+            var clientReport = new ClientReport(timestamp, discardedEvents);
+            envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
+            _options.LogDebug("Attached client report to envelope {0}.", eventId);
         }
 
         /// <summary>
@@ -429,5 +462,10 @@ namespace Sentry.Http
         private static bool HasJsonContent(HttpContent content) =>
             string.Equals(content.Headers.ContentType?.MediaType, "application/json",
                 StringComparison.OrdinalIgnoreCase);
+
+        void IDiscardedEventCounter.IncrementCounter(DiscardReason reason, DataCategory category)
+        {
+            _discardedEvents.Increment(reason.WithCategory(category));
+        }
     }
 }

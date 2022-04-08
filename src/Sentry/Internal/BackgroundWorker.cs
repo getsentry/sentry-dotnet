@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Infrastructure;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal
@@ -16,11 +14,9 @@ namespace Sentry.Internal
         private readonly ITransport _transport;
         private readonly SentryOptions _options;
         private readonly ConcurrentQueue<Envelope> _queue;
-        private readonly ISystemClock _clock;
         private readonly int _maxItems;
         private readonly CancellationTokenSource _shutdownSource;
         private readonly SemaphoreSlim _queuedEnvelopeSemaphore;
-        private readonly ThreadsafeCounterDictionary<DiscardReasonWithCategory> _discardedEvents = new();
 
         private volatile bool _disposed;
         private int _currentItems;
@@ -28,8 +24,6 @@ namespace Sentry.Internal
         private event EventHandler? OnFlushObjectReceived;
 
         internal Task WorkerTask { get; }
-
-        internal IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents => _discardedEvents;
 
         public int QueuedItems => _queue.Count;
 
@@ -44,13 +38,11 @@ namespace Sentry.Internal
             ITransport transport,
             SentryOptions options,
             CancellationTokenSource? shutdownSource = null,
-            ConcurrentQueue<Envelope>? queue = null,
-            ISystemClock? clock = null)
+            ConcurrentQueue<Envelope>? queue = null)
         {
             _transport = transport;
             _options = options;
             _queue = queue ?? new ConcurrentQueue<Envelope>();
-            _clock = clock ?? new SystemClock();
             _maxItems = options.MaxQueueItems;
             _shutdownSource = shutdownSource ?? new CancellationTokenSource();
             _queuedEnvelopeSemaphore = new SemaphoreSlim(0, _maxItems);
@@ -68,10 +60,7 @@ namespace Sentry.Internal
             if (Interlocked.Increment(ref _currentItems) > _maxItems)
             {
                 _ = Interlocked.Decrement(ref _currentItems);
-                foreach (var item in envelope.Items)
-                {
-                    _discardedEvents.Increment(DiscardReason.QueueOverflow.WithCategory(item.DataCategory));
-                }
+                _transport.IncrementDiscardedEventCounts(DiscardReason.QueueOverflow, envelope);
                 return false;
             }
 
@@ -133,21 +122,6 @@ namespace Sentry.Internal
                         {
                             // Dispose inside try/catch
                             using var _ = envelope;
-
-                            // Read and reset discards even if we're not sending them (to prevent excessive growth over time)
-                            var discardedEvents = _discardedEvents.ReadAllAndReset();
-
-                            // Create and attach the client report
-                            if (_options.SendClientReports && discardedEvents.Any(x => x.Value > 0))
-                            {
-                                var timestamp = _clock.GetUtcNow();
-                                var clientReport = new ClientReport(timestamp, discardedEvents);
-                                envelope = envelope.WithClientReport(clientReport);
-
-                                _options.LogDebug(
-                                    "Attached client report to envelope {0}.",
-                                    envelope.TryGetEventId());
-                            }
 
                             // Send the envelope
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
