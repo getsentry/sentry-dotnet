@@ -105,13 +105,13 @@ namespace Sentry
             set => _request = value;
         }
 
-        private Contexts? _contexts;
+        private readonly Contexts _contexts = new();
 
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ??= new Contexts();
-            set => _contexts = value;
+            get => _contexts;
+            set => _contexts.ReplaceWith(value);
         }
 
         private User? _user;
@@ -265,7 +265,7 @@ namespace Sentry
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteStringIfNotNull("timestamp", EndTimestamp);
             writer.WriteSerializableIfNotNull("request", _request, logger);
-            writer.WriteSerializableIfNotNull("contexts", _contexts, logger);
+            writer.WriteSerializableIfNotNull("contexts", _contexts.NullIfEmpty(), logger);
             writer.WriteSerializableIfNotNull("user", _user, logger);
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteSerializable("sdk", Sdk, logger);
@@ -313,7 +313,7 @@ namespace Sentry
                 Platform = platform,
                 Release = release,
                 _request = request,
-                _contexts = contexts,
+                Contexts = contexts ?? new(),
                 _user = user,
                 Environment = environment,
                 Sdk = sdk,
