@@ -602,4 +602,59 @@ public class HttpTransportTests
         // Assert
         requestContent.Should().Contain(envelope.TryGetEventId().ToString());
     }
+
+    [Fact]
+    public void ProcessEnvelope_ShouldAttachClientReport()
+    {
+        var options = new SentryOptions();
+
+        var expectedTimestamp = DateTimeOffset.MaxValue;
+        var clock = Substitute.For<ISystemClock>();
+        clock.GetUtcNow().Returns(expectedTimestamp);
+
+        var logger = Substitute.For<IDiagnosticLogger>();
+
+        var httpTransport = Substitute.For<HttpTransportBase>(options, null, clock);
+
+        // add some fake discards for the report
+        var counter = (IDiscardedEventCounter)httpTransport;
+        counter.IncrementCounter(DiscardReason.NetworkError, DataCategory.Internal);
+        counter.IncrementCounter(DiscardReason.NetworkError, DataCategory.Security);
+        counter.IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
+        counter.IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
+        counter.IncrementCounter(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+        counter.IncrementCounter(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+        counter.IncrementCounter(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+
+        var sentryEvent = new SentryEvent();
+        var expectedEventJson = EnvelopeItem.FromEvent(sentryEvent).Payload.SerializeToString(logger);
+
+        var envelope = Envelope.FromEvent(sentryEvent);
+        var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
+
+        // There should be exactly two items in the envelope
+        Assert.Equal(2, processedEnvelope.Items.Count);
+        var eventItem = processedEnvelope.Items[0];
+        var clientReportItem = processedEnvelope.Items[1];
+
+        // Make sure they have the correct types set in their headers
+        Assert.Equal("event", eventItem.TryGetType());
+        Assert.Equal("client_report", clientReportItem.TryGetType());
+
+        // The event should be unmodified
+        Assert.Equal(expectedEventJson, eventItem.Payload.SerializeToString(logger));
+
+        // The client report should contain the counts of the fake discards
+        const string expectedClientReportJson =
+            "{\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," +
+            "\"discarded_events\":[" +
+            "{\"reason\":\"network_error\",\"category\":\"internal\",\"quantity\":1}," +
+            "{\"reason\":\"network_error\",\"category\":\"security\",\"quantity\":1}," +
+            "{\"reason\":\"queue_overflow\",\"category\":\"error\",\"quantity\":2}," +
+            "{\"reason\":\"ratelimit_backoff\",\"category\":\"transaction\",\"quantity\":3}" +
+            "]}";
+
+        var clientReportJson = clientReportItem.Payload.SerializeToString(logger);
+        Assert.Equal(expectedClientReportJson, clientReportJson);
+    }
 }

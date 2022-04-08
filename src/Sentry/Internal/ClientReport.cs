@@ -26,14 +26,22 @@ namespace Sentry.Internal
             writer.WriteString("timestamp", Timestamp);
 
             writer.WriteStartArray("discarded_events");
-            foreach (var ((category, reason), value) in DiscardedEvents.Where(x=> x.Value > 0))
+
+            // filter out empty counters, and sort the counters to allow for deterministic testing
+            var discardedEvents = DiscardedEvents
+                .Where(x => x.Value > 0)
+                .OrderBy(x => x.Key.Reason)
+                .ThenBy(x => x.Key.Category);
+
+            foreach (var item in discardedEvents)
             {
                 writer.WriteStartObject();
-                writer.WriteString("reason", reason);
-                writer.WriteString("category", category);
-                writer.WriteNumber("quantity", value);
+                writer.WriteString("reason", item.Key.Reason);
+                writer.WriteString("category", item.Key.Category);
+                writer.WriteNumber("quantity", item.Value);
                 writer.WriteEndObject();
             }
+
             writer.WriteEndArray();
 
             writer.WriteEndObject();

@@ -30,7 +30,6 @@ namespace Sentry.Http
         private readonly Func<string, string?> _getEnvironmentVariable;
 
         private readonly ThreadsafeCounterDictionary<DiscardReasonWithCategory> _discardedEvents = new();
-        internal IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents => _discardedEvents;
 
         // Keep track of last discarded session init so that we can promote the next update.
         // We only track one because session updates are ordered.
@@ -62,7 +61,7 @@ namespace Sentry.Http
         /// </summary>
         /// <param name="envelope">The envelope to process.</param>
         /// <returns>The processed envelope, ready to be sent.</returns>
-        protected Envelope ProcessEnvelope(Envelope envelope)
+        protected internal Envelope ProcessEnvelope(Envelope envelope)
         {
             var now = _clock.GetUtcNow();
 
