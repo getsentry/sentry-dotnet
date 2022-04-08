@@ -185,4 +185,47 @@ public class ThreadsafeCounterDictionaryTests
         Assert.Equal(2, counters[b]);
         Assert.Equal(1, counters[c]);
     }
+
+    [Fact]
+    public void CanReadAndResetManyCountersSimultaneously()
+    {
+        const int numCounters = 10;
+        const int numThreadsPerCounter = 20;
+        const int numIterationsPerThread = 10000;
+
+        var counters = new ThreadsafeCounterDictionary<string>();
+
+        var grandTotal = 0;
+        void ReadAndAddToGrandTotal()
+        {
+            var partialTotal = counters.ReadAllAndReset().Values.Sum();
+            Interlocked.Add(ref grandTotal, partialTotal);
+        }
+
+        var random = new Random();
+
+        Parallel.For(0, numCounters * numThreadsPerCounter, x =>
+        {
+            var i = x % numCounters;
+            var counterName = $"counter_{i}";
+
+            var numIterationsToReadAfter = random.Next(100, 1000);
+
+            for (var j = 0; j < numIterationsPerThread; j++)
+            {
+                counters.Increment(counterName);
+
+                if (j % numIterationsToReadAfter == 0)
+                {
+                    ReadAndAddToGrandTotal();
+                }
+            }
+
+            // include any final counts
+            ReadAndAddToGrandTotal();
+        });
+
+        const int expectedGrandTotal = numCounters * numThreadsPerCounter * numIterationsPerThread;
+        Assert.Equal(expectedGrandTotal, grandTotal);
+    }
 }
