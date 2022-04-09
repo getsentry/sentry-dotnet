@@ -96,18 +96,14 @@ namespace Sentry
         {
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
-                _options.LogWarning(
-                    "Transaction dropped due to empty id.");
-
+                _options.LogWarning("Transaction dropped due to empty id.");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(transaction.Name) ||
                 string.IsNullOrWhiteSpace(transaction.Operation))
             {
-                _options.LogWarning(
-                    "Transaction discarded due to one or more required fields missing.");
-
+                _options.LogWarning("Transaction discarded due to one or more required fields missing.");
                 return;
             }
 
@@ -116,22 +112,19 @@ namespace Sentry
             // We still send these transactions over, but warn the user not to do it.
             if (!transaction.IsFinished)
             {
-                _options.LogWarning(
-                    "Capturing a transaction which has not been finished. " +
-                    "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
-                    "to properly finalize the transaction and send it to Sentry.");
+                _options.LogWarning("Capturing a transaction which has not been finished. " +
+                                    "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
+                                    "to properly finalize the transaction and send it to Sentry.");
             }
 
             // Sampling decision MUST have been made at this point
-            Debug.Assert(
-                transaction.IsSampled != null,
+            Debug.Assert(transaction.IsSampled != null,
                 "Attempt to capture transaction without sampling decision.");
 
             if (transaction.IsSampled != true)
             {
-                _options.LogDebug(
-                    "Transaction dropped by sampling.");
-
+                _options.Transport?.IncrementDiscardedEventCounts(DiscardReason.SampleRate, DataCategory.Transaction);
+                _options.LogDebug("Transaction dropped by sampling.");
                 return;
             }
 

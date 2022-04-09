@@ -47,7 +47,7 @@ namespace Sentry
         /// </summary>
         public bool EnableScopeSync { get; set; }
 
-        // Override for tests
+        // TODO: this probably shouldn't be nullable
         internal ITransport? Transport { get; set; }
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
