@@ -75,6 +75,8 @@ namespace Sentry.Http
 
                 if (isRateLimited)
                 {
+                    IncrementCounter(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
+
                     _options.LogDebug(
                         "Envelope item of type {0} was discarded because it's rate-limited.",
                         envelopeItem.TryGetType());
@@ -99,6 +101,8 @@ namespace Sentry.Http
                 if (string.Equals(envelopeItem.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
                     envelopeItem.TryGetLength() > _options.MaxAttachmentSize)
                 {
+                    // note: attachment drops are not currently counted in discarded events
+
                     _options.LogWarning(
                         "Attachment '{0}' dropped because it's too large ({1} bytes).",
                         envelopeItem.TryGetFileName(),
@@ -123,11 +127,12 @@ namespace Sentry.Http
                     _options.LogDebug(
                         "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
                         sessionUpdate.Id);
+
+                    continue;
                 }
-                else
-                {
-                    envelopeItems.Add(envelopeItem);
-                }
+
+                // Finally, add this item to the result
+                envelopeItems.Add(envelopeItem);
             }
 
             var eventId = envelope.TryGetEventId();
@@ -462,9 +467,15 @@ namespace Sentry.Http
             string.Equals(content.Headers.ContentType?.MediaType, "application/json",
                 StringComparison.OrdinalIgnoreCase);
 
-        void IDiscardedEventCounter.IncrementCounter(DiscardReason reason, DataCategory category)
+        private void IncrementCounter(DiscardReason reason, DataCategory category)
         {
             _discardedEvents.Increment(reason.WithCategory(category));
+        }
+
+        void IDiscardedEventCounter.IncrementCounter(DiscardReason reason, DataCategory category)
+        {
+            // internal interface must be implemented explicitly
+            IncrementCounter(reason, category);
         }
     }
 }
