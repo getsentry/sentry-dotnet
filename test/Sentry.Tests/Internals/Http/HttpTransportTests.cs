@@ -371,7 +371,7 @@ public class HttpTransportTests
             e.Message == "Failed to add attachment: {0}." &&
             (string)e.Args[0] == "test1.txt");
 
-        actualEnvelopeSerialized.Should().NotContain("test2.txt");
+        actualEnvelopeSerialized.Should().NotContain("test1.txt");
     }
 
     [Fact]
