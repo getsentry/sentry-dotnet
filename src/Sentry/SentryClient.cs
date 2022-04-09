@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry
@@ -194,6 +195,8 @@ namespace Sentry
                 foreach (var processor in scope.GetAllExceptionProcessors())
                 {
                     processor.Process(@event.Exception, @event);
+
+                    // NOTE: Exception processors can't drop events.
                 }
             }
 
@@ -204,6 +207,7 @@ namespace Sentry
                 processedEvent = processor.Process(processedEvent);
                 if (processedEvent == null)
                 {
+                    _options.Transport?.IncrementDiscardedEventCounts(DiscardReason.EventProcessor, DataCategory.Error);
                     _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                     return SentryId.Empty;
                 }
@@ -212,6 +216,7 @@ namespace Sentry
             processedEvent = BeforeSend(processedEvent);
             if (processedEvent == null) // Rejected event
             {
+                _options.Transport?.IncrementDiscardedEventCounts(DiscardReason.BeforeSend, DataCategory.Error);
                 _options.LogInfo("Event dropped by BeforeSend callback.");
                 return SentryId.Empty;
             }
