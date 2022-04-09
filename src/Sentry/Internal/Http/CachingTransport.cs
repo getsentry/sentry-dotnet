@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
@@ -203,6 +204,8 @@ namespace Sentry.Internal.Http
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
+
+                    _innerTransport.IncrementDiscardedEventCounts(DiscardReason.CacheOverflow, envelope);
                     LogFailureWithDiscard(file, ex);
                 }
             }
