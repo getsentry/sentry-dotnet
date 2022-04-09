@@ -326,6 +326,12 @@ namespace Sentry.Http
 
         private void HandleFailure(HttpResponseMessage response, Envelope envelope)
         {
+            // Increment discarded event counters
+            foreach (var item in envelope.Items)
+            {
+                IncrementCounter(DiscardReason.NetworkError, item.DataCategory);
+            }
+
             // Spare the overhead if level is not enabled
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
             {
@@ -378,6 +384,12 @@ namespace Sentry.Http
         private async Task HandleFailureAsync(HttpResponseMessage response, Envelope envelope,
             CancellationToken cancellationToken)
         {
+            // Increment discarded event counters
+            foreach (var item in envelope.Items)
+            {
+                IncrementCounter(DiscardReason.NetworkError, item.DataCategory);
+            }
+
             // Spare the overhead if level is not enabled
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
             {
