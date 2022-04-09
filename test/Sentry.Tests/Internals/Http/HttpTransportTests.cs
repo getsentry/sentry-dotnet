@@ -657,4 +657,26 @@ public class HttpTransportTests
         var clientReportJson = clientReportItem.Payload.SerializeToString(logger);
         Assert.Equal(expectedClientReportJson, clientReportJson);
     }
+
+    [Fact]
+    public void ProcessEnvelope_ShouldNotAttachClientReportWhenOptionDisabled()
+    {
+        var options = new SentryOptions
+        {
+            // Disable sending of client reports
+            SendClientReports = false
+        };
+
+        var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
+
+        var counter = (IDiscardedEventCounter)httpTransport;
+        counter.IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+        var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
+
+        // There should only be the one event in the envelope
+        Assert.Equal(1, processedEnvelope.Items.Count);
+        Assert.Equal("event", processedEnvelope.Items[0].TryGetType());
+    }
 }
