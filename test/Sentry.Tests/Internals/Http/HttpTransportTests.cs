@@ -279,6 +279,7 @@ public class HttpTransportTests
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
                 DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                SendClientReports = false,
                 Debug = true
             },
             new HttpClient(httpHandler));
