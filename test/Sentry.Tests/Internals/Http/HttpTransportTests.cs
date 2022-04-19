@@ -330,6 +330,86 @@ public class HttpTransportTests
     }
 
     [Fact]
+    public async Task SendEnvelopeAsync_RateLimited_CountsDiscardedEventsCorrectly()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            ));
+
+        var timestamp = DateTimeOffset.UtcNow;
+        var fakeClock = Substitute.For<ISystemClock>();
+        fakeClock.GetUtcNow().Returns(timestamp);
+
+        var httpTransport = new HttpTransport(
+            new SentryOptions
+            {
+                Dsn = DsnSamples.ValidDsnWithSecret,
+                DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                SendClientReports = true,
+                Debug = true
+            },
+            new HttpClient(httpHandler),
+            clock: fakeClock
+        );
+
+        // First request always goes through
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        var envelope = new Envelope(
+            new Dictionary<string, object>(),
+            new[]
+            {
+                // Should be dropped
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "event"},
+                    new EmptySerializable()),
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "event"},
+                    new EmptySerializable()),
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "transaction"},
+                    new EmptySerializable()),
+
+                // Should stay
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "other"},
+                    new EmptySerializable())
+            });
+
+        // The client report should contain rate limit discards only.
+        var expectedClientReport =
+            new ClientReport(timestamp,
+                new Dictionary<DiscardReasonWithCategory, int>
+                {
+                    {DiscardReason.RateLimitBackoff.WithCategory(DataCategory.Error), 2},
+                    {DiscardReason.RateLimitBackoff.WithCategory(DataCategory.Transaction), 1}
+                });
+
+        var expectedEnvelope = new Envelope(
+            new Dictionary<string, object>(),
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "other"},
+                    new EmptySerializable()),
+                EnvelopeItem.FromClientReport(expectedClientReport)
+            });
+
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        var lastRequest = httpHandler.GetRequests().Last();
+        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+        // Assert
+        actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
+    }
+
+    [Fact]
     public async Task SendEnvelopeAsync_AttachmentFail_DropsItem()
     {
         // Arrange
