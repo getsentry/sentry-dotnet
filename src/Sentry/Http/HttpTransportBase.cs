@@ -25,6 +25,7 @@ namespace Sentry.Http
     public abstract class HttpTransportBase : IDiscardedEventCounter
     {
         internal const string DefaultErrorMessage = "No message";
+
         private readonly SentryOptions _options;
         private readonly ISystemClock _clock;
         private readonly Func<string, string?> _getEnvironmentVariable;
@@ -326,11 +327,7 @@ namespace Sentry.Http
 
         private void HandleFailure(HttpResponseMessage response, Envelope envelope)
         {
-            // Increment discarded event counters
-            foreach (var item in envelope.Items)
-            {
-                IncrementCounter(DiscardReason.NetworkError, item.DataCategory);
-            }
+            IncrementDiscardsForHttpFailure(response.StatusCode, envelope);
 
             // Spare the overhead if level is not enabled
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
@@ -384,11 +381,7 @@ namespace Sentry.Http
         private async Task HandleFailureAsync(HttpResponseMessage response, Envelope envelope,
             CancellationToken cancellationToken)
         {
-            // Increment discarded event counters
-            foreach (var item in envelope.Items)
-            {
-                IncrementCounter(DiscardReason.NetworkError, item.DataCategory);
-            }
+            IncrementDiscardsForHttpFailure(response.StatusCode, envelope);
 
             // Spare the overhead if level is not enabled
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
@@ -443,6 +436,22 @@ namespace Sentry.Http
                             envelopeFile.Length, destination);
                     }
                 }
+            }
+        }
+
+        private void IncrementDiscardsForHttpFailure(HttpStatusCode responseStatusCode, Envelope envelope)
+        {
+            if ((int)responseStatusCode is 429 or < 400)
+            {
+                //  Status == 429 or < 400 should not be counted by the client SDK
+                //  See https://develop.sentry.dev/sdk/client-reports/#sdk-side-recommendations
+                return;
+            }
+
+            // Increment discarded event counters for each item in the envelope
+            foreach (var item in envelope.Items)
+            {
+                IncrementCounter(DiscardReason.NetworkError, item.DataCategory);
             }
         }
 
