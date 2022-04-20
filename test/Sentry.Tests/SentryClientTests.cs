@@ -168,6 +168,19 @@ public class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_BeforeEvent_RejectEvent_RecordsDiscard()
+    {
+        _fixture.SentryOptions.BeforeSend = _ => null;
+        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+
+        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
+            .IncrementCounter(DiscardReason.BeforeSend, DataCategory.Error);
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeEvent_ModifyEvent()
     {
         SentryEvent received = null;
