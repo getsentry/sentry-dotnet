@@ -73,12 +73,36 @@ namespace Sentry.Internal.Extensions
         {
             JsonValueKind.True => true,
             JsonValueKind.False => false,
-            JsonValueKind.Number => json.GetDouble(),
+            JsonValueKind.Number => json.GetNumber(), // see implementation for why we don't just call GetDouble
             JsonValueKind.String => json.GetString(),
             JsonValueKind.Array => json.EnumerateArray().Select(GetDynamicOrNull).ToArray(),
             JsonValueKind.Object => json.GetDictionaryOrNull(),
             _ => null
         };
+
+        private static object? GetNumber(this JsonElement json)
+        {
+            var result = json.GetDouble();
+            if (result != 0)
+            {
+                // We got a value, as expected.
+                return result;
+            }
+
+            // We might have 0 when there's actually a value there.
+            // This happens on Unity IL2CPP targets.  Let's workaround that.
+            // See https://github.com/getsentry/sentry-unity/issues/690
+
+            // If the number is an integer, we can avoid extra string parsing
+            if (json.TryGetInt64(out var longResult))
+            {
+                return longResult;
+            }
+
+            // Otherwise, let's get the value as a string and parse it ourselves.
+            // Note that we already know this will succeed due to JsonValueKind.Number
+            return double.Parse(json.ToString()!);
+        }
 
         public static string GetStringOrThrow(this JsonElement json) =>
             json.GetString() ?? throw new InvalidOperationException("JSON string is null.");
