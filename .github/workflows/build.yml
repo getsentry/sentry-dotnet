@@ -57,9 +57,26 @@ jobs:
               3.1.x
               5.0.x
               6.0.x
-            
-        - name: Run build script
-          run: ${{ matrix.build_script }}
+
+        - name: Build
+          run: dotnet build SentryNoSamples.slnf
+
+        - name: Test
+          run: |
+            dotnet test SentryNoSamples.slnf \
+              --configuration Release \
+              --no-build \
+              --logger GitHubActions;report-warnings=false \
+              /p:CopyLocalLockFileAssemblies=true \
+              /p:Exclude="[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*"
+
+        - name: Pack
+          if: matrix.os == 'windows-2022'
+          run: |
+            dotnet pack SentryNoSamples.slnf \
+              --configuration Release \
+              --no-build \
+              /p:ContinuousIntegrationBuild=true
 
         - name: Publish coverage report
           uses: codecov/codecov-action@v1
