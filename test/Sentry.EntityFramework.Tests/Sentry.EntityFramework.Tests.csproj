@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Effort.EF6" Version="2.2.15" />
+    <PackageReference Include="Effort.EF6" Version="2.2.16" />
   </ItemGroup>
 
   <ItemGroup>
