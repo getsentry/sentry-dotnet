@@ -52,24 +52,14 @@ jobs:
               6.0.x
 
         - name: Build
-          run: dotnet build SentryNoSamples.slnf --configuration Release
+          run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: |
-            dotnet test SentryNoSamples.slnf \
-            --configuration Release \
-            --no-build \
-            --logger GitHubActions;report-warnings=false \
-            /p:CopyLocalLockFileAssemblies=true \
-            /p:Exclude="[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*"
+          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l GitHubActions;report-warnings=false /p:Exclude="[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*" /p:UseSourceLink=true
 
         - name: Pack
           if: matrix.os == 'windows-2022'
-          run: |
-            dotnet pack SentryNoSamples.slnf \
-            --configuration Release \
-            --no-build \
-            /p:ContinuousIntegrationBuild=true
+          run: dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
 
         - name: Publish coverage report
           uses: codecov/codecov-action@v1
