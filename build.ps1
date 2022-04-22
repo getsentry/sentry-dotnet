@@ -4,5 +4,5 @@ dotnet test SentryNoSamples.slnf -c Release -l "GitHubActions;report-warnings=fa
     /p:CopyLocalLockFileAssemblies=true
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-dotnet pack SentryNoSamples.slnf -c Release /p:ContinuousIntegrationBuild=true
+dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
 if ($LASTEXITCODE -ne 0) { exit 1 }
