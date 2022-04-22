@@ -160,8 +160,9 @@ namespace Sentry
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
-                    _options.LogInfo(
-                        "Event with exception of type '{0}' was dropped by an exception filter.", @event.Exception.GetType());
+                    _options.Transport?.IncrementDiscardedEventCounts(DiscardReason.EventProcessor, DataCategory.Error);
+                    _options.LogInfo("Event with exception of type '{0}' was dropped by an exception filter.",
+                        @event.Exception.GetType());
                     return SentryId.Empty;
                 }
             }
@@ -189,7 +190,7 @@ namespace Sentry
                 {
                     processor.Process(@event.Exception, @event);
 
-                    // NOTE: Exception processors can't drop events.
+                    // NOTE: Exception processors can't drop events, but exception filters (above) can.
                 }
             }
 
