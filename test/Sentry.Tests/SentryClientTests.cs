@@ -181,6 +181,38 @@ public class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_EventProcessor_RejectEvent_RecordsDiscard()
+    {
+        var processor = Substitute.For<ISentryEventProcessor>();
+        processor.Process(Arg.Any<SentryEvent>()).ReturnsNull();
+
+        _fixture.SentryOptions.AddEventProcessor(processor);
+        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+
+        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
+            .IncrementCounter(DiscardReason.EventProcessor, DataCategory.Error);
+    }
+
+    [Fact]
+    public void CaptureEvent_ExceptionFilter_RecordsDiscard()
+    {
+        var filter = Substitute.For<IExceptionFilter>();
+        filter.Filter(Arg.Any<Exception>()).Returns(true);
+
+        _fixture.SentryOptions.AddExceptionFilter(filter);
+        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureException(new Exception());
+
+        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
+            .IncrementCounter(DiscardReason.EventProcessor, DataCategory.Error);
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeEvent_ModifyEvent()
     {
         SentryEvent received = null;
