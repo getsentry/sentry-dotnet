@@ -10,5 +10,4 @@ fi
 
 dotnet test SentryNoSamples.slnf -c Release -l $testLogger \
     /p:CopyLocalLockFileAssemblies=true \
-    /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*\" \
     /p:UseSourceLink=true
