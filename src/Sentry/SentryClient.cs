@@ -151,6 +151,7 @@ namespace Sentry
             {
                 if (!SynchronizedRandom.NextBool(_options.SampleRate.Value))
                 {
+                    _options.Transport?.IncrementDiscardedEventCounts(DiscardReason.SampleRate, DataCategory.Error);
                     _options.LogDebug("Event sampled.");
                     return SentryId.Empty;
                 }

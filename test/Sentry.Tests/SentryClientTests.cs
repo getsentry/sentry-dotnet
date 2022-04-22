@@ -258,6 +258,20 @@ public class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_SampleDrop_RecordsDiscard()
+    {
+        _fixture.SentryOptions.SampleRate = float.Epsilon;
+        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event);
+
+        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
+            .IncrementCounter(DiscardReason.SampleRate, DataCategory.Error);
+    }
+
+    [Fact]
     public void CaptureEvent_SamplingHighest_SendsEvent()
     {
         // Three decimal places longer than what Random returns. Should always send
