@@ -23,6 +23,13 @@ public class SentryOptionsTests
         Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
     }
 
+    [Fact]
+    public void Transport_ByDefault_IsNull()
+    {
+        var sut = new SentryOptions();
+        Assert.Null(sut.Transport);
+    }
+
 #if NET461
     [SkippableFact(typeof(IsTypeException))]
     public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()

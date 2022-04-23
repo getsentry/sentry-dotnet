@@ -47,7 +47,10 @@ namespace Sentry
         /// </summary>
         public bool EnableScopeSync { get; set; }
 
-        // Override for tests
+        /// <summary>
+        /// This holds a reference to the current transport, when one is active.
+        /// If set manually (for tests), it will be used instead of the default transport.
+        /// </summary>
         internal ITransport? Transport { get; set; }
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }

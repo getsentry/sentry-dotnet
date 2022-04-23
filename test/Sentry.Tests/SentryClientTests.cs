@@ -1,4 +1,7 @@
 using System.Net.Http;
+using Sentry.Internal.Http;
+using Sentry.Testing;
+
 #pragma warning disable CS0618
 
 namespace Sentry.Tests;
@@ -659,5 +662,40 @@ public class SentryClientTests
 
         using var sut = new SentryClient(_fixture.SentryOptions);
         _ = Assert.IsType<BackgroundWorker>(sut.Worker);
+    }
+
+    [Fact]
+    public void Ctor_SetsTransportOnOptions()
+    {
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+        
+        _ = Assert.IsType<HttpTransport>(_fixture.SentryOptions.Transport);
+    }
+
+    [Fact]
+    public void Ctor_KeepsCustomTransportOnOptions()
+    {
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Transport = new FakeTransport();
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+
+        _ = Assert.IsType<FakeTransport>(_fixture.SentryOptions.Transport);
+    }
+
+    [Fact]
+    public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
+    {
+        using var cacheDirectory = new TempDirectory();
+        _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Transport = new FakeTransport();
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+
+        var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
+        _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
     }
 }
