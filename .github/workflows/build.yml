@@ -18,13 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-2022, macos-latest]
-        include:
-          - os: windows-2022
-            build_script: .\build.ps1
-          - os: ubuntu-latest
-            build_script: ./build.sh
-          - os: macos-latest
-            build_script: ./build.sh
 
     steps:
         - name: Checkout
@@ -57,9 +50,17 @@ jobs:
               3.1.x
               5.0.x
               6.0.x
-            
-        - name: Run build script
-          run: ${{ matrix.build_script }}
+
+        - name: Build
+          run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
+
+        - name: Test
+          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false"
+
+        - name: Pack
+          # only pack on windows since we need classic .net assemblies
+          if: matrix.os == 'windows-2022'
+          run: dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
 
         - name: Upload Verify Results
           if: failure()
@@ -70,7 +71,7 @@ jobs:
               **/*.received.*
 
         - name: Archive Artifacts
-          # only the ps1 script packages the SDK
+          # only archive on windows since we only pack on windows. See Pack step.
           if: matrix.os == 'windows-2022'
           uses: actions/upload-artifact@v2
           with:
