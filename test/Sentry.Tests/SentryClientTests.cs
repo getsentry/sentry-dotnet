@@ -203,8 +203,8 @@ public class SentryClientTests
     [Fact]
     public void CaptureEvent_SamplingLowest_DropsEvent()
     {
-        // Three decimal places longer than what Random returns. Should always drop
-        _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
+        // Smallest value allowed. Should always drop
+        _fixture.SentryOptions.SampleRate = float.Epsilon;
         var @event = new SentryEvent();
 
         var sut = _fixture.GetSut();
@@ -215,8 +215,8 @@ public class SentryClientTests
     [Fact]
     public void CaptureEvent_SamplingHighest_SendsEvent()
     {
-        // Three decimal places longer than what Random returns. Should always send
-        _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
+        // Largest value allowed. Should always send
+        _fixture.SentryOptions.SampleRate = 1;
         SentryEvent received = null;
         _fixture.SentryOptions.BeforeSend = e => received = e;
 
