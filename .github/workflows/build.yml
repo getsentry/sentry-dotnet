@@ -58,6 +58,7 @@ jobs:
           run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false"
 
         - name: Pack
+          # only pack on windows since we need classic .net assemblies
           if: matrix.os == 'windows-2022'
           run: dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
 
@@ -73,7 +74,7 @@ jobs:
               **/*.received.*
 
         - name: Archive Artifacts
-          # only the ps1 script packages the SDK
+          # only archive on windows since we only pack on windows. See Pack step.
           if: matrix.os == 'windows-2022'
           uses: actions/upload-artifact@v2
           with:
