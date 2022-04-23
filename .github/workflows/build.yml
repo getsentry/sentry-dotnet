@@ -61,9 +61,6 @@ jobs:
         - name: Run build script
           run: ${{ matrix.build_script }}
 
-        - name: Publish coverage report
-          uses: codecov/codecov-action@v1
-
         - name: Upload Verify Results
           if: failure()
           uses: actions/upload-artifact@v2
