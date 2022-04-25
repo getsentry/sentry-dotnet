@@ -20,12 +20,25 @@ namespace Sentry.Internal
 
         private ITransport CreateTransport()
         {
-            // Override for tests
-            if (_options.Transport is not null)
+            // Start from either the transport given on options, or create a new HTTP transport.
+            var transport = _options.Transport ?? CreateHttpTransport();
+
+            // When a cache directory path is given, wrap the transport in a caching transport.
+            if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
             {
-                return _options.Transport;
+                var cachingTransport = CachingTransport.Create(transport, _options);
+                BlockCacheFlush(cachingTransport);
+                transport = cachingTransport;
             }
 
+            // Always persist the transport on the options, so other places can pick it up where necessary.
+            _options.Transport = transport;
+
+            return transport;
+        }
+
+        private HttpTransport CreateHttpTransport()
+        {
             if (_options.SentryHttpClientFactory is { })
             {
                 _options.LogDebug(
@@ -36,20 +49,7 @@ namespace Sentry.Internal
             var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
             var httpClient = httpClientFactory.Create(_options);
 
-            var httpTransport = new HttpTransport(_options, httpClient);
-
-            // Non-caching transport
-            if (string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
-            {
-                return httpTransport;
-            }
-
-            // Caching transport
-            var cachingTransport = CachingTransport.Create(httpTransport, _options);
-
-            BlockCacheFlush(cachingTransport);
-
-            return cachingTransport;
+            return new HttpTransport(_options, httpClient);
         }
 
         internal void BlockCacheFlush(IFlushableTransport transport)

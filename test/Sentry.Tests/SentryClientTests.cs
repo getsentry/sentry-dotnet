@@ -1,4 +1,7 @@
 using System.Net.Http;
+using Sentry.Internal.Http;
+using Sentry.Testing;
+
 #pragma warning disable CS0618
 
 namespace Sentry.Tests;
@@ -248,8 +251,8 @@ public class SentryClientTests
     [Fact]
     public void CaptureEvent_SamplingLowest_DropsEvent()
     {
-        // Three decimal places longer than what Random returns. Should always drop
-        _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
+        // Smallest value allowed. Should always drop
+        _fixture.SentryOptions.SampleRate = float.Epsilon;
         var @event = new SentryEvent();
 
         var sut = _fixture.GetSut();
@@ -274,8 +277,8 @@ public class SentryClientTests
     [Fact]
     public void CaptureEvent_SamplingHighest_SendsEvent()
     {
-        // Three decimal places longer than what Random returns. Should always send
-        _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
+        // Largest value allowed. Should always send
+        _fixture.SentryOptions.SampleRate = 1;
         SentryEvent received = null;
         _fixture.SentryOptions.BeforeSend = e => received = e;
 
@@ -718,5 +721,40 @@ public class SentryClientTests
 
         using var sut = new SentryClient(_fixture.SentryOptions);
         _ = Assert.IsType<BackgroundWorker>(sut.Worker);
+    }
+
+    [Fact]
+    public void Ctor_SetsTransportOnOptions()
+    {
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+        
+        _ = Assert.IsType<HttpTransport>(_fixture.SentryOptions.Transport);
+    }
+
+    [Fact]
+    public void Ctor_KeepsCustomTransportOnOptions()
+    {
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Transport = new FakeTransport();
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+
+        _ = Assert.IsType<FakeTransport>(_fixture.SentryOptions.Transport);
+    }
+
+    [Fact]
+    public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
+    {
+        using var cacheDirectory = new TempDirectory();
+        _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Transport = new FakeTransport();
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+
+        var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
+        _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
     }
 }

@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
 
-namespace Sentry.Tests;
-
 public static class ModuleInit
 {
     [ModuleInitializer]
     public static void Init()
     {
+        VerifyDiffPlex.Initialize();
         VerifierSettings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(
             target => target.Data,
             (_, value) =>

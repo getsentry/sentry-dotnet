@@ -255,6 +255,9 @@ namespace Sentry
             }
             catch (Exception e)
             {
+                // Attempt to demystify exceptions before adding them as breadcrumbs.
+                e.Demystify();
+
                 _options.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
                 var data = new Dictionary<string, string>
                 {
