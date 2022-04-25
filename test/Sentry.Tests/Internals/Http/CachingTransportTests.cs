@@ -190,31 +190,36 @@ public class CachingTransportTests
         Assert.True(loggerCompletionSource.Task.IsCompleted, "Expected log call never received");
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task EnvelopeReachesInnerTransport()
     {
+        var timeout = TimeSpan.FromSeconds(7);
+
         // Arrange
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
         using var innerTransport = new FakeTransport();
         await using var transport = CachingTransport.Create(innerTransport, options);
 
+        var tcs = new TaskCompletionSource<bool>();
+        using var cts = new CancellationTokenSource(timeout);
+        innerTransport.EnvelopeSent += (_, _) => tcs.SetResult(true);
+        cts.Token.Register(() => tcs.TrySetCanceled());
+
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
-        await transport.SendEnvelopeAsync(envelope);
-
-        while (!innerTransport.GetSentEnvelopes().Any())
-        {
-            await Task.Delay(100);
-        }
+        await transport.SendEnvelopeAsync(envelope, cts.Token);
+        var completed = await tcs.Task;
 
         // Assert
+        Assert.True(completed, "The task timed out!");
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
         sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
     }
