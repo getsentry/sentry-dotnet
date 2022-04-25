@@ -454,7 +454,7 @@ public class CachingTransportTests
             return;
         }
 
-        var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(7));
+        using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(7));
 
         using var watcher = new FileSystemWatcher(directoryPath);
         watcher.IncludeSubdirectories = true;
