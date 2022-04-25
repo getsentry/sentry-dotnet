@@ -38,6 +38,9 @@ namespace Sentry.Internal.Http
         private readonly CancellationTokenSource _workerCts = new();
         private Task _worker = null!;
 
+        // Inner transport exposed internally primarily for testing
+        internal ITransport InnerTransport => _innerTransport;
+
         public static CachingTransport Create(ITransport innerTransport, SentryOptions options)
         {
             var transport = new CachingTransport(innerTransport, options);
