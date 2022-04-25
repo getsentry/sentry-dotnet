@@ -79,6 +79,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
@@ -233,6 +234,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path,
             MaxCacheItems = 2
         };
@@ -268,6 +270,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
@@ -349,6 +352,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
@@ -415,6 +419,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
