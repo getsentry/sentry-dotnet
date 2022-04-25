@@ -468,6 +468,14 @@ public class CachingTransportTests
             var tcs = new TaskCompletionSource<bool>();
             cts.Token.Register(() => tcs.TrySetCanceled());
             watcher.Deleted += (_, _) => tcs.SetResult(true);
+
+            // One final check before waiting
+            if (DirectoryIsEmpty())
+            {
+                return;
+            }
+
+            // Wait for a file to be deleted
             await tcs.Task;
         }
     }
