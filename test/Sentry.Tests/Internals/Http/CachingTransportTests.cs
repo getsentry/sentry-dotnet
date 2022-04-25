@@ -51,12 +51,7 @@ public class CachingTransportTests
 
             // Act
             await transport.SendEnvelopeAsync(envelope);
-
-            // Wait until directory is empty
-            while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any() && exception == null)
-            {
-                await Task.Delay(100);
-            }
+            await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
 
             // Assert
             if (exception != null)
@@ -89,12 +84,7 @@ public class CachingTransportTests
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
-
-        // Wait until directory is empty
-        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
-        {
-            await Task.Delay(100);
-        }
+        await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
@@ -293,12 +283,7 @@ public class CachingTransportTests
         await using var transport = CachingTransport.Create(innerTransport, options);
 
         // Act
-
-        // Wait until directory is empty
-        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
-        {
-            await Task.Delay(100);
-        }
+        await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
 
         // Assert
         innerTransport.GetSentEnvelopes().Should().HaveCount(3);
@@ -457,5 +442,33 @@ public class CachingTransportTests
         // Assert
         Assert.Equal(exception, receivedException);
         Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
+    }
+
+    private async Task WaitForDirectoryToBecomeEmptyAsync(string directoryPath, TimeSpan? timeout = null)
+    {
+        bool DirectoryIsEmpty() => !Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories).Any();
+
+        if (DirectoryIsEmpty())
+        {
+            // No point in waiting if the directory is already empty
+            return;
+        }
+
+        var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(7));
+
+        using var watcher = new FileSystemWatcher(directoryPath);
+        watcher.IncludeSubdirectories = true;
+        watcher.EnableRaisingEvents = true;
+
+        // Wait until timeout or directory is empty
+        while (!DirectoryIsEmpty())
+        {
+            cts.Token.ThrowIfCancellationRequested();
+
+            var tcs = new TaskCompletionSource<bool>();
+            cts.Token.Register(() => tcs.TrySetCanceled());
+            watcher.Deleted += (_, _) => tcs.SetResult(true);
+            await tcs.Task;
+        }
     }
 }
