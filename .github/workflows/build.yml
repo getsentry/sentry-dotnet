@@ -55,13 +55,13 @@ jobs:
           run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=test-results.trx"
+          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Create Test Report
           uses: phoenix-actions/test-reporting@v6
           if: success() || failure()
           with:
-            name: Unit Test Results (${{ matrix.configuration }})
+            name: Unit Test Results (${{ matrix.os }})
             path: '**/*.trx'
             reporter: dotnet-trx
             list-suites: 'all'
