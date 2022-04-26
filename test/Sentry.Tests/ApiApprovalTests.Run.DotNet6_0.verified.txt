@@ -498,6 +498,7 @@ namespace Sentry
         public Sentry.StackTraceMode StackTraceMode { get; set; }
         public double TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
+        public Sentry.Extensibility.ITransport? Transport { get; set; }
         public bool UseAsyncFileIO { get; set; }
     }
     public static class SentryOptionsExtensions
@@ -1037,6 +1038,10 @@ namespace Sentry.Extensibility
     public interface ISentryStackTraceFactory
     {
         Sentry.SentryStackTrace? Create(System.Exception? exception = null);
+    }
+    public interface ITransport
+    {
+        System.Threading.Tasks.Task SendEnvelopeAsync(Sentry.Protocol.Envelopes.Envelope envelope, System.Threading.CancellationToken cancellationToken = default);
     }
     public class RequestBodyExtractionDispatcher : Sentry.Extensibility.IRequestPayloadExtractor
     {
