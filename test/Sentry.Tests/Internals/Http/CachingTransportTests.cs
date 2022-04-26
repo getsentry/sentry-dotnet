@@ -51,12 +51,7 @@ public class CachingTransportTests
 
             // Act
             await transport.SendEnvelopeAsync(envelope);
-
-            // Wait until directory is empty
-            while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any() && exception == null)
-            {
-                await Task.Delay(100);
-            }
+            await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
 
             // Assert
             if (exception != null)
@@ -79,6 +74,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
@@ -88,12 +84,7 @@ public class CachingTransportTests
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
-
-        // Wait until directory is empty
-        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
-        {
-            await Task.Delay(100);
-        }
+        await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
@@ -190,31 +181,36 @@ public class CachingTransportTests
         Assert.True(loggerCompletionSource.Task.IsCompleted, "Expected log call never received");
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task EnvelopeReachesInnerTransport()
     {
+        var timeout = TimeSpan.FromSeconds(7);
+
         // Arrange
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
         using var innerTransport = new FakeTransport();
         await using var transport = CachingTransport.Create(innerTransport, options);
 
+        var tcs = new TaskCompletionSource<bool>();
+        using var cts = new CancellationTokenSource(timeout);
+        innerTransport.EnvelopeSent += (_, _) => tcs.SetResult(true);
+        cts.Token.Register(() => tcs.TrySetCanceled());
+
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
-        await transport.SendEnvelopeAsync(envelope);
-
-        while (!innerTransport.GetSentEnvelopes().Any())
-        {
-            await Task.Delay(100);
-        }
+        await transport.SendEnvelopeAsync(envelope, cts.Token);
+        var completed = await tcs.Task;
 
         // Assert
+        Assert.True(completed, "The task timed out!");
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
         sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
     }
@@ -228,6 +224,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path,
             MaxCacheItems = 2
         };
@@ -263,6 +260,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
@@ -285,12 +283,7 @@ public class CachingTransportTests
         await using var transport = CachingTransport.Create(innerTransport, options);
 
         // Act
-
-        // Wait until directory is empty
-        while (Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any())
-        {
-            await Task.Delay(100);
-        }
+        await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
 
         // Assert
         innerTransport.GetSentEnvelopes().Should().HaveCount(3);
@@ -344,6 +337,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
@@ -410,6 +404,7 @@ public class CachingTransportTests
         {
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
+            Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
 
@@ -447,5 +442,41 @@ public class CachingTransportTests
         // Assert
         Assert.Equal(exception, receivedException);
         Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
+    }
+
+    private async Task WaitForDirectoryToBecomeEmptyAsync(string directoryPath, TimeSpan? timeout = null)
+    {
+        bool DirectoryIsEmpty() => !Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories).Any();
+
+        if (DirectoryIsEmpty())
+        {
+            // No point in waiting if the directory is already empty
+            return;
+        }
+
+        using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(7));
+
+        using var watcher = new FileSystemWatcher(directoryPath);
+        watcher.IncludeSubdirectories = true;
+        watcher.EnableRaisingEvents = true;
+
+        // Wait until timeout or directory is empty
+        while (!DirectoryIsEmpty())
+        {
+            cts.Token.ThrowIfCancellationRequested();
+
+            var tcs = new TaskCompletionSource<bool>();
+            cts.Token.Register(() => tcs.TrySetCanceled());
+            watcher.Deleted += (_, _) => tcs.TrySetResult(true);
+
+            // One final check before waiting
+            if (DirectoryIsEmpty())
+            {
+                return;
+            }
+
+            // Wait for a file to be deleted, but not longer than 100ms
+            await Task.WhenAny(tcs.Task, Task.Delay(100, cts.Token));
+        }
     }
 }
