@@ -139,7 +139,7 @@ namespace Sentry
         /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
         /// </summary>
         /// <remarks>
-        /// This configuration is only relevant is <see cref="SendDefaultPii"/> is set to true.
+        /// This configuration is only relevant if <see cref="SendDefaultPii"/> is set to true.
         /// In environments like server applications this is set to false in order to not report server account names as user names.
         /// </remarks>
         public bool IsEnvironmentUser { get; set; } = true;
