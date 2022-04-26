@@ -80,3 +80,6 @@ jobs:
             path: |
               ${{ github.workspace }}/src/**/Release/*.nupkg
 
+        - name: List vulnerable packages
+          if: matrix.os == 'ubuntu-latest'
+          run: dotnet list package --vulnerable --include-transitive
