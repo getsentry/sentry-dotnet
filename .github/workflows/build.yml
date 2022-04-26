@@ -55,7 +55,7 @@ jobs:
           run: dotnet dotnet restore Sentry.sln
 
         - name: Build
-          run: dotnet build SentryNoSamples.slnf -c Release --no-restore /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
           run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false"
