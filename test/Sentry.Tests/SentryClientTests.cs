@@ -174,13 +174,17 @@ public class SentryClientTests
     public void CaptureEvent_BeforeEvent_RejectEvent_RecordsDiscard()
     {
         _fixture.SentryOptions.BeforeSend = _ => null;
-        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+
+        var recorder = Substitute.For<IClientReportRecorder>();
+        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
+        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        _fixture.SentryOptions.Transport = transport;
+
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
 
-        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
-            .IncrementCounter(DiscardReason.BeforeSend, DataCategory.Error);
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
     }
 
     [Fact]
@@ -190,13 +194,16 @@ public class SentryClientTests
         processor.Process(Arg.Any<SentryEvent>()).ReturnsNull();
 
         _fixture.SentryOptions.AddEventProcessor(processor);
-        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+
+        var recorder = Substitute.For<IClientReportRecorder>();
+        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
+        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
 
-        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
-            .IncrementCounter(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
     }
 
     [Fact]
@@ -206,13 +213,16 @@ public class SentryClientTests
         filter.Filter(Arg.Any<Exception>()).Returns(true);
 
         _fixture.SentryOptions.AddExceptionFilter(filter);
-        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+
+        var recorder = Substitute.For<IClientReportRecorder>();
+        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
+        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureException(new Exception());
 
-        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
-            .IncrementCounter(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
     }
 
     [Fact]
@@ -264,14 +274,19 @@ public class SentryClientTests
     public void CaptureEvent_SampleDrop_RecordsDiscard()
     {
         _fixture.SentryOptions.SampleRate = float.Epsilon;
-        _fixture.SentryOptions.Transport = Substitute.For<ITransport, IDiscardedEventCounter>();
+
+        var recorder = Substitute.For<IClientReportRecorder>();
+        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
+        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        _fixture.SentryOptions.Transport = transport;
+
+
         var @event = new SentryEvent();
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(@event);
 
-        _fixture.SentryOptions.Transport.As<IDiscardedEventCounter>().Received(1)
-            .IncrementCounter(DiscardReason.SampleRate, DataCategory.Error);
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
     }
 
     [Fact]
@@ -729,7 +744,7 @@ public class SentryClientTests
         _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
 
         using var sut = new SentryClient(_fixture.SentryOptions);
-        
+
         _ = Assert.IsType<HttpTransport>(_fixture.SentryOptions.Transport);
     }
 

@@ -5,31 +5,15 @@ namespace Sentry.Internal.Extensions
 {
     internal static class TransportExtensions
     {
-        internal static void IncrementDiscardedEventCounts(this ITransport transport,
-            DiscardReason reason,
-            Envelope envelope)
-        {
-            if (transport is not IDiscardedEventCounter counter)
-            {
-                return;
-            }
+        public static IClientReportRecorder? GetClientReportRecorder(this ITransport transport) =>
+            transport is IHasClientReportRecorder transportWithRecorder
+                ? transportWithRecorder.ClientReportRecorder
+                : null;
 
-            foreach (var item in envelope.Items)
-            {
-                counter.IncrementCounter(reason, item.DataCategory);
-            }
-        }
+        public static void RecordDiscardedEvent(this ITransport transport, DiscardReason reason, DataCategory category) =>
+            transport.GetClientReportRecorder()?.RecordDiscardedEvent(reason, category);
 
-        internal static void IncrementDiscardedEventCounts(this ITransport transport,
-            DiscardReason reason,
-            DataCategory category)
-        {
-            if (transport is not IDiscardedEventCounter counter)
-            {
-                return;
-            }
-
-            counter.IncrementCounter(reason, category);
-        }
+        public static void RecordDiscardedEvents(this ITransport transport, DiscardReason reason, Envelope envelope) =>
+            transport.GetClientReportRecorder()?.RecordDiscardedEvents(reason, envelope);
     }
 }

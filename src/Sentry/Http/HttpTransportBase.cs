@@ -22,15 +22,16 @@ namespace Sentry.Http
     /// Provides a base class for Sentry HTTP transports.  Used internally by the Sentry SDK,
     /// but also allows for higher-level SDKs (such as Unity) to implement their own transport.
     /// </summary>
-    public abstract class HttpTransportBase : IDiscardedEventCounter
+    public abstract class HttpTransportBase : IHasClientReportRecorder
     {
         internal const string DefaultErrorMessage = "No message";
 
         private readonly SentryOptions _options;
         private readonly ISystemClock _clock;
         private readonly Func<string, string?> _getEnvironmentVariable;
+        private readonly IClientReportRecorder _clientReportRecorder;
 
-        private readonly ThreadsafeCounterDictionary<DiscardReasonWithCategory> _discardedEvents = new();
+        IClientReportRecorder IHasClientReportRecorder.ClientReportRecorder => _clientReportRecorder;
 
         // Keep track of last discarded session init so that we can promote the next update.
         // We only track one because session updates are ordered.
@@ -50,6 +51,7 @@ namespace Sentry.Http
             _options = options;
             _clock = clock ?? new SystemClock();
             _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
+            _clientReportRecorder = new ClientReportRecorder(_options, _clock);
         }
 
         // Keep track of rate limits and their expiry dates.
@@ -76,7 +78,7 @@ namespace Sentry.Http
 
                 if (isRateLimited)
                 {
-                    IncrementCounter(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
+                    _clientReportRecorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
 
                     _options.LogDebug(
                         "Envelope item of type {0} was discarded because it's rate-limited.",
@@ -138,7 +140,7 @@ namespace Sentry.Http
 
             var eventId = envelope.TryGetEventId();
 
-            AttachClientReport(envelopeItems, eventId);
+            _clientReportRecorder.AttachClientReport(envelopeItems, eventId);
 
             if (envelopeItems.Count == 0)
             {
@@ -156,24 +158,6 @@ namespace Sentry.Http
             }
 
             return new Envelope(envelope.Header, envelopeItems);
-        }
-
-        private void AttachClientReport(ICollection<EnvelopeItem> envelopeItems, SentryId? eventId)
-        {
-            // Read and reset discards even if we're not sending them (to prevent excessive growth over time)
-            var discardedEvents = _discardedEvents.ReadAllAndReset();
-
-            // Don't attach a client report if we've turned them off or if there's nothing to report
-            if (!_options.SendClientReports || !discardedEvents.Any(x => x.Value > 0))
-            {
-                return;
-            }
-
-            // Create and attach the client report
-            var timestamp = _clock.GetUtcNow();
-            var clientReport = new ClientReport(timestamp, discardedEvents);
-            envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
-            _options.LogDebug("Attached client report to envelope {0}.", eventId);
         }
 
         /// <summary>
@@ -448,11 +432,7 @@ namespace Sentry.Http
                 return;
             }
 
-            // Increment discarded event counters for each item in the envelope
-            foreach (var item in envelope.Items)
-            {
-                IncrementCounter(DiscardReason.NetworkError, item.DataCategory);
-            }
+            _clientReportRecorder.RecordDiscardedEvents(DiscardReason.NetworkError, envelope);
         }
 
         private void LogFailure(string responseString, HttpStatusCode responseStatusCode, SentryId? eventId)
@@ -487,16 +467,5 @@ namespace Sentry.Http
         private static bool HasJsonContent(HttpContent content) =>
             string.Equals(content.Headers.ContentType?.MediaType, "application/json",
                 StringComparison.OrdinalIgnoreCase);
-
-        private void IncrementCounter(DiscardReason reason, DataCategory category)
-        {
-            _discardedEvents.Increment(reason.WithCategory(category));
-        }
-
-        void IDiscardedEventCounter.IncrementCounter(DiscardReason reason, DataCategory category)
-        {
-            // internal interface must be implemented explicitly
-            IncrementCounter(reason, category);
-        }
     }
 }

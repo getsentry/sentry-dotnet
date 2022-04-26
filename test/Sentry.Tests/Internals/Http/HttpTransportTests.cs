@@ -698,14 +698,14 @@ public class HttpTransportTests
         var httpTransport = Substitute.For<HttpTransportBase>(options, null, clock);
 
         // add some fake discards for the report
-        var counter = (IDiscardedEventCounter)httpTransport;
-        counter.IncrementCounter(DiscardReason.NetworkError, DataCategory.Internal);
-        counter.IncrementCounter(DiscardReason.NetworkError, DataCategory.Security);
-        counter.IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
-        counter.IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
-        counter.IncrementCounter(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
-        counter.IncrementCounter(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
-        counter.IncrementCounter(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+        var recorder = ((IHasClientReportRecorder)httpTransport).ClientReportRecorder;
+        recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Internal);
+        recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
 
         var sentryEvent = new SentryEvent();
         var expectedEventJson = EnvelopeItem.FromEvent(sentryEvent).Payload.SerializeToString(logger);
@@ -750,8 +750,8 @@ public class HttpTransportTests
 
         var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
 
-        var counter = (IDiscardedEventCounter)httpTransport;
-        counter.IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
+        var recorder = ((IHasClientReportRecorder)httpTransport).ClientReportRecorder;
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
 
         var envelope = Envelope.FromEvent(new SentryEvent());
         var processedEnvelope = httpTransport.ProcessEnvelope(envelope);

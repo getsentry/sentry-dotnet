@@ -208,7 +208,7 @@ namespace Sentry.Internal.Http
                         throw;
                     }
 
-                    _innerTransport.IncrementDiscardedEventCounts(DiscardReason.CacheOverflow, envelope);
+                    _innerTransport.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
                     LogFailureWithDiscard(file, ex);
                 }
             }

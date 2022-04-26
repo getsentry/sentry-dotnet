@@ -60,7 +60,7 @@ namespace Sentry.Internal
             if (Interlocked.Increment(ref _currentItems) > _maxItems)
             {
                 _ = Interlocked.Decrement(ref _currentItems);
-                _transport.IncrementDiscardedEventCounts(DiscardReason.QueueOverflow, envelope);
+                _transport.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
                 return false;
             }
 

@@ -388,7 +388,10 @@ public class CachingTransportTests
             CacheDirectoryPath = cacheDirectory.Path
         };
 
-        var innerTransport = Substitute.For<ITransport, IDiscardedEventCounter>();
+        var recorder = Substitute.For<IClientReportRecorder>();
+        var innerTransport = Substitute.For<ITransport, IHasClientReportRecorder>();
+        innerTransport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException(new InvalidOperationException()));
@@ -404,8 +407,7 @@ public class CachingTransportTests
         await transport.FlushAsync();
 
         // Test that we recorded the discarded event
-        transport.InnerTransport.As<IDiscardedEventCounter>().Received(1)
-            .IncrementCounter(DiscardReason.CacheOverflow, DataCategory.Error);
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.CacheOverflow, DataCategory.Error);
     }
 
     [Fact(Timeout = 7000)]

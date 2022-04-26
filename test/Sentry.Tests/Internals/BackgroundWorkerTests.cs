@@ -7,7 +7,8 @@ public class BackgroundWorkerTests
 {
     private class Fixture
     {
-        public ITransport Transport { get; set; } = Substitute.For<ITransport, IDiscardedEventCounter>();
+        public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
+        public ITransport Transport { get; set; } = Substitute.For<ITransport, IHasClientReportRecorder>();
         public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
         public ConcurrentQueue<Envelope> Queue { get; set; } = new();
         public CancellationTokenSource CancellationTokenSource { get; set; } = new();
@@ -18,6 +19,8 @@ public class BackgroundWorkerTests
             _ = Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             SentryOptions.Debug = true;
             SentryOptions.DiagnosticLogger = Logger;
+
+            Transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(ClientReportRecorder);
         }
 
         public BackgroundWorker GetSut()
@@ -248,8 +251,8 @@ public class BackgroundWorkerTests
         _ = sut.EnqueueEnvelope(envelope);
 
         // Check that we counted a single discarded event with the correct information
-        _fixture.Transport.As<IDiscardedEventCounter>().Received(1)
-            .IncrementCounter(DiscardReason.QueueOverflow, DataCategory.Error);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
 
         _ = eventsQueuedEvent.Set();
     }
