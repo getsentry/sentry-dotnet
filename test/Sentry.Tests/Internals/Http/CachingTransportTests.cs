@@ -376,6 +376,39 @@ public class CachingTransportTests
     }
 
     [Fact(Timeout = 7000)]
+    public async Task RecordsDiscardedEventOnNonTransientExceptions()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
+
+        var innerTransport = Substitute.For<ITransport, IDiscardedEventCounter>();
+        innerTransport
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .Returns(_ => Task.FromException(new InvalidOperationException()));
+
+        await using var transport = CachingTransport.Create(innerTransport, options);
+
+        // Can't really reliably test this with a worker
+        await transport.StopWorkerAsync();
+
+        // Act
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
+        await transport.FlushAsync();
+
+        // Test that we recorded the discarded event
+        transport.InnerTransport.As<IDiscardedEventCounter>().Received(1)
+            .IncrementCounter(DiscardReason.CacheOverflow, DataCategory.Error);
+    }
+
+    [Fact(Timeout = 7000)]
     public async Task DoesNotDeleteCacheIfHttpRequestException()
     {
         var exception = new HttpRequestException(null);
