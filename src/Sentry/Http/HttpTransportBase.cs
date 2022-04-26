@@ -140,7 +140,12 @@ namespace Sentry.Http
 
             var eventId = envelope.TryGetEventId();
 
-            _clientReportRecorder.AttachClientReport(envelopeItems, eventId);
+            var clientReport = _clientReportRecorder.GenerateClientReport();
+            if (clientReport != null)
+            {
+                envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
+                _options.LogDebug("Attached client report to envelope {0}.", eventId);
+            }
 
             if (envelopeItems.Count == 0)
             {
