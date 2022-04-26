@@ -16,9 +16,4 @@ namespace Sentry.Extensibility
         /// <param name="cancellationToken">The cancellation token.</param>
         Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default);
     }
-
-    internal interface IFlushableTransport : ITransport
-    {
-        Task FlushAsync(CancellationToken cancellationToken = default);
-    }
 }
