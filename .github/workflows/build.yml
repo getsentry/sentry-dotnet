@@ -58,7 +58,7 @@ jobs:
           run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Create Test Report
-          uses: phoenix-actions/test-reporting@v6
+          uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
           if: success() || failure()
           with:
             name: Unit Test Results (${{ matrix.os }})
