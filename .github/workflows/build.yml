@@ -52,7 +52,7 @@ jobs:
               6.0.x
 
         - name: Restore
-          run: dotnet dotnet restore Sentry.sln
+          run: dotnet restore
 
         - name: Build
           run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
