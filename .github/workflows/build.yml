@@ -55,6 +55,7 @@ jobs:
           run: dotnet restore
 
         - name: Build
+          # cant use --no-restore since dotnet restore does not support $(Configuration) based TargetFrameworks
           run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
