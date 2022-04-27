@@ -8,6 +8,7 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using static Sentry.Constants;
 using static Sentry.Internal.Constants;
@@ -49,9 +50,13 @@ namespace Sentry
 
         /// <summary>
         /// This holds a reference to the current transport, when one is active.
-        /// If set manually (for tests), it will be used instead of the default transport.
+        /// If set manually before initialization, the provided transport will be used instead of the default transport.
         /// </summary>
-        internal ITransport? Transport { get; set; }
+        /// <remarks>
+        /// If <seealso cref="CacheDirectoryPath"/> is set, any transport set here will be wrapped in a
+        /// <seealso cref="CachingTransport"/> and used as its inner transport.
+        /// </remarks>
+        public ITransport? Transport { get; set; }
 
         internal IClientReportRecorder ClientReportRecorder { get; set; }
 
@@ -141,7 +146,7 @@ namespace Sentry
         /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
         /// </summary>
         /// <remarks>
-        /// This configuration is only relevant is <see cref="SendDefaultPii"/> is set to true.
+        /// This configuration is only relevant if <see cref="SendDefaultPii"/> is set to true.
         /// In environments like server applications this is set to false in order to not report server account names as user names.
         /// </remarks>
         public bool IsEnvironmentUser { get; set; } = true;

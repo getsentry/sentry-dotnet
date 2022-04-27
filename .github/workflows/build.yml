@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-2022, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
         - name: Checkout
@@ -27,7 +27,7 @@ jobs:
             fetch-depth: 2 # default is 1 and codecov needs > 1
 
         - name: Setup .NET SDK
-          if: matrix.os == 'windows-2022'
+          if: matrix.os == 'windows-latest'
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: |
@@ -59,7 +59,7 @@ jobs:
 
         - name: Pack
           # only pack on windows since we need classic .net assemblies
-          if: matrix.os == 'windows-2022'
+          if: matrix.os == 'windows-latest'
           run: dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
 
         - name: Upload Verify Results
@@ -72,7 +72,7 @@ jobs:
 
         - name: Archive Artifacts
           # only archive on windows since we only pack on windows. See Pack step.
-          if: matrix.os == 'windows-2022'
+          if: matrix.os == 'windows-latest'
           uses: actions/upload-artifact@v2
           with:
             name: ${{ github.sha }}

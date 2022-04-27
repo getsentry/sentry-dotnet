@@ -12,7 +12,7 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {
-    internal class CachingTransport : IFlushableTransport, IAsyncDisposable, IDisposable
+    internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
     {
         private const string EnvelopeFileExt = "envelope";
 
