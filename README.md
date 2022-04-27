@@ -11,6 +11,7 @@ Sentry SDK for .NET
 
 [![build](https://github.com/getsentry/sentry-dotnet/workflows/build/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions?query=branch%3Amain)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-dotnet.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-dotnet?ref=badge_shield)
 
 
 |      Integrations             |    Downloads     |    NuGet Stable     |    NuGet Preview     |  Documentation |
@@ -86,3 +87,7 @@ Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/), battle tested 
 * [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 * [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-sentry-green.svg)](http://stackoverflow.com/questions/tagged/sentry)
 * [![Twitter Follow](https://img.shields.io/twitter/follow/getsentry?label=getsentry&style=social)](https://twitter.com/intent/follow?screen_name=getsentry)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-dotnet.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-dotnet?ref=badge_large)
