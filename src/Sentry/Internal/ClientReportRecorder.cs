@@ -22,16 +22,29 @@ namespace Sentry.Internal
 
         public void RecordDiscardedEvent(DiscardReason reason, DataCategory category)
         {
+            // Don't count discarded events if we're not going to be sending them.
+            if (!_sentryOptions.SendClientReports)
+            {
+                return;
+            }
+
+            // Increment the counter for the discarded event.
             _discardedEvents.Increment(reason.WithCategory(category));
         }
 
         public ClientReport? GenerateClientReport()
         {
-            // Read and reset discarded events even if we're not sending them, to prevent excessive growth over time.
+            // Don't attach a client report if we've turned them off.
+            if (!_sentryOptions.SendClientReports)
+            {
+                return null;
+            }
+
+            // Read and reset discarded events.
             var discardedEvents = _discardedEvents.ReadAllAndReset();
 
-            // Don't attach a client report if we've turned them off or if there's nothing to report.
-            if (!_sentryOptions.SendClientReports || !discardedEvents.Any(x => x.Value > 0))
+            // Don't attach a client report if there's nothing to report.
+            if (!discardedEvents.Any(x => x.Value > 0))
             {
                 return null;
             }
