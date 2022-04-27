@@ -46,5 +46,25 @@ namespace Sentry.Internal
 
             writer.WriteEndObject();
         }
+
+        /// <summary>
+        /// Parses <see cref="ClientReport"/> from JSON.
+        /// </summary>
+        public static ClientReport FromJson(JsonElement json)
+        {
+            var timestamp = json.GetProperty("timestamp").GetDateTimeOffset();
+            var discardedEvents = json.GetProperty("discarded_events").EnumerateArray()
+                .Select(x => new
+                {
+                    Reason = x.GetProperty("reason").GetString()!,
+                    Category = x.GetProperty("category").GetString()!,
+                    Quantity = x.GetProperty("quantity").GetInt32()
+                })
+                .ToDictionary(
+                    x => new DiscardReasonWithCategory(x.Reason, x.Category),
+                    x => x.Quantity);
+
+            return new ClientReport(timestamp, discardedEvents);
+        }
     }
 }

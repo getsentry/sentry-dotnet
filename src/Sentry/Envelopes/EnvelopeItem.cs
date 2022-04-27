@@ -366,6 +366,16 @@ namespace Sentry.Protocol.Envelopes
                 return new JsonSerializable(SessionUpdate.FromJson(json));
             }
 
+            // Client Report
+            if (string.Equals(payloadType, TypeValueClientReport, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                var json = Json.Parse(buffer);
+
+                return new JsonSerializable(ClientReport.FromJson(json));
+            }
+
             // Arbitrary payload
             var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
 
