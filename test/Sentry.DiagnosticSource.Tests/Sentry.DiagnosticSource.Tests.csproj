@@ -1,16 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
-  </PropertyGroup>
-
-  <!--
-  Build these tests for .NET Core 3.0 only in Release configuration.
-  This avoids false-negatives with solution analysis.
-  See https://github.com/getsentry/sentry-dotnet/pull/1563
-  -->
-  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
-    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461;netcoreapp3.0</TargetFrameworks>
+    <!--
+    Build these tests for .NET Core 3.0 only in Release configuration.
+    This avoids false-negatives with solution analysis.
+    See https://github.com/getsentry/sentry-dotnet/pull/1563
+    -->
+    <TargetFrameworks Condition="'$(Configuration)' == 'Debug'">net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
