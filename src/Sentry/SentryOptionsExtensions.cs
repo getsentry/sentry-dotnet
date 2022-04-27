@@ -117,16 +117,36 @@ namespace Sentry
             => options.AddExceptionFilter(new ExceptionTypeFilter<TException>());
 
         /// <summary>
-        /// Add prefix to exclude from 'InApp' stack trace list.
+        /// Add prefix to exclude from 'InApp' stacktrace list.
         /// </summary>
+        /// <param name="options">The SentryOptions which holds the stacktrace list.</param>
+        /// <param name="prefix">The string used to filter the stacktrace to be excluded from InApp.</param>
+        /// <remarks>
+        /// Sentry by default filters the stacktrace to display only application code.
+        /// A user can optionally click to see all which will include framework and libraries.
+        /// A <see cref="string.StartsWith(string)"/> is executed
+        /// </remarks>
+        /// <example>
+        /// 'System.', 'Microsoft.'
+        /// </example>
         public static void AddInAppExclude(this SentryOptions options, string prefix)
             => options.InAppExclude = options.InAppExclude != null
                 ? options.InAppExclude.Concat(new[] { prefix }).ToArray()
                 : new[] { prefix };
 
         /// <summary>
-        /// Add prefix to include as in 'InApp' stack trace.
+        /// Add prefix to include as in 'InApp' stacktrace.
         /// </summary>
+        /// <param name="options">The SentryOptions which holds the stacktrace list.</param>
+        /// <param name="prefix">The string used to filter the stacktrace to be included in InApp.</param>
+        /// <remarks>
+        /// Sentry by default filters the stacktrace to display only application code.
+        /// A user can optionally click to see all which will include framework and libraries.
+        /// A <see cref="string.StartsWith(string)"/> is executed
+        /// </remarks>
+        /// <example>
+        /// 'System.CustomNamespace', 'Microsoft.Azure.App'
+        /// </example>
         public static void AddInAppInclude(this SentryOptions options, string prefix)
             => options.InAppInclude = options.InAppInclude != null
                 ? options.InAppInclude.Concat(new[] { prefix }).ToArray()
