@@ -322,11 +322,8 @@ namespace Sentry.Internal.Http
             var clientReport = _options.ClientReportRecorder.GenerateClientReport();
             if (clientReport != null)
             {
-                var eventId = envelope.TryGetEventId();
-                var envelopeItems = envelope.Items.ToList();
-                envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
-                envelope = new Envelope(envelope.Header, envelopeItems);
-                _options.LogDebug("Attached client report to envelope {0}.", eventId);
+                envelope = envelope.WithItem(EnvelopeItem.FromClientReport(clientReport));
+                _options.LogDebug("Attached client report to envelope {0}.", envelope.TryGetEventId());
             }
 
             // Store the envelope in a file without actually sending it anywhere.

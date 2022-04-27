@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -252,6 +253,18 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return new Envelope(header, items);
+        }
+
+        /// <summary>
+        /// Creates a new envelope starting from the current one and appends the item given.
+        /// </summary>
+        /// <param name="item">The item to append.</param>
+        /// <returns>A new envelope with the same headers and items, including the new one.</returns>
+        internal Envelope WithItem(EnvelopeItem item)
+        {
+            var items = this.Items.ToList();
+            items.Add(item);
+            return new Envelope(Header, items);
         }
     }
 }

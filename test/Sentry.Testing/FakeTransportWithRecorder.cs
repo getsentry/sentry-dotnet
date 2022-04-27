@@ -15,9 +15,7 @@ internal class FakeTransportWithRecorder : FakeTransport
         var clientReport = _clientReportRecorder.GenerateClientReport();
         if (clientReport != null)
         {
-            var envelopeItems = envelope.Items.ToList();
-            envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
-            envelope = new Envelope(envelope.Header, envelopeItems);
+            envelope = envelope.WithItem(EnvelopeItem.FromClientReport(clientReport));
         }
 
         await base.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
