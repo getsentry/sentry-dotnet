@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry
@@ -123,7 +122,7 @@ namespace Sentry
 
             if (transaction.IsSampled != true)
             {
-                _options.Transport?.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
                 _options.LogDebug("Transaction dropped by sampling.");
                 return;
             }
@@ -151,7 +150,7 @@ namespace Sentry
             {
                 if (!SynchronizedRandom.NextBool(_options.SampleRate.Value))
                 {
-                    _options.Transport?.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
                     _options.LogDebug("Event sampled.");
                     return SentryId.Empty;
                 }
@@ -161,7 +160,7 @@ namespace Sentry
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
-                    _options.Transport?.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
                     _options.LogInfo("Event with exception of type '{0}' was dropped by an exception filter.",
                         @event.Exception.GetType());
                     return SentryId.Empty;
@@ -202,7 +201,7 @@ namespace Sentry
                 processedEvent = processor.Process(processedEvent);
                 if (processedEvent == null)
                 {
-                    _options.Transport?.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
                     _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                     return SentryId.Empty;
                 }
@@ -211,7 +210,7 @@ namespace Sentry
             processedEvent = BeforeSend(processedEvent);
             if (processedEvent == null) // Rejected event
             {
-                _options.Transport?.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
                 _options.LogInfo("Event dropped by BeforeSend callback.");
                 return SentryId.Empty;
             }

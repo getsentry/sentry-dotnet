@@ -22,16 +22,13 @@ namespace Sentry.Http
     /// Provides a base class for Sentry HTTP transports.  Used internally by the Sentry SDK,
     /// but also allows for higher-level SDKs (such as Unity) to implement their own transport.
     /// </summary>
-    public abstract class HttpTransportBase : IHasClientReportRecorder
+    public abstract class HttpTransportBase
     {
         internal const string DefaultErrorMessage = "No message";
 
         private readonly SentryOptions _options;
         private readonly ISystemClock _clock;
         private readonly Func<string, string?> _getEnvironmentVariable;
-        private readonly IClientReportRecorder _clientReportRecorder;
-
-        IClientReportRecorder IHasClientReportRecorder.ClientReportRecorder => _clientReportRecorder;
 
         // Keep track of last discarded session init so that we can promote the next update.
         // We only track one because session updates are ordered.
@@ -51,7 +48,6 @@ namespace Sentry.Http
             _options = options;
             _clock = clock ?? new SystemClock();
             _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
-            _clientReportRecorder = new ClientReportRecorder(_options, _clock);
         }
 
         // Keep track of rate limits and their expiry dates.
@@ -78,7 +74,8 @@ namespace Sentry.Http
 
                 if (isRateLimited)
                 {
-                    _clientReportRecorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
+                    _options.ClientReportRecorder
+                        .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
 
                     _options.LogDebug(
                         "Envelope item of type {0} was discarded because it's rate-limited.",
@@ -140,7 +137,7 @@ namespace Sentry.Http
 
             var eventId = envelope.TryGetEventId();
 
-            var clientReport = _clientReportRecorder.GenerateClientReport();
+            var clientReport = _options.ClientReportRecorder.GenerateClientReport();
             if (clientReport != null)
             {
                 envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
@@ -437,7 +434,7 @@ namespace Sentry.Http
                 return;
             }
 
-            _clientReportRecorder.RecordDiscardedEvents(DiscardReason.NetworkError, envelope);
+            _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.NetworkError, envelope);
         }
 
         private void LogFailure(string responseString, HttpStatusCode responseStatusCode, SentryId? eventId)

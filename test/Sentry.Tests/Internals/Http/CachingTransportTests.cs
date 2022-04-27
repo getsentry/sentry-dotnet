@@ -385,13 +385,12 @@ public class CachingTransportTests
             Dsn = DsnSamples.ValidDsnWithoutSecret,
             DiagnosticLogger = _logger,
             Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
+            CacheDirectoryPath = cacheDirectory.Path,
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>()
         };
 
-        var recorder = Substitute.For<IClientReportRecorder>();
-        var innerTransport = Substitute.For<ITransport, IHasClientReportRecorder>();
-        innerTransport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
 
+        var innerTransport = Substitute.For<ITransport>();
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException(new InvalidOperationException()));
@@ -407,7 +406,8 @@ public class CachingTransportTests
         await transport.FlushAsync();
 
         // Test that we recorded the discarded event
-        recorder.Received(1).RecordDiscardedEvent(DiscardReason.CacheOverflow, DataCategory.Error);
+        options.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.CacheOverflow, DataCategory.Error);
     }
 
     [Fact(Timeout = 7000)]

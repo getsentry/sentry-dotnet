@@ -13,6 +13,12 @@ public class SentryClientTests
     {
         public SentryOptions SentryOptions { get; set; } = new();
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
+        public IClientReportRecorder ClientReportRecorder { get; set; } = Substitute.For<IClientReportRecorder>();
+
+        public Fixture()
+        {
+            SentryOptions.ClientReportRecorder = ClientReportRecorder;
+        }
 
         public SentryClient GetSut() => new(SentryOptions, BackgroundWorker);
     }
@@ -175,16 +181,15 @@ public class SentryClientTests
     {
         _fixture.SentryOptions.BeforeSend = _ => null;
 
-        var recorder = Substitute.For<IClientReportRecorder>();
-        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
-        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        var transport = Substitute.For<ITransport>();
         _fixture.SentryOptions.Transport = transport;
 
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
 
-        recorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
     }
 
     [Fact]
@@ -195,15 +200,14 @@ public class SentryClientTests
 
         _fixture.SentryOptions.AddEventProcessor(processor);
 
-        var recorder = Substitute.For<IClientReportRecorder>();
-        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
-        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        var transport = Substitute.For<ITransport>();
         _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
 
-        recorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
     }
 
     [Fact]
@@ -214,15 +218,14 @@ public class SentryClientTests
 
         _fixture.SentryOptions.AddExceptionFilter(filter);
 
-        var recorder = Substitute.For<IClientReportRecorder>();
-        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
-        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        var transport = Substitute.For<ITransport>();
         _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureException(new Exception());
 
-        recorder.Received(1).RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
     }
 
     [Fact]
@@ -275,18 +278,16 @@ public class SentryClientTests
     {
         _fixture.SentryOptions.SampleRate = float.Epsilon;
 
-        var recorder = Substitute.For<IClientReportRecorder>();
-        var transport = Substitute.For<ITransport, IHasClientReportRecorder>();
-        transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+        var transport = Substitute.For<ITransport>();
         _fixture.SentryOptions.Transport = transport;
-
 
         var @event = new SentryEvent();
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(@event);
 
-        recorder.Received(1).RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
     }
 
     [Fact]
@@ -776,14 +777,11 @@ public class SentryClientTests
     [Fact]
     public async Task SentryClient_WithCachingTransport_RecordsDiscardedEvents()
     {
-        var recorder = Substitute.For<IClientReportRecorder>();
-        var innerTransport = Substitute.For<ITransport, IHasClientReportRecorder>();
-        innerTransport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
-
         using var cacheDirectory = new TempDirectory();
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
         _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
 
+        var innerTransport = Substitute.For<ITransport>();
         var cachingTransport = CachingTransport.Create(innerTransport, _fixture.SentryOptions);
         _fixture.SentryOptions.Transport = cachingTransport;
         await cachingTransport.StopWorkerAsync();
@@ -795,6 +793,7 @@ public class SentryClientTests
         _ = sut.CaptureEvent(new SentryEvent());
         await cachingTransport.FlushAsync();
 
-        recorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
     }
 }

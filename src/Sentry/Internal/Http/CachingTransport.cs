@@ -12,7 +12,7 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {
-    internal class CachingTransport : IFlushableTransport, IHasClientReportRecorder, IAsyncDisposable, IDisposable
+    internal class CachingTransport : IFlushableTransport, IAsyncDisposable, IDisposable
     {
         private const string EnvelopeFileExt = "envelope";
 
@@ -42,8 +42,6 @@ namespace Sentry.Internal.Http
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
-        public IClientReportRecorder ClientReportRecorder { get; }
-
         public static CachingTransport Create(ITransport innerTransport, SentryOptions options)
         {
             var transport = new CachingTransport(innerTransport, options);
@@ -65,8 +63,6 @@ namespace Sentry.Internal.Http
                 throw new InvalidOperationException("Cache directory or DSN is not set.");
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
-
-            ClientReportRecorder = _innerTransport.GetClientReportRecorder() ?? new ClientReportRecorder(options);
         }
 
         private void Initialize()
@@ -212,7 +208,7 @@ namespace Sentry.Internal.Http
                         throw;
                     }
 
-                    _innerTransport.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
+                    _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
                     LogFailureWithDiscard(file, ex);
                 }
             }

@@ -53,6 +53,8 @@ namespace Sentry
         /// </summary>
         internal ITransport? Transport { get; set; }
 
+        internal IClientReportRecorder ClientReportRecorder { get; set; }
+
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal string ClientVersion { get; } = SdkName;
@@ -599,6 +601,8 @@ namespace Sentry
             ExceptionProcessorsProviders = new Func<IEnumerable<ISentryEventExceptionProcessor>>[] {
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
+
+            ClientReportRecorder = new ClientReportRecorder(this);
 
             SentryStackTraceFactory = new SentryStackTraceFactory(this);
 

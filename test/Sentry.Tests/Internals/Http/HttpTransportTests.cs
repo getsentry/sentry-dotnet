@@ -342,14 +342,19 @@ public class HttpTransportTests
         var fakeClock = Substitute.For<ISystemClock>();
         fakeClock.GetUtcNow().Returns(timestamp);
 
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var recorder = new ClientReportRecorder(options, fakeClock);
+        options.ClientReportRecorder = recorder;
+
         var httpTransport = new HttpTransport(
-            new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
-                SendClientReports = true,
-                Debug = true
-            },
+            options,
             new HttpClient(httpHandler),
             clock: fakeClock
         );
@@ -693,12 +698,14 @@ public class HttpTransportTests
         var clock = Substitute.For<ISystemClock>();
         clock.GetUtcNow().Returns(expectedTimestamp);
 
+        var recorder = new ClientReportRecorder(options, clock);
+        options.ClientReportRecorder = recorder;
+
         var logger = Substitute.For<IDiagnosticLogger>();
 
         var httpTransport = Substitute.For<HttpTransportBase>(options, null, clock);
 
         // add some fake discards for the report
-        var recorder = ((IHasClientReportRecorder)httpTransport).ClientReportRecorder;
         recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Internal);
         recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Security);
         recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
@@ -750,7 +757,7 @@ public class HttpTransportTests
 
         var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
 
-        var recorder = ((IHasClientReportRecorder)httpTransport).ClientReportRecorder;
+        var recorder = options.ClientReportRecorder;
         recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
 
         var envelope = Envelope.FromEvent(new SentryEvent());

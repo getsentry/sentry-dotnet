@@ -8,7 +8,7 @@ public class BackgroundWorkerTests
     private class Fixture
     {
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
-        public ITransport Transport { get; set; } = Substitute.For<ITransport, IHasClientReportRecorder>();
+        public ITransport Transport { get; set; } = Substitute.For<ITransport>();
         public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
         public ConcurrentQueue<Envelope> Queue { get; set; } = new();
         public CancellationTokenSource CancellationTokenSource { get; set; } = new();
@@ -19,8 +19,7 @@ public class BackgroundWorkerTests
             _ = Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             SentryOptions.Debug = true;
             SentryOptions.DiagnosticLogger = Logger;
-
-            Transport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(ClientReportRecorder);
+            SentryOptions.ClientReportRecorder = ClientReportRecorder;
         }
 
         public BackgroundWorker GetSut()
