@@ -9,7 +9,7 @@
   This avoids false-negatives with solution analysis.
   See https://github.com/getsentry/sentry-dotnet/pull/1563
   -->
-  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TargetFrameworks>$(TargetFrameworks);netcoreapp3.0</TargetFrameworks>
   </PropertyGroup>
 
