@@ -9,4 +9,8 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.15" />
+  </ItemGroup>
+
 </Project>
