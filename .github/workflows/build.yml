@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-2022, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
         - name: Checkout
@@ -27,7 +27,7 @@ jobs:
             fetch-depth: 2 # default is 1 and codecov needs > 1
 
         - name: Setup .NET SDK
-          if: matrix.os == 'windows-2022'
+          if: matrix.os == 'windows-latest'
           uses: actions/setup-dotnet@v1
           with:
             dotnet-version: |
@@ -58,11 +58,22 @@ jobs:
           run: dotnet build SentryNoSamples.slnf -c Release --no-restore /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false"
+          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
+
+        - name: Create Test Report
+          uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
+          # run this step even if previous step failed
+          if: success() || failure()
+          with:
+            name: Unit Test Results (${{ matrix.os }})
+            path: '**/*.trx'
+            reporter: dotnet-trx
+            list-suites: 'all'
+            list-tests: 'failed'
 
         - name: Pack
           # only pack on windows since we need classic .net assemblies
-          if: matrix.os == 'windows-2022'
+          if: matrix.os == 'windows-latest'
           run: dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
 
         - name: Upload Verify Results
@@ -75,7 +86,7 @@ jobs:
 
         - name: Archive Artifacts
           # only archive on windows since we only pack on windows. See Pack step.
-          if: matrix.os == 'windows-2022'
+          if: matrix.os == 'windows-latest'
           uses: actions/upload-artifact@v2
           with:
             name: ${{ github.sha }}

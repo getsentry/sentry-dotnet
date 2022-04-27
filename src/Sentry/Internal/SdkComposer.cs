@@ -52,7 +52,7 @@ namespace Sentry.Internal
             return new HttpTransport(_options, httpClient);
         }
 
-        internal void BlockCacheFlush(IFlushableTransport transport)
+        internal void BlockCacheFlush(CachingTransport transport)
         {
             // If configured, flush existing cache
             if (_options.InitCacheFlushTimeout > TimeSpan.Zero)
