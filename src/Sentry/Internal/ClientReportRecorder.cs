@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Sentry.Infrastructure;
 
@@ -9,6 +10,9 @@ namespace Sentry.Internal
         private readonly ISystemClock _clock;
 
         private readonly ThreadsafeCounterDictionary<DiscardReasonWithCategory> _discardedEvents = new();
+
+        // discarded events are exposed internally for testing
+        internal IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents => _discardedEvents;
 
         public ClientReportRecorder(SentryOptions sentryOptions, ISystemClock clock)
         {
