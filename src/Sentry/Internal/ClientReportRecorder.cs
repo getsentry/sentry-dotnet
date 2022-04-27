@@ -14,10 +14,10 @@ namespace Sentry.Internal
         // discarded events are exposed internally for testing
         internal IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents => _discardedEvents;
 
-        public ClientReportRecorder(SentryOptions sentryOptions, ISystemClock clock)
+        public ClientReportRecorder(SentryOptions sentryOptions, ISystemClock? clock = default)
         {
             _sentryOptions = sentryOptions;
-            _clock = clock;
+            _clock = clock ?? new SystemClock();
         }
 
         public void RecordDiscardedEvent(DiscardReason reason, DataCategory category)
