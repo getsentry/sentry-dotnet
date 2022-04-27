@@ -318,6 +318,17 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
+            // Client reports should be generated here so they get included in the cached data
+            var clientReport = _options.ClientReportRecorder.GenerateClientReport();
+            if (clientReport != null)
+            {
+                var eventId = envelope.TryGetEventId();
+                var envelopeItems = envelope.Items.ToList();
+                envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
+                envelope = new Envelope(envelope.Header, envelopeItems);
+                _options.LogDebug("Attached client report to envelope {0}.", eventId);
+            }
+
             // Store the envelope in a file without actually sending it anywhere.
             // The envelope will get picked up by the background thread eventually.
             await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);

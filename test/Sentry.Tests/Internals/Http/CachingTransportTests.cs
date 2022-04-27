@@ -411,6 +411,54 @@ public class CachingTransportTests
     }
 
     [Fact(Timeout = 7000)]
+    public async Task RoundtripsClientReports()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
+
+        var timestamp = DateTimeOffset.UtcNow;
+        var clock = Substitute.For<ISystemClock>();
+        clock.GetUtcNow().Returns(timestamp);
+        var recorder = new ClientReportRecorder(options, clock);
+        options.ClientReportRecorder = recorder;
+
+        var innerTransport = new FakeTransportWithRecorder(recorder);
+        await using var transport = CachingTransport.Create(innerTransport, options);
+        await transport.StopWorkerAsync(); // we will flush manually below
+
+        // Act
+        recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope); // should internally generate a client report and write to disk
+        var interimClientReport = recorder.GenerateClientReport(); // should be null
+        await transport.FlushAsync(); // will read from disk and should send that client report
+
+        // Test that the interim report was null
+        Assert.Null(interimClientReport);
+
+        // Test that we actually sent the discarded event
+        var clientReport = new ClientReport(timestamp,
+            new Dictionary<DiscardReasonWithCategory, int>
+            {
+                {DiscardReason.BeforeSend.WithCategory(DataCategory.Error), 1}
+            }
+        );
+        var expected = await EnvelopeItem.FromClientReport(clientReport).Payload.SerializeToStringAsync(_logger);
+
+        var envelopeSent = innerTransport.GetSentEnvelopes().Single();
+        var envelopeItem = envelopeSent.Items.Single(x => x.TryGetType() == "client_report");
+        var actual = await envelopeItem.Payload.SerializeToStringAsync(_logger);
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact(Timeout = 7000)]
     public async Task DoesNotDeleteCacheIfHttpRequestException()
     {
         var exception = new HttpRequestException(null);
