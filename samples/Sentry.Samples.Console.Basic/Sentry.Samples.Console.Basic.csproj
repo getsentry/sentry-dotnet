@@ -4,12 +4,12 @@
     <OutputType>Exe</OutputType>
     <!--Version is detected by default as the application release and sent to sentry-->
     <Version>9.8.7</Version>
-    <TargetFrameworks>net5.0;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net48</TargetFrameworks>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
   </ItemGroup>
- 
+
 </Project>
