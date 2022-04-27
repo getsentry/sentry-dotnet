@@ -10,4 +10,8 @@
     <ProjectReference Include="../../src/Sentry.Log4Net/Sentry.Log4Net.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.14" />
+  </ItemGroup>
+
 </Project>
