@@ -772,4 +772,29 @@ public class SentryClientTests
         var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
         _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
     }
+
+    [Fact]
+    public async Task SentryClient_WithCachingTransport_RecordsDiscardedEvents()
+    {
+        var recorder = Substitute.For<IClientReportRecorder>();
+        var innerTransport = Substitute.For<ITransport, IHasClientReportRecorder>();
+        innerTransport.As<IHasClientReportRecorder>().ClientReportRecorder.Returns(recorder);
+
+        using var cacheDirectory = new TempDirectory();
+        _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
+        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+
+        var cachingTransport = CachingTransport.Create(innerTransport, _fixture.SentryOptions);
+        _fixture.SentryOptions.Transport = cachingTransport;
+        await cachingTransport.StopWorkerAsync();
+
+        // This will drop the event and record a discard
+        _fixture.SentryOptions.BeforeSend = _ => null;
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+        await cachingTransport.FlushAsync();
+
+        recorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+    }
 }
