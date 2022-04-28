@@ -21,28 +21,28 @@ jobs:
 
     steps:
         - name: Checkout
-          uses: actions/checkout@v3.0.2
+          uses: actions/checkout@v3
           with:
             submodules: recursive
             fetch-depth: 2 # default is 1 and codecov needs > 1
 
         - name: Setup .NET SDK
           if: matrix.os == 'windows-latest'
-          uses: actions/setup-dotnet@v1
+          uses: actions/setup-dotnet@v2
           with:
             dotnet-version: |
               2.1.818
               3.1.x
         - name: Setup .NET SDK
           if: matrix.os == 'macos-latest'
-          uses: actions/setup-dotnet@v1
+          uses: actions/setup-dotnet@v2
           with:
             dotnet-version: |
               2.1.818
               6.0.x
         - name: Setup .NET SDK
           if: matrix.os == 'ubuntu-latest'
-          uses: actions/setup-dotnet@v1
+          uses: actions/setup-dotnet@v2
           with:
           # Installing 2.1.818 on ubuntu has the side-effect of uninstalling the previous Frameworks.
             dotnet-version: |
@@ -75,7 +75,7 @@ jobs:
 
         - name: Upload Verify Results
           if: failure()
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v3
           with:
             name: verify-test-results
             path: |
@@ -84,7 +84,7 @@ jobs:
         - name: Archive Artifacts
           # only archive on windows since we only pack on windows. See Pack step.
           if: matrix.os == 'windows-latest'
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v3
           with:
             name: ${{ github.sha }}
             if-no-files-found: error
