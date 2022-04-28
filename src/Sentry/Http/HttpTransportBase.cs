@@ -427,14 +427,6 @@ namespace Sentry.Http
 
         private void IncrementDiscardsForHttpFailure(HttpStatusCode responseStatusCode, Envelope envelope)
         {
-            // First, restore any counts that were trying to be sent, so they are not lost.
-            var clientReportItems = envelope.Items.Where(x => x.TryGetType() == "client_report");
-            foreach (var item in clientReportItems)
-            {
-                var clientReport = (ClientReport)((JsonSerializable)item.Payload).Source;
-                _options.ClientReportRecorder.Load(clientReport);
-            }
-
             if ((int)responseStatusCode is 429 or < 400)
             {
                 //  Status == 429 or < 400 should not be counted by the client SDK
@@ -443,6 +435,14 @@ namespace Sentry.Http
             }
 
             _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.NetworkError, envelope);
+
+            // Also restore any counts that were trying to be sent, so they are not lost.
+            var clientReportItems = envelope.Items.Where(x => x.TryGetType() == "client_report");
+            foreach (var item in clientReportItems)
+            {
+                var clientReport = (ClientReport)((JsonSerializable)item.Payload).Source;
+                _options.ClientReportRecorder.Load(clientReport);
+            }
         }
 
         private void LogFailure(string responseString, HttpStatusCode responseStatusCode, SentryId? eventId)

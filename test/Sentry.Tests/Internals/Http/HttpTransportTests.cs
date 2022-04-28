@@ -459,6 +459,41 @@ public class HttpTransportTests
     }
 
     [Fact]
+    public async Task SendEnvelopeAsync_RateLimited_DoesNotRestoreDiscardedEventCounts()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => new HttpResponseMessage((HttpStatusCode)429));
+
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+
+        // some arbitrary discarded events ahead of time
+        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        var totalCounts = recorder.DiscardedEvents.Values.Sum();
+        Assert.Equal(0, totalCounts);
+    }
+
+    [Fact]
     public async Task SendEnvelopeAsync_AttachmentFail_DropsItem()
     {
         // Arrange
