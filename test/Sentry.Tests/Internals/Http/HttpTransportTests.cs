@@ -464,7 +464,7 @@ public class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => new HttpResponseMessage((HttpStatusCode)429));
+                () => new HttpResponseMessage((HttpStatusCode)429);
 
         var options = new SentryOptions
         {
