@@ -281,7 +281,7 @@ namespace Sentry.Internal.Http
         {
             if (_failStorage)
             {
-                throw new Exception("Simulated failure writing to storage (for testing).");
+                throw new("Simulated failure writing to storage (for testing).");
             }
 
             // Envelope file name can be either:
@@ -346,6 +346,8 @@ namespace Sentry.Internal.Http
                 {
                     _options.ClientReportRecorder.Load(clientReport);
                 }
+
+                throw;
             }
         }
 

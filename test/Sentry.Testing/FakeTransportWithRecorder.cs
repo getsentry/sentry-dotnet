@@ -29,6 +29,8 @@ internal class FakeTransportWithRecorder : FakeTransport
             {
                 _clientReportRecorder.Load(clientReport);
             }
+
+            throw;
         }
     }
 }

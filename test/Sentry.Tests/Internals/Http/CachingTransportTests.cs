@@ -486,8 +486,11 @@ public class CachingTransportTests
         recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
 
         // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
-        await transport.SendEnvelopeAsync(envelope); // will fail, since we set failStorage to true
+        await Assert.ThrowsAnyAsync<Exception>(async () =>
+        {
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+            await transport.SendEnvelopeAsync(envelope); // will fail, since we set failStorage to true
+        });
 
         // Assert
         recorder.DiscardedEvents.Should().BeEquivalentTo(new Dictionary<DiscardReasonWithCategory, int>
