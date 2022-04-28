@@ -18,6 +18,17 @@ internal class FakeTransportWithRecorder : FakeTransport
             envelope = envelope.WithItem(EnvelopeItem.FromClientReport(clientReport));
         }
 
-        await base.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await base.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Restore client reports on any failure
+            if (clientReport != null)
+            {
+                _clientReportRecorder.Load(clientReport);
+            }
+        }
     }
 }

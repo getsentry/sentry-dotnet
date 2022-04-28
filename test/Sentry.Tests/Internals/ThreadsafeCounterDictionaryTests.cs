@@ -62,6 +62,51 @@ public class ThreadsafeCounterDictionaryTests
     }
 
     [Fact]
+    public void CanAddManyCountersSimultaneously()
+    {
+        const int numCounters = 10;
+        const int numThreadsPerCounter = 20;
+        const int numIterationsPerThread = 10000;
+        const int multiplier = 3;
+
+        var counters = new ThreadsafeCounterDictionary<string>();
+
+        Parallel.For(0, numCounters * numThreadsPerCounter, x =>
+        {
+            var i = x % numCounters;
+            var counterName = $"counter_{i}";
+
+            for (var j = 0; j < numIterationsPerThread; j++)
+            {
+                counters.Add(counterName, multiplier);
+            }
+        });
+
+        const int expectedCount = numThreadsPerCounter * numIterationsPerThread * multiplier;
+        for (var i = 0; i < numCounters; i++)
+        {
+            Assert.Equal(expectedCount, counters[$"counter_{i}"]);
+        }
+    }
+
+    [Fact]
+    public void CanAddValue()
+    {
+        var counters = new ThreadsafeCounterDictionary<string>();
+        counters.Add("foo", 2);
+        Assert.Equal(2, counters["foo"]);
+    }
+
+    [Fact]
+    public void CanAddToExistingCount()
+    {
+        var counters = new ThreadsafeCounterDictionary<string>();
+        counters.Increment("foo");
+        counters.Add("foo", 2);
+        Assert.Equal(3, counters["foo"]);
+    }
+
+    [Fact]
     public void CanReadOneCounterWithoutResetting()
     {
         var counters = new ThreadsafeCounterDictionary<string>();

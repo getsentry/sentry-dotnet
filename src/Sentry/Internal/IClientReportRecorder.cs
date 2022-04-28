@@ -18,5 +18,14 @@ namespace Sentry.Internal
         /// Returns <c>null</c> if there were no discarded events recorded since the previous call to this method.
         /// </returns>
         ClientReport? GenerateClientReport();
+
+        /// <summary>
+        /// Loads the recorder with the events from the provided client report.
+        /// </summary>
+        /// <remarks>
+        /// Useful when recovering from failures while sending client reports.
+        /// </remarks>
+        /// <param name="clientReport">The client report to load into the recorder.</param>
+        void Load(ClientReport clientReport);
     }
 }

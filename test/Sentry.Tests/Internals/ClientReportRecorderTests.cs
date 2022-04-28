@@ -103,4 +103,21 @@ public class ClientReportRecorderTests
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public void Load_PopulatesCounters()
+    {
+        var discardedEvents = new Dictionary<DiscardReasonWithCategory, int>
+        {
+            {DiscardReason.BeforeSend.WithCategory(DataCategory.Attachment), 1},
+            {DiscardReason.EventProcessor.WithCategory(DataCategory.Error), 2},
+            {DiscardReason.QueueOverflow.WithCategory(DataCategory.Security), 3}
+        };
+        var clientReport = new ClientReport(_fixture.Clock.GetUtcNow(), discardedEvents);
+
+        var sut = new ClientReportRecorder(_fixture.Options, _fixture.Clock);
+        sut.Load(clientReport);
+
+        sut.DiscardedEvents.Should().BeEquivalentTo(discardedEvents);
+    }
 }

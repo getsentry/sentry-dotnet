@@ -53,5 +53,13 @@ namespace Sentry.Internal
             var timestamp = _clock.GetUtcNow();
             return new ClientReport(timestamp, discardedEvents);
         }
+
+        public void Load(ClientReport clientReport)
+        {
+            foreach (var kvp in clientReport.DiscardedEvents)
+            {
+                _discardedEvents.Add(kvp.Key, kvp.Value);
+            }
+        }
     }
 }

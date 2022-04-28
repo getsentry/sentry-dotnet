@@ -415,6 +415,50 @@ public class HttpTransportTests
     }
 
     [Fact]
+    public async Task SendEnvelopeAsync_Fails_RestoresDiscardedEventCounts()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => new HttpResponseMessage(HttpStatusCode.InternalServerError)));
+
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+
+        // some arbitrary discarded events ahead of time
+        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        recorder.DiscardedEvents.Should().BeEquivalentTo(new Dictionary<DiscardReasonWithCategory, int>
+        {
+            // These are the original items recorded.  They should still be there.
+            {DiscardReason.BeforeSend.WithCategory(DataCategory.Attachment), 1},
+            {DiscardReason.EventProcessor.WithCategory(DataCategory.Error), 2},
+            {DiscardReason.QueueOverflow.WithCategory(DataCategory.Security), 3},
+
+            // We also expect two new items recorded, due to the forced network failure.
+            {DiscardReason.NetworkError.WithCategory(DataCategory.Error), 1},  // from the event
+            {DiscardReason.NetworkError.WithCategory(DataCategory.Default), 1} // from the client report
+        });
+    }
+
+    [Fact]
     public async Task SendEnvelopeAsync_AttachmentFail_DropsItem()
     {
         // Arrange

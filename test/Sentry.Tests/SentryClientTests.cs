@@ -184,7 +184,6 @@ public class SentryClientTests
         var transport = Substitute.For<ITransport>();
         _fixture.SentryOptions.Transport = transport;
 
-
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
 

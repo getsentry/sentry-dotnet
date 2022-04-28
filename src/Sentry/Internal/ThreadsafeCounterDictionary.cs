@@ -19,12 +19,19 @@ namespace Sentry.Internal
             private int _value;
             public int Value => _value;
 
+            public void Add(int quantity) => Interlocked.Add(ref _value, quantity);
             public void Increment() => Interlocked.Increment(ref _value);
-
             public int ReadAndReset() => Interlocked.Exchange(ref _value, 0);
         }
 
         private readonly ConcurrentDictionary<TKey, CounterItem> _items = new();
+
+        /// <summary>
+        /// Atomically adds to a counter based on the key provided, creating the counter if necessary.
+        /// </summary>
+        /// <param name="key">The key of the counter to increment.</param>
+        /// <param name="quantity">The amount to add to the counter.</param>
+        public void Add(TKey key, int quantity) => _items.GetOrAdd(key, new CounterItem()).Add(quantity);
 
         /// <summary>
         /// Atomically increments a counter based on the key provided, creating the counter if necessary.

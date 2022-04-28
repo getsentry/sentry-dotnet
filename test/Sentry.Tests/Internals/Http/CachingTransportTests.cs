@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using NSubstitute.ExceptionExtensions;
@@ -456,6 +457,46 @@ public class CachingTransportTests
         var envelopeItem = envelopeSent.Items.Single(x => x.TryGetType() == "client_report");
         var actual = await envelopeItem.Payload.SerializeToStringAsync(_logger);
         Assert.Equal(expected, actual);
+    }
+
+    [Fact(Timeout = 7000)]
+    public async Task RestoresDiscardedEventCounts()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path
+        };
+
+        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        var innerTransport = new FakeTransportWithRecorder(recorder);
+        await using var transport = CachingTransport.Create(innerTransport, options, failStorage: true);
+        await transport.StopWorkerAsync(); // we will flush manually below
+
+        // some arbitrary discarded events ahead of time
+        recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+
+        // Act
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope); // will fail, since we set failStorage to true
+
+        // Assert
+        recorder.DiscardedEvents.Should().BeEquivalentTo(new Dictionary<DiscardReasonWithCategory, int>
+        {
+            // These are the original items recorded.  They should still be there.
+            {DiscardReason.BeforeSend.WithCategory(DataCategory.Attachment), 1},
+            {DiscardReason.EventProcessor.WithCategory(DataCategory.Error), 2},
+            {DiscardReason.QueueOverflow.WithCategory(DataCategory.Security), 3}
+        });
     }
 
     [Fact(Timeout = 7000)]

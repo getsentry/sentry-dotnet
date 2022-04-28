@@ -18,6 +18,7 @@ namespace Sentry.Internal.Http
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
+        private readonly bool _failStorage;
         private readonly string _isolatedCacheDirectoryPath;
         private readonly int _keepCount;
 
@@ -42,17 +43,18 @@ namespace Sentry.Internal.Http
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
-        public static CachingTransport Create(ITransport innerTransport, SentryOptions options)
+        public static CachingTransport Create(ITransport innerTransport, SentryOptions options, bool failStorage = false)
         {
-            var transport = new CachingTransport(innerTransport, options);
+            var transport = new CachingTransport(innerTransport, options, failStorage);
             transport.Initialize();
             return transport;
         }
 
-        private CachingTransport(ITransport innerTransport, SentryOptions options)
+        private CachingTransport(ITransport innerTransport, SentryOptions options, bool failStorage)
         {
             _innerTransport = innerTransport;
             _options = options;
+            _failStorage = failStorage; // For testing
 
             _keepCount = _options.MaxCacheItems >= 1
                 ? _options.MaxCacheItems - 1
@@ -277,6 +279,11 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
+            if (_failStorage)
+            {
+                throw new Exception("Simulated failure writing to storage (for testing).");
+            }
+
             // Envelope file name can be either:
             // 1604679692_2035_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
             // 1604679692_2035__17754019_2035660868.envelope
@@ -326,9 +333,20 @@ namespace Sentry.Internal.Http
                 _options.LogDebug("Attached client report to envelope {0}.", envelope.TryGetEventId());
             }
 
-            // Store the envelope in a file without actually sending it anywhere.
-            // The envelope will get picked up by the background thread eventually.
-            await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                // Store the envelope in a file without actually sending it anywhere.
+                // The envelope will get picked up by the background thread eventually.
+                await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // On any failure writing to the cache, recover the client report.
+                if (clientReport != null)
+                {
+                    _options.ClientReportRecorder.Load(clientReport);
+                }
+            }
         }
 
         public async Task StopWorkerAsync()
