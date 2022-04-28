@@ -17,8 +17,8 @@ jobs:
           with:
             submodules: recursive
 
-        - name: Restore
-          run: dotnet restore
+        - name: Build
+          run: dotnet build
 
         - name: List vulnerable packages
           if: matrix.os == 'windows-latest'
