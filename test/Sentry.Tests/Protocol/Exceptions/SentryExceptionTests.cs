@@ -34,7 +34,7 @@ public class SentryExceptionTests
             "\"value\":\"Value\"," +
             "\"module\":\"Module\"," +
             "\"thread_id\":1," +
-            "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
+            "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\",\"platform\":\"csharp\"}]}," +
             "\"mechanism\":{\"description\":\"Description\"}}",
             actual);
     }

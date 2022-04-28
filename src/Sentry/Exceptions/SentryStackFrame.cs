@@ -104,7 +104,8 @@ namespace Sentry
         /// <summary>
         /// This can override the platform for a single frame. Otherwise the platform of the event is assumed.
         /// </summary>
-        public string? Platform { get; set; }
+        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
+        public string? Platform { get; set; } = Constants.Platform;
 
         /// <summary>
         /// Optionally an address of the debug image to reference.
@@ -160,7 +161,7 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("context_line", ContextLine);
             writer.WriteBooleanIfNotNull("in_app", InApp);
             writer.WriteStringIfNotWhiteSpace("package", Package);
-            writer.WriteStringIfNotWhiteSpace("platform", Platform);
+            writer.WriteString("platform", Constants.Platform);
             writer.WriteNumberIfNotNull("image_addr", ImageAddress.NullIfDefault());
             writer.WriteNumberIfNotNull("symbol_addr", SymbolAddress);
             writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
@@ -211,7 +212,6 @@ namespace Sentry
             var contextLine = json.GetPropertyOrNull("context_line")?.GetString();
             var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
             var package = json.GetPropertyOrNull("package")?.GetString();
-            var platform = json.GetPropertyOrNull("platform")?.GetString();
             var imageAddress = json.GetPropertyOrNull("image_addr")?.GetInt64() ?? 0;
             var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetInt64();
             var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetString();
@@ -233,7 +233,6 @@ namespace Sentry
                 ContextLine = contextLine,
                 InApp = inApp,
                 Package = package,
-                Platform = platform,
                 ImageAddress = imageAddress,
                 SymbolAddress = symbolAddress,
                 InstructionAddress = instructionAddress,

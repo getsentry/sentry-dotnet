@@ -63,7 +63,8 @@ namespace Sentry
         public string? Logger { get; set; }
 
         /// <inheritdoc />
-        public string? Platform { get; set; }
+        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
+        public string? Platform { get; set; } = Constants.Platform;
 
         /// <summary>
         /// Identifies the host SDK from which the event was recorded.
@@ -202,7 +203,6 @@ namespace Sentry
             Exception = exception;
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             EventId = eventId != default ? eventId : SentryId.Create();
-            Platform = Constants.Platform;
         }
 
         /// <inheritdoc />
@@ -231,7 +231,7 @@ namespace Sentry
             writer.WriteString("timestamp", Timestamp);
             writer.WriteSerializableIfNotNull("logentry", Message, logger);
             writer.WriteStringIfNotWhiteSpace("logger", Logger);
-            writer.WriteStringIfNotWhiteSpace("platform", Platform);
+            writer.WriteString("platform", Constants.Platform);
             writer.WriteStringIfNotWhiteSpace("server_name", ServerName);
             writer.WriteStringIfNotWhiteSpace("release", Release);
             writer.WriteSerializableIfNotNull("exception", SentryExceptionValues, logger);
@@ -271,7 +271,6 @@ namespace Sentry
             var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var message = json.GetPropertyOrNull("logentry")?.Pipe(SentryMessage.FromJson);
             var logger = json.GetPropertyOrNull("logger")?.GetString();
-            var platform = json.GetPropertyOrNull("platform")?.GetString();
             var serverName = json.GetPropertyOrNull("server_name")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
             var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).Pipe(v => new SentryValues<SentryException>(v));
@@ -296,7 +295,6 @@ namespace Sentry
                 _modules = modules?.WhereNotNullValue().ToDictionary(),
                 Message = message,
                 Logger = logger,
-                Platform = platform,
                 ServerName = serverName,
                 Release = release,
                 SentryExceptionValues = exceptionValues,

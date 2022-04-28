@@ -33,7 +33,6 @@ public class MonoSentryStackTraceFactoryTests
             Assert.Null(actual!.Frames[i].LineNumber);
             Assert.Null(actual!.Frames[i].InstructionOffset);
             Assert.Null(actual!.Frames[i].Package);
-            Assert.Null(actual!.Frames[i].Platform);
             Assert.Null(actual!.Frames[i].InternalVars);
             Assert.Null(actual!.Frames[i].AbsolutePath);
             Assert.Null(actual!.Frames[i].ContextLine);
