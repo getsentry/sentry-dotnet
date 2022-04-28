@@ -321,21 +321,32 @@ public class HubTests
             }
         }
 
-        var cachePath = offlineCaching ? Path.GetTempPath() : null;
+        using var tempDirectory = new TempDirectory();
+        string cachePath;
+        if (offlineCaching)
+        {
+            cachePath = tempDirectory.Path;
+        }
+        else
+        {
+            cachePath = null;
+        }
 
         var logger = Substitute.For<IDiagnosticLogger>();
-        var expectedLevel = SentryLevel.Error;
-        logger.IsEnabled(expectedLevel).Returns(true);
+        logger.IsEnabled(SentryLevel.Error).Returns(true);
 
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
-            RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
+            // To go through a round trip serialization of cached envelope
+            CacheDirectoryPath = cachePath,
+            // So we don't need to deal with gzip'ed payload
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
-            AutoSessionTracking = false, // Not to send some session envelope
+            // Not to send some session envelope
+            AutoSessionTracking = false,
             Debug = true,
-            DiagnosticLevel = expectedLevel,
+            DiagnosticLevel = SentryLevel.Error,
             DiagnosticLogger = logger
         });
 
@@ -354,7 +365,7 @@ public class HubTests
         Assert.True(requests.All(p => p.Contains(expectedContextKey)),
             "Un-serializable context key should exist");
 
-        logger.Received().Log(expectedLevel, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+        logger.Received().Log(SentryLevel.Error, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
             Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
 #else
