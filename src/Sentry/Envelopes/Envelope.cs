@@ -256,7 +256,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates a new envelope starting from the current one and appends the item given.
+        /// Creates a new <see cref="Envelope"/> starting from the current one and appends the <paramref name="item"/> given.
         /// </summary>
         /// <param name="item">The item to append.</param>
         /// <returns>A new envelope with the same headers and items, including the new one.</returns>

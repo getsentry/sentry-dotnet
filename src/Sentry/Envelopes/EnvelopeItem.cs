@@ -277,7 +277,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from a client report.
+        /// Creates an envelope item from <paramref name="clientReport"/>.
         /// </summary>
         internal static EnvelopeItem FromClientReport(ClientReport clientReport)
         {
