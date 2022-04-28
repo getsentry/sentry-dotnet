@@ -21,5 +21,4 @@ jobs:
           run: dotnet build
 
         - name: List vulnerable packages
-          if: matrix.os == 'windows-latest'
           run: dotnet list package --vulnerable --include-transitive
