@@ -51,11 +51,7 @@ jobs:
               5.0.x
               6.0.x
 
-        - name: Restore
-          run: dotnet restore
-
         - name: Build
-          # cant use --no-restore since dotnet restore does not support $(Configuration) based TargetFrameworks
           run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
@@ -94,7 +90,3 @@ jobs:
             if-no-files-found: error
             path: |
               ${{ github.workspace }}/src/**/Release/*.nupkg
-
-        - name: List vulnerable packages
-          if: matrix.os == 'windows-latest'
-          run: dotnet list package --vulnerable --include-transitive
