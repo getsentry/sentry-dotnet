@@ -4,6 +4,8 @@ on:
   schedule:
     # once a day
     - cron:  '0 0 * * *'
+    # At every 10th minute for testing
+    - 0/10 * * * *
 jobs:
   List-vulnerable-packages:
     runs-on: windows-latest
