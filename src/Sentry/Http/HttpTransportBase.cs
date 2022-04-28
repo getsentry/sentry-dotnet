@@ -68,71 +68,7 @@ namespace Sentry.Http
             var envelopeItems = new List<EnvelopeItem>();
             foreach (var envelopeItem in envelope.Items)
             {
-                // Check if there is at least one matching category for this item that is rate-limited
-                var isRateLimited = CategoryLimitResets
-                    .Any(kvp => kvp.Value > now && kvp.Key.Matches(envelopeItem));
-
-                if (isRateLimited)
-                {
-                    _options.ClientReportRecorder
-                        .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
-
-                    _options.LogDebug(
-                        "Envelope item of type {0} was discarded because it's rate-limited.",
-                        envelopeItem.TryGetType());
-
-                    // Check if session update with init=true
-                    if (envelopeItem.Payload is JsonSerializable
-                        {
-                            Source: SessionUpdate {IsInitial: true} discardedSessionUpdate
-                        })
-                    {
-                        _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
-
-                        _options.LogDebug(
-                            "Discarded envelope item containing initial session update (SID: {0}).",
-                            discardedSessionUpdate.Id);
-                    }
-
-                    continue;
-                }
-
-                // If attachment, needs to respect attachment size limit
-                if (string.Equals(envelopeItem.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
-                    envelopeItem.TryGetLength() > _options.MaxAttachmentSize)
-                {
-                    // note: attachment drops are not currently counted in discarded events
-
-                    _options.LogWarning(
-                        "Attachment '{0}' dropped because it's too large ({1} bytes).",
-                        envelopeItem.TryGetFileName(),
-                        envelopeItem.TryGetLength());
-
-                    continue;
-                }
-
-                // If it's a session update (not discarded) with init=false, check if it continues
-                // a session with previously dropped init and, if so, promote this update to init=true.
-                if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
-                    string.Equals(sessionUpdate.Id.ToString(),
-                        Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
-                        StringComparison.Ordinal))
-                {
-                    var modifiedEnvelopeItem = new EnvelopeItem(
-                        envelopeItem.Header,
-                        new JsonSerializable(new SessionUpdate(sessionUpdate, true)));
-
-                    envelopeItems.Add(modifiedEnvelopeItem);
-
-                    _options.LogDebug(
-                        "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
-                        sessionUpdate.Id);
-
-                    continue;
-                }
-
-                // Finally, add this item to the result
-                envelopeItems.Add(envelopeItem);
+                ProcessEnvelopeItem(now, envelopeItem, envelopeItems);
             }
 
             var eventId = envelope.TryGetEventId();
@@ -160,6 +96,75 @@ namespace Sentry.Http
             }
 
             return new Envelope(envelope.Header, envelopeItems);
+        }
+
+        private void ProcessEnvelopeItem(DateTimeOffset now, EnvelopeItem envelopeItem, List<EnvelopeItem> envelopeItems)
+        {
+            // Check if there is at least one matching category for this item that is rate-limited
+            var isRateLimited = CategoryLimitResets
+                .Any(kvp => kvp.Value > now && kvp.Key.Matches(envelopeItem));
+
+            if (isRateLimited)
+            {
+                _options.ClientReportRecorder
+                    .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
+
+                _options.LogDebug(
+                    "Envelope item of type {0} was discarded because it's rate-limited.",
+                    envelopeItem.TryGetType());
+
+                // Check if session update with init=true
+                if (envelopeItem.Payload is JsonSerializable
+                    {
+                        Source: SessionUpdate {IsInitial: true} discardedSessionUpdate
+                    })
+                {
+                    _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
+
+                    _options.LogDebug(
+                        "Discarded envelope item containing initial session update (SID: {0}).",
+                        discardedSessionUpdate.Id);
+                }
+
+                return;
+            }
+
+            // If attachment, needs to respect attachment size limit
+            if (string.Equals(envelopeItem.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
+                envelopeItem.TryGetLength() > _options.MaxAttachmentSize)
+            {
+                // note: attachment drops are not currently counted in discarded events
+
+                _options.LogWarning(
+                    "Attachment '{0}' dropped because it's too large ({1} bytes).",
+                    envelopeItem.TryGetFileName(),
+                    envelopeItem.TryGetLength());
+
+                return;
+            }
+
+            // If it's a session update (not discarded) with init=false, check if it continues
+            // a session with previously dropped init and, if so, promote this update to init=true.
+            if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
+                string.Equals(sessionUpdate.Id.ToString(),
+                    Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
+                    StringComparison.Ordinal))
+            {
+                var modifiedEnvelopeItem = new EnvelopeItem(
+                    envelopeItem.Header,
+                    new JsonSerializable(new SessionUpdate(sessionUpdate, true)));
+
+                envelopeItems.Add(modifiedEnvelopeItem);
+
+                _options.LogDebug(
+                    "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
+                    sessionUpdate.Id);
+
+                return;
+            }
+
+            // Finally, add this item to the result
+            envelopeItems.Add(envelopeItem);
         }
 
         /// <summary>
