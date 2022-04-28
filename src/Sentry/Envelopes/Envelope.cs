@@ -262,7 +262,7 @@ namespace Sentry.Protocol.Envelopes
         /// <returns>A new envelope with the same headers and items, including the new one.</returns>
         internal Envelope WithItem(EnvelopeItem item)
         {
-            var items = this.Items.ToList();
+            var items = Items.ToList();
             items.Add(item);
             return new Envelope(Header, items);
         }
