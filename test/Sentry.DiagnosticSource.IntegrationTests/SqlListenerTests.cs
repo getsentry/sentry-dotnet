@@ -1,17 +1,14 @@
 using System.Runtime.InteropServices;
-using LocalDb;
 using Sentry.Internals.DiagnosticSource;
 
 [UsesVerify]
-public class SqlListenerTests
+public class SqlListenerTests : IClassFixture<LocalDbFixture>
 {
-    private static SqlInstance sqlInstance;
+    private readonly LocalDbFixture _fixture;
 
-    static SqlListenerTests()
+    public SqlListenerTests(LocalDbFixture fixture)
     {
-        sqlInstance = new SqlInstance(
-            name: "SqlListenerTests" + Namer.RuntimeAndVersion,
-            buildTemplate: TestDbBuilder.CreateTable);
+        _fixture = fixture;
     }
 
 #if !NETFRAMEWORK
@@ -30,7 +27,12 @@ public class SqlListenerTests
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await sqlInstance.Build();
+        var database = await _fixture.SqlInstance.Build();
+#if NET5_0 //TODO: Change to NET5_0_OR_GREATER after updating for https://github.com/SimonCropp/LocalDb/pull/422
+        await using (database)
+#else
+        using (database)
+#endif
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
@@ -66,7 +68,12 @@ public class SqlListenerTests
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await sqlInstance.Build();
+        var database = await _fixture.SqlInstance.Build();
+#if NET5_0 //TODO: Change to NET5_0_OR_GREATER after updating for https://github.com/SimonCropp/LocalDb/pull/422
+        await using (database)
+#else
+        using (database)
+#endif
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
