@@ -27,7 +27,12 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await _fixture.SqlInstance.Build();
+        var database = await _fixture.SqlInstance.Build();
+#if NET5_0 //TODO: Change to NET5_0_OR_GREATER after updating for https://github.com/SimonCropp/LocalDb/pull/422
+        await using (database)
+#else
+        using (database)
+#endif
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
@@ -63,7 +68,12 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await _fixture.SqlInstance.Build();
+        var database = await _fixture.SqlInstance.Build();
+#if NET5_0 //TODO: Change to NET5_0_OR_GREATER after updating for https://github.com/SimonCropp/LocalDb/pull/422
+        await using (database)
+#else
+        using (database)
+#endif
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
