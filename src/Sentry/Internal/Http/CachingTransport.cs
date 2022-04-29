@@ -41,10 +41,10 @@ namespace Sentry.Internal.Http
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
-        public static CachingTransport Create(ITransport innerTransport, SentryOptions options)
+        public static CachingTransport Create(ITransport innerTransport, SentryOptions options, bool startWorker = true)
         {
             var transport = new CachingTransport(innerTransport, options);
-            transport.Initialize();
+            transport.Initialize(startWorker);
             return transport;
         }
 
@@ -64,12 +64,12 @@ namespace Sentry.Internal.Http
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
         }
 
-        private void Initialize()
+        private void Initialize(bool startWorker)
         {
             Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             Directory.CreateDirectory(_processingDirectoryPath);
 
-            _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+            _worker = startWorker ? Task.Run(CachedTransportBackgroundTaskAsync) : Task.CompletedTask;
         }
 
         private async Task CachedTransportBackgroundTaskAsync()

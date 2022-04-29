@@ -41,8 +41,7 @@ public class CachingTransportTests
              }
          })));
 
-        await using var transport = CachingTransport.Create(innerTransport, options);
-        await transport.StopWorkerAsync();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         var tempFile = Path.GetTempFileName();
 
@@ -269,10 +268,7 @@ public class CachingTransportTests
         // Send some envelopes with a failing transport to make sure they all stay in cache
         {
             using var initialInnerTransport = new FakeTransport();
-            await using var initialTransport = CachingTransport.Create(initialInnerTransport, options);
-
-            // Shutdown the worker immediately so nothing gets processed
-            await initialTransport.StopWorkerAsync();
+            await using var initialTransport = CachingTransport.Create(initialInnerTransport, options, startWorker: false);
 
             for (var i = 0; i < 3; i++)
             {
@@ -282,8 +278,7 @@ public class CachingTransportTests
         }
 
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options);
-        await transport.StopWorkerAsync();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
         await transport.FlushAsync();
@@ -311,10 +306,7 @@ public class CachingTransportTests
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException(new Exception("The Message")));
 
-        await using var transport = CachingTransport.Create(innerTransport, options);
-
-        // Can't really reliably test this with a worker
-        await transport.StopWorkerAsync();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -354,10 +346,7 @@ public class CachingTransportTests
                     ? Task.FromException(new InvalidOperationException())
                     : Task.CompletedTask);
 
-        await using var transport = CachingTransport.Create(innerTransport, options);
-
-        // Can't really reliably test this with a worker
-        await transport.StopWorkerAsync();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
         for (var i = 0; i < 3; i++)
@@ -418,10 +407,7 @@ public class CachingTransportTests
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException(exception));
 
-        await using var transport = CachingTransport.Create(innerTransport, options);
-
-        // Can't really reliably test this with a worker
-        await transport.StopWorkerAsync();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
