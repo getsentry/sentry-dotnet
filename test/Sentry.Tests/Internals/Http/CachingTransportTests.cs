@@ -266,21 +266,26 @@ public class CachingTransportTests
         };
 
         // Send some envelopes with a failing transport to make sure they all stay in cache
-        {
-            using var initialInnerTransport = new FakeTransport();
-            await using var initialTransport = CachingTransport.Create(initialInnerTransport, options, startWorker: false);
+        var initialInnerTransport = new FakeFailingTransport();
+        await using var initialTransport = CachingTransport.Create(initialInnerTransport, options, startWorker: false);
 
-            for (var i = 0; i < 3; i++)
-            {
-                using var envelope = Envelope.FromEvent(new SentryEvent());
-                await initialTransport.SendEnvelopeAsync(envelope);
-            }
+        for (var i = 0; i < 3; i++)
+        {
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+            await initialTransport.SendEnvelopeAsync(envelope);
         }
 
-        using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        // Move them all to processing and leave them there (due to FakeFailingTransport)
+        await initialTransport.FlushAsync();
 
         // Act
+
+        // Starting the worker should move files from processing.
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: true);
+
+        // Stopping the worker and then flushing it will ensure all files are processed.
+        await transport.StopWorkerAsync();
         await transport.FlushAsync();
 
         // Assert

@@ -206,6 +206,13 @@ namespace Sentry.Internal.Http
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
+
+                    if (ex.Source == "FakeFailingTransport")
+                    {
+                        // Deliberately sent from unit tests to avoid deleting the file from processing
+                        return;
+                    }
+
                     LogFailureWithDiscard(file, ex);
                 }
             }
