@@ -1,17 +1,14 @@
 using System.Runtime.InteropServices;
-using LocalDb;
 using Sentry.Internals.DiagnosticSource;
 
 [UsesVerify]
-public class SqlListenerTests
+public class SqlListenerTests : IClassFixture<LocalDbFixture>
 {
-    private static SqlInstance sqlInstance;
+    private readonly LocalDbFixture _fixture;
 
-    static SqlListenerTests()
+    public SqlListenerTests(LocalDbFixture fixture)
     {
-        sqlInstance = new SqlInstance(
-            name: "SqlListenerTests" + Namer.RuntimeAndVersion,
-            buildTemplate: TestDbBuilder.CreateTable);
+        _fixture = fixture;
     }
 
 #if !NETFRAMEWORK
@@ -30,7 +27,7 @@ public class SqlListenerTests
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await sqlInstance.Build();
+        using var database = await _fixture.SqlInstance.Build();
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
@@ -66,7 +63,7 @@ public class SqlListenerTests
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        using var database = await sqlInstance.Build();
+        using var database = await _fixture.SqlInstance.Build();
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
