@@ -40,7 +40,9 @@ public class CachingTransportTests
                  exception = readStreamException;
              }
          })));
+
         await using var transport = CachingTransport.Create(innerTransport, options);
+        await transport.StopWorkerAsync();
 
         var tempFile = Path.GetTempFileName();
 
@@ -51,7 +53,7 @@ public class CachingTransportTests
 
             // Act
             await transport.SendEnvelopeAsync(envelope);
-            await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
+            await transport.FlushAsync();
 
             // Assert
             if (exception != null)
@@ -281,9 +283,10 @@ public class CachingTransportTests
 
         using var innerTransport = new FakeTransport();
         await using var transport = CachingTransport.Create(innerTransport, options);
+        await transport.StopWorkerAsync();
 
         // Act
-        await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
+        await transport.FlushAsync();
 
         // Assert
         innerTransport.GetSentEnvelopes().Should().HaveCount(3);
