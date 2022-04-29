@@ -57,7 +57,7 @@ jobs:
             restore-keys: ${{ runner.os }}-nuget
 
         - name: Restore Dependencies
-          run: dotnet restore SentryNoSamples.slnf -c Release
+          run: dotnet restore SentryNoSamples.slnf
 
         - name: Build
           run: dotnet build SentryNoSamples.slnf -c Release --no-restore /p:CopyLocalLockFileAssemblies=true
