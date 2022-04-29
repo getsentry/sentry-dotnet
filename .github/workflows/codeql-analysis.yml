@@ -27,13 +27,25 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Enable Dependency Caching
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        ## we don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
+        restore-keys: ${{ runner.os }}-nuget
+
+    - name: Restore Dependencies
+      run: dotnet restore
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
 
-    - run: dotnet build
+    - name: Build
+      run: dotnet build --no-restore
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

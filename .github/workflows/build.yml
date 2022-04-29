@@ -48,8 +48,19 @@ jobs:
           with:
             dotnet-version: 2.1.818
 
+        - name: Enable Dependency Caching
+          uses: actions/cache@v3
+          with:
+            path: ~/.nuget/packages
+            ## we don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
+            key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
+            restore-keys: ${{ runner.os }}-nuget
+
+        - name: Restore Dependencies
+          run: dotnet restore SentryNoSamples.slnf -c Release
+
         - name: Build
-          run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build SentryNoSamples.slnf -c Release --no-restore /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
           run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
