@@ -27,7 +27,7 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Enable Dependency Caching
+    - name: Dependency Caching
       uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
