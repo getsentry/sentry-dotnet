@@ -115,26 +115,29 @@ namespace Sentry.Internal.Http
 
         private void MoveUnprocessedFilesBackToCache()
         {
-            try
-            {
-                // Processing directory may already contain some files left from previous session
-                // if the worker has been terminated unexpectedly.
-                // Move everything from that directory back to cache directory.
-                if (Directory.Exists(_processingDirectoryPath))
-                {
-                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
-                    {
-                        var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                        _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                            filePath, destinationPath);
+            // Processing directory may already contain some files left from previous session
+            // if the cache was working when the process terminated unexpectedly.
+            // Move everything from that directory back to cache directory.
 
-                        File.Move(filePath, destinationPath);
-                    }
-                }
-            }
-            catch (Exception e)
+            if (!Directory.Exists(_processingDirectoryPath))
             {
-                _options.LogError("Failed to move unprocessed files back to cache.", e);
+                // nothing to do
+                return;
+            }
+
+            foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+            {
+                try
+                {
+                    var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                    _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
+                        filePath, destinationPath);
+                    File.Move(filePath, destinationPath);
+                }
+                catch (Exception e)
+                {
+                    _options.LogError("Failed to move unprocessed file back to cache: {0}", e, filePath);
+                }
             }
         }
 
