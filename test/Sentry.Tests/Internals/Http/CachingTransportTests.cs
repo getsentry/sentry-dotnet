@@ -185,8 +185,6 @@ public class CachingTransportTests
     [Fact]
     public async Task EnvelopeReachesInnerTransport()
     {
-        var timeout = TimeSpan.FromSeconds(7);
-
         // Arrange
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
@@ -198,22 +196,17 @@ public class CachingTransportTests
         };
 
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options);
-
-        var tcs = new TaskCompletionSource<bool>();
-        using var cts = new CancellationTokenSource(timeout);
-        innerTransport.EnvelopeSent += (_, _) => tcs.SetResult(true);
-        cts.Token.Register(() => tcs.TrySetCanceled());
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
-        await transport.SendEnvelopeAsync(envelope, cts.Token);
-        var completed = await tcs.Task;
+        await transport.SendEnvelopeAsync(envelope);
+        await transport.FlushAsync();
 
         // Assert
-        Assert.True(completed, "The task timed out!");
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+        sentEnvelope.Should().BeEquivalentTo(envelope,
+            o => o.Excluding(x => x.Items[0].Header));
     }
 
     [Fact(Timeout = 5000)]
