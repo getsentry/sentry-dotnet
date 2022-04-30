@@ -28,7 +28,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
         var database = await _fixture.SqlInstance.Build();
-#if NET5_0 //TODO: Change to NET5_0_OR_GREATER after updating for https://github.com/SimonCropp/LocalDb/pull/422
+#if NET5_0_OR_GREATER
         await using (database)
 #else
         using (database)
@@ -69,7 +69,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
         var database = await _fixture.SqlInstance.Build();
-#if NET5_0 //TODO: Change to NET5_0_OR_GREATER after updating for https://github.com/SimonCropp/LocalDb/pull/422
+#if NET5_0_OR_GREATER
         await using (database)
 #else
         using (database)
