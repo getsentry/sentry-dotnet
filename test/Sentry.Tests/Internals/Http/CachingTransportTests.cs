@@ -231,25 +231,17 @@ public class CachingTransportTests
         };
 
         var innerTransport = Substitute.For<ITransport>();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
-        var tcs = new TaskCompletionSource<object>();
-
-        // Block until we're done
-        innerTransport
-            .When(t => t.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>()))
-            .Do(_ => tcs.Task.Wait());
-
-        await using var transport = CachingTransport.Create(innerTransport, options);
-
-        // Act & assert
+        // Act
         for (var i = 0; i < options.MaxCacheItems + 2; i++)
         {
             using var envelope = Envelope.FromEvent(new SentryEvent());
             await transport.SendEnvelopeAsync(envelope);
-
-            transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxCacheItems);
         }
-        tcs.SetResult(null);
+
+        // Assert
+        transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxCacheItems);
     }
 
     [Fact(Timeout = 7000)]
