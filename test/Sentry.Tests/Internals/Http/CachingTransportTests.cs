@@ -88,21 +88,15 @@ public class CachingTransportTests
         cts.Token.Register(() => tcs.TrySetCanceled());
 
         await using var transport = CachingTransport.Create(innerTransport, options);
-        try
-        {
-            // Act
-            using var envelope = Envelope.FromEvent(new SentryEvent());
-            await transport.SendEnvelopeAsync(envelope, CancellationToken.None);
-            await tcs.Task; // wait for the inner transport to signal that it sent the envelope
 
-            // Assert
-            var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-            sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
-        }
-        finally
-        {
-            await transport.StopWorkerAsync();
-        }
+        // Act
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope, CancellationToken.None);
+        await tcs.Task; // wait for the inner transport to signal that it sent the envelope
+
+        // Assert
+        var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
+        sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
     }
 
     [Fact]
