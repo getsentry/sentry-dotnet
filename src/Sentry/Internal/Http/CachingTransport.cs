@@ -66,12 +66,14 @@ namespace Sentry.Internal.Http
 
         private void Initialize(bool startWorker)
         {
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
-            Directory.CreateDirectory(_processingDirectoryPath);
-
             // Restore any abandoned files from a previous session
             MoveUnprocessedFilesBackToCache();
 
+            // Ensure directories exist
+            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
+            Directory.CreateDirectory(_processingDirectoryPath);
+
+            // Start a worker, if one is needed
             _worker = startWorker ? Task.Run(CachedTransportBackgroundTaskAsync) : Task.CompletedTask;
         }
 
