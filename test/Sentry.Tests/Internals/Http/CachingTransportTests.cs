@@ -80,16 +80,29 @@ public class CachingTransportTests
         };
 
         using var innerTransport = new FakeTransport();
+
+        var tcs = new TaskCompletionSource<bool>();
+        var timeout = TimeSpan.FromSeconds(7);
+        using var cts = new CancellationTokenSource(timeout);
+        innerTransport.EnvelopeSent += (_, _) => tcs.SetResult(true);
+        cts.Token.Register(() => tcs.TrySetCanceled());
+
         await using var transport = CachingTransport.Create(innerTransport, options);
+        try
+        {
+            // Act
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+            await transport.SendEnvelopeAsync(envelope, CancellationToken.None);
+            await tcs.Task; // wait for the inner transport to signal that it sent the envelope
 
-        // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
-        await transport.SendEnvelopeAsync(envelope);
-        await WaitForDirectoryToBecomeEmptyAsync(cacheDirectory.Path);
-
-        // Assert
-        var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+            // Assert
+            var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
+            sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+        }
+        finally
+        {
+            await transport.StopWorkerAsync();
+        }
     }
 
     [Fact]
@@ -428,41 +441,5 @@ public class CachingTransportTests
         // Assert
         Assert.Equal(exception, receivedException);
         Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
-    }
-
-    private async Task WaitForDirectoryToBecomeEmptyAsync(string directoryPath, TimeSpan? timeout = null)
-    {
-        bool DirectoryIsEmpty() => !Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories).Any();
-
-        if (DirectoryIsEmpty())
-        {
-            // No point in waiting if the directory is already empty
-            return;
-        }
-
-        using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(7));
-
-        using var watcher = new FileSystemWatcher(directoryPath);
-        watcher.IncludeSubdirectories = true;
-        watcher.EnableRaisingEvents = true;
-
-        // Wait until timeout or directory is empty
-        while (!DirectoryIsEmpty())
-        {
-            cts.Token.ThrowIfCancellationRequested();
-
-            var tcs = new TaskCompletionSource<bool>();
-            cts.Token.Register(() => tcs.TrySetCanceled());
-            watcher.Deleted += (_, _) => tcs.TrySetResult(true);
-
-            // One final check before waiting
-            if (DirectoryIsEmpty())
-            {
-                return;
-            }
-
-            // Wait for a file to be deleted, but not longer than 100ms
-            await Task.WhenAny(tcs.Task, Task.Delay(100, cts.Token));
-        }
     }
 }
