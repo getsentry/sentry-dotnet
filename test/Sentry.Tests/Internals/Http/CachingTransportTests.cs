@@ -280,12 +280,11 @@ public class CachingTransportTests
 
         // Act
 
-        // Starting the worker should move files from processing.
+        // Creating the transport should move files from processing during initialization.
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: true);
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
-        // Stopping the worker and then flushing it will ensure all files are processed.
-        await transport.StopWorkerAsync();
+        // Flushing the worker will ensure all files are processed.
         await transport.FlushAsync();
 
         // Assert

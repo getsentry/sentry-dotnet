@@ -69,33 +69,14 @@ namespace Sentry.Internal.Http
             Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             Directory.CreateDirectory(_processingDirectoryPath);
 
+            // Restore any abandoned files from a previous session
+            MoveUnprocessedFilesBackToCache();
+
             _worker = startWorker ? Task.Run(CachedTransportBackgroundTaskAsync) : Task.CompletedTask;
         }
 
         private async Task CachedTransportBackgroundTaskAsync()
         {
-            try
-            {
-                // Processing directory may already contain some files left from previous session
-                // if the worker has been terminated unexpectedly.
-                // Move everything from that directory back to cache directory.
-                if (Directory.Exists(_processingDirectoryPath))
-                {
-                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
-                    {
-                        var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                        _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                            filePath, destinationPath);
-
-                        File.Move(filePath, destinationPath);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _options.LogError("Failed to move unprocessed files back to cache.", e);
-            }
-
             while (!_workerCts.IsCancellationRequested)
             {
                 try
@@ -128,6 +109,31 @@ namespace Sentry.Internal.Http
                 }
             }
             _options.LogDebug("Background worker of CachingTransport has shutdown.");
+        }
+
+        private void MoveUnprocessedFilesBackToCache()
+        {
+            try
+            {
+                // Processing directory may already contain some files left from previous session
+                // if the worker has been terminated unexpectedly.
+                // Move everything from that directory back to cache directory.
+                if (Directory.Exists(_processingDirectoryPath))
+                {
+                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+                    {
+                        var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                        _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
+                            filePath, destinationPath);
+
+                        File.Move(filePath, destinationPath);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failed to move unprocessed files back to cache.", e);
+            }
         }
 
         private void EnsureFreeSpaceInCache()
