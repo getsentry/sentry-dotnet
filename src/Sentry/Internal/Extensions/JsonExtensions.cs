@@ -9,15 +9,9 @@ namespace Sentry.Internal.Extensions
 {
     internal static class JsonExtensions
     {
-        private static JsonSerializerOptions? _serializerOption;
-        /// <summary>
-        /// The Json options with a preset of rules that will remove dangerous and problematic
-        /// data from the serialized object.
-        /// </summary>
-        public static JsonSerializerOptions? SerializerOption => _serializerOption ??= new JsonSerializerOptions
-        {
-            Converters = { new SentryJsonConverter() }
-        };
+        // The Json options with a preset of rules that will remove dangerous and problematic
+        // data from the serialized object.
+        private static JsonSerializerOptions serializerOption = new() { Converters = { new SentryJsonConverter() } };
 
         public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
         {
@@ -79,12 +73,36 @@ namespace Sentry.Internal.Extensions
         {
             JsonValueKind.True => true,
             JsonValueKind.False => false,
-            JsonValueKind.Number => json.GetDouble(),
+            JsonValueKind.Number => json.GetNumber(), // see implementation for why we don't just call GetDouble
             JsonValueKind.String => json.GetString(),
             JsonValueKind.Array => json.EnumerateArray().Select(GetDynamicOrNull).ToArray(),
             JsonValueKind.Object => json.GetDictionaryOrNull(),
             _ => null
         };
+
+        private static object? GetNumber(this JsonElement json)
+        {
+            var result = json.GetDouble();
+            if (result != 0)
+            {
+                // We got a value, as expected.
+                return result;
+            }
+
+            // We might have 0 when there's actually a value there.
+            // This happens on Unity IL2CPP targets.  Let's workaround that.
+            // See https://github.com/getsentry/sentry-unity/issues/690
+
+            // If the number is an integer, we can avoid extra string parsing
+            if (json.TryGetInt64(out var longResult))
+            {
+                return longResult;
+            }
+
+            // Otherwise, let's get the value as a string and parse it ourselves.
+            // Note that we already know this will succeed due to JsonValueKind.Number
+            return double.Parse(json.ToString()!);
+        }
 
         public static string GetStringOrThrow(this JsonElement json) =>
             json.GetString() ?? throw new InvalidOperationException("JSON string is null.");
@@ -286,7 +304,7 @@ namespace Sentry.Internal.Extensions
             }
             else
             {
-                JsonSerializer.Serialize(writer, value, SerializerOption);
+                JsonSerializer.Serialize(writer, value, serializerOption);
             }
         }
 
@@ -296,17 +314,31 @@ namespace Sentry.Internal.Extensions
             object? value,
             IDiagnosticLogger? logger)
         {
+            writer.WritePropertyName(propertyName);
+            var originalPropertyDepth = writer.CurrentDepth;
             try
             {
-                writer.WritePropertyName(propertyName);
                 writer.WriteDynamicValue(value, logger);
             }
-            catch (Exception e) when (logger != null)
+            catch (Exception e)
             {
-                // The only location in the protocol we allow dynamic objects are Extra and Contexts
                 // In the event of an instance that can't be serialized, we don't want to throw away a whole event
                 // so we'll suppress issues here.
-                logger.LogError("Failed to serialize object for property {0}", e, propertyName);
+                logger?.LogError(e, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+                    propertyName, originalPropertyDepth, writer.CurrentDepth);
+
+                // The only location in the protocol we allow dynamic objects are Extra and Contexts.
+                // Render an empty JSON object instead of null. This allows a round trip where this property name is the
+                // key to a map which would otherwise not be set and result in a different object.
+                // This affects envelope size which isn't recomputed after a roundtrip.
+                if (originalPropertyDepth == writer.CurrentDepth)
+                {
+                    writer.WriteStartObject();
+                }
+                while (originalPropertyDepth < writer.CurrentDepth)
+                {
+                    writer.WriteEndObject();
+                }
             }
         }
 
@@ -362,6 +394,61 @@ namespace Sentry.Internal.Extensions
             if (value is not null)
             {
                 writer.WriteNumber(propertyName, value.Value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            short value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            int value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            long value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            float value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
+            }
+        }
+
+        public static void WriteNumberIfNotZero(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            double value)
+        {
+            if (value is not 0)
+            {
+                writer.WriteNumber(propertyName, value);
             }
         }
 

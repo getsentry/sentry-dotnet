@@ -90,13 +90,13 @@ namespace Sentry
             set => _request = value;
         }
 
-        private Contexts? _contexts;
+        private readonly Contexts _contexts = new();
 
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ??= new Contexts();
-            set => _contexts = value;
+            get => _contexts;
+            set => _contexts.ReplaceWith(value);
         }
 
         private User? _user;

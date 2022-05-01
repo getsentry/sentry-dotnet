@@ -4,13 +4,12 @@ namespace Sentry.DiagnosticSource.Internals;
 
 public class DiagnosticsSentryOptionsExtensionsTests
 {
-    public SentryOptions Sut { get; set; } = new();
-
     [Fact]
-    public void DisableDiagnosticListnerIntegration_RemovesDiagnosticSourceIntegration()
+    public void DisableDiagnosticListenerIntegration_RemovesDiagnosticSourceIntegration()
     {
-        Sut.DisableDiagnosticSourceIntegration();
-        Assert.DoesNotContain(Sut.Integrations!,
+        var options = new SentryOptions();
+        options.DisableDiagnosticSourceIntegration();
+        Assert.DoesNotContain(options.Integrations!,
             p => p.GetType() == typeof(SentryDiagnosticListenerIntegration));
     }
 }

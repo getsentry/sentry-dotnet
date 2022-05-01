@@ -39,6 +39,10 @@ public class SentryEventTests
             SentryThreads = new[] { new SentryThread { Crashed = true } },
             ServerName = "server_name",
             TransactionName = "transaction",
+            DebugImages = new List<DebugImage>()
+            {
+                new DebugImage { Type = "wasm", DebugId = "900f7d1b868432939de4457478f34720" }
+            },
         };
 
         sut.Sdk.AddPackage(new Package("name", "version"));
@@ -56,6 +60,11 @@ public class SentryEventTests
         sut.SetTag("tag_key", "tag_value");
 
         var actualString = sut.ToJsonString();
+
+        actualString.Should().Contain(
+            "\"debug_meta\":{\"images\":[" +
+            "{\"type\":\"wasm\",\"debug_id\":\"900f7d1b868432939de4457478f34720\"}" +
+            "]}");
 
         var actual = SentryEvent.FromJson(Json.Parse(actualString));
 

@@ -38,6 +38,22 @@ public class MainSentryEventProcessorTests
         Assert.Equal(Environment.UserName, evt.User.Username);
     }
 
+    [Fact]
+    public void EnsureThreadPoolInfoExists()
+    {
+        var evt = new SentryEvent();
+
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+        var info = (ThreadPoolInfo)evt.Contexts[MainSentryEventProcessor.ThreadPoolInfoKey];
+        Assert.NotEqual(0, info.MinWorkerThreads);
+        Assert.NotEqual(0, info.MinCompletionPortThreads);
+        Assert.NotEqual(0, info.MaxWorkerThreads);
+        Assert.NotEqual(0, info.MaxCompletionPortThreads);
+    }
+
 #if NETCOREAPP3_1_OR_GREATER
     [Fact]
     public void EnsureMemoryInfoExists()
@@ -50,17 +66,8 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
         var memory = (MemoryInfo)evt.Contexts[MainSentryEventProcessor.MemoryInfoKey];
         Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
-        Assert.NotEqual(0, memory.FragmentedBytes);
-        Assert.NotEqual(0, memory.HeapSizeBytes);
         Assert.NotEqual(0, memory.HighMemoryLoadThresholdBytes);
         Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
-        Assert.NotEqual(0, memory.MemoryLoadBytes);
-#if NET5_0_OR_GREATER
-        Assert.NotEqual(0, memory.TotalCommittedBytes);
-        Assert.NotEqual(0, memory.PromotedBytes);
-        Assert.NotEqual(0, memory.PauseTimePercentage);
-        Assert.NotEmpty(memory.PauseDurations);
-#endif
     }
 #endif
 
@@ -99,7 +106,7 @@ public class MainSentryEventProcessorTests
     {
         //Arrange
         var evt = new SentryEvent();
-        var @ip = "192.0.0.1";
+        var ip = "192.0.0.1";
         evt.User.IpAddress = ip;
 
         _fixture.SentryOptions.SendDefaultPii = true;
@@ -361,7 +368,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         // Don't allow any assembly with a + (sha commit is added to informational version)
-        Assert.DoesNotContain(evt.Modules, x => x.Value.Contains("+"));
+        Assert.DoesNotContain(evt.Modules, x => x.Value.Contains('+'));
     }
 
     [Fact]
@@ -373,7 +380,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         // Ensure at least 1 assembly with a + (sha commit is added to informational version)
-        Assert.Contains(evt.Modules, x => x.Value.Contains("+"));
+        Assert.Contains(evt.Modules, x => x.Value.Contains('+'));
     }
 
     [Fact]
@@ -515,9 +522,9 @@ public class MainSentryEventProcessorTests
             // Assert
             dynamic ret = evt.Contexts[key];
 #pragma warning disable IDE0058 // Expression value is never used, cannot use _ = because it'll affect the test result
-            Assert.Equal(getter().Name, ret["Name"]);
-            Assert.Equal(getter().DisplayName, ret["DisplayName"]);
-            Assert.Equal(getter().Calendar.GetType().Name, ret["Calendar"]);
+            Assert.Equal(getter().Name, ret["name"]);
+            Assert.Equal(getter().DisplayName, ret["display_name"]);
+            Assert.Equal(getter().Calendar.GetType().Name, ret["calendar"]);
 #pragma warning restore IDE0058
         }
         finally

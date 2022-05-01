@@ -8,6 +8,7 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using static Sentry.Constants;
 using static Sentry.Internal.Constants;
@@ -47,8 +48,15 @@ namespace Sentry
         /// </summary>
         public bool EnableScopeSync { get; set; }
 
-        // Override for tests
-        internal ITransport? Transport { get; set; }
+        /// <summary>
+        /// This holds a reference to the current transport, when one is active.
+        /// If set manually before initialization, the provided transport will be used instead of the default transport.
+        /// </summary>
+        /// <remarks>
+        /// If <seealso cref="CacheDirectoryPath"/> is set, any transport set here will be wrapped in a
+        /// <seealso cref="CachingTransport"/> and used as its inner transport.
+        /// </remarks>
+        public ITransport? Transport { get; set; }
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
@@ -83,7 +91,10 @@ namespace Sentry
 
         internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
-        internal IBackgroundWorker? BackgroundWorker { get; set; }
+        /// <summary>
+        /// The worker used by the client to pass envelopes.
+        /// </summary>
+        public IBackgroundWorker? BackgroundWorker { get; set; }
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
@@ -133,7 +144,7 @@ namespace Sentry
         /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
         /// </summary>
         /// <remarks>
-        /// This configuration is only relevant is <see cref="SendDefaultPii"/> is set to true.
+        /// This configuration is only relevant if <see cref="SendDefaultPii"/> is set to true.
         /// In environments like server applications this is set to false in order to not report server account names as user names.
         /// </remarks>
         public bool IsEnvironmentUser { get; set; } = true;
@@ -560,6 +571,15 @@ namespace Sentry
         /// (desktop, mobile applications, but not web servers).
         /// </remarks>
         public bool AutoSessionTracking { get; set; } = false;
+
+        /// <summary>
+        /// Whether the SDK should attempt to use asynchronous file I/O.
+        /// For example, when reading a file to use as an attachment.
+        /// </summary>
+        /// <remarks>
+        /// This option should rarely be disabled, but is necessary in some environments such as Unity WebGL.
+        /// </remarks>
+        public bool UseAsyncFileIO { get; set; } = true;
 
         /// <summary>
         /// Delegate which is used to check whether the application crashed during last run.

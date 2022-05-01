@@ -1,5 +1,14 @@
 // ReSharper disable once CheckNamespace
 // Tests code path which excludes frames with namespace Sentry
+
+using System.IO.Compression;
+using System.Net.Http;
+#if NETCOREAPP2_1
+using System.Reflection;
+#endif
+using Sentry.Testing;
+using Sentry.Tests;
+
 namespace NotSentry.Tests;
 
 public class HubTests
@@ -249,6 +258,7 @@ public class HubTests
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         hub.StartSession();
@@ -287,6 +297,72 @@ public class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
+    private class EvilContext
+    {
+        public string Thrower => throw new InvalidDataException();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
+    {
+        var tcs = new TaskCompletionSource<object>();
+        var expectedMessage = Guid.NewGuid().ToString();
+
+        var requests = new List<string>();
+        async Task VerifyAsync(HttpRequestMessage message)
+        {
+            var payload = await message.Content.ReadAsStringAsync();
+            requests.Add(payload);
+            if (payload.Contains(expectedMessage))
+            {
+                tcs.SetResult(null);
+            }
+        }
+
+        var cachePath = offlineCaching ? Path.GetTempPath() : null;
+
+        var logger = Substitute.For<IDiagnosticLogger>();
+        var expectedLevel = SentryLevel.Error;
+        logger.IsEnabled(expectedLevel).Returns(true);
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
+            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            AutoSessionTracking = false, // Not to send some session envelope
+            Debug = true,
+            DiagnosticLevel = expectedLevel,
+            DiagnosticLogger = logger
+        });
+
+        var expectedContextKey = Guid.NewGuid().ToString();
+        var evt = new SentryEvent
+        {
+            Contexts = { [expectedContextKey] = new EvilContext() },
+            Message = new SentryMessage { Formatted = expectedMessage }
+        };
+
+        hub.CaptureEvent(evt);
+
+        // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
+        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+        Assert.True(tcs.Task.IsCompleted, "Event not captured");
+        Assert.True(requests.All(p => p.Contains(expectedContextKey)),
+            "Un-serializable context key should exist");
+
+        logger.Received().Log(expectedLevel, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+#if NETCOREAPP2_1
+            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+#else
+            Arg.Any<InvalidDataException>(),
+#endif
+            Arg.Any<object[]>());
+    }
+
     [Fact]
     public void CaptureEvent_SessionActive_ExceptionReportsError()
     {
@@ -296,6 +372,7 @@ public class HubTests
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         hub.StartSession();
@@ -314,7 +391,11 @@ public class HubTests
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
+        };
         var client = new SentryClient(options, worker);
         var hub = new Hub(options, client);
 
@@ -345,7 +426,11 @@ public class HubTests
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret };
+        var options = new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
+        };
         var client = new SentryClient(options, worker);
         var hub = new Hub(options, client);
 
@@ -766,17 +851,18 @@ public class HubTests
     public void Dispose_CalledSecondTime_ClientDisposedOnce()
     {
         var client = Substitute.For<ISentryClient, IDisposable>();
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret
-        }, client);
+        };
+        var hub = new Hub(options, client);
 
         // Act
         hub.Dispose();
         hub.Dispose();
 
         // Assert
-        ((IDisposable)client).Received(1).Dispose();
+        client.Received(1).FlushAsync(options.ShutdownTimeout);
     }
 
     [Fact]
@@ -787,7 +873,8 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         // Act
@@ -798,6 +885,32 @@ public class HubTests
     }
 
     [Fact]
+    public void StartSession_GlobalSessionManager_ExceptionOnCrashLastRun_CapturesUpdate()
+    {
+        // Arrange
+        var sessionUpdate = new GlobalSessionManagerTests().TryRecoverPersistedSessionWithExceptionOnLastRun();
+        var newSession = new SessionUpdate(Substitute.For<ISession>(), false, default, 0, null);
+
+        var client = Substitute.For<ISentryClient>();
+        var sessionManager = Substitute.For<ISessionManager>();
+        sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
+        sessionManager.StartSession().Returns(newSession);
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
+        }, client, sessionManager);
+
+        // Act
+        hub.StartSession();
+
+        // Assert
+        client.Received().CaptureSession(Arg.Is(sessionUpdate));
+        client.Received().CaptureSession(Arg.Is(newSession));
+    }
+
+    [Fact]
     public void EndSession_CapturesUpdate()
     {
         // Arrange
@@ -805,7 +918,8 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = DsnSamples.ValidDsnWithSecret,
+            Release = "release"
         }, client);
 
         hub.StartSession();
@@ -827,7 +941,8 @@ public class HubTests
         _ = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTracking = true
+            AutoSessionTracking = true,
+            Release = "release"
         }, client);
 
         // Assert
@@ -877,7 +992,8 @@ public class HubTests
         var hub = new Hub(new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTracking = true
+            AutoSessionTracking = true,
+            Release = "release"
         }, client);
 
         // Act
@@ -919,7 +1035,8 @@ public class HubTests
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10),
+            Release = "release"
         };
 
         var hub = new Hub(

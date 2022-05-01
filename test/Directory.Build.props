@@ -7,8 +7,6 @@
     <!-- some projects have transive dependencies on legacy TFW https://github.com/dotnet/announcements/issues/190 -->
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <IsPackable>false</IsPackable>
-    <!-- https://github.com/tonerdo/coverlet/issues/33#issuecomment-382748414 -->
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
@@ -37,16 +35,16 @@
     <Using Include="NSubstitute"/>
     <Using Include="NSubstitute.Core"/>
     <Using Include="NSubstitute.ReturnsExtensions"/>
-    <Using Include="VerifyXunit"/>
-    <PackageReference Include="coverlet.msbuild" Version="3.1.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="NSubstitute" Version="4.2.2" />
-    <PackageReference Include="FluentAssertions" Version="6.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="NSubstitute" Version="4.3.0" />
+    <PackageReference Include="FluentAssertions" Version="6.6.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
-    <PackageReference Include="Verify.Xunit" Version="14.11.1" />
-    <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
-    <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
+    <PackageReference Include="Verify.Xunit" Version="16.7.0" />
+    <PackageReference Include="Verify.DiffPlex" Version="1.2.0" />
+    <PackageReference Include="PublicApiGenerator" Version="10.3.0" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="1.4.1" />
   </ItemGroup>
 
 </Project>

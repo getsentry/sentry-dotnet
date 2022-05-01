@@ -163,7 +163,7 @@ public class HttpContextExtensionsTests
     [InlineData("myArea.myController.myAction", null, "myController", "myAction", "myArea")]
     [InlineData("myController.myAction", null, "myController", "myAction", null)]
     [InlineData(null, null, null, null, null)]
-    public void LegacyRouteFormat_WithPathBase_MatchesExcpectedRoute(string expectedRoute, string pathBase, string controller, string action, string area)
+    public void LegacyRouteFormat_WithPathBase_MatchesExpectedRoute(string expectedRoute, string pathBase, string controller, string action, string area)
     {
         // Arrange
         var httpContext = Fixture.GetMvcSut(area, controller, action, pathBase);
@@ -207,10 +207,9 @@ public class HttpContextExtensionsTests
     public void TryGetRouteTemplate_WithSentryRouteName_RouteName()
     {
         // Arrange
-        var sentryRouteName = Substitute.For<ISentryRouteName>();
-        var httpContext = Fixture.GetSut();
         var expectedName = "abc";
-        sentryRouteName.GetRouteName().Returns(expectedName);
+        TransactionNameProvider sentryRouteName = _ => expectedName;
+        var httpContext = Fixture.GetSut();
         httpContext.Features.Set(sentryRouteName);
 
         // Act

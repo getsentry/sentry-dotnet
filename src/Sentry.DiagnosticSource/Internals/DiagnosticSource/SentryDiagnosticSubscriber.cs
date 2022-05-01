@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Sentry.Extensibility;
 
@@ -10,11 +10,11 @@ namespace Sentry.Internals.DiagnosticSource
     /// </summary>
     internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>, IDisposable
     {
-        private SentryEFCoreListener? _efInterceptor { get; set; }
-        private SentrySqlListener? _sqlListener { get; set; }
-        private List<IDisposable> _disposableListeners = new();
-        private IHub _hub { get; }
-        private SentryOptions _options { get; }
+        private SentryEFCoreListener? _efInterceptor;
+        private SentrySqlListener? _sqlListener;
+        private readonly ConcurrentBag<IDisposable> _disposableListeners = new();
+        private readonly IHub _hub;
+        private readonly SentryOptions _options;
 
         public SentryDiagnosticSubscriber(IHub hub, SentryOptions options)
         {
@@ -33,8 +33,10 @@ namespace Sentry.Internals.DiagnosticSource
                 _efInterceptor = new(_hub, _options);
                 _disposableListeners.Add(listener.Subscribe(_efInterceptor));
                 _options.Log(SentryLevel.Debug, "Registered integration with EF Core.");
+                return;
             }
-            else if (listener.Name == "SqlClientDiagnosticListener")
+
+            if (listener.Name == "SqlClientDiagnosticListener")
             {
                 _sqlListener = new(_hub, _options);
                 _disposableListeners.Add(listener.Subscribe(_sqlListener));

@@ -3,6 +3,7 @@
 using System;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -22,7 +23,6 @@ namespace Sentry
         public double PauseTimePercentage { get; }
         public TimeSpan[] PauseDurations { get; }
         public long Index { get; }
-        public int Generation { get; }
         public long FinalizationPendingCount { get; }
         public bool Compacted { get; }
         public bool Concurrent { get; }
@@ -39,7 +39,6 @@ namespace Sentry
             long pinnedObjectsCount,
             double pauseTimePercentage,
             long index,
-            int generation,
             long finalizationPendingCount,
             bool compacted,
             bool concurrent,
@@ -57,7 +56,6 @@ namespace Sentry
             PauseTimePercentage = pauseTimePercentage;
             PauseDurations = pauseDurations;
             Index = index;
-            Generation = generation;
             FinalizationPendingCount = finalizationPendingCount;
             Compacted = compacted;
             Concurrent = concurrent;
@@ -81,26 +79,26 @@ namespace Sentry
 #endif
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
+            //WriteNumberIfNotZero since on OS that dont implement all props, those props are stubbed out to zero
             writer.WriteStartObject();
 
-            writer.WriteNumber("allocatedBytes", AllocatedBytes);
-            writer.WriteNumber("fragmentedBytes", FragmentedBytes);
-            writer.WriteNumber("heapSizeBytes", HeapSizeBytes);
-            writer.WriteNumber("highMemoryLoadThresholdBytes", HighMemoryLoadThresholdBytes);
-            writer.WriteNumber("totalAvailableMemoryBytes", TotalAvailableMemoryBytes);
-            writer.WriteNumber("memoryLoadBytes", MemoryLoadBytes);
+            writer.WriteNumberIfNotZero("allocated_bytes", AllocatedBytes);
+            writer.WriteNumberIfNotZero("fragmented_bytes", FragmentedBytes);
+            writer.WriteNumberIfNotZero("heap_size_bytes", HeapSizeBytes);
+            writer.WriteNumberIfNotZero("high_memory_load_threshold_bytes", HighMemoryLoadThresholdBytes);
+            writer.WriteNumberIfNotZero("total_available_memory_bytes", TotalAvailableMemoryBytes);
+            writer.WriteNumberIfNotZero("memory_load_bytes", MemoryLoadBytes);
 
 #if NET5_0_OR_GREATER
-            writer.WriteNumber("totalCommittedBytes", TotalCommittedBytes);
-            writer.WriteNumber("promotedBytes", PromotedBytes);
-            writer.WriteNumber("pinnedObjectsCount", PinnedObjectsCount);
-            writer.WriteNumber("pauseTimePercentage", PauseTimePercentage);
-            writer.WriteNumber("index", Index);
-            writer.WriteNumber("generation", Generation);
-            writer.WriteNumber("finalizationPendingCount", FinalizationPendingCount);
+            writer.WriteNumberIfNotZero("total_committed_bytes", TotalCommittedBytes);
+            writer.WriteNumberIfNotZero("promoted_bytes", PromotedBytes);
+            writer.WriteNumberIfNotZero("pinned_objects_count", PinnedObjectsCount);
+            writer.WriteNumberIfNotZero("pause_time_percentage", PauseTimePercentage);
+            writer.WriteNumberIfNotZero("index", Index);
+            writer.WriteNumber("finalization_pending_count", FinalizationPendingCount);
             writer.WriteBoolean("compacted", Compacted);
             writer.WriteBoolean("concurrent", Concurrent);
-            writer.WritePropertyName("pauseDurations");
+            writer.WritePropertyName("pause_durations");
             writer.WriteStartArray();
             foreach (var duration in PauseDurations)
             {

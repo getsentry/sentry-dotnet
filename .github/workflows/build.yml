@@ -6,29 +6,26 @@ on:
       - main
       - release/*
   pull_request:
+
 jobs:
   build:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
-      DOTNET_MULTILEVEL_LOOKUP: 1
+      # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs on Ubuntut and Windows (doesn't happen on macOS)
+      DOTNET_INSTALL_DIR: ${{ startsWith(matrix.os, 'ubuntu') && '/usr/share/dotnet' || startsWith(matrix.os, 'windows') && 'C:\Program Files\dotnet' || '' }}
+
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: windows-latest
-            build_script: .\build.ps1
-          - os: ubuntu-latest
-            build_script: ./build.sh
-          - os: macos-latest
-            build_script: ./build.sh
 
     steps:
         - name: Checkout
-          uses: actions/checkout@v2.3.3
+          uses: actions/checkout@v3
           with:
             submodules: recursive
             fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -38,53 +35,77 @@ jobs:
           with:
             java-version: 11
 
-        - name: Setup .NET SDK (v2.1)
-          uses: actions/setup-dotnet@v1
+        - name: Setup .NET SDK (Windows)
+          if: startsWith(matrix.os, 'windows')
+          uses: actions/setup-dotnet@v2
           with:
-            dotnet-version: '2.1.818'
-        - name: Setup .NET SDK (v3.1)
-          uses: actions/setup-dotnet@v1
+            dotnet-version: 2.1.818
+        - name: Setup .NET SDK (macOS)
+          if: startsWith(matrix.os, 'macos')
+          uses: actions/setup-dotnet@v2
           with:
-            dotnet-version: '3.1.x'
-        - name: Setup .NET SDK (v5.0)
-          uses: actions/setup-dotnet@v1
+            dotnet-version: |
+              2.1.818
+              6.0.x
+        - name: Setup .NET SDK (Ubuntu)
+          if: startsWith(matrix.os, 'ubuntu')
+          uses: actions/setup-dotnet@v2
           with:
-            dotnet-version: '5.0.x'
-        - name: Setup .NET SDK (v6.0)
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: '6.0.x'
+            dotnet-version: 2.1.818
 
         # .NET Android workload doesn't support Linux
         - name: Install Android workload (macOS)
-          if: matrix.os == 'macos-latest'
+          if: startsWith(matrix.os, 'macos')
           run: sudo dotnet workload install android
 
         - name: Install Android workload (Windows)
-          if: matrix.os == 'windows-latest'
+          if: startsWith(matrix.os, 'windows')
           run: dotnet workload install android
 
-        - name: Run build script
-          run: ${{ matrix.build_script }}
+        - name: Dependency Caching
+          uses: actions/cache@v3
+          with:
+            path: ~/.nuget/packages
+            ## we don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
+            key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
+            restore-keys: ${{ runner.os }}-nuget
 
-        - name: Publish coverage report
-          uses: codecov/codecov-action@v1
+        - name: Build
+          run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
+
+        - name: Test
+          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
+
+        - name: Create Test Report
+          uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
+          # run this step even if previous step failed
+          if: success() || failure()
+          with:
+            name: Unit Test Results (${{ matrix.os }})
+            path: '**/*.trx'
+            reporter: dotnet-trx
+            list-suites: 'all'
+            list-tests: 'failed'
+
+        - name: Pack
+          # only pack on windows since we need classic .net assemblies
+          if: startsWith(matrix.os, 'windows')
+          run: dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
 
         - name: Upload Verify Results
           if: failure()
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v3
           with:
             name: verify-test-results
             path: |
               **/*.received.*
 
         - name: Archive Artifacts
-          # only the ps1 script packages the SDK
-          if: matrix.os == 'windows-latest'
-          uses: actions/upload-artifact@v2
+          # only archive on windows since we only pack on windows. See Pack step.
+          if: startsWith(matrix.os, 'windows')
+          uses: actions/upload-artifact@v3
           with:
             name: ${{ github.sha }}
             if-no-files-found: error
             path: |
               ${{ github.workspace }}/src/**/Release/*.nupkg
-

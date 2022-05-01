@@ -81,6 +81,7 @@ public class HubAdapterTests : SentrySdkTestFixture
         Hub.Received(1).ConfigureScope(Expected);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_MockInvoked()
     {

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -18,10 +19,25 @@ namespace Sentry.Internal.Extensions
             await using (stream.ConfigureAwait(false))
 #endif
             {
-                using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
+                using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken)
+                    .ConfigureAwait(false);
 
                 return document.RootElement.Clone();
             }
+        }
+
+        public static JsonElement ReadAsJson(this HttpContent content)
+        {
+            using var stream = content.ReadAsStream();
+            using var document = JsonDocument.Parse(stream);
+            return document.RootElement.Clone();
+        }
+
+        public static string ReadAsString(this HttpContent content)
+        {
+            using var stream = content.ReadAsStream();
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

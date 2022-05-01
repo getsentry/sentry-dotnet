@@ -159,7 +159,7 @@ namespace Sentry
             scope.AddAttachment(
                 new Attachment(
                     type,
-                    new FileAttachmentContent(filePath),
+                    new FileAttachmentContent(filePath, scope.Options.UseAsyncFileIO),
                     Path.GetFileName(filePath),
                     contentType));
 
@@ -169,6 +169,6 @@ namespace Sentry
         /// <param name="scope">The scope.</param>
         /// <returns>The last span not finished or null.</returns>
         internal static ISpan? LastCreatedSpan(this Scope scope)
-            => scope.Transaction?.Spans.LastOrDefault(s => s.IsFinished is false);
+            => scope.Transaction?.Spans.LastOrDefault(s => !s.IsFinished);
     }
 }

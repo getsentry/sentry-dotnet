@@ -138,8 +138,10 @@ public class MainExceptionProcessorTests
     public void CreateSentryException_DataHasObjectAsKey_ItemIgnored()
     {
         var sut = _fixture.GetSut();
-        var ex = new Exception();
-        ex.Data[new object()] = new object();
+        var ex = new Exception
+        {
+            Data = { [new object()] = new object() }
+        };
 
         var actual = sut.CreateSentryException(ex);
 
@@ -215,7 +217,6 @@ public class MainExceptionProcessorTests
                 { "Data1", new { c = 1, d = 2, e = "12345"} },
                 { "Data2", "Something broke again." }
             });
-
 
         //Act
         ex.AddSentryContext(expectedContext1.Key, expectedContext1.Value);

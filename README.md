@@ -10,7 +10,6 @@ Sentry SDK for .NET
 ===========
 
 [![build](https://github.com/getsentry/sentry-dotnet/workflows/build/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions?query=branch%3Amain)
-[![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 
 
@@ -42,7 +41,8 @@ Looking for something else? Let us know by [raising an issue](https://github.com
 Each NuGet package in the table above has its custom view of the docs. Click on the badge to find the best documentation for your use case.
 
 Sentry has extensive documentation for its SDKs on [https://docs.sentry.io](https://docs.sentry.io/platforms/dotnet/).
-[The .NET API (DocFX) is generated on each merge to main and pushed to GitHub pages](https://getsentry.github.io/sentry-dotnet/index.html) Documentation.
+
+Additionally, our [.NET API refererence docs](https://getsentry.github.io/sentry-dotnet/index.html) are generated and deployed on each merge to main.
 
 ### Samples
 
@@ -65,10 +65,11 @@ The packages target **.NET Standard 2.0** and **.NET Framework 4.6.1**. That mea
 Of those, we've tested (we run our unit/integration tests) against:
 
 * .NET Framework 4.8 on Windows
-* Mono 6.6 on macOS and Linux
+* Mono 6.12 on macOS and Linux
 * .NET Core 2.1 on Windows, macOS and Linux
 * .NET Core 3.1 on Windows, macOS and Linux
 * .NET 5 on Windows, macOS and Linux
+* .NET 6 on Windows, macOS and Linux
 
 ### Sentry Protocol
 

@@ -239,11 +239,10 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
-
         {
             // Pre-populate cache
             var initialInnerTransport = new FakeFailingTransport();
-            await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
+            await using var initialTransport = CachingTransport.Create(initialInnerTransport, new SentryOptions
             {
                 DiagnosticLogger = _logger,
                 Dsn = ValidDsnWithoutSecret,
@@ -374,6 +373,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         }
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
@@ -382,6 +382,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_InvokedWithNewScope()
     {
@@ -397,6 +398,106 @@ public class SentrySdkTests : SentrySdkTestFixture
             Assert.NotSame(expected, actual);
 
             SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeAppliesToEvent()
+    {
+        const string expected = "test";
+        var worker = Substitute.For<IBackgroundWorker>();
+
+        using (SentrySdk.Init(o =>
+               {
+                   o.Dsn = ValidDsnWithoutSecret;
+                   o.BackgroundWorker = worker;
+               }))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), s => s.AddBreadcrumb(expected));
+
+            worker.EnqueueEnvelope(
+                Arg.Is<Envelope>(e => e.Items
+                    .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Breadcrumbs
+                    .Single()
+                    .Message == expected));
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeOnlyAppliesOnlyOnce()
+    {
+        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        {
+            var callbackCounter = 0;
+            SentrySdk.CaptureEvent(new SentryEvent(), _ => callbackCounter++);
+            SentrySdk.CaptureEvent(new SentryEvent());
+
+            Assert.Equal(1, callbackCounter);
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScopeNull_LogsError()
+    {
+        var logger = new InMemoryDiagnosticLogger();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsnWithoutSecret,
+            DiagnosticLogger = logger,
+            Debug = true
+        };
+
+        using (SentrySdk.Init(options))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), null as Action<Scope>);
+
+            logger.Entries.Any(e =>
+                    e.Level == SentryLevel.Error &&
+                    e.Message == "Failure to capture event: {0}")
+                .Should()
+                .BeTrue();
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
+        }
+    }
+
+    [Fact]
+    public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        {
+            SentrySdk.CaptureException(new Exception(), _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
+        }
+    }
+
+    [Fact]
+    public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        {
+            SentrySdk.CaptureMessage("TestMessage", _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
         }
     }
 

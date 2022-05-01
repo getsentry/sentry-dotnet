@@ -29,7 +29,7 @@ public static class SentryResponses
     }
 
     public static HttpResponseMessage GetTextErrorResponse(HttpStatusCode code, string detail)
-        => new HttpResponseMessage(code)
+        => new(code)
         {
             Content = new StringContent(detail)
         };

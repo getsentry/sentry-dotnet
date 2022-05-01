@@ -442,17 +442,18 @@ public class SentryTargetTests
 
         var testDisposable = Substitute.For<IDisposable>();
 
-        var evt = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
 
         void Continuation(Exception _)
         {
             testDisposable.Dispose();
-            evt.Set();
+            tcs.SetResult(null);
         }
 
         factory.Flush(Continuation, timeout);
 
-        Assert.True(evt.Wait(timeout));
+        await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+        Assert.True(tcs.Task.IsCompleted);
 
         testDisposable.Received().Dispose();
         await hub.Received().FlushAsync(Arg.Any<TimeSpan>());
@@ -508,8 +509,10 @@ public class SentryTargetTests
         var target = (SentryTarget)_fixture.GetTarget();
         target.Dsn = "${var:mydsn}";
         var logFactory = new LogFactory();
-        var logConfig = new LoggingConfiguration(logFactory);
-        logConfig.Variables["mydsn"] = expectedDsn;
+        var logConfig = new LoggingConfiguration(logFactory)
+        {
+            Variables = { ["mydsn"] = expectedDsn }
+        };
         logConfig.AddRuleForAllLevels(target);
         logFactory.Configuration = logConfig;
         Assert.Equal(expectedDsn, target.Options.Dsn);

@@ -139,6 +139,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.Tests", "test\Sentry.DiagnosticSource.Tests\Sentry.DiagnosticSource.Tests.csproj", "{D870B028-16ED-4551-8B0F-5529479D04C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Android", "samples\Sentry.Samples.Android\Sentry.Samples.Android.csproj", "{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.DiagnosticSource.IntegrationTests", "test\Sentry.DiagnosticSource.IntegrationTests\Sentry.DiagnosticSource.IntegrationTests.csproj", "{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -320,6 +321,10 @@ Global
 		{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -371,6 +376,7 @@ Global
 		{0BE821AB-88D4-4EB5-B012-C964FF58087A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{D870B028-16ED-4551-8B0F-5529479D04C9} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

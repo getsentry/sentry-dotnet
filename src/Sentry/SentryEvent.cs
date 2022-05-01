@@ -97,6 +97,12 @@ namespace Sentry
         }
 
         /// <summary>
+        /// The Sentry Debug Meta Images interface.
+        /// </summary>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta#debug-images"/>
+        public List<DebugImage>? DebugImages { get; set; }
+
+        /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
         public IDictionary<string, string> Modules => _modules ??= new Dictionary<string, string>();
@@ -116,13 +122,13 @@ namespace Sentry
             set => _request = value;
         }
 
-        private Contexts? _contexts;
+        private readonly Contexts _contexts = new();
 
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ??= new Contexts();
-            set => _contexts = value;
+            get => _contexts;
+            set => _contexts.ReplaceWith(value);
         }
 
         private User? _user;
@@ -233,7 +239,7 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
             writer.WriteStringIfNotWhiteSpace("transaction", TransactionName);
             writer.WriteSerializableIfNotNull("request", _request, logger);
-            writer.WriteSerializableIfNotNull("contexts", _contexts, logger);
+            writer.WriteSerializableIfNotNull("contexts", _contexts.NullIfEmpty(), logger);
             writer.WriteSerializableIfNotNull("user", _user, logger);
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteSerializable("sdk", Sdk, logger);
@@ -241,6 +247,16 @@ namespace Sentry
             writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
             writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
             writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
+
+            if (DebugImages?.Count > 0)
+            {
+                writer.WritePropertyName("debug_meta");
+                writer.WriteStartObject();
+
+                writer.WriteArray("images", DebugImages.ToArray(), logger);
+
+                writer.WriteEndObject();
+            }
 
             writer.WriteEndObject();
         }
@@ -272,6 +288,9 @@ namespace Sentry
             var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
 
+            var debugMeta = json.GetPropertyOrNull("debug_meta");
+            var images = debugMeta?.GetPropertyOrNull("images")?.EnumerateArray().Select(DebugImage.FromJson).ToList();
+
             return new SentryEvent(null, timestamp, eventId)
             {
                 _modules = modules?.WhereNotNullValue().ToDictionary(),
@@ -282,10 +301,11 @@ namespace Sentry
                 Release = release,
                 SentryExceptionValues = exceptionValues,
                 SentryThreadValues = threadValues,
+                DebugImages = images,
                 Level = level,
                 TransactionName = transaction,
                 _request = request,
-                _contexts = contexts,
+                Contexts = contexts ?? new(),
                 _user = user,
                 Environment = environment,
                 Sdk = sdk,

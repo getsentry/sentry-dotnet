@@ -8,6 +8,9 @@ public class FuncHandler : HttpMessageHandler
 
     public bool SendAsyncCalled { get; set; }
 
+    public FuncHandler(Func<HttpRequestMessage, CancellationToken, HttpResponseMessage> sendAsyncFunc = null)
+        => SendAsyncFunc = sendAsyncFunc;
+
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)

@@ -26,6 +26,9 @@ namespace Sentry.Protocol.Envelopes
             await Source.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
 
         /// <inheritdoc />
+        public void Serialize(Stream stream, IDiagnosticLogger? logger) => Source.CopyTo(stream);
+
+        /// <inheritdoc />
         public void Dispose() => Source.Dispose();
     }
 }

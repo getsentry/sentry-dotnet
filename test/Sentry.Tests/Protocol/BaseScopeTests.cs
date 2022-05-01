@@ -2,7 +2,7 @@ namespace Sentry.Tests.Protocol;
 
 public class BaseScopeTests
 {
-    private readonly Scope _sut = new Scope(new SentryOptions());
+    private readonly Scope _sut = new(new SentryOptions());
 
     [Fact]
     public void Fingerprint_ByDefault_ReturnsEmptyEnumerable()
@@ -51,9 +51,15 @@ public class BaseScopeTests
     [Fact]
     public void Contexts_Settable()
     {
+        _sut.Contexts.App.Name = "Foo";
+
         var expected = new Contexts();
+        expected.App.Name = "Bar";
+
         _sut.Contexts = expected;
-        Assert.Same(expected, _sut.Contexts);
+
+        Assert.Equal(expected, _sut.Contexts);
+        Assert.NotSame(expected, _sut.Contexts);
     }
 
     [Fact]

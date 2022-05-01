@@ -1,34 +1,22 @@
 using Sentry.Internals.DiagnosticSource;
+using static Sentry.Internals.DiagnosticSource.SentryEFCoreListener;
 
 namespace Sentry.DiagnosticSource.Tests;
 
 public class SentryEFCoreListenerTests
 {
-    internal const string EFQueryStartCompiling = SentryEFCoreListener.EFQueryStartCompiling;
-    internal const string EFQueryCompiling = SentryEFCoreListener.EFQueryCompiling;
-    internal const string EFQueryCompiled = SentryEFCoreListener.EFQueryCompiled;
-    internal const string EFConnectionOpening = SentryEFCoreListener.EFConnectionOpening;
-    internal const string EFCommandExecuting = SentryEFCoreListener.EFCommandExecuting;
-    internal const string EFCommandExecuted = SentryEFCoreListener.EFCommandExecuted;
-    internal const string EFCommandFailed = SentryEFCoreListener.EFCommandFailed;
-    internal const string EFConnectionClosed = SentryEFCoreListener.EFConnectionClosed;
-
-    private Func<ISpan, bool> GetValidator(string type)
+    private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
-            _ when
-                type == EFQueryCompiling ||
-                type == EFQueryCompiled
-                => span => span.Description != null && span.Operation == "db.query_compiler",
-            _ when
-                type == EFConnectionOpening ||
-                type == EFConnectionClosed
-                => span => span.Description == null && span.Operation == "db.connection",
-            _ when
-                type == EFCommandExecuting ||
-                type == EFCommandExecuting ||
-                type == EFCommandFailed
-                => span => span.Description != null && span.Operation == "db.query",
+            EFQueryCompiling or EFQueryCompiled =>
+                span => span.Description != null &&
+                        span.Operation == "db.query.compile",
+            EFConnectionOpening or EFConnectionClosed =>
+                span => span.Description == null &&
+                        span.Operation == "db.connection",
+            EFCommandExecuting or EFCommandExecuting or EFCommandFailed =>
+                span => span.Description != null &&
+                        span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
@@ -51,19 +39,24 @@ public class SentryEFCoreListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope();
-            _scope.Transaction = Tracer;
+            _scope = new Scope
+            {
+                Transaction = Tracer
+            };
 
             var logger = Substitute.For<IDiagnosticLogger>();
             logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-            Options = new SentryOptions { TracesSampleRate = 1.0 };
-            Options.Debug = true;
-            Options.DiagnosticLogger = logger;
+            Options = new SentryOptions
+            {
+                TracesSampleRate = 1.0,
+                Debug = true,
+                DiagnosticLogger = logger
+            };
             Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
             Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
             {
-                Spans.LastOrDefault(s => s.IsFinished is false)?.Finish(SpanStatus.InternalError);
+                Spans.LastOrDefault(s => !s.IsFinished)?.Finish(SpanStatus.InternalError);
                 return SentryId.Empty;
             });
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
@@ -285,7 +278,7 @@ public class SentryEFCoreListenerTests
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, efSql));
-        hub.CaptureEvent(new SentryEvent(), null);
+        hub.CaptureEvent(new SentryEvent(), null as Scope);
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
@@ -320,7 +313,6 @@ public class SentryEFCoreListenerTests
         Assert.False(exceptionReceived);
     }
 
-
     [Theory]
     [InlineData(EFCommandExecuted)]
     [InlineData(EFConnectionClosed)]
@@ -346,7 +338,7 @@ public class SentryEFCoreListenerTests
         var expectedText = "SELECT *...\n FROM ...";
 
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(text);
+        var value = FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);
@@ -356,7 +348,7 @@ public class SentryEFCoreListenerTests
     public void FilterNewLineValue_NullObject_NullString()
     {
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(null);
+        var value = FilterNewLineValue(null);
 
         // Assert
         Assert.Null(value);
@@ -370,7 +362,7 @@ public class SentryEFCoreListenerTests
         var expectedText = "1234";
 
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(text);
+        var value = FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);
@@ -384,7 +376,7 @@ public class SentryEFCoreListenerTests
         var expectedText = "";
 
         // Act
-        var value = SentryEFCoreListener.FilterNewLineValue(text);
+        var value = FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);

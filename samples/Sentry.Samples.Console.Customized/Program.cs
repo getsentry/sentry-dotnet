@@ -98,10 +98,7 @@ internal static class Program
             };
 
             // Access to the HttpClient created to serve the SentryClint
-            o.ConfigureClient = client =>
-            {
-                client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
-            };
+            o.ConfigureClient = client => client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
 
             // Control/override how to apply the State object into the scope
             o.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
@@ -131,7 +128,7 @@ internal static class Program
             });
 
             // Configures a scope which is only valid within the callback
-            SentrySdk.WithScope(s =>
+            SentrySdk.CaptureMessage("Fatal message!", s =>
             {
                 s.Level = SentryLevel.Fatal;
                 s.TransactionName = "main";
@@ -139,8 +136,6 @@ internal static class Program
 
                 // Add a file attachment for upload
                 s.AddAttachment(typeof(Program).Assembly.Location);
-
-                SentrySdk.CaptureMessage("Fatal message!");
             });
 
             var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
@@ -184,12 +179,14 @@ internal static class Program
             // A custom made client, that could be registered with DI,
             // would get disposed by the container on app shutdown
 
-            var evt = new SentryEvent();
-            evt.Message = "Starting new client";
+            var evt = new SentryEvent
+            {
+                Message = "Starting new client"
+            };
             evt.AddBreadcrumb("Breadcrumb directly to the event");
             evt.User.Username = "some@user";
             // Group all events with the following fingerprint:
-            evt.SetFingerprint(new[] { "NewClientDebug" });
+            evt.SetFingerprint("NewClientDebug");
             evt.Level = SentryLevel.Debug;
             SentrySdk.CaptureEvent(evt);
 

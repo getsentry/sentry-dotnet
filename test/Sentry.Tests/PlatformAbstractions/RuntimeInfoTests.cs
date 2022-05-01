@@ -50,9 +50,9 @@ public class RuntimeInfoTests
         var input = new Runtime(".NET Framework");
         RuntimeInfo.SetNetFxReleaseAndVersion(input);
 
-        Assert.NotNull(input.Version);
-        Assert.NotNull(input.FrameworkInstallation);
-        Assert.NotNull(input.FrameworkInstallation.Version);
+        input.Version.Should().NotBeNull();
+        input.FrameworkInstallation.Should().NotBeNull();
+        input.FrameworkInstallation.Version.Should().NotBeNull();
     }
 #endif
 

@@ -147,5 +147,22 @@ namespace Sentry
 
             return result;
         }
+
+        internal void ReplaceWith(Contexts? contexts)
+        {
+            Clear();
+
+            if (contexts == null)
+            {
+                return;
+            }
+
+            foreach (var context in contexts)
+            {
+                this[context.Key] = context.Value;
+            }
+        }
+
+        internal Contexts? NullIfEmpty() => IsEmpty ? null : this;
     }
 }

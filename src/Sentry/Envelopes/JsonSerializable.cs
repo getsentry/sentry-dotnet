@@ -36,5 +36,13 @@ namespace Sentry.Protocol.Envelopes
                 await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
+
+        /// <inheritdoc />
+        public void Serialize(Stream stream, IDiagnosticLogger? logger)
+        {
+            using var writer = new Utf8JsonWriter(stream);
+            Source.WriteTo(writer, logger);
+            writer.Flush();
+        }
     }
 }

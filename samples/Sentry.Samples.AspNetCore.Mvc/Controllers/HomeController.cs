@@ -89,9 +89,14 @@ public class HomeController : Controller
 
             var id = sentry.CaptureException(e);
 
-            ViewData["Message"] = "An exception was caught and sent to Sentry! Event id: " + id;
+            ViewData["Message"] = "An exception was caught and sent to Sentry! Event ID: " + id;
         }
         return View();
+    }
+
+    public IActionResult Test()
+    {
+        throw new Exception("Test exception thrown in controller!");
     }
 
     public IActionResult Error()

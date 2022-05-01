@@ -8,7 +8,7 @@ public class ScopeExtensionsTests
     {
         public SentryOptions ScopeOptions { get; set; } = new();
 
-        public Scope GetSut() => new Scope(ScopeOptions);
+        public Scope GetSut() => new(ScopeOptions);
     }
 
     private readonly Fixture _fixture = new();
@@ -572,7 +572,7 @@ public class ScopeExtensionsTests
     {
         const string expected = "fingerprint";
         var sut = _fixture.GetSut();
-        sut.SetFingerprint(new[] { expected });
+        sut.SetFingerprint(expected);
 
         var target = _fixture.GetSut();
 
@@ -585,11 +585,11 @@ public class ScopeExtensionsTests
     public void Apply_Fingerprint_OnTarget_NotOverwrittenBySource()
     {
         var sut = _fixture.GetSut();
-        sut.SetFingerprint(new[] { "fingerprint" });
+        sut.SetFingerprint("fingerprint");
         var expected = sut.Fingerprint;
 
         var target = _fixture.GetSut();
-        sut.SetFingerprint(new[] { "new fingerprint" });
+        sut.SetFingerprint("new fingerprint");
         sut.Apply(target);
 
         Assert.Equal(expected.Count, target.Fingerprint.Count);

@@ -2,9 +2,96 @@
 
 ## Unreleased
 
+### Features
+
+- Expose `ITransport` and `SentryOptions.Transport` public, to support using custom transports ([#1602](https://github.com/getsentry/sentry-dotnet/pull/1602))
+
 ### Fixes
 
+- Workaround `System.Text.Json` issue with Unity IL2CPP. ([#1583](https://github.com/getsentry/sentry-dotnet/pull/1583))
+- Demystify stack traces for exceptions that fire in a `BeforeSend` callback. ([#1587](https://github.com/getsentry/sentry-dotnet/pull/1587))
+
+## 3.16.0
+
+### Features
+
+- Use a default value of 60 seconds if a `Retry-After` header is not present. ([#1537](https://github.com/getsentry/sentry-dotnet/pull/1537))
+- Add new Protocol definitions for DebugImages and AddressMode ([#1513](https://github.com/getsentry/sentry-dotnet/pull/1513))
+- Add `HttpTransport` extensibility and synchronous serialization support ([#1560](https://github.com/getsentry/sentry-dotnet/pull/1560))
+- Add `UseAsyncFileIO` to Sentry options (enabled by default) ([#1564](https://github.com/getsentry/sentry-dotnet/pull/1564))
+
+### Fixes
+
+- Fix event dropped by bad attachment when no logger is set. ([#1557](https://github.com/getsentry/sentry-dotnet/pull/1557))
+- Ignore zero properties for MemoryInfo ([#1531](https://github.com/getsentry/sentry-dotnet/pull/1531))
+- Cleanup diagnostic source ([#1529](https://github.com/getsentry/sentry-dotnet/pull/1529))
+- Remove confusing message Successfully sent cached envelope ([#1542](https://github.com/getsentry/sentry-dotnet/pull/1542))
+- Fix infinite loop in SentryDatabaseLogging.UseBreadcrumbs ([#1543](https://github.com/getsentry/sentry-dotnet/pull/1543))
+- GetFromRuntimeInformation() in try-catch  ([#1554](https://github.com/getsentry/sentry-dotnet/pull/1554))
+- Make `Contexts` properties more thread-safe ([#1571](https://github.com/getsentry/sentry-dotnet/pull/1571))
+- Fix `PlatformNotSupportedException` exception on `net6.0-maccatalyst` targets ([#1567](https://github.com/getsentry/sentry-dotnet/pull/1567))
+- In ASP.Net Core, make sure that `SentrySdk.LastEventId` is accessible from exception handler pages ([#1573](https://github.com/getsentry/sentry-dotnet/pull/1573))
+
+## 3.15.0
+
+### Features
+
+- Expose ConfigureAppFrame as a public static function. ([#1493](https://github.com/getsentry/sentry-dotnet/pull/1493))
+
+### Fixes
+
+- Make `SentryDiagnosticSubscriber._disposableListeners` thread safe ([#1506](https://github.com/getsentry/sentry-dotnet/pull/1506))
+- Adjust database span names by replacing `_` to `.`. `db.query_compiler` becomes `db.query.compile`. ([#1502](https://github.com/getsentry/sentry-dotnet/pull/1502))
+
+## 3.14.1
+
+### Fixes
+
+- Fix caching transport with attachments ([#1489](https://github.com/getsentry/sentry-dotnet/pull/1489))
+- Revert Sentry in implicit usings ([#1490](https://github.com/getsentry/sentry-dotnet/pull/1490))
+
+## 3.14.0
+
+### Features
+
+- Add the delegate TransactionNameProvider to allow the name definition from Unknown transactions on ASP.NET Core ([#1421](https://github.com/getsentry/sentry-dotnet/pull/1421))
+- SentrySDK.WithScope is now obsolete in favour of overloads of CaptureEvent, CaptureMessage, CaptureException ([#1412](https://github.com/getsentry/sentry-dotnet/pull/1412))
+- Add Sentry to global usings when ImplicitUsings is enabled (`<ImplicitUsings>true</ImplicitUsings>`) ([#1398](https://github.com/getsentry/sentry-dotnet/pull/1398))
+- The implementation of the background worker can now be changed ([#1450](https://github.com/getsentry/sentry-dotnet/pull/1450))
+- Map reg key 528449 to net48 ([#1465](https://github.com/getsentry/sentry-dotnet/pull/1465))
+- Improve logging for failed JSON serialization ([#1473](https://github.com/getsentry/sentry-dotnet/pull/1473))
+
+### Fixes
+
+- Handle exception from crashedLastRun callback ([#1328](https://github.com/getsentry/sentry-dotnet/pull/1328))
+- Reduced the logger noise from EF when not using Performance Monitoring ([#1441](https://github.com/getsentry/sentry-dotnet/pull/1441))
+- Create CachingTransport directories in constructor to avoid DirectoryNotFoundException ([#1432](https://github.com/getsentry/sentry-dotnet/pull/1432))
+- UnobservedTaskException is now considered as Unhandled ([#1447](https://github.com/getsentry/sentry-dotnet/pull/1447))
+- Avoid calls the Thread.CurrentThread where possible ([#1466](https://github.com/getsentry/sentry-dotnet/pull/1466))
+- Rename thread pool protocol keys to snake case ([#1472](https://github.com/getsentry/sentry-dotnet/pull/1472))
+- Treat IOException as a network issue ([#1476](https://github.com/getsentry/sentry-dotnet/pull/1476))
+- Fix incorrect sdk name in envelope header ([#1474](https://github.com/getsentry/sentry-dotnet/pull/1474))
+- Use Trace.WriteLine for TraceDiagnosticLogger ([#1475](https://github.com/getsentry/sentry-dotnet/pull/1475))
+- Remove Exception filters to work around Unity bug on 2019.4.35f IL2CPP ([#1486](https://github.com/getsentry/sentry-dotnet/pull/1486))
+
+## 3.13.0
+
+### Features
+
+- Add CaptureLastError as an extension method to the Server class on ASP.NET ([#1411](https://github.com/getsentry/sentry-dotnet/pull/1411))
+- Add IsDynamicCode* to events ([#1418](https://github.com/getsentry/sentry-dotnet/pull/1418))
+
+### Fixes
+
+- Dispose of client should only flush ([#1354](https://github.com/getsentry/sentry-dotnet/pull/1354))
+
+## 3.12.3
+
+### Fixes
+
+- Events no longer get dropped because of non-serializable contexts or attachments ([#1401](https://github.com/getsentry/sentry-dotnet/pull/1401))
 - Add MemoryInfo to sentry event ([#1337](https://github.com/getsentry/sentry-dotnet/pull/1337))
+- Report ThreadPool stats ([#1399](https://github.com/getsentry/sentry-dotnet/pull/1399))
 
 ## 3.12.2
 

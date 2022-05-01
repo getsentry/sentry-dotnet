@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using Sentry.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
@@ -259,7 +260,7 @@ public class HttpTransportTests
             e.Exception == null &&
             e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
             e.Args[1].ToString() == expectedCode.ToString() &&
-            e.Args[2].ToString() == HttpTransport.DefaultErrorMessage &&
+            e.Args[2].ToString() == HttpTransportBase.DefaultErrorMessage &&
             e.Args[3].ToString() == string.Empty
         ).Should().BeTrue();
     }
@@ -370,7 +371,7 @@ public class HttpTransportTests
             e.Message == "Failed to add attachment: {0}." &&
             (string)e.Args[0] == "test1.txt");
 
-        actualEnvelopeSerialized.Should().NotContain("test2.txt");
+        actualEnvelopeSerialized.Should().NotContain("test1.txt");
     }
 
     [Fact]
