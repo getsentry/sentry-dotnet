@@ -363,28 +363,17 @@ public class CachingTransportTests
         _ = innerTransport.Received(0).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
 
-    [Fact]
-    public async Task DoesNotDeleteCacheIfHttpRequestException()
-    {
-        var exception = new HttpRequestException(null);
-        await TestNetworkException(exception);
-    }
+    public static IEnumerable<object[]> NetworkTestData =>
+        new List<object[]>
+        {
+            new object[] {new HttpRequestException(null)},
+            new object[] {new IOException(null)},
+            new object[] {new SocketException()}
+        };
 
-    [Fact]
-    public async Task DoesNotDeleteCacheIfIOException()
-    {
-        var exception = new IOException(null);
-        await TestNetworkException(exception);
-    }
-
-    [Fact]
-    public async Task DoesNotDeleteCacheIfSocketException()
-    {
-        var exception = new SocketException();
-        await TestNetworkException(exception);
-    }
-
-    private async Task TestNetworkException(Exception exception)
+    [Theory]
+    [MemberData(nameof(NetworkTestData))]
+    public async Task TestNetworkException(Exception exception)
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
