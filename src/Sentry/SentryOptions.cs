@@ -60,8 +60,6 @@ namespace Sentry
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
-        internal string ClientVersion { get; } = SdkName;
-
         internal int SentryVersion { get; } = ProtocolVersion;
 
         /// <summary>
