@@ -15,7 +15,7 @@ public class CachingTransportTests
         _logger = new TestOutputDiagnosticLogger(testOutputHelper);
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task WithAttachment()
     {
         // Arrange
@@ -66,7 +66,7 @@ public class CachingTransportTests
         }
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task WorksInBackground()
     {
         // Arrange
@@ -216,7 +216,7 @@ public class CachingTransportTests
             o => o.Excluding(x => x.Items[0].Header));
     }
 
-    [Fact(Timeout = 5000)]
+    [Fact]
     public async Task MaintainsLimit()
     {
         // Arrange
@@ -244,7 +244,7 @@ public class CachingTransportTests
         transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxCacheItems);
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task AwareOfExistingFiles()
     {
         // Arrange
@@ -283,7 +283,7 @@ public class CachingTransportTests
         innerTransport.GetSentEnvelopes().Should().HaveCount(3);
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task NonTransientExceptionShouldLog()
     {
         // Arrange
@@ -319,7 +319,7 @@ public class CachingTransportTests
         Assert.Equal("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", message);
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task DoesNotRetryOnNonTransientExceptions()
     {
         // Arrange
@@ -363,21 +363,21 @@ public class CachingTransportTests
         _ = innerTransport.Received(0).SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task DoesNotDeleteCacheIfHttpRequestException()
     {
         var exception = new HttpRequestException(null);
         await TestNetworkException(exception);
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task DoesNotDeleteCacheIfIOException()
     {
         var exception = new IOException(null);
         await TestNetworkException(exception);
     }
 
-    [Fact(Timeout = 7000)]
+    [Fact]
     public async Task DoesNotDeleteCacheIfSocketException()
     {
         var exception = new SocketException();
