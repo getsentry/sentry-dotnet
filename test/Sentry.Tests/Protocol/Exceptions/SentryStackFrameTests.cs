@@ -22,6 +22,7 @@ public class SentryStackFrameTests
             Vars = { { "var", "val" } },
             FramesOmitted = { 1, 2 },
             Package = "Package",
+            Platform = "Platform",
             ImageAddress = 3,
             SymbolAddress = 4,
             InstructionOffset = 5,
@@ -46,6 +47,7 @@ public class SentryStackFrameTests
             "\"context_line\":\"ContextLine\"," +
             "\"in_app\":true," +
             "\"package\":\"Package\"," +
+            "\"platform\":\"Platform\"," +
             "\"image_addr\":3," +
             "\"symbol_addr\":4," +
             "\"instruction_addr\":\"0xffffffff\"," +
