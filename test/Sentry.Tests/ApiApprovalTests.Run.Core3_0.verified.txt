@@ -591,8 +591,6 @@ namespace Sentry
         public int? LineNumber { get; set; }
         public string? Module { get; set; }
         public string? Package { get; set; }
-        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
-            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public System.Collections.Generic.IList<string> PostContext { get; }
         public System.Collections.Generic.IList<string> PreContext { get; }
