@@ -25,7 +25,7 @@ namespace Sentry.Internal
         /// <remarks>
         /// Useful when recovering from failures while sending client reports.
         /// </remarks>
-        /// <param name="clientReport">The client report to load into the recorder.</param>
-        void Load(ClientReport clientReport);
+        /// <param name="report">The client report to load into the recorder.</param>
+        void Load(ClientReport report);
     }
 }

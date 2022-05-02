@@ -98,23 +98,23 @@ namespace Sentry.Http
             return new Envelope(envelope.Header, envelopeItems);
         }
 
-        private void ProcessEnvelopeItem(DateTimeOffset now, EnvelopeItem envelopeItem, List<EnvelopeItem> envelopeItems)
+        private void ProcessEnvelopeItem(DateTimeOffset now, EnvelopeItem item, List<EnvelopeItem> items)
         {
             // Check if there is at least one matching category for this item that is rate-limited
             var isRateLimited = CategoryLimitResets
-                .Any(kvp => kvp.Value > now && kvp.Key.Matches(envelopeItem));
+                .Any(kvp => kvp.Value > now && kvp.Key.Matches(item));
 
             if (isRateLimited)
             {
                 _options.ClientReportRecorder
-                    .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, envelopeItem.DataCategory);
+                    .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, item.DataCategory);
 
                 _options.LogDebug(
                     "Envelope item of type {0} was discarded because it's rate-limited.",
-                    envelopeItem.TryGetType());
+                    item.TryGetType());
 
                 // Check if session update with init=true
-                if (envelopeItem.Payload is JsonSerializable
+                if (item.Payload is JsonSerializable
                     {
                         Source: SessionUpdate {IsInitial: true} discardedSessionUpdate
                     })
@@ -130,31 +130,31 @@ namespace Sentry.Http
             }
 
             // If attachment, needs to respect attachment size limit
-            if (string.Equals(envelopeItem.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
-                envelopeItem.TryGetLength() > _options.MaxAttachmentSize)
+            if (string.Equals(item.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
+                item.TryGetLength() > _options.MaxAttachmentSize)
             {
                 // note: attachment drops are not currently counted in discarded events
 
                 _options.LogWarning(
                     "Attachment '{0}' dropped because it's too large ({1} bytes).",
-                    envelopeItem.TryGetFileName(),
-                    envelopeItem.TryGetLength());
+                    item.TryGetFileName(),
+                    item.TryGetLength());
 
                 return;
             }
 
             // If it's a session update (not discarded) with init=false, check if it continues
             // a session with previously dropped init and, if so, promote this update to init=true.
-            if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
+            if (item.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
                 string.Equals(sessionUpdate.Id.ToString(),
                     Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
                     StringComparison.Ordinal))
             {
                 var modifiedEnvelopeItem = new EnvelopeItem(
-                    envelopeItem.Header,
+                    item.Header,
                     new JsonSerializable(new SessionUpdate(sessionUpdate, true)));
 
-                envelopeItems.Add(modifiedEnvelopeItem);
+                items.Add(modifiedEnvelopeItem);
 
                 _options.LogDebug(
                     "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
@@ -164,7 +164,7 @@ namespace Sentry.Http
             }
 
             // Finally, add this item to the result
-            envelopeItems.Add(envelopeItem);
+            items.Add(item);
         }
 
         /// <summary>
