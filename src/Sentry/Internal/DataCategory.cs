@@ -2,6 +2,7 @@ namespace Sentry.Internal
 {
     internal record DataCategory(string Value) : Enumeration(Value)
     {
+        // See https://develop.sentry.dev/sdk/rate-limiting/#definitions for list
         public static DataCategory Attachment = new("attachment");
         public static DataCategory Default = new("default");
         public static DataCategory Error = new("error");

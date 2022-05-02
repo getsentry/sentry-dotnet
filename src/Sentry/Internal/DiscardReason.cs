@@ -2,6 +2,7 @@ namespace Sentry.Internal
 {
     internal record DiscardReason(string Value) : Enumeration(Value)
     {
+        // See https://develop.sentry.dev/sdk/client-reports/ for list
         public static DiscardReason BeforeSend = new("before_send");
         public static DiscardReason CacheOverflow = new("cache_overflow");
         public static DiscardReason EventProcessor = new("event_processor");

@@ -16,12 +16,14 @@ namespace Sentry.Protocol.Envelopes
     public sealed class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
+
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueSession = "session";
         private const string TypeValueAttachment = "attachment";
         private const string TypeValueClientReport = "client_report";
+
         private const string LengthKey = "length";
         private const string FileNameKey = "filename";
 
@@ -37,10 +39,16 @@ namespace Sentry.Protocol.Envelopes
 
         internal DataCategory DataCategory => TryGetType() switch
         {
+            // Yes, the "event" item type corresponds to the "error" data category
             TypeValueEvent => DataCategory.Error,
+
+            // These ones are equivalent
             TypeValueTransaction => DataCategory.Transaction,
             TypeValueSession => DataCategory.Session,
             TypeValueAttachment => DataCategory.Attachment,
+
+            // Not all envelope item types equate to data categories
+            // Specifically, user_report and client_report just use "default"
             _ => DataCategory.Default
         };
 
