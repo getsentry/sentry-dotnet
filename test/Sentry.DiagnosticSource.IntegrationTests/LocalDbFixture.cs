@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using DiffEngine;
 using LocalDb;
 
 public sealed class LocalDbFixture : IDisposable
@@ -19,6 +20,9 @@ public sealed class LocalDbFixture : IDisposable
 
     public void Dispose()
     {
-        SqlInstance?.Cleanup();
+        if (BuildServerDetector.Detected)
+        {
+            SqlInstance?.Cleanup();
+        }
     }
 }
