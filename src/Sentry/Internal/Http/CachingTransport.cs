@@ -220,7 +220,7 @@ namespace Sentry.Internal.Http
 
                     if (ex.Source == "FakeFailingTransport")
                     {
-                        // Deliberately sent from unit tests to avoid deleting the file from processing
+                        // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
                         return;
                     }
 
