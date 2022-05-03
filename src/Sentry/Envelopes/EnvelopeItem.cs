@@ -285,16 +285,16 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="clientReport"/>.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="report"/>.
         /// </summary>
-        internal static EnvelopeItem FromClientReport(ClientReport clientReport)
+        internal static EnvelopeItem FromClientReport(ClientReport report)
         {
             var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
                 [TypeKey] = TypeValueClientReport
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(clientReport));
+            return new EnvelopeItem(header, new JsonSerializable(report));
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(

@@ -6,7 +6,7 @@ namespace Sentry.Internal
 {
     internal class ClientReportRecorder : IClientReportRecorder
     {
-        private readonly SentryOptions _sentryOptions;
+        private readonly SentryOptions _options;
         private readonly ISystemClock _clock;
 
         private readonly ThreadsafeCounterDictionary<DiscardReasonWithCategory> _discardedEvents = new();
@@ -14,16 +14,16 @@ namespace Sentry.Internal
         // discarded events are exposed internally for testing
         internal IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents => _discardedEvents;
 
-        public ClientReportRecorder(SentryOptions sentryOptions, ISystemClock? clock = default)
+        public ClientReportRecorder(SentryOptions options, ISystemClock? clock = default)
         {
-            _sentryOptions = sentryOptions;
+            _options = options;
             _clock = clock ?? new SystemClock();
         }
 
         public void RecordDiscardedEvent(DiscardReason reason, DataCategory category)
         {
             // Don't count discarded events if we're not going to be sending them.
-            if (!_sentryOptions.SendClientReports)
+            if (!_options.SendClientReports)
             {
                 return;
             }
@@ -35,7 +35,7 @@ namespace Sentry.Internal
         public ClientReport? GenerateClientReport()
         {
             // Don't attach a client report if we've turned them off.
-            if (!_sentryOptions.SendClientReports)
+            if (!_options.SendClientReports)
             {
                 return null;
             }

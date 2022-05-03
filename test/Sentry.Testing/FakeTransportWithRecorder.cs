@@ -2,20 +2,20 @@ namespace Sentry.Testing;
 
 internal class FakeTransportWithRecorder : FakeTransport
 {
-    private readonly IClientReportRecorder _clientReportRecorder;
+    private readonly IClientReportRecorder _recorder;
 
-    public FakeTransportWithRecorder(IClientReportRecorder clientReportRecorder)
+    public FakeTransportWithRecorder(IClientReportRecorder recorder)
     {
-        _clientReportRecorder = clientReportRecorder;
+        _recorder = recorder;
     }
 
     public override async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
     {
         // Attach a client report in the same way that the HttpTransportBase class does.
-        var clientReport = _clientReportRecorder.GenerateClientReport();
-        if (clientReport != null)
+        var report = _recorder.GenerateClientReport();
+        if (report != null)
         {
-            envelope = envelope.WithItem(EnvelopeItem.FromClientReport(clientReport));
+            envelope = envelope.WithItem(EnvelopeItem.FromClientReport(report));
         }
 
         try
@@ -25,9 +25,9 @@ internal class FakeTransportWithRecorder : FakeTransport
         catch
         {
             // Restore client reports on any failure
-            if (clientReport != null)
+            if (report != null)
             {
-                _clientReportRecorder.Load(clientReport);
+                _recorder.Load(report);
             }
 
             throw;
