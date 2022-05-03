@@ -74,7 +74,8 @@ namespace Sentry
 #endif
 
         /// <summary>
-        /// Disables the capture of errors through <see cref="AppDomain.ProcessExit"/>
+        /// By default, any queued events (i.e: captures errors) are flushed on <see cref="AppDomain.ProcessExit"/>.
+        /// This method disables that behaviour.
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableAppDomainProcessExitFlush(this SentryOptions options) =>
