@@ -1,34 +1,16 @@
-// ReSharper disable once CheckNamespace
-// Tests code path which excludes frames with namespace Sentry
-
 using System.IO.Compression;
 using System.Net.Http;
 using Sentry.Internal.Http;
+using Sentry.Testing;
+
 #if NETCOREAPP2_1
 using System.Reflection;
 #endif
-using Sentry.Testing;
-using Sentry.Tests;
 
-namespace NotSentry.Tests;
+namespace Sentry.Tests;
 
 public class HubTests
 {
-    private class FakeBackgroundWorker : IBackgroundWorker
-    {
-        public List<Envelope> Queue { get; } = new();
-
-        public int QueuedItems => Queue.Count;
-
-        public bool EnqueueEnvelope(Envelope envelope)
-        {
-            Queue.Add(envelope);
-            return true;
-        }
-
-        public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
-    }
-
     [Fact]
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
@@ -67,36 +49,6 @@ public class HubTests
         }
 
         hub.ConfigureScope(s => Assert.False(s.Locked));
-    }
-
-    [Fact]
-    public void CaptureMessage_AttachStacktraceFalse_DoesNotIncludeStackTrace()
-    {
-        // Arrange
-        var worker = new FakeBackgroundWorker();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            BackgroundWorker = worker,
-            AttachStacktrace = true
-        });
-
-        // Act
-        hub.CaptureMessage("test");
-
-        // Assert
-        var envelope = worker.Queue.Single();
-
-        var stackTrace = envelope.Items
-            .Select(i => i.Payload)
-            .OfType<JsonSerializable>()
-            .Select(i => i.Source)
-            .OfType<SentryEvent>()
-            .Single()
-            .SentryExceptionValues;
-
-        stackTrace.Should().BeNull();
     }
 
     [Fact]
@@ -300,6 +252,8 @@ public class HubTests
 
     private class EvilContext
     {
+        // This property will throw an exception during serialization.
+        // ReSharper disable once UnusedMember.Local
         public string Thrower => throw new InvalidDataException();
     }
 
@@ -314,7 +268,7 @@ public class HubTests
         var requests = new List<string>();
         async Task VerifyAsync(HttpRequestMessage message)
         {
-            var payload = await message.Content.ReadAsStringAsync();
+            var payload = await message.Content!.ReadAsStringAsync();
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
@@ -364,7 +318,7 @@ public class HubTests
             logger.Received().Log(SentryLevel.Error,
                 "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
-            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+            Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
 #else
                 Arg.Any<InvalidDataException>(),
 #endif
