@@ -3,6 +3,7 @@
 
 using System.IO.Compression;
 using System.Net.Http;
+using Sentry.Internal.Http;
 #if NETCOREAPP2_1
 using System.Reflection;
 #endif
@@ -321,46 +322,64 @@ public class HubTests
             }
         }
 
-        var cachePath = offlineCaching ? Path.GetTempPath() : null;
+        using var tempDirectory = offlineCaching ? new TempDirectory() : null;
 
         var logger = Substitute.For<IDiagnosticLogger>();
-        var expectedLevel = SentryLevel.Error;
-        logger.IsEnabled(expectedLevel).Returns(true);
+        logger.IsEnabled(SentryLevel.Error).Returns(true);
 
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
-            RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
+            // To go through a round trip serialization of cached envelope
+            CacheDirectoryPath = tempDirectory?.Path,
+            // So we don't need to deal with gzip'ed payload
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
-            AutoSessionTracking = false, // Not to send some session envelope
+            // Not to send some session envelope
+            AutoSessionTracking = false,
             Debug = true,
-            DiagnosticLevel = expectedLevel,
+            DiagnosticLevel = SentryLevel.Error,
             DiagnosticLogger = logger
-        });
-
-        var expectedContextKey = Guid.NewGuid().ToString();
-        var evt = new SentryEvent
-        {
-            Contexts = { [expectedContextKey] = new EvilContext() },
-            Message = new SentryMessage { Formatted = expectedMessage }
         };
 
-        hub.CaptureEvent(evt);
+        try
+        {
+            var hub = new Hub(options);
 
-        // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
-        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
-        Assert.True(tcs.Task.IsCompleted, "Event not captured");
-        Assert.True(requests.All(p => p.Contains(expectedContextKey)),
-            "Un-serializable context key should exist");
+            var expectedContextKey = Guid.NewGuid().ToString();
+            var evt = new SentryEvent
+            {
+                Contexts = {[expectedContextKey] = new EvilContext()},
+                Message = new SentryMessage {Formatted = expectedMessage}
+            };
 
-        logger.Received().Log(expectedLevel, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            hub.CaptureEvent(evt);
+
+            // Synchronizing in the tests to go through the caching and http transports
+            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+            Assert.True(tcs.Task.IsCompleted, "Event not captured");
+            Assert.True(requests.All(p => p.Contains(expectedContextKey)),
+                "Un-serializable context key should exist");
+
+            logger.Received().Log(SentryLevel.Error,
+                "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
             Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
 #else
-            Arg.Any<InvalidDataException>(),
+                Arg.Any<InvalidDataException>(),
 #endif
-            Arg.Any<object[]>());
+                Arg.Any<object[]>());
+
+        }
+        finally
+        {
+            if (options.Transport is CachingTransport cachingTransport)
+            {
+                // Disposing the caching transport will ensure its worker
+                // is shut down before we try to dispose and delete the temp folder
+                await cachingTransport.DisposeAsync();
+            }
+        }
     }
 
     [Fact]
