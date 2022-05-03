@@ -1,16 +1,13 @@
-// ReSharper disable once CheckNamespace
-// Tests code path which excludes frames with namespace Sentry
-
 using System.IO.Compression;
 using System.Net.Http;
 using Sentry.Internal.Http;
+using Sentry.Testing;
+
 #if NETCOREAPP2_1
 using System.Reflection;
 #endif
-using Sentry.Testing;
-using Sentry.Tests;
 
-namespace NotSentry.Tests;
+namespace Sentry.Tests;
 
 public class HubTests
 {
