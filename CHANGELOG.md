@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.17.0
 
 **Notice:** If you are using self-hosted Sentry, this version and forward requires either Sentry version >= [21.9.0](https://github.com/getsentry/relay/blob/master/CHANGELOG.md#2190), or you must manually disable sending client reports via the `SendClientReports` option.
 
