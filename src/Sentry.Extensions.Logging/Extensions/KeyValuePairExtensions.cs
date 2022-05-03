@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Sentry.Extensions.Logging.Extensions;
 
 internal static class KeyValuePairExtensions

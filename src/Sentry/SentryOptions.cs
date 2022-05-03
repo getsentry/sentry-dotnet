@@ -11,7 +11,6 @@ using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using static Sentry.Constants;
-using static Sentry.Internal.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internals.DiagnosticSource;
