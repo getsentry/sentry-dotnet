@@ -252,6 +252,8 @@ public class HubTests
 
     private class EvilContext
     {
+        // This property will throw an exception during serialization.
+        // ReSharper disable once UnusedMember.Local
         public string Thrower => throw new InvalidDataException();
     }
 
@@ -266,7 +268,7 @@ public class HubTests
         var requests = new List<string>();
         async Task VerifyAsync(HttpRequestMessage message)
         {
-            var payload = await message.Content.ReadAsStringAsync();
+            var payload = await message.Content!.ReadAsStringAsync();
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
@@ -316,7 +318,7 @@ public class HubTests
             logger.Received().Log(SentryLevel.Error,
                 "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
-            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+            Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
 #else
                 Arg.Any<InvalidDataException>(),
 #endif
