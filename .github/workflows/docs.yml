@@ -10,8 +10,8 @@ jobs:
     name: DocFX
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: nikeee/docfx-action@v1.0.0
+      - uses: actions/checkout@v3
+      - uses: nikeee/docfx-action@c2413c359a30494b894e30db268c5504478ff50a
         name: Build Documentation
         with:
           args: docs/docfx.json
@@ -22,7 +22,7 @@ jobs:
           publish_dir: docs/_site
           force_orphan: true
       - name: Archive Docs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: docs
           path: docs/_site
