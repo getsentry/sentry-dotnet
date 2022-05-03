@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,6 +41,7 @@ namespace Sentry
         /// <summary>
         /// The name of the platform.
         /// </summary>
+        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
         public string? Platform { get; set; }
 
         /// <summary>

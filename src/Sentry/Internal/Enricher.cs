@@ -55,9 +55,6 @@ namespace Sentry.Internal
                 eventLike.Sdk.AddPackage("nuget:" + SdkVersion.Instance.Name, SdkVersion.Instance.Version);
             }
 
-            // Platform
-            eventLike.Platform ??= Sentry.Constants.Platform;
-
             // Release
             eventLike.Release ??= ReleaseLocator.Resolve(_options);
 

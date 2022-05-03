@@ -13,6 +13,7 @@
 
 - Workaround `System.Text.Json` issue with Unity IL2CPP. ([#1583](https://github.com/getsentry/sentry-dotnet/pull/1583))
 - Demystify stack traces for exceptions that fire in a `BeforeSend` callback. ([#1587](https://github.com/getsentry/sentry-dotnet/pull/1587))
+- Obsolete `Platform` and always write `csharp` ([#1610](https://github.com/getsentry/sentry-dotnet/pull/1610))
 - Fix a minor issue in the caching transport related to recovery of files from previous session. ([#1617](https://github.com/getsentry/sentry-dotnet/pull/1617))
 
 ## 3.16.0
