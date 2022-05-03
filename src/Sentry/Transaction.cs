@@ -53,6 +53,7 @@ namespace Sentry
         public bool? IsParentSampled { get; set; }
 
         /// <inheritdoc />
+        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
         public string? Platform { get; set; } = Constants.Platform;
 
         /// <inheritdoc />
@@ -210,7 +211,6 @@ namespace Sentry
             SpanId = tracer.SpanId;
             TraceId = tracer.TraceId;
             Operation = tracer.Operation;
-            Platform = tracer.Platform;
             Release = tracer.Release;
             StartTimestamp = tracer.StartTimestamp;
             EndTimestamp = tracer.EndTimestamp;
@@ -259,7 +259,7 @@ namespace Sentry
             writer.WriteString("type", "transaction");
             writer.WriteSerializable("event_id", EventId, logger);
             writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
-            writer.WriteStringIfNotWhiteSpace("platform", Platform);
+            writer.WriteString("platform", Constants.Platform);
             writer.WriteStringIfNotWhiteSpace("release", Release);
             writer.WriteStringIfNotWhiteSpace("transaction", Name);
             writer.WriteString("start_timestamp", StartTimestamp);
@@ -288,7 +288,6 @@ namespace Sentry
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
-            var platform = json.GetPropertyOrNull("platform")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
             var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
             var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
@@ -310,7 +309,6 @@ namespace Sentry
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,
                 Level = level,
-                Platform = platform,
                 Release = release,
                 _request = request,
                 Contexts = contexts ?? new(),

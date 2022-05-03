@@ -6,7 +6,7 @@ internal class FakeTransport : ITransport, IDisposable
 
     public event EventHandler<Envelope> EnvelopeSent;
 
-    public Task SendEnvelopeAsync(
+    public virtual Task SendEnvelopeAsync(
         Envelope envelope,
         CancellationToken cancellationToken = default)
     {

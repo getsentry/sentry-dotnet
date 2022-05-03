@@ -11,7 +11,6 @@ using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using static Sentry.Constants;
-using static Sentry.Internal.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internals.DiagnosticSource;
@@ -58,9 +57,9 @@ namespace Sentry
         /// </remarks>
         public ITransport? Transport { get; set; }
 
-        internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
+        internal IClientReportRecorder ClientReportRecorder { get; set; }
 
-        internal string ClientVersion { get; } = SdkName;
+        internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal int SentryVersion { get; } = ProtocolVersion;
 
@@ -342,6 +341,12 @@ namespace Sentry
         public bool RequestBodyCompressionBuffered { get; set; } = true;
 
         /// <summary>
+        /// Whether to send client reports, which contain statistics about discarded events.
+        /// </summary>
+        /// <see href="https://develop.sentry.dev/sdk/client-reports/"/>
+        public bool SendClientReports { get; set; } = true;
+
+        /// <summary>
         /// An optional web proxy
         /// </summary>
         public IWebProxy? HttpProxy { get; set; }
@@ -598,6 +603,8 @@ namespace Sentry
             ExceptionProcessorsProviders = new Func<IEnumerable<ISentryEventExceptionProcessor>>[] {
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
+
+            ClientReportRecorder = new ClientReportRecorder(this);
 
             SentryStackTraceFactory = new SentryStackTraceFactory(this);
 

@@ -2,14 +2,20 @@
 
 ## Unreleased
 
+**Notice:** If you are using self-hosted Sentry, this version and forward requires either Sentry version >= [21.9.0](https://github.com/getsentry/relay/blob/master/CHANGELOG.md#2190), or you must manually disable sending client reports via the `SendClientReports` option.
+
 ### Features
 
+- Collect and send Client Reports to Sentry, which contain counts of discarded events. ([#1556](https://github.com/getsentry/sentry-dotnet/pull/1556))
 - Expose `ITransport` and `SentryOptions.Transport` public, to support using custom transports ([#1602](https://github.com/getsentry/sentry-dotnet/pull/1602))
 
 ### Fixes
 
 - Workaround `System.Text.Json` issue with Unity IL2CPP. ([#1583](https://github.com/getsentry/sentry-dotnet/pull/1583))
 - Demystify stack traces for exceptions that fire in a `BeforeSend` callback. ([#1587](https://github.com/getsentry/sentry-dotnet/pull/1587))
+- Obsolete `Platform` and always write `csharp` ([#1610](https://github.com/getsentry/sentry-dotnet/pull/1610))
+- Fix a minor issue in the caching transport related to recovery of files from previous session. ([#1617](https://github.com/getsentry/sentry-dotnet/pull/1617))
+- Better DisableAppDomainProcessExitFlush docs ([#1634](https://github.com/getsentry/sentry-dotnet/pull/1634))
 
 ## 3.16.0
 

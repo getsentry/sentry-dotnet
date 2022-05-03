@@ -153,6 +153,8 @@ namespace Sentry
         string? Environment { get; set; }
         System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         Sentry.SentryLevel? Level { get; set; }
+        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
+            " will be removed in version 4.")]
         string? Platform { get; set; }
         string? Release { get; set; }
         Sentry.Request Request { get; set; }
@@ -307,6 +309,8 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public Sentry.SentryLevel? Level { get; set; }
+        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
+            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
@@ -386,6 +390,8 @@ namespace Sentry
         public string? Logger { get; set; }
         public Sentry.SentryMessage? Message { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Modules { get; }
+        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
+            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
@@ -491,6 +497,7 @@ namespace Sentry
         public System.IO.Compression.CompressionLevel RequestBodyCompressionLevel { get; set; }
         public float? SampleRate { get; set; }
         public Sentry.IScopeObserver? ScopeObserver { get; set; }
+        public bool SendClientReports { get; set; }
         public bool SendDefaultPii { get; set; }
         public Sentry.ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }
         public string? ServerName { get; set; }
@@ -522,6 +529,8 @@ namespace Sentry
         public static void DisableTaskUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }
+        public static void RemoveIntegration<TIntegration>(this Sentry.SentryOptions options)
+            where TIntegration : Sentry.Integrations.ISdkIntegration { }
         public static Sentry.SentryOptions UseStackTraceFactory(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
     }
     public static class SentrySdk
@@ -802,6 +811,8 @@ namespace Sentry
         public string Name { get; }
         public string Operation { get; }
         public Sentry.SpanId? ParentSpanId { get; }
+        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
+            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
@@ -855,6 +866,8 @@ namespace Sentry
         public string Name { get; set; }
         public string Operation { get; set; }
         public Sentry.SpanId? ParentSpanId { get; }
+        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
+            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
