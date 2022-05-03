@@ -20,7 +20,7 @@ namespace Sentry.Internal
         ClientReport? GenerateClientReport();
 
         /// <summary>
-        /// Loads the current instance with the events from the provided <paramref name="clientReport"/>.
+        /// Loads the current instance with the events from the provided <paramref name="report"/>.
         /// </summary>
         /// <remarks>
         /// Useful when recovering from failures while sending client reports.
