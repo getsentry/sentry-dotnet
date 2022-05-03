@@ -56,10 +56,10 @@ jobs:
             restore-keys: ${{ runner.os }}-nuget
 
         - name: Build
-          run: dotnet build SentryNoSamples.slnf -c Release /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build Sentry.sln -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test SentryNoSamples.slnf -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
+          run: dotnet test Sentry.sln -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Create Test Report
           uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
@@ -75,7 +75,7 @@ jobs:
         - name: Pack
           # only pack on windows since we need classic .net assemblies
           if: startsWith(matrix.os, 'windows')
-          run: dotnet pack SentryNoSamples.slnf -c Release --no-build /p:ContinuousIntegrationBuild=true
+          run: dotnet pack Sentry.sln -c Release --no-build /p:ContinuousIntegrationBuild=true
 
         - name: Upload Verify Results
           if: failure()
