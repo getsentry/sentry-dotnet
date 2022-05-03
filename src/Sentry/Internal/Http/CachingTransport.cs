@@ -41,10 +41,10 @@ namespace Sentry.Internal.Http
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
-        public static CachingTransport Create(ITransport innerTransport, SentryOptions options)
+        public static CachingTransport Create(ITransport innerTransport, SentryOptions options, bool startWorker = true)
         {
             var transport = new CachingTransport(innerTransport, options);
-            transport.Initialize();
+            transport.Initialize(startWorker);
             return transport;
         }
 
@@ -64,38 +64,21 @@ namespace Sentry.Internal.Http
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
         }
 
-        private void Initialize()
+        private void Initialize(bool startWorker)
         {
+            // Restore any abandoned files from a previous session
+            MoveUnprocessedFilesBackToCache();
+
+            // Ensure directories exist
             Directory.CreateDirectory(_isolatedCacheDirectoryPath);
             Directory.CreateDirectory(_processingDirectoryPath);
 
-            _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+            // Start a worker, if one is needed
+            _worker = startWorker ? Task.Run(CachedTransportBackgroundTaskAsync) : Task.CompletedTask;
         }
 
         private async Task CachedTransportBackgroundTaskAsync()
         {
-            try
-            {
-                // Processing directory may already contain some files left from previous session
-                // if the worker has been terminated unexpectedly.
-                // Move everything from that directory back to cache directory.
-                if (Directory.Exists(_processingDirectoryPath))
-                {
-                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
-                    {
-                        var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                        _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                            filePath, destinationPath);
-
-                        File.Move(filePath, destinationPath);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _options.LogError("Failed to move unprocessed files back to cache.", e);
-            }
-
             while (!_workerCts.IsCancellationRequested)
             {
                 try
@@ -128,6 +111,34 @@ namespace Sentry.Internal.Http
                 }
             }
             _options.LogDebug("Background worker of CachingTransport has shutdown.");
+        }
+
+        private void MoveUnprocessedFilesBackToCache()
+        {
+            // Processing directory may already contain some files left from previous session
+            // if the cache was working when the process terminated unexpectedly.
+            // Move everything from that directory back to cache directory.
+
+            if (!Directory.Exists(_processingDirectoryPath))
+            {
+                // nothing to do
+                return;
+            }
+
+            foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+            {
+                try
+                {
+                    var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                    _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
+                        filePath, destinationPath);
+                    File.Move(filePath, destinationPath);
+                }
+                catch (Exception e)
+                {
+                    _options.LogError("Failed to move unprocessed file back to cache: {0}", e, filePath);
+                }
+            }
         }
 
         private void EnsureFreeSpaceInCache()
@@ -206,6 +217,13 @@ namespace Sentry.Internal.Http
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
+
+                    if (ex.Source == "FakeFailingTransport")
+                    {
+                        // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
+                        return;
+                    }
+
                     LogFailureWithDiscard(file, ex);
                 }
             }
