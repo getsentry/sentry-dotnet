@@ -529,6 +529,8 @@ namespace Sentry
         public static void DisableTaskUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }
+        public static void RemoveIntegration<TIntegration>(this Sentry.SentryOptions options)
+            where TIntegration : Sentry.Integrations.ISdkIntegration { }
         public static Sentry.SentryOptions UseStackTraceFactory(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
     }
     public static class SentrySdk
