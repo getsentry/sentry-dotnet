@@ -1,5 +1,3 @@
-
-
 // ReSharper disable once CheckNamespace
 namespace Sentry.Protocol.Tests.Context;
 
