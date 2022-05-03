@@ -11,21 +11,6 @@ namespace Sentry.Tests;
 
 public class HubTests
 {
-    private class FakeBackgroundWorker : IBackgroundWorker
-    {
-        public List<Envelope> Queue { get; } = new();
-
-        public int QueuedItems => Queue.Count;
-
-        public bool EnqueueEnvelope(Envelope envelope)
-        {
-            Queue.Add(envelope);
-            return true;
-        }
-
-        public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
-    }
-
     [Fact]
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
