@@ -3,6 +3,7 @@
 
 using System.IO.Compression;
 using System.Net.Http;
+using Sentry.Internal.Http;
 #if NETCOREAPP2_1
 using System.Reflection;
 #endif
@@ -326,7 +327,7 @@ public class HubTests
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(SentryLevel.Error).Returns(true);
 
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
             // To go through a round trip serialization of cached envelope
@@ -339,30 +340,46 @@ public class HubTests
             Debug = true,
             DiagnosticLevel = SentryLevel.Error,
             DiagnosticLogger = logger
-        });
-
-        var expectedContextKey = Guid.NewGuid().ToString();
-        var evt = new SentryEvent
-        {
-            Contexts = { [expectedContextKey] = new EvilContext() },
-            Message = new SentryMessage { Formatted = expectedMessage }
         };
 
-        hub.CaptureEvent(evt);
+        try
+        {
+            var hub = new Hub(options);
 
-        // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
-        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
-        Assert.True(tcs.Task.IsCompleted, "Event not captured");
-        Assert.True(requests.All(p => p.Contains(expectedContextKey)),
-            "Un-serializable context key should exist");
+            var expectedContextKey = Guid.NewGuid().ToString();
+            var evt = new SentryEvent
+            {
+                Contexts = {[expectedContextKey] = new EvilContext()},
+                Message = new SentryMessage {Formatted = expectedMessage}
+            };
 
-        logger.Received().Log(SentryLevel.Error, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            hub.CaptureEvent(evt);
+
+            // Synchronizing in the tests to go through the caching and http transports
+            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+            Assert.True(tcs.Task.IsCompleted, "Event not captured");
+            Assert.True(requests.All(p => p.Contains(expectedContextKey)),
+                "Un-serializable context key should exist");
+
+            logger.Received().Log(SentryLevel.Error,
+                "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
             Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
 #else
-            Arg.Any<InvalidDataException>(),
+                Arg.Any<InvalidDataException>(),
 #endif
-            Arg.Any<object[]>());
+                Arg.Any<object[]>());
+
+        }
+        finally
+        {
+            if (options.Transport is CachingTransport cachingTransport)
+            {
+                // Disposing the caching transport will ensure its worker
+                // is shut down before we try to dispose and delete the temp folder
+                await cachingTransport.DisposeAsync();
+            }
+        }
     }
 
     [Fact]
