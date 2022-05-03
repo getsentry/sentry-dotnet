@@ -48,7 +48,7 @@ namespace Sentry.Internal
         }
 
         /// <summary>
-        /// Parses <see cref="ClientReport"/> from JSON.
+        /// Parses <see cref="ClientReport"/> from <paramref name="json"/>.
         /// </summary>
         public static ClientReport FromJson(JsonElement json)
         {

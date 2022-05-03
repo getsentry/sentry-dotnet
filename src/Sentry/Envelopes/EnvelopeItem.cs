@@ -205,7 +205,7 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() => (Payload as IDisposable)?.Dispose();
 
         /// <summary>
-        /// Creates an envelope item from an event.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="event"/>.
         /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
@@ -218,7 +218,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from user feedback.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sentryUserFeedback"/>.
         /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
@@ -231,7 +231,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from transaction.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
         /// </summary>
         public static EnvelopeItem FromTransaction(Transaction transaction)
         {
@@ -244,7 +244,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from a session update.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sessionUpdate"/>.
         /// </summary>
         public static EnvelopeItem FromSession(SessionUpdate sessionUpdate)
         {
@@ -257,7 +257,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from attachment.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="attachment"/>.
         /// </summary>
         public static EnvelopeItem FromAttachment(Attachment attachment)
         {
