@@ -70,36 +70,6 @@ public class HubTests
     }
 
     [Fact]
-    public void CaptureMessage_AttachStacktraceFalse_DoesNotIncludeStackTrace()
-    {
-        // Arrange
-        var worker = new FakeBackgroundWorker();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            BackgroundWorker = worker,
-            AttachStacktrace = true
-        });
-
-        // Act
-        hub.CaptureMessage("test");
-
-        // Assert
-        var envelope = worker.Queue.Single();
-
-        var stackTrace = envelope.Items
-            .Select(i => i.Payload)
-            .OfType<JsonSerializable>()
-            .Select(i => i.Source)
-            .OfType<SentryEvent>()
-            .Single()
-            .SentryExceptionValues;
-
-        stackTrace.Should().BeNull();
-    }
-
-    [Fact]
     public void CaptureMessage_FailedQueue_LastEventIdSetToEmpty()
     {
         // Arrange
