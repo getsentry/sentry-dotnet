@@ -547,5 +547,20 @@ namespace Sentry.Internal.Extensions
                 writer.WriteDynamic(propertyName, value, logger);
             }
         }
+
+        public static void WriteString(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            Enumeration? value)
+        {
+            if (value == null)
+            {
+                writer.WriteNull(propertyName);
+            }
+            else
+            {
+                writer.WriteString(propertyName, value.Value);
+            }
+        }
     }
 }

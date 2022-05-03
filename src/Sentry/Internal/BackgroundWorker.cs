@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal
@@ -59,6 +60,7 @@ namespace Sentry.Internal
             if (Interlocked.Increment(ref _currentItems) > _maxItems)
             {
                 _ = Interlocked.Decrement(ref _currentItems);
+                _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
                 return false;
             }
 
@@ -121,6 +123,7 @@ namespace Sentry.Internal
                             // Dispose inside try/catch
                             using var _ = envelope;
 
+                            // Send the envelope
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.LogDebug(

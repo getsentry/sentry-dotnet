@@ -2,8 +2,11 @@
 
 ## Unreleased
 
+**Notice:** If you are using self-hosted Sentry, this version and forward requires either Sentry version >= [21.9.0](https://github.com/getsentry/relay/blob/master/CHANGELOG.md#2190), or you must manually disable sending client reports via the `SendClientReports` option.
+
 ### Features
 
+- Collect and send Client Reports to Sentry, which contain counts of discarded events. ([#1556](https://github.com/getsentry/sentry-dotnet/pull/1556))
 - Expose `ITransport` and `SentryOptions.Transport` public, to support using custom transports ([#1602](https://github.com/getsentry/sentry-dotnet/pull/1602))
 
 ### Fixes

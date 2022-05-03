@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
@@ -17,6 +18,7 @@ namespace Sentry.Internal.Http
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
+        private readonly bool _failStorage;
         private readonly string _isolatedCacheDirectoryPath;
         private readonly int _keepCount;
 
@@ -41,17 +43,20 @@ namespace Sentry.Internal.Http
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
-        public static CachingTransport Create(ITransport innerTransport, SentryOptions options, bool startWorker = true)
+        public static CachingTransport Create(ITransport innerTransport, SentryOptions options,
+            bool startWorker = true,
+            bool failStorage = false)
         {
-            var transport = new CachingTransport(innerTransport, options);
+            var transport = new CachingTransport(innerTransport, options, failStorage);
             transport.Initialize(startWorker);
             return transport;
         }
 
-        private CachingTransport(ITransport innerTransport, SentryOptions options)
+        private CachingTransport(ITransport innerTransport, SentryOptions options, bool failStorage)
         {
             _innerTransport = innerTransport;
             _options = options;
+            _failStorage = failStorage; // For testing
 
             _keepCount = _options.MaxCacheItems >= 1
                 ? _options.MaxCacheItems - 1
@@ -213,7 +218,8 @@ namespace Sentry.Internal.Http
                     // https://github.com/getsentry/sentry-unity/issues/550
                     if (ex is HttpRequestException or SocketException or IOException)
                     {
-                        _options.LogError("Failed to send cached envelope: {0}, type: {1}, retrying after a delay.", ex, file, ex.GetType().Name);
+                        _options.LogError("Failed to send cached envelope: {0}, type: {1}, retrying after a delay.", ex,
+                            file, ex.GetType().Name);
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
@@ -224,6 +230,7 @@ namespace Sentry.Internal.Http
                         return;
                     }
 
+                    _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
                     LogFailureWithDiscard(file, ex);
                 }
             }
@@ -244,6 +251,7 @@ namespace Sentry.Internal.Http
                     envelopeContents = File.ReadAllText(file);
                 }
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
             }
@@ -292,6 +300,11 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
+            if (_failStorage)
+            {
+                throw new("Simulated failure writing to storage (for testing).");
+            }
+
             // Envelope file name can be either:
             // 1604679692_2035_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
             // 1604679692_2035__17754019_2035660868.envelope
@@ -333,9 +346,30 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
-            // Store the envelope in a file without actually sending it anywhere.
-            // The envelope will get picked up by the background thread eventually.
-            await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
+            // Client reports should be generated here so they get included in the cached data
+            var clientReport = _options.ClientReportRecorder.GenerateClientReport();
+            if (clientReport != null)
+            {
+                envelope = envelope.WithItem(EnvelopeItem.FromClientReport(clientReport));
+                _options.LogDebug("Attached client report to envelope {0}.", envelope.TryGetEventId());
+            }
+
+            try
+            {
+                // Store the envelope in a file without actually sending it anywhere.
+                // The envelope will get picked up by the background thread eventually.
+                await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // On any failure writing to the cache, recover the client report.
+                if (clientReport != null)
+                {
+                    _options.ClientReportRecorder.Load(clientReport);
+                }
+
+                throw;
+            }
         }
 
         public async Task StopWorkerAsync()

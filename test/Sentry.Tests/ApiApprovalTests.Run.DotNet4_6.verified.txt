@@ -490,6 +490,7 @@ namespace Sentry
         public System.IO.Compression.CompressionLevel RequestBodyCompressionLevel { get; set; }
         public float? SampleRate { get; set; }
         public Sentry.IScopeObserver? ScopeObserver { get; set; }
+        public bool SendClientReports { get; set; }
         public bool SendDefaultPii { get; set; }
         public Sentry.ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }
         public string? ServerName { get; set; }

@@ -25,6 +25,7 @@ namespace Sentry.Http
     public abstract class HttpTransportBase
     {
         internal const string DefaultErrorMessage = "No message";
+
         private readonly SentryOptions _options;
         private readonly ISystemClock _clock;
         private readonly Func<string, string?> _getEnvironmentVariable;
@@ -59,7 +60,7 @@ namespace Sentry.Http
         /// </summary>
         /// <param name="envelope">The envelope to process.</param>
         /// <returns>The processed envelope, ready to be sent.</returns>
-        protected Envelope ProcessEnvelope(Envelope envelope)
+        protected internal Envelope ProcessEnvelope(Envelope envelope)
         {
             var now = _clock.GetUtcNow();
 
@@ -67,75 +68,103 @@ namespace Sentry.Http
             var envelopeItems = new List<EnvelopeItem>();
             foreach (var envelopeItem in envelope.Items)
             {
-                // Check if there is at least one matching category for this item that is rate-limited
-                var isRateLimited = CategoryLimitResets
-                    .Any(kvp => kvp.Value > now && kvp.Key.Matches(envelopeItem));
+                ProcessEnvelopeItem(now, envelopeItem, envelopeItems);
+            }
 
-                if (isRateLimited)
-                {
-                    _options.LogDebug(
-                        "Envelope item of type {0} was discarded because it's rate-limited.",
-                        envelopeItem.TryGetType());
+            var eventId = envelope.TryGetEventId();
 
-                    // Check if session update with init=true
-                    if (envelopeItem.Payload is JsonSerializable
-                        {
-                            Source: SessionUpdate {IsInitial: true} discardedSessionUpdate
-                        })
-                    {
-                        _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
-
-                        _options.LogDebug(
-                            "Discarded envelope item containing initial session update (SID: {0}).",
-                            discardedSessionUpdate.Id);
-                    }
-
-                    continue;
-                }
-
-                // If attachment, needs to respect attachment size limit
-                if (string.Equals(envelopeItem.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
-                    envelopeItem.TryGetLength() > _options.MaxAttachmentSize)
-                {
-                    _options.LogWarning(
-                        "Attachment '{0}' dropped because it's too large ({1} bytes).",
-                        envelopeItem.TryGetFileName(),
-                        envelopeItem.TryGetLength());
-
-                    continue;
-                }
-
-                // If it's a session update (not discarded) with init=false, check if it continues
-                // a session with previously dropped init and, if so, promote this update to init=true.
-                if (envelopeItem.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
-                    string.Equals(sessionUpdate.Id.ToString(),
-                        Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
-                        StringComparison.Ordinal))
-                {
-                    var modifiedEnvelopeItem = new EnvelopeItem(
-                        envelopeItem.Header,
-                        new JsonSerializable(new SessionUpdate(sessionUpdate, true)));
-
-                    envelopeItems.Add(modifiedEnvelopeItem);
-
-                    _options.LogDebug(
-                        "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
-                        sessionUpdate.Id);
-                }
-                else
-                {
-                    envelopeItems.Add(envelopeItem);
-                }
+            var clientReport = _options.ClientReportRecorder.GenerateClientReport();
+            if (clientReport != null)
+            {
+                envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
+                _options.LogDebug("Attached client report to envelope {0}.", eventId);
             }
 
             if (envelopeItems.Count == 0)
             {
-                _options.LogInfo(
-                    "Envelope {0} was discarded because all contained items are rate-limited.",
-                    envelope.TryGetEventId());
+                if (_options.SendClientReports)
+                {
+                    _options.LogInfo("Envelope {0} was discarded because all contained items are rate-limited " +
+                                     "and there are no client reports to send.",
+                        eventId);
+                }
+                else
+                {
+                    _options.LogInfo("Envelope {0} was discarded because all contained items are rate-limited.",
+                        eventId);
+                }
             }
 
             return new Envelope(envelope.Header, envelopeItems);
+        }
+
+        private void ProcessEnvelopeItem(DateTimeOffset now, EnvelopeItem item, List<EnvelopeItem> items)
+        {
+            // Check if there is at least one matching category for this item that is rate-limited
+            var isRateLimited = CategoryLimitResets
+                .Any(kvp => kvp.Value > now && kvp.Key.Matches(item));
+
+            if (isRateLimited)
+            {
+                _options.ClientReportRecorder
+                    .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, item.DataCategory);
+
+                _options.LogDebug(
+                    "Envelope item of type {0} was discarded because it's rate-limited.",
+                    item.TryGetType());
+
+                // Check if session update with init=true
+                if (item.Payload is JsonSerializable
+                    {
+                        Source: SessionUpdate {IsInitial: true} discardedSessionUpdate
+                    })
+                {
+                    _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
+
+                    _options.LogDebug(
+                        "Discarded envelope item containing initial session update (SID: {0}).",
+                        discardedSessionUpdate.Id);
+                }
+
+                return;
+            }
+
+            // If attachment, needs to respect attachment size limit
+            if (string.Equals(item.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
+                item.TryGetLength() > _options.MaxAttachmentSize)
+            {
+                // note: attachment drops are not currently counted in discarded events
+
+                _options.LogWarning(
+                    "Attachment '{0}' dropped because it's too large ({1} bytes).",
+                    item.TryGetFileName(),
+                    item.TryGetLength());
+
+                return;
+            }
+
+            // If it's a session update (not discarded) with init=false, check if it continues
+            // a session with previously dropped init and, if so, promote this update to init=true.
+            if (item.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
+                string.Equals(sessionUpdate.Id.ToString(),
+                    Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
+                    StringComparison.Ordinal))
+            {
+                var modifiedEnvelopeItem = new EnvelopeItem(
+                    item.Header,
+                    new JsonSerializable(new SessionUpdate(sessionUpdate, true)));
+
+                items.Add(modifiedEnvelopeItem);
+
+                _options.LogDebug(
+                    "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
+                    sessionUpdate.Id);
+
+                return;
+            }
+
+            // Finally, add this item to the result
+            items.Add(item);
         }
 
         /// <summary>
@@ -289,6 +318,8 @@ namespace Sentry.Http
 
         private void HandleFailure(HttpResponseMessage response, Envelope envelope)
         {
+            IncrementDiscardsForHttpFailure(response.StatusCode, envelope);
+
             // Spare the overhead if level is not enabled
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
             {
@@ -341,6 +372,8 @@ namespace Sentry.Http
         private async Task HandleFailureAsync(HttpResponseMessage response, Envelope envelope,
             CancellationToken cancellationToken)
         {
+            IncrementDiscardsForHttpFailure(response.StatusCode, envelope);
+
             // Spare the overhead if level is not enabled
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
             {
@@ -394,6 +427,26 @@ namespace Sentry.Http
                             envelopeFile.Length, destination);
                     }
                 }
+            }
+        }
+
+        private void IncrementDiscardsForHttpFailure(HttpStatusCode responseStatusCode, Envelope envelope)
+        {
+            if ((int)responseStatusCode is 429 or < 400)
+            {
+                //  Status == 429 or < 400 should not be counted by the client SDK
+                //  See https://develop.sentry.dev/sdk/client-reports/#sdk-side-recommendations
+                return;
+            }
+
+            _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.NetworkError, envelope);
+
+            // Also restore any counts that were trying to be sent, so they are not lost.
+            var clientReportItems = envelope.Items.Where(x => x.TryGetType() == "client_report");
+            foreach (var item in clientReportItems)
+            {
+                var clientReport = (ClientReport)((JsonSerializable)item.Payload).Source;
+                _options.ClientReportRecorder.Load(clientReport);
             }
         }
 

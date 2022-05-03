@@ -58,6 +58,8 @@ namespace Sentry
         /// </remarks>
         public ITransport? Transport { get; set; }
 
+        internal IClientReportRecorder ClientReportRecorder { get; set; }
+
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
 
         internal int SentryVersion { get; } = ProtocolVersion;
@@ -340,6 +342,12 @@ namespace Sentry
         public bool RequestBodyCompressionBuffered { get; set; } = true;
 
         /// <summary>
+        /// Whether to send client reports, which contain statistics about discarded events.
+        /// </summary>
+        /// <see href="https://develop.sentry.dev/sdk/client-reports/"/>
+        public bool SendClientReports { get; set; } = true;
+
+        /// <summary>
         /// An optional web proxy
         /// </summary>
         public IWebProxy? HttpProxy { get; set; }
@@ -596,6 +604,8 @@ namespace Sentry
             ExceptionProcessorsProviders = new Func<IEnumerable<ISentryEventExceptionProcessor>>[] {
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
+
+            ClientReportRecorder = new ClientReportRecorder(this);
 
             SentryStackTraceFactory = new SentryStackTraceFactory(this);
 

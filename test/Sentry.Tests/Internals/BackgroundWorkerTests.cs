@@ -7,6 +7,7 @@ public class BackgroundWorkerTests
 {
     private class Fixture
     {
+        public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
         public ITransport Transport { get; set; } = Substitute.For<ITransport>();
         public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
         public ConcurrentQueue<Envelope> Queue { get; set; } = new();
@@ -18,6 +19,7 @@ public class BackgroundWorkerTests
             _ = Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             SentryOptions.Debug = true;
             SentryOptions.DiagnosticLogger = Logger;
+            SentryOptions.ClientReportRecorder = ClientReportRecorder;
         }
 
         public BackgroundWorker GetSut()
@@ -216,6 +218,40 @@ public class BackgroundWorkerTests
         // in-flight events are kept in queue until completed.
         var queued = sut.EnqueueEnvelope(envelope);
         Assert.False(queued); // Fails to queue second
+
+        _ = eventsQueuedEvent.Set();
+    }
+
+    [Fact]
+    public void CaptureEvent_LimitReached_RecordsDiscardedEvent()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        var transportEvent = new ManualResetEvent(false);
+        var eventsQueuedEvent = new ManualResetEvent(false);
+
+        _fixture.SentryOptions.MaxQueueItems = 1;
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(p =>
+            {
+                _ = transportEvent.Set(); // Processing first event
+                _ = eventsQueuedEvent.WaitOne(); // Stay blocked while test queue events
+            });
+
+        using var sut = _fixture.GetSut();
+
+        // Act
+        _ = sut.EnqueueEnvelope(envelope);
+        _ = transportEvent.WaitOne(); // Wait first event to be in-flight
+
+        // in-flight events are kept in queue until completed.
+        _ = sut.EnqueueEnvelope(envelope);
+
+        // Check that we counted a single discarded event with the correct information
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
 
         _ = eventsQueuedEvent.Set();
     }
