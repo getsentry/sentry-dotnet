@@ -119,11 +119,11 @@ public class CachingTransportTests
 
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-            .ThrowsForAnyArgs(_ =>
+            .ReturnsForAnyArgs(async _ =>
             {
                 capturingCompletionSource.SetResult(null);
-                cancelingCompletionSource.Task.Wait(TimeSpan.FromSeconds(4));
-                return new OperationCanceledException();
+                await Task.WhenAny(cancelingCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(4)));
+                throw new OperationCanceledException();
             });
 
         await using var transport = CachingTransport.Create(innerTransport, options);
