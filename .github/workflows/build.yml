@@ -69,7 +69,7 @@ jobs:
             name: Unit Test Results (${{ matrix.os }})
             path: '**/*.trx'
             reporter: dotnet-trx
-            list-suites: 'all'
+            list-suites: 'failed'
             list-tests: 'failed'
 
         - name: Pack
