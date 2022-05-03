@@ -258,7 +258,7 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates a new <see cref="Envelope"/> starting from the current one and appends the <paramref name="item"/> given.
         /// </summary>
-        /// <param name="item">The <see cref="Envelope"/> to append.</param>
+        /// <param name="item">The <see cref="EnvelopeItem"/> to append.</param>
         /// <returns>A new <see cref="Envelope"/> with the same headers and items, including those from <paramref name="item"/>.</returns>
         internal Envelope WithItem(EnvelopeItem item)
         {
