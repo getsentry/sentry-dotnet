@@ -80,19 +80,18 @@ public class CachingTransportTests
         };
 
         using var innerTransport = new FakeTransport();
-
-        var tcs = new TaskCompletionSource<bool>();
-        var timeout = TimeSpan.FromSeconds(7);
-        using var cts = new CancellationTokenSource(timeout);
-        innerTransport.EnvelopeSent += (_, _) => tcs.SetResult(true);
-        cts.Token.Register(() => tcs.TrySetCanceled());
-
         await using var transport = CachingTransport.Create(innerTransport, options);
+
+        // Attach to the EnvelopeSent event. We'll wait for that below.
+        // ReSharper disable once AccessToDisposedClosure
+        using var waiter = new Waiter<Envelope>(handler => innerTransport.EnvelopeSent += handler);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
-        await transport.SendEnvelopeAsync(envelope, CancellationToken.None);
-        await tcs.Task; // wait for the inner transport to signal that it sent the envelope
+        await transport.SendEnvelopeAsync(envelope);
+
+        // wait for the inner transport to signal that it sent the envelope
+        await waiter.WaitAsync(TimeSpan.FromSeconds(7));
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
