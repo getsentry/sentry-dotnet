@@ -247,10 +247,7 @@ public class SentrySdkTests : SentrySdkTestFixture
                 DiagnosticLogger = _logger,
                 Dsn = ValidDsnWithoutSecret,
                 CacheDirectoryPath = cacheDirectory.Path
-            });
-
-            // Shutdown the worker to make sure nothing gets processed
-            await initialTransport.StopWorkerAsync();
+            }, startWorker: false);
 
             for (var i = 0; i < 3; i++)
             {
