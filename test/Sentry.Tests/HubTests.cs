@@ -321,16 +321,7 @@ public class HubTests
             }
         }
 
-        using var tempDirectory = new TempDirectory();
-        string cachePath;
-        if (offlineCaching)
-        {
-            cachePath = tempDirectory.Path;
-        }
-        else
-        {
-            cachePath = null;
-        }
+        using var tempDirectory = offlineCaching ? new TempDirectory() : null;
 
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(SentryLevel.Error).Returns(true);
@@ -339,7 +330,7 @@ public class HubTests
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
             // To go through a round trip serialization of cached envelope
-            CacheDirectoryPath = cachePath,
+            CacheDirectoryPath = tempDirectory?.Path,
             // So we don't need to deal with gzip'ed payload
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
