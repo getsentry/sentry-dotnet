@@ -87,6 +87,14 @@ namespace Sentry.Internal
                             "Cache flushing is taking longer than the configured timeout of {0}. " +
                             "Continuing without waiting for the task to finish.",
                             _options.InitCacheFlushTimeout);
+                        flushTask.ContinueWith(task =>
+                        {
+                            var aggragateException = task.Exception.Flatten();
+                            foreach (var exception in aggragateException.InnerExceptions)
+                                _options.LogInfo(
+                                    "Cache flushing reported this exception after it timed out: {0}. ",
+                                    exception.ToString());
+                        }, TaskContinuationOptions.OnlyOnFaulted);
                     }
 #endif
                 }
