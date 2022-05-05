@@ -2,20 +2,29 @@ namespace Sentry.Testing;
 
 internal class FakeTransport : ITransport, IDisposable
 {
+    private readonly TimeSpan _artificialDelay;
     private readonly List<Envelope> _envelopes = new();
 
     public event EventHandler<Envelope> EnvelopeSent;
 
-    public virtual Task SendEnvelopeAsync(
+    public FakeTransport(TimeSpan artificialDelay = default)
+    {
+        _artificialDelay = artificialDelay;
+    }
+
+    public virtual async Task SendEnvelopeAsync(
         Envelope envelope,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
+        if (_artificialDelay > TimeSpan.Zero)
+        {
+            await Task.Delay(_artificialDelay, CancellationToken.None);
+        }
+
         _envelopes.Add(envelope);
         EnvelopeSent?.Invoke(this, envelope);
-
-        return Task.CompletedTask;
     }
 
     public IReadOnlyList<Envelope> GetSentEnvelopes() => _envelopes.ToArray();
