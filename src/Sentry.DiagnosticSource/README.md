@@ -1,6 +1,6 @@
 [![Sentry](.assets/sentry-wordmark-dark-280x84.png)](https://sentry.io/?utm_source=github&utm_medium=logo)
 
-_Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us, [**check out our open positions**](https://sentry.io/careers/)_
+_Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us, [**check out our open positions**](https://sentry.io/careers/)._
 
 ### About Sentry DiagnosticSource
 
