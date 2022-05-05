@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Sentry.AspNetCore.Tunnel;
 
-namespace Sentry.Tunnel;
+namespace Sentry.AspNetCore.Tunnel;
 
 /// <summary>
 /// Extension methods to add Sentry ingestion tunnel.
 /// </summary>
-[Obsolete("The functionality from Sentry.Tunnel has been moved into Sentry.AspNetCore. Remove the Sentry.Tunnel NuGet and ensure the Sentry.AspNetCore NuGet is referenced.")]
 public static class SentryTunnelingApplicationBuilderExtensions
 {
     /// <summary>

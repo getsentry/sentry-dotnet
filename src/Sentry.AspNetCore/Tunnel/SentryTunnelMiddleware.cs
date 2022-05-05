@@ -5,7 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sentry.Tunnel;
+namespace Sentry.AspNetCore.Tunnel;
 
 /// <summary>
 /// Middleware that can forward Sentry envelopes.
