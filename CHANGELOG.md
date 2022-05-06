@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Rework how the `InitCacheFlushTimeout` option is implemented. ([#1644](https://github.com/getsentry/sentry-dotnet/pull/1644))
+
 ## 3.17.0
 
 **Notice:** If you are using self-hosted Sentry, this version and forward requires either Sentry version >= [21.9.0](https://github.com/getsentry/relay/blob/master/CHANGELOG.md#2190), or you must manually disable sending client reports via the `SendClientReports` option.

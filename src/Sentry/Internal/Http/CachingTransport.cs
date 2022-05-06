@@ -40,6 +40,8 @@ namespace Sentry.Internal.Http
         private readonly CancellationTokenSource _workerCts = new();
         private Task _worker = null!;
 
+        private ManualResetEventSlim? _initCacheResetEvent;
+
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
@@ -80,6 +82,32 @@ namespace Sentry.Internal.Http
 
             // Start a worker, if one is needed
             _worker = startWorker ? Task.Run(CachedTransportBackgroundTaskAsync) : Task.CompletedTask;
+
+            // Wait for init timeout, if configured.  (Can't do this without a worker.)
+            if (startWorker && _options.InitCacheFlushTimeout > TimeSpan.Zero)
+            {
+                _options.LogDebug("Blocking initialization to flush the cache.");
+
+                using (_initCacheResetEvent = new ManualResetEventSlim())
+                {
+                    // This will complete either when the first round of processing is done,
+                    // or on timeout, whichever comes first.
+                    var completed = _initCacheResetEvent.Wait(_options.InitCacheFlushTimeout);
+                    if (completed)
+                    {
+                        _options.LogDebug("Completed flushing the cache. Resuming initialization.");
+                    }
+                    else
+                    {
+                        _options.LogDebug(
+                            $"InitCacheFlushTimeout of {_options.InitCacheFlushTimeout} reached. " +
+                            "Resuming initialization. Cache will continue flushing in the background.");
+                    }
+                }
+
+                // We're done with this. Set null to avoid object disposed exceptions on future processing calls.
+                _initCacheResetEvent = null;
+            }
         }
 
         private async Task CachedTransportBackgroundTaskAsync()
@@ -185,6 +213,9 @@ namespace Sentry.Internal.Http
             {
                 await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
             }
+
+            // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
+            _initCacheResetEvent?.Set();
         }
 
         private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
