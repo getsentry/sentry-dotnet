@@ -1,9 +1,11 @@
+using System.Collections.Concurrent;
+
 namespace Sentry.Testing;
 
 internal class FakeTransport : ITransport, IDisposable
 {
     private readonly TimeSpan _artificialDelay;
-    private readonly List<Envelope> _envelopes = new();
+    private readonly ConcurrentQueue<Envelope> _envelopes = new();
 
     public event EventHandler<Envelope> EnvelopeSent;
 
@@ -23,7 +25,7 @@ internal class FakeTransport : ITransport, IDisposable
             await Task.Delay(_artificialDelay, CancellationToken.None);
         }
 
-        _envelopes.Add(envelope);
+        _envelopes.Enqueue(envelope);
         EnvelopeSent?.Invoke(this, envelope);
     }
 
