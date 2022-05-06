@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Fixes
+
 - Rework how the `InitCacheFlushTimeout` option is implemented. ([#1644](https://github.com/getsentry/sentry-dotnet/pull/1644))
 
 ## 3.17.0
