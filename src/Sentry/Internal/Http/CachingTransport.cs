@@ -92,6 +92,9 @@ namespace Sentry.Internal.Http
                     // or on timeout, whichever comes first.
                     _initCacheResetEvent.Wait(_options.InitCacheFlushTimeout);
                 }
+
+                // We're done with this. Set null to avoid object disposed exceptions on future processing calls.
+                _initCacheResetEvent = null;
             }
         }
 
