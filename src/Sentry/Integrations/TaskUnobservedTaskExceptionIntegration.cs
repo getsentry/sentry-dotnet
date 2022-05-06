@@ -22,7 +22,6 @@ namespace Sentry.Integrations
 
         public void Unregister(IHub hub)
         {
-            _appDomain.UnobservedTaskException -= Handle;
             _hub = null;
         }
 
