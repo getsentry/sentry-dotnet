@@ -260,8 +260,10 @@ public class SentrySdkTests : SentrySdkTestFixture
             await initialTransport.SendEnvelopeAsync(envelope);
         }
 
-        // Setup the transport to be slow
-        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(500);
+        // Setup the transport to be slow.
+        // NOTE: This must be slow enough for CI or the tests will fail.  If the test becomes flaky, increase the timeout.
+        // We are testing the timing delay behavior, so there's no alternative that will suffice.
+        var processingDelayPerEnvelope = TimeSpan.FromSeconds(2);
         var transport = new FakeTransport(processingDelayPerEnvelope);
 
         // Set the timeout for the desired result
