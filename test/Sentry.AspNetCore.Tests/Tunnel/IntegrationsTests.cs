@@ -3,11 +3,9 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Sentry.AspNetCore.Tunnel;
 
 namespace Sentry.Tunnel.Tests;
 
-[Collection("SentryTunnelCollection")]
 public class IntegrationsTests
 {
     private readonly TestServer _server;
