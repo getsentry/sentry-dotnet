@@ -28,27 +28,30 @@ public class SentryTunnelMiddleware : IMiddleware
     /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        if (context.Request.Method == "OPTIONS")
+        var response = context.Response;
+        var headers = response.Headers;
+        var request = context.Request;
+        if (request.Method == "OPTIONS")
         {
-            context.Response.Headers.Add("Access-Control-Allow-Origin", new[] { (string)context.Request.Headers["Origin"] });
-            context.Response.Headers.Add("Access-Control-Allow-Headers", new[] { "Origin, X-Requested-With, Content-Type, Accept" });
-            context.Response.Headers.Add("Access-Control-Allow-Methods", new[] { "POST, OPTIONS" });
-            context.Response.Headers.Add("Access-Control-Allow-Credentials", new[] { "true" });
-            context.Response.StatusCode = 200;
+            headers.Add("Access-Control-Allow-Origin", new[] { (string)request.Headers["Origin"] });
+            headers.Add("Access-Control-Allow-Headers", new[] { "Origin, X-Requested-With, Content-Type, Accept" });
+            headers.Add("Access-Control-Allow-Methods", new[] { "POST, OPTIONS" });
+            headers.Add("Access-Control-Allow-Credentials", new[] { "true" });
+            response.StatusCode = 200;
             return;
         }
 
         var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = httpClientFactory.CreateClient("SentryTunnel");
         client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version.Value));
-        var ms = new MemoryStream();
-        await context.Request.Body.CopyToAsync(ms).ConfigureAwait(false);
-        ms.Position = 0;
-        using var reader = new StreamReader(ms);
+        var memoryStream = new MemoryStream();
+        await request.Body.CopyToAsync(memoryStream).ConfigureAwait(false);
+        memoryStream.Position = 0;
+        using var reader = new StreamReader(memoryStream);
         var header = await reader.ReadLineAsync().ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(header))
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            response.StatusCode = StatusCodes.Status400BadRequest;
             return;
         }
 
@@ -57,41 +60,41 @@ public class SentryTunnelMiddleware : IMiddleware
             var headerJson = JsonSerializer.Deserialize<Dictionary<string, object>>(header);
             if (headerJson == null)
             {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
+                response.StatusCode = StatusCodes.Status400BadRequest;
+                await response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
                 return;
             }
             if (headerJson.TryGetValue("dsn", out var dsnString) && Uri.TryCreate(dsnString.ToString(), UriKind.Absolute, out var dsn) && _allowedHosts.Contains(dsn.Host))
             {
                 var projectId = dsn.AbsolutePath.Trim('/');
-                ms.Position = 0;
-                var request = new HttpRequestMessage
+                memoryStream.Position = 0;
+                var sentryRequest = new HttpRequestMessage
                 {
                     RequestUri = new Uri($"https://{dsn.Host}/api/{projectId}/envelope/"),
                     Method = HttpMethod.Post,
-                    Content = new StreamContent(ms),
+                    Content = new StreamContent(memoryStream),
                 };
                 var clientIp = context.Connection?.RemoteIpAddress?.ToString();
                 if (clientIp != null)
                 {
-                    request.Headers.Add("X-Forwarded-For", context.Connection?.RemoteIpAddress?.ToString());
+                    sentryRequest.Headers.Add("X-Forwarded-For", context.Connection?.RemoteIpAddress?.ToString());
                 }
-                var responseMessage = await client.SendAsync(request).ConfigureAwait(false);
+                var responseMessage = await client.SendAsync(sentryRequest).ConfigureAwait(false);
                 // We send the response back to the client, whatever it was
-                context.Response.Headers["content-type"] = "application/json";
-                context.Response.StatusCode = (int)responseMessage.StatusCode;
-                await responseMessage.Content.CopyToAsync(context.Response.Body).ConfigureAwait(false);
+                headers["content-type"] = "application/json";
+                response.StatusCode = (int)responseMessage.StatusCode;
+                await responseMessage.Content.CopyToAsync(response.Body).ConfigureAwait(false);
             }
         }
         catch (JsonException)
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
+            response.StatusCode = StatusCodes.Status400BadRequest;
+            await response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
         }
         catch (ArgumentNullException)
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsync("Received empty body").ConfigureAwait(false);
+            response.StatusCode = StatusCodes.Status400BadRequest;
+            await response.WriteAsync("Received empty body").ConfigureAwait(false);
         }
     }
 }

@@ -26,8 +26,4 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Tunnel" />
-  </ItemGroup>
-
 </Project>
