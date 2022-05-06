@@ -86,11 +86,23 @@ namespace Sentry.Internal.Http
             // Wait for init timeout, if configured.  (Can't do this without a worker.)
             if (startWorker && _options.InitCacheFlushTimeout > TimeSpan.Zero)
             {
+                _options.LogDebug("Blocking initialization to flush the cache.");
+
                 using (_initCacheResetEvent = new ManualResetEventSlim())
                 {
                     // This will complete either when the first round of processing is done,
                     // or on timeout, whichever comes first.
-                    _initCacheResetEvent.Wait(_options.InitCacheFlushTimeout);
+                    var completed = _initCacheResetEvent.Wait(_options.InitCacheFlushTimeout);
+                    if (completed)
+                    {
+                        _options.LogDebug("Completed flushing the cache. Resuming initialization.");
+                    }
+                    else
+                    {
+                        _options.LogDebug(
+                            $"InitCacheFlushTimeout of {_options.InitCacheFlushTimeout} reached. " +
+                            "Resuming initialization. Cache will continue flushing in the background.");
+                    }
                 }
 
                 // We're done with this. Set null to avoid object disposed exceptions on future processing calls.
