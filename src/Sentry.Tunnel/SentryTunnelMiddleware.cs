@@ -6,7 +6,7 @@ namespace Sentry.Tunnel;
 /// <seealso href="https://docs.sentry.io/platforms/javascript/troubleshooting/#dealing-with-ad-blockers"/>
 [Obsolete("The functionality from Sentry.Tunnel has been moved into Sentry.AspNetCore. Remove the Sentry.Tunnel NuGet and ensure the Sentry.AspNetCore NuGet is referenced.")]
 public class SentryTunnelMiddleware :
-    Sentry.AspNetCore.Tunnel.SentryTunnelMiddleware
+    Sentry.AspNetCore.SentryTunnelMiddleware
 {
     /// <summary>
     /// Middleware that can forward Sentry envelopes.
