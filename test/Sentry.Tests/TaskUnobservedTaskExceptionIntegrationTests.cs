@@ -84,12 +84,12 @@ public class TaskUnobservedTaskExceptionIntegrationTests
     }
 
     [Fact]
-    public void Unregister_UnhandledException_Unsubscribes()
+    public void Unregister_UnhandledException_DoesNotUnsubscribes()
     {
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
         sut.Unregister(_fixture.Hub);
 
-        _fixture.AppDomain.Received(1).UnobservedTaskException -= sut.Handle;
+        _fixture.AppDomain.DidNotReceive().UnobservedTaskException -= sut.Handle;
     }
 }
