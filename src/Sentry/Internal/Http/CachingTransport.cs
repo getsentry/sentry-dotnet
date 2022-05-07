@@ -187,6 +187,8 @@ namespace Sentry.Internal.Http
                             _options.LogDebug(
                                 "Failed to move unprocessed file back to cache (attempt {0}, retrying.): {1}",
                                 attempt, filePath);
+
+                            Thread.Sleep(200); // give a small bit of time before retry
                         }
                         else
                         {
