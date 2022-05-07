@@ -160,16 +160,44 @@ namespace Sentry.Internal.Http
 
             foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
             {
-                try
+                var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
+                    filePath, destinationPath);
+
+                const int maxAttempts = 3;
+                for (var attempt = 1; attempt <= maxAttempts; attempt++)
                 {
-                    var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                    _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                        filePath, destinationPath);
-                    File.Move(filePath, destinationPath);
-                }
-                catch (Exception e)
-                {
-                    _options.LogError("Failed to move unprocessed file back to cache: {0}", e, filePath);
+                    try
+                    {
+                        File.Move(filePath, destinationPath);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (!File.Exists(filePath))
+                        {
+                            _options.LogDebug(
+                                "Failed to move unprocessed file back to cache (attempt {0}), " +
+                                "but the file no longer exists so it must have been handled by another process: {1}",
+                                attempt, filePath);
+                            break;
+                        }
+
+                        if (attempt < maxAttempts)
+                        {
+                            _options.LogDebug(
+                                "Failed to move unprocessed file back to cache (attempt {0}, retrying.): {1}",
+                                attempt, filePath);
+                        }
+                        else
+                        {
+                            _options.LogError(
+                                "Failed to move unprocessed file back to cache (attempt {0}, done.): {1}", ex,
+                                attempt, filePath);
+                        }
+
+                        // note: we do *not* want to re-throw the exception
+                    }
                 }
             }
         }
