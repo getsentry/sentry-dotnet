@@ -5,6 +5,7 @@
 ### Fixes
 
 - Rework how the `InitCacheFlushTimeout` option is implemented. ([#1644](https://github.com/getsentry/sentry-dotnet/pull/1644))
+- Add retry logic to the caching transport when moving files back from the processing folder. ([#1649](https://github.com/getsentry/sentry-dotnet/pull/1649))
 
 ## 3.17.0
 
