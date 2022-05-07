@@ -161,8 +161,7 @@ namespace Sentry.Internal.Http
             foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
             {
                 var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                    filePath, destinationPath);
+                _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.", filePath, destinationPath);
 
                 const int maxAttempts = 3;
                 for (var attempt = 1; attempt <= maxAttempts; attempt++)
