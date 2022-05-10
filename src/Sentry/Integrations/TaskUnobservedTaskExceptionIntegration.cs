@@ -6,7 +6,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Integrations
 {
-    internal class TaskUnobservedTaskExceptionIntegration : IInternalSdkIntegration
+    internal class TaskUnobservedTaskExceptionIntegration : ISdkIntegration
     {
         private readonly IAppDomain _appDomain;
         private IHub? _hub;
@@ -18,12 +18,6 @@ namespace Sentry.Integrations
         {
             _hub = hub;
             _appDomain.UnobservedTaskException += Handle;
-        }
-
-        public void Unregister(IHub hub)
-        {
-            _appDomain.UnobservedTaskException -= Handle;
-            _hub = null;
         }
 
         // Internal for testability

@@ -4,9 +4,9 @@ public class AppDomainProcessExitIntegrationTests
 {
     private class Fixture
     {
-        public IHub Hub { get; set; } = Substitute.For<IHub, IDisposable>();
+        public IHub Hub { get; } = Substitute.For<IHub, IDisposable>();
 
-        public IAppDomain AppDomain { get; set; } = Substitute.For<IAppDomain>();
+        public IAppDomain AppDomain { get; } = Substitute.For<IAppDomain>();
 
         public Fixture() => Hub.IsEnabled.Returns(true);
 
@@ -25,7 +25,7 @@ public class AppDomainProcessExitIntegrationTests
 
         sut.HandleProcessExit(this, EventArgs.Empty);
 
-        (_fixture.Hub as IDisposable).Received(1).Dispose();
+        ((IDisposable)_fixture.Hub).Received(1).Dispose();
     }
 
     [Fact]
@@ -35,16 +35,5 @@ public class AppDomainProcessExitIntegrationTests
         sut.Register(_fixture.Hub, SentryOptions);
 
         _fixture.AppDomain.Received().ProcessExit += sut.HandleProcessExit;
-    }
-
-    [Fact]
-    public void Unregister_ProcessExit_Unsubscribes()
-    {
-        var sut = _fixture.GetSut();
-
-        sut.Register(_fixture.Hub, SentryOptions);
-        sut.Unregister(_fixture.Hub);
-
-        _fixture.AppDomain.Received(1).ProcessExit -= sut.HandleProcessExit;
     }
 }
