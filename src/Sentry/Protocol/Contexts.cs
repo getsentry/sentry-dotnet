@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
@@ -91,7 +92,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer) => writer.WriteDictionaryValue(this!);
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) => writer.WriteDictionaryValue(this!, logger);
 
         /// <summary>
         /// Parses from JSON.
@@ -136,11 +137,32 @@ namespace Sentry
                 else
                 {
                     // Unknown context - parse as dictionary
-                    result[name] = value.GetDynamic()!;
+                    var dynamicContext = value.GetDynamicOrNull();
+                    if (dynamicContext is not null)
+                    {
+                        result[name] = dynamicContext;
+                    }
                 }
             }
 
             return result;
         }
+
+        internal void ReplaceWith(Contexts? contexts)
+        {
+            Clear();
+
+            if (contexts == null)
+            {
+                return;
+            }
+
+            foreach (var context in contexts)
+            {
+                this[context.Key] = context.Value;
+            }
+        }
+
+        internal Contexts? NullIfEmpty() => IsEmpty ? null : this;
     }
 }

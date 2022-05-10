@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -57,45 +58,16 @@ namespace Sentry.Protocol
         public IDictionary<string, object?> Data { get; } = new Dictionary<string, object?>(StringComparer.Ordinal);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            // Type
-            if (!string.IsNullOrWhiteSpace(Type))
-            {
-                writer.WriteString("type", Type);
-            }
-
-            // Value
-            if (!string.IsNullOrWhiteSpace(Value))
-            {
-                writer.WriteString("value", Value);
-            }
-
-            // Module
-            if (!string.IsNullOrWhiteSpace(Module))
-            {
-                writer.WriteString("module", Module);
-            }
-
-            // Thread ID
-            if (ThreadId != default)
-            {
-                writer.WriteNumber("thread_id", ThreadId);
-            }
-
-            // Stack trace
-            if (Stacktrace is {} stacktrace)
-            {
-                writer.WriteSerializable("stacktrace", stacktrace);
-            }
-
-            // Mechanism
-            if (Mechanism is {} mechanism)
-            {
-                writer.WriteSerializable("mechanism", mechanism);
-            }
+            writer.WriteStringIfNotWhiteSpace("type", Type);
+            writer.WriteStringIfNotWhiteSpace("value", Value);
+            writer.WriteStringIfNotWhiteSpace("module", Module);
+            writer.WriteNumberIfNotNull("thread_id", ThreadId.NullIfDefault());
+            writer.WriteSerializableIfNotNull("stacktrace", Stacktrace, logger);
+            writer.WriteSerializableIfNotNull("mechanism", Mechanism, logger);
 
             writer.WriteEndObject();
         }

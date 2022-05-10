@@ -11,13 +11,33 @@ namespace Sentry.Extensibility
     public static class DiagnosticLoggerExtensions
     {
         /// <summary>
+        /// Log an internal SDK message.
+        /// </summary>
+        internal static void Log(
+            this SentryOptions options,
+            SentryLevel logLevel,
+            string message,
+            Exception? exception = null,
+            params object?[] args)
+            => options.DiagnosticLogger?.Log(logLevel, message, exception, args);
+
+        /// <summary>
         /// Log a debug message.
         /// </summary>
         public static void LogDebug<TArg>(
             this IDiagnosticLogger logger,
             string message,
             TArg arg)
-            => logger.LogIfEnabled(SentryLevel.Debug, message, arg);
+            => logger.LogIfEnabled(SentryLevel.Debug, null, message, arg);
+
+        /// <summary>
+        /// Log a debug message.
+        /// </summary>
+        internal static void LogDebug<TArg>(
+            this SentryOptions options,
+            string message,
+            TArg arg)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Debug, null, message, arg);
 
         /// <summary>
         /// Log a debug message.
@@ -27,7 +47,17 @@ namespace Sentry.Extensibility
             string message,
             TArg arg,
             TArg2 arg2)
-            => logger.LogIfEnabled(SentryLevel.Debug, message, arg, arg2);
+            => logger.LogIfEnabled(SentryLevel.Debug, null, message, arg, arg2);
+
+        /// <summary>
+        /// Log a debug message.
+        /// </summary>
+        internal static void LogDebug<TArg, TArg2>(
+            this SentryOptions options,
+            string message,
+            TArg arg,
+            TArg2 arg2)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Debug, null, message, arg, arg2);
 
         /// <summary>
         /// Log a debug message.
@@ -35,7 +65,15 @@ namespace Sentry.Extensibility
         public static void LogDebug(
             this IDiagnosticLogger logger,
             string message)
-            => logger.LogIfEnabled(SentryLevel.Debug, message);
+            => logger.LogIfEnabled(SentryLevel.Debug, null, message);
+
+        /// <summary>
+        /// Log a debug message.
+        /// </summary>
+        internal static void LogDebug(
+            this SentryOptions options,
+            string message)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Debug, null, message);
 
         /// <summary>
         /// Log a info message.
@@ -43,7 +81,15 @@ namespace Sentry.Extensibility
         public static void LogInfo(
             this IDiagnosticLogger logger,
             string message)
-            => logger.LogIfEnabled(SentryLevel.Info, message);
+            => logger.LogIfEnabled(SentryLevel.Info, null, message);
+
+        /// <summary>
+        /// Log a info message.
+        /// </summary>
+        internal static void LogInfo(
+            this SentryOptions options,
+            string message)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Info, null, message);
 
         /// <summary>
         /// Log a info message.
@@ -52,7 +98,16 @@ namespace Sentry.Extensibility
             this IDiagnosticLogger logger,
             string message,
             TArg arg)
-            => logger.LogIfEnabled(SentryLevel.Info, message, arg);
+            => logger.LogIfEnabled(SentryLevel.Info, null, message, arg);
+
+        /// <summary>
+        /// Log a info message.
+        /// </summary>
+        internal static void LogInfo<TArg>(
+            this SentryOptions options,
+            string message,
+            TArg arg)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Info, null, message, arg);
 
         /// <summary>
         /// Log a info message.
@@ -62,7 +117,17 @@ namespace Sentry.Extensibility
             string message,
             TArg arg,
             TArg2 arg2)
-            => logger.LogIfEnabled(SentryLevel.Info, message, arg, arg2);
+            => logger.LogIfEnabled(SentryLevel.Info, null, message, arg, arg2);
+
+        /// <summary>
+        /// Log a info message.
+        /// </summary>
+        internal static void LogInfo<TArg, TArg2>(
+            this SentryOptions options,
+            string message,
+            TArg arg,
+            TArg2 arg2)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Info, null, message, arg, arg2);
 
         /// <summary>
         /// Log a info message.
@@ -73,7 +138,18 @@ namespace Sentry.Extensibility
             TArg arg,
             TArg2 arg2,
             TArg3 arg3)
-            => logger.LogIfEnabled(SentryLevel.Info, message, arg, arg2, arg3);
+            => logger.LogIfEnabled(SentryLevel.Info, null, message, arg, arg2, arg3);
+
+        /// <summary>
+        /// Log a info message.
+        /// </summary>
+        internal static void LogInfo<TArg, TArg2, TArg3>(
+            this SentryOptions options,
+            string message,
+            TArg arg,
+            TArg2 arg2,
+            TArg3 arg3)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Info, null, message, arg, arg2, arg3);
 
         /// <summary>
         /// Log a warning message.
@@ -81,7 +157,15 @@ namespace Sentry.Extensibility
         public static void LogWarning(
             this IDiagnosticLogger logger,
             string message)
-            => logger.LogIfEnabled(SentryLevel.Warning, message);
+            => logger.LogIfEnabled(SentryLevel.Warning, null, message);
+
+        /// <summary>
+        /// Log a warning message.
+        /// </summary>
+        internal static void LogWarning(
+            this SentryOptions options,
+            string message)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, null, message);
 
         /// <summary>
         /// Log a warning message.
@@ -90,7 +174,16 @@ namespace Sentry.Extensibility
             this IDiagnosticLogger logger,
             string message,
             TArg arg)
-            => logger.LogIfEnabled(SentryLevel.Warning, message, arg);
+            => logger.LogIfEnabled(SentryLevel.Warning, null, message, arg);
+
+        /// <summary>
+        /// Log a warning message.
+        /// </summary>
+        internal static void LogWarning<TArg>(
+            this SentryOptions options,
+            string message,
+            TArg arg)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, null, message, arg);
 
         /// <summary>
         /// Log a warning message.
@@ -100,29 +193,58 @@ namespace Sentry.Extensibility
             string message,
             TArg arg,
             TArg2 arg2)
-            => logger.LogIfEnabled(SentryLevel.Warning, message, arg, arg2);
+            => logger.LogIfEnabled(SentryLevel.Warning, null, message, arg, arg2);
 
         /// <summary>
         /// Log a warning message.
+        /// </summary>
+        internal static void LogWarning<TArg, TArg2>(
+            this SentryOptions options,
+            string message,
+            TArg arg,
+            TArg2 arg2)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, null, message, arg, arg2);
+
+        /// <summary>
+        /// Log a error message.
         /// </summary>
         public static void LogError(
             this IDiagnosticLogger logger,
             string message,
             Exception? exception = null)
-            => logger.LogIfEnabled(SentryLevel.Error, message, exception);
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message);
 
         /// <summary>
-        /// Log a warning message.
+        /// Log a error message.
+        /// </summary>
+        internal static void LogError(
+            this SentryOptions options,
+            string message,
+            Exception? exception = null)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message);
+
+        /// <summary>
+        /// Log a error message.
         /// </summary>
         public static void LogError<TArg>(
             this IDiagnosticLogger logger,
             string message,
             Exception exception,
             TArg arg)
-            => logger.LogIfEnabled(SentryLevel.Error, message, exception, arg);
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg);
 
         /// <summary>
-        /// Log a warning message.
+        /// Log a error message.
+        /// </summary>
+        internal static void LogError<TArg>(
+            this SentryOptions options,
+            string message,
+            Exception exception,
+            TArg arg)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message, arg);
+
+        /// <summary>
+        /// Log a error message.
         /// </summary>
         public static void LogError<TArg, TArg2>(
             this IDiagnosticLogger logger,
@@ -130,19 +252,68 @@ namespace Sentry.Extensibility
             Exception exception,
             TArg arg,
             TArg2 arg2)
-            => logger.LogIfEnabled(SentryLevel.Error, message, exception, arg, arg2);
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2);
 
         /// <summary>
-        /// Log a warning message.
+        /// Log a error message.
         /// </summary>
-        public static void LogError<TArg, TArg2, TArg3>(
+        internal static void LogError<TArg, TArg2>(
+            this SentryOptions options,
+            string message,
+            Exception exception,
+            TArg arg,
+            TArg2 arg2)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2);
+
+        /// <summary>
+        /// Log a error message.
+        /// </summary>
+        public static void LogError<TArg, TArg2, TArg3, TArg4>(
             this IDiagnosticLogger logger,
             string message,
             Exception exception,
             TArg arg,
             TArg2 arg2,
+            TArg3 arg3,
+            TArg4 arg4)
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3, arg4);
+
+        /// <summary>
+        /// Log a error message.
+        /// </summary>
+        internal static void LogError<TArg, TArg2, TArg3, TArg4>(
+            this SentryOptions options,
+            string message,
+            Exception exception,
+            TArg arg,
+            TArg2 arg2,
+            TArg3 arg3,
+            TArg4 arg4)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3, arg4);
+
+        /// <summary>
+        /// Log an error message.
+        /// </summary>
+        public static void LogError<TArg, TArg2, TArg3>(
+            this IDiagnosticLogger logger,
+            Exception exception,
+            string message,
+            TArg arg,
+            TArg2 arg2,
             TArg3 arg3)
-            => logger.LogIfEnabled(SentryLevel.Error, message, arg, arg2, arg3, exception);
+            => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3);
+
+        /// <summary>
+        /// Log an error message.
+        /// </summary>
+        internal static void LogError<TArg, TArg2, TArg3>(
+            this SentryOptions options,
+            Exception exception,
+            string message,
+            TArg arg,
+            TArg2 arg2,
+            TArg3 arg3)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3);
 
         /// <summary>
         /// Log a warning message.
@@ -151,14 +322,41 @@ namespace Sentry.Extensibility
             this IDiagnosticLogger logger,
             string message,
             Exception? exception = null)
-            => logger.LogIfEnabled(SentryLevel.Fatal, message, exception);
+            => logger.LogIfEnabled(SentryLevel.Fatal, exception, message);
+
+        /// <summary>
+        /// Log a warning message.
+        /// </summary>
+        internal static void LogFatal(
+            this SentryOptions options,
+            string message,
+            Exception? exception = null)
+            => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Fatal, exception, message);
 
         internal static void LogIfEnabled(
             this IDiagnosticLogger logger,
             SentryLevel level,
-            string message,
-            Exception? exception = null)
+            Exception? exception,
+            string message)
         {
+            if (logger.IsEnabled(level))
+            {
+                logger.Log(level, message, exception);
+            }
+        }
+
+        internal static void LogIfEnabled(
+            this SentryOptions options,
+            SentryLevel level,
+            Exception? exception,
+            string message)
+        {
+            var logger = options.DiagnosticLogger;
+            if (logger == null)
+            {
+                return;
+            }
+
             if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception);
@@ -168,10 +366,29 @@ namespace Sentry.Extensibility
         internal static void LogIfEnabled<TArg>(
             this IDiagnosticLogger logger,
             SentryLevel level,
+            Exception? exception,
             string message,
-            TArg arg,
-            Exception? exception = null)
+            TArg arg)
         {
+            if (logger.IsEnabled(level))
+            {
+                logger.Log(level, message, exception, arg);
+            }
+        }
+
+        internal static void LogIfEnabled<TArg>(
+            this SentryOptions options,
+            SentryLevel level,
+            Exception? exception,
+            string message,
+            TArg arg)
+        {
+            var logger = options.DiagnosticLogger;
+            if (logger == null)
+            {
+                return;
+            }
+
             if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception, arg);
@@ -181,11 +398,31 @@ namespace Sentry.Extensibility
         internal static void LogIfEnabled<TArg, TArg2>(
             this IDiagnosticLogger logger,
             SentryLevel level,
+            Exception? exception,
             string message,
             TArg arg,
-            TArg2 arg2,
-            Exception? exception = null)
+            TArg2 arg2)
         {
+            if (logger.IsEnabled(level))
+            {
+                logger.Log(level, message, exception, arg, arg2);
+            }
+        }
+
+        internal static void LogIfEnabled<TArg, TArg2>(
+            this SentryOptions options,
+            SentryLevel level,
+            Exception? exception,
+            string message,
+            TArg arg,
+            TArg2 arg2)
+        {
+            var logger = options.DiagnosticLogger;
+            if (logger == null)
+            {
+                return;
+            }
+
             if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception, arg, arg2);
@@ -195,15 +432,74 @@ namespace Sentry.Extensibility
         internal static void LogIfEnabled<TArg, TArg2, TArg3>(
             this IDiagnosticLogger logger,
             SentryLevel level,
+            Exception? exception,
             string message,
             TArg arg,
             TArg2 arg2,
-            TArg3 arg3,
-            Exception? exception = null)
+            TArg3 arg3)
         {
             if (logger.IsEnabled(level))
             {
                 logger.Log(level, message, exception, arg, arg2, arg3);
+            }
+        }
+
+        internal static void LogIfEnabled<TArg, TArg2, TArg3>(
+            this SentryOptions options,
+            SentryLevel level,
+            Exception? exception,
+            string message,
+            TArg arg,
+            TArg2 arg2,
+            TArg3 arg3)
+        {
+            var logger = options.DiagnosticLogger;
+            if (logger == null)
+            {
+                return;
+            }
+
+            if (logger.IsEnabled(level))
+            {
+                logger.Log(level, message, exception, arg, arg2, arg3);
+            }
+        }
+
+        internal static void LogIfEnabled<TArg, TArg2, TArg3, TArg4>(
+            this IDiagnosticLogger logger,
+            SentryLevel level,
+            Exception? exception,
+            string message,
+            TArg arg,
+            TArg2 arg2,
+            TArg3 arg3,
+            TArg4 arg4)
+        {
+            if (logger.IsEnabled(level))
+            {
+                logger.Log(level, message, exception, arg, arg2, arg3, arg4);
+            }
+        }
+
+        internal static void LogIfEnabled<TArg, TArg2, TArg3, TArg4>(
+            this SentryOptions options,
+            SentryLevel level,
+            Exception? exception,
+            string message,
+            TArg arg,
+            TArg2 arg2,
+            TArg3 arg3,
+            TArg4 arg4)
+        {
+            var logger = options.DiagnosticLogger;
+            if (logger == null)
+            {
+                return;
+            }
+
+            if (logger.IsEnabled(level))
+            {
+                logger.Log(level, message, exception, arg, arg2, arg3, arg4);
             }
         }
     }

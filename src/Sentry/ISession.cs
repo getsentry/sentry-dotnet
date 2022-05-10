@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Sentry
 {
@@ -41,11 +41,6 @@ namespace Sentry
         /// User agent.
         /// </summary>
         string? UserAgent { get; }
-
-        /// <summary>
-        /// Status with which the session was ended.
-        /// </summary>
-        SessionEndStatus? EndStatus { get; }
 
         /// <summary>
         /// Reported error count.

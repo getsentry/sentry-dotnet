@@ -1,46 +1,52 @@
 using System.IO.Compression;
 using System.Net;
 #if NET461
-using Sentry.Internal;
 using Sentry.PlatformAbstractions;
 using Xunit.Sdk;
 #endif
-using Xunit;
 
-namespace Sentry.Tests
+namespace Sentry.Tests;
+
+public class SentryOptionsTests
 {
-    public class SentryOptionsTests
+    [Fact]
+    public void DecompressionMethods_ByDefault_AllBitsSet()
     {
-        [Fact]
-        public void DecompressionMethods_ByDefault_AllBitsSet()
-        {
-            var sut = new SentryOptions();
-            Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
-        }
-        [Fact]
-        public void RequestBodyCompressionLevel_ByDefault_Optimal()
-        {
-            var sut = new SentryOptions();
-            Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
-        }
-#if NET461
-        [SkippableFact(typeof(IsTypeException))]
-        public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
-        {
-            Skip.If(!RuntimeInfo.GetRuntime().IsMono());
-
-            var sut = new SentryOptions();
-            Assert.IsType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
-        }
-
-        [SkippableFact(typeof(IsNotTypeException))]
-        public void StackTraceFactory_NotRunningOnMono_NotMonoStackTraceFactory()
-        {
-            Skip.If(RuntimeInfo.GetRuntime().IsMono());
-
-            var sut = new SentryOptions();
-            Assert.IsNotType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
-        }
-#endif
+        var sut = new SentryOptions();
+        Assert.Equal(~DecompressionMethods.None, sut.DecompressionMethods);
     }
+
+    [Fact]
+    public void RequestBodyCompressionLevel_ByDefault_Optimal()
+    {
+        var sut = new SentryOptions();
+        Assert.Equal(CompressionLevel.Optimal, sut.RequestBodyCompressionLevel);
+    }
+
+    [Fact]
+    public void Transport_ByDefault_IsNull()
+    {
+        var sut = new SentryOptions();
+        Assert.Null(sut.Transport);
+    }
+
+#if NET461
+    [SkippableFact(typeof(IsTypeException))]
+    public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
+    {
+        Skip.If(!RuntimeInfo.GetRuntime().IsMono());
+
+        var sut = new SentryOptions();
+        Assert.IsType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
+    }
+
+    [SkippableFact(typeof(IsNotTypeException))]
+    public void StackTraceFactory_NotRunningOnMono_NotMonoStackTraceFactory()
+    {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
+        var sut = new SentryOptions();
+        Assert.IsNotType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
+    }
+#endif
 }

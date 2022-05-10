@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Reflection;
 
 namespace Sentry.Internal
 {
@@ -11,6 +13,11 @@ namespace Sentry.Internal
     {
         internal const string CultureInfoKey = "Current Culture";
         internal const string CurrentUiCultureKey = "Current UI Culture";
+        internal const string MemoryInfoKey = "Memory Info";
+        internal const string ThreadPoolInfoKey = "ThreadPool Info";
+        internal const string IsDynamicCodeKey = "Dynamic Code";
+        internal const string IsDynamicCodeCompiledKey = "Compiled";
+        internal const string IsDynamicCodeSupportedKey = "Supported";
 
         private readonly Enricher _enricher;
 
@@ -31,7 +38,7 @@ namespace Sentry.Internal
 
         public SentryEvent Process(SentryEvent @event)
         {
-            _options.DiagnosticLogger?.LogDebug("Running main event processor on: Event {0}", @event.EventId);
+            _options.LogDebug("Running main event processor on: Event {0}", @event.EventId);
 
             if (TimeZoneInfo.Local is { } timeZoneInfo)
             {
@@ -53,6 +60,16 @@ namespace Sentry.Internal
                 @event.Contexts[CurrentUiCultureKey] = currentUiCultureMap;
             }
 
+#if NETCOREAPP3_0_OR_GREATER
+            @event.Contexts[IsDynamicCodeKey] = new Dictionary<string, bool>
+            {
+                { IsDynamicCodeCompiledKey, RuntimeFeature.IsDynamicCodeCompiled },
+                { IsDynamicCodeSupportedKey, RuntimeFeature.IsDynamicCodeSupported }
+            };
+#endif
+
+            AddMemoryInfo(@event.Contexts);
+            AddThreadPoolInfo(@event.Contexts);
             if (@event.ServerName == null)
             {
                 // Value set on the options take precedence over device name.
@@ -81,12 +98,13 @@ namespace Sentry.Internal
                 var stackTrace = SentryStackTraceFactoryAccessor().Create(@event.Exception);
                 if (stackTrace != null)
                 {
+                    var currentThread = Thread.CurrentThread;
                     var thread = new SentryThread
                     {
                         Crashed = false,
                         Current = true,
-                        Name = Thread.CurrentThread.Name,
-                        Id = Thread.CurrentThread.ManagedThreadId,
+                        Name = currentThread.Name,
+                        Id = currentThread.ManagedThreadId,
                         Stacktrace = stackTrace
                     };
 
@@ -96,7 +114,7 @@ namespace Sentry.Internal
                 }
             }
 
-            if (_options.ReportAssemblies)
+            if (_options.ReportAssembliesMode != ReportAssembliesMode.None)
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
@@ -106,9 +124,22 @@ namespace Sentry.Internal
                     }
 
                     var asmName = assembly.GetName();
-                    if (asmName.Name is not null && asmName.Version is not null)
+                    if (asmName.Name is null)
                     {
-                        @event.Modules[asmName.Name] = asmName.Version.ToString();
+                        continue;
+                    }
+
+                    var asmVersion = _options.ReportAssembliesMode switch
+                    {
+                        ReportAssembliesMode.Version => asmName.Version?.ToString() ?? string.Empty,
+                        ReportAssembliesMode.InformationalVersion => assembly.GetVersion() ?? string.Empty,
+                        _ => throw new ArgumentOutOfRangeException(
+                            $"Report assemblies mode '{_options.ReportAssembliesMode}' is not yet supported")
+                    };
+
+                    if (!string.IsNullOrWhiteSpace(asmVersion))
+                    {
+                        @event.Modules[asmName.Name] = asmVersion;
                     }
                 }
             }
@@ -119,21 +150,69 @@ namespace Sentry.Internal
             return @event;
         }
 
+        private static void AddMemoryInfo(Contexts contexts)
+        {
+#if NETCOREAPP3_0_OR_GREATER
+            var memory = GC.GetGCMemoryInfo();
+            var allocatedBytes = GC.GetTotalAllocatedBytes();
+#if NET5_0_OR_GREATER
+            contexts[MemoryInfoKey] = new MemoryInfo(
+                allocatedBytes,
+                memory.FragmentedBytes,
+                memory.HeapSizeBytes,
+                memory.HighMemoryLoadThresholdBytes,
+                memory.TotalAvailableMemoryBytes,
+                memory.MemoryLoadBytes,
+                memory.TotalCommittedBytes,
+                memory.PromotedBytes,
+                memory.PinnedObjectsCount,
+                memory.PauseTimePercentage,
+                memory.Index,
+                memory.FinalizationPendingCount,
+                memory.Compacted,
+                memory.Concurrent,
+                memory.PauseDurations.ToArray());
+#else
+            contexts[MemoryInfoKey] = new MemoryInfo(
+            allocatedBytes,
+            memory.FragmentedBytes,
+            memory.HeapSizeBytes,
+            memory.HighMemoryLoadThresholdBytes,
+            memory.TotalAvailableMemoryBytes,
+            memory.MemoryLoadBytes);
+#endif
+#endif
+        }
+
+        private void AddThreadPoolInfo(Contexts contexts)
+        {
+            ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
+            ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
+            contexts[ThreadPoolInfoKey] = new ThreadPoolInfo(
+                minWorkerThreads,
+                minCompletionPortThreads,
+                maxWorkerThreads,
+                maxCompletionPortThreads,
+                availableWorkerThreads,
+                availableCompletionPortThreads);
+        }
+
         private static IDictionary<string, string>? CultureInfoToDictionary(CultureInfo cultureInfo)
         {
             var dic = new Dictionary<string, string>();
 
             if (!string.IsNullOrWhiteSpace(cultureInfo.Name))
             {
-                dic.Add("Name", cultureInfo.Name);
+                dic.Add("name", cultureInfo.Name);
             }
             if (!string.IsNullOrWhiteSpace(cultureInfo.DisplayName))
             {
-                dic.Add("DisplayName", cultureInfo.DisplayName);
+                dic.Add("display_name", cultureInfo.DisplayName);
             }
             if (cultureInfo.Calendar is { } cal)
             {
-                dic.Add("Calendar", cal.GetType().Name);
+                dic.Add("calendar", cal.GetType().Name);
             }
 
             return dic.Count > 0 ? dic : null;

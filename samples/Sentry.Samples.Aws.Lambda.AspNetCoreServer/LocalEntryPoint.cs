@@ -1,5 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+
 
 // Only used for testing locally: dotnet run
 public static class LocalEntryPoint

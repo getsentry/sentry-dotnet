@@ -2,6 +2,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 
 namespace Sentry.Protocol.Envelopes
 {
@@ -21,11 +22,27 @@ namespace Sentry.Protocol.Envelopes
         public JsonSerializable(IJsonSerializable source) => Source = source;
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
-            await using var writer = new Utf8JsonWriter(stream);
-            Source.WriteTo(writer);
-            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            var writer = new Utf8JsonWriter(stream);
+
+#if NET461 || NETSTANDARD2_0
+            using (writer)
+#else
+            await using (writer.ConfigureAwait(false))
+#endif
+            {
+                Source.WriteTo(writer, logger);
+                await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Serialize(Stream stream, IDiagnosticLogger? logger)
+        {
+            using var writer = new Utf8JsonWriter(stream);
+            Source.WriteTo(writer, logger);
+            writer.Flush();
         }
     }
 }

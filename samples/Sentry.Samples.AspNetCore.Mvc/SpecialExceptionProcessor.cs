@@ -1,18 +1,13 @@
-using Sentry;
-using Sentry.Extensibility;
-using Sentry.Protocol;
+namespace Samples.AspNetCore.Mvc;
 
-namespace Samples.AspNetCore.Mvc
+public class SpecialExceptionProcessor : SentryEventExceptionProcessor<SpecialException>
 {
-    public class SpecialExceptionProcessor : SentryEventExceptionProcessor<SpecialException>
+    protected override void ProcessException(
+        SpecialException exception,
+        SentryEvent sentryEvent)
     {
-        protected override void ProcessException(
-            SpecialException exception,
-            SentryEvent sentryEvent)
-        {
-            sentryEvent.AddBreadcrumb("Processor running on special exception.");
+        sentryEvent.AddBreadcrumb("Processor running on special exception.");
 
-            sentryEvent.SetTag("IsSpecial", exception.IsSpecial.ToString());
-        }
+        sentryEvent.SetTag("IsSpecial", exception.IsSpecial.ToString());
     }
 }

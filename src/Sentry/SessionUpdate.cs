@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -32,9 +33,6 @@ namespace Sentry
         public string? UserAgent { get; }
 
         /// <inheritdoc />
-        public SessionEndStatus? EndStatus { get; }
-
-        /// <inheritdoc />
         public int ErrorCount { get; }
 
         /// <summary>
@@ -58,6 +56,11 @@ namespace Sentry
         public TimeSpan Duration => Timestamp - StartTimestamp;
 
         /// <summary>
+        /// Status with which the session was ended.
+        /// </summary>
+        public SessionEndStatus? EndStatus { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
         public SessionUpdate(
@@ -68,11 +71,11 @@ namespace Sentry
             string? environment,
             string? ipAddress,
             string? userAgent,
-            SessionEndStatus? endStatus,
             int errorCount,
             bool isInitial,
             DateTimeOffset timestamp,
-            int sequenceNumber)
+            int sequenceNumber,
+            SessionEndStatus? endStatus)
         {
             Id = id;
             DistinctId = distinctId;
@@ -81,17 +84,22 @@ namespace Sentry
             Environment = environment;
             IpAddress = ipAddress;
             UserAgent = userAgent;
-            EndStatus = endStatus;
             ErrorCount = errorCount;
             IsInitial = isInitial;
             Timestamp = timestamp;
             SequenceNumber = sequenceNumber;
+            EndStatus = endStatus;
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
-        public SessionUpdate(ISession session, bool isInitial, DateTimeOffset timestamp, int sequenceNumber)
+        public SessionUpdate(
+            ISession session,
+            bool isInitial,
+            DateTimeOffset timestamp,
+            int sequenceNumber,
+            SessionEndStatus? endStatus)
             : this(
                 session.Id,
                 session.DistinctId,
@@ -100,11 +108,24 @@ namespace Sentry
                 session.Environment,
                 session.IpAddress,
                 session.UserAgent,
-                session.EndStatus,
                 session.ErrorCount,
                 isInitial,
                 timestamp,
-                sequenceNumber)
+                sequenceNumber,
+                endStatus)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SessionUpdate"/>.
+        /// </summary>
+        public SessionUpdate(SessionUpdate sessionUpdate, bool isInitial, SessionEndStatus? endStatus)
+            : this(
+                sessionUpdate,
+                isInitial,
+                sessionUpdate.Timestamp,
+                sessionUpdate.SequenceNumber,
+                endStatus)
         {
         }
 
@@ -112,60 +133,31 @@ namespace Sentry
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
         public SessionUpdate(SessionUpdate sessionUpdate, bool isInitial)
-            : this(sessionUpdate, isInitial, sessionUpdate.Timestamp, sessionUpdate.SequenceNumber)
+            : this(sessionUpdate, isInitial, sessionUpdate.EndStatus)
         {
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            writer.WriteSerializable("sid", Id);
-
-            if (!string.IsNullOrWhiteSpace(DistinctId))
-            {
-                writer.WriteString("did", DistinctId);
-            }
-
+            writer.WriteSerializable("sid", Id, logger);
+            writer.WriteStringIfNotWhiteSpace("did", DistinctId);
             writer.WriteBoolean("init", IsInitial);
-
             writer.WriteString("started", StartTimestamp);
-
             writer.WriteString("timestamp", Timestamp);
-
             writer.WriteNumber("seq", SequenceNumber);
-
             writer.WriteNumber("duration", (int)Duration.TotalSeconds);
-
             writer.WriteNumber("errors", ErrorCount);
-
-            // State
-            if (EndStatus is { } endState)
-            {
-                writer.WriteString("status", endState.ToString().ToSnakeCase());
-            }
+            writer.WriteStringIfNotWhiteSpace("status", EndStatus?.ToString().ToSnakeCase());
 
             // Attributes
             writer.WriteStartObject("attrs");
-
             writer.WriteString("release", Release);
-
-            if (!string.IsNullOrWhiteSpace(Environment))
-            {
-                writer.WriteString("environment", Environment);
-            }
-
-            if (!string.IsNullOrWhiteSpace(IpAddress))
-            {
-                writer.WriteString("ip_address", IpAddress);
-            }
-
-            if (!string.IsNullOrWhiteSpace(UserAgent))
-            {
-                writer.WriteString("user_agent", UserAgent);
-            }
-
+            writer.WriteStringIfNotWhiteSpace("environment", Environment);
+            writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
+            writer.WriteStringIfNotWhiteSpace("user_agent", UserAgent);
             writer.WriteEndObject();
 
             writer.WriteEndObject();
@@ -183,11 +175,11 @@ namespace Sentry
             var environment = json.GetProperty("attrs").GetPropertyOrNull("environment")?.GetString();
             var ipAddress = json.GetProperty("attrs").GetPropertyOrNull("ip_address")?.GetString();
             var userAgent = json.GetProperty("attrs").GetPropertyOrNull("user_agent")?.GetString();
-            var endStatus = json.GetPropertyOrNull("status")?.GetString()?.ParseEnum<SessionEndStatus>();
             var errorCount = json.GetPropertyOrNull("errors")?.GetInt32() ?? 0;
             var isInitial = json.GetPropertyOrNull("init")?.GetBoolean() ?? false;
             var timestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var sequenceNumber = json.GetProperty("seq").GetInt32();
+            var endStatus = json.GetPropertyOrNull("status")?.GetString()?.ParseEnum<SessionEndStatus>();
 
             return new SessionUpdate(
                 id,
@@ -197,12 +189,11 @@ namespace Sentry
                 environment,
                 ipAddress,
                 userAgent,
-                endStatus,
                 errorCount,
                 isInitial,
                 timestamp,
-                sequenceNumber
-            );
+                sequenceNumber,
+                endStatus);
         }
     }
 }

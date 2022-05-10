@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -11,13 +12,32 @@ namespace Sentry.Internal.Extensions
             this HttpContent content,
             CancellationToken cancellationToken = default)
         {
-#if !NET461 && !NETSTANDARD2_0
-            await
+            var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+#if NET461 || NETSTANDARD2_0
+            using (stream)
+#else
+            await using (stream.ConfigureAwait(false))
 #endif
-            using var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            using var jsonDocument = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
+            {
+                using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken)
+                    .ConfigureAwait(false);
 
-            return jsonDocument.RootElement.Clone();
+                return document.RootElement.Clone();
+            }
+        }
+
+        public static JsonElement ReadAsJson(this HttpContent content)
+        {
+            using var stream = content.ReadAsStream();
+            using var document = JsonDocument.Parse(stream);
+            return document.RootElement.Clone();
+        }
+
+        public static string ReadAsString(this HttpContent content)
+        {
+            using var stream = content.ReadAsStream();
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

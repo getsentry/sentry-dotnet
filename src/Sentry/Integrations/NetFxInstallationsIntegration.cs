@@ -1,4 +1,6 @@
 #if NET461
+using System;
+using Sentry.Extensibility;
 using Sentry.PlatformAbstractions;
 
 namespace Sentry.Integrations
@@ -7,9 +9,16 @@ namespace Sentry.Integrations
     {
         public void Register(IHub hub, SentryOptions options)
         {
-            if (!Runtime.Current.IsMono())
+            try
             {
-                options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
+                if (!Runtime.Current.IsMono())
+                {
+                    options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
+                }
+            }
+            catch (Exception ex)
+            {
+                options.LogError("Failed to register NetFxInstallations.", ex);
             }
         }
     }

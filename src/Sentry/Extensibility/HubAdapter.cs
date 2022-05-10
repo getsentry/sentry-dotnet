@@ -66,6 +66,8 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
+        [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+                  "that provide a callback to a configurable scope.")]
         [DebuggerStepThrough]
         public void WithScope(Action<Scope> scopeCallback)
             => SentrySdk.WithScope(scopeCallback);
@@ -111,8 +113,22 @@ namespace Sentry.Extensibility
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
         [DebuggerStepThrough]
+        public void PauseSession()
+            => SentrySdk.PauseSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public void ResumeSession()
+            => SentrySdk.ResumeSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
         public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
-            => SentrySdk.EndSession();
+            => SentrySdk.EndSession(status);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
@@ -174,6 +190,14 @@ namespace Sentry.Extensibility
         [EditorBrowsable(EditorBrowsableState.Never)]
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
             => SentrySdk.CaptureEvent(evt, scope);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+            => SentrySdk.CaptureEvent(evt, configureScope);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.

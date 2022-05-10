@@ -1,4 +1,4 @@
-﻿namespace Sentry
+namespace Sentry
 {
     /// <summary>
     /// Terminal state of a session.

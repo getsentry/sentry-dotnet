@@ -1,9 +1,7 @@
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.PlatformAbstractions;
 
 namespace Sentry.Internal
 {
@@ -40,7 +38,7 @@ namespace Sentry.Internal
             _findPreciseStartupTime = findPreciseStartupTime ?? GetStartupTime;
             if (options.DetectStartupTime == StartupTimeDetectionMode.None)
             {
-                _options.DiagnosticLogger?.LogDebug("Not detecting startup time due to option: {0}",
+                _options.LogDebug("Not detecting startup time due to option: {0}",
                     _options.DetectStartupTime);
                 return;
             }
@@ -48,19 +46,31 @@ namespace Sentry.Internal
             // Fast
             var now = DateTimeOffset.UtcNow;
             StartupTime = now;
+            long? timestamp = 0;
             try
             {
-                BootTime = now.AddTicks(-Stopwatch.GetTimestamp()
+                timestamp = Stopwatch.GetTimestamp();
+                BootTime = now.AddTicks(-timestamp.Value
                                         / (Stopwatch.Frequency
                                            / TimeSpan.TicksPerSecond));
             }
-            catch (DivideByZeroException e)
+            // We can live with only `StartupTime` so lets handle the lack of `BootTime` and construct this object.
+            catch (Exception e)
             {
-                // Seems to have failed on a single Windows Server 2012 on .NET Framework 4.8
+                // DivideByZeroException: Seems to have failed on a single Windows Server 2012 on .NET Framework 4.8
                 // https://github.com/getsentry/sentry-dotnet/issues/954
-                _options.DiagnosticLogger?.LogError(
-                    "Failed to find BootTime: GetTimestamp {0}, Frequency {1}, TicksPerSecond: {2}",
-                    e, Stopwatch.GetTimestamp(), Stopwatch.Frequency, TimeSpan.TicksPerSecond);
+
+                // Can fail on IL2CPP with an unclear line number and this is an optional information:
+                // ArgumentOutOfRangeException: The added or subtracted value results in an un-representable DateTime.
+                // https://github.com/getsentry/sentry-unity/issues/233
+
+                _options.LogError(
+                    "Failed to find BootTime: Now {0}, GetTimestamp {1}, Frequency {2}, TicksPerSecond: {3}",
+                    e,
+                    now,
+                    timestamp,
+                    Stopwatch.Frequency,
+                    TimeSpan.TicksPerSecond);
             }
 
             // An opt-out to the more precise approach (mainly due to IL2CPP):
@@ -79,7 +89,7 @@ namespace Sentry.Internal
                     }
                     catch (Exception e)
                     {
-                        _options.DiagnosticLogger?.LogError("Failure getting precise App startup time.", e);
+                        _options.LogError("Failure getting precise App startup time.", e);
                         //Ignore any exception and stay with the less-precise DateTime.UtcNow value.
                     }
                 }).ContinueWith(_ =>

@@ -1,17 +1,23 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 
 namespace Sentry.Protocol.Envelopes
 {
     /// <summary>
     /// Represents a serializable entity.
     /// </summary>
-    internal interface ISerializable
+    public interface ISerializable
     {
         /// <summary>
-        /// Serializes the object to a stream.
+        /// Serializes the object to a stream asynchronously.
         /// </summary>
-        Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default);
+        Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Serializes the object to a stream synchronously.
+        /// </summary>
+        void Serialize(Stream stream, IDiagnosticLogger? logger);
     }
 }

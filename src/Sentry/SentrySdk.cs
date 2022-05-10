@@ -41,9 +41,8 @@ namespace Sentry
             // from anywhere else, return a disabled hub.
             if (Dsn.IsDisabled(dsn))
             {
-                options.DiagnosticLogger?.LogWarning(
-                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled."
-                );
+                options.LogWarning(
+                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
 
                 return DisabledHub.Instance;
             }
@@ -235,6 +234,8 @@ namespace Sentry
         /// </remarks>
         /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
         /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+        [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+                  "that provide a callback to a configurable scope.")]
         [DebuggerStepThrough]
         public static void WithScope(Action<Scope> scopeCallback)
             => _hub.WithScope(scopeCallback);
@@ -277,6 +278,20 @@ namespace Sentry
             => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
+        /// Captures an event with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="evt">The event.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <returns>The Id of the event.</returns>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+            => _hub.CaptureEvent(evt, configureScope);
+
+        /// <summary>
         /// Captures the exception.
         /// </summary>
         /// <param name="exception">The exception.</param>
@@ -284,6 +299,19 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryId CaptureException(Exception exception)
             => _hub.CaptureException(exception);
+
+        /// <summary>
+        /// Captures the exception with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="exception">The exception.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <returns>The Id of the even.t</returns>
+        [DebuggerStepThrough]
+        public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
+            => _hub.CaptureException(exception, configureScope);
 
         /// <summary>
         /// Captures the message.
@@ -294,6 +322,20 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
             => _hub.CaptureMessage(message, level);
+
+        /// <summary>
+        /// Captures the message with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="message">The message to send.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="level">The message level.</param>
+        /// <returns>The Id of the event.</returns>
+        [DebuggerStepThrough]
+        public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
+            => _hub.CaptureMessage(message, configureScope, level);
 
         /// <summary>
         /// Captures a user feedback.
@@ -398,5 +440,15 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
             => _hub.EndSession(status);
+
+        /// <inheritdoc cref="IHub.PauseSession"/>
+        [DebuggerStepThrough]
+        public static void PauseSession()
+            => _hub.PauseSession();
+
+        /// <inheritdoc cref="IHub.ResumeSession"/>
+        [DebuggerStepThrough]
+        public static void ResumeSession()
+            => _hub.ResumeSession();
     }
 }

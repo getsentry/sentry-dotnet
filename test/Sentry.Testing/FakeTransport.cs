@@ -1,33 +1,35 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Sentry.Extensibility;
-using Sentry.Internal.Extensions;
-using Sentry.Protocol.Envelopes;
+using System.Collections.Concurrent;
 
-namespace Sentry.Testing
+namespace Sentry.Testing;
+
+internal class FakeTransport : ITransport, IDisposable
 {
-    internal class FakeTransport : ITransport, IDisposable
+    private readonly TimeSpan _artificialDelay;
+    private readonly ConcurrentQueue<Envelope> _envelopes = new();
+
+    public event EventHandler<Envelope> EnvelopeSent;
+
+    public FakeTransport(TimeSpan artificialDelay = default)
     {
-        private readonly List<Envelope> _envelopes = new();
+        _artificialDelay = artificialDelay;
+    }
 
-        public event EventHandler<Envelope> EnvelopeSent;
+    public virtual async Task SendEnvelopeAsync(
+        Envelope envelope,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
 
-        public Task SendEnvelopeAsync(
-            Envelope envelope,
-            CancellationToken cancellationToken = default)
+        if (_artificialDelay > TimeSpan.Zero)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            _envelopes.Add(envelope);
-            EnvelopeSent?.Invoke(this, envelope);
-
-            return Task.CompletedTask;
+            await Task.Delay(_artificialDelay, CancellationToken.None);
         }
 
-        public IReadOnlyList<Envelope> GetSentEnvelopes() => _envelopes.ToArray();
-
-        public void Dispose() => _envelopes.DisposeAll();
+        _envelopes.Enqueue(envelope);
+        EnvelopeSent?.Invoke(this, envelope);
     }
+
+    public IReadOnlyList<Envelope> GetSentEnvelopes() => _envelopes.ToArray();
+
+    public void Dispose() => _envelopes.DisposeAll();
 }

@@ -1,30 +1,28 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Sentry.Testing
+namespace Sentry.Testing;
+
+public class LastExceptionFilter : IStartupFilter
 {
-    public class LastExceptionFilter : IStartupFilter
-    {
-        public Exception LastException { get; set; }
+    public Exception LastException { get; set; }
 
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-            =>
-                e =>
+    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+        =>
+            e =>
+            {
+                _ = e.Use(async (_, n) =>
                 {
-                    _ = e.Use(async (_, n) =>
-                        {
-                            try
-                            {
-                                await n();
-                            }
-                            catch (Exception ex)
-                            {
-                                LastException = ex;
-                            }
-                        });
+                    try
+                    {
+                        await n();
+                    }
+                    catch (Exception ex)
+                    {
+                        LastException = ex;
+                    }
+                });
 
-                    next(e);
-                };
-    }
+                next(e);
+            };
 }

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 namespace Sentry
 {
@@ -8,13 +8,34 @@ namespace Sentry
     public class FileAttachmentContent : IAttachmentContent
     {
         private readonly string _filePath;
+        private readonly bool _readFileAsynchronously;
 
         /// <summary>
         /// Creates a new instance of <see cref="FileAttachmentContent"/>.
         /// </summary>
-        public FileAttachmentContent(string filePath) => _filePath = filePath;
+        /// <param name="filePath">The path to the file to attach.</param>
+        public FileAttachmentContent(string filePath) : this(filePath, true)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="FileAttachmentContent"/>.
+        /// </summary>
+        /// <param name="filePath">The path to the file to attach.</param>
+        /// <param name="readFileAsynchronously">Whether to use async file I/O to read the file.</param>
+        public FileAttachmentContent(string filePath, bool readFileAsynchronously)
+        {
+            _filePath = filePath;
+            _readFileAsynchronously = readFileAsynchronously;
+        }
 
         /// <inheritdoc />
-        public Stream GetStream() => File.OpenRead(_filePath);
+        public Stream GetStream() => new FileStream(
+            _filePath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite,
+            bufferSize: 4096,
+            useAsync: _readFileAsynchronously);
     }
 }

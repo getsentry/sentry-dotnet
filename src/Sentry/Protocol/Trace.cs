@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -48,41 +49,17 @@ namespace Sentry.Protocol
         };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (SpanId != SpanId.Empty)
-            {
-                writer.WriteSerializable("span_id", SpanId);
-            }
-
-            if (ParentSpanId is {} parentSpanId && parentSpanId != SpanId.Empty)
-            {
-                writer.WriteSerializable("parent_span_id", parentSpanId);
-            }
-
-            if (TraceId != SentryId.Empty)
-            {
-                writer.WriteSerializable("trace_id", TraceId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Operation))
-            {
-                writer.WriteString("op", Operation);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Description))
-            {
-                writer.WriteString("description", Description);
-            }
-
-            if (Status is {} status)
-            {
-                writer.WriteString("status", status.ToString().ToSnakeCase());
-            }
+            writer.WriteSerializableIfNotNull("span_id", SpanId.NullIfDefault(), logger);
+            writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId?.NullIfDefault(), logger);
+            writer.WriteSerializableIfNotNull("trace_id", TraceId.NullIfDefault(), logger);
+            writer.WriteStringIfNotWhiteSpace("op", Operation);
+            writer.WriteStringIfNotWhiteSpace("description", Description);
+            writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
 
             writer.WriteEndObject();
         }

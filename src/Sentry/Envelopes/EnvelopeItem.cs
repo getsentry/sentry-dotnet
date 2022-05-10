@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
@@ -12,14 +13,17 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Envelope item.
     /// </summary>
-    internal sealed class EnvelopeItem : ISerializable, IDisposable
+    public sealed class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
+
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueSession = "session";
         private const string TypeValueAttachment = "attachment";
+        private const string TypeValueClientReport = "client_report";
+
         private const string LengthKey = "length";
         private const string FileNameKey = "filename";
 
@@ -32,6 +36,21 @@ namespace Sentry.Protocol.Envelopes
         /// Item payload.
         /// </summary>
         public ISerializable Payload { get; }
+
+        internal DataCategory DataCategory => TryGetType() switch
+        {
+            // Yes, the "event" item type corresponds to the "error" data category
+            TypeValueEvent => DataCategory.Error,
+
+            // These ones are equivalent
+            TypeValueTransaction => DataCategory.Transaction,
+            TypeValueSession => DataCategory.Session,
+            TypeValueAttachment => DataCategory.Attachment,
+
+            // Not all envelope item types equate to data categories
+            // Specifically, user_report and client_report just use "default"
+            _ => DataCategory.Default
+        };
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopeItem"/>.
@@ -57,62 +76,128 @@ namespace Sentry.Protocol.Envelopes
                 var value => Convert.ToInt64(value) // can be int, long, or another numeric type
             };
 
+        /// <summary>
+        /// Returns the file name or null if no name exists.
+        /// </summary>
+        /// <returns>The file name or null.</returns>
         public string? TryGetFileName() => Header.GetValueOrDefault(FileNameKey) as string;
 
-        private async Task<MemoryStream> BufferPayloadAsync(CancellationToken cancellationToken = default)
+        private async Task<MemoryStream> BufferPayloadAsync(IDiagnosticLogger? logger, CancellationToken cancellationToken)
         {
             var buffer = new MemoryStream();
-            await Payload.SerializeAsync(buffer, cancellationToken).ConfigureAwait(false);
+            await Payload.SerializeAsync(buffer, logger, cancellationToken).ConfigureAwait(false);
             buffer.Seek(0, SeekOrigin.Begin);
 
             return buffer;
         }
 
-        private async Task SerializeHeaderAsync(
+        private MemoryStream BufferPayload(IDiagnosticLogger? logger)
+        {
+            var buffer = new MemoryStream();
+            Payload.Serialize(buffer, logger);
+            buffer.Seek(0, SeekOrigin.Begin);
+
+            return buffer;
+        }
+
+        private static async Task SerializeHeaderAsync(
             Stream stream,
             IReadOnlyDictionary<string, object?> header,
-            CancellationToken cancellationToken = default)
+            IDiagnosticLogger? logger,
+            CancellationToken cancellationToken)
         {
-            await using var writer = new Utf8JsonWriter(stream);
-            writer.WriteDictionaryValue(header);
-            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            var writer = new Utf8JsonWriter(stream);
+#if NET461 || NETSTANDARD2_0
+            using (writer)
+#else
+            await using (writer.ConfigureAwait(false))
+#endif
+            {
+                writer.WriteDictionaryValue(header, logger);
+                await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private static void SerializeHeader(
+            Stream stream,
+            IReadOnlyDictionary<string, object?> header,
+            IDiagnosticLogger? logger)
+        {
+            using var writer = new Utf8JsonWriter(stream);
+            writer.WriteDictionaryValue(header, logger);
+            writer.Flush();
         }
 
         private async Task SerializeHeaderAsync(
             Stream stream,
-            CancellationToken cancellationToken = default) =>
-            await SerializeHeaderAsync(stream, Header, cancellationToken).ConfigureAwait(false);
+            IDiagnosticLogger? logger,
+            CancellationToken cancellationToken) =>
+            await SerializeHeaderAsync(stream, Header, logger, cancellationToken).ConfigureAwait(false);
+
+        private void SerializeHeader(Stream stream, IDiagnosticLogger? logger) =>
+            SerializeHeader(stream, Header, logger);
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             // Length is known
             if (TryGetLength() != null)
             {
                 // Header
-                await SerializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
+                await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);
                 await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
                 // Payload
-                await Payload.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await Payload.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
             }
             // Length is NOT known (need to calculate)
             else
             {
-#if !NET461 && !NETSTANDARD2_0
-                await
+                var payloadBuffer = await BufferPayloadAsync(logger, cancellationToken).ConfigureAwait(false);
+#if NET461 || NETSTANDARD2_0
+                using (payloadBuffer)
+#else
+                await using (payloadBuffer.ConfigureAwait(false))
 #endif
-                using var payloadBuffer = await BufferPayloadAsync(cancellationToken).ConfigureAwait(false);
+                {
+                    // Header
+                    var headerWithLength = Header.ToDictionary();
+                    headerWithLength[LengthKey] = payloadBuffer.Length;
+                    await SerializeHeaderAsync(stream, headerWithLength, logger, cancellationToken).ConfigureAwait(false);
+                    await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+
+                    // Payload
+                    await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public void Serialize(Stream stream, IDiagnosticLogger? logger)
+        {
+            // Length is known
+            if (TryGetLength() != null)
+            {
+                // Header
+                SerializeHeader(stream, logger);
+                stream.WriteByte((byte)'\n');
+
+                // Payload
+                Payload.Serialize(stream, logger);
+            }
+            // Length is NOT known (need to calculate)
+            else
+            {
+                using var payloadBuffer = BufferPayload(logger);
 
                 // Header
                 var headerWithLength = Header.ToDictionary();
                 headerWithLength[LengthKey] = payloadBuffer.Length;
-
-                await SerializeHeaderAsync(stream, headerWithLength, cancellationToken).ConfigureAwait(false);
-                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+                SerializeHeader(stream, headerWithLength, logger);
+                stream.WriteByte((byte)'\n');
 
                 // Payload
-                await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
+                payloadBuffer.CopyTo(stream);
             }
         }
 
@@ -120,7 +205,7 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() => (Payload as IDisposable)?.Dispose();
 
         /// <summary>
-        /// Creates an envelope item from an event.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="event"/>.
         /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
@@ -133,7 +218,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from user feedback.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sentryUserFeedback"/>.
         /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
@@ -146,7 +231,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from transaction.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
         /// </summary>
         public static EnvelopeItem FromTransaction(Transaction transaction)
         {
@@ -159,7 +244,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from a session update.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sessionUpdate"/>.
         /// </summary>
         public static EnvelopeItem FromSession(SessionUpdate sessionUpdate)
         {
@@ -172,7 +257,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from attachment.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="attachment"/>.
         /// </summary>
         public static EnvelopeItem FromAttachment(Attachment attachment)
         {
@@ -199,6 +284,19 @@ namespace Sentry.Protocol.Envelopes
             return new EnvelopeItem(header, new StreamSerializable(stream));
         }
 
+        /// <summary>
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="report"/>.
+        /// </summary>
+        internal static EnvelopeItem FromClientReport(ClientReport report)
+        {
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+            {
+                [TypeKey] = TypeValueClientReport
+            };
+
+            return new EnvelopeItem(header, new JsonSerializable(report));
+        }
+
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
@@ -219,7 +317,7 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return
-                Json.Parse(buffer.ToArray()).GetObjectDictionary()
+                Json.Parse(buffer.ToArray()).GetDictionaryOrNull()
                 ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
@@ -276,10 +374,20 @@ namespace Sentry.Protocol.Envelopes
                 return new JsonSerializable(SessionUpdate.FromJson(json));
             }
 
+            // Client Report
+            if (string.Equals(payloadType, TypeValueClientReport, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                var json = Json.Parse(buffer);
+
+                return new JsonSerializable(ClientReport.FromJson(json));
+            }
+
             // Arbitrary payload
             var payloadStream = new PartialStream(stream, stream.Position, payloadLength);
 
-            if (payloadLength != null)
+            if (payloadLength is not null)
             {
                 stream.Seek(payloadLength.Value, SeekOrigin.Current);
             }

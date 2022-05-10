@@ -1,74 +1,72 @@
 #if NET461
-using Xunit;
-using System.Collections.Generic;
 using Sentry.PlatformAbstractions;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
 
-namespace Sentry.Tests.PlatformAbstractions
+namespace Sentry.Tests.PlatformAbstractions;
+
+public class NetFxInstallationsEventProcessorTests
 {
-    public class NetFxInstallationsEventProcessorTests
+    private class Fixture
     {
-        private class Fixture
+        public SentryOptions SentryOptions { get; set; } = new();
+
+        public NetFxInstallationsEventProcessor GetSut() => new(SentryOptions);
+    }
+
+    private readonly Fixture _fixture = new();
+
+    [SkippableFact]
+    public void Process_SentryEventWithNetFxList()
+    {
+        Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+
+        //Arrange
+        var @event = new SentryEvent();
+        var sut = _fixture.GetSut();
+
+        //Act
+        _ = sut.Process(@event);
+
+        //Assert
+        _ = Assert.IsAssignableFrom<Dictionary<string, string>>(@event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey]);
+    }
+
+    [SkippableFact]
+    public void Process_ContextWithGetInstallationsData()
+    {
+        Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+
+        //Arrange
+        var @event = new SentryEvent();
+        var sut = _fixture.GetSut();
+        var installationList = FrameworkInfo.GetInstallations();
+        //Act
+        _ = sut.Process(@event);
+
+        //Assert
+        var dictionary = @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey] as Dictionary<string, string>;
+        foreach (var item in installationList)
         {
-            public SentryOptions SentryOptions { get; set; } = new();
-
-            public NetFxInstallationsEventProcessor GetSut() => new(SentryOptions);
+            Assert.Contains($"\"{item.GetVersionNumber()}\"", dictionary[$"{NetFxInstallationsEventProcessor.NetFxInstallationsKey} {item.Profile}"]);
         }
+    }
 
-        private readonly Fixture _fixture = new();
+    [SkippableFact]
+    public void Process_NetFxInstallationsKeyExist_UnchangedSentryEvent()
+    {
+        Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
 
-        [SkippableFact]
-        public void Process_SentryEventWithNetFxList()
-        {
-            Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+        //Arrange
+        var @event = new SentryEvent();
+        var sut = _fixture.GetSut();
+        var userBlob = "user blob";
+        @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey] = userBlob;
 
-            //Arrange
-            var @event = new SentryEvent();
-            var sut = _fixture.GetSut();
+        //Act
+        _ = sut.Process(@event);
 
-            //Act
-            _ = sut.Process(@event);
-
-            //Assert
-            _ = Assert.IsAssignableFrom<Dictionary<string, string>>(@event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey]);
-        }
-
-        [SkippableFact]
-        public void Process_ContextWithGetInstallationsData()
-        {
-            Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
-
-            //Arrange
-            var @event = new SentryEvent();
-            var sut = _fixture.GetSut();
-            var installationList = FrameworkInfo.GetInstallations();
-            //Act
-            _ = sut.Process(@event);
-
-            //Assert
-            var dictionary = @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey] as Dictionary<string, string>;
-            foreach(var item in installationList)
-            {
-                Assert.Contains($"\"{item.GetVersionNumber()}\"", dictionary[$"{NetFxInstallationsEventProcessor.NetFxInstallationsKey} {item.Profile}"]);
-            }
-        }
-
-        [SkippableFact]
-        public void Process_NetFxInstallationsKeyExist_UnchangedSentryEvent()
-        {
-            Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
-
-            //Arrange
-            var @event = new SentryEvent();
-            var sut = _fixture.GetSut();
-            var userBlob = "user blob";
-            @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey] = userBlob;
-
-            //Act
-            _ = sut.Process(@event);
-
-            //Assert
-            Assert.Equal(userBlob, @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey]);
-        }
+        //Assert
+        Assert.Equal(userBlob, @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey]);
     }
 }
 #endif

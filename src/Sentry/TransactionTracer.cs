@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +39,11 @@ namespace Sentry
         /// <inheritdoc cref="ITransaction.Name" />
         public string Name { get; set; }
 
+        /// <inheritdoc cref="ITransaction.IsParentSampled" />
+        public bool? IsParentSampled { get; set; }
+
         /// <inheritdoc />
+        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
         public string? Platform { get; set; } = Constants.Platform;
 
         /// <inheritdoc />
@@ -87,13 +91,13 @@ namespace Sentry
             set => _request = value;
         }
 
-        private Contexts? _contexts;
+        private readonly Contexts _contexts = new();
 
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ??= new Contexts();
-            set => _contexts = value;
+            get => _contexts;
+            set => _contexts.ReplaceWith(value);
         }
 
         private User? _user;
@@ -219,19 +223,22 @@ namespace Sentry
         /// <inheritdoc />
         public void Finish()
         {
-            try
-            {
-                Status ??= SpanStatus.UnknownError;
-                EndTimestamp = DateTimeOffset.UtcNow;
+            Status ??= SpanStatus.UnknownError;
+            EndTimestamp = DateTimeOffset.UtcNow;
 
-                // Client decides whether to discard this transaction based on sampling
-                _hub.CaptureTransaction(new Transaction(this));
-            }
-            finally
+            foreach (var span in _spans)
             {
-                // Clear the transaction from the scope
-                _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+                if (!span.IsFinished)
+                {
+                    span.Finish(SpanStatus.DeadlineExceeded);
+                }
             }
+
+            // Clear the transaction from the scope
+            _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+
+            // Client decides whether to discard this transaction based on sampling
+            _hub.CaptureTransaction(new Transaction(this));
         }
 
         /// <inheritdoc />
@@ -253,13 +260,14 @@ namespace Sentry
             Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
-        public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
+        public ISpan? GetLastActiveSpan() =>
+            // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
+            Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
     }
 }

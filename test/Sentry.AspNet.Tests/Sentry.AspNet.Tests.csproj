@@ -10,6 +10,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNet\Sentry.AspNet.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
 </Project>

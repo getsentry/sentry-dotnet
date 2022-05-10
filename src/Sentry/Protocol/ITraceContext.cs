@@ -1,4 +1,4 @@
-﻿namespace Sentry.Protocol
+namespace Sentry.Protocol
 {
     /// <summary>
     /// Trace metadata stored in 'contexts.trace' on a n event or transaction.

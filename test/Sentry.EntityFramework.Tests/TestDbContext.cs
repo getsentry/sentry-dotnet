@@ -2,23 +2,22 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 
-namespace Sentry.EntityFramework.Tests
+namespace Sentry.EntityFramework.Tests;
+
+public class TestDbContext : DbContext
 {
-    public class TestDbContext : DbContext
+    public TestDbContext(DbConnection connection, bool ownsConnection)
+        : base(connection, ownsConnection)
+    { }
+
+    public virtual DbSet<TestData> TestTable { get; set; }
+
+    public class TestData
     {
-        public TestDbContext(DbConnection connection, bool ownsConnection)
-            : base(connection, ownsConnection)
-        { }
-
-        public virtual DbSet<TestData> TestTable { get; set; }
-
-        public class TestData
-        {
-            [Key]
-            public int Id { get; set; }
-            public string AColumn { get; set; }
-            [Required]
-            public string RequiredColumn { get; set; }
-        }
+        [Key]
+        public int Id { get; set; }
+        public string AColumn { get; set; }
+        [Required]
+        public string RequiredColumn { get; set; }
     }
 }

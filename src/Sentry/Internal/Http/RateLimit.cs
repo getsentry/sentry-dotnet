@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -29,8 +29,7 @@ namespace Sentry.Internal.Http
 
             return new RateLimit(
                 categories,
-                retryAfter
-            );
+                retryAfter);
         }
 
         public static IEnumerable<RateLimit> ParseMany(string rateLimitsEncoded) =>

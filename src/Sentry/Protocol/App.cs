@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -71,46 +72,18 @@ namespace Sentry.Protocol
             };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
         {
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (!string.IsNullOrWhiteSpace(Identifier))
-            {
-                writer.WriteString("app_identifier", Identifier);
-            }
-
-            if (StartTime is {} startTime)
-            {
-                writer.WriteString("app_start_time", startTime);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Hash))
-            {
-                writer.WriteString("device_app_hash", Hash);
-            }
-
-            if (!string.IsNullOrWhiteSpace(BuildType))
-            {
-                writer.WriteString("build_type", BuildType);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("app_name", Name);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("app_version", Version);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Build))
-            {
-                writer.WriteString("app_build", Build);
-            }
+            writer.WriteStringIfNotWhiteSpace("app_identifier", Identifier);
+            writer.WriteStringIfNotNull("app_start_time", StartTime);
+            writer.WriteStringIfNotWhiteSpace("device_app_hash", Hash);
+            writer.WriteStringIfNotWhiteSpace("build_type", BuildType);
+            writer.WriteStringIfNotWhiteSpace("app_name", Name);
+            writer.WriteStringIfNotWhiteSpace("app_version", Version);
+            writer.WriteStringIfNotWhiteSpace("app_build", Build);
 
             writer.WriteEndObject();
         }

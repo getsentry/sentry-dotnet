@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net461;netstandard2.1</TargetFrameworks>
-    <PackageId>Sentry.EntityFramework</PackageId>
-    <AssemblyName>Sentry.EntityFramework</AssemblyName>
-    <RootNamespace>Sentry.EntityFramework</RootNamespace>
     <Description>Official Entity Framework 6 integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <PackageTags>$(PackageTags);EntityFramework;EF;EF6</PackageTags>
   </PropertyGroup>
@@ -14,11 +11,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="EntityFramework" Version="6.0.0" />
+    <PackageReference Include="EntityFramework" Version="6.2.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="EntityFramework" Version="6.3.0" />
   </ItemGroup>
-  
+
 </Project>

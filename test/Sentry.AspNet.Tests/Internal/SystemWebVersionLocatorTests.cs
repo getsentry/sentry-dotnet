@@ -1,54 +1,26 @@
-using System.IO;
-using System.Reflection;
 using System.Web;
 using Sentry.AspNet.Internal;
-using Sentry.Internal;
-using Xunit;
 
-namespace Sentry.AspNet.Tests.Internal
+public class SystemWebVersionLocatorTests :
+    HttpContextTest
 {
-    public class SystemWebVersionLocatorTests
+    [Fact]
+    public void GetCurrent_GetEntryAssemblyNull_HttpApplicationAssembly()
     {
-        private class Fixture
-        {
-            public HttpContext HttpContext { get; set; }
+        var expected = ApplicationVersionLocator.GetCurrent(typeof(HttpApplication).Assembly);
 
-            public Fixture()
-            {
-                HttpContext = new HttpContext(new HttpRequest("test", "http://test", null), new HttpResponse(new StringWriter()));
-            }
+        var actual = SystemWebVersionLocator.Resolve((string)null, Context);
 
-            public Assembly GetSut()
-            {
-                HttpContext.Current = HttpContext;
-                HttpContext.Current.ApplicationInstance = new HttpApplication();
-                return HttpContext.Current.ApplicationInstance.GetType().Assembly;
-            }
-        }
+        Assert.Equal(expected, actual);
+    }
 
-        private readonly Fixture _fixture = new();
+    [Fact]
+    public void HttpApplicationAssembly_VersionParsing()
+    {
+        var expected = ApplicationVersionLocator.GetCurrent(typeof(HttpApplication).Assembly);
 
-        [Fact]
-        public void GetCurrent_GetEntryAssemblyNull_HttpApplicationAssembly()
-        {
-            _fixture.HttpContext.ApplicationInstance = new HttpApplication();
-            var sut = _fixture.GetSut();
-            var expected = ApplicationVersionLocator.GetCurrent(sut);
+        var actual = SystemWebVersionLocator.Resolve(Context);
 
-            var actual = SystemWebVersionLocator.Resolve((string) null, _fixture.HttpContext);
-
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void GetCurrent_GetEntryAssemblySet_HttpApplicationAssembly()
-        {
-            var expected = ApplicationVersionLocator.GetCurrent();
-
-            var actual = SystemWebVersionLocator.Resolve(new SentryOptions(), _fixture.HttpContext);
-
-            Assert.Equal(expected, actual);
-        }
-
+        Assert.Equal(expected, actual);
     }
 }

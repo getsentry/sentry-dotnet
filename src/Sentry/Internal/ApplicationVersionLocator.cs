@@ -14,18 +14,22 @@ namespace Sentry.Internal
                 return null;
             }
 
-            var nameAndVersion = asm.GetNameAndVersion();
-
-            if (string.IsNullOrWhiteSpace(nameAndVersion.Name) ||
-                string.IsNullOrWhiteSpace(nameAndVersion.Version))
+            var name = asm.GetName().Name;
+            var version = asm.GetVersion();
+            if (string.IsNullOrWhiteSpace(name) ||
+                string.IsNullOrWhiteSpace(version))
             {
                 return null;
             }
 
             // Don't add name prefix if it's already set by the user
-            return !nameAndVersion.Version.Contains('@')
-                ? $"{nameAndVersion.Name}@{nameAndVersion.Version}"
-                : nameAndVersion.Version;
+            if (version.Contains('@'))
+            {
+                return version;
+            }
+
+            return $"{name}@{version}";
+
         }
     }
 }

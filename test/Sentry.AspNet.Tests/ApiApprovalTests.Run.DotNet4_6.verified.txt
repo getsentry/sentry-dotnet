@@ -1,0 +1,17 @@
+[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.6.1", FrameworkDisplayName=".NET Framework 4.6.1")]
+namespace Sentry.AspNet
+{
+    public static class HttpContextExtensions
+    {
+        public static void FinishSentryTransaction(this System.Web.HttpContext httpContext) { }
+        public static Sentry.ITransaction StartSentryTransaction(this System.Web.HttpContext httpContext) { }
+    }
+    public static class SentryAspNetOptionsExtensions
+    {
+        public static void AddAspNet(this Sentry.SentryOptions options, Sentry.Extensibility.RequestSize maxRequestBodySize = 0) { }
+    }
+    public static class SentryHttpServerUtilityExtensions
+    {
+        public static Sentry.SentryId CaptureLastError(this System.Web.HttpServerUtility server) { }
+    }
+}

@@ -31,11 +31,11 @@ namespace Sentry.Extensibility
 
             if (exception == null && !isCurrentStackTrace)
             {
-                _options.DiagnosticLogger?.LogDebug("No Exception and AttachStacktrace is off. No stack trace will be collected.");
+                _options.LogDebug("No Exception and AttachStacktrace is off. No stack trace will be collected.");
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
+            _options.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
             return Create(CreateStackTrace(exception), isCurrentStackTrace);
         }
@@ -83,7 +83,7 @@ namespace Sentry.Extensibility
             {
                 StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => p as StackFrame),
                 _ => stackTrace.GetFrames()
-// error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
+                // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
 #if NETCOREAPP3_0
                                             .Where(f => f is not null)
 #endif
@@ -91,7 +91,7 @@ namespace Sentry.Extensibility
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse - Backward compatibility
             if (frames is null)
             {
-                _options.DiagnosticLogger?.LogDebug("No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
+                _options.LogDebug("No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
                     _options.AttachStacktrace, isCurrentStackTrace);
 
                 yield break;
@@ -164,7 +164,7 @@ namespace Sentry.Extensibility
                 }
             }
 
-            frame.InApp ??= !IsSystemModuleName(frame.Module);
+            frame.ConfigureAppFrame(_options);
 
             frame.FileName = stackFrame.GetFileName();
 
@@ -210,17 +210,6 @@ namespace Sentry.Extensibility
         /// <param name="stackFrame">The <see cref="StackFrame"/></param>.
         protected virtual MethodBase? GetMethod(StackFrame stackFrame)
             => stackFrame.GetMethod();
-
-        private bool IsSystemModuleName(string? moduleName)
-        {
-            if (string.IsNullOrEmpty(moduleName))
-            {
-                return false;
-            }
-
-            return _options.InAppInclude?.Any(include => moduleName.StartsWith(include, StringComparison.Ordinal)) != true &&
-                   _options.InAppExclude?.Any(exclude => moduleName.StartsWith(exclude, StringComparison.Ordinal)) == true;
-        }
 
         /// <summary>
         /// Clean up function and module names produced from `async` state machine calls.

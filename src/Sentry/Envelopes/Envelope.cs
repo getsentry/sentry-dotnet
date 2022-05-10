@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
@@ -13,7 +14,7 @@ namespace Sentry.Protocol.Envelopes
     /// <summary>
     /// Envelope.
     /// </summary>
-    internal sealed class Envelope : ISerializable, IDisposable
+    public sealed class Envelope : ISerializable, IDisposable
     {
         private const string EventIdKey = "event_id";
 
@@ -36,11 +37,6 @@ namespace Sentry.Protocol.Envelopes
             Items = items;
         }
 
-        public Envelope(IReadOnlyList<EnvelopeItem> items)
-            : this(Empty.Dictionary<string, object?>(), items)
-        {
-        }
-
         /// <summary>
         /// Attempts to extract the value of "sentry_id" header if it's present.
         /// </summary>
@@ -51,43 +47,97 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : null;
 
-        private async Task SerializeHeaderAsync(Stream stream, CancellationToken cancellationToken = default)
+        private async Task SerializeHeaderAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken)
         {
-            await using var writer = new Utf8JsonWriter(stream);
-            writer.WriteDictionaryValue(Header);
-            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            var writer = new Utf8JsonWriter(stream);
+
+#if NET461 || NETSTANDARD2_0
+            using (writer)
+#else
+            await using (writer.ConfigureAwait(false))
+#endif
+            {
+                writer.WriteDictionaryValue(Header, logger);
+                await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private void SerializeHeader(Stream stream, IDiagnosticLogger? logger)
+        {
+            using var writer = new Utf8JsonWriter(stream);
+            writer.WriteDictionaryValue(Header, logger);
+            writer.Flush();
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
         {
             // Header
-            await SerializeHeaderAsync(stream, cancellationToken).ConfigureAwait(false);
+            await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);
             await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
             // Items
             foreach (var item in Items)
             {
-                await item.SerializeAsync(stream, cancellationToken).ConfigureAwait(false);
+                await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
                 await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Serialize(Stream stream, IDiagnosticLogger? logger)
+        {
+            // Header
+            SerializeHeader(stream, logger);
+            stream.WriteByte((byte)'\n');
+
+            // Items
+            foreach (var item in Items)
+            {
+                item.Serialize(stream, logger);
+                stream.WriteByte((byte)'\n');
             }
         }
 
         /// <inheritdoc />
         public void Dispose() => Items.DisposeAll();
 
+        // limited SDK information (no packages)
+        private static readonly IReadOnlyDictionary<string, string?> SdkHeader = new Dictionary<string, string?>(2, StringComparer.Ordinal)
+        {
+            ["name"] = SdkVersion.Instance.Name,
+            ["version"] = SdkVersion.Instance.Version
+        };
+
+        private static readonly IReadOnlyDictionary<string, object?> DefaultHeader = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            ["sdk"] = SdkHeader
+        };
+
+        private static IReadOnlyDictionary<string, object?> CreateHeader(SentryId? eventId = null)
+        {
+            if (eventId is null)
+            {
+                return DefaultHeader;
+            }
+
+            return new Dictionary<string, object?>(2, StringComparer.Ordinal)
+            {
+                ["sdk"] = SdkHeader,
+                [EventIdKey] = eventId.Value.ToString()
+            };
+        }
+
         /// <summary>
         /// Creates an envelope that contains a single event.
         /// </summary>
         public static Envelope FromEvent(
             SentryEvent @event,
+            IDiagnosticLogger? logger = null,
             IReadOnlyCollection<Attachment>? attachments = null,
             SessionUpdate? sessionUpdate = null)
         {
-            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-            {
-                [EventIdKey] = @event.EventId.ToString()
-            };
+            var header = CreateHeader(@event.EventId);
 
             var items = new List<EnvelopeItem>
             {
@@ -96,7 +146,17 @@ namespace Sentry.Protocol.Envelopes
 
             if (attachments is not null)
             {
-                items.AddRange(attachments.Select(EnvelopeItem.FromAttachment));
+                foreach (var attachment in attachments)
+                {
+                    try
+                    {
+                        items.Add(EnvelopeItem.FromAttachment(attachment));
+                    }
+                    catch (Exception exception)
+                    {
+                        logger?.LogError("Failed to add attachment: {0}.", exception, attachment.FileName);
+                    }
+                }
             }
 
             if (sessionUpdate is not null)
@@ -112,10 +172,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-            {
-                [EventIdKey] = sentryUserFeedback.EventId.ToString()
-            };
+            var header = CreateHeader(sentryUserFeedback.EventId);
 
             var items = new[]
             {
@@ -130,10 +187,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromTransaction(Transaction transaction)
         {
-            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-            {
-                [EventIdKey] = transaction.EventId.ToString()
-            };
+            var header = CreateHeader(transaction.EventId);
 
             var items = new[]
             {
@@ -148,12 +202,14 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromSession(SessionUpdate sessionUpdate)
         {
+            var header = CreateHeader();
+
             var items = new[]
             {
                 EnvelopeItem.FromSession(sessionUpdate)
             };
 
-            return new Envelope(items);
+            return new Envelope(header, items);
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
@@ -176,7 +232,7 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return
-                Json.Parse(buffer.ToArray()).GetObjectDictionary()
+                Json.Parse(buffer.ToArray()).GetDictionaryOrNull()
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
         }
 
@@ -197,6 +253,18 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return new Envelope(header, items);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Envelope"/> starting from the current one and appends the <paramref name="item"/> given.
+        /// </summary>
+        /// <param name="item">The <see cref="EnvelopeItem"/> to append.</param>
+        /// <returns>A new <see cref="Envelope"/> with the same headers and items, including the new <paramref name="item"/>.</returns>
+        internal Envelope WithItem(EnvelopeItem item)
+        {
+            var items = Items.ToList();
+            items.Add(item);
+            return new Envelope(Header, items);
         }
     }
 }

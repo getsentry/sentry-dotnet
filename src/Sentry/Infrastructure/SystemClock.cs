@@ -5,7 +5,7 @@ namespace Sentry.Infrastructure
     /// <summary>
     /// Implementation of <see cref="ISystemClock"/> to help testability.
     /// </summary>
-    /// <seealso cref="Sentry.Infrastructure.ISystemClock" />
+    /// <seealso cref="ISystemClock" />
     public sealed class SystemClock : ISystemClock
     {
         /// <summary>

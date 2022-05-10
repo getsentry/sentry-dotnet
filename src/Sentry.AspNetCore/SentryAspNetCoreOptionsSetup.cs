@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
@@ -12,16 +11,25 @@ using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostEnvironment;
 
 namespace Sentry.AspNetCore
 {
-    internal class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
+    /// <summary>
+    /// Sets up ASP.NET Core option for Sentry.
+    /// </summary>
+    public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
     {
         private readonly IHostingEnvironment _hostingEnvironment;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
+        /// </summary>
         public SentryAspNetCoreOptionsSetup(
             ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider> providerConfiguration,
             IHostingEnvironment hostingEnvironment)
             : base(providerConfiguration.Configuration)
             => _hostingEnvironment = hostingEnvironment;
 
+        /// <summary>
+        /// Configures the <see cref="SentryAspNetCoreOptions"/>.
+        /// </summary>
         public override void Configure(SentryAspNetCoreOptions options)
         {
             base.Configure(options);
@@ -35,12 +43,13 @@ namespace Sentry.AspNetCore
                     // Sentry specific environment takes precedence #92.
                     options.Environment = locatedEnvironment;
                 }
-                else
+                else if (options.AdjustStandardEnvironmentNameCasing)
                 {
                     // NOTE: Sentry prefers to have its environment setting to be all lower case.
-                    //       .NET Core sets the ENV variable to 'Production' (upper case P) or
-                    //       'Development' (upper case D) which conflicts with the Sentry recommendation.
-                    //       As such, we'll be kind and override those values, here ... if applicable.
+                    //       .NET Core sets the ENV variable to 'Production' (upper case P),
+                    //       'Development' (upper case D) or 'Staging' (upper case S) which conflicts with
+                    //       the Sentry recommendation. As such, we'll be kind and override those values,
+                    //       here ... if applicable.
                     // Assumption: The Hosting Environment is always set.
                     //             If not set by a developer, then the framework will auto set it.
                     //             Alternatively, developers might set this to a CUSTOM value, which we
@@ -65,6 +74,10 @@ namespace Sentry.AspNetCore
                         options.Environment = _hostingEnvironment.EnvironmentName;
                     }
                 }
+                else
+                {
+                    options.Environment = _hostingEnvironment.EnvironmentName;
+                }
             }
 
             options.AddLogEntryFilter((category, _, eventId, _)
@@ -75,6 +88,10 @@ namespace Sentry.AspNetCore
                        category,
                        "Microsoft.AspNetCore.Server.Kestrel",
                        StringComparison.Ordinal));
+
+#if NETSTANDARD2_0
+            options.AddDiagnosticSourceIntegration();
+#endif
         }
     }
 }

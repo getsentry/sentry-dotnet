@@ -1,0 +1,7 @@
+<Project>
+  <ItemGroup>
+    <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
+    <Using Remove="System.Net.Http"/>
+    <Using Remove="System.Net.Http.Json"/>
+  </ItemGroup>
+</Project>

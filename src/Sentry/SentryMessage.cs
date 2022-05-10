@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -39,39 +40,18 @@ namespace Sentry
         public string? Formatted { get; set; }
 
         /// <summary>
-        /// Coerces <see cref="System.String"/> into <see cref="SentryMessage"/>.
+        /// Coerces <see cref="string"/> into <see cref="SentryMessage"/>.
         /// </summary>
-        public static implicit operator SentryMessage(string? message) => new() {Message = message};
+        public static implicit operator SentryMessage(string? message) => new() { Message = message };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            // Message
-            if (!string.IsNullOrWhiteSpace(Message))
-            {
-                writer.WriteString("message", Message);
-            }
-
-            // Params
-            if (Params is {} @params)
-            {
-                writer.WriteStartArray("params");
-
-                foreach (var i in @params)
-                {
-                    writer.WriteDynamicValue(i);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Formatted
-            if (!string.IsNullOrWhiteSpace(Formatted))
-            {
-                writer.WriteString("formatted", Formatted);
-            }
+            writer.WriteStringIfNotWhiteSpace("message", Message);
+            writer.WriteArrayIfNotEmpty("params", Params, logger);
+            writer.WriteStringIfNotWhiteSpace("formatted", Formatted);
 
             writer.WriteEndObject();
         }
@@ -82,7 +62,7 @@ namespace Sentry
         public static SentryMessage FromJson(JsonElement json)
         {
             var message = json.GetPropertyOrNull("message")?.GetString();
-            var @params = json.GetPropertyOrNull("params")?.EnumerateArray().Select(j => j.GetDynamic()).Where(o => o != null).ToArray();
+            var @params = json.GetPropertyOrNull("params")?.EnumerateArray().Select(j => j.GetDynamicOrNull()).Where(o => o != null).ToArray();
             var formatted = json.GetPropertyOrNull("formatted")?.GetString();
 
             return new SentryMessage
