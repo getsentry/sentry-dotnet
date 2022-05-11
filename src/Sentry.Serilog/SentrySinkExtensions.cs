@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.IO.Compression;
 using System.Net;
 using Sentry;
@@ -12,6 +13,7 @@ namespace Serilog;
 /// <summary>
 /// Sentry Serilog Sink extensions.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentrySinkExtensions
 {
     /// <summary>

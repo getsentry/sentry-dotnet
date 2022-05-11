@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Web;
 using Sentry.Extensibility;
 using Sentry.Protocol;
@@ -7,6 +8,7 @@ namespace Sentry.AspNet;
 /// <summary>
 /// HttpServerUtility extensions.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryHttpServerUtilityExtensions
 {
     /// <summary>

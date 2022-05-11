@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Linq;
 using Sentry.Internals.DiagnosticSource;
 
@@ -6,6 +7,7 @@ namespace Sentry
     /// <summary>
     /// The additional Sentry Options extensions from Sentry Diagnostic Listener.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryOptionsDiagnosticExtensions
     {
         /// <summary>

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Hide public extension method container classes from Intellisense. ([#1654](https://github.com/getsentry/sentry-dotnet/pull/1654))
+
 ## 3.17.1
 
 ### Fixes
