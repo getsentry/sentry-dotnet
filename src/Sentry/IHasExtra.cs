@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Sentry
 {
@@ -21,6 +22,7 @@ namespace Sentry
     /// <summary>
     /// Extensions for <see cref="IHasExtra"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HasExtraExtensions
     {
         /// <summary>
