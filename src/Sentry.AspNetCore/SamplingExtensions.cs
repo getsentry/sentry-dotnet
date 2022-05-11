@@ -1,8 +1,11 @@
+using System.ComponentModel;
+
 namespace Sentry.AspNetCore;
 
 /// <summary>
 /// Methods to extract ASP.NET Core specific data from <see cref="TransactionSamplingContext"/>.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SamplingExtensions
 {
     internal const string KeyForHttpMethod = "__HttpMethod";

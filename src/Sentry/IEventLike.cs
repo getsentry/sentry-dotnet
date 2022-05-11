@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Sentry
@@ -88,6 +89,7 @@ namespace Sentry
     /// <summary>
     /// Extensions for <see cref="IEventLike"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class EventLikeExtensions
     {
         /// <summary>

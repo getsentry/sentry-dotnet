@@ -24,6 +24,7 @@ namespace Sentry
     /// <summary>
     /// Extensions for <see cref="IHasBreadcrumbs"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HasBreadcrumbsExtensions
     {
 #if !NET461
