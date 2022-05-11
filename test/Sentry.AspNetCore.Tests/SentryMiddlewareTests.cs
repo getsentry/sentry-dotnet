@@ -1,10 +1,5 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
-#if NETCOREAPP2_1 || NET461
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using Microsoft.AspNetCore.Hosting;
-#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;

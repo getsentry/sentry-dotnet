@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+namespace Sentry.Samples.GenericHost;
+
 internal class SampleHostedService : IHostedService
 {
     private readonly IHub _hub;

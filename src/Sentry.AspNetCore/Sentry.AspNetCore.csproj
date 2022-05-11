@@ -27,4 +27,19 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Microsoft.AspNetCore.Hosting" />
+    <Using Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <!-- Prefer the updated names of these items throughout the project. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <Using Include="Microsoft.AspNetCore.Hosting.IHostingEnvironment" Alias="IWebHostEnvironment" />
+    <Using Include="Microsoft.Extensions.Hosting.IHostingEnvironment" Alias="IHostEnvironment" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <Using Include="Microsoft.AspNetCore.Hosting.IWebHostEnvironment" Alias="IWebHostEnvironment" />
+    <Using Include="Microsoft.Extensions.Hosting.IHostEnvironment" Alias="IHostEnvironment" />
+  </ItemGroup>
+
 </Project>

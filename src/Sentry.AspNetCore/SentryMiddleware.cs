@@ -1,11 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Diagnostics;
-#if NETSTANDARD2_0
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -23,7 +18,7 @@ internal class SentryMiddleware
     private readonly RequestDelegate _next;
     private readonly Func<IHub> _getHub;
     private readonly SentryAspNetCoreOptions _options;
-    private readonly IHostingEnvironment _hostingEnvironment;
+    private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly ILogger<SentryMiddleware> _logger;
 
     internal static readonly SdkVersion NameAndVersion
@@ -37,7 +32,7 @@ internal class SentryMiddleware
     /// <param name="next">The next.</param>
     /// <param name="getHub">The sentry Hub accessor.</param>
     /// <param name="options">The options for this integration</param>
-    /// <param name="hostingEnvironment">The hosting environment.</param>
+    /// <param name="webHostEnvironment">The web host environment.</param>
     /// <param name="logger">Sentry logger.</param>
     /// <exception cref="ArgumentNullException">
     /// next
@@ -48,13 +43,13 @@ internal class SentryMiddleware
         RequestDelegate next,
         Func<IHub> getHub,
         IOptions<SentryAspNetCoreOptions> options,
-        IHostingEnvironment hostingEnvironment,
+        IWebHostEnvironment webHostEnvironment,
         ILogger<SentryMiddleware> logger)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         _getHub = getHub ?? throw new ArgumentNullException(nameof(getHub));
         _options = options.Value;
-        _hostingEnvironment = hostingEnvironment;
+        _webHostEnvironment = webHostEnvironment;
         _logger = logger;
     }
 
@@ -176,7 +171,7 @@ internal class SentryMiddleware
             scope.Sdk.AddPackage(ProtocolPackageName, version);
         }
 
-        if (_hostingEnvironment.WebRootPath is { } webRootPath)
+        if (_webHostEnvironment.WebRootPath is { } webRootPath)
         {
             scope.SetWebRoot(webRootPath);
         }

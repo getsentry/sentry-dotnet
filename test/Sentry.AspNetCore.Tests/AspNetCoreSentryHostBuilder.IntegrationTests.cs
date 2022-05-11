@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Hosting;
-using Xunit;
 
 namespace Sentry.AspNetCore.Tests
 {

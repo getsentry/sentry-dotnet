@@ -26,4 +26,16 @@
     </None>
   </ItemGroup>
 
+  <!-- Prefer these new names throughout the project. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
+    <Using Include="Microsoft.AspNetCore.Hosting.IHostingEnvironment" Alias="IWebHostEnvironment" />
+    <Using Include="Microsoft.Extensions.Hosting.IHostingEnvironment" Alias="IHostEnvironment" />
+    <Using Include="Microsoft.AspNetCore.Hosting.IApplicationLifetime" Alias="IHostApplicationLifetime" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp2.1' AND '$(TargetFramework)' != 'net461'">
+    <Using Include="Microsoft.AspNetCore.Hosting.IWebHostEnvironment" Alias="IWebHostEnvironment" />
+    <Using Include="Microsoft.Extensions.Hosting.IHostEnvironment" Alias="IHostEnvironment" />
+    <Using Include="Microsoft.Extensions.Hosting.IHostApplicationLifetime" Alias="IHostApplicationLifetime" />
+  </ItemGroup>
+
 </Project>

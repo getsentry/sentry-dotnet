@@ -11,12 +11,13 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions { }
 }
+namespace Microsoft.Extensions.Hosting
+{
+    public static class SentryHostBuilderExtensions { }
+}
 namespace Sentry.AspNetCore
 {
-    public interface ISentryBuilder
-    {
-        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
-    }
+    public interface ISentryBuilder : Sentry.Extensions.Logging.ISentryBuilder { }
     public interface IUserFactory
     {
         Sentry.User? Create(Microsoft.AspNetCore.Http.HttpContext context);
@@ -49,7 +50,7 @@ namespace Sentry.AspNetCore
     }
     public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.ConfigureFromConfigurationOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
     {
-        public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment) { }
+        public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration, Microsoft.Extensions.Hosting.IHostingEnvironment hostEnvironment) { }
         public override void Configure(Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
     }
     public static class SentryBuilderExtensions

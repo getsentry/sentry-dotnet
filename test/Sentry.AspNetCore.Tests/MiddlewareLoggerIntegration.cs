@@ -1,8 +1,3 @@
-#if NETCOREAPP2_1 || NET461
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
@@ -22,7 +17,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
         public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
         public SentryAspNetCoreOptions Options { get; set; } = new();
-        public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
+        public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
         public ILogger<SentryMiddleware> MiddlewareLogger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
         public ILogger SentryLogger { get; set; }
         public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();

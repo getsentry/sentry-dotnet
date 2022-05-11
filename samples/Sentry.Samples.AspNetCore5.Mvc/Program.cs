@@ -14,21 +14,61 @@ public static class Program
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();
+                // webBuilder.UseSentry(o =>
+                // {
+                //     o.Debug = true;
+                //     o.MaxRequestBodySize = RequestSize.Always;
+                //     o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                //     o.TracesSampler = ctx =>
+                //     {
+                //         if (string.Equals(ctx.TryGetHttpRoute(), "/Home/Privacy", StringComparison.Ordinal))
+                //         {
+                //             // Collect fewer traces for this page
+                //             return 0.3;
+                //         }
+                //
+                //         return 1;
+                //     };
+                // });
+            })
+            .ConfigureWebHost(x =>
+            {
+
+            })
+            .UseSentry()
+            .UseSentry("https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537")
+            .UseSentry(o =>
+            {
+                o.Debug = true;
+                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+            })
+            .UseSentry((c, o) =>
+            {
+                o.Debug = true;
+                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
             })
             .UseSentry(o =>
             {
                 o.Debug = true;
-                o.MaxRequestBodySize = RequestSize.Always;
                 o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-                o.TracesSampler = ctx =>
-                {
-                    if (string.Equals(ctx.TryGetHttpRoute(), "/Home/Privacy", StringComparison.Ordinal))
-                    {
-                        // Collect fewer traces for this page
-                        return 0.3;
-                    }
-
-                    return 1;
-                };
+                o.MinimumEventLevel = LogLevel.Debug;
+            })
+            .UseSentry((c, o) =>
+            {
+                o.Debug = true;
+                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                o.MinimumEventLevel = LogLevel.Debug;
+            })
+            .UseSentry(o =>
+            {
+                o.Debug = true;
+                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                o.MaxRequestBodySize = RequestSize.Always;
+            })
+            .UseSentry((c, o) =>
+            {
+                o.Debug = true;
+                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                o.MaxRequestBodySize = RequestSize.Always;
             });
 }

@@ -1,0 +1,14 @@
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Sentry.Extensions.Logging;
+
+/// <summary>
+/// Allows for further customization of Sentry integration
+/// </summary>
+public interface ISentryBuilder
+{
+    /// <summary>
+    /// Gets the <see cref="IServiceCollection"/> where Sentry services are configured.
+    /// </summary>
+    IServiceCollection Services { get; }
+}

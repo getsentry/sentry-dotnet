@@ -226,9 +226,9 @@ namespace Sentry
         /// The environment the application is running
         /// </summary>
         /// <remarks>
-        /// This value can also be set via environment variable: SENTRY_ENVIRONMENT
+        /// This value can also be set via environment variable: <c>SENTRY_ENVIRONMENT</c>
         /// In some cases you don't need to set this manually since integrations, when possible, automatically fill this value.
-        /// For ASP.NET Core which can read from IHostingEnvironment
+        /// For example, Sentry.AspNetCore will set this automatically, based on the hosting environment's name.
         /// </remarks>
         /// <example>
         /// Production, Staging

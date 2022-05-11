@@ -1,13 +1,7 @@
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 using Sentry.Internal;
-#if NETSTANDARD2_0
-using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostEnvironment;
-#endif
 
 namespace Sentry.AspNetCore
 {
@@ -16,16 +10,16 @@ namespace Sentry.AspNetCore
     /// </summary>
     public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IHostEnvironment _hostEnvironment;
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
         /// </summary>
         public SentryAspNetCoreOptionsSetup(
             ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider> providerConfiguration,
-            IHostingEnvironment hostingEnvironment)
+            IHostEnvironment hostEnvironment)
             : base(providerConfiguration.Configuration)
-            => _hostingEnvironment = hostingEnvironment;
+            => _hostEnvironment = hostEnvironment;
 
         /// <summary>
         /// Configures the <see cref="SentryAspNetCoreOptions"/>.
@@ -56,27 +50,27 @@ namespace Sentry.AspNetCore
                     //             need to respect (especially the case-sensitivity).
                     //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
 
-                    if (_hostingEnvironment.IsProduction())
+                    if (_hostEnvironment.IsProduction())
                     {
                         options.Environment = Internal.Constants.ProductionEnvironmentSetting;
                     }
-                    else if (_hostingEnvironment.IsStaging())
+                    else if (_hostEnvironment.IsStaging())
                     {
                         options.Environment = Internal.Constants.StagingEnvironmentSetting;
                     }
-                    else if (_hostingEnvironment.IsDevelopment())
+                    else if (_hostEnvironment.IsDevelopment())
                     {
                         options.Environment = Internal.Constants.DevelopmentEnvironmentSetting;
                     }
                     else
                     {
                         // Use the value set by the developer.
-                        options.Environment = _hostingEnvironment.EnvironmentName;
+                        options.Environment = _hostEnvironment.EnvironmentName;
                     }
                 }
                 else
                 {
-                    options.Environment = _hostingEnvironment.EnvironmentName;
+                    options.Environment = _hostEnvironment.EnvironmentName;
                 }
             }
 

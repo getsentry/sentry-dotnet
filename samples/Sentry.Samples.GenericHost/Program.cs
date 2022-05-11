@@ -1,17 +1,31 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Sentry.Samples.GenericHost;
 
 await Host.CreateDefaultBuilder()
-    .ConfigureHostConfiguration(c =>
+    .ConfigureServices(services =>
     {
-        c.SetBasePath(Directory.GetCurrentDirectory());
-        c.AddJsonFile("appsettings.json", optional: false);
+        services.AddHostedService<SampleHostedService>();
     })
-    .ConfigureServices((_, s) => s.AddHostedService<SampleHostedService>())
-    .ConfigureLogging(b => b.AddConsole())
     .UseSentry()
-    .UseConsoleLifetime()
+    .UseSentry("https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537")
+    .UseSentry(o =>
+    {
+        o.Debug = true;
+        o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+    })
+    .UseSentry(o =>
+    {
+        o.Debug = true;
+        o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+        o.MinimumEventLevel = LogLevel.Debug;
+    })
+    .UseSentry((c, o) =>
+    {
+        o.Debug = true;
+        o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+        o.MinimumEventLevel = LogLevel.Debug;
+    })
     .Build()
     .RunAsync();

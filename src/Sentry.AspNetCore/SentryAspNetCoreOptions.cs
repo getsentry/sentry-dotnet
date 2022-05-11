@@ -53,7 +53,7 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     public TransactionNameProvider? TransactionNameProvider { get; set; }
 
     /// <summary>
-    /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="Microsoft.AspNetCore.Hosting.IHostingEnvironment" />
+    /// Controls whether the casing of the standard (Production, Development and Staging) environment name supplied by <see cref="IWebHostEnvironment" />
     /// is adjusted when setting the Sentry environment. Defaults to true.
     /// </summary>
     /// <remarks>

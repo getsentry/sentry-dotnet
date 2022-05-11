@@ -1,8 +1,3 @@
-#if NETCOREAPP2_1 || NET461
-using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostEnvironment;
-#endif
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Sentry.Testing;
@@ -13,7 +8,7 @@ public class SentryAspNetCoreOptionsSetupTests
 {
     private readonly SentryAspNetCoreOptionsSetup _sut = new(
         Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-        Substitute.For<IHostingEnvironment>());
+        Substitute.For<IHostEnvironment>());
 
     private readonly SentryAspNetCoreOptions _target = new();
 
@@ -50,15 +45,15 @@ public class SentryAspNetCoreOptionsSetupTests
     [InlineData(null, "production", "production")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'p').
     [InlineData(null, "development", "development")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 'd').
     [InlineData(null, "staging", "staging")] // Custom - nothing set. ASPNET_ENVIRONMENT is custom (notice lowercase 's').
-    public void Filters_Environment_CustomOrASPNETEnvironment_Set(string environment, string hostingEnvironmentSetting, string expectedEnvironment)
+    public void Filters_Environment_CustomOrASPNETEnvironment_Set(string environment, string webHostEnvironmentSetting, string expectedEnvironment)
     {
         // Arrange.
-        var hostingEnvironment = Substitute.For<IHostingEnvironment>();
-        hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
+        var hostEnvironment = Substitute.For<IHostEnvironment>();
+        hostEnvironment.EnvironmentName = webHostEnvironmentSetting;
 
         var sut = new SentryAspNetCoreOptionsSetup(
             Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-            hostingEnvironment);
+            hostEnvironment);
 
         //const string environment = "some environment";
         _target.Environment = environment;
@@ -79,15 +74,15 @@ public class SentryAspNetCoreOptionsSetupTests
     [InlineData(null, "Production", false, "Production")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default PROD.
     [InlineData(null, "Development", false, "Development")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default DEV.
     [InlineData(null, "Staging", false, "Staging")] // Custom - nothing set. Adjust standard casing - false. ASPNET_ENVIRONMENT is default STAGING.
-    public void Filters_Environment_AdjustStandardEnvironmentNameCasing_AffectsSentryEnvironment(string environment, string hostingEnvironmentSetting, bool adjustStandardEnvironmentNameCasingSetting, string expectedEnvironment)
+    public void Filters_Environment_AdjustStandardEnvironmentNameCasing_AffectsSentryEnvironment(string environment, string webHostEnvironmentSetting, bool adjustStandardEnvironmentNameCasingSetting, string expectedEnvironment)
     {
         // Arrange.
-        var hostingEnvironment = Substitute.For<IHostingEnvironment>();
-        hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
+        var hostEnvironment = Substitute.For<IHostEnvironment>();
+        hostEnvironment.EnvironmentName = webHostEnvironmentSetting;
 
         var sut = new SentryAspNetCoreOptionsSetup(
             Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-            hostingEnvironment);
+            hostEnvironment);
 
         _target.Environment = environment;
         _target.AdjustStandardEnvironmentNameCasing = adjustStandardEnvironmentNameCasingSetting;

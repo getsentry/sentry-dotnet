@@ -1,8 +1,3 @@
-#if NETCOREAPP2_1 || NET461
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#endif
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,54 +6,57 @@ namespace Sentry.AspNetCore.Tests;
 
 public class SentryWebHostBuilderExtensionsTests
 {
-    public IWebHostBuilder WebHostBuilder { get; set; } = Substitute.For<IWebHostBuilder>();
-    public ServiceCollection Services { get; set; } = new();
-    public IConfiguration Configuration { get; set; } = Substitute.For<IConfiguration>();
-    public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
-
-    public SentryWebHostBuilderExtensionsTests()
+    private class Fixture
     {
-        var context = new WebHostBuilderContext
+        public IWebHostBuilder WebHostBuilder { get; } = Substitute.For<IWebHostBuilder>();
+        public ServiceCollection Services { get; } = new();
+
+        public Fixture()
         {
-            Configuration = Configuration,
-            HostingEnvironment = HostingEnvironment
-        };
+            var context = new WebHostBuilderContext
+            {
+                Configuration = Substitute.For<IConfiguration>(),
+                HostingEnvironment = Substitute.For<IWebHostEnvironment>()
+            };
 
-        WebHostBuilder
-            .When(b => b.ConfigureServices(Arg.Any<Action<IServiceCollection>>()))
-            .Do(i => i.Arg<Action<IServiceCollection>>()(Services));
+            WebHostBuilder
+                .When(b => b.ConfigureServices(Arg.Any<Action<IServiceCollection>>()))
+                .Do(i => i.Arg<Action<IServiceCollection>>()(Services));
 
-        WebHostBuilder
-            .When(b => b.ConfigureServices(Arg.Any<Action<WebHostBuilderContext, IServiceCollection>>()))
-            .Do(i => i.Arg<Action<WebHostBuilderContext, IServiceCollection>>()(context, Services));
+            WebHostBuilder
+                .When(b => b.ConfigureServices(Arg.Any<Action<WebHostBuilderContext, IServiceCollection>>()))
+                .Do(i => i.Arg<Action<WebHostBuilderContext, IServiceCollection>>()(context, Services));
+        }
     }
+
+    private readonly Fixture _fixture = new();
 
     [Theory, MemberData(nameof(ExpectedServices))]
     public void UseSentry_ValidDsnString_ServicesRegistered(Action<IServiceCollection> assert)
     {
-        _ = WebHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
-        assert(Services);
+        _ = _fixture.WebHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
+        assert(_fixture.Services);
     }
 
     [Theory, MemberData(nameof(ExpectedServices))]
     public void UseSentry_Parameterless_ServicesRegistered(Action<IServiceCollection> assert)
     {
-        _ = WebHostBuilder.UseSentry();
-        assert(Services);
+        _ = _fixture.WebHostBuilder.UseSentry();
+        assert(_fixture.Services);
     }
 
     [Theory, MemberData(nameof(ExpectedServices))]
     public void UseSentry_DisableDsnString_ServicesRegistered(Action<IServiceCollection> assert)
     {
-        _ = WebHostBuilder.UseSentry(Sentry.Constants.DisableSdkDsnValue);
-        assert(Services);
+        _ = _fixture.WebHostBuilder.UseSentry(Sentry.Constants.DisableSdkDsnValue);
+        assert(_fixture.Services);
     }
 
     [Theory, MemberData(nameof(ExpectedServices))]
     public void UseSentry_Callback_ServicesRegistered(Action<IServiceCollection> assert)
     {
-        _ = WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
-        assert(Services);
+        _ = _fixture.WebHostBuilder.UseSentry(o => o.InitializeSdk = false);
+        assert(_fixture.Services);
     }
 
     public static IEnumerable<object[]> ExpectedServices()

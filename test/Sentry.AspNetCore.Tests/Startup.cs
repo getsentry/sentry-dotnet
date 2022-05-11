@@ -1,9 +1,4 @@
 using Microsoft.AspNetCore.Builder;
-#if NETCOREAPP2_1 || NET461
-using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostEnvironment;
-#endif
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +17,7 @@ public class Startup
     {
     }
 
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+    public void Configure(IApplicationBuilder app, IHostEnvironment env)
     {
     }
 }

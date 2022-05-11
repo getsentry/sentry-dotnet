@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Sentry.AspNetCore;
 
@@ -9,12 +8,13 @@ namespace Sentry.AspNetCore;
 public class SentryStartupFilter : IStartupFilter
 {
     /// <summary>
-    /// Adds Sentry to the pipeline.
+    /// Adds Sentry to the startup pipeline.
     /// </summary>
-    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => e =>
-    {
-        e.UseSentry();
+    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) =>
+        builder =>
+        {
+            builder.UseSentry();
 
-        next(e);
-    };
+            next(builder);
+        };
 }

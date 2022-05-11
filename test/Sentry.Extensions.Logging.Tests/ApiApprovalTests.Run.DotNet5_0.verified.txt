@@ -1,4 +1,8 @@
 ﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
+namespace Microsoft.Extensions.Hosting
+{
+    public static class SentryHostBuilderExtensions { }
+}
 namespace Microsoft.Extensions.Logging
 {
     public static class LoggingBuilderExtensions { }
@@ -14,6 +18,10 @@ namespace Sentry.Extensions.Logging
     public interface ILogEntryFilter
     {
         bool Filter(string categoryName, Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, System.Exception? exception);
+    }
+    public interface ISentryBuilder
+    {
+        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
     }
     public class MelDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
     {
