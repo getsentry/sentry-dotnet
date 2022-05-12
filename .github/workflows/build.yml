@@ -48,7 +48,6 @@ jobs:
             dotnet-version: 2.1.818
 
         - name: Dependency Caching
-          if: "!startsWith(matrix.os, 'windows')" # See https://github.com/getsentry/sentry-dotnet/issues/1647
           uses: actions/cache@v3
           with:
             path: ~/.nuget/packages
