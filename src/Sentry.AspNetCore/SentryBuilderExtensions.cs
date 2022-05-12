@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.AspNetCore;
@@ -5,6 +6,7 @@ namespace Sentry.AspNetCore;
 /// <summary>
 /// Extension methods for <see cref="ISentryBuilder"/>
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryBuilderExtensions
 {
     /// <summary>
