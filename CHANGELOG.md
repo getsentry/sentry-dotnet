@@ -5,6 +5,7 @@
 ### Features
 
 - Expose `ITransport` and `SentryOptions.Transport` public, to support using custom transports ([#1602](https://github.com/getsentry/sentry-dotnet/pull/1602))
+- Android native crash support ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288))
 
 ### Fixes
 
@@ -143,7 +144,6 @@
 
 ### Features
 
-- .NET 6 specific targets ([#939](https://github.com/getsentry/sentry-dotnet/pull/939))
 - Sentry Sessions status as Breadcrumbs ([#1263](https://github.com/getsentry/sentry-dotnet/pull/1263))
 - Enhance GCP Integraction with performance monitoring and revision number ([#1286](https://github.com/getsentry/sentry-dotnet/pull/1286))
 - Bump Ben.Demystifier to support .NET 6 ([#1290](https://github.com/getsentry/sentry-dotnet/pull/1290))
