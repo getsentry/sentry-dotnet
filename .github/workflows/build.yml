@@ -80,7 +80,6 @@ jobs:
           run: dotnet build ${{ matrix.slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          if: startsWith(matrix.os, 'ubuntu')
           run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Create Test Report
