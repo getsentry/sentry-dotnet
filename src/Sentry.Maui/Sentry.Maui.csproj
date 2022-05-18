@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    
+    <!-- 
+      Imports the MAUI core reference assemblies.
+      See https://github.com/dotnet/maui/blob/main/src/Workload/README.md
+      
+      Requires the MAUI .NET workload to be installed with:
+       dotnet workload install maui
+    -->
+    <UseMauiCore>true</UseMauiCore>
+    
+    <!-- 
+      MAUI dependencies are not signed, as of RC3.  See https://github.com/dotnet/maui/issues/749
+      If MAUI assemblies are signed in the future, remove this to sign our library - which will be a breaking change.
+     -->
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
