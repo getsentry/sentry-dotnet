@@ -23,12 +23,12 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
-          - slnf: SentryLinux.slnf
-            os: ubuntu-latest
-          - slnf: SentryWindows.slnf
-            os: windows-latest
-          - slnf: SentryMac.slnf
-            os: macos-latest
+          - os: ubuntu-latest
+            slnf: SentryLinux.slnf
+          - os: windows-latest
+            slnf: SentryWindows.slnf
+          - os: macos-latest
+            slnf: SentryMac.slnf
 
     steps:
         - name: Checkout
@@ -77,11 +77,11 @@ jobs:
             restore-keys: ${{ runner.os }}-nuget
 
         - name: Build
-          run: dotnet build ${{ slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build ${{ matrix.slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
           if: startsWith(matrix.os, 'ubuntu')
-          run: dotnet test ${{ slnf }} -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
+          run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Create Test Report
           uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
@@ -97,7 +97,7 @@ jobs:
         - name: Pack
           # only pack on windows since we need classic .net assemblies
           if: startsWith(matrix.os, 'windows')
-          run: dotnet pack ${{ slnf }} -c Release --no-build
+          run: dotnet pack ${{ matrix.slnf }} -c Release --no-build
 
         - name: Upload Verify Results
           if: failure()
